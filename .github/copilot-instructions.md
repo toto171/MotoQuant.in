@@ -1,5 +1,7 @@
 # GitHub Copilot instructions
 
+MotoQuant is open source (MIT, see `../LICENSE`); contributions follow `../CONTRIBUTING.md`.
+
 This repo's working contract is **[../AGENTS.md](../AGENTS.md)** — read it first.
 It is model-agnostic and authoritative for every AI tool and human.
 

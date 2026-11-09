@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Before filing: check CLAUDE.md → "Full Project Roadmap". If your idea is already in a future phase, comment there instead of opening a new issue.
+        Before filing: check docs/ROADMAP.md. If your idea is already listed, comment on the existing issue instead of opening a new one.
 
   - type: textarea
     id: problem
@@ -39,8 +39,7 @@ body:
         - Phase 2 — Database / ingestion
         - Phase 3 — Validation / calibration
         - Phase 4 — AI / optimisation
-        - Phase 5 — Desktop app
-        - Phase 6 — Commercial launch
+        - Phase 6 — Distribution / integrations (API, MCP, web)
         - Out of scope — please discuss first
     validations:
       required: true

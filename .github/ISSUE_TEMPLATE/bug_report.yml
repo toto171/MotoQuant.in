@@ -52,7 +52,6 @@ body:
         - database / schema
         - CLI
         - FastAPI backend
-        - Desktop (Tauri + React)
         - Web (Next.js)
         - Calibration (Dragy / dyno / ECU)
         - Parts catalog / fitment

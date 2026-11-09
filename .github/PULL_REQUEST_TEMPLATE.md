@@ -1,5 +1,5 @@
 <!--
-Thanks for contributing to MotoQuant Pro.
+Thanks for contributing to MotoQuant (MIT-licensed; by submitting you agree your contribution is released under the same license).
 First time here? Read AGENTS.md (the working contract) and docs/INVARIANTS.md (what must never break).
 Fill every section. Delete sections that don't apply (e.g. "Physics benchmark deltas" for a docs-only PR), but don't delete the Kaizen checklist.
 Run `make check` (fast gate) and `make test` (full suite) before opening this PR.
@@ -19,9 +19,9 @@ Closes #
 - [ ] New feature
 - [ ] Physics / sub-model change
 - [ ] Database schema change
-- [ ] Bike / parts / tire data
+- [ ] Bike / parts / tire / benchmark data (every value has a cited source in the PR body)
 - [ ] Calibration data (Dragy / dyno / ECU log)
-- [ ] Desktop (Tauri + React) or Web (Next.js) frontend
+- [ ] Web (Next.js) frontend
 - [ ] Docs / tooling / CI
 
 ## Test plan
@@ -63,7 +63,8 @@ python scripts/check_baselines.py
 
 - [ ] `python -m pytest tests/ -q` is green locally.
 - [ ] `ruff check .` and `ruff format --check .` are clean.
-- [ ] If this is a desktop / web PR: `npx tsc --noEmit` green in `desktop/` and `npm run build` green in `web/`.
-- [ ] Updated `CLAUDE.md` → "Current State" and the relevant phase checklist if this was substantive.
+- [ ] If this touches `web/`: `npm run build` is green in `web/`.
+- [ ] If substantive: added a `CHANGELOG.md` entry (and `docs/` if behaviour changed).
+- [ ] No fabricated data: every spec/benchmark/price I added has a citable source.
 - [ ] No secrets, API keys, or `.env` files in the diff.
 - [ ] Commit messages are imperative-mood ("Add …", "Fix …"), subject ≤ 72 chars.

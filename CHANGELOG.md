@@ -4,6 +4,25 @@ Notable changes, newest first. This is the human-readable milestone history;
 the exhaustive session-by-session log lives in `CLAUDE.md` (top entry = latest)
 and `reports/`. Format loosely follows [Keep a Changelog](https://keepachangelog.com).
 
+## [Unreleased] — 2026-11-09 — Open-sourced under MIT
+
+MotoQuant is now free and open source ([LICENSE](LICENSE), MIT).
+
+### Added
+- `LICENSE` (MIT), `SECURITY.md`, `CODE_OF_CONDUCT.md`; open-source
+  README/CONTRIBUTING, issue/PR templates (incl. a sourced bike/benchmark
+  data template); `docs/adr/0006-open-source-mit.md`.
+- `pyproject.toml` license, readme, classifiers and project URLs.
+
+### Removed
+- Payments, subscriptions, paid tiers, license keys and sim-quota metering,
+  along with their docs (`docs/PAYMENTS_SETUP.md`,
+  `docs/COMMERCIAL_LAUNCH.md`). Everything on the site is free.
+
+### Changed
+- Accounts are kept, optionally, only to save runs to a garage. Per-IP rate
+  limits remain as abuse protection.
+
 ## [PR #116] — 2026-07-19 — Scrapling dev-side scraping toolkit
 
 Dev-only scraping toolkit; **nothing in it writes `motoquant.db`** — scraped

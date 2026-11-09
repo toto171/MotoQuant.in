@@ -1,9 +1,9 @@
-# MotoQuant Pro — Frequently Asked Questions
+# MotoQuant — Frequently Asked Questions
 
 ## General Questions
 
-### What is MotoQuant Pro?
-MotoQuant Pro is a physics-based quarter-mile drag racing simulator for motorcycles. It uses first-principles aerodynamics, tire physics (Pacejka slip characteristics), drivetrain dynamics, and engine modeling to predict your bike's quarter-mile ET (elapsed time) and trap speed. The simulator lets you test modifications—power increases, gear ratios, tire swaps, weight reduction—and see their impact on performance *before* spending money at the tuner or parts shop.
+### What is MotoQuant?
+MotoQuant is a free, open-source ([MIT](../LICENSE)) physics-based quarter-mile drag racing simulator for motorcycles. It uses first-principles aerodynamics, tire physics (Pacejka slip characteristics), drivetrain dynamics, and engine modeling to predict your bike's quarter-mile ET (elapsed time) and trap speed. The simulator lets you test modifications—power increases, gear ratios, tire swaps, weight reduction—and see their impact on performance *before* spending money at the tuner or parts shop.
 
 ### Who should use it?
 - **Drag racers** — predict ET gains from mods, plan builds within budget constraints
@@ -269,29 +269,32 @@ CLI: `python -m motoquant.run sim --bike-id 1 --part-ids 10,20,30 --json > resul
 
 ## Support & Feedback
 
+### Is it free? Do I need an account?
+Yes, it is free and open source, with no tiers, payments or usage quota. You can simulate without an account; an optional account only lets you save runs to a garage. Per-IP rate limits exist purely to prevent abuse.
+
 ### How do I report a bug?
-Email us at **support@motoquant.in** with:
+Open an issue on GitHub (https://github.com/toto171/MotoQuant.in/issues) or email **support@motoquant.in** with:
 - Your bike model (make, year)
 - Modifications you applied
 - The unexpected result
 - Expected result (if you know)
 - Actual quarter-mile time (if you've run it)
 
-Or use the bug report form on motoquant.in.
+Security problems: report privately per [SECURITY.md](../SECURITY.md).
 
 ### Can I request a new bike or tire?
-Yes — email **requests@motoquant.in** with the make, model, year, and any available specs (power, weight, dimensions, OEM tire fitment). We prioritize Indian-market bikes and popular international models.
+Yes — open a "bike / benchmark data" issue (or email **requests@motoquant.in**) with the make, model, year, and any available specs (power, weight, dimensions, OEM tire fitment) **and the source** for them. We prioritize Indian-market bikes and popular international models.
 
 ### Is there a community or forum?
-We're building one — watch motoquant.in for launch. In the meantime, reach out directly or join our Discord (link at motoquant.in).
+Use GitHub Discussions on the repository (https://github.com/toto171/MotoQuant.in/discussions) for questions and show-and-tell, and see [CONTRIBUTING.md](../CONTRIBUTING.md) if you want to help.
 
 ### What's your roadmap?
 - **Phase 3 (Current):** Web launch, calibration pipeline, public leaderboard
 - **Phase 4:** AI optimization (Bayesian tuning within budget)
 - **Phase 5:** ~~Desktop app~~ — discontinued July 2026; the hosted web app is the product
-- **Phase 6:** B2C freemium / B2B pro tiers, OBD-II live telemetry
+- **Phase 6:** open-source release (done), OBD-II live telemetry
 
-See the full roadmap at motoquant.in/roadmap.
+See `docs/ROADMAP.md` for the engineering backlog.
 
 ---
 
@@ -301,7 +304,7 @@ See the full roadmap at motoquant.in/roadmap.
 No. This is a **predictive tool**, not ground truth. Real quarter-mile results vary with weather, driver skill, tire temperature, surface condition, and equipment wear. Use the simulator to make informed decisions, not as a guarantee.
 
 ### Can I use your data in a tuning shop?
-Yes, if you include proper attribution: "Simulated with MotoQuant Pro." For commercial use (shops, racing teams, OEMs), contact us about licensing.
+Yes. MotoQuant is MIT-licensed: you may use, modify and redistribute it, including commercially, as long as the copyright and license notice stay with the code. Attribution in your own materials ("Simulated with MotoQuant") is appreciated but not required for using the results.
 
 ### What data do you collect?
 - Simulation runs (anonymized: bike ID, mods, results — no personal info)
@@ -315,5 +318,5 @@ Yes — simulation runs are your own unless you explicitly submit to the public 
 
 ---
 
-**Last updated:** April 2026  
+**Last updated:** November 2026  
 **Questions?** Contact support@motoquant.in or visit motoquant.in

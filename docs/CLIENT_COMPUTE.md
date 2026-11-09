@@ -1,6 +1,6 @@
 # Client-Side Compute — using the rider's hardware to scale
 
-> Written 2026-08-11 (commercial-launch readiness). Operator directive: move
+> Written 2026-08-11. Maintainer directive: move
 > quick sims — and eventually main sims — onto the user's device so the
 > 0.5-CPU Render instance stops being the scaling bottleneck.
 
@@ -11,7 +11,7 @@
 | Live/quick estimates (slider drags) | **Browser** — `web/lib/surrogate.js` | Shipped 2026-08-11. Zero server cost, ~0.01 ms, proven equal to the server surrogate to <1e-9 s |
 | Exact quarter-mile (splits, timeseries) | **Server** (RK4) | The authoritative number; the Run button |
 | Full sims in-browser (future) | **Browser** — Pyodide/WASM, gated on CI proof | See "Main sims" below |
-| Build Optimizer / Autotune / Outlaw | **Server only, pro-gated** | The paid product — never shipped to the client |
+| Build Optimizer / Autotune / Outlaw | **Server only** | Orchestrate hundreds of sims plus the knapsack/ROI machinery; too heavy for a browser tab |
 | Leaderboard saves | **Server only** | Estimated results can never be saved (enforced in the simulator page) |
 
 ## Tier 1 — the in-browser surrogate (SHIPPED)
@@ -76,7 +76,7 @@ Two open questions gate the UI work, and both are answered by
    call (acceptable for an explicit "run locally" action?) is made on real
    numbers.
 
-If the harness passes: wire a lazy-loaded "run locally" path for the FREE
+If the harness passes: wire a lazy-loaded "run locally" path for the
 full-sim action (payload ~15 MB, cached; worth it for offline + zero server).
 If it drifts: record the deltas here and stop — an "exact" number that
 disagrees with the server by more than the baseline tolerance must not ship.
@@ -84,11 +84,11 @@ disagrees with the server by more than the baseline tolerance must not ship.
 What client full sims deliberately do NOT change:
 - **Leaderboard integrity** — saved runs stay server-authoritative. (Note:
   `/api/simulate/save` currently trusts the client-supplied ET — a documented,
-  rate-limited beta posture. Client-side sims neither worsen nor fix that;
+  rate-limited posture. Client-side sims neither worsen nor fix that;
   the fix is server-side recomputation at save time, tracked separately.)
-- **The paid tier** — Optimizer/Autotune/Outlaw orchestrate hundreds of sims
-  plus the knapsack/ROI machinery server-side and stay pro-gated. Shipping
-  the engine for single free sims does not ship the analysis product.
+- **The analysis tools** — Optimizer/Autotune/Outlaw orchestrate hundreds of
+  sims plus the knapsack/ROI machinery and stay server-side. Running single
+  sims locally does not change that.
 
 ## Rejected alternatives (do not re-litigate without new facts)
 

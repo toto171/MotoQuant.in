@@ -1,27 +1,60 @@
-# Contributing to MotoQuant Pro
+# Contributing to MotoQuant
 
-Welcome. This guide gets you from a fresh clone to a green test suite in under 10 minutes, then covers the day-to-day workflow.
+Thanks for your interest. MotoQuant is open source under the [MIT license](LICENSE); this guide gets you from a fresh clone to a green test suite in under 10 minutes, then covers the day-to-day workflow. By submitting a contribution you agree it is licensed under the same MIT terms (there is no CLA or DCO sign-off).
 
-If you're a new collaborator joining for the first time, also read `ONBOARDING.md` — it has the current project state, the "what to pick up first" list, and the Kaizen/token-budget rules the project runs by.
+Please follow the [Code of Conduct](CODE_OF_CONDUCT.md). Report security issues privately per [SECURITY.md](SECURITY.md), not in public issues. Read [AGENTS.md](AGENTS.md) (the one-page working contract for every contributor, human or AI), and see `docs/ONBOARDING.md` for the current project state and the "what to pick up first" list.
+
+---
+
+## Ways to contribute
+
+You do not need to touch the physics to help. In rough order of value:
+
+1. **Instrumented timeslips and benchmarks** — Dragy/VBox/Racelogic runs of *stock* bikes, with a source (magazine test, video, timeslip photo, Dragy export). Small-displacement and 2-stroke accuracy is limited by data, not by the model. Open a "bike / benchmark data" issue or a PR.
+2. **Bike, part and tire data** — new bikes (see `motoquant/scraper/known_bikes*.py`), corrections to existing specs, gear cassettes from service manuals, OEM tire fitments, parts and fitment rules.
+3. **Bug reports and fixes** — use the bug-report issue template; include the bike, venue, inputs and the number you expected.
+4. **Docs, tests, tooling, web UI** — anything that makes the above easier.
+
+### The honest-data rule
+
+Every spec, benchmark, price and gear ratio needs a **citable source** (service manual, manufacturer spec sheet, magazine test, instrumented timeslip, retailer page). **No fabricated numbers**: if you cannot source a value, leave it out and say so — an honest gap beats apparent completeness. Estimates must be labelled as estimates and must not be presented as measurements. Data PRs without sources will be closed.
+
+### Filing issues and PRs
+
+- Search existing issues first. Use the issue templates (bug, feature, bike/benchmark data, calibration data).
+- Keep PRs focused; one logical change each. Fill in the PR template, including the physics-baseline table if you touched physics.
+- Questions and design discussion belong in GitHub Discussions.
 
 ---
 
 ## 1. Repository
 
-- **GitHub:** https://github.com/da25mem5s02-debug/MotoQuant_v1
-  - Planned move: once the GitHub Organization `motoquant-labs` is created (see `docs/TEAM_SCALING.md`), the repo transfers to `github.com/motoquant-labs/motoquant`. Update your remote with `git remote set-url origin <new-url>` after the transfer.
+- **GitHub:** https://github.com/toto171/MotoQuant.in
+- **Live site:** https://motoquant.in
 - **Package name:** `motoquant` (formerly `dragsim` — do not reintroduce that string anywhere)
 - **Python:** 3.10 or newer (tested on 3.10, 3.11, 3.12)
-- **Primary DB:** SQLite (`motoquant.db`) — Supabase PostgreSQL is deferred to Phase 6
+- **Primary DB:** SQLite (`motoquant.db`) — see `docs/adr/0004-sqlite-until-scale.md`
 
 ---
 
 ## 2. One-time setup
 
+Short version — the `Makefile` mirrors CI exactly, so green locally ≈ green in CI:
+
+```bash
+make install   # deps + editable package
+make health    # state of the world: baselines, lint, catalog, headline drift, secret scan
+# ...work...
+make check     # fast pre-PR gate (~3 min): lint + format + baselines + fast tests
+make test      # full suite (~25 min) — required before opening a PR
+```
+
+Longer version:
+
 ```bash
 # 1. Clone
-git clone https://github.com/da25mem5s02-debug/MotoQuant_v1.git
-cd MotoQuant_v1
+git clone https://github.com/toto171/MotoQuant.in.git
+cd MotoQuant.in
 
 # 2. Virtual environment (recommended)
 python -m venv .venv
@@ -76,13 +109,7 @@ proxies to the production Render API). Before committing anything under `web/`,
 run `npx next build` — it is exactly what Vercel runs and catches the
 App-Router prerender class of failure (see `web/CONTRIBUTING.md`).
 
-The desktop app lives in `desktop/` (Tauri 2 + React; hosted-only client):
-`cd desktop && npm install && npx tsc --noEmit && npx vitest run` for the
-JS-side checks. The Rust shell needs a local cargo toolchain (see
-`desktop/RELEASE.md`).
-
-The legacy Streamlit UI (`app.py`) has been removed. The web app (`web/`)
-and the desktop app (`desktop/`) are the supported user interfaces.
+The web app (`web/`) is the supported user interface. (`desktop/` is a discontinued scaffold kept for reference only — see `docs/adr/0005-desktop-discontinued.md`.)
 
 ### 3c. FastAPI web server
 
@@ -166,12 +193,12 @@ git push -u origin feature/<short-name>
 **PR requirements (strict — enforced by branch protection on `main`):**
 - Tests pass locally (`python -m pytest tests/ -q`).
 - Ruff clean (`ruff check . && ruff format --check .`).
-- CI workflow green on the PR (pytest + ruff + desktop tsc/vite build + web Next.js build).
-- **At least one approving review** from someone other than the PR author.
+- CI workflow green on the PR (pytest + ruff + web Next.js build).
+- **At least one approving review** from a maintainer other than the PR author.
 - For files owned via `.github/CODEOWNERS` (physics, schema, calibration, API, infra): the listed **CODEOWNER's approval is required** — GitHub will auto-request it.
 - For physics changes: include the benchmark ET deltas in the PR description (template has a table for this).
 - For schema changes: include the migration path (even if manual) and update `CLAUDE.md` → "Current State" section.
-- **No self-merge.** Even the repo owner goes through review on anything touching a CODEOWNER-protected path.
+- **No self-merge.** Even maintainers go through review on anything touching a CODEOWNER-protected path.
 - `main` is protected: no direct pushes, no force-push, no deletion.
 - Once merged, a successful CI run on `main` triggers the Vercel production deploy (`.github/workflows/deploy.yml`). A red CI never reaches Vercel.
 
@@ -212,22 +239,11 @@ This is not optional. The current clean state of the codebase is the result of a
 
 ## 9. Where to ask questions
 
-- GitHub Issues on the repo (preferred — leaves a trail).
-- Direct message to the other co-owner for quick synchronous stuff.
-- `CLAUDE.md` is the always-current project status document — check it first before asking "is X done yet?"
+- GitHub Discussions for open-ended questions; GitHub Issues for bugs and concrete proposals (leaves a trail).
+- `docs/ONBOARDING.md` and `docs/ARCHITECTURE.md` first — most "where does X live?" questions are answered there.
 
 ---
 
 ## 10. Release / deploy
 
-Live since April 2026; backend migrated Railway → Render on May 31, 2026:
-- Render (API): `motoquant-api.onrender.com` — Docker deploy via `render.yaml` (free tier, Singapore).
-- Vercel (web): `motoquant.in` — `vercel.json` + the `/api/*` rewrite in `web/next.config.js` point at Render.
-- Domain: `motoquant.in` (primary), `motoquant.app` (reserve).
-
-Merging to `main` IS the production deploy: Render rebuilds the API when the
-diff touches `motoquant/**`, `motoquant.db`, `requirements-api.txt`, `Dockerfile`
-or `render.yaml` (the `buildFilter` — web-only merges do not restart the API),
-and Vercel deploys the frontend on every merge. See `docs/RENDER_MIGRATION.md`
-for the runbook + rollback. Do not touch hosting settings without coordinating —
-we only have one set of credentials.
+Merging to `main` is the production deploy: Render rebuilds the API when the diff touches `motoquant/**`, `motoquant.db`, `requirements-api.txt`, `Dockerfile` or `render.yaml` (the `buildFilter` — web-only merges do not restart the API), and Vercel deploys the frontend on every merge. Only maintainers hold hosting credentials; see `docs/RENDER_MIGRATION.md` for the runbook and rollback. Contributors never need hosting access to develop or test.

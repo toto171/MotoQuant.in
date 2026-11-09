@@ -1,41 +1,39 @@
-# Engineering roadmap — the path to a durable business
+# Engineering roadmap
 
 > Honest, prioritized, and tied to real blockers. This is the "what to do next
-> and why" for whoever is at the keyboard — a model, a human, or the operator.
-> Re-rank it as reality changes; don't let it rot. Last substantive revision:
-> 2026-07-06 (PR #100).
+> and why" for whoever is at the keyboard — a contributor, a maintainer, or an
+> AI session. Re-rank it as reality changes; don't let it rot. Last substantive
+> revision: 2026-11-09 (open-sourced under MIT, ADR-0006).
 
 ## North star
 
-- **$1M valuation by 2026-12-31, $10M by 2027-12-31**, via **B2C freemium**
-  (basic sim + gear tools free) + **B2B Pro Studio** (full optimization + AI
-  calibration for tuning shops / teams), with acquisition optionality. All three
-  share the same prerequisites: *more validated benchmarks, more content &
-  visibility, and a product that stays up and correct under real load.*
+MotoQuant is a free, open-source ([MIT](../LICENSE)) physics engine whose
+differentiator is **validated, transparent accuracy**. Everything below serves
+that: *more sourced benchmarks, more bikes and parts with citable data, more
+visibility, and a product that stays up and correct under real load.*
 
 ## The honest reality
 
 The **code is not the bottleneck.** The engine is validated, the product is live
-(`motoquant.in` on Vercel, API on Render), and the test suite is deep. The
-things standing between here and revenue are, in order:
+(`motoquant.in` on Vercel, API on Render), and the test suite is deep. What
+stands between here and a much better project, in order:
 
-1. **Operator actions** — payment-provider config, prod DB durability. No code
-   ships revenue until these are done.
+1. **Prod durability** — user accounts/saved runs live in SQLite baked into the
+   image; a persistent disk is needed so deploys don't wipe them.
 2. **Data** — small-cc accuracy is *data-limited, not model-limited*; it needs
-   real instrumented Dragy timeslips, which is an outreach/partnership problem.
+   real instrumented Dragy timeslips, which is a community-contribution problem.
 3. **One real engineering scaling blocker** — the shared SQLite connection.
 
-Everything below is ranked by *what unblocks revenue or prevents an outage*, not
-by what's fun to build.
+Everything below is ranked by *what prevents an outage or improves accuracy*,
+not by what's fun to build.
 
-## P0 — Do before scaling or charging money
+## P0 — Do before scaling
 
 | # | Item | Owner | Why | Success metric |
 |---|---|---|---|---|
-| P0-1 | **Payment providers live** (Razorpay + Stripe keys, plans, `MOTOQUANT_BILLING_ENFORCE=1`) | Operator | No revenue path exists until this is flipped. Code is complete (`docs/PAYMENTS_SETUP.md`). | First successful paid checkout in prod. |
-| P0-2 | **Prod DB durability** (Render persistent disk, ~$7/mo; `docker-entrypoint.sh` already seeds it) | Operator | Every deploy currently wipes user accounts/runs. Cannot retain paying users on an ephemeral DB. | Accounts survive a deploy. |
-| P0-3 | **Fix the shared SQLite connection before multi-worker** (per-thread / pooled conn, or the Postgres migration) | Engineering | KNOWN_TRAPS T14 / ADR-0004: one `check_same_thread=False` connection is shared across request + job threads; concurrent writes can interleave. Fine at 1 worker, corrupts under scale. | 2+ workers pass a concurrent read/write stress test with no interleave/errors. |
-| P0-4 | **Rotate any exposed credentials + wire the secret-scan gate** (done in CI as of PR #100) | Operator + Eng | Tokens have historically been pasted into chats/docs. CI now blocks token-shaped strings; operator must rotate anything already leaked. | `make health` secret scan clean; PATs/keys rotated. |
+| P0-1 | **Prod DB durability** (Render persistent disk, ~$7/mo; `docker-entrypoint.sh` already seeds it) | Maintainer | Every deploy currently wipes user accounts/saved runs. | Accounts survive a deploy. |
+| P0-2 | **Fix the shared SQLite connection before multi-worker** (per-thread / pooled conn, or the Postgres migration) | Engineering | KNOWN_TRAPS T14 / ADR-0004: one `check_same_thread=False` connection is shared across request + job threads; concurrent writes can interleave. Fine at 1 worker, corrupts under scale. | 2+ workers pass a concurrent read/write stress test with no interleave/errors. |
+| P0-3 | **Keep credentials out of the repo** (secret-scan gate runs in CI) | Everyone | Tokens have historically been pasted into chats/docs. CI blocks token-shaped strings; rotate anything already leaked. | `make health` secret scan clean. |
 
 ## P1 — Correctness & hardening
 
@@ -51,11 +49,6 @@ used to sit in this "still deferred" block is done and verified in the tree
 (re-verified in the 2026-07-25 audit). Recorded here because sessions have
 repeatedly re-scoped completed work from stale backlog text:
 
-- ~~License-key device binding bypassable by omitting `device_id`~~ — bound keys
-  now reject device_id-omitting validates, and `/license-key/validate` is
-  rate-limited (10/60 s).
-- ~~Razorpay webhook has no idempotency ledger~~ — ledger mirrored from the
-  Stripe path, with a sha256(body) fallback event id.
 - ~~`python-jose` unmaintained~~ — migrated to `PyJWT`; algorithms pinned, no
   alg-confusion path, and the unsigned `dev.` branch stays gated on the
   library-absent case.
@@ -69,10 +62,10 @@ repeatedly re-scoped completed work from stale backlog text:
   declare crank semantics, so the parasitic + chain-efficiency paths — and
   the 29 previously-inert priced SKUs behind them — are live; see
   reports/session_2026_08_08_full_night_run.md.)*
-- *Also already resolved — do NOT re-implement:* the license-key **revoke route**
-  and the auth **timing-safe compare + bounded fail-tracker** hardening (July-3
-  inventory items A1-5/A1-6). Sessions keep re-scoping them from the stale
-  `reports/ROADMAP_2026_07_03.md` inventory — treat that file as history only.
+- *Also already resolved — do NOT re-implement:* the auth **timing-safe compare
+  + bounded fail-tracker** hardening. Sessions keep re-scoping finished work from
+  the stale `reports/ROADMAP_2026_07_03.md` inventory — treat that file as
+  history only.
 
 ## P1 — Accuracy (data-limited)
 
@@ -104,7 +97,7 @@ repeatedly re-scoped completed work from stale backlog text:
 
 - **Observability**: Sentry is wired (env-gated). Add product analytics
   (GA4/PostHog) so every user-facing KPI stops being "TBD". Then instrument the
-  funnel (sim → save → share → signup → upgrade).
+  funnel (sim → save → share → signup).
 - **Content & SEO**: the accuracy/validation story is the differentiator. More
   blog posts, the `/validation` explorer, and honest benchmark tables compound
   into organic traffic (see `docs/SEO_STRATEGY.md`).

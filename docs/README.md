@@ -1,5 +1,7 @@
 # docs/ — index
 
+MotoQuant is open source under the [MIT license](../LICENSE) — see also [../CONTRIBUTING.md](../CONTRIBUTING.md), [../SECURITY.md](../SECURITY.md) and [../CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md).
+
 Start here if you're new: **[../AGENTS.md](../AGENTS.md)** (the working
 contract) → **[ONBOARDING.md](ONBOARDING.md)** → **[ARCHITECTURE.md](ARCHITECTURE.md)**
 → [../CONTRIBUTING.md](../CONTRIBUTING.md). One-command tour: `make health`.
@@ -12,27 +14,26 @@ contract) → **[ONBOARDING.md](ONBOARDING.md)** → **[ARCHITECTURE.md](ARCHITE
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Module map + data-flow diagram + "where do I change X?" |
 | [INVARIANTS.md](INVARIANTS.md) | What must never break, and the automated gate that enforces each. |
 | [KNOWN_TRAPS.md](KNOWN_TRAPS.md) | Bugs & gotchas that keep coming back — read before a big change. |
-| [ROADMAP.md](ROADMAP.md) | Prioritized engineering roadmap + scaling blockers → the $1M/$10M path. |
+| [ROADMAP.md](ROADMAP.md) | Prioritized engineering roadmap and open work. |
 | [FAQ.md](FAQ.md) | Common questions. |
 
 ## Subsystems
 | Doc | What it covers |
 |---|---|
+| [CLIENT_COMPUTE.md](CLIENT_COMPUTE.md) | Running sims on the user's device: in-browser surrogate, Pyodide plan. |
 | [CHAT_AGENT.md](CHAT_AGENT.md) | The agentic chat: tool-calling loop, tools, budgets. |
 | [MCP.md](MCP.md) | Stdio MCP server: wire MotoQuant sims into Claude Code / Desktop. |
 | [MOTOQUANT_LLM_PLAN.md](MOTOQUANT_LLM_PLAN.md) | LLM provider abstraction + roadmap. |
 | [OBSERVABILITY.md](OBSERVABILITY.md) | Sentry wiring (env-gated). |
 | [SCRAPING.md](SCRAPING.md) | Scrapling toolkit (dev-side): polite fetch tiers → validator gate. |
 | [PARAMETER_AUDIT.txt](PARAMETER_AUDIT.txt) | Physics parameter inventory. |
-| [adr/](adr/) | Architecture Decision Records. |
+| [adr/](adr/) | Architecture Decision Records (incl. [ADR-0006: open source under MIT](adr/0006-open-source-mit.md)). |
 | [papers/](papers/) | Reference papers, project plans, validation reports. |
 
 ## Deploy & ops
 | Doc | What it covers |
 |---|---|
 | [RENDER_MIGRATION.md](RENDER_MIGRATION.md) | API cutover to Render + rollback runbook. |
-| [PAYMENTS_SETUP.md](PAYMENTS_SETUP.md) | Stripe/Razorpay go-live steps (operator). |
-| [COMMERCIAL_LAUNCH.md](COMMERCIAL_LAUNCH.md) | Freemium/quota launch plan. |
 | [RELEASE.md](RELEASE.md) | Release process (desktop parts deprecated). |
 | [INSTALL.md](INSTALL.md) | Install notes (desktop parts deprecated). |
 | [RUFF_SETUP.md](RUFF_SETUP.md) | Lint/format config. |

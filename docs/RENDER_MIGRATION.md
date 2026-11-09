@@ -1,4 +1,4 @@
-# Migrate MotoQuant Pro API: Railway → Render (free tier)
+# Migrate MotoQuant API: Railway → Render (free tier)
 
 **Goal:** drop hosting cost to $0/mo for the 3-4 month runway while MotoQuant
 gets users. Keep the Vercel frontend on `motoquant.in` untouched; only swap the
@@ -56,8 +56,8 @@ Render is dashboard-driven. There is nothing to install on your machine.
 ### Setting optional secrets
 
 If/when you want chat (`GEMINI_API_KEY`, `GROQ_API_KEY`), error tracking
-(`SENTRY_DSN`), or auth (`JWT_SECRET`, `RAZORPAY_KEY_ID`,
-`RAZORPAY_KEY_SECRET`), add them in the Render dashboard:
+(`SENTRY_DSN`), or stable sessions (`JWT_SECRET` — if unset the server generates a random
+per-process secret and warns, so sessions reset on each restart), add them in the Render dashboard:
 
 `motoquant-api` → **Environment** → **Add Environment Variable**
 
@@ -197,13 +197,13 @@ the worker, `/api/bikes` and `/api/simulate/*` share that warm worker).
 In order of effort (low → high):
 
 1. **Render Starter ($7/mo)** — same dashboard, no sleep, persistent disk.
-   One-click upgrade from the free plan once revenue covers it.
+   One-click upgrade from the free plan once hosting costs are covered.
 2. **Fly.io pay-as-you-go (~$1.50-2/mo)** — slightly cheaper than Render
    Starter, no sleep, requires Docker (already have one) + `flyctl` install.
 3. **Oracle Cloud Always Free** — 4× ARM Ampere cores + 24 GB RAM forever
    free. Strictly better resources than any paid tier on this list. Costs
    1-2 hours of setup time (provision VM, install Docker, set up Caddy for
-   TLS, point DNS). Worth doing once MotoQuant has paid users and the $5/mo
+   TLS, point DNS). Worth doing once the project has enough traffic that the $5/mo
    feels worth retiring permanently rather than just deferring.
 
 The migration path from Render to any of these is identical to this one:
