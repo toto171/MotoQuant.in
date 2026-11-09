@@ -53,7 +53,7 @@ import motoquant
 
 engine = motoquant.MotoQuantEngine(motoquant.gsxr1000_k5())
 result = engine.run()
-print(f"{result.time_quarter:.4f} s")   # 9.9331
+print(f"{result.time_quarter:.4f} s")  # 9.9331
 ```
 
 …or from the CLI, for a catalog bike at a venue:
