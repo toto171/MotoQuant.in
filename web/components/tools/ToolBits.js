@@ -13,7 +13,8 @@
  */
 
 import { useEffect, useState } from 'react';
-import { AlertCircle, ChevronDown } from 'lucide-react';
+import { AlertCircle, ChevronDown, Wind } from 'lucide-react';
+import { environmentOverridesFromLocation } from '../LocationPicker';
 
 // ─── formatting ──────────────────────────────────────────────────────────────
 export const fmtINR = (n) =>
@@ -78,9 +79,9 @@ export function ErrorCard({ message, onRetry }) {
 }
 
 // ─── layout pieces ───────────────────────────────────────────────────────────
-export function Step({ n, title, children, hint = null }) {
+export function Step({ n, title, children, hint = null, id }) {
   return (
-    <section className="card card-pad" aria-labelledby={`step-${n}-title`}>
+    <section id={id} className="card card-pad scroll-mt-24" aria-labelledby={`step-${n}-title`}>
       <div className="mb-4 flex items-center gap-3">
         <span className="step-badge" aria-hidden="true">
           {n}
@@ -188,5 +189,122 @@ export function Segmented({ label, options, value, onChange, idPrefix }) {
         ))}
       </div>
     </div>
+  );
+}
+
+// ─── manual race conditions (shared by Upgrades + Race-day setup) ───────────
+// Physical envelopes for the manual overrides. Values are clamped into range
+// before entering a request body; non-numeric input shows an inline hint and
+// NEVER enters the body.
+export const MANUAL_FIELDS = [
+  { key: 'temp', label: 'Air temperature (°C)', min: -20, max: 55, step: 0.5, ph: 'e.g. 32', hint: '−20 to 55 °C' },
+  { key: 'humidity', label: 'Humidity (%)', min: 0, max: 100, step: 1, ph: 'e.g. 55', hint: '0 to 100 %' },
+  { key: 'altitude', label: 'Altitude above sea level (m)', min: -100, max: 5000, step: 10, ph: 'e.g. 600', hint: '−100 to 5000 m' },
+];
+
+const clampNum = (n, min, max) => Math.min(max, Math.max(min, n));
+
+/**
+ * Parse + validate a manual field. Returns:
+ *  - { value: null, invalid: false }  — empty, field unused
+ *  - { value: null, invalid: true }   — non-numeric, excluded from request
+ *  - { value: n, invalid: false, clamped } — numeric, clamped into [min,max]
+ */
+export function manualFieldValue(raw, { min, max }) {
+  if (raw === '' || raw == null) return { value: null, invalid: false, clamped: false };
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return { value: null, invalid: true, clamped: false };
+  return { value: clampNum(n, min, max), invalid: false, clamped: n < min || n > max };
+}
+
+export const EMPTY_MANUAL = { temp: '', humidity: '', altitude: '' };
+
+/** Parse every manual field at once: { temp: {...}, humidity: {...}, altitude: {...} }. */
+export function manualStates(manual) {
+  return Object.fromEntries(MANUAL_FIELDS.map((f) => [f.key, manualFieldValue(manual[f.key], f)]));
+}
+
+/**
+ * Race-condition fields for a request body — the SAME mapping for every tool:
+ * a matched venue id, else the place's name (the server resolves it), then the
+ * hand-set values on top (they win over the resolved place).
+ */
+export function conditionsBody(location, states) {
+  const body = {};
+  const env = environmentOverridesFromLocation(location);
+  if (env.venue_id != null) body.venue_id = env.venue_id;
+  else if (location) {
+    const label =
+      location.venue_name || location.location_name || location._label || location.resolved_name;
+    if (label) body.location = label;
+  }
+  if (states.temp.value != null) body.ambient_temp_c = states.temp.value;
+  else if (env.ambient_temp_c != null) body.ambient_temp_c = env.ambient_temp_c;
+  if (states.humidity.value != null) body.humidity_pct = states.humidity.value;
+  else if (env.humidity_pct != null) body.humidity_pct = env.humidity_pct;
+  if (states.altitude.value != null) body.altitude_m = states.altitude.value;
+  return body;
+}
+
+/** The "Set conditions by hand" disclosure body. */
+export function ManualConditions({ idPrefix = 'mq-manual', storageKey, manual, setManual }) {
+  const states = manualStates(manual);
+  const anyManual = Object.values(manual).some((v) => v !== '');
+  return (
+    <MoreOptions storageKey={storageKey} label="Set conditions by hand">
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setManual({ temp: '25', humidity: '', altitude: '0' })}
+          className="btn-ghost btn-sm"
+        >
+          <Wind size={16} aria-hidden="true" /> Standard conditions (sea level, 25 °C)
+        </button>
+        {anyManual && (
+          <button
+            type="button"
+            onClick={() => setManual(EMPTY_MANUAL)}
+            className="min-h-[44px] text-sm font-medium text-white/70 underline-offset-2 hover:text-white hover:underline"
+          >
+            Clear
+          </button>
+        )}
+      </div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {MANUAL_FIELDS.map((f) => {
+          const st = states[f.key];
+          const flagged = st.invalid || st.clamped;
+          return (
+            <div key={f.key}>
+              <label htmlFor={`${idPrefix}-${f.key}`} className="field-label">
+                {f.label}
+              </label>
+              <input
+                id={`${idPrefix}-${f.key}`}
+                type="number"
+                inputMode="decimal"
+                min={f.min}
+                max={f.max}
+                step={f.step}
+                value={manual[f.key]}
+                onChange={(e) => setManual((m) => ({ ...m, [f.key]: e.target.value }))}
+                placeholder={f.ph}
+                aria-invalid={st.invalid || undefined}
+                aria-describedby={flagged ? `${idPrefix}-${f.key}-msg` : undefined}
+                className={`input-base font-mono ${
+                  flagged ? 'border-signal-stage/70 focus:border-signal-stage' : ''
+                }`}
+              />
+              {flagged && (
+                <p id={`${idPrefix}-${f.key}-msg`} className="field-hint text-signal-stage">
+                  {st.invalid ? `Enter a number (${f.hint})` : `Adjusted to fit ${f.hint}`}
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <p className="field-hint">Values you type here replace the ones from the place above.</p>
+    </MoreOptions>
   );
 }

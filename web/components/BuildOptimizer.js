@@ -18,18 +18,23 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Wrench, Gauge, SlidersHorizontal, Share2, Beaker, Check, MapPin } from 'lucide-react';
+import { Wrench, Gauge, SlidersHorizontal, Share2, Beaker, Check } from 'lucide-react';
 import { API_URL, optimizeBuildJob, partLabel } from '../lib/api';
 import useAsyncTask from '../lib/useAsyncTask';
 import ActionButton from './ActionButton';
 import SimProgress from './SimProgress';
 import BikePicker from './BikePicker';
-import LocationPicker, { environmentOverridesFromLocation } from './LocationPicker';
+import LocationPicker from './LocationPicker';
+import ConditionsLine, { DEFAULT_ALTITUDE_M, DEFAULT_TEMP_C } from './ConditionsLine';
 import Term from './Term';
 import NextSteps from './NextSteps';
 import {
   Step,
   MoreOptions,
+  ManualConditions,
+  EMPTY_MANUAL,
+  manualStates,
+  conditionsBody,
   RangeField,
   Segmented,
   ErrorCard,
@@ -78,8 +83,9 @@ const POPULAR_BIKES = [
 
 const SEVERITY_WORDS = { info: 'Note', warning: 'Heads up', critical: 'Important' };
 
-// Server default conditions when no location is chosen (see product brief).
-const DEFAULT_CONDITIONS = 'Aamby Valley default — 679 m, 22 °C';
+// What the server uses when no place is chosen (stated before a run; after a
+// run the server's echoed conditions block is shown instead).
+const DEFAULT_CONDITIONS = `the default conditions (${DEFAULT_ALTITUDE_M} m altitude, ${DEFAULT_TEMP_C} °C)`;
 
 const plainCategory = (s) => String(s || '').replace(/_/g, ' ');
 
@@ -151,10 +157,8 @@ export default function BuildOptimizer() {
   const resultRef = useRef(null);
   const moreRef = useRef(null);
 
-  const env = environmentOverridesFromLocation(location);
-  const venueId = env.venue_id ?? null;
-  // A resolved place that is not one of our tracks cannot drive the optimizer.
-  const placeIgnored = location != null && venueId == null;
+  const [manual, setManual] = useState(EMPTY_MANUAL);
+  const fieldStates = manualStates(manual);
 
   // Job-backed run — useAsyncTask owns AbortController + progress + error;
   // optimizeBuildJob polls /api/jobs with real candidate-scoring % and
@@ -168,7 +172,9 @@ export default function BuildOptimizer() {
         goal,
         profile,
         rider_weight_kg: riderKg,
-        venue_id: venueId,
+        // A seeded track, any other place by name, and/or hand-set values —
+        // the same fields (and meaning) as Race-day setup.
+        ...conditionsBody(location, fieldStates),
       },
       onProgress,
       signal,
@@ -210,8 +216,10 @@ export default function BuildOptimizer() {
       goal,
       profile,
       riderKg,
-      venue: venueId != null ? location : null,
-      placeIgnored,
+      venue: location && location.matched_venue_id != null ? location : null,
+      label: location
+        ? location.venue_name || location.location_name || location._label || null
+        : null,
     });
     task.reset(); // clear the previous result + error before a fresh run
     task.run();
@@ -291,13 +299,6 @@ export default function BuildOptimizer() {
       );
     }
   }
-
-  const venueNow = ran?.venue;
-  const conditionsText = venueNow
-    ? `${venueNow.venue_name || venueNow.location_name || venueNow._label}${
-        venueNow.altitude_m != null ? ` — ${Math.round(venueNow.altitude_m)} m` : ''
-      }${venueNow.temperature_c != null ? `, ${Math.round(venueNow.temperature_c)} °C` : ''}`
-    : DEFAULT_CONDITIONS;
 
   const simHref = (() => {
     if (!result || !ran?.bike || parts.length === 0) return null;
@@ -423,7 +424,7 @@ export default function BuildOptimizer() {
           </fieldset>
         </Step>
 
-        <div ref={moreRef} className="card card-pad">
+        <div ref={moreRef} id="mq-opt-where" className="card card-pad scroll-mt-24">
           <MoreOptions storageKey="mq-opt-more" label="More options" forceOpen={forceMore}>
             <Segmented
               idPrefix="mq-opt-goal"
@@ -441,16 +442,11 @@ export default function BuildOptimizer() {
                 compact
               />
               <p className="field-hint">
-                Adjusts for altitude and weather. Only known drag strips can be used here; without a
-                choice we use {DEFAULT_CONDITIONS}.
+                Adjusts for altitude and weather. Without a choice we use {DEFAULT_CONDITIONS}.
               </p>
-              {placeIgnored && (
-                <p className="mt-2 flex items-start gap-2 text-sm text-signal-stage" role="status">
-                  <MapPin size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
-                  That place isn&apos;t one of our tracks, so the {DEFAULT_CONDITIONS} will be used.
-                  Pick a track above to change it.
-                </p>
-              )}
+              <div className="mt-3">
+                <ManualConditions idPrefix="mq-opt-manual" storageKey="mq-opt-manual" manual={manual} setManual={setManual} />
+              </div>
             </div>
             <RangeField
               id="mq-opt-rider"
@@ -539,19 +535,12 @@ export default function BuildOptimizer() {
                 {result.goal === 'max_trap' ? 'highest finish speed' : 'quickest time'} · Rider:{' '}
                 {ran?.riderKg ?? riderKg} kg
               </p>
-              <p className="mt-1 text-sm text-white/65">
-                Conditions: {conditionsText}.{' '}
-                <button
-                  type="button"
-                  onClick={openMoreOptions}
-                  className="font-medium text-accent underline-offset-2 hover:underline"
-                >
-                  Change location
-                </button>
-                {ran?.placeIgnored && (
-                  <span className="text-signal-stage"> (The place you picked is not a known track.)</span>
-                )}
-              </p>
+              <ConditionsLine
+                className="mt-1 text-sm text-white/65"
+                env={result.environment}
+                placeLabel={ran?.label}
+                onChange={openMoreOptions}
+              />
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <Tile

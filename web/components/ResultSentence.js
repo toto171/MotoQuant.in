@@ -55,10 +55,13 @@ export default function ResultSentence({
       <strong className="font-semibold text-white">{et.toFixed(2)} s</strong>
       {trap}.
       {estimated && (
-        <span className="text-white/60">
+        <>
           {' '}
-          (<Term k="instant_estimate" />)
-        </span>
+          {/* one unbreakable unit, so the brackets never split across lines */}
+          <span className="whitespace-nowrap text-white/60">
+            (<Term k="instant_estimate" />)
+          </span>
+        </>
       )}
     </p>
   );

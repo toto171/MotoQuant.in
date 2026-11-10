@@ -1,7 +1,8 @@
 'use client';
 
 import { PANEL } from './controls';
-import { bikeName } from './format';
+import { bikeName, isNum } from './format';
+import { describeEstimate } from '../ConditionsLine';
 
 function Rows({ rows }) {
   return (
@@ -15,9 +16,10 @@ function Rows({ rows }) {
 
 export default function SpecsTab({ sim }) {
   const {
-    bike, headline, fullRes, riderKg, powerBoost, massChange, ambientTemp, trackTemp, humidity,
-    headwind, venue, frontTire, rearTire, selectedParts,
+    bike, headline, fullRes, riderKg, powerBoost, massChange, frontTire, rearTire, selectedParts,
   } = sim;
+  // The conditions the latest result was REALLY computed under (server echo).
+  const env = (fullRes || headline)?.environment ?? null;
   const cfg = fullRes?.config;
   const hp = cfg?.peak_power_hp ?? headline?.peak_power_hp;
   const mass = cfg?.total_mass_kg ?? headline?.total_mass_kg;
@@ -51,11 +53,12 @@ export default function SpecsTab({ sim }) {
         <h3 className="mb-1 font-display text-base font-semibold text-white">Conditions</h3>
         <Rows
           rows={[
-            ['Place', venue?.name || 'Aamby Valley default (679 m)'],
-            ['Air temperature', `${ambientTemp} °C`],
-            ['Track temperature', `${trackTemp} °C`],
-            ['Humidity', `${humidity} %`],
-            ['Wind', headwind === 0 ? 'None' : `${headwind > 0 ? 'Headwind' : 'Tailwind'} ${Math.abs(headwind)} km/h`],
+            ['Place', env ? (env.is_default ? 'Default conditions' : env.name) : headline?.estimateAssumes ? describeEstimate(headline.estimateAssumes) : null],
+            ['Altitude', isNum(env?.altitude_m) ? `${Math.round(env.altitude_m)} m` : null],
+            ['Air temperature', isNum(env?.ambient_temp_c) ? `${Math.round(env.ambient_temp_c)} °C` : null],
+            ['Track temperature', isNum(env?.track_temp_c) ? `${Math.round(env.track_temp_c)} °C` : null],
+            ['Humidity', isNum(env?.humidity_pct) ? `${Math.round(env.humidity_pct)} %` : null],
+            ['Wind', !env ? null : Math.abs(env.headwind_kmh || 0) < 0.5 ? 'None' : `${env.headwind_kmh > 0 ? 'Headwind' : 'Tailwind'} ${Math.abs(Math.round(env.headwind_kmh))} km/h`],
             ['Front tyre', tyre(frontTire)],
             ['Rear tyre', tyre(rearTire)],
           ]}

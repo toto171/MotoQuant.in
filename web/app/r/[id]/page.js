@@ -151,7 +151,7 @@ export default function RunPage() {
                   {run.year ? <span className="text-white/55"> · {run.year}</span> : null}
                 </h1>
                 <p className="mt-1 text-sm text-white/65">
-                  {run.venue ? `Conditions: ${run.venue}` : 'Venue not recorded'}
+                  {run.venue ? `Conditions: ${run.venue}` : 'Conditions were not recorded for this run'}
                   {run.created_at ? ` · ${String(run.created_at).slice(0, 10)}` : ''}
                 </p>
 

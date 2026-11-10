@@ -7,17 +7,8 @@ import ActionButton from '../ActionButton';
 import SimProgress from '../SimProgress';
 import { ErrorTile, PANEL } from './controls';
 import { SimChart, COLOR_NAMES } from './charts';
-import { conditionsText, fmt } from './format';
-
-function PartsNote({ sim }) {
-  if (!sim.selectedParts.length) return null;
-  return (
-    <p className="rounded-xl border border-signal-stage/30 bg-signal-stage/[0.07] p-3 text-sm text-white/80">
-      The full simulation uses your bike, weight, tyres and conditions but <strong>not your selected parts yet</strong>.
-      For a time with parts, use the Quarter mile tab.
-    </p>
-  );
-}
+import ConditionsLine from '../ConditionsLine';
+import { fmt } from './format';
 
 function StaleNote({ sim }) {
   const { fullRes, fullFresh } = sim;
@@ -35,16 +26,12 @@ export function ChartsTab({ sim }) {
   const chartData = useMemo(() => {
     const ts = fullRes?.timeseries;
     if (!ts?.t_s) return [];
-    // The server reports tyre grip used as 0-100 already multiplied by 100 again
-    // (values up to ~10,000); show a true percentage.
-    const tmax = Math.max(0, ...(ts.traction_pct || [0]));
-    const tdiv = tmax > 200 ? 100 : 1;
     return ts.t_s.map((t, i) => ({
       t: +t.toFixed(2),
       speed: ts.v_kmh?.[i] ?? 0,
       rpm: ts.rpm?.[i] ?? 0,
       gear: ts.gear?.[i] ?? 0,
-      traction: (ts.traction_pct?.[i] ?? 0) / tdiv,
+      traction: ts.traction_pct?.[i] ?? 0, // a true 0-100 % from the server
       tire_temp: ts.tire_temp_c?.[i] ?? 0,
       power: ts.power_kw?.[i] ?? 0,
     }));
@@ -64,7 +51,6 @@ export function ChartsTab({ sim }) {
   return (
     <div className="space-y-4">
       {task.error && <ErrorTile message={`The full simulation failed — ${task.error}`} onRetry={run} />}
-      <PartsNote sim={sim} />
       <StaleNote sim={sim} />
       {chartData.length > 0 ? (
         <div className="space-y-6">
@@ -80,9 +66,10 @@ export function ChartsTab({ sim }) {
             <SimChart data={chartData} dataKey="power" label="Power (kW)" unit="kW" color={COLOR_NAMES.stage} />
             <SimChart data={chartData} dataKey="tire_temp" label="Rear tyre temperature (°C)" unit="°C" color={COLOR_NAMES.foul} />
           </div>
-          <p className="text-sm text-white/60">
-            Conditions: {conditionsText(fullRes.meta)}. <Term k="traction">What is tyre grip used?</Term>
-          </p>
+          <div className="text-sm text-white/60">
+            <ConditionsLine env={fullRes.environment} className="text-sm text-white/60" />
+            <Term k="traction">What is tyre grip used?</Term>
+          </div>
         </div>
       ) : (
         <div className="py-8 text-center">
@@ -122,7 +109,6 @@ export function SplitsTab({ sim }) {
   return (
     <div className="space-y-4">
       {task.error && <ErrorTile message={`The full simulation failed — ${task.error}`} onRetry={run} />}
-      <PartsNote sim={sim} />
       <StaleNote sim={sim} />
       {hasFull ? (
         <div className="timeslip overflow-x-auto">

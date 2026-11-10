@@ -21,23 +21,26 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Sliders, Cog, Flag, CircleDot, Flame, Zap, Wrench, Wind } from 'lucide-react';
+import { Sliders, Cog, Flag, CircleDot, Flame, Zap, Wrench } from 'lucide-react';
 import { API_URL, autotuneEcuJob } from '../lib/api';
 import useAsyncTask from '../lib/useAsyncTask';
 import ActionButton from './ActionButton';
 import SimProgress from './SimProgress';
 import BikePicker from './BikePicker';
-import LocationPicker, { environmentOverridesFromLocation } from './LocationPicker';
+import LocationPicker from './LocationPicker';
+import ConditionsLine, { DEFAULT_ALTITUDE_M, DEFAULT_TEMP_C } from './ConditionsLine';
 import Term from './Term';
 import NextSteps from './NextSteps';
 import {
   Step,
-  MoreOptions,
   RangeField,
   ErrorCard,
+  ManualConditions,
+  EMPTY_MANUAL,
+  manualStates,
+  conditionsBody,
   describeTimeChange,
   fmtSecs,
-  TONE_TEXT,
 } from './tools/ToolBits';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -60,34 +63,10 @@ const POPULAR_BIKES = [
   { label: 'GSX-R1000', search: 'gsx-r1000' },
 ];
 
-// Server default conditions when no location is chosen (see product brief).
-const DEFAULT_CONDITIONS = 'Aamby Valley default — 679 m, 22 °C';
+// What the server uses when no place is chosen (stated before a run, so there
+// is no server block to read yet; after a run the echoed block is used).
+const DEFAULT_CONDITIONS = `the default conditions (${DEFAULT_ALTITUDE_M} m altitude, ${DEFAULT_TEMP_C} °C)`;
 const GUIDANCE_LABEL = 'General guidance — not simulated for this bike';
-
-// ─── validated manual conditions ─────────────────────────────────────────────
-// Physical envelopes for the manual overrides. Values are clamped into range
-// before entering the request body; non-numeric input shows an inline hint
-// and NEVER enters the body.
-const MANUAL_FIELDS = [
-  { key: 'temp', label: 'Air temperature (°C)', min: -20, max: 55, step: 0.5, ph: 'e.g. 32', hint: '−20 to 55 °C' },
-  { key: 'humidity', label: 'Humidity (%)', min: 0, max: 100, step: 1, ph: 'e.g. 55', hint: '0 to 100 %' },
-  { key: 'altitude', label: 'Altitude above sea level (m)', min: -100, max: 5000, step: 10, ph: 'e.g. 600', hint: '−100 to 5000 m' },
-];
-
-const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
-
-/**
- * Parse + validate a manual field. Returns:
- *  - { value: null, invalid: false }  — empty, field unused
- *  - { value: null, invalid: true }   — non-numeric, excluded from request
- *  - { value: n, invalid: false, clamped } — numeric, clamped into [min,max]
- */
-function manualFieldValue(raw, { min, max }) {
-  if (raw === '' || raw == null) return { value: null, invalid: false, clamped: false };
-  const n = Number(raw);
-  if (!Number.isFinite(n)) return { value: null, invalid: true, clamped: false };
-  return { value: clamp(n, min, max), invalid: false, clamped: n < min || n > max };
-}
 
 // ─── result pieces ──────────────────────────────────────────────────────────
 function FromTo({ label, from, to, unit }) {
@@ -152,47 +131,28 @@ export default function EcuAutotune() {
   const resultRef = useRef(null);
 
   // Optional manual conditions (override / supplement the resolved location)
-  const [manual, setManual] = useState({ temp: '', humidity: '', altitude: '' });
-  const anyManual = Object.values(manual).some((v) => v !== '');
+  const [manual, setManual] = useState(EMPTY_MANUAL);
 
   // Per-field parse/validate state (drives inline hints + the request body)
-  const fieldStates = Object.fromEntries(
-    MANUAL_FIELDS.map((f) => [f.key, manualFieldValue(manual[f.key], f)]),
-  );
+  const fieldStates = manualStates(manual);
 
   // Job-backed run — useAsyncTask owns AbortController + progress + error;
   // autotuneEcuJob polls /api/jobs with the real sweep % and cancels the
   // job server-side when the signal aborts (Stop).
   const task = useAsyncTask(async (signal, onProgress) => {
     if (!bike) throw new Error('Choose a bike first.');
-    const env = environmentOverridesFromLocation(location);
     const body = {
       bike_id: bike.id,
       rider_weight_kg: riderKg,
+      ...conditionsBody(location, fieldStates),
     };
-    // Prefer a resolved venue id; otherwise pass the location label so the
-    // backend resolves it (same path /api/venues/resolve uses).
-    if (env.venue_id != null) body.venue_id = env.venue_id;
-    else if (location) {
-      const label =
-        location.venue_name || location.location_name || location._label || location.resolved_name;
-      if (label) body.location = label;
-    }
-    // Manual overrides win when supplied. Values are validated + clamped —
-    // invalid (non-numeric) input never enters the body.
-    const { temp, humidity, altitude } = fieldStates;
-    if (temp.value != null) body.ambient_temp_c = temp.value;
-    else if (env.ambient_temp_c != null) body.ambient_temp_c = env.ambient_temp_c;
-    if (humidity.value != null) body.humidity_pct = humidity.value;
-    else if (env.humidity_pct != null) body.humidity_pct = env.humidity_pct;
-    if (altitude.value != null) body.altitude_m = altitude.value;
 
     return autotuneEcuJob(body, onProgress, signal);
   });
 
   const run = () => {
     setStopped(false);
-    const manualUsed = MANUAL_FIELDS.some((f) => fieldStates[f.key].value != null);
+    const manualUsed = Object.values(fieldStates).some((f) => f.value != null);
     setRan({
       bike,
       riderKg,
@@ -261,12 +221,6 @@ export default function EcuAutotune() {
   }, []);
 
   // ── plain-language pieces ──
-  const placeName = ran?.manualUsed
-    ? ran?.label
-      ? `${ran.label}, with the conditions you set`
-      : 'the conditions you set'
-    : ran?.label || DEFAULT_CONDITIONS;
-
   let airSentence = null;
   if (env) {
     const loss = Number(env.power_loss_pct);
@@ -309,11 +263,6 @@ export default function EcuAutotune() {
   const launchChange = launchModelled ? describeTimeChange(launch.delta_et_s) : null;
   const launchHasGain = !!launchChange && launchChange.tone !== 'flat';
 
-  const manualProps = (f) => {
-    const st = fieldStates[f.key];
-    return { st, flagged: st.invalid || st.clamped };
-  };
-
   return (
     <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
       {/* ── Inputs ─────────────────────────────────────────────────────── */}
@@ -322,7 +271,7 @@ export default function EcuAutotune() {
           <BikePicker value={bike} onSelect={setBike} popular={POPULAR_BIKES} />
         </Step>
 
-        <Step n={2} title="Where are you racing?">
+        <Step n={2} id="mq-tune-where" title="Where are you racing?">
           <LocationPicker
             value={location}
             onResolved={setLocation}
@@ -334,60 +283,7 @@ export default function EcuAutotune() {
           </p>
 
           <div className="mt-3">
-            <MoreOptions storageKey="mq-tune-manual" label="Set conditions by hand">
-              <div className="flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setManual({ temp: '25', humidity: '', altitude: '0' })}
-                  className="btn-ghost btn-sm"
-                >
-                  <Wind size={16} aria-hidden="true" /> Standard conditions (sea level, 25 °C)
-                </button>
-                {anyManual && (
-                  <button
-                    type="button"
-                    onClick={() => setManual({ temp: '', humidity: '', altitude: '' })}
-                    className="min-h-[44px] text-sm font-medium text-white/70 underline-offset-2 hover:text-white hover:underline"
-                  >
-                    Clear
-                  </button>
-                )}
-              </div>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                {MANUAL_FIELDS.map((f) => {
-                  const { st, flagged } = manualProps(f);
-                  return (
-                    <div key={f.key}>
-                      <label htmlFor={`mq-manual-${f.key}`} className="field-label">
-                        {f.label}
-                      </label>
-                      <input
-                        id={`mq-manual-${f.key}`}
-                        type="number"
-                        inputMode="decimal"
-                        min={f.min}
-                        max={f.max}
-                        step={f.step}
-                        value={manual[f.key]}
-                        onChange={(e) => setManual((m) => ({ ...m, [f.key]: e.target.value }))}
-                        placeholder={f.ph}
-                        aria-invalid={st.invalid || undefined}
-                        aria-describedby={flagged ? `mq-manual-${f.key}-msg` : undefined}
-                        className={`input-base font-mono ${
-                          flagged ? 'border-signal-stage/70 focus:border-signal-stage' : ''
-                        }`}
-                      />
-                      {flagged && (
-                        <p id={`mq-manual-${f.key}-msg`} className="field-hint text-signal-stage">
-                          {st.invalid ? `Enter a number (${f.hint})` : `Adjusted to fit ${f.hint}`}
-                        </p>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-              <p className="field-hint">Values you type here replace the ones from the place above.</p>
-            </MoreOptions>
+            <ManualConditions idPrefix="mq-manual" storageKey="mq-tune-manual" manual={manual} setManual={setManual} />
           </div>
         </Step>
 
@@ -461,9 +357,15 @@ export default function EcuAutotune() {
                 </p>
               )}
               {netSentence && <p className="mt-3 text-base leading-relaxed text-white/80">{netSentence}</p>}
-              <p className="mt-3 text-sm text-white/65">
-                Conditions: {placeName}. Rider: {ran?.riderKg ?? riderKg} kg.
-              </p>
+              <ConditionsLine
+                className="mt-3 text-sm text-white/65"
+                env={env}
+                placeLabel={ran?.label}
+                onChange={() =>
+                  document.getElementById('mq-tune-where')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                }
+              />
+              <p className="mt-1 text-sm text-white/65">Rider: {ran?.riderKg ?? riderKg} kg.</p>
 
               {env && (
                 <div className="mt-4 border-t border-white/10 pt-1">
@@ -552,7 +454,15 @@ export default function EcuAutotune() {
             {launch &&
               (!launchModelled ? (
                 <RecCard icon={Flag} title="Launch RPM" muted badge="Not modelled">
-                  <p className="text-sm text-white/75">Launch RPM isn&apos;t modelled for this bike.</p>
+                  <p className="text-sm text-white/75">
+                    {launch.reason || 'Launch RPM isn\u2019t modelled for this bike.'}
+                    {launch.stock_rpm != null && (
+                      <>
+                        {' '}
+                        Start from your usual {fmtInt(launch.stock_rpm)} rpm and adjust by feel on the line.
+                      </>
+                    )}
+                  </p>
                 </RecCard>
               ) : launchHasGain ? (
                 <RecCard icon={Flag} title="Launch RPM" change={launchChange}>

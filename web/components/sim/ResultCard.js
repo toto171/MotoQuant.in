@@ -18,7 +18,8 @@ import Term from '../Term';
 import ActionButton from '../ActionButton';
 import SimProgress from '../SimProgress';
 import { ErrorTile } from './controls';
-import { conditionsText, fmt, inr, isNum, quickerSlower } from './format';
+import ConditionsLine from '../ConditionsLine';
+import { fmt, inr, isNum, quickerSlower } from './format';
 
 function scrollToId(id) {
   const el = typeof document !== 'undefined' ? document.getElementById(id) : null;
@@ -31,7 +32,7 @@ function scrollToId(id) {
 
 export default function ResultCard({ sim, advanced = false }) {
   const {
-    bike, headline, headlineFresh, exactFull, quickRes, selectedParts, buildCost, liveActive,
+    bike, headline, headlineFresh, exactFull, quickRes, quickFresh, selectedParts, buildCost, liveActive,
     quickTask, fullSimTask, saveTask, saveable, savedRun, startFullSim, calculateNow,
     setShowEnv,
   } = sim;
@@ -50,10 +51,14 @@ export default function ResultCard({ sim, advanced = false }) {
     }
   };
 
+  // The "parts make it quicker" strip comes from the quick sim (it also runs
+  // the stock bike); the exact full simulation agrees with it to the millisecond.
   const delta =
-    !exactFull && quickRes && headline === quickRes && isNum(quickRes.stock_et_s) && isNum(quickRes.et_delta_s)
+    quickRes && quickFresh && !quickRes.estimated && isNum(quickRes.stock_et_s) && isNum(quickRes.et_delta_s)
       ? quickRes
       : null;
+  const venueChosen = !!meta?.venueId;
+  const skipped = headline?.parts_skipped || [];
 
   const rows = headline
     ? [
@@ -118,12 +123,19 @@ export default function ResultCard({ sim, advanced = false }) {
             build={modified ? 'modified' : 'stock'}
           />
 
-          <p className="mt-2 text-sm text-white/65">
-            Conditions: {conditionsText(meta)}.{' '}
-            <button type="button" onClick={changeLocation} className="font-medium text-accent underline underline-offset-2 hover:text-accent-bright">
-              Change location
-            </button>
-          </p>
+          <ConditionsLine
+            className="mt-2 text-sm text-white/65"
+            env={headline.environment}
+            estimate={headline.environment ? null : headline.estimateAssumes || {}}
+            placeLabel={!venueChosen ? meta?.placeLabel : null}
+            onChange={changeLocation}
+          />
+
+          {skipped.length > 0 && (
+            <p role="status" className="mt-3 rounded-xl border border-signal-stage/30 bg-signal-stage/[0.07] p-3 text-sm text-white/80">
+              Some parts in this setup are no longer in the catalog and were skipped.
+            </p>
+          )}
 
           {headline.estimated && (
             <p className="mt-3 rounded-xl border border-signal-stage/30 bg-signal-stage/[0.07] p-3 text-sm text-white/80">

@@ -21,7 +21,8 @@ import dynamic from 'next/dynamic';
 import { AlertCircle, MapPin, ChevronDown, ArrowRight } from 'lucide-react';
 import { environmentOverridesFromLocation } from './LocationPicker';
 import { predictQuick, preloadSurrogate } from '../lib/surrogate';
-import { API_URL, runJob } from '../lib/api';
+import { API_URL, runJob, getBikeCatalog } from '../lib/api';
+import ConditionsLine from './ConditionsLine';
 import SimProgress from './SimProgress';
 import ResultSentence from './ResultSentence';
 import Term from './Term';
@@ -36,9 +37,6 @@ const LocationPicker = dynamic(() => import('./LocationPicker'), {
   ssr: false,
   loading: () => <div className="skeleton h-28 w-full rounded-xl" aria-hidden="true" />,
 });
-
-// What the server assumes when no location is chosen (api default conditions).
-const DEFAULT_CONDITIONS = 'Aamby Valley default — 679 m altitude, 22 °C';
 
 // Curated bikes. `match` is the catalog name (year range stripped) used to
 // find the CURRENT id at runtime; when several rows share a name the newest
@@ -200,10 +198,9 @@ export default function SimulatorWidget() {
   const loadCatalog = useCallback(() => {
     let cancelled = false;
     setCatalog({ state: 'loading', map: {} });
-    fetch(`${API_URL}/api/bikes?limit=2000`)
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((data) => {
-        if (!cancelled) setCatalog({ state: 'ready', map: resolveCatalog(data.bikes || []) });
+    getBikeCatalog()
+      .then((bikes) => {
+        if (!cancelled) setCatalog({ state: 'ready', map: resolveCatalog(bikes || []) });
       })
       .catch(() => {
         if (!cancelled) setCatalog({ state: 'error', map: {} });
@@ -382,15 +379,13 @@ export default function SimulatorWidget() {
   const exact = run && run.sig === sig ? run : null;
   const placeName = location ? locationName(location) : null;
 
-  const conditionsLine = location ? (
-    <>
-      Conditions: {placeName}
-      {location.altitude_m != null ? ` — ${Math.round(location.altitude_m)} m altitude` : ''}
-      {location.temperature_c != null ? `, ${Math.round(location.temperature_c)} °C` : ''}.
-    </>
-  ) : (
-    <>Conditions: {DEFAULT_CONDITIONS}.</>
-  );
+  // Conditions are worded from the server's echoed `environment` block (exact
+  // results) or from what the in-browser estimate assumes — never restated
+  // from what this page sent (see ConditionsLine).
+  const changeLocation = () => {
+    setLocationOpen(true);
+    document.getElementById('widget-location')?.scrollIntoView?.({ block: 'center', behavior: 'smooth' });
+  };
 
   const simulatorHref = (() => {
     const p = new URLSearchParams();
@@ -605,7 +600,7 @@ export default function SimulatorWidget() {
           </div>
 
           {/* Location */}
-          <div className="mb-6">
+          <div className="mb-6" id="widget-location">
             <button
               type="button"
               onClick={() => setLocationOpen((v) => !v)}
@@ -676,10 +671,10 @@ export default function SimulatorWidget() {
           {/* ── Result ─────────────────────────────────────────────── */}
           <div className="mt-6" aria-live="polite">
             {exact?.kind === 'quarter' && (
-              <QuarterResult data={exact.data} riderKg={riderKg} placeName={placeName} conditions={conditionsLine} />
+              <QuarterResult data={exact.data} riderKg={riderKg} placeName={placeName} placeLabel={placeName} onChange={changeLocation} />
             )}
             {exact?.kind === 'topspeed' && (
-              <TopSpeedResult data={exact.data} riderKg={riderKg} placeName={placeName} conditions={conditionsLine} />
+              <TopSpeedResult data={exact.data} riderKg={riderKg} placeName={placeName} placeLabel={placeName} onChange={changeLocation} />
             )}
             {!exact && !loading && estimate && (
               <EstimateResult
@@ -687,7 +682,8 @@ export default function SimulatorWidget() {
                 bikeName={bike.label}
                 riderKg={riderKg}
                 placeName={placeName}
-                conditions={conditionsLine}
+                estimateVenue={env.venue_id != null ? placeName : null}
+                                onChange={changeLocation}
               />
             )}
             {!exact && !loading && !estimate && estimatePending && (
@@ -726,11 +722,7 @@ function BigNumber({ value, unit }) {
   );
 }
 
-function Conditions({ children }) {
-  return <p className="mt-3 text-sm text-white/60">{children}</p>;
-}
-
-function EstimateResult({ estimate, bikeName, riderKg, placeName, conditions }) {
+function EstimateResult({ estimate, bikeName, riderKg, placeName, estimateVenue, estimateAltitudeM, onChange }) {
   return (
     <div className="rounded-xl border border-white/10 bg-asphalt-3 p-4 sm:p-5">
       <BigNumber value={estimate.etS.toFixed(2)} unit="s" />
@@ -743,7 +735,11 @@ function EstimateResult({ estimate, bikeName, riderKg, placeName, conditions }) 
         venueName={placeName}
         estimated
       />
-      <Conditions>{conditions}</Conditions>
+      <ConditionsLine
+        className="mt-3 text-sm text-white/60"
+        estimate={{ venueName: estimateVenue, altitudeM: estimateAltitudeM }}
+        onChange={onChange}
+      />
       <p className="mt-2 text-sm text-white/60">
         Press <strong className="font-semibold text-white/80">Calculate my time</strong> for the
         exact result with launch and halfway splits.
@@ -752,7 +748,7 @@ function EstimateResult({ estimate, bikeName, riderKg, placeName, conditions }) 
   );
 }
 
-function QuarterResult({ data, riderKg, placeName, conditions }) {
+function QuarterResult({ data, riderKg, placeName, placeLabel, onChange }) {
   const has = (v) => typeof v === 'number' && Number.isFinite(v);
   return (
     <div className="rounded-xl border border-white/10 bg-asphalt-3 p-4 sm:p-5">
@@ -765,7 +761,7 @@ function QuarterResult({ data, riderKg, placeName, conditions }) {
         trapKmh={data.trap_speed_kmh}
         venueName={placeName}
       />
-      <Conditions>{conditions}</Conditions>
+      <ConditionsLine className="mt-3 text-sm text-white/60" env={data.environment} placeLabel={placeLabel} onChange={onChange} />
       <div className="mt-3">
         {has(data.et_60ft_s) && (
           <div className="stat-row">
@@ -802,7 +798,7 @@ function QuarterResult({ data, riderKg, placeName, conditions }) {
   );
 }
 
-function TopSpeedResult({ data, riderKg, placeName, conditions }) {
+function TopSpeedResult({ data, riderKg, placeName, placeLabel, onChange }) {
   const has = (v) => typeof v === 'number' && Number.isFinite(v);
   if (!has(data.terminal_velocity_kmh)) return null;
   return (
@@ -820,7 +816,7 @@ function TopSpeedResult({ data, riderKg, placeName, conditions }) {
           ? ' It was still gaining speed slowly when the run ended, so the true top speed may be a little higher.'
           : ''}
       </p>
-      <Conditions>{conditions}</Conditions>
+      <ConditionsLine className="mt-3 text-sm text-white/60" env={data.environment} placeLabel={placeLabel} onChange={onChange} />
       <div className="mt-3">
         {has(data.time_to_terminal_s) && (
           <div className="stat-row">

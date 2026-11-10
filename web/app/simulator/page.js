@@ -97,7 +97,16 @@ function SimulatorPageInner() {
                 <button type="button" onClick={sim.dismissBikeNotice} className="btn-ghost btn-sm shrink-0">Dismiss</button>
               </div>
             )}
-            <AskPanel />
+            {sim.notices.map((msg) => (
+              <div key={msg} role="status" className="flex items-center justify-between gap-3 rounded-xl border border-signal-stage/30 bg-signal-stage/[0.07] p-3 text-sm text-white/85">
+                <span>{msg}</span>
+                <button type="button" onClick={() => sim.dismissNotice(msg)} className="btn-ghost btn-sm shrink-0">Dismiss</button>
+              </div>
+            ))}
+            {/* Simple mode on phones shows the chat below the result instead (see SimpleMode). */}
+            <div className={mode === 'advanced' ? '' : 'hidden lg:block'}>
+              <AskPanel />
+            </div>
             {mode === 'advanced' ? <AdvancedWorkbench sim={sim} /> : <SimpleMode sim={sim} />}
           </div>
         )}

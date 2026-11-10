@@ -1,7 +1,7 @@
 {
   "name": "MotoQuant",
   "short_name": "MotoQuant",
-  "description": "First-principles physics simulation for quarter-mile drag racing.",
+  "description": "Free, open-source quarter-mile simulator for motorcycles. Pick a bike, see its time, find what makes it quicker.",
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },

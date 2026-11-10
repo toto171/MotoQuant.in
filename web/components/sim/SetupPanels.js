@@ -9,6 +9,7 @@ import { memo, useMemo } from 'react';
 import { ChevronDown } from 'lucide-react';
 import LocationPicker from '../LocationPicker';
 import Term from '../Term';
+import { DEFAULT_ALTITUDE_M } from '../ConditionsLine';
 import BikeChooser from './BikeChooser';
 import { ErrorTile, SimDropdown, SimSlider } from './controls';
 
@@ -23,7 +24,7 @@ const venueItem = (v) => (
   </span>
 );
 const venueSelected = (v) => <span>{v.name}</span>;
-const NO_VENUE = { id: null, name: 'Aamby Valley default (no venue)', country: 'Default', altitude_m: 679 };
+const NO_VENUE = { id: null, name: 'Default conditions (no venue)', country: 'Default', altitude_m: DEFAULT_ALTITUDE_M };
 
 const tireKey = (t) => t.id ?? 'stock';
 const tireSearch = (t) => `${t.manufacturer} ${t.model} ${t.size_designation || ''} ${t.compound_type || ''}`;
@@ -64,7 +65,7 @@ export const EnvironmentPanel = memo(function EnvironmentPanel({
       </button>
       {!open && (
         <p className="text-sm text-white/60">
-          {venue ? `${venue.name}${venue.altitude_m != null ? ` · ${Math.round(venue.altitude_m)} m` : ''}` : 'Aamby Valley default · 679 m'} · {ambientTemp} °C
+          {venue ? `${venue.name}${venue.altitude_m != null ? ` · ${Math.round(venue.altitude_m)} m` : ''}` : `Default conditions · ${DEFAULT_ALTITUDE_M} m`} · {ambientTemp} °C
         </p>
       )}
       {open && (

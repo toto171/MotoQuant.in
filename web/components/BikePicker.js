@@ -151,16 +151,21 @@ export default function BikePicker({
     el?.scrollIntoView({ block: 'nearest' });
   }, [hi]);
 
+  const [chipError, setChipError] = useState(null); // { search } of the chip that failed
+
   const pickPopular = async (search) => {
+    setChipError(null);
     try {
       const r = await fetch(
         `${API_URL}/api/bikes?search=${encodeURIComponent(search)}&limit=1`
       );
-      if (!r.ok) return;
+      if (!r.ok) throw new Error(String(r.status));
       const data = await r.json();
       if (data.bikes?.[0]) pick(data.bikes[0]);
+      else throw new Error('not found');
     } catch {
-      /* chip is a convenience — stay quiet on failure */
+      // Never fail silently: say so, and offer a retry.
+      setChipError({ search });
     }
   };
 
@@ -215,6 +220,18 @@ export default function BikePicker({
             </button>
           ))}
         </div>
+      )}
+      {chipError && (
+        <p role="alert" className="mt-2 text-sm text-signal-foul">
+          We couldn&apos;t reach the bike list.{' '}
+          <button
+            type="button"
+            onClick={() => pickPopular(chipError.search)}
+            className="font-medium underline underline-offset-2"
+          >
+            Try again
+          </button>
+        </p>
       )}
 
       <AnimatePresence>

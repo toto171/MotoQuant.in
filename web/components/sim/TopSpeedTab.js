@@ -7,6 +7,7 @@ import ActionButton from '../ActionButton';
 import SimProgress from '../SimProgress';
 import { ErrorTile, PANEL } from './controls';
 import { SimChart } from './charts';
+import ConditionsLine from '../ConditionsLine';
 
 const LSR = [
   { key: 'quarter_mile', label: '¼ mile', sub: '402 m' },
@@ -127,8 +128,9 @@ export default function TopSpeedTab({ sim }) {
         </div>
       )}
 
-      {selectedParts.length > 0 && !r.meta?.partCount && (
-        <p className="text-sm text-white/60">This run did not include your selected parts.</p>
+      <ConditionsLine env={r.environment} className="text-sm text-white/60" />
+      {(r.parts_skipped?.length ?? 0) > 0 && (
+        <p className="text-sm text-white/60">Some parts in this setup are no longer in the catalog and were skipped.</p>
       )}
 
       <ActionButton task={task} onRun={startTopSpeed} label="Run it again" runningLabel="Top speed" variant="ghost" disabled={!bike} className="w-full" />

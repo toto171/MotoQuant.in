@@ -7,6 +7,7 @@ import Term from '../Term';
 import ActionButton from '../ActionButton';
 import SimProgress from '../SimProgress';
 import { ErrorTile, PANEL, SimSlider } from './controls';
+import ConditionsLine from '../ConditionsLine';
 import { OverlayChart } from './charts';
 import { bikeName, inr } from './format';
 
@@ -84,6 +85,8 @@ export default function CompareTab({ sim }) {
               {delta.cost_diff_inr !== 0 && ` · Build B costs ${inr(Math.abs(delta.cost_diff_inr))} ${delta.cost_diff_inr > 0 ? 'more' : 'less'}`}
             </p>
           </div>
+
+          <ConditionsLine env={r.environment} className="text-sm text-white/60" />
 
           <div className="grid gap-3 sm:grid-cols-2">
             {[

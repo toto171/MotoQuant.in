@@ -4,18 +4,18 @@
  */
 
 // ── Defaults (the values the sliders start at; also the "not custom" test) ──
+// The weather values mirror the SERVER's default conditions (22 °C / 30 °C
+// track / 40 % / no wind). While all four are at these values the weather
+// fields are simply not sent, so the server runs — and echoes — its defaults.
 export const DEFAULTS = {
   riderKg: 75,
   powerBoost: 0,
   massChange: 0,
-  ambientTemp: 25,
+  ambientTemp: 22,
   trackTemp: 30,
   humidity: 40,
   headwind: 0,
 };
-
-// The server simulates at Aamby Valley's altitude whenever no venue is sent.
-export const DEFAULT_PLACE = { name: 'Aamby Valley', altitudeM: 679 };
 
 export const MODE_KEY = 'mq-sim-mode';
 
@@ -77,35 +77,6 @@ export function quickerSlower(deltaS) {
   return `${Math.abs(deltaS).toFixed(2)} s ${deltaS < 0 ? 'quicker' : 'slower'}`;
 }
 
-/**
- * Plain-words description of the conditions a result was computed under.
- * `snap` is the snapshot captured when the run started (see makeSnap).
- */
-export function conditionsText(snap) {
-  if (!snap) return '';
-  const temp = isNum(snap.tempC) ? `${Math.round(snap.tempC)} °C` : null;
-  if (snap.venueName) {
-    const alt = isNum(snap.venueAltM) ? `${Math.round(snap.venueAltM)} m` : null;
-    if (snap.envCustom) {
-      return `${snap.venueName}${alt ? ` (${alt})` : ''} altitude with your custom conditions`;
-    }
-    return `${snap.venueName}${alt ? ` — ${alt}` : ''}${temp && !snap.estimated ? `, ${temp}` : ''}`;
-  }
-  if (snap.placeLabel) {
-    return `${snap.placeLabel} weather${temp ? ` — ${temp}` : ''}${
-      isNum(snap.humidity) ? `, ${Math.round(snap.humidity)} % humidity` : ''
-    }; altitude stays at the ${DEFAULT_PLACE.name} default (${DEFAULT_PLACE.altitudeM} m)`;
-  }
-  if (snap.envCustom) {
-    return `your custom conditions (${DEFAULT_PLACE.altitudeM} m altitude${temp ? `, ${temp}` : ''}${
-      isNum(snap.humidity) ? `, ${Math.round(snap.humidity)} % humidity` : ''
-    })`;
-  }
-  return `${DEFAULT_PLACE.name} default — ${DEFAULT_PLACE.altitudeM} m altitude${
-    temp && !snap.estimated ? `, ${temp}` : ''
-  }`;
-}
-
 /** Pure key of the inputs that determine a result (for staleness checks). */
 export function makeKey(v, withParts = true) {
   return JSON.stringify([
@@ -132,6 +103,10 @@ export function normalizeFull(f) {
     estimated: false,
     exact: true,
     meta: f.meta,
+    environment: f.environment || null,
+    parts_applied: f.parts_applied || [],
+    parts_skipped: f.parts_skipped || [],
+    build_cost_inr: f.build_cost_inr ?? 0,
   };
 }
 
@@ -162,21 +137,61 @@ function normTokens(str) {
  * several hits -> newest model year, then the shortest name. Returns a bike or null.
  */
 export function resolveBikeSlug(slug, bikes) {
-  let tokens = normTokens(slug);
+  const tokens = normTokens(slug);
   if (!tokens.length || !bikes?.length) return null;
+  const slugYear = (tokens.find((x) => /^(19|20)\d\d$/.test(x)) || null);
+  const y = slugYear ? parseInt(slugYear, 10) : null;
   const index = bikes.map((b) => {
-    const toks = normTokens(`${b.manufacturer || ''} ${b.model || b.model_name || ''}`);
-    return { b, toks, set: new Set(toks), joined: toks.join(' ') };
+    const label = `${b.manufacturer || ''} ${b.model || b.model_name || ''}`;
+    const toks = normTokens(label);
+    const rng = /\(\s*((?:19|20)\d\d)\s*-\s*((?:19|20)\d\d)?/.exec(label);
+    const from = rng ? parseInt(rng[1], 10) : b.year || null;
+    const to = rng ? (rng[2] ? parseInt(rng[2], 10) : 9999) : from;
+    return { b, toks, set: new Set(toks), joined: toks.join(' '), compact: toks.join(''), from, to };
   });
+  const pick = (hits) => {
+    hits.sort((a, c) => {
+      if (y != null) {
+        const ai = a.from != null && y >= a.from && y <= a.to ? 1 : 0;
+        const ci = c.from != null && y >= c.from && y <= c.to ? 1 : 0;
+        if (ai !== ci) return ci - ai; // the generation that covers the slug's year
+      }
+      return (c.b.year || 0) - (a.b.year || 0) || a.toks.length - c.toks.length;
+    });
+    return hits[0].b;
+  };
   const attempt = (t) => {
     const joined = t.join(' ');
     let hits = index.filter((e) => e.joined === joined);
     if (!hits.length) hits = index.filter((e) => t.every((x) => e.set.has(x)));
-    if (!hits.length) return null;
-    hits.sort((a, c) => (c.b.year || 0) - (a.b.year || 0) || a.toks.length - c.toks.length);
-    return hits[0].b;
+    return hits.length ? pick(hits) : null;
+  };
+  // Last resort: names spell things differently ("GSX-R 600" vs "gsx-r600",
+  // "765 R" vs "765r"), so compare with the spaces squeezed out and ignore
+  // years and generation codes such as "k8".
+  const squeezed = (t) => {
+    const core = t.filter((x) => x.length > 1 && !/^(19|20)\d\d$/.test(x) && !/^[a-z]\d{1,2}$/.test(x));
+    if (!core.length) return null;
+    const hits = index.filter((e) => core.every((x) => e.compact.includes(x)));
+    return hits.length ? pick(hits) : null;
   };
   const expanded = tokens.flatMap((x) => (x === 're' ? ['royal', 'enfield'] : [x]));
   const noYear = expanded.filter((x) => !/^(19|20)\d\d$/.test(x));
-  return attempt(tokens) || attempt(expanded) || attempt(noYear);
+  return attempt(tokens) || attempt(expanded) || attempt(noYear) || squeezed(expanded);
+}
+
+/**
+ * Resolve a venue slug like "mmrt" or "aamby-valley" (blog links) against the
+ * venue list: every slug token must appear among the venue name's tokens.
+ * Several hits -> the shortest name. Returns a venue or null.
+ */
+export function resolveVenueSlug(slug, venues) {
+  const tokens = normTokens(slug);
+  if (!tokens.length || !venues?.length) return null;
+  const hits = venues
+    .map((v) => ({ v, set: new Set(normTokens(v.name)), n: normTokens(v.name).length }))
+    .filter((e) => tokens.every((t) => e.set.has(t)));
+  if (!hits.length) return null;
+  hits.sort((a, b) => a.n - b.n);
+  return hits[0].v;
 }

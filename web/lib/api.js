@@ -106,8 +106,27 @@ function optimizeBuildBody({
   rider_weight_kg,
   venue_id,
   max_candidates,
+  location,
+  lat,
+  lon,
+  altitude_m,
+  ambient_temp_c,
+  track_temp_c,
+  humidity_pct,
+  pressure_hpa,
 }) {
   const body = { bike_id, budget_inr };
+  // Optional race conditions — same fields (and meaning) as the autotune route.
+  if (location != null && location !== '') body.location = location;
+  if (lat != null && lon != null) {
+    body.lat = lat;
+    body.lon = lon;
+  }
+  if (altitude_m != null) body.altitude_m = altitude_m;
+  if (ambient_temp_c != null) body.ambient_temp_c = ambient_temp_c;
+  if (track_temp_c != null) body.track_temp_c = track_temp_c;
+  if (humidity_pct != null) body.humidity_pct = humidity_pct;
+  if (pressure_hpa != null) body.pressure_hpa = pressure_hpa;
   if (goal != null) body.goal = goal;
   if (profile != null) body.profile = profile;
   if (rider_weight_kg != null) body.rider_weight_kg = rider_weight_kg;
@@ -438,6 +457,45 @@ export function getBikeCatalog() {
     _catalogPromise = null;
   });
   return _catalogPromise;
+}
+
+// ── Parts catalog + per-bike compatibility (two cheap requests) ─────────
+// The full catalog is fetched ONCE per page load (no bike id → no per-bike
+// annotation, and the list omits fitment_rules/specifications by default).
+// Which parts fit a given bike is a separate ids-only request, so changing
+// bike costs a few KB instead of re-downloading the whole catalog.
+let _partsPromise = null;
+export function getPartsCatalog() {
+  if (_partsPromise) return _partsPromise;
+  _partsPromise = (async () => {
+    const res = await fetch(`${API_URL}/api/parts?limit=5000`);
+    if (!res.ok) {
+      const err = new Error(`API error ${res.status}`);
+      err.status = res.status;
+      throw err;
+    }
+    const data = await res.json();
+    return Array.isArray(data?.parts) ? data.parts : [];
+  })();
+  _partsPromise.catch(() => {
+    _partsPromise = null;
+  });
+  return _partsPromise;
+}
+
+/** Ids of the parts that fit `bikeId` (abortable). Resolves to a number[]. */
+export async function getCompatiblePartIds(bikeId, signal) {
+  const res = await fetch(
+    `${API_URL}/api/parts?bike_id=${encodeURIComponent(bikeId)}&compatible_only=true&limit=5000&fields=id`,
+    { signal },
+  );
+  if (!res.ok) {
+    const err = new Error(`API error ${res.status}`);
+    err.status = res.status;
+    throw err;
+  }
+  const data = await res.json();
+  return Array.isArray(data?.part_ids) ? data.part_ids : [];
 }
 
 // ── Part display label ──────────────────────────────────────────────────

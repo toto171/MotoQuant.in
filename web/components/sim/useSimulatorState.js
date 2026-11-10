@@ -22,6 +22,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   API_URL as API, simulateJob, topspeedJob, compareJob, saveRun,
+  getBikeCatalog, getPartsCatalog, getCompatiblePartIds,
 } from '../../lib/api';
 import useAsyncTask from '../../lib/useAsyncTask';
 import { predictQuick, preloadSurrogate } from '../../lib/surrogate';
@@ -29,7 +30,7 @@ import { useAuth } from '../AuthProvider';
 import { track, trackSimRun, installErrorHandlers } from '../../lib/telemetry';
 import {
   DEFAULTS, MODE_KEY, bikeName, exclusiveGroup, makeKey, normalizeFull,
-  pickDefaultBikeForVariant, resolveBikeSlug,
+  pickDefaultBikeForVariant, resolveBikeSlug, resolveVenueSlug,
 } from './format';
 
 const abortError = () => new DOMException('Aborted', 'AbortError');
@@ -58,7 +59,8 @@ export default function useSimulatorState(searchParams) {
   const [bikes, setBikes] = useState([]);
   const [venues, setVenues] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [allParts, setAllParts] = useState([]);
+  const [catalogParts, setCatalogParts] = useState([]); // whole catalogue, fetched once
+  const [compatIds, setCompatIds] = useState(null); // Set of part ids that fit `partsBikeId`
   const [allTires, setAllTires] = useState([]);
   const [bikesStatus, setBikesStatus] = useState('loading'); // loading | ready | error
   const [venuesStatus, setVenuesStatus] = useState('loading');
@@ -96,6 +98,7 @@ export default function useSimulatorState(searchParams) {
   const [linkReady, setLinkReady] = useState(false);
   const [linkPending, setLinkPending] = useState(false);
   const [bikeNotice, setBikeNotice] = useState(false);
+  const [notices, setNotices] = useState([]); // plain-words notes about a shared link / stale ids
 
   // ─── Compare config ────────────────────────────────────────────────────────
   const [compareBike, setCompareBike] = useState(null);
@@ -133,6 +136,21 @@ export default function useSimulatorState(searchParams) {
   }, [categories]);
   catNameRef.current = categoryNameById;
 
+  // The catalogue with each part annotated for the CURRENT bike. Fit comes from
+  // the ids-only compatibility request, so a bike change never re-downloads the
+  // catalogue; while a bike's ids are still loading nothing is annotated.
+  const allParts = useMemo(() => {
+    if (!compatIds) return catalogParts;
+    return catalogParts.map((p) => {
+      const fits = compatIds.has(p.id);
+      return fits ? { ...p, compatible: true } : {
+        ...p,
+        compatible: false,
+        fitment_reason: 'it is not listed as fitting this bike',
+      };
+    });
+  }, [catalogParts, compatIds]);
+
   const buildCost = useMemo(
     () => selectedParts.reduce((s, p) => s + (p.price_inr || 0), 0),
     [selectedParts],
@@ -167,16 +185,60 @@ export default function useSimulatorState(searchParams) {
     };
   }
 
+  // Weather is only sent once the user (or a chosen place) has changed it. At
+  // the defaults it is left out, so the server runs its own default conditions
+  // and says so in the `environment` block it echoes.
+  function weatherFields() {
+    if (weatherDefault) return {};
+    return {
+      ambient_temp_c: ambientTemp,
+      track_temp_c: trackTemp,
+      humidity_pct: humidity,
+      headwind_kmh: headwind,
+    };
+  }
+
+  // A shared link can carry a venue or tyre id that no longer exists; the API
+  // answers 404 "Venue 9 not found" / "Tire 9 not found". Drop that one id from
+  // the setup, say so, and retry the request once without it.
+  const addNotice = useCallback((msg) => {
+    setNotices((prev) => (prev.includes(msg) ? prev : [...prev, msg]));
+  }, []);
+  const dismissNotice = useCallback((msg) => {
+    setNotices((prev) => prev.filter((m) => m !== msg));
+  }, []);
+  async function withRefRecovery(body, call) {
+    try {
+      return await call(body);
+    } catch (e) {
+      const m = e?.status === 404 ? /^(Venue|Tire) (\d+) not found/i.exec(e?.message || '') : null;
+      if (!m) throw e;
+      const kind = m[1].toLowerCase();
+      const id = Number(m[2]);
+      const next = { ...body };
+      for (const k of Object.keys(next)) {
+        if (kind === 'venue' ? k === 'venue_id' : /tire_id$/.test(k) && next[k] === id) delete next[k];
+      }
+      if (kind === 'venue') {
+        setVenue(null);
+        setLocation(null);
+        addNotice('The venue in this link is no longer available, so the default conditions are used.');
+      } else {
+        setFrontTire((t) => (t?.id === id ? null : t));
+        setRearTire((t) => (t?.id === id ? null : t));
+        addNotice('A tyre in this link is no longer in the catalog, so the original tyre is used.');
+      }
+      return call(next);
+    }
+  }
+
   // Shared sim request body (read fresh at call time — useAsyncTask keeps fn current).
   function baseSimBody(extra = {}) {
     const body = {
       rider_mass_kg: riderKg,
       power_boost_pct: powerBoost,
       mass_delta_kg: massChange,
-      ambient_temp_c: ambientTemp,
-      track_temp_c: trackTemp,
-      humidity_pct: humidity,
-      headwind_kmh: headwind,
+      ...weatherFields(),
       ...extra,
     };
     if (bike?.id != null) body.bike_id = bike.id;
@@ -221,6 +283,8 @@ export default function useSimulatorState(searchParams) {
           peak_power_hp: est.peakPowerHp,
           total_mass_kg: est.totalMassKg,
           estimated: true,
+          // What the in-browser model assumed (no server block exists for it).
+          estimateAssumes: { venueName: venue?.name ?? null, altitudeM: venue?.altitude_m ?? null },
           meta: { ...makeSnap(true), estimated: true },
         };
         runEvent?.success({ et_quarter_s: data.et_quarter_s, trap_speed_kmh: data.trap_speed_kmh });
@@ -237,24 +301,26 @@ export default function useSimulatorState(searchParams) {
     try {
       const snap = makeSnap(true);
       const body = baseSimBody({ part_ids: selectedParts.map((p) => p.id) });
-      const res = await fetch(`${API}/api/simulate/quick`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-        signal,
+      const data = await withRefRecovery(body, async (b) => {
+        const res = await fetch(`${API}/api/simulate/quick`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(b),
+          signal,
+        });
+        if (!res.ok) {
+          const detail = await readDetail(res);
+          const err = new Error(
+            res.status === 429
+              ? detail || 'You are calculating very quickly — live updates are paused for a few seconds.'
+              : detail || `The simulator returned an error (${res.status}). Please try again.`,
+          );
+          err.status = res.status;
+          err.retryAfter = Number(res.headers.get('retry-after')) || null;
+          throw err;
+        }
+        return res.json();
       });
-      if (!res.ok) {
-        const detail = await readDetail(res);
-        const err = new Error(
-          res.status === 429
-            ? detail || 'You are calculating very quickly — live updates are paused for a few seconds.'
-            : detail || `The simulator returned an error (${res.status}). Please try again.`,
-        );
-        err.status = res.status;
-        err.retryAfter = Number(res.headers.get('retry-after')) || null;
-        throw err;
-      }
-      const data = await res.json();
       throwIfAborted(signal);
       runEvent?.success({
         et_quarter_s: data?.et_quarter_s ?? null,
@@ -271,13 +337,17 @@ export default function useSimulatorState(searchParams) {
     }
   });
 
-  // Full simulation — job-backed with real RK4 progress. The server's full-sim
-  // route has no part list, so this result never includes parts (the UI says so).
+  // Full simulation — job-backed with real RK4 progress. Honours the selected
+  // parts exactly like the quick sim (same part_ids, same engine), so the two
+  // agree to the millisecond.
   const fullSimTask = useAsyncTask(async (signal, onProgress) => {
-    const runEvent = trackSimRun('simulator_page', 'full', { bike_id: bike?.id ?? null });
+    const runEvent = trackSimRun('simulator_page', 'full', {
+      bike_id: bike?.id ?? null, part_count: selectedParts.length,
+    });
     try {
-      const snap = makeSnap(false);
-      const data = await simulateJob(baseSimBody(), onProgress, signal);
+      const snap = makeSnap(true);
+      const body = baseSimBody({ part_ids: selectedParts.map((p) => p.id) });
+      const data = await withRefRecovery(body, (b) => simulateJob(b, onProgress, signal));
       throwIfAborted(signal);
       runEvent.success({
         et_quarter_s: data?.et_quarter_s ?? null,
@@ -299,7 +369,7 @@ export default function useSimulatorState(searchParams) {
     try {
       const snap = makeSnap(true);
       const body = baseSimBody({ part_ids: selectedParts.map((p) => p.id), include_timeseries: true });
-      const data = await topspeedJob(body, onProgress, signal);
+      const data = await withRefRecovery(body, (b) => topspeedJob(b, onProgress, signal));
       throwIfAborted(signal);
       runEvent.success({
         terminal_velocity_kmh: data?.terminal_velocity_kmh ?? null,
@@ -333,10 +403,7 @@ export default function useSimulatorState(searchParams) {
       b_rider_mass_kg: riderKg,
       b_part_ids: [],
       venue_id: venue?.id ?? undefined,
-      ambient_temp_c: ambientTemp,
-      track_temp_c: trackTemp,
-      humidity_pct: humidity,
-      headwind_kmh: headwind,
+      ...weatherFields(),
     };
     const runEvent = trackSimRun('simulator_page', 'compare', {
       bike_id: bike?.id ?? null,
@@ -344,7 +411,7 @@ export default function useSimulatorState(searchParams) {
     });
     try {
       const snap = { ...makeSnap(true), compareKey, bBikeName: bikeName(bBike) };
-      const data = await compareJob(body, onProgress, signal);
+      const data = await withRefRecovery(body, (b) => compareJob(b, onProgress, signal));
       throwIfAborted(signal);
       runEvent.success({
         delta_et_s: data?.delta?.et_s ?? null,
@@ -423,11 +490,11 @@ export default function useSimulatorState(searchParams) {
     compareTask.result && compareTask.result.meta?.bikeId === bike?.id ? compareTask.result : null;
 
   const quickFresh = !!quickRes && quickRes.meta.key === keyFull;
-  const fullFresh = !!fullRes && fullRes.meta.key === keyNoParts;
+  const fullFresh = !!fullRes && fullRes.meta.key === keyFull;
   const topFresh = !!topRes && topRes.meta.key === keyFull;
   const compareFresh = !!compareRes && compareRes.meta.compareKey === compareKey;
 
-  const exactFull = fullFresh && selectedParts.length === 0 ? normalizeFull(fullRes) : null;
+  const exactFull = fullFresh ? normalizeFull(fullRes) : null;
   const headline = exactFull || quickRes;
   const headlineFresh = exactFull ? true : quickFresh;
   const saveable = headline && !headline.estimated && headlineFresh ? headline : null;
@@ -655,10 +722,11 @@ export default function useSimulatorState(searchParams) {
       if (!res.ok) throw new Error(`API ${res.status}`);
       return res.json();
     };
-    getJson(`${API}/api/bikes?limit=2000`)
-      .then((d) => {
+    // The bike list is the shared, memoised catalogue (one request per page
+    // load, reused by the landing widget and anything else that needs it).
+    getBikeCatalog()
+      .then((list) => {
         if (ctl.signal.aborted) return;
-        const list = d.bikes || [];
         setBikes(list);
         if (list.length) setBikesStatus('ready');
         else {
@@ -712,36 +780,50 @@ export default function useSimulatorState(searchParams) {
     }
   }, [applyPendingTires, settlePending]);
 
+  // Parts: the whole catalogue is fetched ONCE (shared, memoised); which parts
+  // fit the current bike is a separate ids-only request, so switching bike
+  // costs a few KB. Abortable, with one automatic retry before showing Retry.
   const loadParts = useCallback(async (bikeId) => {
     partsAbortRef.current?.abort();
     const ctl = new AbortController();
     partsAbortRef.current = ctl;
     setPartsStatus('loading');
     setPartsError(null);
+    const attempt = () => Promise.all([getPartsCatalog(), getCompatiblePartIds(bikeId, ctl.signal)]);
     try {
-      const res = await fetch(
-        `${API}/api/parts?bike_id=${bikeId}&compatible_only=false&limit=2000`,
-        { signal: ctl.signal },
-      );
-      if (!res.ok) throw new Error(`API ${res.status}`);
-      const data = await res.json();
+      let out;
+      try {
+        out = await attempt();
+      } catch (e) {
+        if (e?.name === 'AbortError') throw e;
+        await new Promise((r) => setTimeout(r, 1200));
+        if (ctl.signal.aborted) return;
+        out = await attempt();
+      }
       if (ctl.signal.aborted) return;
-      const list = Array.isArray(data.parts) ? data.parts : [];
-      setAllParts(list);
+      const [catalog, ids] = out;
+      const fits = new Set(ids);
+      setCatalogParts(catalog);
+      setCompatIds(fits);
       setPartsBikeId(bikeId);
       setPartsStatus('ready');
       const pending = pendingLinkRef.current;
       if (pending?.parts) {
-        const found = pending.parts
-          .map((id) => list.find((p) => p.id === id))
-          .filter((p) => p && p.compatible !== false);
+        const found = [];
+        let missing = 0;
+        let notFit = 0;
+        for (const id of pending.parts) {
+          const part = catalog.find((p) => p.id === id);
+          if (!part) missing += 1;
+          else if (!fits.has(id)) notFit += 1;
+          else found.push({ ...part, compatible: true });
+        }
         if (found.length) setSelectedParts(found);
+        if (missing) addNotice('Some parts in this link are no longer in the catalog and were skipped.');
+        if (notFit) addNotice('Some parts in this link do not fit the selected bike and were left out.');
         pending.parts = null;
       }
-      setSelectedParts((prev) => prev.filter((p) => {
-        const hit = list.find((x) => x.id === p.id);
-        return !hit || hit.compatible !== false;
-      }));
+      setSelectedParts((prev) => prev.filter((p) => fits.has(p.id) || !catalog.some((x) => x.id === p.id)));
     } catch (e) {
       if (e?.name === 'AbortError') return;
       console.warn('parts load failed', e);
@@ -751,7 +833,7 @@ export default function useSimulatorState(searchParams) {
     } finally {
       if (!ctl.signal.aborted) settlePending();
     }
-  }, [settlePending]);
+  }, [settlePending, addNotice]);
 
   /* ═══════════════ Effects ═══════════════ */
 
@@ -792,8 +874,11 @@ export default function useSimulatorState(searchParams) {
     if (hasBikeParam) setBikeNotice(slugMissed);
 
     if (sp.has('venue')) {
-      const vid = parseInt(sp.get('venue') ?? '', 10);
-      const v = Number.isFinite(vid) ? venues.find((x) => x.id === vid) : null;
+      const rawVenue = (sp.get('venue') ?? '').trim();
+      const v = /^\d+$/.test(rawVenue)
+        ? venues.find((x) => x.id === parseInt(rawVenue, 10))
+        : resolveVenueSlug(rawVenue, venues); // blog links use names like "mmrt"
+
       if (v) { setVenue(v); setLocation(null); }
     }
     qsNum('rider', setRiderKg, 50, 130);
@@ -898,7 +983,7 @@ export default function useSimulatorState(searchParams) {
     changeBike, togglePart, removePart, applyLocation, pickVenue, resetEnv, resetAll,
     // view
     mode, modeReady, setMode, activeTab, setActiveTab, liveSim, setLiveSim, liveActive,
-    bikeNotice, dismissBikeNotice: () => setBikeNotice(false),
+    bikeNotice, dismissBikeNotice: () => setBikeNotice(false), notices, dismissNotice,
     focusRequest, clearFocusRequest, goAdvanced, defaultBikeVariant,
     // compare config
     compareBike, setCompareBike, comparePower, setComparePower, compareMass, setCompareMass,

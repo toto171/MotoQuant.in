@@ -104,7 +104,8 @@ export default function GettingStartedPage() {
         <p className="rounded-xl border border-white/10 bg-asphalt-2 px-4 py-3 text-sm text-white/75">
           <strong className="text-white">If you do not choose a location</strong>, the simulation uses its default
           conditions: Aamby Valley, 679 m altitude, 22 °C, 40 % humidity. That is not sea level, so a time at
-          the default can differ from one at your local strip. The result card always tells you which conditions it used.
+          the default can differ from one at your local strip. The simulator shows the conditions it used right next
+          to every result, so you always know what a number was calculated for.
         </p>
       </Step>
 

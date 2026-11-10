@@ -10,8 +10,9 @@
  * server's quick simulation when the estimate is unavailable. If neither
  * answers, the sentence is simply omitted — never a placeholder number.
  *
- * Conditions are the server defaults (a stock bike, 75 kg rider, Aamby
- * Valley: 679 m altitude, 22 C) and are stated next to the number.
+ * Conditions (a stock bike, 75 kg rider, the server's default air) are
+ * worded by ConditionsLine — from the server's echoed `environment` block
+ * when the server answered, or from what the instant estimate assumes.
  */
 
 import { useEffect, useState } from 'react';
@@ -20,6 +21,7 @@ import { Gauge } from 'lucide-react';
 import ResultSentence from '../ResultSentence';
 import Term from '../Term';
 import { API_URL } from '../../lib/api';
+import ConditionsLine from '../ConditionsLine';
 import { predictQuick } from '../../lib/surrogate';
 
 const RIDER_KG = 75;
@@ -50,7 +52,7 @@ export default function BikePredictedTime({ bike }) {
           if (res.ok) {
             const d = await res.json();
             if (Number.isFinite(d.et_quarter_s)) {
-              out = { et: d.et_quarter_s, trap: d.trap_speed_kmh, instant: false };
+              out = { et: d.et_quarter_s, trap: d.trap_speed_kmh, instant: false, env: d.environment || null };
             }
           }
         } catch {
@@ -94,8 +96,13 @@ export default function BikePredictedTime({ bike }) {
                   <Term k="instant_estimate" />.{' '}
                 </>
               )}
-              Conditions: Aamby Valley default, 679 m altitude, 22 °C. Pick your own location in
-              the simulator.
+              <ConditionsLine
+                as="span"
+                className=""
+                env={est.env}
+                estimate={est.env ? null : {}}
+              />{' '}
+              Pick your own location in the simulator.
             </p>
           </>
         ) : done ? (
