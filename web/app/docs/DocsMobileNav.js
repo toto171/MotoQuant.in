@@ -27,7 +27,7 @@ export default function DocsMobileNav({ pages }) {
         </span>
         <span
           aria-hidden="true"
-          className="shrink-0 text-white/45 transition-transform duration-200 motion-reduce:transition-none group-open:rotate-180"
+          className="shrink-0 text-white/60 transition-transform duration-200 motion-reduce:transition-none group-open:rotate-180"
         >
           ▾
         </span>

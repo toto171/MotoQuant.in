@@ -572,12 +572,6 @@ PATTERNS = [
         "CommandPalette doc-comment catalog",
     ),
     (
-        "web/app/docs/physics/SubModelsCtaVariant.js",
-        r"(\d{2,4}) bikes",
-        "all_known_bikes",
-        "SubModels CTA bikes",
-    ),
-    (
         "web/app/features/page.js",
         r"'(\d{2,4}) parts\.",
         "parts_db",

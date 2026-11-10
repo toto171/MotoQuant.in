@@ -148,7 +148,7 @@ function Prose({ content }) {
             <p className="text-sm text-white/80 leading-relaxed italic">{block.text}</p>
           </div>
         );
-        return <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">{block.text}</p>;
+        return <p key={i} className="text-white/75 text-base leading-relaxed mb-5">{block.text}</p>;
       })}
     </div>
   );
@@ -163,14 +163,14 @@ export default function PostPage() {
         <div className="max-w-2xl mx-auto">
           <div className="flex flex-wrap gap-2 mb-6">
             {['small-cc', 'Yamaha R15', 'Indian bikes', 'tuning'].map(t => (
-              <span key={t} className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide">{t}</span>
+              <span key={t} className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent">{t}</span>
             ))}
           </div>
           <CodeComment className="mb-4">r15 v3 · where the seconds go</CodeComment>
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             Why Your R15 Won&apos;t Hit 14s (And What Will Actually Help)
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-6">
+          <div className="text-sm text-white/60 mb-6">
             24 April 2026 · 10 min read · MotoQuant Blog
           </div>
 
@@ -179,19 +179,19 @@ export default function PostPage() {
             <span aria-hidden="true" className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent" />
             <div>
               <div className="flex items-end gap-1.5">
-                <ScoreboardDigits value="16.2" h={26} color="#FFFFFF" label="16.2 seconds stock" />
-                <span className="font-mono text-xs text-white/40 mb-0.5">s</span>
+                <ScoreboardDigits value="16.2" h={26} label="16.2 seconds stock" />
+                <span className="font-mono text-xs text-white/60 mb-0.5">s</span>
               </div>
-              <div className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">stock · 15.8–16.2 band</div>
+              <div className="mt-1.5 text-xs text-white/60">stock · 15.8–16.2 band</div>
             </div>
             <div>
               <div className="flex items-end gap-1.5">
                 <ScoreboardDigits value="15.0" h={26} label="15.0 seconds prepped" />
-                <span className="font-mono text-xs text-white/40 mb-0.5">s</span>
+                <span className="font-mono text-xs text-white/60 mb-0.5">s</span>
               </div>
-              <div className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">prepped · sprocket + tyres + filter</div>
+              <div className="mt-1.5 text-xs text-white/60">prepped · sprocket + tyres + filter</div>
             </div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-orange/80 mb-0.5">Δ −1.2 s · engine never opened</div>
+            <div className="text-xs text-accent mb-0.5">Δ −1.2 s · engine never opened</div>
           </div>
         </div>
 
@@ -202,7 +202,7 @@ export default function PostPage() {
             <div className="font-display font-bold text-white mb-1">Simulate your R15 setup</div>
             <div className="text-white/60 text-sm">Select the YZF-R15 V3 and try the sprocket mod in the parts builder. See the ET delta before you buy anything.</div>
           </div>
-          <Link href="/simulator" className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">Run sim →</Link>
+          <Link href="/simulator" className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">Open the simulator →</Link>
         </div>
       </article>
 

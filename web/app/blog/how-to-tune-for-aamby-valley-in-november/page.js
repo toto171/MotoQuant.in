@@ -143,7 +143,7 @@ function Prose({ content }) {
             <p className="text-sm text-white/80 leading-relaxed italic">{block.text}</p>
           </div>
         );
-        return <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">{block.text}</p>;
+        return <p key={i} className="text-white/75 text-base leading-relaxed mb-5">{block.text}</p>;
       })}
     </div>
   );
@@ -158,13 +158,13 @@ export default function PostPage() {
         <div className="max-w-2xl mx-auto">
           <div className="flex flex-wrap gap-2 mb-6">
             {['venue', 'Aamby Valley', 'weather', 'conditions'].map(t => (
-              <span key={t} className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide">{t}</span>
+              <span key={t} className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent">{t}</span>
             ))}
           </div>
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             How to Tune for Aamby Valley in November
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             24 April 2026 · 6 min read · MotoQuant Blog
           </div>
         </div>
@@ -176,7 +176,7 @@ export default function PostPage() {
             <div className="font-display font-bold text-white mb-1">Set Aamby Valley as your venue</div>
             <div className="text-white/60 text-sm">Select your bike, open the Location Picker, choose Aamby Valley City, and the November conditions load automatically.</div>
           </div>
-          <Link href="/simulator" className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">Run sim →</Link>
+          <Link href="/simulator" className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">Open the simulator →</Link>
         </div>
       </article>
 

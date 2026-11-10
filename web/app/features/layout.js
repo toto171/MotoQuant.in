@@ -4,8 +4,8 @@
 
 import StructuredData, { SITE_URL } from '../StructuredData';
 
-const TITLE = "Features — Physics Drag Sim, Parts ROI, Dragy Import, Build Optimiser (India)";
-const DESCRIPTION = "What you get inside MotoQuant: 15 first-principles physics sub-models (Pacejka tires, RK4 solver, weight transfer, two-stroke expansion-chamber), 541-bike catalog covering Hayabusa to R15 V4 to NS400Z, parts ROI with cost-per-tenth in INR, budget-aware build optimiser, Dragy GPS calibration, A vs B compare, and the smart recommendations engine.";
+const TITLE = "What you can do with MotoQuant — free quarter-mile simulator for motorcycles";
+const DESCRIPTION = "Pick a bike from the 541-bike catalog and see its quarter-mile time, find the best parts for your budget, get a race-day setup for your strip, compare two bikes, check your own timeslips and save and share runs. Free and open source.";
 
 export const metadata = {
   title: TITLE,

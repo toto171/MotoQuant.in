@@ -1,10 +1,7 @@
-import { Suspense } from "react";
 import Link from "next/link";
 import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
 import PageHero from "../../components/PageHero";
-import { Stagger, StaggerItem } from "../../components/Reveal";
-import EndOfBlogIndexCta from "./EndOfBlogIndexCta";
 
 export const metadata = {
   title:
@@ -612,10 +609,10 @@ const POSTS = [
 const FEATURED_SLUG = "how-the-motoquant-physics-engine-works";
 
 const RUBRICS = [
-  { id: "physics", title: "Physics & engineering" },
-  { id: "guides", title: "Guides & venue tuning" },
+  { id: "physics", title: "How it works" },
+  { id: "guides", title: "Guides and drag-strip tuning" },
   { id: "comparisons", title: "Bike comparisons" },
-  { id: "breakdowns", title: "Bike breakdowns" },
+  { id: "breakdowns", title: "Bike-by-bike breakdowns" },
 ];
 
 function rubricFor(slug) {
@@ -640,43 +637,28 @@ function rubricFor(slug) {
   return "breakdowns";
 }
 
+function fmtDate(d) {
+  return new Date(d).toLocaleDateString("en-IN", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
 function FeaturedPostCard({ post }) {
   return (
-    <Link href={`/blog/${post.slug}`} className="block group mb-16">
-      <article className="card card-hover p-6 md:p-8">
-        <div className="mb-4 flex items-center gap-2.5">
-          <span className="chip chip-volt">Featured dispatch</span>
-        </div>
-        <div className="grid md:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] gap-6 md:gap-10 items-start">
-          <div>
-            <h2 className="font-display font-semibold text-2xl md:text-3xl text-white leading-snug mb-4 group-hover:text-accent transition-colors">
-              {post.title}
-            </h2>
-            <p className="text-white/65 text-sm leading-relaxed mb-5">
-              {post.excerpt}
-            </p>
-            <div className="flex items-center gap-4">
-              <span className="label-mono">
-                {new Date(post.date).toLocaleDateString("en-IN", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}{" "}
-                · {post.readTime} read
-              </span>
-              <span className="text-accent text-xs font-mono group-hover:text-accent-bright transition-colors">
-                Read the deep dive →
-              </span>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-1.5 content-start md:justify-end">
-            {post.tags.map((t) => (
-              <span key={t} className="chip h-fit">
-                {t}
-              </span>
-            ))}
-          </div>
-        </div>
+    <Link href={`/blog/${post.slug}`} className="block group mb-12">
+      <article className="card card-hover card-pad">
+        <p className="eyebrow mb-2">Start here</p>
+        <h2 className="font-display font-semibold text-2xl md:text-3xl text-white leading-snug mb-3 group-hover:text-accent transition-colors">
+          {post.title}
+        </h2>
+        <p className="text-white/70 text-base leading-relaxed mb-4 line-clamp-3">
+          {post.excerpt}
+        </p>
+        <p className="text-sm text-white/60">
+          {fmtDate(post.date)} · {post.readTime} read
+        </p>
       </article>
     </Link>
   );
@@ -685,33 +667,16 @@ function FeaturedPostCard({ post }) {
 function PostCard({ post }) {
   return (
     <Link href={`/blog/${post.slug}`} className="block group h-full">
-      <article className="card card-hover h-full p-6">
-        <div className="flex flex-wrap gap-1.5 mb-4">
-          {post.tags.map((t) => (
-            <span key={t} className="chip">
-              {t}
-            </span>
-          ))}
-        </div>
-        <h2 className="font-display font-semibold text-xl text-white mb-3 group-hover:text-accent transition-colors leading-snug">
+      <article className="card card-hover h-full card-pad">
+        <h3 className="font-display font-semibold text-lg text-white mb-2 group-hover:text-accent transition-colors leading-snug">
           {post.title}
-        </h2>
-        <p className="text-white/65 text-sm leading-relaxed mb-4">
+        </h3>
+        <p className="text-white/70 text-sm leading-relaxed mb-3 line-clamp-3">
           {post.excerpt}
         </p>
-        <div className="flex items-center justify-between gap-3">
-          <div className="label-mono">
-            {new Date(post.date).toLocaleDateString("en-IN", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}{" "}
-            · {post.readTime} read
-          </div>
-          <span className="shrink-0 text-white/45 text-xs font-mono group-hover:text-accent transition-colors">
-            Read →
-          </span>
-        </div>
+        <p className="text-sm text-white/60">
+          {fmtDate(post.date)} · {post.readTime} read
+        </p>
       </article>
     </Link>
   );
@@ -731,44 +696,27 @@ export default function BlogIndexPage() {
     <div className="min-h-screen bg-asphalt-0 text-white">
       <SiteNav />
 
-      {/* Hero — IGNITION v5 voice; kicker count stays in lockstep with the
-          POSTS array by construction. */}
       <PageHero
-        kicker={`${POSTS.length} dispatches · physics · tuning · data`}
-        badge="MotoQuant Blog"
-        title={<>The physics of <span className="text-gradient-orange">drag racing.</span></>}
-        sub="Technical deep-dives on motorcycle physics, tuning strategy, and data analysis. Written for the Indian drag racing community."
+        title="Blog"
+        sub={`${POSTS.length} articles on how motorcycles launch, how to tune for each drag strip, and what every bike should run in the quarter mile.`}
       />
 
-      <main id="main" className="pb-24 px-6">
+      <main id="main" className="pb-24 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
           <FeaturedPostCard post={featured} />
 
           {grouped.map((rubric) => (
-            <section key={rubric.id} className="mb-16 last:mb-0">
-              <div className="flex flex-wrap items-baseline gap-3 mb-6">
-                <h2 className="font-display font-bold text-2xl tracking-tight text-white">
-                  {rubric.title}
-                </h2>
-                <span className="label-mono">
-                  {rubric.posts.length}{" "}
-                  {rubric.posts.length === 1 ? "post" : "posts"}
-                </span>
-              </div>
-              <Stagger className="grid md:grid-cols-2 lg:grid-cols-3 gap-6" stagger={0.04}>
+            <section key={rubric.id} className="mb-14 last:mb-0">
+              <h2 className="font-display font-bold text-xl md:text-2xl tracking-tight text-white mb-5">
+                {rubric.title}
+              </h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {rubric.posts.map((post) => (
-                  <StaggerItem key={post.slug} className="h-full">
-                    <PostCard post={post} />
-                  </StaggerItem>
+                  <PostCard key={post.slug} post={post} />
                 ))}
-              </Stagger>
+              </div>
             </section>
           ))}
-
-          {/* GROWTH_EXP_006 — end-of-grid simulator CTA (default OFF, ?variant=B) */}
-          <Suspense fallback={null}>
-            <EndOfBlogIndexCta />
-          </Suspense>
         </div>
       </main>
 

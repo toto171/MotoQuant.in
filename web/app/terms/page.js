@@ -21,8 +21,6 @@ export default function TermsPage() {
       <SiteNav />
 
       <PageHero
-        kicker="legal · terms of service · pune jurisdiction"
-        badge="Legal"
         title="Terms of Service"
         sub="Plain terms for a free, hosted instance of open-source software."
         className="pb-8 md:pb-10"
@@ -32,7 +30,7 @@ export default function TermsPage() {
 
       <main id="main" className="pt-10 pb-20 px-4 sm:px-6">
         <div className="mx-auto max-w-3xl">
-        <p className="text-white/65 text-sm leading-relaxed">
+        <p className="text-white/75 text-base leading-relaxed">
           MotoQuant (&ldquo;MotoQuant&rdquo;) is free, open-source software for
           simulating motorcycle drag-racing quarter-mile times. The site at motoquant.in is a
           free, public instance of that project, run from Pune, India. By using it you agree
@@ -134,7 +132,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <div className="card mt-8 p-5 md:p-6 text-sm text-white/45">
+        <div className="card mt-8 p-5 md:p-6 text-sm text-white/60">
           <p>MotoQuant &middot; Pune, Maharashtra, India</p>
           <p>Contact: <a href="mailto:motoquant@gmail.com" className="font-mono text-white/80 hover:text-white transition-colors">motoquant@gmail.com</a></p>
           <div className="mt-4 flex flex-wrap gap-4">
@@ -154,7 +152,7 @@ function Section({ title, children }) {
   return (
     <section className="card mt-6 p-5 md:p-6">
       <h2 className="font-display font-semibold text-lg md:text-xl text-white mb-3 border-l-2 border-white/15 pl-3">{title}</h2>
-      <div className="space-y-3 text-white/65 text-sm leading-relaxed">{children}</div>
+      <div className="space-y-3 text-white/75 text-base leading-relaxed">{children}</div>
     </section>
   );
 }

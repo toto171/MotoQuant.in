@@ -250,7 +250,7 @@ export default function Page() {
         <header className="mb-10">
           <div className="flex flex-wrap gap-1.5 mb-4">
             {['physics', 'engine', 'validation', 'methodology'].map(t => (
-              <span key={t} className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide">
+              <span key={t} className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent">
                 {t}
               </span>
             ))}
@@ -279,7 +279,7 @@ export default function Page() {
           {/* Reference baselines — timing-board panel */}
           <div className="relative overflow-hidden rounded-xl border border-brand-orange/20 bg-ink-1/60 p-5 mt-6">
             <span aria-hidden="true" className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent" />
-            <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-4">
+            <div className="text-xs text-white/60 mb-4">
               Reference baselines · preserved across all releases
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -290,14 +290,14 @@ export default function Page() {
               ].map(([bike, et]) => (
                 <div key={bike}>
                   <div className="flex items-end gap-1">
-                    <ScoreboardDigits value={et} h={22} color="#FFFFFF" label={`${et} seconds`} />
-                    <span className="font-mono text-[10px] text-white/40 mb-0.5">s</span>
+                    <ScoreboardDigits value={et} h={22} label={`${et} seconds`} />
+                    <span className="font-mono text-[10px] text-white/60 mb-0.5">s</span>
                   </div>
-                  <div className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">{bike}</div>
+                  <div className="mt-1.5 text-xs text-white/60">{bike}</div>
                 </div>
               ))}
             </div>
-            <p className="text-white/40 text-xs mt-4">
+            <p className="text-white/60 text-xs mt-4">
               All claims about cluster bias, mean absolute error, and within-tolerance fractions in this post reflect the August 2026 sweep against 250 published benchmarks (276 matched).
             </p>
           </div>

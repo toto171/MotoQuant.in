@@ -22,30 +22,30 @@
  *   5. BEST PREDICTIONS — the ten cleanest published (non-derived) runs,
  *      plus the honest callout about the DERIVED entry-cc / 2T benchmarks.
  *
- * Chart palette (v5): primary series = signal orange #FF5E1F (#FF8F57 on
- * hover); positive residuals (sim slower) = signal-foul #EF4444; negative
- * (sim faster) = signal-go #22C55E; neutral grid rgba(255,255,255,0.08);
- * tolerance band rgba(255,94,31,0.06). Chart backgrounds are transparent
- * on .card panels.
+ * Chart palette (v6): all colours are theme variables (lib/theme.js cssVar), so
+ * the chart is legible in both light and dark. Chart backgrounds are
+ * transparent on .card panels.
  *
- * Reduced-motion safe (Reveal handles it; the SVGs are static + hover-only).
+ * Reduced-motion safe (the SVGs are static + hover-only).
  * Responsive: SVGs scale via viewBox (no body overflow); the wide tables
  * scroll inside their own overflow-x containers.
  */
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Reveal } from './Reveal';
 import ScoreboardDigits from './ScoreboardDigits';
-import CodeComment from './CodeComment';
+import { cssVar } from '../lib/theme';
 
-const ACCENT = '#FF5E1F'; // signal orange — primary data series
-const ACCENT_BRIGHT = '#FF8F57'; // hover / active state of the primary series
-const GO = '#22C55E'; // signal-go — negative residual (sim faster)
-const FOUL = '#EF4444'; // signal-foul — positive residual (sim slower)
-const GRID = 'rgba(255,255,255,0.08)'; // neutral gridlines / frames
-const BAND = 'rgba(255,94,31,0.06)'; // ±0.2s tolerance band fill
-const NEUTRAL_BIN = 'rgba(255,255,255,0.30)'; // |Δ| < 0.05 centre bin
+// Theme-aware chart palette: every colour reads a CSS variable so it follows
+// the light/dark theme with no re-render (see lib/theme.js).
+const ACCENT = cssVar('--accent'); // primary data series
+const ACCENT_BRIGHT = cssVar('--accent-bright'); // hover / active state
+const GO = cssVar('--go'); // negative residual (sim faster)
+const FOUL = cssVar('--foul'); // positive residual (sim slower)
+const FG = cssVar('--fg'); // foreground ink (text, strokes)
+const GRID = cssVar('--fg', 0.14); // neutral gridlines / frames
+const BAND = cssVar('--accent', 0.1); // ±0.2s tolerance band fill
+const NEUTRAL_BIN = cssVar('--fg', 0.35); // |Δ| < 0.05 centre bin
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const signed = (n, d = 3) => (n > 0 ? '+' : n < 0 ? '−' : '±') + Math.abs(n).toFixed(d);
@@ -161,10 +161,10 @@ function Scatter({ bikes }) {
               }}
               aria-pressed={on}
               className={[
-                'px-3.5 py-2 rounded-full font-mono text-[10px] uppercase tracking-[0.15em] transition-colors',
+                'px-4 min-h-[44px] rounded-full text-sm font-medium transition-colors',
                 on
                   ? 'border border-accent/60 bg-accent/10 text-accent'
-                  : 'border border-white/[0.12] bg-white/[0.02] text-white/55 hover:text-white hover:border-white/30',
+                  : 'border border-white/15 bg-white/[0.02] text-white/70 hover:text-white hover:border-white/30',
               ].join(' ')}
             >
               {f.label}
@@ -191,10 +191,10 @@ function Scatter({ bikes }) {
             <g key={t}>
               <line x1={sx(t)} y1={M.t} x2={sx(t)} y2={M.t + S} stroke={GRID} strokeWidth="0.75" />
               <line x1={M.l} y1={sy(t)} x2={M.l + S} y2={sy(t)} stroke={GRID} strokeWidth="0.75" />
-              <text x={sx(t)} y={M.t + S + 16} fill="#FFFFFF" opacity="0.4" fontSize="10" fontFamily="monospace" textAnchor="middle">
+              <text x={sx(t)} y={M.t + S + 16} fill={FG} opacity="0.7" fontSize="10" fontFamily="monospace" textAnchor="middle">
                 {t}
               </text>
-              <text x={M.l - 8} y={sy(t) + 3.5} fill="#FFFFFF" opacity="0.4" fontSize="10" fontFamily="monospace" textAnchor="end">
+              <text x={M.l - 8} y={sy(t) + 3.5} fill={FG} opacity="0.7" fontSize="10" fontFamily="monospace" textAnchor="end">
                 {t}
               </text>
             </g>
@@ -224,13 +224,13 @@ function Scatter({ bikes }) {
           </text>
 
           {/* axis titles */}
-          <text x={M.l + S / 2} y={H - 4} fill="#FFFFFF" opacity="0.55" fontSize="11" fontFamily="monospace" textAnchor="middle">
+          <text x={M.l + S / 2} y={H - 4} fill={FG} opacity="0.75" fontSize="11" fontFamily="monospace" textAnchor="middle">
             REAL ET (s) — published timeslip
           </text>
           <text
             x={14}
             y={M.t + S / 2}
-            fill="#FFFFFF"
+            fill={FG}
             opacity="0.55"
             fontSize="11"
             fontFamily="monospace"
@@ -252,7 +252,7 @@ function Scatter({ bikes }) {
                 r={isH ? r + 2 : r}
                 fill={isH ? ACCENT_BRIGHT : ACCENT}
                 fillOpacity={isH ? 1 : o}
-                stroke={isH ? '#FFFFFF' : 'none'}
+                stroke={isH ? FG : 'none'}
                 strokeWidth={isH ? 1.2 : 0}
                 onMouseEnter={() => setHover(i)}
                 onMouseLeave={() => setHover(null)}
@@ -266,20 +266,20 @@ function Scatter({ bikes }) {
           {/* hover tooltip */}
           {tip && (
             <g pointerEvents="none">
-              <line x1={tip.px} y1={tip.py} x2={tip.x + (tip.x < tip.px ? tip.tw : 0)} y2={tip.y + tip.th / 2} stroke="rgba(255,255,255,0.35)" strokeWidth="0.75" />
-              <rect x={tip.x} y={tip.y} width={tip.tw} height={tip.th} rx="7" fill="#0A0A0B" stroke="rgba(255,255,255,0.25)" strokeWidth="1" />
-              <text x={tip.x + 12} y={tip.y + 20} fill="#FFFFFF" fontSize="12" fontFamily="monospace" fontWeight="600">
+              <line x1={tip.px} y1={tip.py} x2={tip.x + (tip.x < tip.px ? tip.tw : 0)} y2={tip.y + tip.th / 2} stroke={cssVar('--fg', 0.45)} strokeWidth="0.75" />
+              <rect x={tip.x} y={tip.y} width={tip.tw} height={tip.th} rx="7" fill={cssVar('--surface-1')} stroke={cssVar('--fg', 0.3)} strokeWidth="1" />
+              <text x={tip.x + 12} y={tip.y + 20} fill={FG} fontSize="12" fontFamily="monospace" fontWeight="600">
                 {`${hb.make} ${hb.model}`.slice(0, 26)}
               </text>
-              <text x={tip.x + 12} y={tip.y + 36} fill="rgba(255,255,255,0.5)" fontSize="10.5" fontFamily="monospace">
+              <text x={tip.x + 12} y={tip.y + 36} fill={cssVar('--fg', 0.7)} fontSize="10.5" fontFamily="monospace">
                 {`${hb.year} · ${hb.disp_cc}cc · ${hb.cluster_label}`.slice(0, 32)}
               </text>
-              <text x={tip.x + 12} y={tip.y + 53} fill="#FFFFFF" fontSize="11" fontFamily="monospace">
+              <text x={tip.x + 12} y={tip.y + 53} fill={FG} fontSize="11" fontFamily="monospace">
                 {`real ${hb.real_et}s   sim ${hb.sim_et}s`}
               </text>
               <text x={tip.x + 12} y={tip.y + 70} fontSize="11" fontFamily="monospace">
                 <tspan fill={hb.delta < 0 ? GO : FOUL}>{`Δ ${signed(hb.delta)}s`}</tspan>
-                <tspan fill="rgba(255,255,255,0.5)">{`  ${shortSource(hb.source)}`}</tspan>
+                <tspan fill={cssVar('--fg', 0.7)}>{`  ${shortSource(hb.source)}`}</tspan>
               </text>
             </g>
           )}
@@ -296,7 +296,7 @@ function Scatter({ bikes }) {
           ].map((s) => {
             const { r, o } = dotStyle(s.w);
             return (
-              <span key={s.label} className="inline-flex items-center gap-1.5 text-[11px] text-white/55">
+              <span key={s.label} className="inline-flex items-center gap-1.5 text-xs text-white/65">
                 <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
                   <circle cx="8" cy="8" r={r} fill={ACCENT} fillOpacity={o} />
                 </svg>
@@ -305,7 +305,7 @@ function Scatter({ bikes }) {
             );
           })}
           {clipped > 0 && (
-            <span className="text-[11px] text-white/35 font-mono">
+            <span className="text-xs text-white/65 font-mono">
               · {clipped} slow outlier{clipped > 1 ? 's' : ''} clamped to the {hi}s edge
             </span>
           )}
@@ -320,7 +320,7 @@ function Scatter({ bikes }) {
         <div className="mt-3 overflow-x-auto card">
           <table className="w-full text-left border-collapse min-w-[640px]">
             <thead>
-              <tr className="text-[10px] font-mono uppercase tracking-widest text-white/45 border-b border-white/10">
+              <tr className="text-xs font-medium text-white/65 border-b border-white/10">
                 <th className="px-3 py-2 font-medium">Bike</th>
                 <th className="px-3 py-2 font-medium">Year</th>
                 <th className="px-3 py-2 font-medium text-right">Real</th>
@@ -335,11 +335,11 @@ function Scatter({ bikes }) {
                 .map((b, i) => (
                   <tr key={i} className="border-b border-white/[0.04] last:border-0 text-sm">
                     <td className="px-3 py-1.5 text-white/85 whitespace-nowrap">{b.make} {b.model}</td>
-                    <td className="px-3 py-1.5 text-white/45 font-mono text-xs">{b.year}</td>
+                    <td className="px-3 py-1.5 text-white/65 font-mono text-xs">{b.year}</td>
                     <td className="px-3 py-1.5 text-right font-mono text-white/70 tabular-nums">{b.real_et}s</td>
                     <td className="px-3 py-1.5 text-right font-mono text-white/70 tabular-nums">{b.sim_et}s</td>
                     <td className={`px-3 py-1.5 text-right ${b.delta > 0 ? 'delta-up' : 'delta-down'}`}>{signed(b.delta)}s</td>
-                    <td className="px-3 py-1.5 text-white/40 text-xs">{shortSource(b.source)}</td>
+                    <td className="px-3 py-1.5 text-white/65 text-xs">{shortSource(b.source)}</td>
                   </tr>
                 ))}
             </tbody>
@@ -357,12 +357,12 @@ function StatTile({ value, unit, pre, label, sub }) {
   return (
     <div className="card p-4 sm:p-5 flex flex-col">
       <div className="flex items-end gap-1 leading-none min-h-[28px]">
-        {pre && <span className="font-mono text-sm mb-0.5 text-white/50">{pre}</span>}
-        <ScoreboardDigits value={value} h={28} color="#FFFFFF" label={`${pre || ''}${value}${unit || ''}`} />
-        {unit && <span className="font-mono text-xs text-white/40 mb-0.5">{unit}</span>}
+        {pre && <span className="font-mono text-sm mb-0.5 text-white/65">{pre}</span>}
+        <ScoreboardDigits value={value} h={28} label={`${pre || ''}${value}${unit || ''}`} />
+        {unit && <span className="font-mono text-xs text-white/65 mb-0.5">{unit}</span>}
       </div>
       <div className="label-mono mt-3">{label}</div>
-      {sub && <div className="font-mono text-[10px] text-white/35 mt-1">{sub}</div>}
+      {sub && <div className="font-mono text-xs text-white/65 mt-1">{sub}</div>}
     </div>
   );
 }
@@ -438,7 +438,7 @@ function Histogram({ bikes, bias }) {
           <line key={f} x1={M.l} y1={cy(maxCount * f)} x2={M.l + PW} y2={cy(maxCount * f)} stroke={GRID} strokeWidth="0.75" />
         ))}
         {/* zero line */}
-        <line x1={M.l + PW / 2} y1={M.t} x2={M.l + PW / 2} y2={M.t + PH} stroke="rgba(255,255,255,0.18)" strokeWidth="1" strokeDasharray="3 4" />
+        <line x1={M.l + PW / 2} y1={M.t} x2={M.l + PW / 2} y2={M.t + PH} stroke={cssVar('--fg', 0.35)} strokeWidth="1" strokeDasharray="3 4" />
 
         {/* bars */}
         {bins.map((c, i) => {
@@ -472,7 +472,7 @@ function Histogram({ bikes, bias }) {
         {xLabels.map((v) => {
           const x = M.l + ((v - BMIN) / (NB * BINW)) * PW;
           return (
-            <text key={v} x={x} y={M.t + PH + 18} fill="#FFFFFF" opacity="0.4" fontSize="10" fontFamily="monospace" textAnchor="middle">
+            <text key={v} x={x} y={M.t + PH + 18} fill={FG} opacity="0.7" fontSize="10" fontFamily="monospace" textAnchor="middle">
               {v > 0 ? `+${v}` : v}
             </text>
           );
@@ -482,12 +482,12 @@ function Histogram({ bikes, bias }) {
 
         {/* hover count */}
         {hover != null && bins[hover] > 0 && (
-          <text x={cx(hover) + bw / 2} y={cy(bins[hover]) - 5} fill="#FFFFFF" fontSize="10.5" fontFamily="monospace" textAnchor="middle" fontWeight="600">
+          <text x={cx(hover) + bw / 2} y={cy(bins[hover]) - 5} fill={FG} fontSize="10.5" fontFamily="monospace" textAnchor="middle" fontWeight="600">
             {bins[hover]}
           </text>
         )}
       </svg>
-      <p className="mt-2 px-1 text-[11px] text-white/45 font-mono">
+      <p className="mt-2 px-1 text-xs text-white/65 font-mono">
         Δ = simulated − real. {bikes.length} benchmarks binned at 0.1s; the mass sits inside ±0.2s, centred on a near-zero bias.
       </p>
     </div>
@@ -515,11 +515,11 @@ function ClusterBreakdown({ clusters }) {
               <div className="min-w-0">
                 <div className="flex items-baseline gap-2">
                   <span className="font-display font-semibold text-sm text-white truncate">{c.label}</span>
-                  <span className="font-mono text-[10px] text-white/40 shrink-0">N={c.n}</span>
+                  <span className="font-mono text-xs text-white/65 shrink-0">N={c.n}</span>
                 </div>
               </div>
               <div className="flex items-center gap-3 justify-self-end">
-                <span className="font-mono text-xs text-white/45 tabular-nums w-16 text-right">bias {signed(c.w_bias, 2)}</span>
+                <span className="font-mono text-xs text-white/65 tabular-nums w-16 text-right">bias {signed(c.w_bias, 2)}</span>
                 <StatusChip mae={c.w_mean_abs} />
               </div>
               <div className="col-span-2 flex items-center gap-3">
@@ -535,7 +535,7 @@ function ClusterBreakdown({ clusters }) {
           );
         })}
       </div>
-      <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11px] text-white/45">
+      <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-white/65">
         <span className="label-mono">Weighted |Δ|</span>
         <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-signal-go" /> tight &lt; 0.20s</span>
         <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-signal-stage" /> fair &lt; 0.50s</span>
@@ -561,12 +561,12 @@ function BestPredictions({ bikes }) {
     <div className="card overflow-hidden">
       <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-2.5 border-b border-dashed border-white/15 bg-asphalt-1/70">
         <span className="label-mono">MotoQuant timing assoc · cleanest published runs</span>
-        <span className="hidden sm:block font-mono text-[10px] tracking-[0.18em] uppercase text-white/40">10 smallest |Δ| · non-derived</span>
+        <span className="hidden sm:block text-xs text-white/65">10 smallest |Δ| · non-derived</span>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse min-w-[600px]">
           <thead>
-            <tr className="text-[10px] font-mono uppercase tracking-widest text-white/45 border-b border-white/10 bg-white/[0.02]">
+            <tr className="text-xs font-medium text-white/65 border-b border-white/10 bg-white/[0.02]">
               <th className="px-4 py-2.5 font-medium">#</th>
               <th className="px-4 py-2.5 font-medium">Bike</th>
               <th className="px-4 py-2.5 font-medium text-right">Real ET</th>
@@ -578,15 +578,15 @@ function BestPredictions({ bikes }) {
           <tbody>
             {top.map((b, i) => (
               <tr key={i} className="border-b border-white/[0.04] last:border-0 hover:bg-white/[0.03] transition-colors">
-                <td className="px-4 py-3 font-mono text-white/40 tabular-nums">{i + 1}</td>
+                <td className="px-4 py-3 font-mono text-white/65 tabular-nums">{i + 1}</td>
                 <td className="px-4 py-3">
                   <div className="font-display font-semibold text-white text-sm whitespace-nowrap">{b.make} {b.model}</div>
-                  <div className="font-mono text-[11px] text-white/40">{b.year} · {b.disp_cc}cc</div>
+                  <div className="font-mono text-xs text-white/65">{b.year} · {b.disp_cc}cc</div>
                 </td>
                 <td className="px-4 py-3 text-right font-mono text-white/70 tabular-nums text-sm">{b.real_et.toFixed(2)}s</td>
                 <td className="px-4 py-3 text-right font-mono text-white tabular-nums text-sm font-semibold">{b.sim_et.toFixed(2)}s</td>
                 <td className={`px-4 py-3 text-right text-sm font-semibold ${b.delta > 0 ? 'delta-up' : 'delta-down'}`}>{signed(b.delta)}s</td>
-                <td className="px-4 py-3 font-mono text-[11px] text-white/40">{shortSource(b.source)}</td>
+                <td className="px-4 py-3 font-mono text-xs text-white/65">{shortSource(b.source)}</td>
               </tr>
             ))}
           </tbody>
@@ -602,14 +602,14 @@ function BestPredictions({ bikes }) {
 function Section({ kicker, title, sub, children }) {
   return (
     <section className="mb-16 md:mb-24">
-      <Reveal>
+      <div>
         <div className="mb-6 max-w-2xl">
-          <CodeComment className="mb-3">{kicker}</CodeComment>
+          <p className="eyebrow mb-2">{kicker}</p>
           <h2 className="font-display font-bold text-3xl md:text-4xl tracking-tight text-white">{title}</h2>
-          {sub && <p className="mt-3 text-white/65 text-sm sm:text-base leading-relaxed">{sub}</p>}
+          {sub && <p className="mt-3 text-white/75 text-base leading-relaxed">{sub}</p>}
         </div>
-      </Reveal>
-      <Reveal delay={0.05}>{children}</Reveal>
+      </div>
+      <div>{children}</div>
     </section>
   );
 }
@@ -632,22 +632,22 @@ export default function AccuracyExplorer({ data }) {
   return (
     <div className="max-w-6xl mx-auto px-6 pb-24">
       {/* reference-baseline strip */}
-      <Reveal>
+      <div>
         <div className="card px-4 sm:px-6 py-4 mb-14 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
-          <div className="label-mono shrink-0">Reference baselines · Δ ±0.0000 since Jul 2026</div>
+          <div className="text-sm text-white/70 shrink-0">Reference bikes, unchanged since July 2026</div>
           <div className="flex flex-wrap gap-x-8 gap-y-2">
             {REFS.map((r) => (
               <div key={r.name} className="flex items-baseline gap-2">
-                <span className="font-mono text-xs text-white/55">{r.name}</span>
+                <span className="font-mono text-xs text-white/70">{r.name}</span>
                 <span className="font-mono text-sm text-white tabular-nums font-semibold">{r.et.toFixed(4)}s</span>
               </div>
             ))}
           </div>
         </div>
-      </Reveal>
+      </div>
 
       <Section
-        kicker="01 · real vs simulated"
+        kicker="Real vs simulated"
         title={<>Every prediction against its <span className="text-accent">timeslip</span></>}
         sub={`One dot per matched benchmark: the published real ET on the x-axis, MotoQuant's simulated ET on the y-axis, on the same scale. The dashed line is a perfect prediction; the shaded stripe is the ±0.2s tolerance band that instrumented magazine tests report as their own run-to-run spread. Dot weight = source confidence, so the low-confidence DERIVED estimates recede.`}
       >
@@ -655,7 +655,7 @@ export default function AccuracyExplorer({ data }) {
       </Section>
 
       <Section
-        kicker="02 · the numbers"
+        kicker="The numbers"
         title={<>Where the <span className="text-accent">residuals</span> land</>}
         sub={`Across ${n_matched} matched benchmarks the model is essentially centred at zero, and more than half land inside a fifth of a second.`}
       >
@@ -663,7 +663,7 @@ export default function AccuracyExplorer({ data }) {
       </Section>
 
       <Section
-        kicker="03 · residual shape"
+        kicker="Residual shape"
         title={<>A tight, <span className="text-accent">near-symmetric</span> error distribution</>}
         sub="The residual Δ = sim − real, binned at 0.1s. Green bins are runs we call faster than reality, red bins slower; the mass is stacked on the centre with only a whisker of bias."
       >
@@ -671,7 +671,7 @@ export default function AccuracyExplorer({ data }) {
       </Section>
 
       <Section
-        kicker="04 · by segment"
+        kicker="By segment"
         title={<>Litre classes are <span className="text-accent">tight</span>; entry-cc is data-limited</>}
         sub="Weighted mean absolute error per cluster, on the cylinder-aware 12-cluster taxonomy (twins, singles, and small-cc I4s are split out from same-displacement I4 buckets). The litre, sport-twin, and mid-twin clusters — the ones with real instrumented timeslips — sit well under 0.20s. The wide clusters are the small-cc and two-stroke bikes whose benchmarks are DERIVED estimates, not a model failure."
       >
@@ -679,7 +679,7 @@ export default function AccuracyExplorer({ data }) {
       </Section>
 
       <Section
-        kicker="05 · cleanest predictions"
+        kicker="Cleanest predictions"
         title={<>Ten runs, ten <span className="text-accent">real</span> timeslips</>}
         sub="The ten smallest residuals among fully published (non-derived) benchmarks — Cycle World, Sport Rider, MCN, MotoStatz, FastestLaps. Race fuel, professional rider, ideal strip."
       >
@@ -687,7 +687,7 @@ export default function AccuracyExplorer({ data }) {
         {/* honest callout */}
         <div className="mt-6 card border-signal-stage/25 bg-signal-stage/[0.04] p-5 sm:p-6">
           <div className="label-mono text-signal-stage mb-2">Honest caveat · data, not physics</div>
-          <p className="text-white/70 text-sm leading-relaxed">
+          <p className="text-white/75 text-base leading-relaxed">
             The <span className="text-white font-semibold">entry 150–200cc</span> and{' '}
             <span className="text-white font-semibold">two-stroke</span> clusters carry large |Δ| because most of their
             benchmarks are <span className="text-signal-stage font-mono">DERIVED</span> — 0-100 km/h times multiplied by 1.6,
@@ -705,11 +705,11 @@ export default function AccuracyExplorer({ data }) {
       <div className="pt-8 border-t border-white/10 grid sm:grid-cols-2 gap-4">
         <Link href="/docs/validation" className="card card-hover block p-4 group">
           <div className="font-display font-semibold text-white mb-1 group-hover:text-accent transition-colors">Per-bike benchmark table →</div>
-          <div className="text-xs text-white/50">Methodology, per-cluster bias, and the full source list.</div>
+          <div className="text-sm text-white/65">Methodology, per-cluster bias, and the full source list.</div>
         </Link>
         <Link href="/whitepaper" className="card card-hover block p-4 group">
           <div className="font-display font-semibold text-white mb-1 group-hover:text-accent transition-colors">Read the whitepaper →</div>
-          <div className="text-xs text-white/50">The physics, the validation method, the honest error budget.</div>
+          <div className="text-sm text-white/65">The physics, the validation method, the honest error budget.</div>
         </Link>
       </div>
     </div>

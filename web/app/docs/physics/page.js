@@ -1,7 +1,4 @@
 import Link from 'next/link';
-import SubModelsCtaVariant from './SubModelsCtaVariant';
-import CodeComment from '../../../components/CodeComment';
-import ScoreboardDigits from '../../../components/ScoreboardDigits';
 
 export const metadata = {
   title: 'Physics Whitepaper',
@@ -44,12 +41,12 @@ function SubModelRow({ model }) {
     <div className="py-4 border-b border-white/[0.05] last:border-0">
       <div className="flex items-start gap-4">
         <div className="w-8 shrink-0 pt-1">
-          <ScoreboardDigits value={model.n} h={16} label={`sub-model ${model.n}`} />
+          <span className="font-mono text-sm tabular-nums text-accent">{model.n}</span>
         </div>
         <div className="flex-1">
           <div className="font-display font-bold text-sm text-white mb-1">{model.name}</div>
-          <p className="text-xs text-white/60 leading-relaxed">{model.desc}</p>
-          <div className="mt-1.5 font-mono text-[10px] text-white/30">{model.file}</div>
+          <p className="text-sm text-white/70 leading-relaxed">{model.desc}</p>
+          <div className="mt-1.5 font-mono text-xs text-white/60 break-all">{model.file}</div>
         </div>
       </div>
     </div>
@@ -60,32 +57,37 @@ export default function PhysicsPage() {
   return (
     <article>
       <header className="mb-12">
-        <CodeComment className="mb-3">physics engine · 15 submodels</CodeComment>
-        <h1 className="font-display font-bold text-4xl text-white mb-4 tracking-tight">How MotoQuant Simulates a Quarter Mile</h1>
-        <p className="text-white/60 text-base leading-relaxed">
-          A first-principles summary of the 15 sub-models, the RK4 numerical integrator, and the validation
-          methodology behind every ET prediction.
+        <p className="eyebrow mb-2">For the curious</p>
+        <h1 className="font-display font-bold text-3xl md:text-4xl text-white mb-4 tracking-tight">How the physics works</h1>
+        <p className="text-white/70 text-base leading-relaxed mb-5">
+          The engineering behind every prediction: the 15 sub-models, the numerical integrator and how
+          we check the results. You do not need any of this to use the simulator.
+        </p>
+        <p className="rounded-xl border border-accent/25 bg-accent/5 px-4 py-3 text-base leading-relaxed text-white/85">
+          <strong className="font-semibold text-white">In short:</strong> MotoQuant steps your bike forward
+          one millisecond at a time. At each step it works out engine power, gearing, tyre grip, drag and weight
+          transfer, until the bike crosses the quarter-mile line.
         </p>
       </header>
 
       {/* Overview */}
       <section className="mb-14">
         <h2 className="font-display font-bold text-2xl text-white mb-4">Overview</h2>
-        <p className="text-white/70 text-sm leading-relaxed mb-4">
+        <p className="text-white/75 text-base leading-relaxed mb-4">
           MotoQuant solves the motorcycle drag problem as a system of coupled ODEs. The state vector at each timestep
           is [position, velocity, engine_RPM, tyre_temperature, clutch_temperature, gear]. The RK4 integrator advances
           this vector at dt = 1 ms (fixed-step mode) or dt_min = 0.5 ms / dt_max = 5 ms (adaptive mode), re-evaluating
           aerodynamic and traction forces at the midpoint of each step.
         </p>
-        <p className="text-white/70 text-sm leading-relaxed mb-4">
+        <p className="text-white/75 text-base leading-relaxed mb-4">
           The simulation terminates when the bike crosses 402.336 m (the quarter mile), when elapsed time exceeds
           26 s (prevents infinite loops on bikes that cannot complete), or when a NaN/Inf is detected in the state vector
           (which triggers an early-exit with an error flag rather than a corrupted result).
         </p>
         <div className="card p-5 mb-4 border-brand-orange/20">
           <div className="label-mono text-brand-accent mb-2">State vector</div>
-          <code className="block text-sm font-mono text-white/80">[x, v, ω_e, T_tyre, T_clutch, gear]</code>
-          <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-mono text-white/50">
+          <code className="block overflow-x-auto text-sm font-mono text-white/80">[x, v, ω_e, T_tyre, T_clutch, gear]</code>
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-mono text-white/60">
             <span>x — position (m)</span>
             <span>v — velocity (m/s)</span>
             <span>ω_e — engine RPM (rad/s)</span>
@@ -96,7 +98,7 @@ export default function PhysicsPage() {
         </div>
         <div className="card p-5 border-brand-orange/20">
           <div className="label-mono text-brand-accent mb-2">Force balance at each timestep</div>
-          <code className="block text-sm font-mono text-white/80 leading-relaxed">
+          <code className="block overflow-x-auto whitespace-pre text-sm font-mono text-white/80 leading-relaxed">
             F_net = F_traction − F_aero − F_rolling_resistance − F_grade<br />
             a = F_net / m_total<br />
             F_traction = min(T_wheel / R_tyre, μ_peak × F_z_rear × Pacejka(κ))
@@ -106,18 +108,18 @@ export default function PhysicsPage() {
 
       {/* Integrator */}
       <section className="mb-14">
-        <h2 className="font-display font-bold text-2xl text-white mb-4">Numerical Integrator</h2>
-        <p className="text-white/70 text-sm leading-relaxed mb-4">
+        <h2 className="font-display font-bold text-2xl text-white mb-4">Numerical integrator</h2>
+        <p className="text-white/75 text-base leading-relaxed mb-4">
           The fixed-step RK4 integrator runs at dt = 1 ms. For most bikes, this gives adequate accuracy — the maximum
           position error per step is O(dt⁵) ≈ 10⁻¹⁵ m, well within measurement noise.
         </p>
-        <p className="text-white/70 text-sm leading-relaxed mb-4">
+        <p className="text-white/75 text-base leading-relaxed mb-4">
           The adaptive-dt solver uses a fifth-order embedded RK pair (RK45) with error control. Step size is
           halved when position error exceeds 10⁻⁴ m and doubled when error is below 10⁻⁶ m. The adaptive solver
           is most useful for clutch-heavy launch phases where the state changes rapidly and 1 ms steps may
           slightly mis-time the engagement point.
         </p>
-        <p className="text-white/70 text-sm leading-relaxed">
+        <p className="text-white/75 text-base leading-relaxed">
           Aerodynamic drag is re-evaluated at the RK4 midpoint (i.e. at v + k₁/2 rather than at v) to reduce
           the systematic bias that naive Euler or basic RK4 produces at high velocities. This is a minor but
           measurable improvement for bikes that spend significant run time above 180 km/h.
@@ -126,9 +128,9 @@ export default function PhysicsPage() {
 
       {/* Sub-models */}
       <section className="mb-14">
-        <h2 className="font-display font-bold text-2xl text-white mb-2">The 15 Sub-Models</h2>
+        <h2 className="font-display font-bold text-2xl text-white mb-2">The 15 sub-models</h2>
         <p className="text-white/60 text-sm mb-6">
-          Each sub-model is an independent Python module in <code className="font-mono text-brand-accent">motoquant/submodels/</code>.
+          Each sub-model is an independent Python module in <code className="font-mono text-brand-accent break-words">motoquant/submodels/</code>.
           They communicate only through the BikeConfig dataclass and the current state vector — no global state.
         </p>
         <div className="card px-5 border-brand-orange/20 divide-y divide-white/[0.05]">
@@ -136,27 +138,24 @@ export default function PhysicsPage() {
         </div>
       </section>
 
-      {/* EXP-016: post-sub-models simulator CTA (variant B only; fallback=null → SSG byte-identical to control) */}
-      <SubModelsCtaVariant />
-
       {/* Bike config */}
       <section className="mb-14">
-        <h2 className="font-display font-bold text-2xl text-white mb-4">BikeConfig: The Parameter Container</h2>
-        <p className="text-white/70 text-sm leading-relaxed mb-4">
-          Every simulation takes a <code className="font-mono text-brand-accent">BikeConfig</code> object — a nested Pydantic/dataclass
+        <h2 className="font-display font-bold text-2xl text-white mb-4">BikeConfig: the parameter container</h2>
+        <p className="text-white/75 text-base leading-relaxed mb-4">
+          Every simulation takes a <code className="font-mono text-brand-accent break-words">BikeConfig</code> object — a nested Pydantic/dataclass
           structure with 13 parameter sections: EngineParams, ForcedInductionParams, DrivetrainParams, ClutchParams,
           ChainParams, TireParams, AeroParams, ChassisParams, WheelieParams, RiderParams, StagingParams,
           EnvironmentParams, ParasiticParams.
         </p>
-        <p className="text-white/70 text-sm leading-relaxed mb-4">
-          The <code className="font-mono text-brand-accent">spec_to_bike_config()</code> function in <code className="font-mono text-brand-accent">scraper/importer.py</code> converts
-          a raw <code className="font-mono text-brand-accent">BikeSpec</code> (scraped or hand-entered) into a validated BikeConfig. It applies
+        <p className="text-white/75 text-base leading-relaxed mb-4">
+          The <code className="font-mono text-brand-accent break-words">spec_to_bike_config()</code> function in <code className="font-mono text-brand-accent break-words">scraper/importer.py</code> converts
+          a raw <code className="font-mono text-brand-accent break-words">BikeSpec</code> (scraped or hand-entered) into a validated BikeConfig. It applies
           displacement-scaled engine inertia, chain-pitch-inferred drivetrain parameters, category-aware tire grip
           defaults, and the 150+ Tier-1 gear ratio families.
         </p>
-        <p className="text-white/70 text-sm leading-relaxed">
-          Parts mods apply dotted-path notation to override specific fields (e.g. <code className="font-mono text-brand-accent">engine.peak_power_hp</code>,
-          <code className="font-mono text-brand-accent mx-1">drivetrain.front_sprocket</code>). The bridge module validates every path before applying,
+        <p className="text-white/75 text-base leading-relaxed">
+          Parts mods apply dotted-path notation to override specific fields (e.g. <code className="font-mono text-brand-accent break-words">engine.peak_power_hp</code>,
+          <code className="font-mono text-brand-accent mx-1 break-all">drivetrain.front_sprocket</code>). The bridge module validates every path before applying,
           logging a warning if the path is stale.
         </p>
       </section>
@@ -166,12 +165,12 @@ export default function PhysicsPage() {
         <div className="label-mono mb-4">Next</div>
         <div className="grid sm:grid-cols-2 gap-4">
           <Link href="/docs/validation" className="card card-hover block p-4 group">
-            <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Validation Data →</div>
-            <div className="text-xs text-white/50">Benchmark table with 250 benchmarks, per-cluster accuracy metrics, and methodology.</div>
+            <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Validation data →</div>
+            <div className="text-xs text-white/60">Benchmark table with 250 benchmarks, per-cluster accuracy metrics, and methodology.</div>
           </Link>
           <Link href="/docs/getting-started" className="card card-hover block p-4 group">
-            <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Run your first sim →</div>
-            <div className="text-xs text-white/50">Getting Started guide — web and API.</div>
+            <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Run your first simulation →</div>
+            <div className="text-xs text-white/60">The five-minute getting started guide.</div>
           </Link>
         </div>
       </div>

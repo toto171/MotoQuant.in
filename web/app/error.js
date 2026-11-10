@@ -1,39 +1,32 @@
 'use client';
 
 /**
- * Route error boundary (IGNITION v5). Catches render/runtime errors below
- * the root layout and offers an honest retry instead of a white screen.
- * Client component by Next.js convention (receives error + reset).
+ * Route error boundary. Catches render/runtime errors below the root layout
+ * and offers a retry instead of a white screen.
  */
-
-import StageDots from '../components/StageDots';
 
 export default function Error({ error, reset }) {
   return (
     <div className="min-h-screen bg-asphalt-0 text-white antialiased flex items-center justify-center px-6">
       <div className="max-w-lg w-full text-center py-24">
-        <div className="flex items-center justify-center gap-3">
-          <StageDots foul size={8} />
-          <span className="label-mono">engine fault — run interrupted</span>
-        </div>
-        <h1 className="mt-6 font-display font-bold text-3xl md:text-4xl tracking-tight">
-          Something broke mid-run.
+        <h1 className="font-display font-bold text-3xl md:text-4xl tracking-tight">
+          Something went wrong
         </h1>
-        <p className="mt-4 text-white/65 leading-relaxed">
-          The page hit an unexpected error. Your data is fine — restart the run
-          or head back to the pits.
+        <p className="mt-4 text-base text-white/75 leading-relaxed">
+          The page hit an unexpected error. Nothing you entered has been lost. Try again, or go
+          back to the simulator.
         </p>
         {process.env.NODE_ENV !== 'production' && error?.message && (
-          <p className="mt-4 rounded-xl border border-signal-foul/30 bg-signal-foul/10 px-4 py-3 text-left font-mono text-xs text-signal-foul/90 break-words">
+          <p className="mt-4 rounded-xl border border-signal-foul/30 bg-signal-foul/10 px-4 py-3 text-left font-mono text-xs text-signal-foul break-words">
             {String(error.message).slice(0, 300)}
           </p>
         )}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <button type="button" onClick={() => reset()} className="btn-primary">
-            Restart the run
+            Try again
           </button>
-          <a href="/" className="btn-ghost">
-            Back to the pits
+          <a href="/simulator" className="btn-ghost">
+            Open the simulator
           </a>
         </div>
       </div>

@@ -1,10 +1,8 @@
 import Link from 'next/link';
 import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
-import CodeComment from '../../components/CodeComment';
 import { Reveal } from '../../components/Reveal';
 import ScoreboardDigits from '../../components/ScoreboardDigits';
-import TerminalCtaVariant from './TerminalCtaVariant';
 
 export const metadata = {
   title: 'Whitepaper — MotoQuant Physics Engine (Pacejka Tire Model + RK4)',
@@ -200,27 +198,27 @@ function Section({ s }) {
   return (
     <section id={s.id} className="scroll-mt-24 mb-16">
       <div className="flex items-baseline gap-4 mb-5">
-        <span className="font-mono text-white/40 text-sm tabular-nums">§{s.n}</span>
-        <h2 className="font-display font-bold text-3xl tracking-tight text-white">
+        <span className="font-mono text-white/60 text-sm tabular-nums">§{s.n}</span>
+        <h2 className="font-display font-bold text-2xl md:text-3xl tracking-tight text-white">
           {s.title}
         </h2>
       </div>
       {s.body && s.body.map((p, i) => (
-        <p key={`b${i}`} className="text-white/65 leading-relaxed mb-4">
+        <p key={`b${i}`} className="text-white/75 leading-relaxed mb-4">
           {p}
         </p>
       ))}
       {s.list && (
         <div className="card my-6 p-5">
           {s.list.title && (
-            <div className="label-mono mb-3">
+            <div className="mb-3 text-sm font-semibold text-white/80">
               {s.list.title}
             </div>
           )}
           <ul className="space-y-2 text-sm text-white/65 leading-relaxed">
             {s.list.items.map((item, i) => (
               <li key={i} className="flex gap-3">
-                <span className="text-white/40 shrink-0">›</span>
+                <span className="text-white/60 shrink-0">›</span>
                 <span>{item}</span>
               </li>
             ))}
@@ -236,7 +234,7 @@ function Section({ s }) {
                   {s.table.head.map((h, i) => (
                     <th
                       key={i}
-                      className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45"
+                      className="text-left px-4 py-3 text-xs font-medium text-white/60 whitespace-nowrap"
                     >
                       {h}
                     </th>
@@ -275,17 +273,17 @@ function Section({ s }) {
         </div>
       )}
       {s.body2 && s.body2.map((p, i) => (
-        <p key={`b2${i}`} className="text-white/65 leading-relaxed mb-4">
+        <p key={`b2${i}`} className="text-white/75 leading-relaxed mb-4">
           {p}
         </p>
       ))}
       {s.extra && s.extra.map((p, i) => (
-        <p key={`e${i}`} className="text-white/65 leading-relaxed mb-4">
+        <p key={`e${i}`} className="text-white/75 leading-relaxed mb-4">
           {p}
         </p>
       ))}
       {s.citation && (
-        <pre className="card my-4 p-5 text-xs font-mono text-white/75 whitespace-pre-wrap leading-relaxed">
+        <pre className="card my-4 p-5 text-sm font-mono text-white/75 whitespace-pre-wrap break-words leading-relaxed">
           {s.citation}
         </pre>
       )}
@@ -303,8 +301,7 @@ export default function WhitepaperPage() {
           {/* Cover */}
           <Reveal>
           <div className="mb-16 pb-12">
-            <CodeComment className="mb-4">formal specification · rk4 · 1ms</CodeComment>
-            <div className="label-mono mb-4">
+            <div className="text-sm text-white/60 mb-4">
               Whitepaper · Version 1.0 · April 30, 2026 · validation data: August 2026 sweep
             </div>
             <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-white mb-6">
@@ -313,7 +310,7 @@ export default function WhitepaperPage() {
             <p className="text-white/65 text-base mb-2">
               Ritwik Singh &nbsp;·&nbsp; Arya Desai
             </p>
-            <p className="text-white/40 text-sm font-mono">
+            <p className="text-white/60 text-sm font-mono">
               MotoQuant &middot; Pune, India &middot;{' '}
               <a href="mailto:motoquant@gmail.com" className="text-white/70 hover:text-white transition-colors">
                 motoquant@gmail.com
@@ -333,9 +330,9 @@ export default function WhitepaperPage() {
               ].map(t => (
                 <div key={t.label} className="card p-4">
                   <div className="flex items-end justify-center gap-1">
-                    {t.pre && <span className="font-mono text-sm text-white/40 mb-0.5">{t.pre}</span>}
+                    {t.pre && <span className="font-mono text-sm text-white/60 mb-0.5">{t.pre}</span>}
                     <ScoreboardDigits value={t.seg} h={24} label={`${t.pre || ''}${t.seg}${t.post || ''}`} />
-                    {t.post && <span className="font-mono text-sm text-white/40 mb-0.5">{t.post}</span>}
+                    {t.post && <span className="font-mono text-sm text-white/60 mb-0.5">{t.post}</span>}
                   </div>
                   <div className="label-mono mt-2 text-center">{t.label}</div>
                 </div>
@@ -347,19 +344,24 @@ export default function WhitepaperPage() {
 
           {/* Abstract */}
           <section id="abstract" className="mb-16 scroll-mt-24">
-            <div className="label-mono mb-3">Abstract</div>
-            <p className="text-white/75 leading-relaxed text-[15px] border-l-2 border-accent/60 pl-5">
+            <p className="mb-6 rounded-xl border border-accent/25 bg-accent/5 px-4 py-3 text-base leading-relaxed text-white/85">
+              <strong className="font-semibold text-white">In short:</strong> MotoQuant predicts a motorcycle&apos;s
+              quarter-mile time from physics, not from a fitted curve. This paper explains how it works, how we
+              check it against 250 published results, and where it is still weak.
+            </p>
+            <h2 className="mb-3 font-display text-xl font-semibold text-white">Abstract</h2>
+            <p className="text-white/75 leading-relaxed text-base border-l-2 border-accent/60 pl-5">
               {ABSTRACT}
             </p>
           </section>
 
           {/* Table of contents */}
           <nav id="toc" className="mb-16 scroll-mt-24">
-            <div className="label-mono mb-3">Contents</div>
+            <h2 className="mb-3 font-display text-xl font-semibold text-white">Contents</h2>
             <ol className="space-y-2 columns-1 sm:columns-2 gap-x-10">
               {SECTIONS.map(s => (
                 <li key={s.id} className="flex items-baseline gap-3 break-inside-avoid">
-                  <span className="font-mono text-white/40 text-sm tabular-nums">§{s.n}</span>
+                  <span className="font-mono text-white/60 text-sm tabular-nums">§{s.n}</span>
                   <a
                     href={`#${s.id}`}
                     className="text-white/75 hover:text-white transition-colors text-sm"
@@ -376,23 +378,24 @@ export default function WhitepaperPage() {
 
           {/* Footer / next steps */}
           <div className="mt-20 pt-10 border-t border-white/5">
-            <div className="label-mono mb-3">
-              Continue reading
-            </div>
+            <h2 className="mb-3 font-display text-xl font-semibold text-white">Continue reading</h2>
             <div className="grid sm:grid-cols-3 gap-4">
               <Link href="/docs/physics" className="group card card-hover p-5">
                 <div className="font-display font-semibold text-white group-hover:text-accent transition-colors">
-                  Physics docs →
+                  How the physics works →
                 </div>
-                <div className="text-sm text-white/55 mt-1">Sub-model deep-dives.</div>
+                <div className="text-sm text-white/65 mt-1">Sub-model deep-dives.</div>
               </Link>
               <Link href="/docs/validation" className="group card card-hover p-5">
                 <div className="font-display font-semibold text-white group-hover:text-accent transition-colors">
-                  Validation data →
+                  Accuracy data →
                 </div>
-                <div className="text-sm text-white/55 mt-1">Per-bike benchmark table.</div>
+                <div className="text-sm text-white/65 mt-1">Per-bike benchmark table.</div>
               </Link>
-              <TerminalCtaVariant />
+              <Link href="/simulator" className="group card card-hover border-accent/40 p-5">
+                <div className="font-display font-semibold text-accent">Open the simulator →</div>
+                <div className="text-sm text-white/65 mt-1">See the engine for yourself.</div>
+              </Link>
             </div>
           </div>
         </article>

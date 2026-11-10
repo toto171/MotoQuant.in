@@ -2,7 +2,6 @@ import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 import StructuredData, { articleSchema } from '../../StructuredData';
-import InlineSimCta from './InlineSimCta';
 
 const SLUG = 'pulsar-ns200-vs-apache-rtr-200-quarter-mile-physics';
 const TITLE = 'Pulsar NS200 vs Apache RTR 200 4V: Quarter-Mile Physics';
@@ -89,14 +88,6 @@ const CONTENT = [
       ['Top gear at trap', '5th, ~8,900 rpm', '5th, ~8,400 rpm'],
       ['Cluster bias band', '±0.5 s entry-200-300', '±0.5 s entry-200-300'],
     ],
-  },
-  {
-    // EXP-010: mid-article inline CTA sentinel. Renders <InlineSimCta />
-    // which is a client component that returns null on variant=A
-    // (control / default) and a "Run this comparison" card on variant=B.
-    // Placement: immediately after the stock-sim numbers table, where
-    // reader comparison intent peaks.
-    type: 'inline-cta',
   },
   {
     type: 'p',
@@ -245,11 +236,6 @@ function Prose({ content }) {
             </div>
           );
         }
-        if (block.type === 'inline-cta') {
-          // EXP-010 — client component, default off; renders null on the
-          // control arm so the static-prerendered DOM is unchanged.
-          return <InlineSimCta key={i} />;
-        }
         if (block.type === 'table') {
           const [header, ...rows] = block.rows;
           return (
@@ -260,7 +246,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -283,7 +269,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -311,7 +297,7 @@ export default function PostPage() {
             {['Bajaj', 'Pulsar NS200', 'TVS', 'Apache RTR 200 4V', 'Indian 200cc', 'comparison'].map((t) => (
               <span
                 key={t}
-                className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
               >
                 {t}
               </span>
@@ -320,7 +306,7 @@ export default function PostPage() {
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             Pulsar NS200 vs Apache RTR 200 4V: Which Wins the Quarter Mile?
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             18 May 2026 · 11 min read · MotoQuant Blog
           </div>
         </div>
@@ -332,7 +318,7 @@ export default function PostPage() {
             <div className="font-display font-bold text-white mb-1">Simulate NS200 vs Apache RTR 200 4V side-by-side</div>
             <div className="text-white/60 text-sm">Pick both bikes, swap mods, sweep rider weight and venue conditions, and see the ET delta before you spend a rupee.</div>
           </div>
-          <Link href="/simulator" className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">Run sim →</Link>
+          <Link href="/simulator" className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">Open the simulator →</Link>
         </div>
 
         <div className="max-w-2xl mx-auto mt-16">
@@ -372,13 +358,6 @@ export default function PostPage() {
                 Browse the full bike catalog
               </Link>{' '}
               — NS200, RS200, RTR 200 4V, RTR 160 4V, and 330+ other bikes with full spec sheets and OEM tire fitments.
-            </li>
-            <li>
-              ·{' '}
-              <a href="https://github.com/toto171/MotoQuant.in" target="_blank" rel="noopener noreferrer" className="text-brand-accent hover:text-brand-orange transition-colors">
-                MotoQuant on GitHub
-              </a>{' '}
-              — free and open source under the MIT License.
             </li>
           </ul>
         </div>

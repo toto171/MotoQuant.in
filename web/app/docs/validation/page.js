@@ -1,6 +1,4 @@
 import Link from 'next/link';
-import CredibilityCtaVariant from './CredibilityCtaVariant';
-import CodeComment from '../../../components/CodeComment';
 
 export const metadata = {
   title: 'Validation Data',
@@ -61,11 +59,17 @@ export default function ValidationPage() {
   return (
     <article>
       <header className="mb-12">
-        <CodeComment className="mb-3">validation · 250 benchmarks</CodeComment>
-        <h1 className="font-display font-bold text-4xl text-white mb-4 tracking-tight">Benchmark Results — August 2026</h1>
-        <p className="text-white/60 text-base leading-relaxed">
+        <p className="eyebrow mb-2">Accuracy</p>
+        <h1 className="font-display font-bold text-3xl md:text-4xl text-white mb-4 tracking-tight">Benchmark results, August 2026</h1>
+        <p className="text-white/70 text-base leading-relaxed mb-5">
           Source-quality-weighted sweep results across 250 published benchmarks (276 matched to a catalog bike).
           Metrics, per-cluster bias, and methodology. Last updated 8 August 2026.
+        </p>
+        <p className="rounded-xl border border-accent/25 bg-accent/5 px-4 py-3 text-base leading-relaxed text-white/85">
+          <strong className="font-semibold text-white">In short:</strong> we compare the simulator with real
+          timeslips from magazines and instrumented tests. On average it lands within about a quarter of a
+          second, and it is neither systematically quick nor slow. Small bikes and two-strokes are the weakest
+          spot, and we say so below.
         </p>
         <Link
           href="/validation"
@@ -78,7 +82,7 @@ export default function ValidationPage() {
 
       {/* Headline stats */}
       <section className="mb-14">
-        <h2 className="font-display font-bold text-2xl text-white mb-6">Aggregate Metrics (276 matched benchmarks)</h2>
+        <h2 className="font-display font-bold text-2xl text-white mb-6">Aggregate metrics (276 matched benchmarks)</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
           {[
             { num: '0.263s', label: 'Weighted |Δ|' },
@@ -88,7 +92,7 @@ export default function ValidationPage() {
           ].map((s, i) => (
             <div key={i} className="card p-4 border-brand-orange/20 text-center">
               <div className="font-display font-bold text-xl text-brand-orange tabular-nums">{s.num}</div>
-              <div className="font-mono text-[10px] text-white/50 uppercase tracking-wide mt-1">{s.label}</div>
+              <div className="text-xs text-white/60 mt-1">{s.label}</div>
             </div>
           ))}
         </div>
@@ -100,8 +104,8 @@ export default function ValidationPage() {
             { num: '256', label: 'Within ±1.00s' },
           ].map((s, i) => (
             <div key={i} className="card p-4 text-center">
-              <div className="font-display font-bold text-xl text-white tabular-nums">{s.num}<span className="text-white/40 text-sm">/276</span></div>
-              <div className="font-mono text-[10px] text-white/50 uppercase tracking-wide mt-1">{s.label}</div>
+              <div className="font-display font-bold text-xl text-white tabular-nums">{s.num}<span className="text-white/60 text-sm">/276</span></div>
+              <div className="text-xs text-white/60 mt-1">{s.label}</div>
             </div>
           ))}
         </div>
@@ -109,13 +113,14 @@ export default function ValidationPage() {
 
       {/* Reference baselines */}
       <section className="mb-14">
-        <h2 className="font-display font-bold text-2xl text-white mb-4">Reference Baselines (hand-calibrated)</h2>
+        <h2 className="font-display font-bold text-2xl text-white mb-4">Reference baselines (hand-calibrated)</h2>
         <p className="text-white/60 text-sm mb-6">
-          Three reference bikes from <code className="font-mono text-brand-accent">defaults.py</code> are hand-calibrated and excluded from the ALL_KNOWN_BIKES auto-reseed.
+          Three reference bikes from <code className="font-mono text-brand-accent break-words">defaults.py</code> are hand-calibrated and excluded from the ALL_KNOWN_BIKES auto-reseed.
           They serve as regression anchors — if any code change moves these by more than ±0.02s, something is wrong.
         </p>
-        <div className="card border-brand-orange/20 overflow-hidden">
-          <div className="hidden sm:grid grid-cols-[1fr_120px_120px_120px] gap-4 px-5 py-3 border-b border-brand-orange/20 bg-white/[0.02] text-[10px] font-mono uppercase tracking-widest text-white/50">
+        <div className="card border-brand-orange/20 overflow-x-auto">
+         <div className="min-w-[440px]">
+          <div className="grid grid-cols-[1fr_90px_90px_90px] gap-4 px-5 py-3 border-b border-brand-orange/20 bg-white/[0.02] text-xs font-medium text-white/60">
             <div>Bike</div>
             <div className="text-right">Target</div>
             <div className="text-right">Simulated</div>
@@ -126,7 +131,7 @@ export default function ValidationPage() {
             { name: 'YZF-R1 4C8 (2007)', target: 10.300, sim: 10.144, delta: -0.156 },
             { name: 'Hayabusa Gen1 (1999)', target: 10.350, sim: 10.363, delta: +0.013 },
           ].map((b, i) => (
-            <div key={i} className="grid grid-cols-[1fr_120px_120px_120px] gap-4 px-5 py-3 border-b border-white/[0.04] last:border-0">
+            <div key={i} className="grid grid-cols-[1fr_90px_90px_90px] gap-4 px-5 py-3 border-b border-white/[0.04] last:border-0">
               <div className="font-display font-semibold text-white text-sm">{b.name}</div>
               <div className="text-right font-mono text-white/70 tabular-nums text-sm">{b.target.toFixed(3)}s</div>
               <div className="text-right font-mono text-white tabular-nums text-sm">{b.sim.toFixed(3)}s</div>
@@ -135,12 +140,13 @@ export default function ValidationPage() {
               </div>
             </div>
           ))}
+         </div>
         </div>
       </section>
 
       {/* Top 10 */}
       <section className="mb-14">
-        <h2 className="font-display font-bold text-2xl text-white mb-4">Top 10 Most Accurate Bikes</h2>
+        <h2 className="font-display font-bold text-2xl text-white mb-4">Top 10 most accurate bikes</h2>
         <p className="text-white/60 text-sm mb-6">
           The 10 smallest residuals across the matched corpus — top-10 mean absolute error ±0.007s.
           Sources: Cycle World, Sport Rider, MCN, Motorcycle Consumer News. One row (rank 3) is a
@@ -148,7 +154,7 @@ export default function ValidationPage() {
           Conditions: race fuel, professional rider, ideal strip.
         </p>
         <div className="card border-brand-orange/20 overflow-hidden">
-          <div className="hidden md:grid grid-cols-[36px_1fr_100px_100px_90px_130px] gap-3 px-5 py-3 border-b border-brand-orange/20 bg-white/[0.02] text-[10px] font-mono uppercase tracking-widest text-white/50">
+          <div className="hidden md:grid grid-cols-[36px_1fr_100px_100px_90px_130px] gap-3 px-5 py-3 border-b border-brand-orange/20 bg-white/[0.02] text-xs font-medium text-white/60">
             <div>#</div><div>Bike</div><div className="text-right">Target</div>
             <div className="text-right">Simulated</div><div className="text-right">Δ</div><div className="text-right">Source</div>
           </div>
@@ -167,21 +173,21 @@ export default function ValidationPage() {
                   <span className={`font-display font-bold text-sm tabular-nums ${color}`}>{sign}{b.delta.toFixed(3)}s</span>
                 </div>
                 <div className="md:hidden grid grid-cols-3 gap-2 text-xs">
-                  <div><div className="text-white/40 text-[10px] font-mono">Year</div><div className="text-white/80 font-mono">{b.year}</div></div>
-                  <div><div className="text-white/40 text-[10px] font-mono">Target</div><div className="text-white/80 font-mono tabular-nums">{b.target.toFixed(2)}s</div></div>
-                  <div><div className="text-white/40 text-[10px] font-mono">Sim</div><div className="text-white/80 font-mono tabular-nums">{b.sim.toFixed(2)}s</div></div>
+                  <div><div className="text-white/60 text-xs">Year</div><div className="text-white/80 font-mono">{b.year}</div></div>
+                  <div><div className="text-white/60 text-xs">Target</div><div className="text-white/80 font-mono tabular-nums">{b.target.toFixed(2)}s</div></div>
+                  <div><div className="text-white/60 text-xs">Sim</div><div className="text-white/80 font-mono tabular-nums">{b.sim.toFixed(2)}s</div></div>
                 </div>
-                <div className="md:hidden mt-1.5 text-[10px] font-mono text-white/40">{b.cc} · {b.source}</div>
+                <div className="md:hidden mt-1.5 text-xs text-white/60">{b.cc} · {b.source}</div>
                 {/* Desktop */}
                 <div className="hidden md:block font-bold text-brand-orange font-display">{b.rank}</div>
                 <div className="hidden md:block">
                   <div className="font-bold text-white text-sm">{b.name}</div>
-                  <div className="font-mono text-xs text-white/40">{b.year} · {b.cc}</div>
+                  <div className="font-mono text-xs text-white/60">{b.year} · {b.cc}</div>
                 </div>
                 <div className="hidden md:block text-right font-mono text-white/70 tabular-nums text-sm">{b.target.toFixed(2)}s</div>
                 <div className="hidden md:block text-right font-mono text-white tabular-nums text-sm font-semibold">{b.sim.toFixed(2)}s</div>
                 <div className={`hidden md:block text-right font-display font-bold tabular-nums text-sm ${color}`}>{sign}{b.delta.toFixed(3)}s</div>
-                <div className="hidden md:block text-right font-mono text-[10px] text-white/40 self-center">{b.source}</div>
+                <div className="hidden md:block text-right text-xs text-white/60 self-center">{b.source}</div>
               </div>
             );
           })}
@@ -190,7 +196,7 @@ export default function ValidationPage() {
 
       {/* Per-cluster bias */}
       <section className="mb-14">
-        <h2 className="font-display font-bold text-2xl text-white mb-4">Per-Cluster Bias</h2>
+        <h2 className="font-display font-bold text-2xl text-white mb-4">Per-cluster bias</h2>
         <p className="text-white/60 text-sm mb-6">
           Positive bias means the simulator predicts slower than reality. Clusters follow the cylinder-aware
           12-cluster taxonomy introduced in the July 2026 retune — twins, singles, and small-cc I4 screamers are
@@ -206,14 +212,14 @@ export default function ValidationPage() {
             <div key={i} className="flex items-center justify-between gap-4 px-5 py-3.5 border-b border-white/[0.04] last:border-0">
               <div className="flex-1">
                 <div className="font-display font-semibold text-sm text-white">{c.name}</div>
-                <div className="font-mono text-[10px] text-white/40 mt-0.5">{c.note}</div>
+                <div className="text-xs text-white/60 mt-0.5">{c.note}</div>
               </div>
               <div className="flex items-center gap-3 shrink-0">
                 <span className={`font-display font-bold tabular-nums text-sm ${
                   c.status === 'closed' ? 'text-brand-accent' :
                   c.status === 'good' ? 'text-brand-green' : 'text-brand-amber'
                 }`}>{c.bias}</span>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wide ${
+                <span className={`px-2 py-0.5 rounded text-xs font-medium ${
                   c.status === 'closed' ? 'bg-brand-accent/10 text-brand-accent' :
                   c.status === 'good' ? 'bg-brand-green/10 text-brand-green' :
                   'bg-brand-amber/10 text-brand-amber'
@@ -229,7 +235,7 @@ export default function ValidationPage() {
       {/* Methodology */}
       <section className="mb-14">
         <h2 className="font-display font-bold text-2xl text-white mb-4">Methodology</h2>
-        <div className="space-y-4 text-white/70 text-sm leading-relaxed">
+        <div className="space-y-4 text-white/75 text-base leading-relaxed">
           <p>
             <strong className="text-white">Benchmark sources:</strong> Published magazine timeslips from Cycle World,
             Sport Rider, MCN, Motorcyclist, and BikeWale. Indian community strip records from MotoStatz, Facebook
@@ -249,34 +255,30 @@ export default function ValidationPage() {
           <p>
             <strong className="text-white">Known limitations:</strong> Residual small-cc and 2T bias is a calibration
             gap, not a physics gap. The correct fix is per-bike Cd and μ calibration using real strip data — upload
-            a Dragy CSV to <code className="font-mono text-brand-accent">/api/calibrate/dragy</code> to overlay your
+            a Dragy CSV to <code className="font-mono text-brand-accent break-words">/api/calibrate/dragy</code> to overlay your
             real run against the sim and quantify the gap for your specific bike; the engine&apos;s offline
             calibrator then fits Cd and μ from measured runs.
           </p>
           <p>
             <strong className="text-white">Regression testing:</strong> 10 dedicated regression tests in
             <code className="font-mono text-brand-accent mx-1">tests/test_power_boost_regression.py</code> run on every
-            commit to catch DB drift. The test helper copies <code className="font-mono text-brand-accent">motoquant.db</code> to
+            commit to catch DB drift. The test helper copies <code className="font-mono text-brand-accent break-words">motoquant.db</code> to
             a temp directory to avoid WAL journal-mode errors on mounted filesystems.
           </p>
         </div>
       </section>
-
-      {/* GROWTH_EXP_015 — credibility CTA injected here in variant B; renders
-          null in variant A so the terminal Next nav still anchors the page. */}
-      <CredibilityCtaVariant />
 
       {/* Next */}
       <div className="pt-8 border-t border-brand-orange/10">
         <div className="label-mono mb-4">Next</div>
         <div className="grid sm:grid-cols-2 gap-4">
           <Link href="/docs/getting-started" className="card card-hover block p-4 group">
-            <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Getting Started →</div>
-            <div className="text-xs text-white/50">Run your first simulation in under 60 seconds.</div>
+            <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Getting started →</div>
+            <div className="text-xs text-white/60">Run your first simulation in under 60 seconds.</div>
           </Link>
           <Link href="/simulator" className="card card-hover block p-4 group">
             <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Try the simulator →</div>
-            <div className="text-xs text-white/50">541 bikes, free in the browser, no account needed.</div>
+            <div className="text-xs text-white/60">541 bikes, free in the browser, no account needed.</div>
           </Link>
         </div>
       </div>

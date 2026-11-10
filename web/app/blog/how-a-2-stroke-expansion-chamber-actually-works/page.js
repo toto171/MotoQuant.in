@@ -240,7 +240,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -263,7 +263,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -293,7 +293,7 @@ export default function PostPage() {
               (t) => (
                 <span
                   key={t}
-                  className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                  className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
                 >
                   {t}
                 </span>
@@ -303,7 +303,7 @@ export default function PostPage() {
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             How a 2-Stroke Expansion Chamber Actually Works
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             8 May 2026 · 11 min read · MotoQuant Blog
           </div>
         </div>
@@ -371,14 +371,6 @@ export default function PostPage() {
               — including all 20 two-stroke entries (RD350, RX100, RGV250,
               RS125, NSR250, KTM 300 EXC, and more).
             </li>
-            <li>
-              ·{" "}
-              <a href="https://github.com/toto171/MotoQuant.in" target="_blank" rel="noopener noreferrer"
-                className="text-brand-accent hover:text-brand-orange transition-colors">
-                MotoQuant on GitHub
-              </a>{" "}
-              — free and open source under the MIT License.
-            </li>
           </ul>
         </div>
 
@@ -398,7 +390,7 @@ export default function PostPage() {
             href="/simulator?bike=yamaha-rx100"
             className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
           >
-            Run sim →
+            Open the simulator →
           </Link>
         </div>
       </article>

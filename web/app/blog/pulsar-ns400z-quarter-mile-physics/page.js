@@ -225,7 +225,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -248,7 +248,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -276,7 +276,7 @@ export default function PostPage() {
             {['Bajaj', 'Pulsar NS400Z', 'KTM RC 390', 'Indian 400cc', 'physics'].map((t) => (
               <span
                 key={t}
-                className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
               >
                 {t}
               </span>
@@ -285,7 +285,7 @@ export default function PostPage() {
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             Pulsar NS400Z Quarter-Mile Physics (and Why an RC 390 Still Wins)
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             18 May 2026 · 12 min read · MotoQuant Blog
           </div>
         </div>
@@ -297,7 +297,7 @@ export default function PostPage() {
             <div className="font-display font-bold text-white mb-1">Simulate the NS400Z vs RC 390 head-to-head</div>
             <div className="text-white/60 text-sm">Pick both bikes, sweep rider weight, swap mods, change venue conditions, and see the ET delta before you spend a rupee on either one.</div>
           </div>
-          <Link href="/simulator" className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">Run sim →</Link>
+          <Link href="/simulator" className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">Open the simulator →</Link>
         </div>
 
         <div className="max-w-2xl mx-auto mt-16">
@@ -337,13 +337,6 @@ export default function PostPage() {
                 Browse the full bike catalog
               </Link>{' '}
               — NS400Z, RC 390, Duke 390, Dominar 400, Apache RR 310, and 390+ other bikes with full spec sheets and OEM tire fitments.
-            </li>
-            <li>
-              ·{' '}
-              <a href="https://github.com/toto171/MotoQuant.in" target="_blank" rel="noopener noreferrer" className="text-brand-accent hover:text-brand-orange transition-colors">
-                MotoQuant on GitHub
-              </a>{' '}
-              — free and open source under the MIT License.
             </li>
           </ul>
         </div>

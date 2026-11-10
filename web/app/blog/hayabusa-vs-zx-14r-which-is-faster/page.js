@@ -2,7 +2,6 @@ import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 import StructuredData, { articleSchema } from '../../StructuredData';
-import InlineSimCta from './InlineSimCta';
 
 const SLUG = 'hayabusa-vs-zx-14r-which-is-faster';
 const TITLE = 'Hayabusa vs ZX-14R: Quarter-Mile Drag Race Physics (India)';
@@ -104,9 +103,6 @@ const CONTENT = [
   {
     type: 'callout',
     text: 'These are stock-tune simulations. A modded Hayabusa with a stretched swingarm, a 14-tooth front sprocket, drag tires, a 4-into-1 stainless system, and a Power Commander tune will run mid-9s territory at well over 250 km/h trap. A modded ZX-14R does the same. The differences in this post describe stock bikes on stock tires under controlled launch conditions — not strip-prepped drag specials.',
-  },
-  {
-    type: 'inline_cta_slot',
   },
   {
     type: 'h2',
@@ -256,13 +252,6 @@ function Prose({ content }) {
             </div>
           );
         }
-        if (block.type === 'inline_cta_slot') {
-          // EXP-017 — mid-article inline CTA. Renders nothing on the
-          // control arm; renders a glass CTA card on ?variant=B.
-          // Wrapped in Suspense inside InlineSimCta to satisfy the
-          // App-Router CSR-bailout rule.
-          return <InlineSimCta key={i} />;
-        }
         if (block.type === 'table') {
           const [header, ...rows] = block.rows;
           return (
@@ -273,7 +262,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -296,7 +285,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -325,7 +314,7 @@ export default function PostPage() {
             {['Suzuki', 'Hayabusa', 'Kawasaki', 'ZX-14R', 'hyper sport', 'comparison'].map((t) => (
               <span
                 key={t}
-                className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
               >
                 {t}
               </span>
@@ -334,7 +323,7 @@ export default function PostPage() {
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             Hayabusa vs ZX-14R: Which Is Faster Off the Line?
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             8 May 2026 · 11 min read · MotoQuant Blog
           </div>
         </div>
@@ -380,13 +369,6 @@ export default function PostPage() {
               </Link>{' '}
               — Hayabusa Gen2/Gen3, ZX-14R 2012, and 330+ other bikes with full spec sheets.
             </li>
-            <li>
-              ·{' '}
-              <a href="https://github.com/toto171/MotoQuant.in" target="_blank" rel="noopener noreferrer" className="text-brand-accent hover:text-brand-orange transition-colors">
-                MotoQuant on GitHub
-              </a>{' '}
-              — free and open source under the MIT License.
-            </li>
           </ul>
         </div>
 
@@ -402,7 +384,7 @@ export default function PostPage() {
             href="/simulator?bike=suzuki-hayabusa"
             className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
           >
-            Run sim →
+            Open the simulator →
           </Link>
         </div>
       </article>
