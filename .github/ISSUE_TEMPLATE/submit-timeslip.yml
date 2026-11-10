@@ -1,0 +1,102 @@
+name: Submit a timeslip
+description: A real quarter-mile run (Dragy, GPS logger, timing lights or a published test). Reviewed runs join the set the simulator is checked against.
+title: "Timeslip: "
+labels: ["timeslip"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Real runs are what make the simulator more accurate, especially for small bikes, where few instrumented tests have been published. A maintainer checks each submission before it joins the benchmark set, and the change that adds it links back to this issue.
+
+        Please only submit runs you made yourself or that were published with their source.
+
+  - type: input
+    id: bike
+    attributes:
+      label: Bike
+      description: Make, model and year.
+      placeholder: KTM Duke 390 (2019)
+    validations:
+      required: true
+
+  - type: input
+    id: catalog
+    attributes:
+      label: Catalog page
+      description: The bike's page on motoquant.in, if it is in the catalog.
+
+  - type: input
+    id: et
+    attributes:
+      label: Quarter-mile time (s)
+      placeholder: "13.845"
+    validations:
+      required: true
+
+  - type: input
+    id: trap
+    attributes:
+      label: Finish-line speed (km/h)
+
+  - type: input
+    id: sixty
+    attributes:
+      label: 60-foot time (s)
+
+  - type: input
+    id: eighth
+    attributes:
+      label: Eighth-mile time (s)
+
+  - type: dropdown
+    id: timing
+    attributes:
+      label: How was it timed?
+      options:
+        - Dragy or another GPS logger
+        - Timing lights at a drag strip
+        - Published magazine or website test
+        - Other (say how in the notes)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: stock
+    attributes:
+      label: Was the bike stock?
+      options:
+        - Stock
+        - Modified (list the changes below)
+    validations:
+      required: true
+
+  - type: textarea
+    id: mods
+    attributes:
+      label: Changes from stock
+      description: Exhaust, gearing, tyres, tune, anything else.
+
+  - type: input
+    id: venue
+    attributes:
+      label: Where and when
+      placeholder: Aamby Valley, March 2026
+
+  - type: input
+    id: rider
+    attributes:
+      label: Rider weight with gear (kg)
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Drag a screenshot of the Dragy result or the timeslip into this box, or link to the published test.
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Weather, launch technique, anything unusual about the run.

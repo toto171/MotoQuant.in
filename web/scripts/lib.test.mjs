@@ -118,3 +118,35 @@ test('every change from stock is listed on the slip', () => {
   ]);
   assert.deepEqual(slip.changesFromStock({ rider_mass_kg: 75 }, {}), []);
 });
+
+const contribute = await load('../lib/contribute.js');
+
+test('a timeslip submission opens the issue form with the numbers filled in', () => {
+  const url = new URL(
+    contribute.timeslipIssueUrl({ bikeName: 'KTM Duke 390', bikeId: 12, et: 13.8456, trap: 151.24, sixty: 2.1 }),
+  );
+  assert.equal(url.origin + url.pathname, 'https://github.com/toto171/MotoQuant.in/issues/new');
+  const q = url.searchParams;
+  assert.equal(q.get('template'), 'submit-timeslip.yml');
+  assert.equal(q.get('title'), 'Timeslip: KTM Duke 390 13.846 s');
+  assert.equal(q.get('et'), '13.846');
+  assert.equal(q.get('trap'), '151.2');
+  assert.equal(q.get('sixty'), '2.100');
+  assert.equal(q.get('catalog'), 'https://www.motoquant.in/bikes/12');
+  assert.equal(q.has('eighth'), false);
+});
+
+test('every prefilled field exists in the issue form', () => {
+  const form = readFileSync(
+    new URL('../../.github/ISSUE_TEMPLATE/submit-timeslip.yml', import.meta.url),
+    'utf8',
+  );
+  const ids = new Set([...form.matchAll(/^\s+id:\s*(\S+)/gm)].map((m) => m[1]));
+  const url = new URL(
+    contribute.timeslipIssueUrl({ bikeName: 'X', bikeId: 1, et: 10, trap: 200, sixty: 1.9, eighth: 6.5 }),
+  );
+  for (const key of url.searchParams.keys()) {
+    if (key === 'template' || key === 'title') continue;
+    assert.ok(ids.has(key), `issue form has no field "${key}"`);
+  }
+});

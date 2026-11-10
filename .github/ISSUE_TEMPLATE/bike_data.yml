@@ -1,5 +1,5 @@
-name: Bike / benchmark / part / tire data
-description: Add or correct a bike spec, a benchmark timeslip, a part, or a tire. A source is required.
+name: Catalog data (code contribution)
+description: Add or correct a bike spec, benchmark, part or tyre in the catalog's own format. A source is required. Riders without code can use "Suggest a bike" or "Submit a timeslip".
 title: "[data] "
 labels: ["data", "triage"]
 body:

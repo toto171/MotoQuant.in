@@ -1,16 +1,18 @@
 'use client';
 
 import { useMemo, useRef } from 'react';
-import { BarChart3, Upload, Zap } from 'lucide-react';
+import { BarChart3, ExternalLink, Upload, Zap } from 'lucide-react';
 import Term from '../Term';
 import SimProgress from '../SimProgress';
 import { ErrorTile, PANEL } from './controls';
 import { DynoChart, RealVsSimChart } from './charts';
 import { mergeOnTime } from '../../lib/timeseries';
+import { timeslipIssueUrl } from '../../lib/contribute';
+import { bikeName } from './format';
 
 export default function MyDataTab({ sim }) {
   const {
-    dragyTask, dynoTask, uploadResult: u, onDragyFile, onDynoFile, lastDragyFileRef, lastDynoFileRef,
+    dragyTask, dynoTask, uploadResult: u, onDragyFile, onDynoFile, lastDragyFileRef, lastDynoFileRef, bike,
   } = sim;
   const dragyRef = useRef(null);
   const dynoRef = useRef(null);
@@ -124,6 +126,30 @@ export default function MyDataTab({ sim }) {
                 {Object.entries(u.best_run.splits).map(([k, v]) => (
                   <div key={k} className="stat-row"><span>{k}</span><span>{v?.toFixed(3)} s</span></div>
                 ))}
+              </div>
+            )}
+            {u.best_run?.et_quarter_s != null && (
+              <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-white/10 pt-4">
+                <p className="min-w-[14rem] flex-1 text-sm text-white/65">
+                  Your file stays with you; nothing here is stored. To help the simulator, submit
+                  this run as a public GitHub issue with the numbers filled in, and attach the
+                  Dragy screenshot there.
+                </p>
+                <a
+                  href={timeslipIssueUrl({
+                    bikeName: bike ? bikeName(bike) : '',
+                    bikeId: bike?.id ?? null,
+                    et: u.best_run.et_quarter_s,
+                    trap: u.best_run.trap_speed_kmh,
+                    sixty: u.best_run.splits?.['60ft_s'] ?? u.best_run.splits?.['60ft'],
+                    eighth: u.best_run.splits?.['660ft_s'] ?? u.best_run.splits?.['660ft'],
+                  })}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-ghost btn-sm"
+                >
+                  Submit this run <ExternalLink size={14} aria-hidden="true" />
+                </a>
               </div>
             )}
           </div>

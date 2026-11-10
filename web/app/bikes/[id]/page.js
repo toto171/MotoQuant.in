@@ -253,7 +253,7 @@ export default function BikeDetailPage() {
               )}
 
               <div className="mt-4">
-                <TimeslipCTA bikeId={bike.id} />
+                <TimeslipCTA bikeId={bike.id} bikeName={[bike.manufacturer, bike.model].filter(Boolean).join(" ")} />
               </div>
             </div>
           )}

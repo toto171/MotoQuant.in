@@ -1,64 +1,9 @@
-# CODEOWNERS for MotoQuant
+# Every pull request requests a review from the maintainer. With branch
+# protection's "Require review from Code Owners" turned on, nothing merges to
+# main (and so nothing deploys) without that review.
 #
-# Every PR touching a matched path will auto-request review from the listed
-# owner(s). Combined with branch protection ("Require review from Code Owners"),
-# this enforces the "physics + schema changes need an explicit review" rule
-# from CONTRIBUTING.md.
-#
-# When a new co-developer joins, add their GitHub handle here on the areas they
-# own. Until then @toto171 (Hritwik) owns everything.
+# When someone takes ownership of an area, add a line for it below the
+# default, for example:
+#   /motoquant/scraper/known_bikes*.py   @toto171 @their-handle
 
-# ---- Default owner (fallback) ----
-*                                   @toto171
-
-# ---- Physics engine + sub-models (most sensitive) ----
-/motoquant/physics.py               @toto171
-/motoquant/submodels/               @toto171
-/motoquant/models.py                @toto171
-/motoquant/defaults.py              @toto171
-/motoquant/constants.py             @toto171
-
-# ---- Database schema + migrations ----
-/motoquant/database/schema.py       @toto171
-/motoquant/database/connection.py   @toto171
-/motoquant/database/bridge.py       @toto171
-
-# ---- Calibration pipeline ----
-/motoquant/calibration/             @toto171
-
-# ---- Analysis / optimisation / surrogates ----
-/motoquant/analysis/                @toto171
-
-# ---- Public API surfaces ----
-/motoquant/api.py                   @toto171
-/motoquant/run.py                   @toto171
-
-# ---- Data catalogs (lighter review — any collaborator can approve) ----
-# Add a second handle here once a data-lead joins:
-/motoquant/scraper/known_bikes.py   @toto171
-/motoquant/scraper/gear_ratios.py   @toto171
-/motoquant/database/seed.py         @toto171
-/motoquant/database/seed_catalogs/  @toto171
-
-# ---- Web (Next.js marketing + simulator) ----
-/web/                               @toto171
-
-# ---- CI / infra / deploy configs ----
-/.github/                           @toto171
-/Dockerfile                         @toto171
-/render.yaml                        @toto171
-/vercel.json                        @toto171
-/requirements-api.txt               @toto171
-/pyproject.toml                     @toto171
-
-# ---- Project docs (any maintainer can approve) ----
-/CLAUDE.md                          @toto171
-/AGENTS.md                          @toto171
-/CONTRIBUTING.md                    @toto171
-/docs/ONBOARDING.md                 @toto171
-
-# ---- Licensing + community policy ----
-/LICENSE                            @toto171
-/NOTICE                             @toto171
-/SECURITY.md                        @toto171
-/CODE_OF_CONDUCT.md                 @toto171
+*   @toto171
