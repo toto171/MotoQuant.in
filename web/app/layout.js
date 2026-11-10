@@ -1,4 +1,4 @@
-import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
 import { THEME_INIT_SCRIPT } from '../lib/theme';
 import { AuthProvider } from '../components/AuthProvider';
@@ -10,27 +10,30 @@ import StructuredData, {
   SITE_URL,
 } from './StructuredData';
 
-const inter = Inter({
+// Fonts are self-hosted (web/app/fonts, SIL Open Font License) so the build
+// never depends on a network fetch to Google Fonts — that fetch failed CI
+// twice. Each file is the variable-weight Latin subset.
+const inter = localFont({
+  src: './fonts/inter-latin-wght-normal.woff2',
   variable: '--font-inter',
-  subsets: ['latin'],
   display: 'swap',
-  weight: ['400', '500', '600', '700'],
+  weight: '100 900',
 });
 
-// IGNITION v5 display face — the identity kit's own type (Space Grotesk 700
-// is the wordmark face; web, app and logo speak one voice).
-const spaceGrotesk = Space_Grotesk({
+// Display face — Space Grotesk 700 is the wordmark face; web and logo speak
+// one voice.
+const spaceGrotesk = localFont({
+  src: './fonts/space-grotesk-latin-wght-normal.woff2',
   variable: '--font-display',
-  subsets: ['latin'],
   display: 'swap',
-  weight: ['500', '600', '700'],
+  weight: '300 700',
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const jetbrainsMono = localFont({
+  src: './fonts/jetbrains-mono-latin-wght-normal.woff2',
   variable: '--font-jetbrains-mono',
-  subsets: ['latin'],
   display: 'swap',
-  weight: ['400', '500', '700'],
+  weight: '100 800',
 });
 
 export const viewport = {

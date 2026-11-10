@@ -58,9 +58,9 @@ The Suspense boundary must be in a parent of the component that calls the hook, 
 
 These don't exist during SSR. Read them inside `useEffect` (which only runs in the browser) or behind a `typeof window !== 'undefined'` guard.
 
-### `next/font/google` requires network access at build time
+### Fonts are self-hosted
 
-The build fetches font CSS from `fonts.googleapis.com`. If you're building offline or behind a strict firewall, the build fails. CI always has internet so this only hits local builds — work around it with `next dev` (which fetches lazily) for local iteration.
+The three typefaces live in `web/app/fonts/` and are loaded with `next/font/local`, so the build needs no network access. Do not switch back to `next/font/google`: it fetches from Google at build time, and that fetch has failed CI more than once. To add a typeface, add its `.woff2` and licence file to that folder.
 
 ## File-write hygiene
 
