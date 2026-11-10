@@ -443,7 +443,7 @@ def _extract_nominal_features(config: BikeConfig) -> dict[str, float]:
     Used for inference: given a real BikeConfig, produce its feature vector.
     """
     gear_ratios = config.drivetrain.gear_ratios or [2.8, 2.0, 1.5, 1.2, 1.0, 0.85]
-    rider_mass = config.rider.mass_kg if hasattr(config, "rider") else 75.0
+    rider_mass = config.chassis.rider_mass_kg
     total_mass = config.chassis.dry_mass_kg + rider_mass
 
     base = {
@@ -506,7 +506,7 @@ def _apply_features_to_config(
         )
 
     # Mass — subtract rider weight to get bike dry mass
-    rider_mass = cfg.rider.mass_kg if hasattr(cfg, "rider") else 75.0
+    rider_mass = cfg.chassis.rider_mass_kg
     cfg.chassis.dry_mass_kg = max(80.0, features["total_mass_kg"] - rider_mass)
 
     # Aero

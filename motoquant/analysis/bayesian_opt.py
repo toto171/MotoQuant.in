@@ -32,7 +32,6 @@ Parameters tuned
   cd_delta              : aerodynamic drag coefficient change (±0.1)
   frontal_area_delta_m2 : frontal area adjustment (±0.05 m²)
   tire_mu_delta         : tire peak friction (μ_peak) adjustment (±0.25)
-  rear_pressure_delta   : rear tire pressure adjustment (±2 psi)
   gearing_ratio_delta   : final drive ratio adjustment (±10%, mult factor 0.9–1.1)
 
 Budget constraint
@@ -66,6 +65,7 @@ import numpy as np
 
 from ..models import BikeConfig
 from ..physics import MotoQuantEngine
+from .sobol import scale_dyno_to_peak_power
 
 # ─────────────────────────────────────────────────────────────────
 # Result dataclass
@@ -90,7 +90,6 @@ class OptimizationResult:
     best_cd_delta: float
     best_frontal_area_delta_m2: float
     best_tire_mu_delta: float
-    best_rear_pressure_delta: float
     best_gearing_ratio_delta: float
 
     # Optimization diagnostics
@@ -112,7 +111,6 @@ class OptimizationResult:
             f"  Drag coeff:     {self.best_cd_delta:+.3f}",
             f"  Frontal area:   {self.best_frontal_area_delta_m2:+.4f} m²",
             f"  Tire grip (μ):  {self.best_tire_mu_delta:+.3f}",
-            f"  Rear pressure:  {self.best_rear_pressure_delta:+.2f} psi",
             f"  Gearing ratio:  {self.best_gearing_ratio_delta:+.2%}",
             "",
             f"Optimization completed in {self.iterations_completed}/{self.n_iterations} iterations",
@@ -134,7 +132,6 @@ class OptimizationResult:
             "best_cd_delta": round(self.best_cd_delta, 4),
             "best_frontal_area_delta_m2": round(self.best_frontal_area_delta_m2, 4),
             "best_tire_mu_delta": round(self.best_tire_mu_delta, 3),
-            "best_rear_pressure_delta": round(self.best_rear_pressure_delta, 2),
             "best_gearing_ratio_delta": round(self.best_gearing_ratio_delta, 4),
             "n_iterations": self.n_iterations,
             "iterations_completed": self.iterations_completed,
@@ -162,7 +159,6 @@ class BayesianBuildOptimizer:
         "cd_delta": (-0.10, 0.10),
         "frontal_area_delta_m2": (-0.05, 0.05),
         "tire_mu_delta": (-0.15, 0.30),  # tire compound/grip improvement
-        "rear_pressure_delta": (-2.0, 3.0),  # psi (pressure fine-tuning)
         "gearing_ratio_delta": (-0.10, 0.10),  # multiplicative factor
     }
 
@@ -174,7 +170,6 @@ class BayesianBuildOptimizer:
         "cd_delta": 0.0,  # aero mods estimated via part costs
         "frontal_area_delta_m2": 0.0,
         "tire_mu_delta": 3000.0,  # tire compound/upgrade cost
-        "rear_pressure_delta": 0.0,  # pressure tuning is free (just air)
         "gearing_ratio_delta": 5000.0,  # sprocket/chain kit
     }
 
@@ -236,9 +231,12 @@ class BayesianBuildOptimizer:
         """Apply parameter deltas to a copy of the base config."""
         cfg = copy.deepcopy(self.base_config)
 
-        # Power
+        # Power: the physics reads the dyno curve, so the curve is scaled with
+        # peak_power_hp (same scaling the Sobol sampler uses).
+        nominal_hp = cfg.engine.peak_power_hp
         cfg.engine.peak_power_hp += params.get("power_delta_hp", 0.0)
         cfg.engine.peak_power_hp = max(1.0, cfg.engine.peak_power_hp)
+        scale_dyno_to_peak_power(cfg, nominal_hp)
 
         # Mass (dry mass reduction)
         cfg.chassis.dry_mass_kg += params.get("mass_delta_kg", 0.0)
@@ -254,9 +252,6 @@ class BayesianBuildOptimizer:
         # Tires
         cfg.tires.mu_peak += params.get("tire_mu_delta", 0.0)
         cfg.tires.mu_peak = np.clip(cfg.tires.mu_peak, 0.70, 1.80)
-
-        cfg.tires.rear_pressure_psi += params.get("rear_pressure_delta", 0.0)
-        cfg.tires.rear_pressure_psi = np.clip(cfg.tires.rear_pressure_psi, 20.0, 50.0)
 
         # Gearing: apply as a multiplicative factor to the EFFECTIVE final
         # drive. Reading/writing final_drive_ratio directly is a no-op for
@@ -440,7 +435,6 @@ class BayesianBuildOptimizer:
             best_cd_delta=best_params["cd_delta"],
             best_frontal_area_delta_m2=best_params["frontal_area_delta_m2"],
             best_tire_mu_delta=best_params["tire_mu_delta"],
-            best_rear_pressure_delta=best_params["rear_pressure_delta"],
             best_gearing_ratio_delta=best_params["gearing_ratio_delta"],
             n_iterations=self.n_iterations,
             iterations_completed=len(self.X_samples),

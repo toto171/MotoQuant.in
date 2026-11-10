@@ -15,11 +15,12 @@ drag build, in the order that matters physically:
                 memory bounded (roi.py allocates one bucket per ₹100 and
                 overflows on float('inf')).
   3. SETUP    — ecu_autotune.autotune on the MODIFIED config (gearing sweep +
-                launch-RPM sweep + tyre pressure + fuel/timing guidance).
+                launch-RPM sweep where the sim models it + tyre pressure and
+                fuel/timing guidance, which are not simulated).
                 Sprocket parts selected in stage 2 become the sweep center —
                 autotune's rear-sprocket sweep owns the final gearing word.
-  4. VERIFY   — autotune's combined verification sim (recommended gearing +
-                launch RPM on the full build) is the headline number.
+  4. VERIFY   — autotune's combined verification sim (recommended gearing, plus
+                launch RPM where modelled, on the full build) is the headline number.
 
 Progress is partitioned across the stages like /api/jobs/compare does:
 tires 0-0.05, parts 0.05-0.68, autotune 0.68-0.97, wrap-up to 1.0.
@@ -206,8 +207,8 @@ def optimize_outlaw(
             ),
             "total_cost_inr": build_dict.get("total_cost_inr"),
             "notes": [
-                "Stage order: drag rubber → parts (full_race knapsack) → gearing/"
-                "launch autotune on the modified bike → combined verification sim.",
+                "Stage order: drag rubber → parts (full_race knapsack) → gearing"
+                " (and launch where modelled) autotune on the modified bike → combined verification sim.",
                 "Sprocket parts selected by the optimizer become the autotune "
                 "gearing-sweep center; autotune owns the final gearing word.",
             ],

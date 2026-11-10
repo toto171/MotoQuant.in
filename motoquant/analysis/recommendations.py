@@ -45,6 +45,7 @@ from enum import Enum
 
 from ..models import BikeConfig
 from .roi import (
+    _ALL_PARTS_LIMIT,
     EXCLUSIVE_CATEGORIES,
     BuildROIResult,
     PartROIResult,
@@ -83,7 +84,6 @@ _PROFILE_CATEGORIES: dict[BuildProfile, set[str]] = {
         "bodywork",
         "suspension",
         "brakes",
-        "tire",
     },
     BuildProfile.DRAG_PREP: {
         "exhaust",
@@ -97,9 +97,11 @@ _PROFILE_CATEGORIES: dict[BuildProfile, set[str]] = {
         "swingarm_ext",
         "battery",
         "bodywork",
-        "tire",
         "nitrous",
         "fuel_system",
+        "lowering_kit",
+        "air_shifter",
+        "lockup_clutch",
     },
     BuildProfile.FULL_RACE: {
         "exhaust",
@@ -113,12 +115,14 @@ _PROFILE_CATEGORIES: dict[BuildProfile, set[str]] = {
         "swingarm_ext",
         "battery",
         "bodywork",
-        "tire",
         "nitrous",
         "fuel_system",
         "boost_kit",
         "suspension",
         "brakes",
+        "lowering_kit",
+        "air_shifter",
+        "lockup_clutch",
     },
 }
 
@@ -258,7 +262,7 @@ class BuildTier:
         lines = [
             f"── {self.tier_name} (budget: ₹{self.budget_inr:,.0f}) ──",
             f"  ET: {self.build.base_et_s:.3f}s → {self.build.modified_et_s:.3f}s "
-            f"({self.build.delta_et_s:+.3f}s)",
+            f"({-self.build.delta_et_s:+.3f}s)",
             f"  Cost: ₹{self.build.total_cost_inr:,.0f}  "
             f"({len(self.build.selected_parts)} parts)",
         ]
@@ -336,7 +340,10 @@ class BuildRecommendation:
             "budget_inr": self.budget_inr,
             "base_et_s": self.build.base_et_s,
             "modified_et_s": self.build.modified_et_s,
-            "delta_et_s": round(self.build.delta_et_s, 4),
+            # delta_et_s = modified - base (negative = quicker); et_gain_s is the
+            # same number with the sign flipped (positive = quicker).
+            "delta_et_s": round(-self.build.delta_et_s, 4) + 0.0,
+            "et_gain_s": round(self.build.delta_et_s, 4) + 0.0,
             "total_cost_inr": self.build.total_cost_inr,
             "parts_selected": [
                 {
@@ -344,7 +351,9 @@ class BuildRecommendation:
                     "name": p.part_name,
                     "category": p.category,
                     "price_inr": p.price_inr,
-                    "delta_et_s": round(p.delta_et_s, 4),
+                    "delta_et_s": round(-p.delta_et_s, 4) + 0.0,
+                    "et_gain_s": round(p.delta_et_s, 4) + 0.0,
+                    "no_straight_line_effect": p.no_straight_line_effect,
                     "roi_score": round(p.roi_score, 4)
                     if not math.isinf(p.roi_score)
                     else None,
@@ -406,7 +415,8 @@ class UpgradePath:
                     "budget_inr": t.budget_inr,
                     "base_et_s": t.build.base_et_s,
                     "modified_et_s": t.build.modified_et_s,
-                    "delta_et_s": round(t.build.delta_et_s, 4),
+                    "delta_et_s": round(-t.build.delta_et_s, 4) + 0.0,
+                    "et_gain_s": round(t.build.delta_et_s, 4) + 0.0,
                     "total_cost_inr": t.build.total_cost_inr,
                     "parts_count": len(t.build.selected_parts),
                     "parts": [
@@ -581,7 +591,7 @@ def recommend_build(
     # Get all candidate parts, filtered by profile
     all_parts = parts_repo.search(
         bike_model_id=bike_model_id,
-        limit=200,
+        limit=_ALL_PARTS_LIMIT,
     )
     filtered_parts = _filter_parts_by_profile(all_parts, profile)
     filtered_ids = [p["id"] for p in filtered_parts]
@@ -694,7 +704,7 @@ def generate_upgrade_path(
     n_tiers = max(2, min(5, n_tiers))
 
     # Discover available parts
-    all_parts = parts_repo.search(bike_model_id=bike_model_id, limit=200)
+    all_parts = parts_repo.search(bike_model_id=bike_model_id, limit=_ALL_PARTS_LIMIT)
     filtered_parts = _filter_parts_by_profile(all_parts, profile)
 
     if not filtered_parts:
@@ -767,7 +777,7 @@ def get_category_upgrade_order(
 
     Useful for building a "what to buy first" guide.
     """
-    all_parts = parts_repo.search(bike_model_id=bike_model_id, limit=200)
+    all_parts = parts_repo.search(bike_model_id=bike_model_id, limit=_ALL_PARTS_LIMIT)
     filtered_parts = _filter_parts_by_profile(all_parts, profile)
     filtered_ids = [p["id"] for p in filtered_parts]
 

@@ -99,8 +99,11 @@ class CompareDict(TypedDict):
 
     a: _CompareBikeEntry
     b: _CompareBikeEntry
-    delta_et_s: float  # A.et_quarter_s - B.et_quarter_s, rounded to 4dp
-    delta_trap_kmh: float  # A.trap_speed_kmh - B.trap_speed_kmh, rounded to 1dp
+    # B relative to A (after - before, bike A is the reference): NEGATIVE =
+    # B is quicker. Same meaning as /api/simulate/compare and
+    # /api/surrogate/compare.
+    delta_et_s: float  # B.et_quarter_s - A.et_quarter_s, rounded to 4dp
+    delta_trap_kmh: float  # B.trap_speed_kmh - A.trap_speed_kmh, rounded to 1dp
     faster: str  # "A" | "B" | "tie"
 
 
@@ -480,11 +483,12 @@ def _run_compare(
         result.error_detail = f"Bike B sim failed: {sim_b}"
         return result
 
-    delta_et = sim_a["et_quarter_s"] - sim_b["et_quarter_s"]
-    delta_trap = sim_a["trap_speed_kmh"] - sim_b["trap_speed_kmh"]
-    if delta_et < 0:
+    # B relative to A (negative = B quicker), the same sign as the API.
+    delta_et = sim_b["et_quarter_s"] - sim_a["et_quarter_s"]
+    delta_trap = sim_b["trap_speed_kmh"] - sim_a["trap_speed_kmh"]
+    if delta_et > 0:
         faster = "A"
-    elif delta_et > 0:
+    elif delta_et < 0:
         faster = "B"
     else:
         faster = "tie"

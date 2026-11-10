@@ -1183,7 +1183,8 @@ def cmd_parts(args):
                 "delta_et_s": round(delta_et, 4),
                 "base_trap_ms": round(base_result.speed_quarter, 3),
                 "modified_trap_ms": round(mod_result.speed_quarter, 3),
-                "delta_trap_ms": round(delta_trap, 3),
+                "delta_trap_mps": round(delta_trap, 3),
+                "delta_trap_ms": round(delta_trap, 3),  # deprecated alias (m/s)
                 "cost_per_tenth_inr": (
                     round(cost_per_tenth, 0) if cost_per_tenth < 1e9 else None
                 ),
@@ -2026,7 +2027,12 @@ def cmd_analysis(args):
 
     # ── analysis roi ─────────────────────────────────────────────
     if sub == "roi":
-        from .analysis.roi import compute_parts_roi, find_best_build, rank_categories
+        from .analysis.roi import (
+            _ALL_PARTS_LIMIT,
+            compute_parts_roi,
+            find_best_build,
+            rank_categories,
+        )
 
         db = ensure_db(args)
         parts_repo = db.parts
@@ -2059,10 +2065,10 @@ def cmd_analysis(args):
         if args.part_ids:
             part_ids = [int(x) for x in args.part_ids.split(",")]
         elif args.category:
-            raw = parts_repo.search(category=args.category, limit=200)
+            raw = parts_repo.search(category=args.category, limit=_ALL_PARTS_LIMIT)
             part_ids = [p["id"] for p in raw]
         else:
-            raw = parts_repo.search(limit=200)
+            raw = parts_repo.search(limit=_ALL_PARTS_LIMIT)
             part_ids = [p["id"] for p in raw]
 
         if getattr(args, "optimize", False):
@@ -2083,15 +2089,20 @@ def cmd_analysis(args):
                     "total_cost_inr": build.total_cost_inr,
                     "base_et_s": round(build.base_et_s, 4),
                     "modified_et_s": round(build.modified_et_s, 4),
-                    "delta_et_s": round(build.delta_et_s, 4),
-                    "delta_trap_ms": round(build.delta_trap_ms, 4),
+                    # delta_et_s = modified - base: NEGATIVE = quicker.
+                    "delta_et_s": round(-build.delta_et_s, 4) + 0.0,
+                    "et_gain_s": round(build.delta_et_s, 4) + 0.0,
+                    "delta_trap_mps": round(build.delta_trap_ms, 4),
+                    "delta_trap_ms": round(build.delta_trap_ms, 4),  # deprecated alias
                     "selected_parts": [
                         {
                             "part_id": p.part_id,
                             "name": p.part_name,
                             "category": p.category_display,
                             "price_inr": p.price_inr,
-                            "delta_et_s": round(p.delta_et_s, 4),
+                            "delta_et_s": round(-p.delta_et_s, 4) + 0.0,
+                            "et_gain_s": round(p.delta_et_s, 4) + 0.0,
+                            "no_straight_line_effect": p.no_straight_line_effect,
                             "roi_score": round(p.roi_score, 4),
                             "cost_per_tenth_inr": (
                                 round(p.cost_per_tenth_inr, 0)
@@ -2131,8 +2142,11 @@ def cmd_analysis(args):
                         "name": r.part_name,
                         "category": r.category_display,
                         "price_inr": r.price_inr,
-                        "delta_et_s": round(r.delta_et_s, 4),
-                        "delta_trap_ms": round(r.delta_trap_ms, 4),
+                        "delta_et_s": round(-r.delta_et_s, 4) + 0.0,
+                        "et_gain_s": round(r.delta_et_s, 4) + 0.0,
+                        "delta_trap_mps": round(r.delta_trap_ms, 4),
+                        "delta_trap_ms": round(r.delta_trap_ms, 4),  # deprecated alias
+                        "no_straight_line_effect": r.no_straight_line_effect,
                         "roi_score": round(r.roi_score, 4),
                         "cost_per_tenth_inr": (
                             round(r.cost_per_tenth_inr, 0)

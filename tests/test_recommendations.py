@@ -114,7 +114,7 @@ class TestProfileFiltering(unittest.TestCase):
             {"id": 2, "category_name": "boost_kit"},
             {"id": 3, "category_name": "ecu"},
             {"id": 4, "category_name": "wheelie_bar"},
-            {"id": 5, "category_name": "tire"},
+            {"id": 5, "category_name": "brakes"},
         ]
 
     def test_all_profile_returns_all(self):
@@ -130,7 +130,7 @@ class TestProfileFiltering(unittest.TestCase):
         self.assertNotIn("wheelie_bar", cats)
         self.assertIn("exhaust", cats)
         self.assertIn("ecu", cats)
-        self.assertIn("tire", cats)
+        self.assertIn("brakes", cats)
 
     def test_drag_prep_includes_wheelie_bar(self):
         parts = self._make_parts()

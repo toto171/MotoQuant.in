@@ -738,13 +738,15 @@ def _exec_compare_bikes(ctx: AgentContext, args: dict) -> dict:
         except Exception as e:  # noqa: BLE001
             return {"error": f"bike {key} sim failed: {type(e).__name__}: {e}"}
         results[key] = _sim_to_dict(sim, name, notes)
-    delta_et = results["a"]["et_quarter_s"] - results["b"]["et_quarter_s"]
+    # B relative to A (bike A is the reference): NEGATIVE = B is quicker —
+    # the same sign as /api/simulate/compare and /api/surrogate/compare.
+    delta_et = results["b"]["et_quarter_s"] - results["a"]["et_quarter_s"]
     out = {
         "bike_a": results["a"],
         "bike_b": results["b"],
         "delta_et_s": round(delta_et, 4),
         "winner": results["a"]["bike_name"]
-        if delta_et < 0
+        if delta_et > 0
         else results["b"]["bike_name"],
     }
     ctx.add_block("compare_result", out)
@@ -752,6 +754,7 @@ def _exec_compare_bikes(ctx: AgentContext, args: dict) -> dict:
 
 
 def _exec_search_parts(ctx: AgentContext, args: dict) -> dict:
+    from ..analysis.roi import _ALL_PARTS_LIMIT
     from ..database.parts_repo import PartsRepository
 
     bike_id = int(args.get("bike_id") or 0)
@@ -761,11 +764,11 @@ def _exec_search_parts(ctx: AgentContext, args: dict) -> dict:
         rows = repo.search(
             bike_model_id=bike_id,
             category=args.get("category") or None,
-            limit=200,
+            limit=_ALL_PARTS_LIMIT,
         )
     except TypeError:
         # older search signature — degrade to unfiltered then filter here
-        rows = repo.search(bike_model_id=bike_id, limit=200)
+        rows = repo.search(bike_model_id=bike_id, limit=_ALL_PARTS_LIMIT)
     max_price = args.get("max_price_inr")
     out_rows = []
     for r in rows:

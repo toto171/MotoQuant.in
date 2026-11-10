@@ -8,9 +8,10 @@ altitude — produced by ``/api/venues/resolve`` and applied onto
 ``config.environment``), recommend the optimal launch setup:
 
   • final drive / gearing   — swept and scored on the full physics sim
-  • launch RPM              — swept and scored on the full physics sim
-  • tyre pressure           — conditions-aware guideline (heuristic, bounded)
-  • fuel / timing trim      — air-density-derived guideline (advisory)
+  • launch RPM              — swept and scored on the full physics sim, only
+                              where the sim responds to it (two-step launches)
+  • tyre pressure           — general guidance, not simulated
+  • fuel / timing trim      — air-density guidance, not simulated
 
 …with the atmospheric rationale (density altitude, air density, power
 correction) shown alongside.
@@ -21,7 +22,7 @@ The surrogate's feature vector exposes only ``altitude_m`` from the
 environment and has **no** ``launch_rpm`` feature, so it is blind to launch
 tuning and to temperature / humidity / pressure effects.  Recommending a
 conditions-specific setup through it would be silently wrong, so the gearing
-and launch sweeps use the full physics engine (``roi._run_et``), which reads
+and launch sweeps use the full physics engine (``roi._run_et`` via ``roi.SimMemo``), which reads
 ``config.environment.air_density()`` directly.  Atmospherics are *consumed*
 from the environment model here, never re-derived.
 
@@ -38,11 +39,15 @@ from dataclasses import asdict, dataclass
 
 from ..models import BikeConfig
 from ..submodels.environmental import EnvironmentalModel
-from .roi import _run_et
+from .roi import SimMemo
 
 __all__ = ["EcuAutotune", "autotune"]
 
 _RHO_SL_STD = 1.2250  # kg/m³ (matches submodels/environmental)
+
+# Launch-RPM candidates whose ETs agree within this many seconds mean the sim
+# is not responding to the knob at all.
+_LAUNCH_LIVENESS_TOL_S = 1e-3
 
 
 def _clamp(x, lo, hi):
@@ -73,14 +78,20 @@ class EcuAutotune:
             f"{e['altitude_m']:.0f} m  →  DA {e['density_altitude_ft']:.0f} ft "
             f"(ρ {e['air_density_kgm3']:.3f}, power {e['power_correction_pct']:.0f}%)",
             f"  gearing : {self.gearing['recommendation']}  ({self.gearing['delta_et_s']:+.3f}s)",
-            f"  launch  : {self.launch_rpm['recommended_rpm']:.0f} rpm  ({self.launch_rpm['delta_et_s']:+.3f}s)",
+            f"  launch  : {self._launch_line()}",
             f"  tyres   : rear {self.tyre_pressure['rear_psi']:.0f} psi / front {self.tyre_pressure['front_psi']:.0f} psi",
             f"  fuel    : {self.fuel_timing['fuel_trim_pct']:+.1f}% trim, "
             f"{self.fuel_timing['timing_advance_deg']:+.1f}° timing",
             f"  net     : {self.stock['et_s']:.3f}s → {self.combined['et_s']:.3f}s "
-            f"({self.combined['delta_et_s']:+.3f}s) with recommended gearing + launch",
+            f"({self.combined['delta_et_s']:+.3f}s) with the simulated setup",
         ]
         return "\n".join(lines)
+
+    def _launch_line(self) -> str:
+        lr = self.launch_rpm
+        if lr.get("adjustable") and lr.get("recommended_rpm") is not None:
+            return f"{lr['recommended_rpm']:.0f} rpm  ({lr['delta_et_s']:+.3f}s)"
+        return "not modelled for this bike — no recommendation"
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -94,7 +105,8 @@ def _environment_block(config: BikeConfig) -> tuple[dict, float]:
     env = config.environment
     model = EnvironmentalModel(config)
     rho = float(model.rho)
-    sigma = rho / _RHO_SL_STD  # density ratio ≈ NA power-correction factor
+    sigma = rho / _RHO_SL_STD  # air-density ratio (fuel/timing guidance only)
+    power_corr = float(model.power_correction)  # exactly what the sim applies
     da_ft = float(model.density_alt_ft)
     block = {
         "location": getattr(env, "venue_name", None),
@@ -106,10 +118,8 @@ def _environment_block(config: BikeConfig) -> tuple[dict, float]:
         "air_density_kgm3": round(rho, 4),
         "density_altitude_ft": round(da_ft, 0),
         "density_altitude_m": round(da_ft * 0.3048, 0),
-        "power_correction_pct": round(float(model.power_correction) * 100.0, 1),
-        "power_loss_pct": round(
-            float(getattr(model, "da_power_loss_pct", (1.0 - sigma) * 100.0)), 1
-        ),
+        "power_correction_pct": round(power_corr * 100.0, 1),
+        "power_loss_pct": round(max(0.0, 1.0 - power_corr) * 100.0, 1),
     }
     return block, sigma
 
@@ -118,8 +128,9 @@ def _environment_block(config: BikeConfig) -> tuple[dict, float]:
 # Sweeps (full physics sim — atmospherics matter)
 # ─────────────────────────────────────────────────────────────────────────
 def _gearing_recommendation(
-    config: BikeConfig, stock_et: float, *, span: int = 3, on_sim=None
+    config: BikeConfig, stock_et: float, *, span: int = 3, on_sim=None, sim=None
 ) -> dict:
+    sim = sim if sim is not None else SimMemo()
     dt = config.drivetrain
     front = int(getattr(dt, "front_sprocket", 0) or 0)
     rear = int(getattr(dt, "rear_sprocket", 0) or 0)
@@ -134,7 +145,7 @@ def _gearing_recommendation(
         for t in teeth:
             cfg = copy.deepcopy(config)
             cfg.drivetrain.rear_sprocket = t
-            et, trap = _run_et(cfg)
+            et, trap = sim(cfg)
             if on_sim is not None:
                 on_sim()
             candidates.append(
@@ -189,8 +200,16 @@ def _gearing_recommendation(
 
 
 def _launch_recommendation(
-    config: BikeConfig, stock_et: float, *, steps: int = 6, on_sim=None
+    config: BikeConfig, stock_et: float, *, steps: int = 6, on_sim=None, sim=None
 ) -> dict:
+    """Sweep ``staging.launch_rpm`` only when the sim actually responds to it.
+
+    The staging model reads ``launch_rpm`` solely for two-step launches. A bike
+    without two-step, or one whose probe ETs are identical, gets
+    ``adjustable: False`` and no recommendation rather than an arbitrary RPM
+    with an invented rationale.
+    """
+    sim = sim if sim is not None else SimMemo()
     eng = config.engine
     redline = float(getattr(eng, "redline_rpm", 12000.0))
     pt = float(getattr(eng, "peak_torque_rpm", redline * 0.7))
@@ -200,6 +219,25 @@ def _launch_recommendation(
         getattr(config.staging, "launch_rpm", 0.0) or getattr(eng, "launch_rpm", pt)
     )
 
+    def _fixed(reason: str, candidates=None) -> dict:
+        return {
+            "adjustable": False,
+            "stock_rpm": round(stock_launch, 0),
+            "recommended_rpm": None,
+            "et_s": round(stock_et, 4),
+            "trap_kmh": None,
+            "delta_et_s": 0.0,
+            "reason": reason,
+            "rationale": reason,
+            "candidates": candidates or [],
+        }
+
+    not_modelled = (
+        "Launch RPM is not modelled for this bike, so no recommendation is made."
+    )
+    if not bool(getattr(config.staging, "two_step", False)):
+        return _fixed(not_modelled)
+
     lo = _clamp(min(pt, pp) * 0.80, idle * 2.0, redline)
     hi = _clamp(redline * 0.97, lo + 500.0, redline)
     if hi <= lo:
@@ -208,34 +246,48 @@ def _launch_recommendation(
     grid = [round(lo + (hi - lo) * i / (steps - 1), -1) for i in range(steps)]
     grid = sorted(set(grid + [round(stock_launch, -1)]))
 
-    candidates: list[dict] = []
-    for rpm in grid:
+    def _candidate(rpm: float) -> dict:
         cfg = copy.deepcopy(config)
         cfg.staging.launch_rpm = float(rpm)
-        et, trap = _run_et(cfg)
+        et, trap = sim(cfg)
         if on_sim is not None:
             on_sim()
-        candidates.append(
-            {
-                "launch_rpm": float(rpm),
-                "et_s": round(et, 4),
-                "trap_kmh": round(trap * 3.6, 1),
-                "is_stock": abs(rpm - stock_launch) < 1.0,
-            }
+        return {
+            "launch_rpm": float(rpm),
+            "et_s": round(et, 4),
+            "trap_kmh": round(trap * 3.6, 1),
+            "is_stock": abs(rpm - stock_launch) < 1.0,
+        }
+
+    # Liveness probe: the two most separated candidates. If the sim cannot
+    # tell them apart there is nothing to recommend and the rest of the sweep
+    # would be wasted work.
+    candidates = {rpm: _candidate(rpm) for rpm in (grid[0], grid[-1])}
+    if abs(candidates[grid[0]]["et_s"] - candidates[grid[-1]]["et_s"]) < (
+        _LAUNCH_LIVENESS_TOL_S
+    ):
+        return _fixed(
+            not_modelled, sorted(candidates.values(), key=lambda c: c["launch_rpm"])
         )
-    best = min(candidates, key=lambda c: c["et_s"])
+    for rpm in grid:
+        if rpm not in candidates:
+            candidates[rpm] = _candidate(rpm)
+    ordered = [candidates[r] for r in grid]
+    best = min(ordered, key=lambda c: c["et_s"])
     return {
+        "adjustable": True,
         "stock_rpm": round(stock_launch, 0),
         "recommended_rpm": best["launch_rpm"],
         "et_s": best["et_s"],
         "trap_kmh": best["trap_kmh"],
         "delta_et_s": round(best["et_s"] - stock_et, 4) + 0.0,  # negative = faster
+        "reason": "Launch RPM changes the simulated ET for this bike.",
         "rationale": (
             "higher launch RPM keeps the engine in its powerband off the line"
             if best["launch_rpm"] >= stock_launch
-            else "lower launch RPM reduces wheelspin / bog for this traction level"
+            else "a lower launch RPM gives the quickest simulated quarter for this traction level"
         ),
-        "candidates": candidates,
+        "candidates": ordered,
     }
 
 
@@ -257,11 +309,12 @@ def _tyre_pressure_recommendation(config: BikeConfig, env: dict) -> dict:
         "rear_psi": float(rec_rear),
         "front_psi": float(rec_front),
         "rationale": (
-            f"Drop the rear to ~{rec_rear:.0f} psi (from {stock_rear:.0f}) to enlarge the launch "
-            f"contact patch; front ~{rec_front:.0f} psi for stability. Track at {track_temp:.0f}°C "
-            f"{'builds pressure quickly — start near the upper bound' if track_temp >= 35 else 'is cool — a lower start helps grip'}. "
-            "Guideline; verify with a 60-ft pass."
+            f"General guidance — not simulated. A common drag starting point is a rear around "
+            f"{rec_rear:.0f} psi (stock {stock_rear:.0f}) and a front around {rec_front:.0f} psi; "
+            f"the track is at {track_temp:.0f}°C. Tyre pressure has no effect in the "
+            "MotoQuant simulation, so treat this as a starting point and verify it on the track."
         ),
+        "simulated": False,
         "is_guideline": True,
     }
 
@@ -291,10 +344,12 @@ def _fuel_timing_recommendation(config: BikeConfig, env: dict, sigma: float) -> 
         "density_ratio": round(sigma, 4),
         "applicable": True,
         "rationale": (
-            f"Air is {abs(1.0 - sigma) * 100:.0f}% {'thinner' if sigma < 1 else 'denser'} than sea-level "
-            f"std (DA {da:.0f} ft). {applic}"
+            f"General guidance — not simulated. Air is {abs(1.0 - sigma) * 100:.0f}% "
+            f"{'thinner' if sigma < 1 else 'denser'} than sea-level std (DA {da:.0f} ft). "
+            f"{applic} Fuel and timing are not modelled, so this shows no ET change."
         ),
         "is_guideline": True,
+        "simulated": False,
     }
 
 
@@ -336,7 +391,8 @@ def autotune(
             _done[0] += 1
             progress_cb(min(0.98, _done[0] / _total), stage)
 
-    stock_et, stock_trap = _run_et(config)
+    sim = SimMemo()
+    stock_et, stock_trap = sim(config)
     if _tick is not None:
         _tick("Baseline run")
     stock = {
@@ -358,24 +414,28 @@ def autotune(
         stock_et,
         span=gear_span,
         on_sim=(lambda: _tick("Sweeping gearing")) if _tick is not None else None,
+        sim=sim,
     )
     launch = _launch_recommendation(
         config,
         stock_et,
         steps=launch_steps,
         on_sim=(lambda: _tick("Sweeping launch RPM")) if _tick is not None else None,
+        sim=sim,
     )
     tyres = _tyre_pressure_recommendation(config, env_block)
     fuel = _fuel_timing_recommendation(config, env_block, sigma)
 
-    # Net effect of the two simulated knobs applied together.
+    # Net effect of the simulated knobs applied together (gearing, and launch
+    # RPM only where the sim responds to it).
     combined = {"et_s": stock["et_s"], "trap_kmh": stock["trap_kmh"], "delta_et_s": 0.0}
     if include_combined:
         cfg = copy.deepcopy(config)
         if gearing.get("adjustable") and gearing.get("recommended_rear"):
             cfg.drivetrain.rear_sprocket = int(gearing["recommended_rear"])
-        cfg.staging.launch_rpm = float(launch["recommended_rpm"])
-        c_et, c_trap = _run_et(cfg)
+        if launch.get("adjustable") and launch.get("recommended_rpm") is not None:
+            cfg.staging.launch_rpm = float(launch["recommended_rpm"])
+        c_et, c_trap = sim(cfg)
         if _tick is not None:
             _tick("Verifying combined setup")
         combined = {
@@ -399,7 +459,7 @@ def autotune(
     else:
         air_note = f"Moderate density altitude ({da:.0f} ft) — modest corrections."
     rationale = (
-        f"{air_note} Recommended gearing + launch lower the quarter from "
+        f"{air_note} The simulated setup change takes the quarter from "
         f"{stock['et_s']:.3f}s to {combined['et_s']:.3f}s ({combined['delta_et_s']:+.3f}s) "
         f"in these conditions."
     )
