@@ -300,16 +300,33 @@ def test_aborted_launch_is_not_reported_as_a_run(tmp_path):
 # ─── 6. Accepted runs keep exactly the per-launch integration ────────────
 
 
-def test_et_equals_integration_from_the_launch_frame(tmp_path):
+def test_et_equals_integration_from_motion_onset(tmp_path):
     """The prefix-sum detector must report the same ET (to the bit) as
-    integrating v(t) from the launch frame, which is what the old detector
-    did for every accepted run."""
+    integrating v(t) over the whole rest of the file, which is what the old
+    O(windows x N) detector did for every accepted run.
+
+    2026-11 port: the clock starts at the back-extrapolated motion onset
+    (calibration/_launch.py), not at the first >= 0.8 m/s frame, so the
+    reference integration starts there too. The from-launch-frame figure this
+    test used to pin is ~0.08 s quicker than the bike's real from-rest ET.
+    """
+    from motoquant.calibration._launch import launch_slice
+
     t, v = _run_arrays(rate=25.0)
     v = v + np.where(v > 0, 0.03 * np.sin(np.arange(len(v))), 0.0)
     runs = dragy._detect_runs(t, v, _integrate_distance(t, v))
     assert len(runs) == 1
     launch, _end, et, _trap = runs[0]
-    t_run = t[launch:] - t[launch]
-    d_run = _integrate_distance(t_run, v[launch:])
+    t_run, v_run = launch_slice(t, v, launch)
+    d_run = _integrate_distance(t_run, v_run)
     assert et == _interpolate_et(t_run, d_run, QUARTER_MILE_M)
     assert math.isfinite(et) and 5.0 < et < 30.0
+
+    # ...and it is the from-rest ET: 10 m/s^2 to 60 m/s (6 s, 180 m), then
+    # 222.336 m at 60 m/s = 9.7056 s. Timing from the launch frame read 9.626.
+    assert et == pytest.approx(6.0 + (QUARTER_MILE_M - 180.0) / 60.0, abs=0.02)
+    t_old = t[launch:] - t[launch]
+    et_old = _interpolate_et(
+        t_old, _integrate_distance(t_old, v[launch:]), QUARTER_MILE_M
+    )
+    assert 0.05 < et - et_old < 0.12

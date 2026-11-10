@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Physics Engine
-=============================
+MotoQuant — Physics Engine
+==========================
 Thin orchestrator that composes 12 sub-model classes into a single
 simulation loop. RK4 fixed-step integration at 1 ms timestep.
 
@@ -59,6 +59,14 @@ from .submodels import (
     WheelieModel,
 )
 from .submodels.cog import system_cog
+
+# Library-level ceilings on a single run(), checked before anything is
+# allocated (the output arrays are sized from max_time). The API's request
+# models are tighter (max_time_s <= 300, distance <= 20 km). Mirrored in
+# rust/motoquant-core/src/engine.rs (MAX_RUN_DISTANCE_M / MAX_RUN_TIME_S): both
+# engines refuse the same arguments with the same ValueError message.
+MAX_RUN_DISTANCE_M = 1.0e6
+MAX_RUN_TIME_S = 600.0
 
 # ═══════════════════════════════════════════
 # SIMULATION STATE
@@ -260,7 +268,13 @@ class MotoQuantEngine:
         self.N_r_static = self.m_total * G * (1.0 - c.chassis.front_weight_pct)
         self.eta_dt = c.drivetrain.drivetrain_efficiency()
         self.T_tire_launch = c.tires.tire_temp_at_launch(c.environment.ambient_temp_c)
-        self.mu_prep = c.tires.track_prep_multiplier(c.environment.track_temp_c)
+        # Tyre-level prep wins; the venue-level setting (environment.track_prep)
+        # applies when the tyre's is "none" (it used to be accepted and ignored).
+        self.mu_prep = c.tires.track_prep_multiplier(
+            c.environment.track_temp_c,
+            c.environment.track_prep,
+            c.environment.track_prep_passes,
+        )
         self.anti_squat_frac = c.suspension.anti_squat_pct / 100.0
         self.T_tire_ref_K = self.T_tire_launch + 273.15
         self.F_gradient = self.m_total * G * c.environment.track_gradient_pct / 100.0
@@ -502,6 +516,15 @@ class MotoQuantEngine:
         -------
         SimResult with all time-domain channels (from rest) and split times
         (from the start beam).
+
+        Raises
+        ------
+        ValueError
+            If ``rollout_m`` is negative or not finite; if ``distance`` is
+            NaN, not beyond the rollout or above ``MAX_RUN_DISTANCE_M``; or
+            if ``max_time`` is NaN, not positive or above ``MAX_RUN_TIME_S``.
+            Raised before anything is allocated, with the same message on the
+            Python and Rust engines.
         """
         if not (rollout_m >= 0.0) or rollout_m == float("inf"):
             raise ValueError(
@@ -514,6 +537,21 @@ class MotoQuantEngine:
             raise ValueError(
                 f"distance must be > rollout_m (got distance={float(distance)!r}, "
                 f"rollout_m={float(rollout_m)!r})"
+            )
+        if not (distance <= MAX_RUN_DISTANCE_M):
+            # +inf and absurd distances. (They used to run silently until
+            # max_time expired.)
+            raise ValueError(
+                f"distance must be finite and <= {MAX_RUN_DISTANCE_M!r} m "
+                f"(got distance={float(distance)!r})"
+            )
+        if not (0.0 < max_time <= MAX_RUN_TIME_S):
+            # Also rejects NaN. Before this check max_time=0 returned an empty
+            # "run" with ET 0.0, inf raised OverflowError from the array
+            # sizing and a huge value raised MemoryError (or, natively, ran).
+            raise ValueError(
+                f"max_time must be finite and in (0, {MAX_RUN_TIME_S!r}] s "
+                f"(got max_time={float(max_time)!r})"
             )
         dt = self.dt
         cfg = self.cfg

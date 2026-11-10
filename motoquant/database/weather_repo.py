@@ -92,13 +92,27 @@ def compute_power_correction(
     altitude_m: float,
 ) -> float:
     """
-    SAE J607 power correction factor.
-    Returns a multiplier < 1.0 for conditions worse than standard.
-    Standard: 15°C, 1013.25 hPa, 0% humidity, sea level.
+    Engine power correction factor for the given weather — the same factor the
+    simulation applies to a naturally aspirated engine
+    (``submodels.environmental.sae_power_correction``): SAE J1349 scaling with
+    dry-air pressure and sqrt(inlet temperature), anchored on the catalog
+    reference day (0 m, 25 C, 50 % RH, 1013.25 hPa = the simulator's
+    calibration conditions).  Returns a multiplier < 1.0 for conditions worse
+    than that day.
+
+    (Was ``sqrt(rho / 1.225)``, a third formula that matched neither the
+    simulation nor the dyno importer: the stored / displayed "PCF" for a
+    venue disagreed with the power the simulation actually used there.)
     """
-    rho = compute_air_density(temp_c, humidity_pct, pressure_hpa, altitude_m)
-    rho_std = 1.225
-    return (rho / rho_std) ** 0.5  # Simplified SAE correction
+    from ..submodels.environmental import sae_power_correction
+
+    env = EnvironmentParams(
+        altitude_m=altitude_m,
+        ambient_temp_c=temp_c,
+        relative_humidity_pct=humidity_pct,
+        barometric_pressure_hpa=pressure_hpa,
+    )
+    return float(sae_power_correction(env))
 
 
 class WeatherRepository:

@@ -43,12 +43,14 @@ Public API
 import csv
 import math
 import re
+import warnings
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
 import numpy as np
 
+from ._launch import launch_origin_time
 from .dragy import LAUNCH_VEL_THRESHOLD_MS, MIN_STAGE_FRAMES, QUARTER_MILE_M
 
 # ─── Constants ────────────────────────────────────────────────────────────
@@ -167,11 +169,17 @@ class ECURunWindow:
     """
     A single drag run extracted from an ECU log.
 
-    Timestamps start at 0 (launch point). All channels present in the
-    parent ECULog are available here sliced to the run window.
+    Timestamps start at 0 at the first sample of the window (the first frame
+    at/above the staging speed threshold). All channels present in the parent
+    ECULog are available here sliced to the run window.
+
+    ET, trap speed and splits are NOT timed from that frame — the bike is
+    already moving there — but from the back-extrapolated motion onset,
+    ``onset_lead_s`` earlier (see ``_launch.py``): from rest, no 1-ft rollout,
+    the convention the overlay simulation uses (``run(rollout_m=0.0)``).
     """
 
-    time_s: np.ndarray  # seconds, 0 = launch
+    time_s: np.ndarray  # seconds, 0 = first sample of the window
     rpm: np.ndarray | None
     tps_pct: np.ndarray | None
     vehicle_speed_ms: np.ndarray | None
@@ -193,6 +201,9 @@ class ECURunWindow:
     sample_rate_hz: float
     run_index: int = 0
     source_file: str = ""
+    # Seconds between the true motion onset (back-extrapolated, v = 0) and
+    # time_s[0].  ET, trap speed and splits are measured from the onset.
+    onset_lead_s: float = 0.0
 
     @property
     def trap_speed_kmh(self) -> float:
@@ -210,7 +221,8 @@ class ECURunWindow:
         """Return split times at standard drag strip distances."""
         if self.vehicle_speed_ms is None or len(self.vehicle_speed_ms) == 0:
             return {}
-        dist = _integrate_distance(self.time_s, self.vehicle_speed_ms)
+        t_int, v_int = _from_rest(self.time_s, self.vehicle_speed_ms, self.onset_lead_s)
+        dist = _integrate_distance(t_int, v_int)
         marks = {
             "60ft": 18.288,
             "330ft": 100.584,
@@ -220,7 +232,7 @@ class ECURunWindow:
         }
         out = {}
         for name, m in marks.items():
-            t = _interpolate_et(self.time_s, dist, m)
+            t = _interpolate_et(t_int, dist, m)
             if t is not None:
                 out[name] = round(t, 4)
         return out
@@ -239,6 +251,7 @@ class ECURunWindow:
             "launch_rpm": round(self.launch_rpm, 0),
             "sample_rate_hz": self.sample_rate_hz,
             "duration_s": round(self.duration_s, 3),
+            "onset_lead_s": round(self.onset_lead_s, 4),
             "source_file": self.source_file,
             "splits": self.splits(),
         }
@@ -633,6 +646,12 @@ def _apply_unit_overrides(
         conv = _unit_conversion(std_name, unit_cols[i])
         if conv is not _NO_OVERRIDE:
             new_map[i] = (std_name, conv)
+        elif std_name == "vehicle_speed_ms" and unit_cols[i].strip():
+            # A units row is unambiguous: a speed column in a unit this
+            # importer does not convert (knots, ft/s ...) is dropped, never
+            # read with the name-pattern km/h default.
+            _refuse_speed_unit(f"#{i + 1} (units row)", unit_cols[i].strip())
+            del new_map[i]
     return new_map
 
 
@@ -651,6 +670,56 @@ def _header_unit(col_lower: str) -> str | None:
     return tokens[-1] if len(tokens) >= 2 else None
 
 
+# A vehicle-speed header is a speed-ish NAME followed by an optional unit.
+# 'engine speed' is RPM and never starts with one of these names.
+_SPEED_NAME_RE = re.compile(
+    r"^(?:gps[\s_.\-]*speed|veh(?:icle)?[\s_.\-]*(?:speed|spd)|wheel[\s_.\-]*speed"
+    r"|ground[\s_.\-]*speed|speed|vss)"
+)
+# Units a speed column can plausibly carry that this importer does NOT convert.
+# Seen without brackets ("Speed knots") they are still clearly a unit, not a
+# name qualifier such as "rear".
+_UNSUPPORTED_SPEED_UNITS = frozenset(
+    {
+        "knots", "knot", "kn", "kt", "kts", "ft/s", "fps", "ft/sec", "cm/s",
+        "mm/s", "m/s2", "m/s^2", "m/min", "km/s",
+    }
+)  # fmt: skip
+
+
+def _refuse_speed_unit(where: str, unit: str) -> tuple[None, None]:
+    warnings.warn(
+        f"ECU speed column {where}: unrecognised speed unit {unit!r} "
+        "(expected km/h, mph or m/s); column ignored",
+        stacklevel=3,
+    )
+    return None, None
+
+
+def _map_speed_column(col_lower: str) -> tuple[str | None, object | None] | None:
+    """Map a vehicle-speed header whose text is exactly NAME [+ UNIT].
+
+    Returns the mapping for spellings the alias table misses ('GPS Speed',
+    'Veh Spd', 'SpeedKPH', 'Speed kph', 'Speed [mph]'); ``(None, None)`` plus
+    a warning for a speed header carrying a unit this importer does not
+    convert; and ``None`` when the header is not such a spelling (a name
+    qualifier like 'Wheel Speed Rear', or not a speed header at all) so the
+    alias table decides. A bare header with no unit is km/h, as before.
+    """
+    m = _SPEED_NAME_RE.match(col_lower)
+    if m is None:
+        return None
+    unit = re.sub(r"[\s()\[\]_\-:]+", "", col_lower[m.end() :])
+    if not unit:
+        return "vehicle_speed_ms", KMH_TO_MS
+    conv = _unit_conversion("vehicle_speed_ms", unit)
+    if conv is not _NO_OVERRIDE:
+        return "vehicle_speed_ms", conv
+    if unit in _UNSUPPORTED_SPEED_UNITS:
+        return _refuse_speed_unit(repr(col_lower), unit)
+    return None
+
+
 def _map_column(col_name: str) -> tuple[str | None, object | None]:
     """Map a raw column name to a standard channel name + conversion.
 
@@ -662,6 +731,9 @@ def _map_column(col_name: str) -> tuple[str | None, object | None]:
     matched before the unit-specific ones.
     """
     col_lower = col_name.lower().strip()
+    speed = _map_speed_column(col_lower)
+    if speed is not None:
+        return speed
     # Strip units in parentheses for matching: "Speed (km/h)" → "Speed"
     col_clean = re.sub(r"\s*[(\[][^)\]]*[)\]]", "", col_lower).strip()
 
@@ -672,6 +744,14 @@ def _map_column(col_name: str) -> tuple[str | None, object | None]:
                 override = _unit_conversion(std, unit)
                 if override is not _NO_OVERRIDE:
                     conv = override
+                elif std == "vehicle_speed_ms":
+                    # A unit the header spells out in brackets ("Speed
+                    # (knots)") or a known speed unit we do not convert is
+                    # REFUSED, never read with the km/h default: that would
+                    # silently skew every ET and trap figure.
+                    bracketed = _HEADER_UNIT_RE.search(col_lower) is not None
+                    if bracketed or unit in _UNSUPPORTED_SPEED_UNITS:
+                        return _refuse_speed_unit(repr(col_lower), unit)
             return std, conv
     return None, None
 
@@ -776,7 +856,11 @@ def _extract_runs_from_speed(
 
         # Extract window
         window = slice(launch_idx, run_end)
-        run = _build_run_window(log, window, run_index, t[launch_idx])
+        # ET is timed from the back-extrapolated motion onset, not the first
+        # sample above the staging threshold (which dropped the launch itself
+        # and read 0.12-0.20 s quick against a simulation timed from rest).
+        onset_lead = float(t[launch_idx]) - launch_origin_time(t, speed, launch_idx)
+        run = _build_run_window(log, window, run_index, t[launch_idx], onset_lead)
         if run is not None:
             runs.append(run)
             run_index += 1
@@ -876,8 +960,13 @@ def _build_run_window(
     window: slice,
     run_index: int,
     t_launch: float,
+    onset_lead_s: float = 0.0,
 ) -> Optional["ECURunWindow"]:
-    """Slice all channels to the window and build an ECURunWindow."""
+    """Slice all channels to the window and build an ECURunWindow.
+
+    ``onset_lead_s`` is the gap between the back-extrapolated motion onset and
+    ``t_launch``; ET and trap speed are integrated from the onset.
+    """
     t_win = log.time_s[window] - t_launch
 
     if len(t_win) < 5:
@@ -887,9 +976,10 @@ def _build_run_window(
 
     # Compute ET and trap speed from speed channel
     if speed_win is not None and len(speed_win) > 3:
-        dist = _integrate_distance(t_win, speed_win)
-        et = _interpolate_et(t_win, dist, QUARTER_MILE_M)
-        trap = _interpolate_speed(t_win, speed_win, dist, QUARTER_MILE_M)
+        t_int, v_int = _from_rest(t_win, speed_win, onset_lead_s)
+        dist = _integrate_distance(t_int, v_int)
+        et = _interpolate_et(t_int, dist, QUARTER_MILE_M)
+        trap = _interpolate_speed(t_int, v_int, dist, QUARTER_MILE_M)
         et_q = et if et is not None else float("nan")
         trap_s = trap if trap is not None else float("nan")
         peak_speed = float(np.max(speed_win))
@@ -923,6 +1013,7 @@ def _build_run_window(
         sample_rate_hz=log.sample_rate_hz,
         run_index=run_index,
         source_file=log.source_file,
+        onset_lead_s=onset_lead_s,
     )
 
 
@@ -934,6 +1025,16 @@ def _slice_or_none(arr: np.ndarray | None, window: slice) -> np.ndarray | None:
 
 
 # ─── Maths helpers ────────────────────────────────────────────────────────
+
+
+def _from_rest(
+    t: np.ndarray, v: np.ndarray, lead_s: float
+) -> tuple[np.ndarray, np.ndarray]:
+    """(t, v) on a clock that starts at motion onset: a (0, 0) sample is prepended
+    and ``t`` shifted by ``lead_s`` (the onset-to-first-sample gap)."""
+    if lead_s > 0.0 and len(t):
+        return np.concatenate([[0.0], t + lead_s]), np.concatenate([[0.0], v])
+    return t, v
 
 
 def _integrate_distance(t: np.ndarray, v: np.ndarray) -> np.ndarray:

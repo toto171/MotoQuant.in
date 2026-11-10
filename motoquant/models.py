@@ -3,6 +3,46 @@ MotoQuant — Parameter Models
 ============================
 All input parameters organized into dataclasses by category.
 Every parameter that affects prediction by >= 0.1% is represented.
+
+Fields accepted but not read by the quarter-mile simulation
+------------------------------------------------------------
+These fields are stored, validated and round-tripped, but changing them does
+not change ET or trap speed (checked 2026-11-10 by perturbing every numeric
+field on the K5 reference and three catalog bikes — V-Rod Muscle, YZF-R15 V4,
+RD350 — with the rollout-epoch physics).  Do not tune them, fit them or
+expose them as levers; wiring one into the physics is a deliberate accuracy
+epoch (and a Rust-core change).
+
+* ``tires.front_pressure_psi`` / ``tires.rear_pressure_psi`` -- no
+  pressure-dependent grip or rolling-resistance term exists (the only
+  pressure effect is the hot-tyre Gay-Lussac factor, which uses temperature).
+* ``tires.mu_slide``, ``tires.tread_depth_mm`` and ``tires.pacejka_B/C/D/E``
+  (``pacejka_force`` is not called by ``run()``).
+* ``staging.reaction_time_ms`` / ``staging.vehicle_response_ms`` -- the
+  staging dead time is not applied.
+* ``clutch.slipper_ratio`` (and ``braking.slipper_ratio``) -- no slipper
+  back-torque branch runs on the quarter-mile path.
+* ``rider.mass_kg`` -- the sim reads ``chassis.rider_mass_kg``;
+  ``rider.cog_height_seated_mm``, ``rider.gear_mass_kg`` and
+  ``rider.experience_level`` are unused.  ``rider.height_cm``,
+  ``rider.launch_forward_shift_mm`` and ``rider.tuck_transition_time_s`` are
+  live.
+* ``suspension.*`` except ``suspension.anti_squat_pct`` and
+  ``suspension.static_sag_mm``.
+* ``braking.*`` -- braking is not part of the quarter-mile run.
+* ``wheelie.*`` except ``wheelie.wheelie_bar`` and, with a bar fitted,
+  ``wheelie.bar_length_mm``.
+
+Conditionally live -- NOT dead, although a perturbation on one bike can make
+them look it: ``engine.peak_power_hp`` / ``peak_torque_nm`` /
+``peak_power_rpm`` shape the torque only for a config WITHOUT a
+``dyno_curve`` (with one, the curve is the torque; scale it too), every
+``forced_induction.*`` field needs a boosted ``boost_type``,
+``drivetrain.shaft_efficiency`` needs a shaft drive,
+``environment.track_prep`` / ``track_prep_passes`` apply only when the
+tyre's own ``track_prep_type`` is "none", ``tires.reversion_temp_c`` only
+above that temperature, and the wind direction / heading only at non-zero
+wind speed.
 """
 
 from dataclasses import dataclass, field
@@ -511,19 +551,33 @@ class TireParams:
         decay = np.exp(-self.time_burnout_to_launch_s / max(tau, 1.0))
         return ambient_temp_c + (self.burnout_end_temp_c - ambient_temp_c) * decay
 
-    def track_prep_multiplier(self, track_temp_c: float) -> float:
-        """Grip multiplier from track prep compound."""
-        if self.track_prep_type == TRACK_NONE:
+    def track_prep_multiplier(
+        self,
+        track_temp_c: float,
+        venue_prep_type: str = TRACK_NONE,
+        venue_prep_passes: int = 0,
+    ) -> float:
+        """Grip multiplier from track prep compound.
+
+        The tyre's own prep setting wins; when it is ``TRACK_NONE`` the
+        venue-level prep (``EnvironmentParams.track_prep`` /
+        ``track_prep_passes``) applies instead. With both at ``TRACK_NONE``
+        the result is exactly 1.0, as before the venue fallback existed.
+        """
+        prep_type, passes = self.track_prep_type, self.track_prep_passes
+        if prep_type == TRACK_NONE:
+            prep_type, passes = venue_prep_type, venue_prep_passes
+        if prep_type == TRACK_NONE:
             return 1.0
         # Base multiplier decreases with passes and degrades above 50C
-        if self.track_prep_type in (TRACK_VHT, TRACK_PJ1):
-            freshness = max(0.0, 1.0 - self.track_prep_passes / 200.0)
+        if prep_type in (TRACK_VHT, TRACK_PJ1):
+            freshness = max(0.0, 1.0 - passes / 200.0)
             temp_penalty = max(0.0, 1.0 - max(0.0, track_temp_c - 50.0) / 30.0)
             return (
                 1.0 + 0.12 * freshness * temp_penalty
             )  # 12% max grip boost from VHT/PJ1
-        if self.track_prep_type == TRACK_RUBBER:
-            return 1.0 + 0.10 * max(0.0, 1.0 - self.track_prep_passes / 500.0)
+        if prep_type == TRACK_RUBBER:
+            return 1.0 + 0.10 * max(0.0, 1.0 - passes / 500.0)
         return 1.0
 
 
@@ -744,6 +798,20 @@ class EnvironmentParams:
     track_prep_passes: int = 0  # Freshness
     track_heading_deg: float = 0.0  # Track direction for wind calc
     track_gradient_pct: float = 0.0  # % grade (positive = uphill)
+
+    def dry_air_pressure_pa(self) -> float:
+        """Dry-air partial pressure (Pa): station pressure minus water-vapour pressure.
+
+        Uses the same barometric and Magnus models as ``air_density``.
+        """
+        P_sea = self.barometric_pressure_hpa * 100.0
+        P_alt = P_sea * (1.0 - 0.0065 * self.altitude_m / 288.15) ** (
+            9.80665 * 0.0289644 / (8.31447 * 0.0065)
+        )
+        e_sat = 610.78 * np.exp(
+            17.27 * self.ambient_temp_c / (self.ambient_temp_c + 237.3)
+        )
+        return float(P_alt - e_sat * self.relative_humidity_pct / 100.0)
 
     def air_density(self) -> float:
         """Compute air density from altitude, temp, humidity using barometric formula."""

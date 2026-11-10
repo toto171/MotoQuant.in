@@ -42,8 +42,15 @@ Predefined presets are available:
     PRESET_FULL       : cd + mu_peak + drivetrain.chain_efficiency
 
 Every ``path`` must name a real numeric dataclass field (validated before
-any simulation runs); an unknown path raises CalibrationError instead of
-being written as a phantom attribute nothing reads.
+any simulation runs); an unknown path raises CalibrationError (a ValueError)
+instead of being written as a phantom attribute nothing reads.
+
+Timing convention: every simulation here runs with ``rollout_m=0.0`` (timed
+from rest), because DragRunData / ECURunWindow are timed from the
+back-extrapolated motion onset (``_launch.py``), not from a 1-ft rollout.
+
+``calibrate_multi_run`` simulates once per candidate parameter vector and
+scores that one result against every run.
 """
 
 import copy
@@ -72,8 +79,13 @@ log = logging.getLogger(__name__)
 # ─── Error ────────────────────────────────────────────────────────────────
 
 
-class CalibrationError(Exception):
-    """Raised when calibration cannot be completed."""
+class CalibrationError(ValueError):
+    """Raised when calibration cannot be completed.
+
+    A ValueError subclass: the common cause is a bad argument (an unknown or
+    non-numeric parameter path, invalid bounds, an empty spec list), and
+    callers that guard calibration input with ``except ValueError`` catch it.
+    """
 
 
 # ─── Parameter presets ────────────────────────────────────────────────────
@@ -290,16 +302,21 @@ class _Objective:
         self.n_evals = 0
         self.n_crashes = 0
 
-    def __call__(self, x: np.ndarray) -> float:
-        self.n_evals += 1
+    def simulate(self, x: np.ndarray):
+        """Run the sim for parameter vector ``x``.
+
+        Returns the SimResult, or None when the simulation crashes or never
+        reaches the quarter mile (both are penalised by ``cost_for``).
+        """
         cfg = copy.deepcopy(self._base_config)
         for i, spec in enumerate(self._specs):
             _set_param(cfg, spec["path"], float(x[i]))
 
         try:
-            # rollout_m=0.0: the GPS/ECU parsers time a real run from its
-            # first-motion frame (no 1-ft rollout), so the sim must use the
-            # same convention or every fit absorbs a ~0.3 s timing offset.
+            # rollout_m=0.0: the GPS/ECU parsers time a real run from motion
+            # onset (from rest, no 1-ft rollout — calibration/_launch.py), so
+            # the sim must use the same convention or every fit absorbs a
+            # ~0.3 s timing offset.
             sim = engine_select.make_engine(cfg).run(rollout_m=0.0)
         except Exception as exc:
             self.n_crashes += 1
@@ -311,13 +328,22 @@ class _Objective:
                     type(exc).__name__,
                     exc,
                 )
-            return 1e6  # penalise crashes
+            return None
 
         if sim.time_quarter <= 0 or sim.speed_quarter <= 0:
-            return 1e6
+            return None
+        return sim
 
+    def cost_for(self, sim) -> float:
+        """Cost of an already-run sim against this objective's real run."""
+        if sim is None:
+            return 1e6  # penalise crashes / unfinished runs
         cmp = compare_runs(self._real_run, sim)
         return compute_cost(cmp, self._weights)
+
+    def __call__(self, x: np.ndarray) -> float:
+        self.n_evals += 1
+        return self.cost_for(self.simulate(x))
 
 
 # ─── Public API ───────────────────────────────────────────────────────────
@@ -483,7 +509,12 @@ def calibrate_multi_run(
 
     def combined_obj(x: np.ndarray) -> float:
         n_evals[0] += 1
-        costs = [o(x) for o in objs]
+        # Every objective shares the same config and parameter vector, so
+        # simulate ONCE and score that single result against every run (it
+        # used to re-run the identical simulation once per run: same fit,
+        # N times the simulations).
+        sim = objs[0].simulate(x)
+        costs = [o.cost_for(sim) for o in objs]
         return float(np.mean(costs))
 
     initial_cost = combined_obj(x0)

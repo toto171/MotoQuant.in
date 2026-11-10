@@ -21,7 +21,7 @@ pub mod interp;
 pub mod splits;
 
 pub use config::{ResolvedConfig, SCHEMA_VERSION};
-pub use engine::{Engine, RunOutput, MAX_SAMPLES};
+pub use engine::{Engine, RunOutput, MAX_RUN_DISTANCE_M, MAX_RUN_TIME_S, MAX_SAMPLES};
 pub use error::{ErrorKind, SimError};
 pub use splits::{Splits, ROLLOUT_M};
 

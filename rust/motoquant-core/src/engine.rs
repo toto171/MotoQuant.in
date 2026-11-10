@@ -27,6 +27,15 @@ use crate::fmath::{self, ExpImpl};
 /// from overflowing.
 pub const MAX_SAMPLES: usize = 1 << 22;
 
+/// Library-level ceilings on a single run, mirroring `physics.py`
+/// (`MAX_RUN_DISTANCE_M` / `MAX_RUN_TIME_S`). `run()` rejects a non-finite,
+/// non-positive or larger `distance` / `max_time` with a `ValueError`-kind
+/// error and the same message as Python, before anything is allocated. At the
+/// default 1 ms step the time ceiling is 600 k samples, 7x under
+/// `MAX_SAMPLES`; the sample cap still guards a tiny `dt`.
+pub const MAX_RUN_DISTANCE_M: f64 = 1.0e6;
+pub const MAX_RUN_TIME_S: f64 = 600.0;
+
 /// Samples reserved up front (a 26 s quarter-mile needs 26,001). Beyond this
 /// the buffers double on demand via `try_reserve`.
 const PREALLOC_SAMPLES: usize = 1 << 18;
@@ -661,6 +670,22 @@ impl<'a> Engine<'a> {
                 py_float_repr(rollout_m)
             )));
         }
+        // Python: `if not (distance <= MAX_RUN_DISTANCE_M)` (+inf, absurd).
+        if !(distance <= MAX_RUN_DISTANCE_M) {
+            return Err(SimError::value(format!(
+                "distance must be finite and <= {} m (got distance={})",
+                py_float_repr(MAX_RUN_DISTANCE_M),
+                py_float_repr(distance)
+            )));
+        }
+        // Python: `if not (0.0 < max_time <= MAX_RUN_TIME_S)` (also NaN).
+        if !(0.0 < max_time && max_time <= MAX_RUN_TIME_S) {
+            return Err(SimError::value(format!(
+                "max_time must be finite and in (0, {}] s (got max_time={})",
+                py_float_repr(MAX_RUN_TIME_S),
+                py_float_repr(max_time)
+            )));
+        }
         let c = self.c;
         let g_const = self.g;
         let rpm_to_rads = self.rpm_to_rads;
@@ -711,6 +736,9 @@ impl<'a> Engine<'a> {
         // exception-for-exception: int(nan) -> ValueError, int(±inf) ->
         // OverflowError, a negative n_max -> np.zeros' ValueError. (dt == 0
         // is refused by ResolvedConfig::validate as ZeroDivisionError.)
+        // max_time is already validated above (0 < max_time <= 600) and dt by
+        // ResolvedConfig::validate (> 0), so only a dt small enough to
+        // overflow the quotient can still reach these branches.
         let q = max_time / dt;
         if q.is_nan() {
             return Err(SimError::value(format!(

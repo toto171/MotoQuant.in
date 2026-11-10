@@ -16,6 +16,12 @@ are bit-identical by construction. The sims run through
 ``engine_select.run_quarter`` (the Rust core when available); the Rust core
 consumes ``power_correction`` resolved by this Python model, so both engines
 see the fix.
+
+2026-11 port: the plain (NA) correction is the reference-anchored SAE J1349
+form (``sae_power_correction``: dry-air pressure and sqrt(T)), no longer
+rho / 1.225. The two are bit-identical on the reference day the K5 runs on,
+so the from-NA comparisons are unchanged; off that day the expected plain
+value is the SAE one.
 """
 
 from __future__ import annotations
@@ -26,7 +32,7 @@ import pytest
 
 from motoquant import gsxr1000_k5
 from motoquant.engine_select import make_engine, run_quarter
-from motoquant.submodels.environmental import EnvironmentalModel
+from motoquant.submodels.environmental import EnvironmentalModel, sae_power_correction
 
 _RHO_STD = 1.2250
 
@@ -77,7 +83,9 @@ def test_non_compensating_fi_sims_exactly_like_na(make_cfg, fi):
 def test_non_compensating_fi_gets_plain_density_correction(fi):
     cfg = _with_fi(_hot_aamby(), **fi)
     env = EnvironmentalModel(cfg)
-    assert env.power_correction == env.rho / _RHO_STD
+    # the plain NA correction, exactly what the same bike gets with no FI
+    assert env.power_correction == sae_power_correction(cfg.environment)
+    assert env.power_correction == EnvironmentalModel(_hot_aamby()).power_correction
     assert env.power_correction < 0.97  # i.e. the floor would have bitten
     assert make_engine(cfg).power_correction == env.power_correction
 
@@ -93,7 +101,9 @@ def test_non_compensating_fi_gets_plain_density_correction(fi):
 def test_real_boost_keeps_the_floor(fi):
     cfg = _with_fi(_hot_aamby(), **fi)
     env = EnvironmentalModel(cfg)
-    assert env.power_correction == max(0.97, env.rho / _RHO_STD) == 0.97
+    plain = sae_power_correction(cfg.environment)
+    assert plain < 0.97
+    assert env.power_correction == max(0.97, plain) == 0.97
 
 
 def test_na_correction_is_bit_identical():

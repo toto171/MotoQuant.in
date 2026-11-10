@@ -7,7 +7,10 @@
 //! engine calls the same C `pow`/`sin` as CPython, so ET/trap/splits are
 //! asserted EXACTLY equal there.
 
-use motoquant_core::{simulate, ErrorKind, ResolvedConfig, MAX_SAMPLES, ROLLOUT_M};
+use motoquant_core::{
+    simulate, ErrorKind, ResolvedConfig, MAX_RUN_DISTANCE_M, MAX_RUN_TIME_S, MAX_SAMPLES,
+    ROLLOUT_M,
+};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -112,19 +115,49 @@ fn run(
     simulate(cfg, distance, max_time, adaptive, ROLLOUT_M)
 }
 
-/// Python sizes its output with `np.zeros(int(max_time / dt) + 1)`; every
-/// error class it raises from that line is mirrored, and an oversized run is
-/// a MemoryError-kind error — never an allocator abort.
+/// `run()` argument validation mirrors Python's: a non-finite, non-positive or
+/// absurd `max_time` / `distance` is a ValueError-kind error with Python's
+/// message, raised before anything is allocated (2026-11: these used to be
+/// an OverflowError for inf, a MemoryError or a silent multi-minute run for a
+/// huge value, and an EMPTY result for max_time <= 0). `dt == 0` stays
+/// Python's ZeroDivisionError.
 #[test]
 fn sizing_errors_mirror_python_classes() {
     let cfg = k5();
-    assert_eq!(kind_of(&cfg, 402.336, f64::NAN, false), Some(ErrorKind::Value));
-    assert_eq!(kind_of(&cfg, 402.336, f64::INFINITY, false), Some(ErrorKind::Overflow));
-    assert_eq!(kind_of(&cfg, 402.336, f64::NEG_INFINITY, false), Some(ErrorKind::Overflow));
-    assert_eq!(kind_of(&cfg, 402.336, -1.0, false), Some(ErrorKind::Value));
-    // int(-1.5) + 1 == 0 -> np.zeros(0) is fine in Python: empty result.
-    let (out, _) = run(&cfg, 402.336, -0.0015, false).expect("n_max == 0 is valid");
-    assert!(out.ch.is_empty());
+    for bad in [
+        f64::NAN,
+        f64::INFINITY,
+        f64::NEG_INFINITY,
+        -1.0,
+        -0.0015,
+        0.0,
+        -0.0,
+        MAX_RUN_TIME_S + 1e-9,
+        1e9,
+    ] {
+        let e = run(&cfg, 402.336, bad, false).expect_err("bad max_time");
+        assert_eq!(e.kind, ErrorKind::Value, "max_time {bad}: {e}");
+        assert!(e.msg.starts_with("max_time must be finite and in (0, 600.0] s"), "{e}");
+    }
+    let e = run(&cfg, 402.336, f64::INFINITY, false).unwrap_err();
+    assert_eq!(e.msg, "max_time must be finite and in (0, 600.0] s (got max_time=inf)");
+    let e = run(&cfg, 402.336, 0.0, true).unwrap_err();
+    assert_eq!(e.msg, "max_time must be finite and in (0, 600.0] s (got max_time=0.0)");
+    for bad in [f64::INFINITY, 1e12, MAX_RUN_DISTANCE_M * 1.000001] {
+        let e = run(&cfg, bad, 26.0, false).expect_err("bad distance");
+        assert_eq!(e.kind, ErrorKind::Value, "distance {bad}: {e}");
+    }
+    let e = run(&cfg, 1e12, 26.0, false).unwrap_err();
+    assert_eq!(
+        e.msg,
+        "distance must be finite and <= 1000000.0 m (got distance=1000000000000.0)"
+    );
+    // The ceilings themselves are valid arguments (a 0.5 s horizon keeps the
+    // run short; it simply does not finish).
+    let (out, sp) = run(&cfg, MAX_RUN_DISTANCE_M, 0.5, false).expect("distance at the ceiling");
+    assert!(!sp.finished_quarter && out.ch.len() > 100);
+    let (_, sp) = run(&cfg, 402.336, MAX_RUN_TIME_S, false).expect("max_time at the ceiling");
+    assert!(sp.finished_quarter);
     // Schema 4 (epoch round 2): the finish line must lie beyond the start
     // beam — distance <= rollout_m (NaN included) is Python's ValueError,
     // with the same message.
@@ -156,14 +189,20 @@ fn sizing_errors_mirror_python_classes() {
 #[test]
 fn huge_runs_hit_the_sample_cap_not_the_allocator() {
     let cfg = k5();
-    // A huge max_time is fine when the bike finishes: buffers grow lazily.
-    let (out, sp) = run(&cfg, 402.336, 1e13, false).expect("finishing run");
+    // The longest horizon run() accepts is fine when the bike finishes:
+    // buffers grow lazily, nothing is sized from max_time.
+    let (out, sp) = run(&cfg, 402.336, MAX_RUN_TIME_S, false).expect("finishing run");
     assert!(sp.finished_quarter && out.ch.len() < 20_000);
-    // A run that would store more than MAX_SAMPLES samples is refused.
-    let e = run(&cfg, 1e12, 1e9, false).expect_err("must hit the cap");
+    // With valid arguments the cap is only reachable through a tiny dt: a
+    // 0.1 ms step over the full 600 s / 1,000 km would store 6 M samples
+    // (> MAX_SAMPLES) and is refused — a MemoryError-kind error, never an
+    // allocator abort.
+    let mut fine = cfg.clone();
+    fine.dt = 0.0001;
+    let e = run(&fine, MAX_RUN_DISTANCE_M, MAX_RUN_TIME_S, false).expect_err("must hit the cap");
     assert_eq!(e.kind, ErrorKind::Memory, "{e}");
-    let e = run(&cfg, 1e12, 1e9, true).expect_err("adaptive must hit the cap");
-    assert_eq!(e.kind, ErrorKind::Memory, "{e}");
+    // At the default 1 ms step the ceilings sit well under the cap.
+    assert!((MAX_RUN_TIME_S / cfg.dt) as usize + 1 < MAX_SAMPLES);
     assert!(MAX_SAMPLES >= 240_001, "cap below the API's longest run");
 }
 

@@ -25,7 +25,13 @@ The detector:
   2. Finds the *last* consecutive window of at least MIN_STAGE_FRAMES frames
      where v < LAUNCH_VEL_THRESHOLD_MS.
   3. The "launch frame" is the first frame *after* that window where velocity
-     climbs above LAUNCH_VEL_THRESHOLD_MS AND the slope is positive.
+     climbs above LAUNCH_VEL_THRESHOLD_MS AND the slope is positive. The
+     clock does NOT start there: the bike is already moving at that frame, so
+     the time origin is the back-extrapolated moment of motion onset (v = 0,
+     see ``_launch.py``). ET, trap speed and every split are therefore timed
+     FROM REST with no 1-ft rollout — the convention the overlay simulation
+     uses (``run(rollout_m=0.0)``). They read ~0.25-0.35 s longer than the
+     strip-style figure a Dragy device shows (1-ft rollout).
   4. Integrates v(t) forward from launch to find cumulative distance.
   5. Interpolates the exact timestamp when distance crosses 402.336 m.
   6. Returns DragRunData trimmed from launch to (quarter + POST_TRAP_MARGIN_S).
@@ -49,6 +55,7 @@ import numpy as np
 
 # ─── Physical constants ────────────────────────────────────────────────────
 from ..constants import QUARTER_MILE_M  # single source of truth (402.336 m)
+from ._launch import launch_slice
 
 log = logging.getLogger(__name__)
 
@@ -99,11 +106,13 @@ class DragRunData:
     One detected quarter-mile run extracted from a Dragy GPS file.
 
     All time-series arrays are the same length and share the same index.
-    ``timestamps[0] == 0.0`` (launch is the time origin).
+    ``timestamps[0] == 0.0`` is the back-extrapolated moment of motion onset
+    (a virtual v = 0 sample is prepended when onset precedes the first
+    above-threshold frame), so ET / trap / splits are timed from rest.
     """
 
     # ── Time-series (numpy arrays, SI units) ──────────────────────────────
-    timestamps: np.ndarray  # seconds, t=0 at launch
+    timestamps: np.ndarray  # seconds, t=0 at motion onset
     velocity_ms: np.ndarray  # m/s
     distance_m: np.ndarray  # cumulative metres from launch
     acceleration_ms2: np.ndarray  # dv/dt (central differences, m/s²)
@@ -385,9 +394,14 @@ def _detect_runs(
     repeated pinned the API CPU for tens of seconds, and the 25 MB upload cap
     for hours. Now one cumulative-distance prefix sum answers "where does
     this launch reach 402 m" by binary search, and only ACCEPTED runs are
-    re-integrated locally (over their own <= 30 s + 1 s slice). Accepted runs
-    report exactly the ET / trap the old per-window integration produced
-    (same prefix of the same cumulative sum).
+    re-integrated locally (over their own <= 30 s + 1 s slice).
+
+    ET and trap speed are measured from the back-extrapolated motion onset
+    (``_launch.launch_slice``), not from the launch frame: starting the clock
+    at the first >= 0.8 m/s frame dropped the launch itself and made every
+    uploaded run read 0.12-0.20 s too quick against a simulation timed from
+    rest. The onset estimate looks back a bounded window, so the cost stays
+    linear.
 
     A launch whose bike re-stages (the next staged window begins) before it
     has covered 402 m is an aborted run and is rejected. Previously such a
@@ -438,32 +452,27 @@ def _detect_runs(
         # Aborted run: the bike re-staged (next staged window) before 402 m.
         if w + 1 < len(staged_windows) and staged_windows[w + 1][0] < k:
             continue
-        d0, d1 = cum[k - 1] - base, cum[k] - base
-        t0, t1 = t[k - 1] - t[launch_idx], t[k] - t[launch_idx]
-        frac = (QUARTER_MILE_M - d0) / (d1 - d0) if (d1 - d0) > 0 else 0.0
-        et = float(t0 + frac * (t1 - t0))
-        trap_speed = float(v_ms[k - 1] + frac * (v_ms[k] - v_ms[k - 1]))
 
-        # Sanity checks
+        # Candidate. Re-integrate locally from MOTION ONSET to just past the
+        # crossing. The slice [launch_idx, k + 3) always contains it: the
+        # distance covered between onset and the launch frame only moves the
+        # crossing earlier than k, and the +3 margin absorbs rounding between
+        # the global and local sums. launch_slice re-zeroes time at the
+        # back-extrapolated onset and prepends a virtual v = 0 sample there.
+        hi = min(k + 3, n)
+        t_run, v_run = launch_slice(t, v_ms, launch_idx, hi - 1)
+        lead = len(t_run) - (hi - launch_idx)  # 1 when the onset sample exists
+        d_run = _integrate_distance(t_run, v_run)
+        et = _interpolate_et(t_run, d_run, QUARTER_MILE_M)
+        trap_local_idx = int(np.searchsorted(d_run, QUARTER_MILE_M))
+        if et is None or trap_local_idx >= len(d_run):
+            continue  # unreachable for a monotone prefix sum; never guess
+
+        # Sanity checks (on the from-rest ET that is reported)
         if et < MIN_RUN_DURATION_S or et > MAX_RUN_DURATION_S:
             continue
-
-        # Accepted. Re-integrate locally from the launch frame to just past
-        # the crossing, so the reported ET / trap are bit-identical to the
-        # old per-window integration (the local cumsum is a prefix of the
-        # old whole-remainder cumsum). The +3 margin absorbs rounding
-        # between the global and local sums.
-        hi = min(k + 3, n)
-        t_run = t[launch_idx:hi] - t[launch_idx]  # re-zero time
-        v_run = v_ms[launch_idx:hi]
-        d_run = _integrate_distance(t_run, v_run)
-        et_local = _interpolate_et(t_run, d_run, QUARTER_MILE_M)
-        trap_raw_idx = int(np.searchsorted(d_run, QUARTER_MILE_M))
-        if et_local is not None and trap_raw_idx < len(d_run):
-            et = et_local
-            trap_speed = _interpolate_speed_at_distance(v_run, d_run, QUARTER_MILE_M)
-        else:
-            trap_raw_idx = k - launch_idx
+        trap_speed = _interpolate_speed_at_distance(v_run, d_run, QUARTER_MILE_M)
+        trap_raw_idx = max(trap_local_idx - lead, 0)  # relative to launch_idx
 
         # Find trap index (how many samples past launch to keep): the
         # POST_TRAP_MARGIN_S worth of frames at the file's median rate, but
@@ -792,11 +801,10 @@ def _build_run_list(
 
     results = []
     for run_num, (launch_idx, end_idx, et_quarter, trap_speed) in enumerate(detected):
-        t_slice = t_arr[launch_idx : end_idx + 1].copy()
-        v_slice = v_arr[launch_idx : end_idx + 1].copy()
-
-        # Re-zero time and re-integrate distance within this slice
-        t_slice -= t_slice[0]
+        # Re-zero time at (back-extrapolated) motion onset — the same origin
+        # _detect_runs timed the ET from — and re-integrate distance within
+        # this slice.
+        t_slice, v_slice = launch_slice(t_arr, v_arr, launch_idx, end_idx)
         d_slice = _integrate_distance(t_slice, v_slice)
         a_slice = _compute_acceleration(t_slice, v_slice)
 

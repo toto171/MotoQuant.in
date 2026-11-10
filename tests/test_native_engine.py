@@ -36,7 +36,7 @@ import pytest
 import motoquant as mq
 from motoquant import native
 from motoquant.database.bridge import db_row_to_config
-from motoquant.physics import MotoQuantEngine
+from motoquant.physics import MAX_RUN_DISTANCE_M, MAX_RUN_TIME_S, MotoQuantEngine
 
 ROOT = Path(__file__).resolve().parent.parent
 REQUIRE_NATIVE = os.environ.get("MOTOQUANT_REQUIRE_NATIVE") == "1"
@@ -212,16 +212,33 @@ def test_degenerate_inputs_raise_like_python():
                 eng(**kw)
             msgs.append(str(ei.value))
         assert msgs[0] == msgs[1], (kw, msgs)
-    # Output sizing `np.zeros(int(max_time / dt) + 1)`: same class as Python.
-    for kw, exc in (
-        ({"max_time": -1.0}, ValueError),
-        ({"max_time": float("nan")}, ValueError),
-        ({"max_time": float("inf")}, OverflowError),
+    # 2026-11: a non-finite, non-positive or absurd max_time / distance is a
+    # ValueError on BOTH engines, with the SAME message, before anything is
+    # allocated. (It used to be an OverflowError for inf, a MemoryError — or
+    # natively a silent multi-minute run — for a huge horizon, and an EMPTY
+    # result for max_time <= 0.)
+    for kw, needle in (
+        ({"max_time": -1.0}, "max_time"),
+        ({"max_time": -0.0015}, "max_time"),
+        ({"max_time": 0.0}, "max_time"),
+        ({"max_time": float("nan")}, "max_time"),
+        ({"max_time": float("inf")}, "max_time"),
+        ({"max_time": 1e9}, "max_time"),
+        ({"max_time": MAX_RUN_TIME_S * 1.000001}, "max_time"),
+        ({"distance": float("inf")}, "distance"),
+        ({"distance": 1e12}, "distance"),
+        ({"distance": MAX_RUN_DISTANCE_M * 1.000001}, "distance"),
+        ({"distance": 1e12, "max_time": 1e9}, "distance"),
     ):
-        with pytest.raises(exc):
-            MotoQuantEngine(mq.gsxr1000_k5()).run(**kw)
-        with pytest.raises(exc):
-            native.run_native(mq.gsxr1000_k5(), **kw)
+        msgs = []
+        for eng in (
+            MotoQuantEngine(cfg).run,
+            lambda **k: native.run_native(cfg, **k),
+        ):
+            with pytest.raises(ValueError, match=needle) as ei:
+                eng(**kw)
+            msgs.append(str(ei.value))
+        assert msgs[0] == msgs[1], (kw, msgs)
     with pytest.raises(ZeroDivisionError):
         MotoQuantEngine(mq.gsxr1000_k5(), dt=0.0).run()
     with pytest.raises(ZeroDivisionError):
@@ -232,13 +249,32 @@ def test_degenerate_inputs_raise_like_python():
 def test_oversized_run_raises_memoryerror_instead_of_aborting():
     """A run that would store more than MAX_SAMPLES samples must raise a
     Python MemoryError (Python's own np.zeros raises MemoryError for it) —
-    before the cap this aborted the whole interpreter in the allocator."""
+    before the cap this aborted the whole interpreter in the allocator.
+
+    Since run() bounds max_time (MAX_RUN_TIME_S) the cap is only reachable
+    with a tiny dt: 0.1 ms over the full 600 s would store 6 M samples."""
     cfg = mq.gsxr1000_k5()
     with pytest.raises(MemoryError):
-        native.run_native(cfg, distance=1e12, max_time=1e9)
-    # A huge horizon that the bike never needs is fine: buffers grow lazily.
-    r = native.run_native(cfg, max_time=1e6)
+        native.run_native(
+            cfg, distance=MAX_RUN_DISTANCE_M, max_time=MAX_RUN_TIME_S, dt=0.0001
+        )
+    # The longest horizon run() accepts is fine when the bike never needs it:
+    # buffers grow lazily, nothing is sized from max_time.
+    r = native.run_native(cfg, max_time=MAX_RUN_TIME_S)
     assert abs(float(r.time_quarter) - REFS["gsxr1000_k5"]) <= TOL
+
+
+def test_run_ceilings_accept_the_longest_legitimate_requests():
+    """The library ceilings must sit above everything the product asks for:
+    the API's longest run (300 s, 20 km) and run_top_speed's defaults."""
+    from motoquant.constants import TOPSPEED_MAX_DISTANCE_M, TOPSPEED_MAX_TIME_S
+
+    assert MAX_RUN_TIME_S >= 300.0 >= TOPSPEED_MAX_TIME_S
+    assert MAX_RUN_DISTANCE_M >= 20000.0 >= TOPSPEED_MAX_DISTANCE_M
+    # ...and the ceilings themselves are valid arguments (a short horizon keeps
+    # this quick; the run simply does not finish).
+    r = MotoQuantEngine(mq.gsxr1000_k5()).run(distance=MAX_RUN_DISTANCE_M, max_time=0.5)
+    assert len(r.t) > 100 and not r.finished_quarter
 
 
 @needs_native
