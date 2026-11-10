@@ -35,7 +35,7 @@ hypothesis>=6.100,<7
 ruff>=0.16.2,<0.17
 
 # Coverage instrumentation for the main-push CI tier (`--cov=motoquant`).
-pytest-cov>=5,<8
+pytest-cov>=7.1.0,<8
 
 # Optional analysis deps. Without them tests/test_analysis.py (sobol) and
 # tests/test_surrogate.py skip large blocks that CI runs for real.
