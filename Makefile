@@ -77,6 +77,32 @@ audit: ## Check headline stats (bike/part/tire counts) are in sync sitewide
 	$(PY) scripts/audit_headline_stats.py
 	$(PY) web/scripts/gen_bike_ids.py --check
 
+# ── Rebuilding the catalog and its caches ─────────────────────────────────
+# The catalog database is built from the curated specs by a fixed chain of
+# idempotent scripts. RESEED_DB defaults to the tracked file; point it at a
+# copy to try a change first (make reseed RESEED_DB=/tmp/mq.db).
+RESEED_DB ?= motoquant.db
+RESEED_CHAIN := reseed_configs_from_specs \
+  patch_2026_07_06_reference_configs patch_2026_07_06_catalog_integrity \
+  patch_2026_07_06_tire_dedup patch_2026_07_13_scrape_data \
+  patch_2026_08_08_fitment_integrity patch_2026_08_08_quickshifter_overrides \
+  patch_2026_10_23_drop_monetization patch_2026_10_24_parts_data \
+  patch_2026_10_24_config_sync patch_2026_11_05_reference_rows \
+  patch_2026_11_10_catalog_fixes patch_2026_11_10_epoch \
+  patch_2026_11_10_remove_accounts
+
+.PHONY: reseed
+reseed: ## Rebuild the catalog's bike configs from the specs, then run every data patch in order
+	@for s in $(RESEED_CHAIN); do \
+	  echo "== $$s"; MOTOQUANT_DB=$(abspath $(RESEED_DB)) $(PY) scripts/$$s.py || exit 1; \
+	done
+
+.PHONY: regen
+regen: ## Regenerate everything that caches the physics: regression snapshot, stock leaderboard, browser surrogate export
+	MOTOQUANT_DB=$(abspath motoquant.db) $(PY) scripts/generate_regression_snapshot.py
+	MOTOQUANT_DB=$(abspath motoquant.db) $(PY) scripts/gen_stock_leaderboard.py
+	$(PY) scripts/gen_surrogate_web.py
+
 .PHONY: surrogate-web
 surrogate-web: ## Regenerate the in-browser surrogate assets (run after ANY reseed/retune/surrogate regen)
 	$(PY) scripts/gen_surrogate_web.py

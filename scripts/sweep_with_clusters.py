@@ -111,7 +111,7 @@ def run_sweep(out_path):
             }
         )
 
-    # Benchmarks — score-and-pick (Option 2 from DISPATCH_INBOX 2026-05-25):
+    # Benchmarks — score-and-pick (the second of the options weighed in the 2026-05-25 matcher review):
     # for each catalog row, pick the *most-specific* in-range benchmark.
     # Logic lives in sweep_lib.bind_benchmark_for_record, shared with the
     # other drivers; since the 2026-10 data epoch it runs the "epoch" policy

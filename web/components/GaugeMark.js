@@ -1,7 +1,7 @@
 /**
  * GaugeMark — the MotoQuant "redline Q" mark as an inline SVG.
  *
- * Exact geometry from MotoQuant_Identity_Kit/motoquant-mark-dark.svg:
+ * Exact geometry of the brand mark (the "redline Q"):
  * a heavyweight dial ring with a 30° sector gap at 315°, a tapered needle
  * that accelerates outward through the gap (45° speed cut), and the hub.
  * Colors per the kit: static parts white, moving parts Signal #FF5E1F.

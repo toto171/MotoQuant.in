@@ -84,7 +84,7 @@ def best_benchmark_match(spec, benchmarks):
     ``(bmfr, bmodel, byear, tgt_et, tgt_trap, src)`` or ``None``.
 
     Score-and-pick instead of sort-then-first-match, so the matcher is
-    robust against benchmark insertion-order (DISPATCH_INBOX 2026-05-25
+    robust against benchmark insertion-order (maintainer review 2026-05-25
     Option 2).
     """
     best = None

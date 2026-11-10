@@ -755,7 +755,7 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # rows to the older "Ninja H2" 2015 benchmark via shorter token-set match,
     # so adding the H2 SX entry would not bind cleanly until the matcher
     # specificity bug documented in CLAUDE.md gets fixed — queued to
-    # DISPATCH_INBOX.md as `[urgent]` for follow-up).
+    # the maintainer queue for follow-up).
     #
     # BMW S 1000 R (999 cc I4 naked, 2021-2024) — MotoStatz Dragy instrumented:
     # 10.41s @ 144 mph (~232 km/h). Same MotoStatz/Dragy source bar as the
@@ -873,7 +873,7 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # Adding the 2003 data point as a parallel reference; the matcher in
     # validation_sweep.py::run_sweep will continue to bind the existing
     # 2000 entry first (sequential iteration + first-year-match wins).
-    # The matcher specificity bug documented in DISPATCH_INBOX (2026-05-25)
+    # The matcher specificity bug found in the 2026-05-25 matcher review
     # does not affect this entry — no token-subset collision with other
     # catalog rows (ZX-9R is unique).
     # URL: https://motostatz.com/kawasaki-zx-9r-top-speed-acceleration/
@@ -1033,7 +1033,7 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # the "(13S)" suffix in the model pattern is intentional — the bare token
     # set {YZF, R6} would match both 2C0 and 13S catalog rows; the (13S) suffix
     # makes the match unambiguous and future-proofs against the matcher
-    # specificity bug filed at DISPATCH_INBOX 2026-05-25.
+    # specificity bug found in the 2026-05-25 matcher review.
     # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
     (
         "Yamaha",
@@ -1528,7 +1528,7 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # with existing entries.
     #
     # CONFLICT NOTE — investigated this pass but NOT added (queued urgent
-    # audit to DISPATCH_INBOX): existing entry "Rocket 3 R 2020 = 10.50s @
+    # audit to the maintainer queue): existing entry "Rocket 3 R 2020 = 10.50s @
     # 226 km/h (Cycle World 2020)" on line ~123 has a transcribed/internally-
     # inconsistent trap speed. The Cycle World "Rickey Gadson and the Triumph
     # Rocket 3 R" feature (cycleworld.com/story/motorcycle-racing/rickey-
@@ -1761,7 +1761,7 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # Rejected this pass (logged in report so future passes skip):
     #   * Honda VFR1200F (CW 2010 April Don Canet 10.33s @ 134.85 mph) —
     #     NOT in catalog; per anti-fabrication rule, no benchmark without
-    #     a catalog spec to bind. Queued via DISPATCH_INBOX for catalog
+    #     a catalog spec to bind. Queued for catalog
     #     expansion pass.
     #   * Honda CBR1100XX Super Blackbird (MotoStatz 10.38s @ 137.8 mph,
     #     Dragy named) — NOT in catalog; same handling, queued.
@@ -3465,7 +3465,7 @@ def run_sweep(verbose: bool = True) -> dict:
                 f"{rec.get('sim_et_s', '---')}s  {rec['status']}"
             )
 
-        # Benchmark match — score-and-pick (Option 2 from DISPATCH_INBOX
+        # Benchmark match — score-and-pick (the option chosen in the 2026-05-25 matcher review
         # 2026-05-25). Word-boundary matching + manufacturer + year-range
         # filter, then pick the *most-specific* benchmark (highest model-
         # token-count). Robust against insertion-order and token-count

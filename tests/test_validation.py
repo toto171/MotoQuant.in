@@ -586,7 +586,7 @@ class TestMatcherSpecificity:
 class TestProductionMatcherSpecificity:
     """Regression tests that exercise the *real* production helpers
     `_best_benchmark_match` and `_model_specificity_score` in
-    `scripts/validation_sweep.py` (Option 2 fix from DISPATCH_INBOX
+    `scripts/validation_sweep.py` (the fix chosen in the 2026-05-25 matcher review
     2026-05-25). These would fail if the score-and-pick logic regressed
     to first-match-wins, regardless of any benchmark-list ordering.
     """

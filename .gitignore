@@ -1,177 +1,55 @@
-# Ruff cache
-.ruff_cache/
-
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
 *.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-# ...but the first-party `lib/` folder under the web frontend is source, not
-# a Python build artifact, and must be tracked.
-!web/lib/
-!web/lib/**
-parts/
-# motoquant/parts/ is first-party source (compatibility engine), not a
-# Python build artifact. Must be tracked — otherwise /api/parts with a
-# bike_id filter 500s in production because the module isn't in the wheel.
-!motoquant/parts/
-!motoquant/parts/**
-sdist/
-var/
-wheels/
 *.egg-info/
-.installed.cfg
-*.egg
-
-# Virtual environments
-.venv
+build/
+dist/
+.venv/
 venv/
-ENV/
-env/
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Testing
+# Tests, lint and coverage
 .pytest_cache/
+.hypothesis/
+.ruff_cache/
 .coverage
+coverage.xml
 htmlcov/
-.tox/
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Database
+# Databases. The seeded catalog motoquant.db is tracked deliberately (the
+# Docker image and the tests use it); any other database, and SQLite's
+# journal and backup files, stay out.
 *.db
+!/motoquant.db
 *.db-shm
 *.db-wal
-# Rotational DB backups (e.g. motoquant.db.bak.20260420) -- the suffix
-# means the plain *.db rule doesn't catch them.
 *.db.bak*
-*.db-shm.bak*
-*.db-wal.bak*
-# Pre-rebuild safety copies (e.g. motoquant.db.before-rebuild_2026_05_03,
-# tokens.md.before-rebuild). The suffix-after-extension form breaks the
-# narrower *.db.bak* and *.db* globs above, so cover the whole class.
-*.db.before-rebuild*
-*.before-rebuild
-*.before-rebuild_*
-*.before-reseed
-*.before-reseed_*
 
-# Temporary files
-.tmp
-tmp/
-*.temp
-
-# Streamlit
-.streamlit/
-
-# FUSE temp files
-.fuse_hidden*
-
-# Trained model artifacts (too large for git)
-*.pkl
+# Model artifacts: only the shipped ones under artifacts/ are tracked.
 *.npz
-# …except the shipped baseline surrogate under artifacts/, so the CLI works
-# out-of-the-box without a 12-minute training run.
+*.pkl
 !artifacts/**/*.npz
 !artifacts/**/*.pkl
-# Progress-bar log from the generate command — keep out of git.
-artifacts/**/*.log
 
-# Backup archives
-*.zip
-
-# Node
+# Web
 node_modules/
 .next/
-# Alternate Next.js build directories (NEXT_DIST_DIR=.next-<name>, used so
-# parallel builds do not share one output folder), e.g. web/.next-ci/
 .next-*/
+.vercel/
 
-# Scrape checkpoints
-*_checkpoint.json
-
-# Pytest cache copies
-pytest-cache-files-*/
-motoquant/parts/__pycache__/
-__pycache__/
-
-# Local secrets — never commit
-# (contains GitHub PAT pasted in chat sessions, env files, etc.)
-# User should revoke any PAT here at github.com/settings/tokens
-tokens.md
-tokens.md.bak
-*.tokens
-*.token
-secrets.local
-.env.local
-
-# ── Reliability stack hardening (2026-05-04) ──────────────────────────────
-# Belt-and-braces — these paths SHOULD never be inside the repo (they live
-# outside the FUSE mount or in /tmp), but defence-in-depth in case anyone
-# ever copies them in.
-.motoquant-secrets/
-git-creds.env
-preflight.env
-mq-session-*/
-*.session.lock
-
-# ── Added 2026-05-07: post-cleanup hardening ──
-# Runtime session logs — never track
-logs/
-logs/*.log
-
-# One-time token-merge files (transient, manual cleanup after paste)
-TOKENS_UPDATE_*.md
-
-# Defensive: file accidentally created when bash redirect target name
-# collides with the 'claude' command (sed-mangle artifact, see 2c4986d)
-/claude
-
-# Cowork/Claude local worktree + agent state (never commit)
-.claude/
-
-# ── Added 2026-06-12: repo-hygiene pass ──
-# Git bundles (crash-insurance snapshots made by sandbox sessions — never track)
-*.bundle
-# Stray build/session logs at any depth (b1.log, build*.log, npmi.log class —
-# /tmp scratch that occasionally gets copied into the repo). No .log file is
-# tracked today (verified via `git ls-files '*.log'`), so this swallows nothing.
-*.log
-# Patch-tool droppings
-*.orig
-*.rej
-
-# Scrapling toolkit raw-HTML disk cache (scripts/scrape_bike_specs.py)
-scrape_cache/
-
-# Rust core build output
+# Rust
 rust/target/
 
-# ── Added 2026-10-24: open-source secret hygiene ──
-# Environment files at any depth. The committed templates (.env.example,
-# web/.env.local.example) stay tracked via the negations below.
+# Scraper cache (scripts/scrape_bike_specs.py)
+scrape_cache/
+
+# Secrets and local configuration: never commit.
+# The templates (.env.example, web/.env.local.example) stay tracked.
 .env
 .env.*
 !.env.example
 !*.example
-# Keys, certificates and credential exports
+.npmrc
 *.pem
 *.key
 *.p12
@@ -179,10 +57,21 @@ rust/target/
 id_rsa*
 id_ed25519*
 *credentials*.json
-# npm auth tokens live in .npmrc
-.npmrc
-# Vercel CLI project link (org/project ids + cached env pulled by `vercel pull`)
-.vercel/
-# Test / coverage output
-coverage.xml
-.hypothesis/
+
+# Editors, OS and tool state
+.vscode/
+.idea/
+.claude/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# Logs and leftovers
+*.log
+logs/
+tmp/
+*.orig
+*.rej
+*.bundle
+*.zip

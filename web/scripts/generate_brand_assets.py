@@ -21,7 +21,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 # ----------------------------------------------------------------------------
-# Brand tokens (IGNITION v5 — MotoQuant_Identity_Kit + web/tailwind.config.js)
+# Brand tokens (IGNITION v5 — web/tailwind.config.js)
 # ----------------------------------------------------------------------------
 ORANGE = "#FF5E1F"  # Signal (identity kit)
 ORANGE_LIGHT = "#FF8F57"
@@ -80,7 +80,7 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # ----------------------------------------------------------------------------
-# Logo mark: the identity kit "redline Q" (MotoQuant_Identity_Kit, July 2026).
+# Logo mark: the "redline Q" (July 2026; see web/components/GaugeMark.js).
 # Heavyweight dial ring, 30-degree sector gap at 315, tapered needle that
 # accelerates outward through the gap, hub dot at large sizes (the kit app
 # icon drops the hub below 64px). Geometry lifted from the kit SVGs verbatim

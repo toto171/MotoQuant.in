@@ -1,8 +1,6 @@
 
 # Shell scripts must be LF — CRLF breaks bash on Linux/WSL
 *.sh text eol=lf
-scripts/agents/*.md text eol=lf
-scripts/subagents/*.md text eol=lf
 
 # Python sources must be LF (2026-08-08): defaults.py silently flipped
 # CRLF->LF inside a physics commit, burying a 76-line change under ~1,510

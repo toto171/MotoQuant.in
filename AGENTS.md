@@ -1,10 +1,9 @@
 # AGENTS.md — working agreement for any contributor (human or AI)
 
-> This is the **canonical, model-agnostic contract** for changing this repo.
-> It is short on purpose. Read it fully before your first edit. It applies to
-> every AI coding tool (Claude, Cursor, Copilot, Gemini, …) and every human.
-> `CLAUDE.md` is a *different* thing — a long session changelog; skim only its
-> top entry. Start here, not there.
+> This is the **canonical contract** for changing this repo. It is short on
+> purpose. Read it fully before your first edit. It applies to every human
+> and every AI coding tool; `CLAUDE.md` and `.github/copilot-instructions.md`
+> only point back here.
 
 MotoQuant is a free, open-source (Apache-2.0) first-principles physics engine
 for motorcycle quarter-mile drag racing, plus the product built on it (CLI,
@@ -67,10 +66,13 @@ before a big change.
 6. **When you touch `web/**`, run `make web-build`** (that's what Vercel runs).
    `useSearchParams()` must sit inside a `<Suspense>` boundary or the static
    build fails.
-7. **Don't rewrite `CLAUDE.md`** — it's a fragile single-paragraph changelog;
-   prepend one line at most. Put substantive write-ups in `reports/`.
-8. **Verify file length after a large Write** (`wc -l`) — write tools can
-   truncate; a suspiciously short file lost its tail.
+7. **Caches of the physics are regenerated with the change that moves it:**
+   the regression snapshot, the stock leaderboard, the instant-estimate model
+   and the browser engine fixtures (see the regeneration list in
+   [CONTRIBUTING.md](CONTRIBUTING.md)).
+8. **Record what you measured.** A change that moves accuracy carries its
+   sweep result in the pull request; a larger investigation gets a short
+   write-up in `reports/`.
 
 ## 3. Where things live
 
