@@ -216,7 +216,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "If you own either bike or are choosing between them, the MotoQuant simulator lets you set your own conditions: rider weight, ambient temperature, the elevation of your local strip, and parts-catalog mods. Both bikes are in the catalog with gear ratios from the service manuals and Cd values. Each run at motoquant.in/simulator takes about 30 seconds.",
+    text: "If you own either bike or are choosing between them, the MotoQuant simulator lets you set your own conditions: rider weight, ambient temperature, the elevation of your local strip, and parts-catalog mods. Both bikes are in the catalog with Cd values and gear ratios from the service manuals. Each run at motoquant.in/simulator takes about 30 seconds.",
   },
   {
     type: 'p',

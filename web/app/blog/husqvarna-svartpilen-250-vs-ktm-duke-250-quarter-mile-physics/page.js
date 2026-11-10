@@ -50,7 +50,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The bikes differ in final drive and aerodynamics. The Duke 250 runs F16 / R47 sprockets. KTM picked that taller setup because Duke owners ride at city speeds 80 percent of the time, and a tall final drive cuts engine RPM at an 80 km/h cruise. The Svartpilen runs F14 / R46. Per Husqvarna India’s 2024 parts catalogue, that is a deliberately shorter final drive, chosen to suit the bike’s mid-range torque. Husqvarna markets the Svartpilen as the bike that pulls harder out of corners and in the lower gears, and on a drag strip that same choice pays off.',
+    text: 'The bikes differ in final drive and aerodynamics. The Duke 250 runs F16 / R47 sprockets. KTM picked that taller setup because Duke owners ride at city speeds 80 percent of the time, and a tall final drive cuts engine RPM at an 80 km/h cruise. The Svartpilen runs F14 / R46. Per Husqvarna India’s 2024 parts catalogue, that is a deliberately shorter final drive, chosen to suit the bike’s mid-range torque. Husqvarna markets the Svartpilen as the bike that pulls harder out of corners and in the lower gears. On a drag strip, that gearing choice pays off.',
   },
   {
     type: 'h2',
@@ -88,7 +88,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: '1. Final drive. The Husqvarna’s F14 / R46 gives a final-drive ratio of 3.286 against 2.938 for the Duke’s F16 / R47, about 12 percent shorter. With the same six gearbox ratios, the same primary and the same tire rolling radius, the shorter final drive covers less ground per engine revolution, trading top-end gearing for mid-gear acceleration. On a 250 cc bike that reaches the 402-metre trap line in fourth gear, twelve percent more leverage in every gear except top has the Svartpilen pulling roughly 270 rpm higher than the Duke at the trap. On a 30 hp single whose power curve is steep above 7,500 rpm, those 270 rpm are worth real trap speed.',
+    text: '1. Final drive. The Husqvarna’s F14 / R46 gives a final-drive ratio of 3.286 against 2.938 for the Duke’s F16 / R47, about 12 percent shorter. With the same six gearbox ratios, the same primary and the same tire rolling radius, the shorter final drive covers less ground per engine revolution, trading top-end gearing for mid-gear acceleration. On a 250 cc bike that reaches the 402-metre trap line in fourth gear, twelve percent more leverage in every gear except top means the Svartpilen is pulling roughly 270 rpm higher than the Duke at the trap. On a 30 hp single whose power curve is steep above 7,500 rpm, those 270 rpm are worth real trap speed.',
   },
   {
     type: 'p',
@@ -96,7 +96,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: '3. Mass. KTM India’s spec sheet gives the Duke 250 at 148 kg dry. The Svartpilen 250 is 144 kg dry (154 kg kerb minus the roughly 10 kg of fuel in the 9.5-litre tank). The 4 kg helps a little at launch, though the simulator has the two bikes essentially tied at 60 feet because traction limits both, and it adds a small advantage through the rest of the run. With a 78 kg rider the Husky carries 222 kg in total against the Duke’s 226 kg, 1.8 percent less. On its own that is worth maybe 0.05 seconds of ET: real, but small.',
+    text: '3. Mass. KTM India’s spec sheet gives the Duke 250 at 148 kg dry. The Svartpilen 250 is 144 kg dry (154 kg kerb minus the roughly 10 kg of fuel in the 9.5-litre tank). The 4 kg gap helps a little at launch, though the simulator has the two bikes essentially tied at 60 feet because traction limits both. After that it adds a small advantage through the rest of the run. With a 78 kg rider the Husky carries 222 kg in total against the Duke’s 226 kg, 1.8 percent less. On its own that is worth maybe 0.05 seconds of ET: real, but small.',
   },
   {
     type: 'h2',
@@ -136,7 +136,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'On a Svartpilen, the sport tire alone is the big mod. The OEM Apollo Alpha H1 in 150/60-17 is a competent street tire, but it is no Pirelli Diablo. Fit a Diablo Rosso II or a Michelin Road 5 and the simulator takes about 0.3 seconds off the stock 14.77, into the 14.4-second range. After that the cost per tenth climbs steeply. An ECU flash adds another 0.25 seconds for ₹14,000, a marginal call. A slip-on exhaust at ₹38,000+ for 0.15 seconds is brutal value on a sub-25 hp bike.',
+    text: 'On a Svartpilen, the sport tire alone is the big mod. The OEM Apollo Alpha H1 in 150/60-17 is a competent street tire, but it is no Pirelli Diablo. Fit a Diablo Rosso II or a Michelin Road 5 and the simulator takes about 0.3 seconds off the stock 14.77, into the 14.4-second range. After that the cost per tenth climbs steeply. An ECU flash takes off another 0.25 seconds for ₹14,000, a marginal call. A slip-on exhaust at ₹38,000+ for 0.15 seconds is brutal value on a sub-25 hp bike.',
   },
   {
     type: 'callout',
@@ -178,7 +178,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'If you are choosing between a Duke 250 and a Svartpilen 250, your local dealer may not be able to tell you which is quicker; sales training covers engines and ergonomics, not aerodynamics. The simulator at motoquant.in lets you set rider weight, ambient temperature, density altitude, tire choice and final-drive ratio and watch the ETs change live. Both bikes start with the Indian-market 30 hp tune and OEM sprockets. Put the Duke on F15 and the gap shrinks by roughly 0.15 seconds. Put both on Pirelli Diablo Rosso IIs and the gap stays close to the stock figure, because the same tire helps both bikes by roughly the same factor.',
+    text: 'If you are choosing between a Duke 250 and a Svartpilen 250, the salesperson at your local dealer cannot tell you which is quicker, because their training covers engines and ergonomics, not aerodynamics. The simulator at motoquant.in lets you set rider weight, ambient temperature, density altitude, tire choice and final-drive ratio and watch the ETs change live. Both bikes start with the Indian-market 30 hp tune and OEM sprockets. Put the Duke on F15 and the gap shrinks by roughly 0.15 seconds. Put both on Pirelli Diablo Rosso IIs and the gap stays close to the stock figure, because the same tire helps both bikes by roughly the same factor.',
   },
   {
     type: 'p',
@@ -186,7 +186,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Two caveats. Every number in this post is a stock-tune simulation under specific conditions. Change the rider weight, the surface or the launch technique and the absolute ETs move, but the quicker bike stays quicker. And the entry-200-300 cc cluster has a +0.5 to +1.4 s slow bias against real instrumented runs, so expect a competent rider on a warm bike with good launches to beat the sim figures, with the gap between the two bikes roughly constant. These figures will tighten as more Indian small-cc Dragy and VBOX timeslips join the benchmark set.',
+    text: 'Two caveats. Every number in this post is a stock-tune simulation under specific conditions. Change the rider weight, the surface or the launch technique and the absolute ETs move, but the quicker bike stays quicker. And the entry-200-300 cc cluster has a +0.5 to +1.4 s slow bias against real instrumented runs, so expect a competent rider on a warm bike with good launches to beat the sim figures, with the gap between the two bikes roughly constant. The bias will tighten as more Indian small-cc Dragy and VBOX timeslips join the benchmark set.',
   },
 ];
 
@@ -318,7 +318,7 @@ export default function PostPage() {
               <Link href="/blog/pulsar-ns200-vs-apache-rtr-200-quarter-mile-physics" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Pulsar NS200 vs Apache RTR 200 4V quarter-mile physics
               </Link>:{' '}
-              two rival makers in the same Indian sub-300cc segment, decided by similar physics.
+              the same Indian sub-300cc segment, with similar physics levers deciding it.
             </li>
             <li>
               ·{' '}

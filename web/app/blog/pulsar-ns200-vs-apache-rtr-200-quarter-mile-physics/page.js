@@ -35,7 +35,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'The Bajaj Pulsar NS200 and the TVS Apache RTR 200 4V are the two bikes Indian 200cc drag riders argue about most. MotoQuant simulates the 2017+ NS200 at roughly 15.9 seconds and the 2016+ Apache RTR 200 4V at roughly 16.4 seconds under matched Aamby Valley November conditions. That half-second gap maps almost exactly onto the 4 hp and 18 kg the bikes do not share. Below: where each one wins, where the simulator puts the gap, and which three mods buy the most ET on each platform for under ₹15,000.',
+    text: 'The Bajaj Pulsar NS200 and the TVS Apache RTR 200 4V are the two bikes Indian 200cc drag riders argue about most. MotoQuant simulates the 2017+ NS200 at roughly 15.9 seconds and the 2016+ Apache RTR 200 4V at roughly 16.4 seconds under matched Aamby Valley November conditions. That half-second gap maps almost exactly onto the 4 hp and 18 kg the bikes do not share. Each bike wins somewhere. The sections below cover where, where the simulator puts the gap, and which three mods buy the most ET on each platform for under ₹15,000.',
   },
   {
     type: 'h2',
@@ -170,7 +170,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The simulator output assumes matched conditions, matched rider weight and a clean launch on both bikes. Real strip days add rider, tire-temperature and chain-wear variance, which together add roughly ±0.15 s of noise on either bike.',
+    text: 'The simulator output assumes matched conditions, matched rider weight and a clean launch on both bikes. Real strip days add rider, tire-temperature and chain-wear variance, which together put roughly ±0.15 s of noise on either bike.',
   },
   {
     type: 'p',

@@ -80,7 +80,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "Launch RPM is the second cause. Magazine testers run a fully warmed bike with traction control at its lowest setting, dump the clutch at exactly the rpm where the front tyre just begins to skim, and ride the throttle through 60 feet on the edge of a wheelie. MotoQuant pins its launch-RPM floor to the bike's peak-torque rpm. That is conservative and repeatable, and it suits a smart rider rather than a heroic one. On the 1390 the difference is roughly 0.10 to 0.15s of 60-foot time, which alone accounts for half of the sim-real gap.",
+    text: "Launch RPM is the second cause. Magazine testers run a fully warmed bike with traction control at its lowest setting, dump the clutch at exactly the rpm where the front tire just begins to skim, and ride the throttle through 60 feet on the edge of a wheelie. MotoQuant pins its launch-RPM floor to the bike's peak-torque rpm. That is conservative and repeatable, and it suits a smart rider rather than a heroic one. On the 1390 the difference is roughly 0.10 to 0.15s of 60-foot time, which alone accounts for half of the sim-real gap.",
   },
   {
     type: 'callout',
@@ -100,7 +100,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "There is one quiet exception. The 1390's revised crankshaft and pistons sharpen throttle response between 4,000 and 7,000 rpm, the range the bike spends most of its time in during a low-traction launch. The simulator does not currently model this transient gain, because its torque curve is interpolated from peak figures plus the documented dyno band. The real 1390 may therefore pull slightly harder out of the hole than the model predicts. That would bring a careful rider closer to the magazine's 9.95s than to the simulated 10.225s: better mid-band response takes another 0.05–0.10s off the simulated time with no other change.",
+    text: "There is one exception. The 1390's revised crankshaft and pistons sharpen throttle response between 4,000 and 7,000 rpm, the range the bike spends most of its time in during a low-traction launch. The simulator does not currently model this transient gain, because its torque curve is interpolated from peak figures plus the documented dyno band. The real 1390 may therefore pull slightly harder out of the hole than the model predicts. That would bring a careful rider closer to the magazine's 9.95s than to the simulated 10.225s: better mid-band response takes another 0.05–0.10s off the simulated time with no other change.",
   },
   {
     type: 'h2',
@@ -194,7 +194,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "Two caveats. First, every number in this post is a stock-tune simulation under specific conditions. Change the rider weight, the ambient temperature, the surface or the launch technique and the absolute ETs shift, but the order of which mods help most stays the same. Second, work on closing the simulator's litre-naked cluster bias is ongoing. The May 2026 calibration work added Hypothesis property tests that pin the four load-bearing physics knobs to monotonic invariants, which makes future bias corrections safer to ship. Today's 10.225s might become a 10.10s in three months with no change to the bike's spec.",
+    text: "Two caveats. First, every number in this post is a stock-tune simulation under specific conditions. Change the rider weight, the ambient temperature, the surface or the launch technique and the absolute ETs shift, but the ranking of which mods help most stays the same. Second, work on closing the simulator's litre-naked cluster bias is ongoing. The May 2026 calibration work added Hypothesis property tests that pin the four load-bearing physics knobs to monotonic invariants, which makes future bias corrections safer to ship. Today's 10.225s might become a 10.10s in three months with no change to the bike's spec.",
   },
   {
     type: 'p',

@@ -40,7 +40,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: "Over a full quarter mile at Aamby Valley, MotoQuant puts a stock Kawasaki Ninja ZX-14R 0.35 seconds ahead of a stock Suzuki Hayabusa. Over the first 60 feet, the Hayabusa is 0.035 seconds quicker. So the answer to \"which is faster off the line\" depends on what you mean by \"off the line\". The two bikes have shared the title of \"fastest production motorcycle on a public road\" for over twenty years, and they trade wins on dyno charts, in magazine timing runs and in Sunday morning arguments outside Pune coffee shops. The Hayabusa Gen1 is one of the simulator's reference bikes, pinned at 10.1100 seconds, and the ZX-14R 2012 sits in the same hyper-sport class. (Updated 10 November 2026: the simulated times were re-run on the current engine.)",
+    text: "Over a full quarter mile at Aamby Valley, MotoQuant puts a stock Kawasaki Ninja ZX-14R 0.35 seconds ahead of a stock Suzuki Hayabusa. Over the first 60 feet, the simulator has the Hayabusa 0.035 seconds quicker. So the answer to \"which is faster off the line\" depends on what you mean by \"off the line\". The two bikes have shared the title of \"fastest production motorcycle on a public road\" for over twenty years, and they trade wins on dyno charts, in magazine timing runs and in Sunday morning arguments outside Pune coffee shops. The Hayabusa Gen1 is one of the simulator's reference bikes, pinned at 10.1100 seconds, and the ZX-14R 2012 sits in the same hyper-sport class. (Updated 10 November 2026: the simulated times were re-run on the current engine.)",
   },
   {
     type: 'h2',
@@ -52,7 +52,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "MotoQuant takes the spec sheet it simulates from the catalog entries seeded in the project (SUZUKI_HAYABUSA_GEN2 and KAWASAKI_ZX14R_2012). The Hayabusa Gen1 reference bike behind the validated 10.1100 s ET is a slightly older model (1999-2007, 170 hp at the wheel), defined separately in defaults.py.",
+    text: "The spec sheet MotoQuant simulates, in the table below, comes from the catalog entries seeded in the project (SUZUKI_HAYABUSA_GEN2 and KAWASAKI_ZX14R_2012). The Hayabusa Gen1 reference bike behind the validated 10.1100 s ET is a slightly older model (1999-2007, 170 hp at the wheel), defined separately in defaults.py.",
   },
   {
     type: 'table',

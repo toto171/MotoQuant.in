@@ -662,7 +662,7 @@ export default function AccuracyExplorer({ data }) {
       <Section
         kicker="The numbers"
         title={<>Where the <span className="text-accent">residuals</span> land</>}
-        sub={`Across ${n_matched} matched benchmarks the model is essentially centred at zero, and more than half land inside a fifth of a second.`}
+        sub={`Across ${n_matched} matched benchmarks the model is centred close to zero, and more than half land inside a fifth of a second.`}
       >
         <Distribution dist={distribution} overall={overall} n={n_matched} topTen={topTen} />
       </Section>

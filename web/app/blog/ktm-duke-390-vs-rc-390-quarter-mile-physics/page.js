@@ -72,7 +72,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Both ETs sit inside MotoQuant\'s mid-twin-300-500 cluster bias band of about ±0.4 seconds. The relative gap (two tenths and four km/h) is stable across rider weight, ambient temperature, and density altitude sweeps. The Duke 390 is always slower, by margins that match a Cd × A delta. The bikes are roughly equal off the line, where aerodynamics barely matters, and the gap opens as speed climbs: the RC 390 is seven hundredths ahead at the 1/8-mile mark and two tenths ahead at the trap. Neither bike has a Dragy timeslip in our benchmark set yet, so the absolute numbers carry the cluster band of uncertainty, but the order of the two bikes is structural.',
+    text: 'Both ETs sit inside MotoQuant\'s mid-twin-300-500 cluster bias band of about ±0.4 seconds. The relative gap (two tenths and four km/h) is stable across rider weight, ambient temperature, and density altitude sweeps. The Duke 390 is consistently slower, by margins that match a Cd × A delta. The bikes are roughly equal off the line, where aerodynamics barely matters, and the gap opens as speed climbs: the RC 390 is seven hundredths ahead at the 1/8-mile mark and two tenths ahead at the trap. Neither bike has a Dragy timeslip in our benchmark set yet, so the absolute numbers carry the cluster band of uncertainty, but the order of the two bikes is structural.',
   },
   {
     type: 'callout',

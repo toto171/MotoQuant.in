@@ -6,7 +6,7 @@ import StructuredData, { articleSchema } from '../../StructuredData';
 const SLUG = 'cfmoto-675sr-r-quarter-mile-physics';
 const TITLE = 'CFMoto 675SR-R quarter-mile physics: the 95hp Daytona 660 rival';
 const DESCRIPTION =
-  'MotoQuant simulates the CFMoto 675SR-R at 11.323s with a 214.4 km/h trap. CFMoto\'s first inline triple costs under INR 6 lakh; here is how its physics compares with the Daytona 660, Street Triple 765 R, MT-09 and its 800NK sibling.';
+  'MotoQuant simulates the CFMoto 675SR-R at 11.323s with a 214.4 km/h trap. Here is how CFMoto\'s first inline triple, priced under INR 6 lakh, compares in the sim with the Daytona 660, Street Triple 765 R, MT-09 and its 800NK sibling.';
 
 export const metadata = {
   title: 'CFMoto 675SR-R quarter-mile physics | MotoQuant',
@@ -35,7 +35,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'MotoQuant simulates the CFMoto 675SR-R at 11.323 seconds and a 214.4 km/h trap under Aamby Valley November conditions. That trap is 5.6 km/h faster than a Triumph Daytona 660 in the same sim, and the Daytona\'s ET sits 0.24 seconds behind. CFMoto\'s first inline triple is due in India at a target price of around INR 5.85 lakh ex-showroom, about INR 3 lakh under the Daytona and INR 4 lakh under a Street Triple 765 R. The bike is fast. The useful question is what 675cc of Chinese inline triple buys you against the established British bikes, and where the simulator finds the tenths.',
+    text: 'MotoQuant simulates the CFMoto 675SR-R at 11.323 seconds and a 214.4 km/h trap under Aamby Valley November conditions. That trap is 5.6 km/h faster than a Triumph Daytona 660 in the same sim, and the Daytona\'s ET sits 0.24 seconds behind. CFMoto\'s first inline triple is due in India at a target price of around INR 5.85 lakh ex-showroom, about INR 3 lakh under the Daytona and INR 4 lakh under a Street Triple 765 R. Its speed is not in doubt. The useful question is what 675cc of Chinese inline triple buys you against the established British bikes, and where the simulator finds the tenths.',
   },
   {
     type: 'h2',
@@ -96,7 +96,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The Street Triple 765 R shows the other side. At 765cc and 123 hp, it has 28 more horsepower and 14 more newton-meters of torque than the SR-R. The simulator scores it at 11.001s and 217.3 km/h: 0.32 seconds quicker, but only 2.9 km/h faster at the trap. The Triumph wins the launch and the 60-foot because its extra torque pulls harder off the line, then loses most of its trap-speed advantage to the SR-R fairing. Put the SR-R bodywork on the Street Triple and the simulator says it would run a 10.85. CFMoto spent on aerodynamics where the British bikes spent on the engine.',
+    text: 'The Street Triple 765 R shows the other side. At 765cc and 123 hp, it has 28 more horsepower and 14 more newton-meters of torque than the SR-R. The simulator scores it at 11.001s and 217.3 km/h: 0.32 seconds quicker, but only 2.9 km/h faster at the trap. The Triumph wins the launch and the first 60 feet because its extra torque pulls harder off the line, then loses most of its trap-speed advantage to the SR-R fairing. Put the SR-R bodywork on the Street Triple and the simulator says it would run a 10.85. CFMoto spent on aerodynamics where the British bikes spent on the engine.',
   },
   {
     type: 'h2',
@@ -140,11 +140,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'For drag use, the key fact is that the 6-speed cassette is identical to the 800NK\'s, so the established 800NK aftermarket gearing parts fit directly. Powertronic India already lists a Stage 1 ECU flash for the 800NK ECU family at INR 32,000. CFMoto India has confirmed that the SR-R will ship with the same Bosch ECU SKU, so the flash is expected to work on both bikes from launch day. The simulator estimates that a Powertronic Stage 1 flash, an Akrapovic slip-on and a 16/45 sprocket swap would take the SR-R to 11.05 to 11.10 seconds for under INR 95,000 in parts. That is within 0.05 seconds of a stock Street Triple 765 R for less than half the total cost of bike plus mods.',
+    text: 'For drag use, the SR-R has the same 6-speed cassette as the 800NK, so the established 800NK aftermarket gearing parts fit directly. Powertronic India already lists a Stage 1 ECU flash for the 800NK ECU family at INR 32,000. CFMoto India has confirmed that the SR-R will ship with the same Bosch ECU SKU, so the flash is expected to work on both bikes from launch day. The simulator estimates that a Powertronic Stage 1 flash, an Akrapovic slip-on and a 16/45 sprocket swap would take the SR-R to 11.05 to 11.10 seconds for under INR 95,000 in parts. That is within 0.05 seconds of a stock Street Triple 765 R for less than half the total cost of bike plus mods.',
   },
   {
     type: 'callout',
-    text: 'Fastest path on the SR-R: the Powertronic Stage 1 flash first (around INR 32,000, expected 0.08 seconds), then a 16/45 sprocket swap (around INR 4,500, expected 0.05 seconds), then an Akrapovic slip-on if you want the sound. The slip-on alone is worth closer to 0.02 seconds, so buy it for the noise. Skip air filter and airbox mods; they show up on the dyno graph but not on the strip.',
+    text: 'Fastest path on the SR-R: the Powertronic Stage 1 flash first (around INR 32,000, expected 0.08 seconds), then a 16/45 sprocket swap (around INR 4,500, expected 0.05 seconds), then an Akrapovic slip-on if you want the sound. The slip-on alone is worth closer to 0.02 seconds, so buy it for the noise. Skip the air filter and airbox mods; they show up on the dyno graph but not on the strip.',
   },
   {
     type: 'h2',

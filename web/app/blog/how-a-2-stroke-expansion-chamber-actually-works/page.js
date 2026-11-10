@@ -34,7 +34,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: "lead",
-    text: "A 2-stroke expansion chamber is a tuned acoustic device. On a Yamaha RX100 it swings peak torque from roughly 35 % of its potential to 100 % across a window only about 1,500 rpm wide. Get the geometry right and the bike makes its rated 11 hp at 7,500 rpm. Get it wrong and the bike pulls like a lawnmower. The simulator currently runs the 2-stroke cluster at a +0.494 s bias against published benchmarks across five bikes. What limits that figure most is how few real instrumented timeslips exist for vintage Indian and Japanese 2T machines.",
+    text: "A 2-stroke expansion chamber is a tuned acoustic device. On a Yamaha RX100 it swings peak torque from roughly 35 % of its potential to 100 % across a window only about 1,500 rpm wide. Get the geometry right and the bike makes its rated 11 hp at 7,500 rpm. Get it wrong and the bike pulls like a lawnmower. The simulator currently runs the 2-stroke cluster at a +0.494 s bias against published benchmarks across five bikes. That figure is limited mostly by how few real instrumented timeslips exist for vintage Indian and Japanese 2T machines.",
   },
   {
     type: "h2",
@@ -143,7 +143,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: '1. Benchmark scarcity. The five 2T bikes that match published instrumented data are RD350, RD400 Daytona, NSR250R MC21, RS250, and RZV500R. The Indian-market RX100 / RX135 / RXZ135 trio has zero published timed quarter-mile data. Every "12.4 second RX100" claim on a forum is a Dragy GPS app reading on a public road, not a strip timing trap. The simulator carries those bikes but cannot validate their absolute ET against magazine data.',
+    text: '1. Benchmark scarcity. The five 2T bikes that match published instrumented data are RD350, RD400 Daytona, NSR250R MC21, RS250 and RZV500R. The Indian-market RX100 / RX135 / RXZ135 trio has zero published timed quarter-mile data. Every "12.4 second RX100" claim on a forum is a Dragy GPS app reading on a public road, not a strip timing trap. The simulator carries those bikes but cannot validate their absolute ET against magazine data.',
   },
   {
     type: "p",

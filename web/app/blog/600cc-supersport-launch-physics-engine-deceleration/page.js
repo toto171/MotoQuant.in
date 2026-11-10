@@ -48,7 +48,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The benchmark quality was not the problem. All eight come from instrumented Sport Rider and MotoStatz tests, with documented launch protocols and fifth-wheel or Dragy GPS verification. The bikes were not the problem either. K5 GSX-R 1000, R1 4C8, and Hayabusa Gen 1, our three reference baselines, held to four decimal places (10.0334s / 10.2859s / 10.4712s, the pins of that era; the July 2026 physics epoch later re-based them). The litre-sport-195+ cluster had a mean absolute delta of 0.138 seconds. The fault was specific to 600cc inline-fours, not to inline-fours in general or to the launch model as a whole.", // [historical baselines]
+    text: "The benchmark quality was not the problem. All eight come from instrumented Sport Rider and MotoStatz tests, with documented launch protocols and fifth-wheel or Dragy GPS verification. The bikes were not the problem either. K5 GSX-R 1000, R1 4C8, and Hayabusa Gen 1, our three reference baselines, stayed exact to four decimal places (10.0334s / 10.2859s / 10.4712s, the pins of that era; the July 2026 physics epoch later re-based them). The litre-sport-195+ cluster had a mean absolute delta of 0.138 seconds. The fault was specific to 600cc inline-fours, not to inline-fours in general or to the launch model as a whole.", // [historical baselines]
   },
   {
     type: "table",
@@ -303,7 +303,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The cruiser-1300+ cluster (VMAX 1700, Rocket 3 R, Rocket 3 Storm R) shows the same clean signal that mid-twin-500-700 showed two weeks ago: three instrumented benchmarks, all slow by roughly 528 milliseconds, all similar hardware (heavy V-twin / inline-three muscle bikes with heavy flywheels). The cruiser profile currently has over_clutch_factor=0.0 and max_engine_decel_rads2=0.0, both knobs disabled. That is almost certainly too conservative for a launch model on a 1,700cc engine making 165 Nm of crank torque. A modest bump (over_clutch_factor to 0.15, max_engine_decel_rads2 to 100, much lower than 600 because cruiser cranks are 3-4× heavier than 600cc supersport cranks) should close most of the cruiser bias next session.",
+    text: "The cruiser-1300+ cluster (VMAX 1700, Rocket 3 R, Rocket 3 Storm R) shows the same clean signal that mid-twin-500-700 showed two weeks ago: three instrumented benchmarks, all slow by roughly 528 milliseconds, all on similar hardware (heavy V-twin / inline-three muscle bikes with heavy flywheels). The cruiser profile currently has over_clutch_factor=0.0 and max_engine_decel_rads2=0.0, both knobs disabled. That is almost certainly too conservative for a launch model on a 1,700cc engine making 165 Nm of crank torque. A modest bump (over_clutch_factor to 0.15, max_engine_decel_rads2 to 100, much lower than 600 because cruiser cranks are 3-4× heavier than 600cc supersport cranks) should close most of the cruiser bias next session.",
   },
   {
     type: "p",
@@ -311,7 +311,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Two other jobs are open. We still need to wire mu_peak_override into submodels/tire.py, which gives a new lever for the two-stroke and entry-150-200 clusters. Those two clusters are dead-knob cases today, because every existing lever either has no headroom or is gated out by dyno_curve.is_at_wheel. We also need to wire chain_efficiency_override into submodels/drivetrain.py so small-cc bikes can take per-bike chain-loss calibration. Both are ~15-line patches, queued for the next maintenance window.",
+    text: "Two other jobs are open. We still need to wire mu_peak_override into submodels/tire.py to get a new lever for the two-stroke and entry-150-200 clusters. Those two clusters are dead-knob cases today, because every existing lever either has no headroom or is gated out by dyno_curve.is_at_wheel. We also need to wire chain_efficiency_override into submodels/drivetrain.py so small-cc bikes can take per-bike chain-loss calibration. Both are ~15-line patches, queued for the next maintenance window.",
   },
   {
     type: "h2",

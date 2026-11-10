@@ -48,11 +48,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The J-platform displaces 349cc from a 72mm bore × 85.8mm stroke, a longer-stroke configuration than the UCE\'s 70mm × 90.5mm. Peak power is declared at 20.2 hp at 6100 rpm and 27 Nm at 4000 rpm (Royal Enfield press kit, 2023). The air/oil-cooled single uses a SOHC two-valve head with electronic fuel injection (replacing the earlier carburetted versions). Its cam profile is much milder than the UCE\'s; the UCE made 19.8 hp at 5250 rpm, with a narrower, peakier torque curve. The torque peak at 4000 rpm is 1000 rpm lower than on the Meteor and Hunter variants. That is a deliberate calibration for low-speed tractability, which the Bullet has always put ahead of outright performance.',
+    text: 'The J-platform displaces 349cc from a 72mm bore × 85.8mm stroke, a longer-stroke configuration than the UCE\'s 70mm × 90.5mm. Peak power is declared at 20.2 hp at 6100 rpm and 27 Nm at 4000 rpm (Royal Enfield press kit, 2023). The air/oil-cooled single uses a SOHC two-valve head with electronic fuel injection (replacing the earlier carburetted versions). Its cam profile is milder than the UCE\'s; the UCE made 19.8 hp at 5250 rpm, with a narrower, peakier torque curve. The torque peak at 4000 rpm is 1000 rpm lower than on the Meteor and Hunter variants. That is a deliberate calibration for low-speed tractability, which the Bullet has always put ahead of outright performance.',
   },
   {
     type: 'p',
-    text: 'Royal Enfield publishes a kerb mass of 195 kg (wet). With a typical 17-litre fuel tank (at 0.745 kg/litre for petrol) and 2.3 litres of engine oil, dry mass works out to approximately 178 kg. That is clearly more than the 191 kg kerb weight of the Hunter 350 and the 192 kg of the Meteor 350. The extra mass comes from the traditional pressed-steel frame, the cast-iron cylinder block and a fuel tank larger than the Hunter\'s.',
+    text: 'Royal Enfield publishes a kerb mass of 195 kg (wet). With a typical 17-litre fuel tank (at 0.745 kg/litre for petrol) and 2.3 litres of engine oil, dry mass works out to approximately 178 kg. The kerb figure sits noticeably above the 191 kg kerb weight of the Hunter 350 and the 192 kg of the Meteor 350. The extra mass comes from the traditional pressed-steel frame, the cast-iron cylinder block and a fuel tank larger than the Hunter\'s.',
   },
   {
     type: 'h2',
@@ -107,7 +107,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The Hunter 350 is the quickest of the four in the simulator (17.45 seconds at a 122 km/h trap) on the identical engine. Its 14 kg mass advantage (181 kg vs 195 kg kerb) is worth roughly 0.15 seconds, and its lower drag coefficient (a naked, scrambler-like profile against the Bullet\'s upright café stance) is worth the remaining 0.13 seconds. The Meteor 350\'s cruiser-style wind deflectors add a little drag over the Hunter, and it lands at 17.62 seconds. The Classic 350 has the most drag of the four (Cd 0.85: the chrome headlamp nacelle and the large mudguards add frontal blockage) and sits at 17.91 seconds, nearly half a second behind the Hunter on the same engine.',
+    text: 'The Hunter 350 is the quickest of the four in the simulator (17.45 seconds at a 122 km/h trap) with the identical engine. Its 14 kg mass advantage (181 kg vs 195 kg kerb) is worth roughly 0.15 seconds, and its lower drag coefficient (a naked, scrambler-like profile against the Bullet\'s upright café stance) is worth the remaining 0.13 seconds. The Meteor 350\'s cruiser-style wind deflectors add a little drag over the Hunter, and it lands at 17.62 seconds. The Classic 350 has the most drag of the four (Cd 0.85: the chrome headlamp nacelle and the large mudguards add frontal blockage) and sits at 17.91 seconds, nearly half a second behind the Hunter on the same engine.',
   },
   {
     type: 'callout',
@@ -123,7 +123,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'At Aamby Valley and MMRT, the Bullet 350 is a fairly common sight in the weekend-open class, usually ridden by commuters doing their first strip run rather than by dedicated drag racers. The 17.7-second ET puts it well into the entry-leisure segment, ahead of a Hero Xtreme 200S 4V (17.4s simulator) but behind an RE Continental GT 650 (14.1s simulator) and considerably behind a TVS Apache RTR 200 4V (approximately 16.4s). If you want sub-16-second times from a Royal Enfield, look at the Continental GT 650 or Interceptor 650: same company, very different engine architecture.',
+    text: 'At Aamby Valley and MMRT, the Bullet 350 is a fairly common sight in the weekend-open class, usually as a commuter on its first strip run rather than as a dedicated drag bike. The 17.7-second ET puts it well into the entry-leisure segment, ahead of a Hero Xtreme 200S 4V (17.4s simulator) but behind an RE Continental GT 650 (14.1s simulator) and considerably behind a TVS Apache RTR 200 4V (approximately 16.4s). If you want sub-16-second times from a Royal Enfield, look at the Continental GT 650 or Interceptor 650: same company, very different engine architecture.',
   },
   {
     type: 'h2',
@@ -146,7 +146,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The cheapest tenth is the rear sprocket swap. A 44-tooth rear sprocket (up from the stock 41T) shortens the final drive by 7.3 percent and keeps the engine deeper in its power band through the early gears. The torque curve peaks at 4000 rpm and falls away above 5500 rpm, so this change pulls first-gear exit speed down from 63 km/h to 57 km/h. That sounds like a penalty, but it keeps the engine in the 3500-4500 rpm band for longer during the acceleration pulse, where the torque curve is flattest. The simulator estimates 0.22 seconds of ET gain for approximately ₹2,400 including fitting. That is ₹10,900 per tenth, acceptable for an entry-segment bike.',
+    text: 'The cheapest tenth is the rear sprocket swap. A 44-tooth rear sprocket (up from the stock 41T) shortens the final drive by 7.3 percent and keeps the engine deeper in its power band through the early gears. It pulls first-gear exit speed down from 63 km/h to 57 km/h. That sounds like a penalty, but on a bike whose torque curve peaks at 4000 rpm and falls away above 5500 rpm, it keeps the engine in the 3500-4500 rpm band for longer during the acceleration pulse, where the torque curve is flattest. The simulator estimates 0.22 seconds of ET gain for approximately ₹2,400 including fitting. That is ₹10,900 per tenth, acceptable for an entry-segment bike.',
   },
   {
     type: 'p',
@@ -154,7 +154,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The air filter and slip-on exhaust both improve peak breathing past 5500 rpm where the stock J-platform head is most restricted. Together they add an estimated 1-1.5 hp at the top of the rev range. On 20.2 hp of peak power that is a 5-7 percent gain, which sounds useful. The ET payoff is small, though, because the extra power only arrives in the last few hundred metres, when the bike is already in fourth gear and the engine is near redline. The pair costs ₹12,100 for approximately 0.15 seconds of ET, about ₹80,700 per tenth: poor value next to the sprocket swap.',
+    text: 'The air filter and slip-on exhaust both improve peak breathing past 5500 rpm where the stock J-platform head is most restricted. Together they add an estimated 1-1.5 hp at the top of the rev range. On 20.2 hp of peak power that is a 5-7 percent gain, meaningful on its own. The ET payoff is still small, because the extra power only arrives in the last few hundred metres, when the bike is already in fourth gear and the engine is near redline. The pair costs ₹12,100 for approximately 0.15 seconds of ET, about ₹80,700 per tenth: poor value next to the sprocket swap.',
   },
   {
     type: 'h2',
@@ -341,7 +341,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Simulate your Bullet 350</div>
             <div className="text-white/60 text-sm">
-              Free simulator. Set your rider weight, strip and sprocket mods, and watch the ET change live.
+              Free simulator. Set your rider weight, venue and sprocket mods, and watch the ET change live.
             </div>
           </div>
           <Link

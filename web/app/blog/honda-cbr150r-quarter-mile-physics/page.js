@@ -37,7 +37,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: "lead",
-    text: "MotoQuant simulates the 2021-onwards Honda CBR150R at 18.42 seconds and 130.5 km/h trap under matched Aamby Valley November conditions. That is a tenth quicker than a stock Yamaha R15 V4 despite making one full horsepower less. The CBR150R is also 14 km/h slower at the trap than the R15 V4. Both numbers come out of the same calculation and have the same cause: 136 kg dry against the R15's 142 kg, and a Cd seven percent lower, because Honda's HRC wind-tunnel team shaped the bigger fairing instead of bolting it on as an afterthought. The CBR150R is a fixture of the Malaysian and Indonesian drag scene, available in India only through grey-market importers at roughly ₹2.6 to ₹2.9 lakh on-road. Below: what the 17.1 hp single does at the strip, where the gap to the R15 V4 comes from, and which mods are worth running on a 150 cc Honda that India never officially sold.",
+    text: "MotoQuant simulates the 2021-onwards Honda CBR150R at 18.42 seconds and 130.5 km/h trap under matched Aamby Valley November conditions. That is a tenth quicker than a stock Yamaha R15 V4 despite making one full horsepower less. The CBR150R is also 14 km/h slower at the trap than the R15 V4. Both numbers come out of the same calculation and have the same cause: 136 kg dry against the R15's 142 kg, and a Cd seven percent lower, because Honda's HRC wind-tunnel team shaped the bigger fairing instead of bolting it on as an afterthought. The CBR150R is a fixture of the Malaysian and Indonesian drag scene, available in India only through grey-market importers at roughly ₹2.6 to ₹2.9 lakh on-road. Here is what the 17.1 hp single does at the strip, where the gap to the R15 V4 comes from, and which mods are worth running on a 150 cc Honda that India never officially sold.",
   },
   {
     type: "h2",
@@ -53,7 +53,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Honda India does not sell the CBR150R. Its Indian portfolio in this class is the Hornet 2.0 and CB200X (184 cc, 17.0 hp), both running the older SOHC HET engine that traces back to the 2014 CB Trigger. The K56F engine is a generation newer and more refined, but Honda has said that the expected volume does not justify homologating an Indonesian build for Indian regulations. Indian 150-class buyers who want a faired sport bike are pointed at the R15 V4 instead.",
+    text: "Honda India does not sell the CBR150R. Its Indian portfolio in this class is the Hornet 2.0 and CB200X (184 cc, 17.0 hp), both running the older SOHC HET engine that traces back to the 2014 CB Trigger. The K56F engine is a generation newer and more refined, but Honda has said that the volume does not justify homologating an Indonesian build for Indian regulations. Indian 150-class buyers who want a faired sport bike are pointed at the R15 V4 instead.",
   },
   {
     type: "h2",
@@ -79,7 +79,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Strip the documented +1.84 s entry-150-200 cluster bias and the CBR150R lands within 0.4 seconds of the MotoStatz instrumented runs, which is well inside repeatability for a 17 hp bike at a 70 kg rider weight. The bias is structural; it affects every bike in the 125-200 cc band roughly equally and it narrows as more real-world timeslips join the benchmark set. What the simulator does get right is the order: CBR150R quicker than R15 V4, quicker than Y15ZR V2.",
+    text: "Strip the documented +1.84 s entry-150-200 cluster bias and the CBR150R lands within 0.4 seconds of the MotoStatz instrumented runs, which is well inside repeatability for a 17 hp bike at a 70 kg rider weight. The bias is structural; it affects every bike in the 125-200 cc band roughly equally and it narrows as more real-world timeslips join the benchmark set. What the simulator gets right with confidence is the order: CBR150R quicker than R15 V4, quicker than Y15ZR V2.",
   },
   {
     type: "callout",
@@ -181,7 +181,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The 14F/42R swap shifts every shift-point downward by 6.7 percent. First becomes 35 km/h, fifth becomes 102 km/h, and the bike crosses the trap line at 122 km/h in fifth instead of bouncing off the rev limiter in fifth at 110 km/h. In the simulator the net effect is roughly 0.09 s of ET across the run, with most of the saving coming from the first 80 metres where the bike spends gears one and two. After 200 metres the shorter gearing loses a fraction of a tenth to the stock setup because the engine spends more time in the upper revs across all gears, but the launch-phase savings dominate.",
+    text: "The 14F/42R swap shifts every shift-point downward by 6.7 percent. First becomes 35 km/h, fifth becomes 102 km/h, and the bike crosses the trap line at 122 km/h in fifth instead of bouncing off the rev limiter in fifth at 110 km/h. In the simulator the net saving is roughly 0.09 s of ET across the run, with most of the saving coming from the first 80 metres where the bike spends gears one and two. After 200 metres the shorter gearing loses a fraction of a tenth to the stock setup because the engine spends more time in the upper revs across all gears, but the launch-phase savings dominate.",
   },
   {
     type: "p",

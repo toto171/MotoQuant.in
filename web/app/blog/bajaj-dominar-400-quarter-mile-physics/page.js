@@ -39,7 +39,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: "lead",
-    text: "MotoQuant simulates the 2019-spec Bajaj Dominar 400 at 14.62 seconds and a 156 km/h trap at Aamby Valley in November conditions. Autocar India's GPS-timed runs put the same bike at 14.4-14.9 seconds across their road-test archive. A stock KTM RC 390 runs 13.5 seconds on the same simulator, and it shares almost nothing with the Dominar except the Chakan production line that builds both. Most Dominar owners look for that 0.9-second gap in the engine or the gearbox. It is in mass, gearing, and a power band that peaks 500 rpm too early for the way the bike is geared.",
+    text: "MotoQuant simulates the 2019-spec Bajaj Dominar 400 at 14.62 seconds and a 156 km/h trap at Aamby Valley in November conditions. Autocar India's GPS-timed runs put the same bike at 14.4-14.9 seconds across their road-test archive. A stock KTM RC 390 runs 13.5 seconds on the same simulator, and it shares almost nothing with the Dominar except the Chakan production line that builds both. That 0.9-second gap does not come from the engine or the gearbox, where most Dominar owners look for it. It comes from mass, gearing, and a power band that peaks 500 rpm too early for the way the bike is geared.",
   },
   {
     type: "h2",
@@ -59,7 +59,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Stock numbers from MotoQuant under Aamby Valley November conditions (density altitude near 1,100 m, 22°C ambient, dry asphalt, μ_peak 1.10 on the OEM MRF Zapper FY1 rear, 78 kg rider):",
+    text: "MotoQuant's stock numbers under Aamby Valley November conditions (density altitude near 1,100 m, 22°C ambient, dry asphalt, μ_peak 1.10 on the OEM MRF Zapper FY1 rear, 78 kg rider):",
   },
   {
     type: "table",
@@ -155,7 +155,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "At ₹2.4 lakh on-road, the Dominar 400 holds its own. The KTM RC 390 is 1.1 seconds quicker but costs ₹1 lakh more on the road, roughly ₹91,000 per second of ET. That is poor value if strip time is all you care about. The Duke 390 sits between them at ₹3.2 lakh and 13.7 s. The BMW G310R is half a second slower and costs more, and the CB350RS and Classic 350 are in a different performance class. Measured as cost per second of ET, the Dominar 400 is better value than the whole Royal Enfield range and competitive with the BMW G310 platform.",
+    text: "At ₹2.4 lakh on-road, the Dominar 400 is competitive. The KTM RC 390 is 1.1 seconds quicker but costs ₹1 lakh more on the road, roughly ₹91,000 per second of ET. That is poor value if strip time is all you care about. The Duke 390 sits between them at ₹3.2 lakh and 13.7 s. The BMW G310R is half a second slower and costs more, and the CB350RS and Classic 350 are in a different performance class. Measured as cost per second of ET, the Dominar 400 is better value than the whole Royal Enfield range and competitive with the BMW G310 platform.",
   },
   {
     type: "callout",
@@ -186,7 +186,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The Powertronic Stage 1 flash is the biggest single ET drop on the bike under ₹20,000. Powertronic's Dominar map (part number PT-DOM400) sharpens throttle response and adds about 3 hp at peak, which the simulator turns into 0.18 seconds of ET. Useful, not dramatic. The flash works best with the sprocket swap: the shorter final drive and sharper throttle make the bike more responsive on the street, and it runs a 14.25 at the strip instead of a 14.62. The full stack costs ₹30,100 for 0.37 seconds, about ₹8,100 per tenth. In absolute terms that competes with much more expensive bikes.",
+    text: "The Powertronic Stage 1 flash is the biggest single ET drop on the bike under ₹20,000. Powertronic's Dominar-specific map (part number PT-DOM400) sharpens throttle response and adds about 3 hp at peak, which the simulator turns into 0.18 seconds of ET. Useful, not dramatic. The flash works best with the sprocket swap: the shorter final drive and sharper throttle make the bike more responsive on the street, and it runs a 14.25 at the strip instead of a 14.62. The full stack costs ₹30,100 for 0.37 seconds, about ₹8,100 per tenth. In absolute terms that competes with much more expensive bikes.",
   },
   {
     type: "h2",
@@ -210,7 +210,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The parts ROI view helps most on the Dominar because the return on mods falls off sharply at the ₹18,000 mark. Below that, every rupee buys measurable tenths (sprocket, filter, tire, flash). Above it, returns drop steeply: a slip-on exhaust on the Dominar adds maybe 0.04-0.06 seconds of ET for ₹25,000-40,000, which is ₹500,000-650,000 per tenth. The stock exhaust does not hold the Dominar back the way it does an RC 390. The simulator shows you where that drop-off is before you spend the money.",
+    text: "The parts ROI view helps most on the Dominar because its mod list has a sharp break at the ₹18,000 mark. Below that, every rupee buys measurable tenths (sprocket, filter, tire, flash). Above it, returns drop steeply: a slip-on exhaust on the Dominar adds maybe 0.04-0.06 seconds of ET for ₹25,000-40,000, which is ₹500,000-650,000 per tenth. The stock exhaust does not hold the Dominar back the way it does an RC 390. The simulator shows you where that drop-off is before you spend the money.",
   },
   {
     type: "p",

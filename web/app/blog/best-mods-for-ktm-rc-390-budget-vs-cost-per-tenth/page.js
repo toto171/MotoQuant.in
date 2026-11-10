@@ -75,11 +75,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The sprocket swap gives the best return of any mod on a 390-class single. One tooth less at the front shortens overall gearing by 6.25 percent. That keeps the LC4c in the strong part of its torque curve through the first three gears, which is where a quarter-mile run spends most of its time. The 15-tooth front is a stock JT JTF1901-15 part, ₹950 at any Indian KTM workshop. The downsides: about 4 percent less top speed, higher revs at a 100 km/h cruise, and a measurable fuel-economy hit in stop-go traffic. None of that matters on a strip where you trap at 168 km/h, well below the bike\'s 180 km/h stock top speed.',
+    text: 'The sprocket swap gives the best return of any mod on a 390-class single. Dropping one tooth at the front shortens overall gearing by 6.25 percent. That keeps the LC4c in the strong part of its torque curve through the first three gears, which is where a quarter-mile run spends most of its time. The 15-tooth front is a stock JT JTF1901-15 part, ₹950 at any Indian KTM workshop. The downsides: about 4 percent less top speed, higher revs at a 100 km/h cruise, and a measurable fuel-economy hit in stop-go traffic. None of that matters on a strip where you trap at 168 km/h, well below the bike\'s 180 km/h stock top speed.',
   },
   {
     type: 'p',
-    text: 'The DNA filter is a drop-in panel filter that flows roughly 22 percent more air than the OEM paper filter. On the dyno it gains 0.8 to 1.5 hp at peak. That is small, but it adds cleanly to a re-flash later and lasts the rest of the bike\'s life with one wash a year. It needs no tune and no airbox change, and it stays fully OBD-compliant. Higher-octane fuel helps a little. The LC4c runs 12.5:1 compression, and on regular 91 RON the ECU pulls a few degrees of ignition advance if it detects knock; Indian Oil XP-95 or Speed 97 lets the bike hold its mapped timing. The 0.04 seconds is real but small, so pay for it on strip days, not on the daily commute.',
+    text: 'The DNA filter is a drop-in panel filter that flows roughly 22 percent more air than the OEM paper filter. On the dyno it gains 0.8 to 1.5 hp at peak. That is small, but it adds cleanly to a re-flash later and lasts the rest of the bike\'s life with one wash a year. It needs no tune and no airbox change, and it stays fully OBD-compliant. Higher-octane fuel helps a little. The LC4c runs 12.5:1 compression, and on regular 91 RON the ECU pulls a few degrees of ignition advance if it detects knock; Indian Oil XP-95 or Speed 97 lets the bike hold its mapped timing. The 0.04-second gain is real but small, so pay for it on strip days, not on the daily commute.',
   },
   {
     type: 'p',
@@ -87,7 +87,7 @@ const CONTENT = [
   },
   {
     type: 'h2',
-    text: 'Tier 2 (₹10,000 to ₹30,000): the mid-range',
+    text: 'Tier 2 (₹10,000 to ₹30,000): the mid-range sweet spot',
   },
   {
     type: 'p',
@@ -122,7 +122,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Past ₹30,000, the cost per tenth roughly doubles with every extra ₹15,000. This tier is for owners who compete in regional drag events two or three times a year; most casual track-day riders should stop at Tier 2. Tier 3 adds ₹38,000 (₹68,500 in total) and roughly 0.25 seconds, at ₹15,200 per tenth for this tier alone. Against stock, the bike is now roughly 0.95 seconds quicker and runs a 12.55.',
+    text: 'Past ₹30,000, the cost per tenth roughly doubles with every extra ₹15,000. This tier is for owners who compete in regional drag events two or three times a year; most casual track-day riders should stop at Tier 2. Tier 3 costs ₹38,000 more (₹68,500 in total) and takes off roughly 0.25 seconds, at ₹15,200 per tenth for this tier alone. Against stock, the bike is now roughly 0.95 seconds quicker and runs a 12.55.',
   },
   {
     type: 'table',
@@ -152,7 +152,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Past ₹70,000 you are no longer modding a street bike. You are building a strip bike that happens to be road-legal. Most of this tier is imported, and customs, GST and freight bring the landed cost to roughly 1.55× the USD retail price. Tier 4 adds ₹95,000 to ₹150,000 depending on your choices (₹165,000 to ₹220,000 in total) and roughly 0.40 to 0.60 seconds. The bike now runs an 11.95 to 12.15, close to the Fast Track Racing 11.342 record at last.',
+    text: 'Past ₹70,000 you are no longer modding a street bike. You are building a strip bike that happens to be road-legal. Most of this tier is imported, and customs, GST and freight bring the landed cost to roughly 1.55× the USD retail price. Tier 4 adds ₹95,000 to ₹150,000 depending on your choices (₹165,000 to ₹220,000 in total) and takes off roughly 0.40 to 0.60 seconds. The bike now runs an 11.95 to 12.15, finally close to the Fast Track Racing 11.342 record.',
   },
   {
     type: 'table',
@@ -171,7 +171,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The stretched swingarm stops wheelies. A stock RC 390 with a sticky rear, a re-flash and a hard launch will lift the front wheel through first gear and lose roughly 0.4 seconds in the air. The Schnitz or Brock\'s 150 mm stretch moves the rear axle back, which lowers the centre-of-gravity ratio that causes the wheelie, so the rider can put full torque to the rear without lifting. Finding one is the hard part: only one or two Indian shops (Narhe in Pune, occasionally a Hyderabad fabricator) keep them in stock. A direct US import lands at roughly ₹62,000 including duty. It has to stay on the track, because the bike turns like a barge with the stretch fitted.',
+    text: 'The stretched swingarm fights wheelies. A stock RC 390 with a sticky rear, a re-flash and a hard launch will lift the front wheel through first gear and lose roughly 0.4 seconds in the air. The Schnitz or Brock\'s 150 mm stretch moves the rear axle back, which lowers the centre-of-gravity ratio that causes the wheelie, so the rider can put full torque to the rear without lifting. Finding one is the hard part: only one or two Indian shops (Narhe in Pune, occasionally a Hyderabad fabricator) keep them in stock. A direct US import lands at roughly ₹62,000 including duty. It has to stay on the track, because the bike turns like a barge with the stretch fitted.',
   },
   {
     type: 'p',
@@ -179,7 +179,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Stage 2 head work is as far as a single goes without a big-bore kit. A skilled head porter at one of three or four Indian shops will flow-bench the OEM head, port and polish the intake runners, and fit a +1 mm lift cam. For street use the LC4c valvetrain handles the extra lift on stock springs; for competition it needs uprated springs (₹4,500 extra). The power gain is roughly 4 to 6 hp on top of all earlier mods. This is also the mod that starts to wear the slipper clutch: past about 50 hp the OEM-spec assembly begins to glaze, so if you do strip days, plan a clutch swap every 8,000 km.',
+    text: 'Stage 2 head work is as far as a single goes without a big-bore kit. A skilled head porter at one of three or four Indian shops will flow-bench the OEM head, port and polish the intake runners, and fit a +1 mm lift cam. For street use the LC4c valvetrain handles the extra lift on stock springs; for competition it needs uprated springs (₹4,500 extra). The power gain is roughly 4 to 6 hp on top of all earlier mods. This is also the mod that makes the slipper clutch wear faster: past about 50 hp the OEM-spec assembly begins to glaze, so if you do strip days, plan a clutch swap every 8,000 km.',
   },
   {
     type: 'h2',
@@ -187,7 +187,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Each tier stacked on stock, with a 70 kg rider in Aamby Valley November conditions:',
+    text: 'Running totals, with each tier stacked on stock, a 70 kg rider and Aamby Valley November conditions:',
   },
   {
     type: 'table',
@@ -203,7 +203,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The first ₹39,100 buys 0.72 seconds, about a third of the whole gap to the Fast Track Racing record. The next ₹70,500 buys another 0.18, and the next ₹166,000 another 0.57. The last ₹374,400 buys roughly 0.69 more, but by then each tenth costs ₹54,260. Even so, the public mod ladder never quite reaches the record. A serious 11.3-second pass needs custom head work, custom-ratio gearboxes, drag-only chassis changes, and a rider with hundreds of practice launches. Money buys the parts; only practice buys the last two tenths.',
+    text: 'The first ₹39,100 buys 0.72 seconds, about a third of the whole gap to the Fast Track Racing record. The next ₹70,500 buys another 0.18, and the next ₹166,000 another 0.57. The last ₹374,400 buys roughly 0.69 more, but by then each tenth costs ₹54,260. The public mod ladder still never quite reaches the record, because a serious 11.3-second pass needs custom head work, custom-ratio gearboxes, drag-only chassis changes, and a rider with hundreds of practice launches. Money buys the parts; only practice buys the last two tenths.',
   },
   {
     type: 'h2',

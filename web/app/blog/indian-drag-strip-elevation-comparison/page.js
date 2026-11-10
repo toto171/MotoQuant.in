@@ -4,12 +4,12 @@ import SiteFooter from '../../../components/SiteFooter';
 import StructuredData, { articleSchema } from '../../StructuredData';
 
 const SLUG = 'indian-drag-strip-elevation-comparison';
-const TITLE = 'Indian Drag Strips Ranked by Elevation: What Altitude Costs Over a Quarter Mile';
+const TITLE = 'Indian drag strips ranked by elevation: what altitude costs over a quarter mile';
 const DESCRIPTION =
   'Five Indian drag strips on November weather: a stock Hayabusa loses 0.09 s between BIC and Aamby Valley, an R15 V4 loses 0.36 s. MotoQuant shows why small bikes pay more.';
 
 export const metadata = {
-  title: 'Indian Drag Strips Ranked by Elevation | MotoQuant',
+  title: 'Indian drag strips ranked by elevation | MotoQuant',
   description: DESCRIPTION,
   keywords: [
     'indian drag strips ranked',
@@ -46,7 +46,7 @@ const CONTENT = [
   },
   {
     type: 'h2',
-    text: 'Five Strips, Five Elevations, One Country',
+    text: 'Five strips, five elevations',
   },
   {
     type: 'p',
@@ -69,7 +69,7 @@ const CONTENT = [
   },
   {
     type: 'h2',
-    text: 'Power Against Drag',
+    text: 'Power against drag',
   },
   {
     type: 'p',
@@ -77,7 +77,7 @@ const CONTENT = [
   },
   {
     type: 'h2',
-    text: 'The Hayabusa Sweep: One Bike, Five Venues',
+    text: 'The Hayabusa sweep: one bike, five venues',
   },
   {
     type: 'p',
@@ -100,7 +100,7 @@ const CONTENT = [
   },
   {
     type: 'h2',
-    text: 'Small Bikes Pay More',
+    text: 'Small bikes pay more',
   },
   {
     type: 'p',
@@ -127,7 +127,7 @@ const CONTENT = [
   },
   {
     type: 'h2',
-    text: 'What Wind Adds',
+    text: 'What wind adds',
   },
   {
     type: 'p',
@@ -135,7 +135,7 @@ const CONTENT = [
   },
   {
     type: 'h2',
-    text: 'How Far to Trust the Numbers',
+    text: 'How far to trust the numbers',
   },
   {
     type: 'p',
@@ -147,7 +147,7 @@ const CONTENT = [
   },
   {
     type: 'h2',
-    text: 'Run It Yourself',
+    text: 'Run it yourself',
   },
   {
     type: 'p',
@@ -263,7 +263,7 @@ export default function PostPage() {
             ))}
           </div>
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
-            Indian Drag Strips Ranked by Elevation: What Altitude Costs Over a Quarter Mile
+            Indian drag strips ranked by elevation: what altitude costs over a quarter mile
           </h1>
           <div className="text-sm text-white/60 mb-12">
             25 May 2026 · 12 min read · MotoQuant Blog
@@ -282,9 +282,9 @@ export default function PostPage() {
                 href="/blog/how-to-tune-for-aamby-valley-in-november"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                How to Tune for Aamby Valley in November
+                How to tune for Aamby Valley in November
               </Link>
-              : venue-specific deep dive on the highest of the five Indian strips.
+              : a closer look at the highest of the five Indian strips.
             </li>
             <li>
               ·{' '}
@@ -292,7 +292,7 @@ export default function PostPage() {
                 href="/blog/how-to-tune-for-mmrt-chennai"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                How to Tune for MMRT Chennai
+                How to tune for MMRT Chennai
               </Link>
               : the sea-level counterpart at the other end of the venue table.
             </li>
@@ -302,7 +302,7 @@ export default function PostPage() {
                 href="/blog/hayabusa-quarter-mile-physics-what-limits-9-6-seconds"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                Hayabusa Quarter-Mile Physics: What Limits 9.6 Seconds
+                Hayabusa quarter-mile physics: what limits 9.6 seconds
               </Link>
               : the bike used as the anchor in this post, with a breakdown of what limits a stock litre-plus bike.
             </li>
@@ -312,9 +312,9 @@ export default function PostPage() {
                 href="/blog/why-your-r15-wont-hit-14s"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                Why Your R15 Won&apos;t Hit 14s
+                Why your R15 won&apos;t hit 14s
               </Link>
-              : the small-cc side of the altitude story; why a 18 hp R15 V4 cannot make up the venue penalty with parts.
+              : the small-cc side of the altitude story; why an 18 hp R15 V4 cannot make up the venue penalty with parts.
             </li>
             <li>
               ·{' '}
@@ -322,7 +322,7 @@ export default function PostPage() {
                 href="/blog/how-the-motoquant-physics-engine-works"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                How the MotoQuant Physics Engine Works
+                How the MotoQuant physics engine works
               </Link>
               : the 15-sub-model architecture, including the environmental sub-model that does the DA correction for every venue in this post.
             </li>
@@ -341,7 +341,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Sweep your bike across all five Indian venues</div>
             <div className="text-white/60 text-sm">
-              Free simulator: pick any bike, pick MMRT or Aamby Valley or BIC, watch the ET and trap shift in real time. Find the venue your bike actually wants.
+              Pick any bike in the free simulator, choose MMRT, Aamby Valley or BIC, and watch the ET and trap change as you switch. Find the venue that suits your bike.
             </div>
           </div>
           <Link

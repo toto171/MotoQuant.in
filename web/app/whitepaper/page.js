@@ -35,7 +35,7 @@ const SECTIONS = [
     title: 'Introduction',
     body: [
       'Motorcycle drag racing in India has grown fast at Aamby Valley (Lonavala, Maharashtra), MMRT Chennai, the Buddh International Circuit, Kari Motor Speedway (Coimbatore), and the Hyderabad strips. The community has outgrown the available tooling: spreadsheet calculators that treat power-to-weight as the sole input, regression-based estimators trained on limited international data, and per-bike rules of thumb that fail to generalise across mass, aero, gearing, traction, and venue conditions.',
-      'MotoQuant is meant to fill that gap: an open simulator that anyone can audit, in which every coefficient traces back to a physical measurement rather than a fitted curve. This paper sets out the architecture, the validation method, and the remaining error we benchmark every release against.',
+      'MotoQuant is built to fill that gap: an open simulator that anyone can audit, in which every coefficient traces back to a physical measurement rather than a fitted curve. This paper sets out the architecture, the validation method, and the remaining error we benchmark every release against.',
     ],
   },
   {
@@ -168,7 +168,7 @@ const SECTIONS = [
     n: '8',
     title: 'Known limitations',
     body: [
-      'The two-stroke cluster still carries a +0.077 s weighted bias and a 0.642 s weighted |Δ| because piston-port 2T launch dynamics include an off-pipe / on-pipe transition whose integral-of-power-over-time is not perfectly captured by the current expansion-chamber Gaussian curve. The Indian entry small-cc cluster (entry-150-200) has the largest weighted |Δ| of any cluster with ten or more benchmarks, 0.702 s. Its bias is centred, at −0.011 s, but the results scatter widely. Its derived benchmarks carry a declared ±0.7 s uncertainty, but six of its seven instrumented rows also miss by 0.4–0.9 s, in both directions, and many small bikes still carry a known gearing limitation (reports/session_2026_11_10_epoch.md). Closing the gap needs both per-bike Dragy / VBox-measured stock data and sourced gearing for the benchmarked small bikes.',
+      'The two-stroke cluster still carries a +0.077 s weighted bias and a 0.642 s weighted |Δ| because piston-port 2T launch dynamics include an off-pipe / on-pipe transition whose integral-of-power-over-time is not perfectly captured by the current expansion-chamber Gaussian curve. The Indian entry small-cc cluster (entry-150-200) has the largest weighted |Δ| of any cluster with ten or more benchmarks, 0.702 s. Its bias is centred at −0.011 s, but the results scatter widely. Its derived benchmarks carry a declared ±0.7 s uncertainty, but six of its seven instrumented rows also miss by 0.4–0.9 s, in both directions, and many small bikes still carry a known gearing limitation (reports/session_2026_11_10_epoch.md). Closing the gap needs both per-bike Dragy / VBox-measured stock data and sourced gearing for the benchmarked small bikes.',
       'The cruiser 1300+ cluster has only N=5 and the small-cc I4 screamer cluster only N=2, too few for statistically meaningful conclusions. The Apache RTR 200 4V is a documented outlier: the simulator gives 18.95 s against an instrumented 18.1 s, a 0.85 s miss on a high-confidence row; we have not adjusted the model on the strength of one data point.',
     ],
   },

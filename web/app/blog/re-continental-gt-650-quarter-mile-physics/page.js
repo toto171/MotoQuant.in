@@ -35,7 +35,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: "lead",
-    text: "MotoQuant simulates the Royal Enfield Continental GT 650 at roughly 14.1 seconds and a 158 km/h trap under Aamby Valley November conditions. The 648 cc air/oil-cooled parallel twin makes 47 hp at 7,150 rpm and 52 Nm at 5,250 rpm from a 78 mm bore and 67.8 mm stroke. It is a deliberately under-stressed engine with the same internals as the Interceptor 650, in a clip-on cafe-racer body. On a strip the spec sheet tells only half the story. The chassis, the gearing and the 182 kg dry mass matter more.",
+    text: "MotoQuant simulates the Royal Enfield Continental GT 650 at roughly 14.1 seconds and a 158 km/h trap under Aamby Valley November conditions. The 648 cc air/oil-cooled parallel twin makes 47 hp at 7,150 rpm and 52 Nm at 5,250 rpm from a 78 mm bore and 67.8 mm stroke. The engine is deliberately under-stressed and shares its internals with the Interceptor 650; the GT puts it in a clip-on cafe-racer body. On a strip the spec sheet tells only half the story. The chassis, the gearing and the 182 kg dry mass matter more.",
   },
   {
     type: "h2",
@@ -47,7 +47,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "For drag analysis the GT 650 is interesting because of its engine: an unstressed twin built to deliver torque at low rpm and survive 50,000 km of badly maintained Indian-highway riding. It is no sport bike in cafe-racer clothes. Peak power comes at 7,150 rpm, redline is around 7,500, and the strong part of the torque curve runs from about 3,000 to 6,500 rpm. The simulator puts the GT 650 in the mid-twin-500-700 cluster (the same class as the Kawasaki Ninja 650, Yamaha MT-07 and Aprilia RS 660), where the bias band is +0.16 seconds, well within tolerance.",
+    text: "For drag analysis the GT 650 is interesting because it is no sport bike in cafe-racer clothes. Its engine is an unstressed twin built to deliver torque at low rpm and survive 50,000 km of badly maintained Indian-highway riding. Peak power comes at 7,150 rpm, redline is around 7,500, and the strong part of the torque curve runs from about 3,000 to 6,500 rpm. The simulator puts the GT 650 in the mid-twin-500-700 cluster (the same class as the Kawasaki Ninja 650, Yamaha MT-07 and Aprilia RS 660), where the bias band is +0.16 seconds, well within tolerance.",
   },
   {
     type: "h2",
@@ -74,7 +74,7 @@ const CONTENT = [
   },
   {
     type: "callout",
-    text: "The GT 650 and the Interceptor 650 share an engine, a frame and a 6-speed gearbox. The GT is roughly 0.05 seconds quicker in the simulator under matched conditions, because the clip-on riding position lowers the rider's CoG by about 40 mm and cuts the projected frontal area from ~0.50 m² to ~0.46 m². Past 130 km/h the GT pulls slightly cleaner, so its edge shows up as a little extra trap speed, not at the launch.",
+    text: "The GT 650 and the Interceptor 650 share an engine, a frame and a 6-speed gearbox. The GT is roughly 0.05 seconds quicker in the simulator under matched conditions, because the clip-on riding position lowers the rider's CoG by about 40 mm and cuts the projected frontal area from ~0.50 m² to ~0.46 m². Past 130 km/h the GT pulls slightly cleaner, so its edge shows up as a small gain in trap speed, not at the launch.",
   },
   {
     type: "h2",
@@ -82,11 +82,11 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "On power-to-weight, the GT 650 sits at 47 hp / 182 kg dry (~258 hp/tonne). The Aprilia RS 660 has 100 hp / 169 kg dry (~592 hp/tonne) and the Kawasaki Ninja 650 has 67 hp / 192 kg dry (~349 hp/tonne). The RS 660 sims around 11.4 seconds, the Ninja 650 around 13.0 seconds and the GT 650 around 14.1 seconds. Three things in how the bikes are built account for the gap:",
+    text: "On power-to-weight, the GT 650 sits at 47 hp / 182 kg dry (~258 hp/tonne). The Aprilia RS 660 has 100 hp / 169 kg dry (~592 hp/tonne) and the Kawasaki Ninja 650 has 67 hp / 192 kg dry (~349 hp/tonne). The RS 660 sims around 11.4 seconds, the Ninja 650 around 13.0 seconds and the GT 650 around 14.1 seconds. Three structural factors account for the gap:",
   },
   {
     type: "p",
-    text: "1. Peak-power RPM. The GT 650 makes its 47 hp at 7,150 rpm and redlines at 7,500. The Ninja 650 makes 67 hp at 8,000 and redlines at 11,000. The Aprilia RS 660 makes 100 hp at 10,500 and redlines at 11,500. Each extra 1,000 rpm of usable headroom means more time in each gear on the strong part of the curve. That adds area under the torque-versus-time integral, and so carries more momentum into the next gear. The GT 650 has by far the shortest usable rev band of the three, and it has to upshift while its peers are still pulling.",
+    text: "1. Peak-power RPM. The GT 650 makes its 47 hp at 7,150 rpm and redlines at 7,500. The Ninja 650 makes 67 hp at 8,000 and redlines at 11,000. The Aprilia RS 660 makes 100 hp at 10,500 and redlines at 11,500. Each extra 1,000 rpm of usable headroom means more time in each gear on the strong part of the curve. That adds area under the torque-versus-time integral, so the bike carries more momentum into the next gear. The GT 650 has by far the shortest usable rev band of the three, and it has to upshift while its peers are still pulling.",
   },
   {
     type: "p",
@@ -209,7 +209,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "For the GT 650, that means the simulated 14.1-second ET is probably within 0.2 seconds of what you would see at a real timed strip on a warmed bike with a competent rider. If you want certainty, the answer is the same as for any bike: take the GT to a real timed strip, run a Dragy or a VBOX, and trust the timing trap over the simulator. Still, the simulator is closer here than it is for smaller bikes, and its order of which mods help most holds either way.",
+    text: "For the GT 650, that means the simulated 14.1-second ET is probably within 0.2 seconds of what you would see at a real timed strip on a warmed bike with a competent rider. If you want certainty, the answer is the same as for any bike: take the GT to a real timed strip, run a Dragy or a VBOX, and trust the timing trap over the simulator. Still, the simulator is closer here than it is for smaller bikes, and its ranking of which mods help most holds either way.",
   },
   {
     type: "h2",
@@ -225,7 +225,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Two caveats. First, every number in this post is a stock-tune simulation under specific conditions. Change the rider weight, the ambient temperature, the surface or the launch technique and the absolute ETs shift, but the order of which mods help most stays the same. Second, the mid-twin-500-700 cluster bias has been narrowing over the past three months. The May 2026 clutch over-clutching rewrite cut the cluster mean absolute error from 1.07 to 0.62 seconds, and more Dragy submissions from Indian GT 650 owners will tighten it further. Today's GT number is the most honest the simulator has been on this bike, and it will only get more accurate.",
+    text: "Two caveats. First, every number in this post is a stock-tune simulation under specific conditions. Change the rider weight, the ambient temperature, the surface or the launch technique and the absolute ETs shift, but the ranking of which mods help most stays the same. Second, the mid-twin-500-700 cluster bias has been narrowing over the past three months. The May 2026 clutch over-clutching rewrite cut the cluster mean absolute error from 1.07 to 0.62 seconds, and more Dragy submissions from Indian GT 650 owners will tighten it further. Today's GT number is the most honest the simulator has been on this bike, and it will only get more accurate.",
   },
   {
     type: "p",

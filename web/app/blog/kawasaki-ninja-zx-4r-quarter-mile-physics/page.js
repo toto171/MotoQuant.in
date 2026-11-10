@@ -70,11 +70,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The simulation lands in the middle of the published instrumented band. That is typical for the litre-sport-600-1000 cluster, where the April 27 sweep documented a 0.22s mean absolute error across 29 matched benchmarks. The bike sits in that cluster despite its 400cc because its engine, a high-revving inline-four with peak power at 14,500 rpm, behaves like a scaled-down 600cc supersport rather than a scaled-up 400cc twin. The tyre grip model, the gear-cassette torque multiplication and the synthesized 0.88 redline-factor torque tail all carry over directly from the ZX-6R class.',
+    text: 'The simulation lands in the middle of the published instrumented band. That is typical for the litre-sport-600-1000 cluster, where the April 27 sweep documented a 0.22s mean absolute error across 29 matched benchmarks. The bike sits in that cluster despite its 400cc displacement because its engine, a high-revving inline-four with peak power at 14,500 rpm, behaves like a scaled-down 600cc supersport rather than a scaled-up 400cc twin. The tyre grip model, the gear-cassette torque multiplication and the synthesized 0.88 redline-factor torque tail all carry over directly from the ZX-6R class.',
   },
   {
     type: 'callout',
-    text: 'Look at the trap speed. A stock Pulsar NS400Z traps at 158 km/h, an RC 390 at 166 km/h, and a Ninja 400 twin at about 175 km/h. At 192.6 km/h, the ZX-4R has left every other 400-class bike behind by the 1,000-foot line, with the same displacement.',
+    text: 'Look at the trap speed: 192.6 km/h. A stock Pulsar NS400Z traps at 158 km/h, an RC 390 at 166 km/h, and a Ninja 400 twin at about 175 km/h. By the 1,000-foot line the ZX-4R has left every other 400-class bike behind, with the same displacement.',
   },
   {
     type: 'h2',
@@ -94,7 +94,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: '3. Mass distribution and chassis. At 191 kg dry, the ZX-4R is heavier than a Ninja 400 twin at 168 kg, but the extra mass sits low and central around the inline-four crank. That lowers the polar moment about the launch axis, so the simulator records less front-end lightening per unit of acceleration than on a top-heavy twin of similar power. In practice the ZX-4R can carry slightly more throttle in gear 1 before it hits the wheelie limit, even though it is heavier.',
+    text: '3. Mass distribution and chassis. At 191 kg dry, the ZX-4R is heavier than a Ninja 400 twin at 168 kg, but the extra mass sits low and central around the inline-four crank. That lowers the polar moment about the launch axis, so the simulator records less front-end lightening per unit of acceleration than on a top-heavy twin of similar power. In practice, the ZX-4R can carry slightly more throttle in gear 1 before it hits the wheelie limit, even though it is heavier.',
   },
   {
     type: 'h2',
@@ -102,7 +102,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The 2 kg dry-mass gap between the ZX-4R (191 kg) and the ZX-4RR (189 kg) is small but measurable. Both bikes in MotoQuant under identical conditions:',
+    text: 'The 2 kg dry-mass gap between the ZX-4R (191 kg) and the ZX-4RR (189 kg) is small but measurable. Both bikes, run in MotoQuant under identical conditions:',
   },
   {
     type: 'table',
@@ -119,7 +119,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "Suspension is the exception. The ZX-4RR ships with a fully adjustable 37 mm Showa BPF front fork; the ZX-4R gets a non-adjustable Showa SFF-BP unit. For street riding and casual track days the base fork is fine. For repeated quarter-mile launches, where rebound damping controls how the front wheel goes from compressed to extended, the ZX-4RR fork is better. Upgrading the base fork means going aftermarket (an Öhlins NIX30 cartridge kit runs about ₹85,000 fitted), so the base trim's cost-per-tenth advantage shrinks if you plan to race the bike seriously.",
+    text: "Suspension is the exception. The ZX-4RR ships with a fully adjustable 37 mm Showa BPF front fork; the ZX-4R gets a non-adjustable Showa SFF-BP unit. For street riding and casual track days the base fork is fine. For repeated quarter-mile launches, where rebound damping affects how the front wheel goes from compressed to extended, the ZX-4RR fork is better. Upgrading the base fork means going aftermarket (an Öhlins NIX30 cartridge kit runs about ₹85,000 fitted), so the base trim's cost-per-tenth advantage shrinks if you plan to race the bike seriously.",
   },
   {
     type: 'h2',
@@ -135,11 +135,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: '2. Aerodynamics above 170 km/h. Its Cd of about 0.62 and frontal area of 0.41 m² give a Cd × A of roughly 0.254 m². That is excellent for a small-displacement sport bike (about 8 percent lower than a Ninja 400, thanks to the deeper full fairing), but it still limits the back half of the run. Above 170 km/h, the simulator shows aerodynamic drag taking about 55 percent of the rear-wheel power. The only fix is a tail fairing extension, which is not legal on public roads in India.',
+    text: '2. Aerodynamics above 170 km/h. Its Cd of about 0.62 and frontal area of 0.41 m² give a Cd × A of roughly 0.254 m². That is excellent for a small-displacement sport bike (about 8 percent lower than a Ninja 400, thanks to the deeper full fairing), but it is what limits the back half of the run. Above 170 km/h, the simulator shows aerodynamic drag taking about 55 percent of the rear-wheel power. The only fix is a tail fairing extension, which is not legal on public roads in India.',
   },
   {
     type: 'p',
-    text: '3. Gear-3-to-gear-4 shift point. On the stock 17F/45R sprockets, the ZX-4R crosses the trap line in fifth gear at about 14,800 rpm, just under the 15,000 rpm shift point and well into peak power. But the simulator log shows a brief drop in the gear-4 power band at the 1,000-foot mark, where a slightly earlier shift would have kept the engine 500 rpm higher. The fix is in the rider, not the bike: practice the shift sequence, and do not chase the rev limiter on the 3-to-4 change. Nailing this shift is worth roughly 0.03–0.05s of ET.',
+    text: '3. Gear-3-to-gear-4 shift point. On the stock 17F/45R sprockets, the ZX-4R crosses the trap line in fifth gear at about 14,800 rpm, just under the 15,000 rpm shift point and well into peak power. But the simulator log shows a brief drop into the gear-4 power band at the 1,000-foot mark, where a slightly earlier shift would have kept the engine 500 rpm higher. The fix is in the rider, not the bike: practice the shift sequence, and do not chase the rev limiter on the 3-to-4 change. Nailing this shift is worth roughly 0.03–0.05s of ET.',
   },
   {
     type: 'h2',
@@ -185,7 +185,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: '3. Sprocket swap to 16F/45R: about ₹4,800 in parts, worth roughly 0.04s ET. It drops the final-drive ratio enough to keep the engine 800 rpm higher in every gear, which matters more than usual on a peaky inline-four. The cost is highway cruising rpm, up by about 600 rpm at 100 km/h. That is a comfort issue, not a reliability one; the engine is happy at 8,000 rpm all day.',
+    text: '3. Sprocket swap to 16F/45R: about ₹4,800 in parts, worth roughly 0.04s ET. It drops the final-drive ratio enough to keep the engine 800 rpm higher in every gear, which matters more than usual on a peaky inline-four. The cost is highway cruising rpm, up by about 600 rpm at 100 km/h. That is mostly a comfort issue, not a reliability one; the engine is happy at 8,000 rpm all day.',
   },
   {
     type: 'callout',

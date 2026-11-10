@@ -157,7 +157,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "1. The 1.81 s 60-foot. A modern litre superbike with the same rider posts 1.55 to 1.60 s to the 60-foot line. The K8 gives away roughly two-tenths in the first 18 metres. With 125 hp at 13,500 rpm, there is not enough torque at 4,000 rpm to break the rear loose, but there is enough that the clutch needs careful slip through the first half of first gear. The simulator runs an idealised launch and still posts 1.81 s, because below 80 km/h the bike is limited by engine output, not tyre grip. The K8 has traction to spare and not enough torque to use it. That is the usual 600cc story at the strip.",
+    text: "1. The 1.81 s 60-foot. A modern litre superbike with the same rider posts 1.55 to 1.60 s to the 60-foot line. The K8 gives away roughly two-tenths in the first 18 metres. With 125 hp at 13,500 rpm, there is not enough torque at 4,000 rpm to break the rear loose, but there is enough that the clutch needs careful slip through the first half of gear 1. The simulator runs an idealised launch and still posts 1.81 s, because below 80 km/h the bike is limited by engine output, not tyre grip. The K8 has traction to spare and not enough torque to use it. That is the usual 600cc story at the strip.",
   },
   {
     type: "p",

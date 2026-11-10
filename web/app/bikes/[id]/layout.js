@@ -100,7 +100,7 @@ export async function generateMetadata({ params }) {
     disp && power && mass
       ? `${disp} · ${power} · ${mass} dry.`
       : [disp, power, mass].filter(Boolean).join(' · '),
-    `The ET prediction runs the full physics with this bike's own aero (Cd ${bike.cd?.toFixed?.(2) || '–'}, frontal area ${bike.frontal_area_m2?.toFixed?.(2) || '–'} m²), gear ratios and OEM tire fitments.`,
+    `The ET comes from the full physics model, using this bike's own aero (Cd ${bike.cd?.toFixed?.(2) || '–'}, frontal area ${bike.frontal_area_m2?.toFixed?.(2) || '–'} m²), gear ratios and OEM tire fitments.`,
     'Free, in your browser, no signup.',
   ]
     .filter(Boolean)

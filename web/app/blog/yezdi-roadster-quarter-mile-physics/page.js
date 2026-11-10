@@ -48,7 +48,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'In plain terms, the Roadster is a 175 kg (dry) retro naked whose liquid-cooled single makes more power than a Classic 350 (28.6 hp vs 20.2 hp at the crank) and slightly less torque per kg than the air-cooled Royal Enfield (0.166 Nm/kg vs 0.140 Nm/kg). It is faster, taller-geared, and revs harder than the Classic 350. Depending on the model year and dealer, it is also ₹15,000 to ₹40,000 cheaper. The Roadster sells on that value, and the drag-strip numbers mostly check that the value is real.',
+    text: 'The Roadster is a 175 kg (dry) retro naked whose liquid-cooled single makes more power than a Classic 350 (28.6 hp vs 20.2 hp at the crank) and slightly less torque per kg than the air-cooled Royal Enfield (0.166 Nm/kg vs 0.140 Nm/kg). It is faster, taller-geared, and revs harder than the Classic 350. Depending on the model year and dealer, it is also ₹15,000 to ₹40,000 cheaper. The Roadster sells on that value, and the drag-strip numbers mostly check that the value is real.',
   },
   {
     type: 'h2',
@@ -145,7 +145,7 @@ const CONTENT = [
   },
   {
     type: 'callout',
-    text: 'The order on a Yezdi Roadster: 15/41 sprocket swap first (~₹6,500 / ~0.18 s, the cheapest tenth on the bike), then an Apollo or MRF rear tyre (~₹4,200 / ~0.07 s), then a Powertronic Stage 1 flash if a Powertronic dealer is within reach (~₹18,000 / ~0.10 s). Total ~₹28,700 for ~0.35 s of ET, which lands a sub-15-second stock-class Roadster at most Indian strips. Skip the slip-on exhaust: on a stock head, back-pressure changes do little for a single’s volumetric efficiency.',
+    text: 'Mod order on a Yezdi Roadster: 15/41 sprocket swap first (~₹6,500 / ~0.18 s, the cheapest tenth on the bike), then an Apollo or MRF rear tyre (~₹4,200 / ~0.07 s), then a Powertronic Stage 1 flash if a Powertronic dealer is within reach (~₹18,000 / ~0.10 s). Total ~₹28,700 for ~0.35 s of ET, which lands a sub-15-second stock-class Roadster at most Indian strips. Skip the slip-on exhaust: on a stock head, back-pressure changes do little for a single’s volumetric efficiency.',
   },
   {
     type: 'h2',
@@ -189,7 +189,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Two caveats. First, every number in this post is a stock-tune simulation under the same Aamby Valley November conditions. Change the venue (sea-level MMRT helps by ~0.15-0.20 s) or the rider (a 65 kg rider instead of the 78 kg simulated default helps by ~0.10 s) and the absolute ETs move; the Roadster’s place among its rivals does not. Second, there is no instrumented ET for this bike to calibrate against. The 15.42 s number is a first-principles estimate from the engine torque curve, the gearbox ratios, the dry mass and the published Cd/frontal-area inputs. If a Dragy timeslip from a stock Roadster turns up (Valley Run 2026 Winter is the obvious place to get one), the model will be updated, and the headline number may move by 0.1 to 0.3 seconds either way.',
+    text: 'Two caveats. First, every number in this post is a stock-tune simulation under the same Aamby Valley November conditions. Change the venue (sea-level MMRT helps by ~0.15-0.20 s) or the rider (a 65 kg rider instead of the 78 kg simulated default helps by ~0.10 s) and the absolute ETs move; the Roadster’s place among its rivals does not. Second, there is no instrumented ET for this bike to calibrate against. The 15.42 s number is a first-principles estimate from the engine torque curve, the gearbox ratios, the dry mass and the published Cd/frontal-area inputs. If a Dragy timeslip from a stock Roadster turns up (Valley Run 2026 Winter would be the obvious place to get one), the model will be updated, and the headline number may move by 0.1 to 0.3 seconds either way.',
   },
   {
     type: 'p',

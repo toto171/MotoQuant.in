@@ -45,11 +45,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The R15 runs a 428-pitch chain. Worn or badly tensioned, it can lose 2–4% of engine power. That is 0.4–0.7 hp. On an 18 hp bike, it matters. MotoQuant models chain efficiency at 0.94 for small-cc bikes with budget-grade chains.',
+    text: 'The R15 runs a 428-pitch chain. Worn or badly tensioned, it can lose 2–4% of engine power. That is 0.4–0.7 hp, a real loss when the whole bike makes 18 hp. MotoQuant models chain efficiency at 0.94 for small-cc bikes with budget-grade chains.',
   },
   {
     type: 'callout',
-    text: 'The biggest clutch fix for the R15 is practice. A smooth, fast release at 4,000–4,500 RPM consistently beats a slip-and-dump at 6,000 RPM. In MotoQuant\'s simulation the best R15 launch RPM is around 4,200 RPM (56% of peak power RPM).',
+    text: 'The biggest clutch fix for the R15 is practice, not parts. A smooth, fast release at 4,000–4,500 RPM consistently beats a slip-and-dump at 6,000 RPM. In MotoQuant\'s simulation the best R15 launch RPM is around 4,200 RPM (56% of peak power RPM).',
   },
   {
     type: 'h2',

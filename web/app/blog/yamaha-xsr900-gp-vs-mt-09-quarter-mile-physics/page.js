@@ -166,7 +166,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'At Indian drag strips the answer is clear. At Aamby Valley, Madras Motor Race Track or the Hyderabad strip, nobody buys the GP for its quarter-mile numbers. The bikes you actually see at the line in the 11-second mid-twin / triple bracket are MT-09s, the Triumph Street Triple 765 R, the Aprilia Tuono 660 and the occasional KTM 990 Duke. The GP shows up at Sunday breakfast rides, not at Valley Run.',
+    text: 'On Indian drag strips the answer is clear. At Aamby Valley, Madras Motor Race Track or the Hyderabad strip, nobody buys the GP for its quarter-mile numbers. The bikes you actually see at the line in the 11-second mid-twin / triple bracket are MT-09s, the Triumph Street Triple 765 R, the Aprilia Tuono 660 and the occasional KTM 990 Duke. The GP shows up at Sunday breakfast rides, not at Valley Run.',
   },
   {
     type: 'h2',
@@ -202,7 +202,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'So which is faster, the XSR900 GP or the MT-09? The MT-09 wins the quarter mile by about 0.12 seconds under matched stock conditions, the GP wins the top-speed run by 15-20 km/h, and on a real strip the gap is well inside the run-to-run variance both bikes will show. Pick the MT-09 for the strip and the GP for the open highway.',
+    text: 'Which is faster, the XSR900 GP or the MT-09? The MT-09 wins the quarter mile by about 0.12 seconds under matched stock conditions, the GP wins the top-speed run by 15-20 km/h, and on a real strip the gap is well inside the run-to-run variance both bikes will show. Pick the MT-09 for the strip and the GP for the open highway.',
   },
   {
     type: 'p',
@@ -214,7 +214,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'If a salesman in a Pune Yamaha showroom tells you the GP is faster than the MT-09 because of the fairing, he is half right. The GP is faster at 240 km/h. He just left out that you need an empty stretch of road, which most Indians do not have access to, before that advantage shows up. On the quarter mile, the only measure most buyers actually use to compare bikes, the MT-09 wins on every count.',
+    text: 'If a salesman in a Pune Yamaha showroom tells you the GP is faster than the MT-09 because of the fairing, he is half right. The GP is faster at 240 km/h. He just left out that the advantage only shows up on an empty stretch of road, which most Indians do not have access to. On the quarter mile, the only measure most buyers actually use to compare bikes, the MT-09 wins on every count.',
   },
 ];
 

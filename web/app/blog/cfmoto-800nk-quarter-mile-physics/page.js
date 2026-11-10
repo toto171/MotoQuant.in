@@ -33,7 +33,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'MotoQuant simulates the CFMoto 800NK at 11.386 seconds and a 203.2 km/h trap under Aamby Valley November conditions. That puts it in the litre-sport-600-1000 cluster: half a second behind a stock KTM Duke 790, half a second ahead of a well-ridden RE Continental GT 650. The better question is what you are buying at ₹9-12 lakh, and the answer is more honest than the marketing.',
+    text: 'MotoQuant simulates the CFMoto 800NK at 11.386 seconds and a 203.2 km/h trap under Aamby Valley November conditions. That puts it in the litre-sport-600-1000 cluster: half a second behind a stock KTM Duke 790, half a second ahead of a well-ridden RE Continental GT 650. The question that matters is what you are buying at ₹9-12 lakh, and the answer is more honest than the marketing.',
   },
   {
     type: 'h2',
@@ -86,7 +86,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Three things, in order of impact. The first is gearing. The LC8c has a lot of pull for a parallel twin (81 Nm at 8000 rpm is useful torque), but the cassette ratios were chosen for the road, not the drag strip. First gear at 2.667 with a 16/41 final drive puts the bike at about 105 km/h at the 10500 rpm rev limit. That is too tall for a clean launch; the bike spends the first 60 feet bogged down in mid-range torque and an unhelpful clutch slip phase, then has to shift to second almost as soon as it has straightened up. The simulator log shows the 800NK crossing the trap line in fourth gear at about 9100 rpm, well within the powerband, but with one more gear change than the run can absorb cleanly.',
+    text: 'Three things, in order of impact. The first is gearing. The LC8c pulls hard for a parallel twin (81 Nm at 8000 rpm), but the cassette ratios were chosen for the road, not the drag strip. First gear at 2.667 with a 16/41 final drive puts the bike at about 105 km/h at the 10500 rpm rev limit. That is too tall for a clean launch; the bike spends the first 60 feet bogged down in mid-range torque and an unhelpful clutch slip phase, then has to shift to second almost as soon as it has straightened up. The simulator log shows the 800NK crossing the trap line in fourth gear at about 9100 rpm, well within the powerband, but with one more gear change than the run can absorb cleanly.',
   },
   {
     type: 'p',
@@ -160,7 +160,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'A more aggressive 15/42 swap shortens the ratios further and puts the bike in fifth at the trap. That sounds better and is not. The shift lands roughly 60 feet before the trap line, and the gear-change deadband costs more ET than the shorter gear gains in wheel torque. On stock power the 800NK needs a slightly shorter fourth gear, not a fifth, and the 16/42 swap gives it exactly that.',
+    text: 'A more aggressive 15/42 swap shortens the ratios further and puts the bike in fifth at the trap. That sounds better and is not. The shift lands roughly 60 feet before the trap line, and the gear-change deadband costs more ET than the shorter gear gains in wheel torque. On stock power the 800NK wants to stay in fourth, with that gear a little shorter. The 16/42 swap does exactly that.',
   },
   {
     type: 'h2',
@@ -176,7 +176,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'If you want the fastest bike in its price class, the 800NK is the wrong bike. If you want a parallel-twin naked for weekend rides, occasional drag-strip days and a long upgrade path through the KTM ecosystem, the simulator data says it is the right one. Treat the 11.4-second stock ET as the floor. From there, small, cheap, well-understood mods will build a genuine 10.5-second bike for under ₹15 lakh all-in, and that upgrade path is what CFMoto is really selling.',
+    text: 'If you want the fastest bike in its price class, the 800NK is the wrong bike. If you want a parallel-twin naked that will hold up to weekend rides, occasional drag-strip days and a long upgrade path through the KTM ecosystem, the simulator data says it is the right one. Treat the 11.4-second stock ET as the floor. From there, small, cheap, well-understood mods will let you build a genuine 10.5-second bike for under ₹15 lakh all-in, and that upgrade path is what CFMoto is selling.',
   },
   {
     type: 'h2',

@@ -236,7 +236,7 @@ export default function ValidationPage() {
           <p>
             <strong className="text-white">Benchmark sources:</strong> Published magazine timeslips from Cycle World,
             Sport Rider, MCN, Motorcyclist and BikeWale, and Indian community strip records from MotoStatz, Facebook
-            drag groups and published drag event results. All benchmarks assume a professional rider, race fuel and
+            drag groups and published drag event results. All benchmarks are for a professional rider, race fuel and
             an ideal strip unless noted otherwise.
           </p>
           <p>

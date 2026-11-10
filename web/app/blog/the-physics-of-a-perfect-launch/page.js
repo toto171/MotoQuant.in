@@ -22,7 +22,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'Three things decide the first 0.4 seconds of a drag run: the RPM at which the clutch engages, how much the rear tyre slips, and how much weight moves onto the rear wheel. Get any one wrong and you lose tenths, sometimes much more. MotoQuant simulates all three when you press Run, and each one changes the other two.',
+    text: 'Three things decide the first 0.4 seconds of a drag run: the RPM at which the clutch engages, how much the rear tyre slips, and how much weight moves onto the rear wheel. Get any one wrong and you lose tenths, sometimes much more. Each one changes the other two, and MotoQuant simulates all three when you press Run.',
   },
   {
     type: 'h2',

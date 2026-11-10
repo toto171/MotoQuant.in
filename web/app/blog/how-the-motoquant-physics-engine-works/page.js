@@ -121,7 +121,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Weight transfer reduces front axle load and increases rear axle load proportionally to acceleration × CoG_height / wheelbase. More rear load means more available traction. Past a critical point the front goes light enough that the bike wheelies, which is a separate sub-model that limits available drive force to whatever keeps the front wheel a few millimeters off the ground. A liter-class superbike on a hard launch typically wheelies in gear 1 around 0.7–1.0 g; the wheelie limit is what caps acceleration in that window, not engine power or tire grip.',
+    text: 'Weight transfer reduces front axle load and increases rear axle load proportionally to acceleration × CoG_height / wheelbase. More rear load means more available traction. Past a critical point the front goes light enough that the bike wheelies. Wheelie is a separate sub-model that limits available drive force to whatever keeps the front wheel a few millimeters off the ground. A liter-class superbike on a hard launch typically wheelies in gear 1 around 0.7–1.0 g; the wheelie limit is what caps acceleration in that window, not engine power or tire grip.',
   },
   {
     type: 'p',
@@ -145,7 +145,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Three reference baselines are fixed: GSX-R 1000 K5 (10.0436 s), YZF-R1 4C8 (10.1092 s), and Hayabusa Gen1 (10.1100 s). Every code change must keep these to four decimals. They catch "improvements" that quietly broke the engine.',
+    text: 'Three reference baselines are locked: GSX-R 1000 K5 (10.0436 s), YZF-R1 4C8 (10.1092 s), and Hayabusa Gen1 (10.1100 s). Every code change must keep these to four decimals. They catch "improvements" that quietly broke the engine.',
   },
   {
     type: 'p',

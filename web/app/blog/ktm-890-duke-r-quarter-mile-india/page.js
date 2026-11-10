@@ -36,7 +36,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'MotoQuant simulates the KTM 890 Duke R at 11.07 seconds and a 202 km/h trap at Aamby Valley in November conditions, 0.35 seconds quicker than the standard 890 Duke we covered in the GSX-S750 comparison post. Almost every 890 Duke that reaches India is the R variant, so the standard-variant comparison is mostly academic. This post covers what the R does on a drag strip and why, then where an Indian owner who paid ₹11.5 lakh for it can buy the cheapest tenths.',
+    text: 'MotoQuant simulates the KTM 890 Duke R at 11.07 seconds and a 202 km/h trap at Aamby Valley in November conditions, 0.35 seconds quicker than the standard 890 Duke we covered in the GSX-S750 comparison post. Almost every 890 Duke that reaches India is the R variant, so the standard-variant comparison is academic. The rest of this post is about the R: what it does on a drag strip, why, and where an Indian owner who paid ₹11.5 lakh for it can buy the cheapest tenths.',
   },
   {
     type: 'h2',
@@ -44,7 +44,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "KTM never officially homologated the standard 890 Duke for the Indian market. The 790 Duke had a brief CKD run in 2019. The 890 Duke arrived as a CBU import in 2020 (same engine platform, more capacity, more electronics) and was quietly withdrawn from the official India price list inside eighteen months. The two routes that kept the bike alive in India were the Nepal grey market (Kathmandu-registered CBU units crossing through Sunauli or Raxaul) and Dubai re-exports through Mumbai. Both routes mostly carry the R. The standard 890 Duke and the R share a price floor in their export markets, but the R has the visible extras (the orange-frame paint, the WP Apex suspension, the Brembo Stylema brakes), and a grey-market buyer feels they are getting the higher trim for the same money.",
+    text: "KTM never officially homologated the standard 890 Duke for the Indian market. The 790 Duke had a brief CKD run in 2019. The 890 Duke arrived as a CBU import in 2020 (same engine platform, more capacity, more electronics) and was quietly withdrawn from the official India price list inside eighteen months. The two routes that kept the bike alive in India were the Nepal grey market (Kathmandu-registered CBU units crossing through Sunauli or Raxaul) and Dubai re-exports through Mumbai. Both routes mostly carry the R. The standard 890 Duke and the R share a price floor in their export markets, but the R has the visible extras (the orange-frame paint, the WP Apex suspension, the Brembo Stylema brakes), so a grey-market buyer feels they are getting the higher trim for the same money.",
   },
   {
     type: 'p',
@@ -212,7 +212,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "If your decision tree is \"quickest mid-cc naked under ₹15 lakh,\" the math says MT-09. If your decision tree is \"quickest mid-cc naked that I will modify and ride hard,\" the 890 Duke R is the better starting point: the R's stock components leave less performance on the table after a Tier-1 mod stack, and with Powertronic in India the tuning support is much better than for the official MT-09 import. The strip times converge around 10.85s for a modded 890 Duke R against 10.86s for a stock MT-09; after that point it is rider and chassis, not engine.",
+    text: "If your decision tree is \"quickest mid-cc naked under ₹15 lakh,\" the math says MT-09. If your decision tree is \"quickest mid-cc naked that I will modify and ride hard,\" the 890 Duke R is the better starting point. Its stock components leave less performance on the table after a Tier-1 mod stack, and with Powertronic in India the tuning support is much better than for the official MT-09 import. The strip times converge around 10.85s for a modded 890 Duke R against 10.86s for a stock MT-09; after that point it is rider and chassis, not engine.",
   },
 ];
 

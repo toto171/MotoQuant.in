@@ -70,7 +70,7 @@ const POSTS = [
     title:
       "Royal Enfield Interceptor 650 quarter-mile physics: 14.15s on 47hp",
     excerpt:
-      "MotoQuant simulates the Royal Enfield Interceptor 650 at 14.151s and a 155.8 km/h trap at Aamby Valley in November. That is 0.05s slower than the GT 650 with the identical engine, because the upright bars push 0.50 m² of frontal area against the cafe racer's 0.46 m². Top of the cost-per-tenth list: the F15/R46 sprocket swap (₹2,400, 0.16s off the ET) and the Powertronic Stage 1 flash (₹14,500, another 0.21s). The ₹17,000 mod combo puts the bike at a simulated 13.81s, faster than a stock Pulsar NS400Z.",
+      "MotoQuant simulates the Royal Enfield Interceptor 650 at 14.151s and a 155.8 km/h trap at Aamby Valley in November. That is 0.05s slower than the GT 650, which has the same engine, because the upright bars push 0.50 m² of frontal area against the cafe racer's 0.46 m². Top of the cost-per-tenth list: the F15/R46 sprocket swap (₹2,400, 0.16s off the ET) and the Powertronic Stage 1 flash (₹14,500, another 0.21s). The ₹17,000 mod combo puts the bike at a simulated 13.81s, faster than a stock Pulsar NS400Z.",
   },
   {
     slug: "triumph-tiger-900-gt-pro-quarter-mile-physics",
@@ -103,7 +103,7 @@ const POSTS = [
     ],
     title: "Yamaha RD350 quarter-mile physics: Why a 1973 2-stroke still runs 14.7s",
     excerpt:
-      "MotoQuant simulates the 1973 Yamaha RD350 at 14.707s and a ~145 km/h trap in Aamby Valley November conditions, quicker than a 2026 Pulsar NS200, Hunter 350 or R15 V4. Cycle World clocked the real bike at 14.000s in 1973. The May 31 2026 two-stroke clutch calibration took 347ms off the simulated ET. Also inside: the detune math for the Indian Rajdoot RD350 HT and LT, an honest look at the simulator's bias for two-strokes, and the cheapest tenth on the bike (a ₹450 sprocket swap).",
+      "MotoQuant simulates the 1973 Yamaha RD350 at 14.707s and a ~145 km/h trap in Aamby Valley November conditions, quicker than a 2026 Pulsar NS200, Hunter 350 or R15 V4. Cycle World clocked the real bike at 14.000s in 1973. The May 31 2026 two-stroke clutch calibration took 347ms off the simulated ET. Also inside: the detune math for the Indian Rajdoot RD350 HT and LT, the simulator's known bias on two-strokes, and the cheapest tenth on the bike (a ₹450 sprocket swap).",
   },
   {
     slug: "bmw-f-900-gs-quarter-mile-physics",
@@ -133,7 +133,7 @@ const POSTS = [
     ],
     title: "CFMoto 675SR-R quarter-mile physics: The 95hp Daytona 660 rival",
     excerpt:
-      "The CFMoto 675SR-R, CFMoto's first inline triple, is aimed at under ₹6 lakh ex-showroom in India for FY26. It traps 5.6 km/h faster than a Daytona 660 with the same 95 hp, on better aerodynamics. MotoQuant simulates it at 11.323s and a 214.4 km/h trap. How it compares with the Daytona 660, Street Triple 765 R, MT-09 and its 800NK sibling, plus the mods ranked by cost per tenth, led by the ₹32,000 Powertronic Stage 1 flash.",
+      "CFMoto's first inline triple is aimed at under ₹6 lakh ex-showroom in India for FY26. MotoQuant simulates the 675SR-R at 11.323s and a 214.4 km/h trap, 5.6 km/h faster at the trap than a Daytona 660 with the same 95 hp, on better aerodynamics. How it compares with the Daytona 660, Street Triple 765 R, MT-09 and its 800NK sibling, plus the mods ranked by cost per tenth, led by the ₹32,000 Powertronic Stage 1 flash.",
   },
   {
     slug: "aprilia-tuono-457-vs-rs-457-quarter-mile-physics",
@@ -164,7 +164,7 @@ const POSTS = [
     ],
     title: "Why 600cc supersports were running 200ms slow in our sim",
     excerpt:
-      "MotoQuant's 600cc inline-four simulations were biased +0.207s slow against Sport Rider and MotoStatz benchmarks. The fix was one number: max_engine_decel_rads2 went from 150 to 600 radians per second squared. Why a 600cc inline-four crankshaft decelerates four times faster during clutch slip than the old cap allowed, the simulated ETs for the GSX-R 600 K6, R6 13S and CBR600RR 2013 after the fix, and how the K5, R1 and Hayabusa reference baselines held to four decimals through the change.",
+      "MotoQuant's 600cc inline-four simulations were biased +0.207s slow against Sport Rider and MotoStatz benchmarks. The fix was one number: max_engine_decel_rads2 went from 150 to 600 radians per second squared. Why a 600cc inline-four crankshaft can decelerate four times faster during clutch slip than the old cap allowed, the simulated ETs for the GSX-R 600 K6, R6 13S and CBR600RR 2013 after the fix, and how the K5, R1 and Hayabusa reference baselines held to four decimals through the change.",
   },
   {
     slug: "honda-cbr150r-quarter-mile-physics",
@@ -237,7 +237,7 @@ const POSTS = [
     ],
     title: "Harley Nightster RH975: Revolution Max quarter-mile physics",
     excerpt:
-      "Cycle World clocked the Nightster RH975 at 11.99s, quicker than a Triumph Street Triple 765 R. MotoQuant simulates it at 12.45s, and almost all of the 0.46s gap is in the launch. Why a 90 hp, 212 kg belt-drive Harley runs an 11.x, and why the Sportster S RH1250S posts nearly the same time with 31 more horsepower.",
+      "Cycle World clocked the Nightster RH975 at 11.99s, quicker than a Triumph Street Triple 765 R. MotoQuant simulates it at 12.45s, and almost all of the 0.46s gap is in the launch. Why a 90 hp, 212 kg belt-drive Harley runs an 11.x, and why the Sportster S RH1250S posts nearly the same time despite 31 more horsepower.",
   },
   {
     slug: "kawasaki-ninja-h2-sx-quarter-mile-physics",
@@ -253,7 +253,7 @@ const POSTS = [
     ],
     title: "Kawasaki Ninja H2 SX quarter-mile physics: Supercharged tourer",
     excerpt:
-      "MotoQuant simulates the 2018-2023 Ninja H2 SX at 10.20 s and a 232.8 km/h trap at Aamby Valley in November: a Hayabusa-class quarter mile from a 238 kg sport-tourer with its hard luggage mounts still bolted on. How the supercharger pays back the touring spec, where the 20 kg of pannier brackets sit, and how a stripped H2 SX runs within 0.06 s of a stock Ninja H2 without spending a rupee on parts. Grey-market prices in India: ₹28-32 lakh, against ₹17.7 lakh for a Hayabusa Gen 3.",
+      "MotoQuant simulates the 2018-2023 Ninja H2 SX at 10.20 s and a 232.8 km/h trap at Aamby Valley in November: a Hayabusa-class quarter mile from a 238 kg sport-tourer with its hard luggage mounts still bolted on. How the supercharger pays back the touring spec, where the 20 kg of pannier brackets sit, and how a stripped H2 SX runs within 0.06 s of a stock Ninja H2 without spending a rupee on parts. Grey-market price in India: ₹28-32 lakh, against ₹17.7 lakh for a Hayabusa Gen 3.",
   },
   {
     slug: "honda-cb125r-quarter-mile-physics",
@@ -293,7 +293,7 @@ const POSTS = [
     ],
     title: "Royal Enfield Bullet 350 quarter-mile physics: 17.7s on the strip",
     excerpt:
-      "MotoQuant simulates the Bullet 350 J-platform at 17.735s and a 118 km/h trap. Autocar India and BikeWale GPS-timed stock bikes at 17.8-18.3s. Why 20.2 hp and 195 kg produce a 17-second ET, how the six-speed gearbox works against you at the strip, and what the J-platform siblings (Classic 350, Meteor 350, Hunter 350) inherit from the same engine.",
+      "Autocar India and BikeWale GPS-timed stock Bullet 350s at 17.8-18.3s; MotoQuant simulates the J-platform bike at 17.735s and a 118 km/h trap. Why 20.2 hp and 195 kg produce a 17-second ET, how the six-speed gearbox works against you at the strip, and what the J-platform siblings (Classic 350, Meteor 350, Hunter 350) inherit from the same engine.",
   },
   {
     slug: "honda-hornet-2-0-vs-pulsar-ns200-quarter-mile",
@@ -318,7 +318,7 @@ const POSTS = [
     tags: ["Bajaj", "Dominar 400", "Indian 400cc", "sport-tourer", "physics"],
     title: "Bajaj Dominar 400 quarter-mile physics: 373cc single at the strip",
     excerpt:
-      "MotoQuant simulates the Bajaj Dominar 400 at 14.62s and a 156 km/h trap. Autocar India clocked 14.4-14.9s on the same bike. Where the 0.9s gap to a stock RC 390 comes from, why 168 kg of mass matters more than the 40hp engine, and four mods under ₹18,000 that close most of the gap for Indian Dominar owners.",
+      "Autocar India clocked the Bajaj Dominar 400 at 14.4-14.9s; MotoQuant simulates it at 14.62s and a 156 km/h trap. Where the 0.9s gap to a stock RC 390 comes from, why 168 kg of mass matters more than the 40hp engine, and four mods under ₹18,000 that close most of the gap for Indian Dominar owners.",
   },
   {
     slug: "yamaha-mt-15-v1-quarter-mile-physics",
@@ -327,7 +327,7 @@ const POSTS = [
     tags: ["Yamaha", "MT-15 V1", "Indian 155cc", "naked sport", "physics"],
     title: "Yamaha MT-15 V1 quarter-mile physics: 155cc naked drag",
     excerpt:
-      "MotoQuant simulates the Yamaha MT-15 V1 at 17.05s and a 125.5 km/h trap. It is the 2019 R15 V3 platform without VVA, and it loses about a tenth and a half to its faired sibling, mostly to aero rather than the engine. Where Indian 155cc owners find cheap tenths, and why a ₹3,850 sprocket-and-tire combo beats a ₹38,000 slip-on.",
+      "In the simulator, the Yamaha MT-15 V1 runs 17.05s with a 125.5 km/h trap. It is the 2019 R15 V3 platform without VVA, and it loses about a tenth and a half to its faired sibling, mostly to aero rather than the engine. Where Indian 155cc owners find cheap tenths, and why a ₹3,850 sprocket-and-tire combo beats a ₹38,000 slip-on.",
   },
   {
     slug: "hayabusa-quarter-mile-physics-what-limits-9-6-seconds",
@@ -359,7 +359,7 @@ const POSTS = [
     title:
       "Aprilia Tuono 660 Factory quarter-mile physics: 11.02s on the strip",
     excerpt:
-      "With 5 extra hp, 14 kg less and sharper gearing, the Aprilia Tuono 660 Factory runs 0.3s ahead of the base Tuono 660. MotoQuant simulates it at 11.02s and a 215.7 km/h trap. Where that lead comes from, and why at ₹16.15 lakh the Factory trim is the value pick among middleweight nakeds in India.",
+      "MotoQuant simulates the Aprilia Tuono 660 Factory at 11.02s and a 215.7 km/h trap, 0.3s ahead of the base Tuono 660. How 5 extra hp, 14 kg less and sharper gearing make up that gap, and why at ₹16.15 lakh the Factory trim is the value pick among middleweight nakeds in India.",
   },
   {
     slug: "triumph-street-triple-765r-quarter-mile-physics",
@@ -458,7 +458,7 @@ const POSTS = [
     readTime: "11 min",
     tags: ["Kawasaki", "Ninja ZX-4R", "400cc", "inline-four", "physics"],
     excerpt:
-      "MotoQuant simulates the 2024 Kawasaki Ninja ZX-4R at 12.681s and a 192.6 km/h trap. Why a 76 hp 400cc inline-four runs a 12.6 when every other 400-class bike runs a 13.5, plus three mods under ₹30,000 that close the gap to the ZX-4RR.",
+      "The 2024 Kawasaki Ninja ZX-4R runs 12.681s with a 192.6 km/h trap in MotoQuant. Why a 76 hp 400cc inline-four runs a 12.6 when every other 400-class bike runs a 13.5, plus three mods under ₹30,000 that close the gap to the ZX-4RR.",
   },
   {
     slug: "yamaha-mt-125-xsr125-platform-physics",
@@ -512,7 +512,7 @@ const POSTS = [
     readTime: "10 min",
     tags: ["Royal Enfield", "Continental GT 650", "Indian 650cc", "cafe racer"],
     excerpt:
-      "MotoQuant simulates the RE Continental GT 650 at ~14.1s and a 158 km/h trap. Why the 47 hp / 52 Nm air/oil-cooled twin is rev-limited rather than power-limited, and the ₹7,800 sprocket-and-tire combo that closes most of the gap.",
+      "In MotoQuant, the RE Continental GT 650 runs ~14.1s with a 158 km/h trap. Why the 47 hp / 52 Nm air/oil-cooled twin is rev-limited rather than power-limited, and the ₹7,800 sprocket-and-tire combo that closes most of the gap.",
   },
   {
     slug: "pulsar-ns200-vs-apache-rtr-200-quarter-mile-physics",
@@ -562,7 +562,7 @@ const POSTS = [
     readTime: "9 min",
     tags: ["Hero", "Xtreme 200S 4V", "Indian 200cc", "commuter sport"],
     excerpt:
-      "MotoQuant simulates the Hero Xtreme 200S 4V at 17.40s and a 125 km/h trap. Why the 19.1 hp / 17.35 Nm 4-valve oil-cooled single is limited by gearing rather than power, and the two ₹3,600 mods that close most of the gap.",
+      "The Hero Xtreme 200S 4V runs 17.40s with a 125 km/h trap in the simulator. Why the 19.1 hp / 17.35 Nm 4-valve oil-cooled single is limited by gearing rather than power, and the two ₹3,600 mods that close most of the gap.",
   },
   {
     slug: "ktm-1390-super-duke-r-evo-quarter-mile-physics",
@@ -589,7 +589,7 @@ const POSTS = [
     readTime: "8 min",
     tags: ["physics", "launch control", "clutch"],
     excerpt:
-      "Clutch engagement rpm, tire slip ratio and weight transfer work together in the first 0.4 seconds, and getting any one of them wrong costs you tenths. This post works through the math.",
+      "Clutch engagement rpm, tire slip ratio and weight transfer work together in the first 0.4 seconds, and getting any one of them wrong costs you tenths. The post works through the math for each.",
   },
   {
     slug: "why-your-r15-wont-hit-14s",
@@ -598,7 +598,7 @@ const POSTS = [
     readTime: "10 min",
     tags: ["small-cc", "Yamaha R15", "Indian bikes", "tuning"],
     excerpt:
-      "The Yamaha YZF-R15 V3 should run ~14.5s based on factory power. Most stock bikes run 15.5–16s. The gap comes from gearing, clutch slip and traction, not engine power, and this post goes through it second by second.",
+      "The Yamaha YZF-R15 V3 should run ~14.5s based on factory power. Most stock bikes run 15.5–16s. The gap comes from gearing, clutch slip and traction, not engine power, and the post accounts for it second by second.",
   },
   {
     slug: "how-to-tune-for-aamby-valley-in-november",

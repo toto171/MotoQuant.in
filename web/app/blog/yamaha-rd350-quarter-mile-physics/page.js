@@ -104,7 +104,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Almost all of the 1.3 to 2.2 second gap between the RD350 and any modern Indian 200-350cc commuter is engine power. The chassis mass band is the same, so is the 17-inch rear wheel, and tyre grip and gearing are similar. The 2-stroke twin simply makes much more torque across a usable rev band, and sends it to the rear wheel through a 6-speed gearbox geared to suit the engine\'s specific output. Even the RD400 Daytona, three years newer and 6 hp stronger, is only half a second quicker than the RD350 in the sim. The RD350 was already most of the way to the practical limit for a carburetted 2-stroke twin.',
+    text: 'Almost all of the 1.3 to 2.2 second gap between the RD350 and any modern Indian 200-350cc commuter is engine power. The chassis mass band and the 17-inch rear wheel are the same, and tyre grip and gearing are similar. The 2-stroke twin simply makes much more torque across a usable rev band, and sends it to the rear wheel through a 6-speed gearbox geared to suit the engine\'s specific output. Even the RD400 Daytona, three years newer and 6 hp stronger, is only half a second quicker than the RD350 in the sim. The RD350 was already most of the way to the practical limit for a carburetted 2-stroke twin.',
   },
   {
     type: 'h2',
@@ -140,7 +140,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'At the strip, an RD350 wants more aggressive clutch slip than a 4-stroke of equivalent power, and the 2T crank can take it. The expansion chamber needs revs in the tuned band (around 7500 rpm for the stock RD350 chamber) to make the rated power. A soft launch that drops the engine below 5500 rpm during clutch engagement falls off the pipe: the chamber stops stuffing charge and the bike accelerates as if it had 22 hp instead of 39. A short, hard clutch slip with the engine held at 7000-7500 rpm, launched on the first hint of front-wheel lift, gives the 14-second result. A soft, street-style launch gives a 16-second result on the same hardware.',
+    text: 'At the strip, an RD350 wants more aggressive clutch slip than a 4-stroke of equivalent power, and the 2T crank can take it. The expansion chamber needs revs in the tuned band (around 7500 rpm for the stock RD350 chamber) to make the rated power. A soft launch that drops the engine below 5500 rpm during clutch engagement falls off the pipe: the chamber stops stuffing charge and the bike accelerates as if it had 22 hp instead of 39. Hold the engine at 7000-7500 rpm, slip the clutch short and hard, and launch on the first hint of front-wheel lift: that gives the 14-second result. A soft, street-style launch gives a 16-second result on the same hardware.',
   },
   {
     type: 'callout',
@@ -180,11 +180,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'A 53-year-old RD350 in India in 2026 is almost certainly not stock. Most running examples have been through 30-40 years of makeshift repairs, decarbonising and substitute parts. The faults that most often cost strip ET are a leaking crank seal (it steals primary compression and drops peak power by 4-7 hp), a slack expansion chamber baffle (it shifts the tuned rpm and narrows the band) and a worn clutch basket (it stretches the slip and bleeds the launch). All three can be fixed. None needs work on the engine internals beyond a top-end rebuild, which any competent 2-stroke shop in Pune, Bangalore or Coimbatore can do.',
+    text: 'A 53-year-old RD350 in India in 2026 is almost certainly not stock. Running examples have been through 30-40 years of makeshift repairs, decarbonising and substitute parts. The most common faults that cost strip ET are a leaking crank seal (it steals primary compression and drops peak power by 4-7 hp), a slack expansion chamber baffle (it shifts the tuned rpm and narrows the band) and a worn clutch basket (it stretches the slip and bleeds the launch). All three can be fixed. None needs work on the engine internals beyond a top-end rebuild, which any competent 2-stroke shop in Pune, Bangalore or Coimbatore can do.',
   },
   {
     type: 'p',
-    text: 'For a properly restored RD350 (crank seals replaced, expansion chamber checked or replaced with a Yamaha service replica, clutch overhauled with new friction plates, carburettors rebuilt with the original 240 main jets), the simulator suggests an Aamby Valley November ET of approximately 14.2 to 14.5 seconds with a competent launch, and a trap speed of 142 to 148 km/h. The Cycle World 1973 benchmark bounds that range on the optimistic side, and the modelled cluster bias bounds it on the conservative side.',
+    text: 'Take a properly restored RD350: crank seals replaced, expansion chamber checked or replaced with a Yamaha service replica, clutch overhauled with new friction plates, carburettors rebuilt with the original 240 main jets. With a competent launch, the simulator suggests an Aamby Valley November ET of approximately 14.2 to 14.5 seconds and a trap speed of 142 to 148 km/h. The Cycle World 1973 benchmark bounds that range on the optimistic side, and the modelled cluster bias bounds it on the conservative side.',
   },
   {
     type: 'p',

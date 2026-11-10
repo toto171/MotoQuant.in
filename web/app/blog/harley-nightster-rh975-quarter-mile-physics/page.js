@@ -4,12 +4,12 @@ import SiteFooter from '../../../components/SiteFooter';
 import StructuredData, { articleSchema } from '../../StructuredData';
 
 const SLUG = 'harley-nightster-rh975-quarter-mile-physics';
-const TITLE = 'Harley Nightster RH975: Revolution Max Quarter-Mile Physics';
+const TITLE = 'Harley Nightster RH975: Revolution Max quarter-mile physics';
 const DESCRIPTION =
-  'Harley-Davidson Nightster RH975 quarter-mile physics deep-dive. MotoQuant simulates the 975cc Revolution Max 975T V-twin at 12.38s; Cycle World clocked 11.99s at 110.4 mph. Honest breakdown of the gap, and why a 90 hp Harley keeps up with 600cc middleweights. Indian context included.';
+  'MotoQuant simulates the Harley-Davidson Nightster RH975 and its 975cc Revolution Max 975T V-twin at 12.38s; Cycle World clocked 11.99s at 110.4 mph. Where the gap comes from, why a 90 hp Harley keeps up with 600cc middleweights, and what it means in India.';
 
 export const metadata = {
-  title: 'Harley Nightster RH975 Quarter-Mile Physics | MotoQuant',
+  title: 'Harley Nightster RH975 quarter-mile physics | MotoQuant',
   description: DESCRIPTION,
   keywords: [
     'harley davidson nightster rh975 quarter mile',
@@ -36,27 +36,27 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'Cycle World\'s 2022 instrumented test put the Harley-Davidson Nightster RH975 through the quarter mile in 11.99 seconds at 110.4 mph. That makes a stock Nightster quicker than a Triumph Street Triple 765 R on the drag strip, and within tenths of a Kawasaki Ninja 650. The Revolution Max 975T V-twin is not the sluggish cruiser motor most people assume it is. MotoQuant simulates the Nightster at 12.38 seconds, a 0.39-second gap from the Cycle World benchmark, which sits inside the cruiser cluster\'s documented bias band. Here is what the physics actually says about why a 90 hp belt-drive Harley runs an 11.x.',
+    text: 'Cycle World\'s 2022 instrumented test put the Harley-Davidson Nightster RH975 through the quarter mile in 11.99 seconds at 110.4 mph. That makes a stock Nightster quicker than a Triumph Street Triple 765 R on the drag strip, and within tenths of a Kawasaki Ninja 650. The Revolution Max 975T V-twin is not the slow cruiser engine most people take it for. MotoQuant simulates the Nightster at 12.38 seconds, 0.39 seconds off the Cycle World figure and inside the cruiser cluster\'s documented bias band. Here is why a 90 hp belt-drive Harley runs an 11.x.',
   },
   {
     type: 'h2',
-    text: 'The Revolution Max 975T: A Different Kind of V-Twin',
+    text: 'The Revolution Max 975T: a different kind of V-twin',
   },
   {
     type: 'p',
-    text: 'Harley-Davidson introduced the Revolution Max platform in 2021 with the Pan America adventure bike. The Nightster arrived in 2022 as the first dedicated street model using the smaller 975cc version of the engine. The architecture is a significant departure from the Milwaukee-Eight and Twin Cam V-twins that built Harley\'s reputation: the Revolution Max 975T is a liquid-cooled, DOHC 4-valve-per-cylinder 60° V-twin with variable valve timing and a counterbalancer shaft. It looks more like a Ducati V-twin on paper than a traditional Harley pushrod engine.',
+    text: 'Harley-Davidson introduced the Revolution Max platform in 2021 with the Pan America adventure bike. The Nightster followed in 2022 as the first dedicated street model built around the smaller 975cc version. The engine is a clear break from the Milwaukee-Eight and Twin Cam V-twins that built Harley\'s name: the Revolution Max 975T is a liquid-cooled 60° V-twin with DOHC, 4 valves per cylinder, variable valve timing and a counterbalancer shaft. On paper it looks more like a Ducati V-twin than a traditional Harley pushrod engine.',
   },
   {
     type: 'p',
-    text: 'Peak power is 90 hp at 7,500 rpm. Peak torque is 95 Nm at 5,000 rpm. The torque peak lands 2,500 rpm earlier than the power peak: a broad, accessible curve designed for real-world riding, not a narrow RPM spike. The 60° vee angle and counterbalancer produce a much smoother idle than the traditional 45° big V-twins, and the variable valve timing extends the usable power band across a wider RPM range than a fixed-cam equivalent would allow.',
+    text: 'Peak power is 90 hp at 7,500 rpm and peak torque is 95 Nm at 5,000 rpm. The torque peak comes 2,500 rpm before the power peak, which gives a broad curve built for real-world riding rather than a narrow RPM spike. The 60° vee and the counterbalancer give a much smoother idle than the traditional 45° big V-twins, and variable valve timing spreads usable power across a wider RPM range than fixed cams would.',
   },
   {
     type: 'p',
-    text: 'The final drive is belt: a 24-tooth front pulley and a 68-tooth rear, giving an overall drive ratio that sits on the tall side for a drag application. Belt drive eliminates chain stretch and sprocket wear but means a Nightster owner cannot simply drop a tooth on the front pulley the way they would on a chain-drive bike. The drivetrain geometry is fixed at the belt ratio; the only available gearing change is the rear pulley, which requires more work and cost than a sprocket swap.',
+    text: 'The final drive is a belt: a 24-tooth front pulley and a 68-tooth rear, an overall ratio on the tall side for drag use. A belt does not stretch or wear sprockets, but a Nightster owner cannot simply drop a tooth at the front the way a chain-drive owner can. The belt ratio fixes the gearing. The only change available is the rear pulley, which takes more work and money than a sprocket swap.',
   },
   {
     type: 'h2',
-    text: 'Spec Card: Nightster RH975 vs the 600cc Middleweight Benchmark',
+    text: 'Spec card: Nightster RH975 vs the 600cc middleweight benchmark',
   },
   {
     type: 'table',
@@ -77,71 +77,71 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The comparison column that matters is the Street Triple 765 R. The Triumph makes 28 more horsepower, weighs 46 kg less, and runs a sport-naked aero package with a significantly smaller frontal area. It costs more in most markets. And it beats the Nightster by roughly 1.7-1.9 seconds of ET. The Nightster, with 67 percent of the Triumph\'s peak power and 128 percent of its mass, runs within two seconds of a motorcycle that most riders would consider genuinely quick. That is the Revolution Max 975T\'s case for being taken seriously at the strip.',
+    text: 'The column that matters is the Street Triple 765 R. The Triumph makes 28 hp more, weighs 46 kg less, and has a sport-naked aero package with a much smaller frontal area. It costs more in most markets, and it beats the Nightster by roughly 1.7-1.9 seconds of ET. With 67 percent of the Triumph\'s peak power and 128 percent of its mass, the Nightster still runs within two seconds of a bike most riders would call quick. That is the case for taking the Revolution Max 975T seriously at the strip.',
   },
   {
     type: 'h2',
-    text: 'Sim vs Cycle World: The 0.39-Second Gap',
+    text: 'Sim vs Cycle World: the 0.39-second gap',
   },
   {
     type: 'p',
-    text: 'MotoQuant simulates the stock Nightster RH975 at 12.377 seconds and 181.8 km/h (113.0 mph) trap. Cycle World clocked 11.99 seconds at 110.4 mph (177.6 km/h) in their 2022 instrumented test, run under California conditions. The gap is 0.39 seconds of ET and 4.2 km/h (2.6 mph) of trap speed.',
+    text: 'MotoQuant simulates the stock Nightster RH975 at 12.377 seconds with a 181.8 km/h (113.0 mph) trap. Cycle World clocked 11.99 seconds at 110.4 mph (177.6 km/h) in its 2022 instrumented test, under California conditions. The gap is 0.39 seconds of ET and 4.2 km/h (2.6 mph) of trap speed.',
   },
   {
     type: 'callout',
-    text: 'The trap speed inversion, where MotoQuant simulates a higher trap speed (181.8 km/h) than Cycle World recorded (177.6 km/h) while also simulating a slower ET (12.38 s vs 11.99 s), is a known signature of the cruiser cluster\'s bias pattern. It means the simulator is getting the bike to the 402 m mark on a slower trajectory overall, but is reaching a similar terminal velocity. The most likely cause: the launch and clutch engagement phase is more conservative in the model than Cycle World\'s instrumented rider achieved in their test. Cycle World tests are done with professional riders performing optimal launches. The simulator uses a stock launch-RPM profile without manual optimisation.',
+    text: 'The trap-speed inversion is a known signature of the cruiser cluster\'s bias: MotoQuant simulates a higher trap speed than Cycle World recorded (181.8 km/h vs 177.6 km/h) but a slower ET (12.38 s vs 11.99 s). The simulated bike reaches the 402 m mark on a slower path overall, at a similar terminal speed. The most likely cause is the launch: the model\'s clutch engagement is more conservative than what Cycle World\'s test rider managed. Cycle World uses professional riders making optimal launches. The simulator uses a stock launch-RPM profile with no manual optimisation.',
   },
   {
     type: 'p',
-    text: 'For context: the MotoQuant cruiser-1300+ cluster (which the Nightster sits adjacent to as a large V-twin) has a documented mean absolute error of 0.407 seconds and a positive bias of 0.407 seconds (simulator runs slower than reality). The Nightster\'s 0.39-second gap is within that range. This is not a physics error specific to the Nightster; it reflects the fundamental challenge of modelling the launch phase on heavy bikes with belt drives and tall final gearing.',
+    text: 'For context, MotoQuant\'s cruiser-1300+ cluster (the Nightster sits next to it as a large V-twin) has a documented mean absolute error of 0.407 seconds and a positive bias of 0.407 seconds, meaning the simulator runs slower than reality. The Nightster\'s 0.39-second gap is inside that range. It is not a physics error specific to the Nightster. It comes from the general difficulty of modelling the launch on heavy bikes with belt drives and tall final gearing.',
   },
   {
     type: 'p',
-    text: 'The full split breakdown from MotoQuant: 60-foot at 2.295 seconds, 330-foot at 5.498 seconds, 1/8-mile at 8.116 seconds and 152.2 km/h, 1,000-foot at 10.405 seconds. A real Nightster with an optimal launch typically runs the 60-foot in roughly 2.05-2.10 seconds, which explains roughly half of the gap: the simulator\'s modelled clutch engagement is conservative, losing about 0.2 seconds in the first 60 feet.',
+    text: 'MotoQuant\'s full splits: 60-foot at 2.295 seconds, 330-foot at 5.498 seconds, 1/8-mile at 8.116 seconds and 152.2 km/h, 1,000-foot at 10.405 seconds. A real Nightster with an optimal launch typically runs the 60-foot in roughly 2.05-2.10 seconds. That accounts for roughly half the gap: the simulator\'s clutch engagement is conservative and loses about 0.2 seconds in the first 60 feet.',
   },
   {
     type: 'h2',
-    text: 'Why the Nightster Runs an 11.x: Physics of the V-Twin',
+    text: 'Why the Nightster runs an 11.x: the V-twin physics',
   },
   {
     type: 'p',
-    text: 'Three factors make the Nightster faster than its paper power-to-weight ratio suggests.',
+    text: 'Three things make the Nightster quicker than its paper power-to-weight ratio suggests.',
   },
   {
     type: 'p',
-    text: 'First: the torque curve shape. Peak torque arrives at 5,000 rpm: in most riding situations the Nightster is already well into its power band before first gear becomes power-limited. In a quarter-mile run, a bike that produces strong torque at 4,000-6,000 rpm makes better use of its power during the gearing-limited early phase of the run than a high-revving engine that only produces peak power at 10,000 rpm. The Nightster is not traction-limited at launch the way a 100+ hp sport bike is. It goes relatively cleanly from launch RPM to redline in first gear without significant wheel slip on dry pavement.',
+    text: 'First, the shape of the torque curve. Peak torque arrives at 5,000 rpm, so in most situations the Nightster is well into its power band before first gear becomes power-limited. Early in a quarter-mile run, while gearing is the limit, a bike with strong torque at 4,000-6,000 rpm uses its power better than a high-revving engine that makes peak power only at 10,000 rpm. The Nightster is not traction-limited at launch the way a 100+ hp sport bike is. On dry pavement it pulls from launch RPM to redline in first gear without much wheel slip.',
   },
   {
     type: 'p',
-    text: 'Second: displacement advantage. 975 cc produces torque more easily than 765 cc. The Street Triple 765 R needs to rev to 9,350 rpm to match the Nightster\'s 95 Nm peak torque. The Nightster is at that torque level from roughly 3,500 rpm upward. In a drag context, a wider torque plateau means the bike stays in a high-torque state across a larger range of gear ratios and engine speeds. The gearing does not need to be as aggressively short to keep the engine in its useful range.',
+    text: 'Second, displacement. 975 cc makes torque more easily than 765 cc. The Street Triple 765 R has to rev to 9,350 rpm to match the Nightster\'s 95 Nm peak torque; the Nightster is at that level from roughly 3,500 rpm up. In a drag run, a wider torque plateau keeps the bike in a high-torque state across more gear ratios and engine speeds, so the gearing does not need to be as short to keep the engine in its useful range.',
   },
   {
     type: 'p',
-    text: 'Third: the weight, while large in absolute terms, is not as damaging to ET as it appears. At 212 kg dry, the Nightster\'s power-to-weight ratio is approximately 68 hp per tonne (using 90 hp and 132 kg total: bike dry mass plus approximate fuel and a 70 kg rider). The Street Triple 765 R at 166 kg dry runs approximately 115 hp per tonne on the same calculation. The Triumph\'s massive advantage in power-to-weight is the reason it beats the Nightster by 1.7-1.9 seconds, not the Nightster\'s weight in isolation. A bike running 11.99 seconds with 68 hp per tonne is physically well-sorted.',
+    text: 'Third, the weight is large but does less damage to ET than it seems. At 212 kg dry, the Nightster\'s power-to-weight ratio is approximately 68 hp per tonne (using 90 hp and 132 kg total: bike dry mass plus approximate fuel and a 70 kg rider). The Street Triple 765 R at 166 kg dry works out to approximately 115 hp per tonne on the same calculation. The Triumph beats the Nightster by 1.7-1.9 seconds because of that big power-to-weight advantage, not because of the Nightster\'s weight on its own. A bike that runs 11.99 seconds on 68 hp per tonne is well sorted.',
   },
   {
     type: 'h2',
-    text: 'Belt Drive at the Strip: What It Costs You',
+    text: 'Belt drive at the strip: what it costs you',
   },
   {
     type: 'p',
-    text: 'Belt drive has a real power loss penalty versus a well-maintained chain drive. Harley-Davidson\'s belt system runs at roughly 2-3 percent drivetrain loss versus a typical 1.5-2 percent for a chain drive in good condition. At 90 hp crank output, the difference is approximately 0.5-1.5 hp at the wheel, a small but measurable disadvantage.',
+    text: 'A belt loses more power than a well-maintained chain. Harley-Davidson\'s belt system loses roughly 2-3 percent in the drivetrain, against a typical 1.5-2 percent for a chain in good condition. At 90 hp at the crank, the difference is approximately 0.5-1.5 hp at the wheel: small, but measurable.',
   },
   {
     type: 'p',
-    text: 'The larger issue for drag racing is the fixed gearing. A chain-drive bike owner can change sprockets for ₹900-3,000 and gain 0.15-0.25 seconds of ET by optimising the drive ratio for the quarter mile. The Nightster\'s belt system requires either a different rear pulley (which is a larger job, typically ₹8,000-15,000 in India including labour) or accepting the stock gearing as fixed. The stock 24F/68R gives an overall first-gear ratio that is appropriate for street riding (moderate, not aggressive), and the bike runs through all six gears before reaching the 402 m mark.',
+    text: 'The bigger problem for drag racing is the fixed gearing. A chain-drive owner can change sprockets for ₹900-3,000 and gain 0.15-0.25 seconds of ET by matching the drive ratio to the quarter mile. On the Nightster the choice is a different rear pulley (a bigger job, typically ₹8,000-15,000 in India including labour) or living with the stock gearing. The stock 24F/68R gives an overall first-gear ratio suited to street riding (moderate, not aggressive), and the bike goes through all six gears before the 402 m mark.',
   },
   {
     type: 'p',
-    text: 'In MotoQuant\'s split data, the Nightster uses all six gears by the time it crosses the quarter-mile. A well-set-up drag bike at this power level would ideally be in 3rd or 4th gear at the 402 m mark, maximising power delivery per gear. The Nightster\'s tall gearing forces it through the cassette, losing engine efficiency at each shift transition. This is the primary mechanical reason MotoQuant\'s sim ET is 0.39 seconds slower than the Cycle World benchmark. The model\'s launch RPM and clutch engagement are set conservatively, but the gearing analysis is correct.',
+    text: 'In MotoQuant\'s split data, the Nightster has used all six gears by the time it crosses the quarter-mile. A well-set-up drag bike at this power level would ideally be in 3rd or 4th at the 402 m mark, getting the most from each gear. The Nightster\'s tall gearing forces it through the whole cassette, and it loses engine efficiency at every shift. This is the main mechanical reason MotoQuant\'s sim ET is 0.39 seconds slower than the Cycle World benchmark. The model\'s launch RPM and clutch engagement are conservative, but the gearing analysis is correct.',
   },
   {
     type: 'h2',
-    text: 'What Mods Actually Move the Needle on a Nightster',
+    text: 'Which mods help on a Nightster',
   },
   {
     type: 'p',
-    text: 'The Indian Nightster market is thin for dedicated drag parts: the bike is priced at approximately ₹15.5-16.5 lakh ex-showroom in India and attracts buyers who are primarily interested in street and touring use rather than strip performance. The parts ecosystem reflects this. There are realistic options, but the cost-per-tenth ladder looks different from a Pulsar NS200 or RC 390.',
+    text: 'Dedicated drag parts for the Nightster are scarce in India. The bike costs approximately ₹15.5-16.5 lakh ex-showroom, and its buyers mostly care about street and touring use, not strip times. The parts on offer reflect that. There are realistic options, but the cost-per-tenth ladder looks different from a Pulsar NS200\'s or an RC 390\'s.',
   },
   {
     type: 'table',
@@ -156,67 +156,75 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The cost-per-tenth numbers for the Nightster are substantially worse than for Indian commuter bikes or even most 600cc middleweights. This is not a failure of the parts. The ECU flash and exhaust are genuine improvements. It is a consequence of the Nightster\'s starting point: at 11.99-12.38 seconds stock, the absolute gains from bolt-on mods are smaller in percentage terms than on a 14-17 second commuter bike, and the parts are priced for the premium cruiser segment rather than the performance segment.',
+    text: 'The Nightster\'s cost per tenth is much worse than on Indian commuter bikes or even most 600cc middleweights. The parts are not the problem; the ECU flash and exhaust are real improvements. The cause is the starting point. At 11.99-12.38 seconds stock, bolt-on mods gain less in percentage terms than on a 14-17 second commuter, and the parts are priced for the premium cruiser segment rather than the performance segment.',
   },
   {
     type: 'p',
-    text: 'The rear pulley swap is the highest-ROI drag-specific modification on the Nightster platform. Dropping the rear pulley from 68T to 62T shortens the overall gearing by approximately 9 percent, which keeps the engine closer to its peak torque band through a larger portion of each gear span. MotoQuant\'s model suggests this would recover roughly 0.15-0.20 seconds, enough to put a well-launched Nightster solidly into the 11.7-11.8 second range. Custom rear pulleys are available through Harley-Davidson tuning specialists in Bangalore and Mumbai; expect to source the pulley from the US market at approximately ₹12,000-15,000 and add ₹3,000-5,000 for belt-length matching and fitting.',
+    text: 'The rear pulley swap is the best-value drag modification on the Nightster. Going from a 68T to a 62T rear pulley shortens overall gearing by approximately 9 percent, which keeps the engine nearer its peak torque band through more of each gear. MotoQuant\'s model suggests this would recover roughly 0.15-0.20 seconds, enough to put a well-launched Nightster solidly in the 11.7-11.8 second range.',
+  },
+  {
+    type: 'p',
+    text: 'Harley-Davidson tuning specialists in Bangalore and Mumbai can supply custom rear pulleys. Expect to source the pulley from the US at approximately ₹12,000-15,000, plus ₹3,000-5,000 for belt-length matching and fitting.',
   },
   {
     type: 'callout',
-    text: 'The Nightster\'s belt drive is the single biggest structural constraint for drag tuning. Every other performance motorcycle in its price range offers a chain drive that allows ₹900-3,000 sprocket swaps for rapid gearing experiments. The Nightster requires a pulley swap that costs 10-20x more and is not reversible in an afternoon. If your primary goal is strip performance, this is the tradeoff you accept with the Harley platform.',
+    text: 'The belt drive is the biggest structural limit on drag tuning a Nightster. Every other performance bike at its price has a chain, so a ₹900-3,000 sprocket swap lets you try different gearing quickly. The Nightster needs a pulley swap that costs 10-20x more and cannot be undone in an afternoon. If strip performance is your main goal, that is the trade-off you accept with the Harley.',
   },
   {
     type: 'h2',
-    text: 'Nightster vs Sportster S: The Natural Comparison',
+    text: 'Nightster vs Sportster S: the obvious comparison',
   },
   {
     type: 'p',
-    text: 'Harley-Davidson sells the Sportster S RH1250S alongside the Nightster using the larger Revolution Max 1250T engine: 121 hp, 127 Nm, and the same belt-drive architecture. The Sportster S weighs approximately 228 kg wet, about 10-15 kg more than the Nightster in comparable trim. The power-to-weight ratio is roughly 83 hp per tonne for the Sportster S versus the Nightster\'s 68 hp per tonne.',
+    text: 'Harley-Davidson sells the Sportster S RH1250S alongside the Nightster. It uses the larger Revolution Max 1250T engine (121 hp, 127 Nm) with the same belt drive. The Sportster S weighs approximately 228 kg wet, about 10-15 kg more than the Nightster in comparable trim. Power-to-weight is roughly 83 hp per tonne for the Sportster S against the Nightster\'s 68 hp per tonne.',
   },
   {
     type: 'p',
-    text: 'Cycle World tested the Sportster S in 2021 and posted a 12.05 second quarter mile, almost exactly the same as the Nightster\'s 11.99 seconds. The Sportster S\'s 31 additional horsepower and 32 Nm of extra torque are partially offset by its additional mass and its taller overall gearing. The Nightster, despite its smaller engine, essentially matches the Sportster S at the strip under controlled conditions.',
+    text: 'Cycle World tested the Sportster S in 2021 and recorded a 12.05 second quarter mile, almost the same as the Nightster\'s 11.99 seconds. Its extra 31 hp and 32 Nm are partly cancelled out by its extra mass and taller overall gearing. Under controlled conditions, the smaller-engined Nightster matches the Sportster S at the strip.',
   },
   {
     type: 'p',
-    text: 'This is a counterintuitive result worth dwelling on. The Nightster is roughly ₹3-4 lakh less expensive in India, lighter, narrower, and easier to ride in traffic. At the drag strip it posts the same time as the flagship model in its family. The Revolution Max 975T engine is that well-suited to the bike\'s weight and gearing, which tells you something about the mechanical efficiency of the smaller engine package versus the 1250T in the heavier Sportster S chassis.',
+    text: 'That is a surprising result. In India the Nightster costs roughly ₹3-4 lakh less, and it is lighter, narrower and easier to ride in traffic. At the drag strip it posts the same time as the flagship of its family. The Revolution Max 975T suits the bike\'s weight and gearing that well, which says something about how efficient the smaller engine package is next to the 1250T in the heavier Sportster S chassis.',
   },
   {
     type: 'p',
-    text: 'A full Nightster vs Sportster S physics breakdown (including the launch characteristics of each engine, the torque curve comparison at matched RPM, and the gearing optimisation path for both) is covered in a separate post. The short version: if strip performance is the primary criterion, the Nightster is the better pick of the two in stock form.',
+    text: 'A separate post covers the full Nightster vs Sportster S physics: how each engine launches, the two torque curves at matched RPM, and the gearing changes for both. In short, if strip performance is what you care about most, the stock Nightster is the better pick of the two.',
   },
   {
     type: 'h2',
-    text: 'The Indian Market Context',
+    text: 'The Indian market',
   },
   {
     type: 'p',
-    text: 'The Nightster arrived in India in 2022 at approximately ₹15.5 lakh ex-showroom, positioning it above the Royal Enfield Super Meteor 650 and below the Triumph Bonneville T120. In the Indian performance context, that price buys significantly more quarter-mile performance from a KTM 890 Duke R (11.07 s, ₹11-12 lakh via grey market) or a BMW S 1000 R (sub-10 s, ₹22 lakh). The Nightster is not purchased in India because it is the fastest motorcycle at any price point. It is purchased because of the combination of style, sound, riding position, and the Revolution Max\'s mechanical character, all of which are real.',
+    text: 'The Nightster arrived in India in 2022 at approximately ₹15.5 lakh ex-showroom, above the Royal Enfield Super Meteor 650 and below the Triumph Bonneville T120. In Indian performance terms, that money buys much more quarter-mile performance in a KTM 890 Duke R (11.07 s, ₹11-12 lakh via grey market) or a BMW S 1000 R (sub-10 s, ₹22 lakh).',
   },
   {
     type: 'p',
-    text: 'For an Indian drag strip context: the Nightster will comfortably beat any stock Indian 650cc twin (RE Continental GT 650 runs approximately 14.1 seconds, RE Interceptor 650 similar), any 400cc Indian bike (RC 390 at approximately 13.5 seconds), and most stock 600cc sport bikes from the used market. It competes directly with stock Kawasaki Ninja 650 (approximately 13.4 seconds), MT-07 class bikes, and the lower end of the litre-class naked segment.',
+    text: 'Indian buyers do not choose the Nightster because it is the fastest bike at its price. They choose it for the style, the sound, the riding position and the Revolution Max\'s mechanical character, and all of those are real.',
   },
   {
     type: 'p',
-    text: 'At an Aamby Valley strip meet, a stock Nightster in the hands of a competent rider running consistent launches is going to beat most of the Indian bikes in the paddock. That is a genuine surprise to most observers who associate Harley-Davidson with slow, heavy touring bikes. The Revolution Max 975T platform changed that.',
+    text: 'At an Indian drag strip, the Nightster will comfortably beat any stock Indian 650cc twin (the RE Continental GT 650 runs approximately 14.1 seconds, the RE Interceptor 650 about the same), any 400cc Indian bike (RC 390 at approximately 13.5 seconds), and most stock 600cc sport bikes from the used market. It competes directly with a stock Kawasaki Ninja 650 (approximately 13.4 seconds), MT-07-class bikes and the lower end of the litre-class naked segment.',
+  },
+  {
+    type: 'p',
+    text: 'At an Aamby Valley strip meet, a stock Nightster with a competent rider making consistent launches will beat most of the Indian bikes in the paddock. That surprises most people, who think of Harley-Davidson as slow, heavy touring bikes. The Revolution Max 975T changed that.',
   },
   {
     type: 'h2',
-    text: 'Simulate It Yourself',
+    text: 'Simulate it yourself',
   },
   {
     type: 'p',
-    text: 'The MotoQuant sim result of 12.38 seconds is the physics prediction under conservative launch conditions and stock tune. The Cycle World 11.99 seconds is the instrumented benchmark with a professional rider performing optimal launches at sea-level California conditions. The 0.39-second gap is almost entirely accounted for by launch optimisation: the Nightster\'s belt drive and V-twin character make it tractable to ride aggressively from the line without significant wheel spin, so a competent rider can consistently improve on the sim\'s conservative launch model.',
+    text: 'MotoQuant\'s 12.38 seconds is the physics prediction with a conservative launch and stock tune. Cycle World\'s 11.99 seconds is an instrumented benchmark from a professional rider making optimal launches at sea level in California. Launch technique accounts for almost all of the 0.39-second gap. The Nightster\'s belt drive and V-twin character let a rider launch hard without much wheel spin, so a competent rider can reliably beat the sim\'s conservative launch model.',
   },
   {
     type: 'p',
-    text: 'If you own a Nightster and have a Dragy GPS timer, upload the run in the simulator to line it up against the simulation split by split; the file is compared and deleted, not kept. To help the model, submit the run through the "Submit a timeslip" form; a reviewed run joins the benchmark set. The Nightster is a good candidate because its belt drive fixes the gearing: there is no sprocket variation to account for.',
+    text: 'If you own a Nightster and a Dragy GPS timer, upload a run in the simulator to compare it with the simulation split by split; the file is compared and then deleted, not kept. To help improve the model, send the run through the "Submit a timeslip" form; a reviewed run joins the benchmark set. The Nightster is a good candidate because its belt drive fixes the gearing, so there is no sprocket variation to account for.',
   },
   {
     type: 'p',
-    text: 'The simulator at motoquant.in has the Nightster RH975 pre-loaded with full spec including the Revolution Max 975T torque curve, 24F/68R belt gearing, and 212 kg dry mass. You can sweep venue conditions (Aamby Valley November at 1,100 m density altitude versus MMRT Chennai at near sea level and 30°C), rider weight, and the limited mod catalog to model what a rear pulley swap or ECU flash actually buys in seconds on your home strip.',
+    text: 'The simulator at motoquant.in has the Nightster RH975 loaded with its full spec, including the Revolution Max 975T torque curve, 24F/68R belt gearing and 212 kg dry mass. You can change venue conditions (Aamby Valley November at 1,100 m density altitude, or MMRT Chennai near sea level at 30°C), rider weight and the limited mod catalog to see what a rear pulley swap or ECU flash buys in seconds at your home strip.',
   },
 ];
 
@@ -322,7 +330,7 @@ export default function PostPage() {
             ))}
           </div>
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
-            Harley Nightster RH975: Revolution Max Quarter-Mile Physics
+            Harley Nightster RH975: Revolution Max quarter-mile physics
           </h1>
           <div className="text-sm text-white/60 mb-12">
             25 May 2026 · 11 min read · MotoQuant Blog
@@ -334,7 +342,7 @@ export default function PostPage() {
         <div className="max-w-2xl mx-auto mt-16 glass rounded-xl p-6 border border-brand-orange/25 flex flex-col sm:flex-row items-center gap-4">
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Simulate the Nightster RH975</div>
-            <div className="text-white/60 text-sm">Load the Nightster at Aamby Valley or MMRT Chennai, sweep rider weight and conditions, and model the rear pulley swap or ECU flash before spending ₹15,000–55,000 on mods.</div>
+            <div className="text-white/60 text-sm">Load the Nightster at Aamby Valley or MMRT Chennai, change rider weight and conditions, and model the rear pulley swap or ECU flash before spending ₹15,000–55,000 on mods.</div>
           </div>
           <Link
             href="/simulator"
@@ -350,30 +358,30 @@ export default function PostPage() {
             <li>
               ·{' '}
               <Link href="/blog/triumph-street-triple-765r-quarter-mile-physics" className="text-brand-accent hover:text-brand-orange transition-colors">
-                Triumph Street Triple 765 R Quarter-Mile Physics
+                Triumph Street Triple 765 R quarter-mile physics
               </Link>
-              : the Nightster's nearest competitor in the 11-12 second range from a completely different architecture. 118 hp inline-three at ₹10.67 lakh, beats the Nightster by ~1.75 s, but costs less.
+              : the Nightster's nearest rival in the 11-12 second range, built a completely different way: a 118 hp inline-three at ₹10.67 lakh that beats the Nightster by ~1.75 s and costs less.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/kawasaki-z900rs-quarter-mile-physics" className="text-brand-accent hover:text-brand-orange transition-colors">
-                Kawasaki Z900RS Quarter-Mile Physics
+                Kawasaki Z900RS quarter-mile physics
               </Link>
-              : another premium naked in the 11-second range: 948cc inline-four, retro styling, 11.18 s sim. The Z900RS and Nightster are natural strip rivals at similar Indian CBU price points.
+              : another premium naked in the 11-second range, a retro 948cc inline-four that sims at 11.18 s. The Z900RS and the Nightster are natural strip rivals at similar Indian CBU prices.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/how-the-motoquant-physics-engine-works" className="text-brand-accent hover:text-brand-orange transition-colors">
-                How the MotoQuant Physics Engine Works
+                How the MotoQuant physics engine works
               </Link>
-              : the full methodology behind the 12.38 s prediction: clutch model, belt-drive efficiency, V-twin torque curve synthesis, and why the cruiser cluster has a +0.4 s bias.
+              : the full method behind the 12.38 s prediction: clutch model, belt-drive efficiency, V-twin torque curve synthesis, and why the cruiser cluster has a +0.4 s bias.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/the-physics-of-a-perfect-launch" className="text-brand-accent hover:text-brand-orange transition-colors">
-                The Physics of a Perfect Launch
+                The physics of a perfect launch
               </Link>
-              : most of the Nightster's 0.39 s gap to Cycle World's benchmark lives in the first 60 feet. Clutch engagement RPM, weight transfer, and slip ratio on a 212 kg V-twin.
+              : most of the Nightster's 0.39 s gap to Cycle World's benchmark is in the first 60 feet. Clutch engagement RPM, weight transfer, and slip ratio on a 212 kg V-twin.
             </li>
             <li>
               ·{' '}

@@ -7,7 +7,7 @@ const SLUG = "kawasaki-ninja-400-vs-zx-4r-quarter-mile-physics";
 const TITLE =
   "Kawasaki Ninja 400 vs ZX-4R: parallel twin vs inline-four at the strip";
 const DESCRIPTION =
-  "MotoQuant simulates the Ninja 400 at ~13.1s and the ZX-4R at 12.681s / 192.6 km/h. Same 400cc class, 0.4s apart, and architecture, redline and gearing explain the gap. India pricing, cost-per-tenth mods, and why the inline-four wins on the top end.";
+  "MotoQuant simulates the Ninja 400 at ~13.1s and the ZX-4R at 12.681s / 192.6 km/h. Same 400cc class, 0.4s apart. Architecture, redline and gearing explain the gap. India pricing, cost-per-tenth mods, and why the inline-four wins on the top end.";
 
 export const metadata = {
   title: "Kawasaki Ninja 400 vs ZX-4R quarter mile | MotoQuant",
@@ -100,7 +100,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The 60-foot times are nearly identical. In this sim the Ninja 400 is two hundredths quicker at 60 feet, because it is 17 kg lighter and, at the low speeds of the first few bike-lengths, the ZX-4R's extra power has not yet made up for the weight. After that the gap is almost all top end. The 1/8-mile splits are already 0.4 seconds apart, and most of that builds between the 1/8 and the 1/4 as the ZX-4R keeps pulling toward a 192.6 km/h trap while the Ninja 400 runs into its lower rpm ceiling. The ZX-4R's 192.6 km/h trap is 20 km/h higher than the Ninja's, and it is worth more than the ET suggests: in a race from a roll, or from mid-range speed, the ZX-4R's advantage is larger still.",
+    text: "The 60-foot times are nearly identical. In this sim the Ninja 400 is two hundredths quicker at 60 feet, because it is 17 kg lighter and, at the low speeds of the first few bike-lengths, the ZX-4R's extra power has not yet made up for the weight. After that the gap is almost all top end. The 1/8-mile splits are already 0.4 seconds apart, and most of that builds between the 1/8 and the 1/4 as the ZX-4R keeps pulling toward a 192.6 km/h trap while the Ninja 400 runs into its lower rpm ceiling. The ZX-4R's 192.6 km/h trap is 20 km/h higher than the Ninja's, and it is worth far more than the ET suggests: in a race from a roll, or from mid-range speed, the ZX-4R's advantage is larger still.",
   },
   {
     type: "callout",
@@ -112,7 +112,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The Ninja 400's twin makes its torque early and then runs out of revs. Peak torque comes at 8,000 rpm and peak power at 10,000 rpm. The useful band from peak torque to redline is about 2,000 rpm, which in sixth gear is roughly 25 km/h of road speed before the engine hits its rev ceiling. Then the rider has nowhere to go: there is no seventh gear, and the engine is already past its power peak. The bike traps in 6th at around 9,200 rpm, still on the power side of the curve, with no gear left to find.",
+    text: "The Ninja 400's twin makes its torque early and then runs out of revs. Peak torque comes at 8,000 rpm and peak power at 10,000 rpm. The useful band from peak torque to redline is about 2,000 rpm, which in sixth gear is roughly 25 km/h of road speed before the engine hits its rev ceiling. Then the rider has nowhere to go: there is no seventh gear to shift into, so the engine falls away from its power peak. The bike traps in 6th at around 9,200 rpm, still on the power side of the curve, with no gear left to find.",
   },
   {
     type: "p",
@@ -163,7 +163,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "A Ninja 400 with a front-sprocket drop (13T → 12T or 14F → 13F depending on the chain pitch you are running), a TVS Eurogrip Protorq Extreme rear, a Powertronic Stage 1 re-flash and a K&N drop-in air filter costs ₹25,000 in parts and closes most of the gap to a stock ZX-4R. It will not beat a ZX-4R: the power advantage is built into the engine, and a sprocket, tire and flash do not add 31 hp. But it cuts the margin to under 0.15 seconds, which is within rider variance at a strip. A ZX-4R on similar mods is still about 0.35 seconds quicker, but it costs ₹3.75 lakh more.",
+    text: "A Ninja 400 with a front-sprocket drop (13T → 12T or 14F → 13F depending on the chain pitch you are running), a TVS Eurogrip Protorq Extreme rear, a Powertronic Stage 1 re-flash and a K&N drop-in air filter costs ₹25,000 and closes most of the gap to a stock ZX-4R. It will not beat a ZX-4R: the power advantage is built into the engine, and a sprocket, tire and flash do not add 31 hp. But it cuts the margin to under 0.15 seconds, which is within rider variance at a strip. A ZX-4R on similar mods is still about 0.35 seconds quicker, but it costs ₹3.75 lakh more.",
   },
   {
     type: "h2",
@@ -221,7 +221,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The ZX-4R starts from a higher floor, though. It runs 12.681 seconds on stock rubber and stock gearing; among Indian 400cc motorcycles that sits alongside the KTM Duke 390 RC at ~13.5s and above even a moderately tuned Ninja 650 at ~12.8s. Whatever the mods, the Ninja 400 will not reach that level without forced induction or engine work.",
+    text: "The ZX-4R starts from a higher floor, though. It runs 12.681 seconds on stock rubber and stock gearing, which among Indian 400cc motorcycles sits alongside the KTM Duke 390 RC at ~13.5s and above even a moderately tuned Ninja 650 at ~12.8s. Whatever the mods, the Ninja 400 will not reach that level without forced induction or engine work.",
   },
   {
     type: "h2",
@@ -261,7 +261,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "At Aamby Valley in April (peak summer, DA ~1,300 m) both bikes lose power to the higher density altitude: the Ninja 400 roughly 0.12 seconds against its November time, the ZX-4R roughly 0.14 seconds. The gap between them is essentially unchanged. The venue moves the absolute times more than it moves the order of these two bikes.",
+    text: "At Aamby Valley in April (peak summer, DA ~1,300 m) both bikes lose power to the higher density altitude. The Ninja 400 runs roughly 0.12 seconds slower than in November and the ZX-4R roughly 0.14 seconds slower. The gap between them is essentially unchanged. The venue moves the absolute times more than it moves the order of these two bikes.",
   },
   {
     type: "callout",

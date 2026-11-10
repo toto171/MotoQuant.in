@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'hero-xtreme-200s-4v-quarter-mile-physics';
-const TITLE = 'Hero Xtreme 200S 4V Quarter-Mile Physics: 200cc Commuter Drag';
+const TITLE = 'Hero Xtreme 200S 4V quarter-mile physics: 200cc commuter drag';
 
 function breadcrumbs() {
   return {

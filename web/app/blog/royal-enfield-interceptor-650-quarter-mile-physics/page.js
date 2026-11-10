@@ -41,7 +41,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: "lead",
-    text: "MotoQuant simulates the Royal Enfield Interceptor 650 at 14.15 seconds and 155.8 km/h trap under Aamby Valley November conditions. The Continental GT 650 runs 0.05 seconds quicker with an engine that is mechanically identical down to the cam profiles: 47 hp, 52 Nm, and 181 kg dry for the Interceptor. The difference is the wide handlebars and the upright seat. The Interceptor pushes 0.50 m² of frontal area through the air against the GT 650's 0.46 m², and at 150 km/h that 9 percent aero penalty costs almost exactly 50 milliseconds of ET. This is India's best-selling mid-displacement bike (Royal Enfield moved 31,847 Interceptor 650 units in FY24, per its annual report), so 14.15 seconds is where most owners' mod-budget questions start. Below are the cluster bias band and the cost-per-tenth ladder for an owner who wants to see a 13 on the timing board.",
+    text: "MotoQuant simulates the Royal Enfield Interceptor 650 at 14.15 seconds and 155.8 km/h trap under Aamby Valley November conditions. The Continental GT 650 runs 0.05 seconds quicker with an engine that is mechanically identical down to the cam profiles: 47 hp, 52 Nm, and 181 kg dry for the Interceptor. The difference is the wide handlebars and the upright seat. The Interceptor pushes 0.50 m² of frontal area through the air against the GT 650's 0.46 m², and at 150 km/h that 9 percent aero penalty costs almost exactly 50 milliseconds of ET. This is India's best-selling mid-displacement bike (Royal Enfield moved 31,847 Interceptor 650 units in FY24, per its annual report), so 14.15 seconds is where every owner's mod-budget question starts. Below are the cluster bias band and the cost-per-tenth ladder for an owner who wants to see a 13 on the timing board.",
   },
   {
     type: "h2",
@@ -79,7 +79,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The Interceptor 650 sits in the simulator's mid_twin_500_700 cluster, which carried a bias band of about +0.16 seconds slow in the May 30 2026 sweep. Apply that correction, and a well-prepped surface, a competent rider and warm tires should give 13.95 to 14.10 seconds. The little timed data that exists agrees. TeamBHP forum members have logged GPS-timed Interceptor 650 quarters between 13.9 and 14.4 seconds, depending on rider technique and ambient conditions, with most around 14.1. The order against the GT 650 (cleaner aero) and the Super Meteor 650 (heavier, taller) follows from the bikes' physical differences.",
+    text: "The Interceptor 650 sits in the simulator's mid_twin_500_700 cluster, which carries a bias band of about +0.16 seconds slow as of the May 30 2026 sweep. Apply that correction, and a well-prepped surface, a competent rider and warm tires should give 13.95 to 14.10 seconds. The little timed data that exists agrees. TeamBHP forum members have logged GPS-timed Interceptor 650 quarters between 13.9 and 14.4 seconds, depending on rider technique and ambient conditions, with most around 14.1. The order against the GT 650 (cleaner aero) and the Super Meteor 650 (heavier, taller) follows from the bikes' physical differences.",
   },
   {
     type: "callout",
@@ -107,7 +107,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Five bikes within ₹3 lakh of the Interceptor 650 on the Indian market overlap with it on use. The numbers are MotoQuant stock-tune simulations under the same Aamby Valley November conditions, with OEM tires and OEM gearing on every bike (no mods, no swaps):",
+    text: "The table compares five bikes that sit within ₹3 lakh of the Interceptor 650 on the Indian market and overlap with it on use. The numbers are MotoQuant stock-tune simulations under the same Aamby Valley November conditions, with OEM tires and OEM gearing on every bike (no mods, no swaps):",
   },
   {
     type: "table",
@@ -127,7 +127,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The spread across the three RE 650s is what the chassis physics predicts. The GT 650 leads at 14.10 on cleaner aero, 0.05 seconds ahead. The Interceptor 650 sits in the middle at 14.15. The Super Meteor 650 trails at 14.62, 0.47 seconds back, because its cruiser ergonomics, extra 40 kg and larger frontal area add up to a strip penalty that no engine tune on the shared 648 cc twin can recover. A buyer choosing between ₹3.04 lakh (Interceptor 650 ex-showroom Delhi, May 2026), ₹3.21 lakh (Continental GT 650) and ₹3.84 lakh (Super Meteor 650) gets the quickest strip bike in the GT 650, by 0.05 seconds. That margin is lost in the difference riding position makes. Pick the body you want to ride; on the strip the Interceptor and the GT are close to identical.",
+    text: "The spread across the three RE 650s is what the chassis physics predicts. The GT 650 leads at 14.10 on cleaner aero, 0.05 seconds ahead. The Interceptor 650 sits in the middle at 14.15. The Super Meteor 650 trails at 14.62, 0.47 seconds back, because its cruiser ergonomics, extra 40 kg and larger frontal area add up to a strip penalty that no engine tune on the shared 648 cc twin can recover. For an Indian buyer choosing between ₹3.04 lakh (Interceptor 650 ex-showroom Delhi, May 2026), ₹3.21 lakh (Continental GT 650) and ₹3.84 lakh (Super Meteor 650), the simulator's quickest strip pick is the GT 650, by 0.05 seconds. That margin is too small to outweigh the riding position you prefer. Pick the body you want to ride; on the strip the Interceptor and the GT are close to identical.",
   },
   {
     type: "h2",
@@ -154,7 +154,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Powertronic India confirms its Stage 1 flash for the 2020-onwards EFI Interceptor 650 (the 2018-2019 carburetor-era bikes cannot be flashed). The flash remaps fuel and ignition between 4,500 and 7,500 rpm, where the SOHC head does its work, and adds roughly 3 hp at the rear wheel. Powertronic India's published dyno chart shows 44 wheel hp after the flash, up from 41 stock. The simulator turns that into 0.21 seconds. The largest single share comes from the smoother midrange torque curve, which picks up about 0.04 seconds of 60-foot time on top of the back-half power gain. Add the F15/R46 sprocket swap and the combo costs ₹16,900 and takes the sim ET from 14.15 to 13.81: a 13 on the timing board for under ₹17,000, on a chassis that is otherwise stock. That is exceptional value at this displacement.",
+    text: "Powertronic India offers its Stage 1 flash for the 2020-onwards EFI Interceptor 650 (the 2018-2019 carburetor-era bikes cannot be flashed). The flash remaps fuel and ignition between 4,500 and 7,500 rpm, where the SOHC head does its work, and adds roughly 3 hp at the rear wheel. Powertronic India's published dyno chart shows 44 wheel hp after the flash, up from 41 stock. The simulator turns that into 0.21 seconds off the ET. The largest single share comes from the smoother midrange torque curve, which picks up about 0.04 seconds of 60-foot time on top of the back-half power gain. Add the F15/R46 sprocket swap and the combo costs ₹16,900 and takes the sim ET from 14.15 to 13.81: a 13 on the timing board for under ₹17,000, on a chassis that is otherwise stock. That is exceptional value at this displacement.",
   },
   {
     type: "p",
@@ -214,7 +214,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Two caveats. First, every number in this post is a stock-tune simulation under Aamby Valley November conditions. At Chennai MMRT in February (sea level, hot ambient, higher humidity) the simulator takes roughly 0.07 seconds off the Interceptor 650 on density altitude alone. At a high strip like Leh in summer it adds 0.40 to 0.55 seconds to the same bike. That is rare for an Indian touring bike, but Interceptor owners do ride those routes, and RE has a dealer in Leh. The order of the mods holds across venues; the absolute ETs move with the air.",
+    text: "Two caveats. First, every number in this post is a stock-tune simulation under Aamby Valley November conditions. At Chennai MMRT in February (sea level, hot ambient, higher humidity) the simulator takes roughly 0.07 seconds off the Interceptor 650 on density altitude alone. At a high-altitude strip like Leh in summer it adds 0.40 to 0.55 seconds to the same bike. That is rare for an Indian touring bike, but Interceptor owners do ride those routes, and RE has a dealer in Leh. The order of the mods holds across venues; the absolute ETs move with the air.",
   },
   {
     type: "p",

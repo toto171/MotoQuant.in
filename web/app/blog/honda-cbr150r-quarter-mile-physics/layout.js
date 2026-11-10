@@ -7,7 +7,7 @@ import StructuredData, { SITE_URL } from "../../StructuredData";
 
 const SLUG = "honda-cbr150r-quarter-mile-physics";
 const TITLE =
-  "Honda CBR150R Quarter-Mile Physics: 17hp SE Asia Sport Single";
+  "Honda CBR150R quarter-mile physics: 17hp SE Asia sport single";
 
 function breadcrumbs() {
   return {

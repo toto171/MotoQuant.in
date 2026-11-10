@@ -155,7 +155,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The Hornet 2.0 falls behind on ECU tuning. The NS200 has a large aftermarket for Powertronic, Aracer, and Bazzaz flashes, which find roughly 1.5-2.0 hp above 8,000 rpm, where the OEM map is conservative. The Hornet 2.0 has a much thinner ECU re-flash market in India: Honda\'s FI map is already near the engine\'s mechanical limit at 17 hp, so there is less headroom to find. An aftermarket piggyback on the Hornet 2.0 buys roughly 0.05 seconds versus the NS200\'s 0.15. The ₹/tenth ratio is three times worse.',
+    text: 'The Hornet 2.0 falls behind on ECU tuning. The NS200 has a large aftermarket for Powertronic, Aracer, and Bazzaz flashes, which add roughly 1.5-2.0 hp above 8,000 rpm, where the OEM map is conservative. The Hornet 2.0 has a much thinner ECU re-flash market in India: Honda\'s FI map is already near the engine\'s mechanical limit at 17 hp, so there is less headroom. An aftermarket piggyback on the Hornet 2.0 buys roughly 0.05 seconds versus the NS200\'s 0.15. The ₹/tenth ratio is three times worse.',
   },
   {
     type: 'p',
@@ -163,7 +163,7 @@ const CONTENT = [
   },
   {
     type: 'callout',
-    text: 'The Hornet 2.0 will not break 17 seconds on an Indian strip without significant engine work. The NS200, with a ₹26,000 mod budget, can regularly break 15.0 seconds. The gap is built into the power-to-weight of the two engines, and tuning will not fix it.',
+    text: 'The Hornet 2.0 will not break 17 seconds on an Indian strip without significant engine work. The NS200, with a ₹26,000 mod budget, can regularly break 15.0 seconds. Tuning will not close the gap: it comes from the two engine designs and the power-to-weight they give.',
   },
   {
     type: 'h2',

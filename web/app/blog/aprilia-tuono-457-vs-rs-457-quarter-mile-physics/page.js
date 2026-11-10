@@ -40,7 +40,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: "lead",
-    text: "MotoQuant simulates the Aprilia Tuono 457 at 13.681 seconds and a 162.2 km/h trap at Aamby Valley in November conditions. The RS 457 (same engine, same gearbox, same 175 kg dry mass) runs 13.275 seconds and a 175.9 km/h trap in the same simulator under matched conditions. That is 0.406 seconds and 13.7 km/h between two bikes that share every internal part down to the gear ratios. The whole gap comes from two numbers. The drag coefficient climbs from 0.58 on the faired RS to 0.74 on the naked Tuono, and frontal area grows from 0.48 square metres to 0.52. The engines and gearboxes do not differ. The Tuono 457 is an RS 457 without its fairing, and the simulator shows what that fairing is worth in tenths.",
+    text: "MotoQuant simulates the Aprilia Tuono 457 at 13.681 seconds and a 162.2 km/h trap at Aamby Valley in November conditions. The RS 457 (same engine, same gearbox, same 175 kg dry mass) runs 13.275 seconds and a 175.9 km/h trap in the same simulator under matched conditions. That is 0.406 seconds and 13.7 km/h between two bikes that share every internal part down to the gear ratios. The whole gap comes from two numbers. The drag coefficient climbs from 0.58 on the faired RS to 0.74 on the naked Tuono, and frontal area grows from 0.48 square metres to 0.52. The engines and gearboxes do not differ in any way worth measuring. The Tuono 457 is an RS 457 without its fairing, and the simulator shows what that fairing is worth in tenths.",
   },
   {
     type: "h2",
@@ -142,7 +142,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "In the Indian entry-naked segment, the Tuono 457 at ₹3.95 lakh and 47 hp competes directly with the KTM 390 Duke (₹3.30 lakh, 45 hp, 165 kg), the Bajaj Pulsar NS400Z (₹1.92 lakh, 39 hp, 174 kg), and the Triumph Speed 400 (₹2.40 lakh, 39.5 hp, 170 kg). On simulated quarter-mile ET, the Tuono 457 at 13.68 s sits behind the 390 Duke (13.42 s, lighter and shorter gearing) but ahead of the NS400Z (13.95 s, heavier and less peaky) and the Speed 400 (14.12 s, single-cylinder torque-curve disadvantage). The Tuono is the slowest premium twin in its price band on raw ET, but it has the most refined twin-cylinder character of the four. That counts on the street and not at all at the strip.",
+    text: "In the Indian entry-naked twin segment, the Tuono 457 at ₹3.95 lakh and 47 hp competes directly with the KTM 390 Duke (₹3.30 lakh, 45 hp, 165 kg), the Bajaj Pulsar NS400Z (₹1.92 lakh, 39 hp, 174 kg), and the Triumph Speed 400 (₹2.40 lakh, 39.5 hp, 170 kg). On simulated quarter-mile ET, the Tuono 457 at 13.68 s sits behind the 390 Duke (13.42 s, lighter and shorter gearing) but ahead of the NS400Z (13.95 s, heavier and less peaky) and the Speed 400 (14.12 s, single-cylinder torque-curve disadvantage). The Tuono is the slowest premium twin in its price band on raw ET, but it has the most refined twin-cylinder character of the four. That matters on the street and not at all at the strip.",
   },
   {
     type: "h2",
@@ -175,7 +175,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The most expensive tenth on the platform is the SC-Project S1 slip-on at ₹68,000, and the simulator predicts only 0.10 seconds of ET gain, which works out to ₹6.8 lakh per second of ET. If you want ET, the slip-on is the wrong purchase. If you want the bike to sound like a proper twin, it is the right purchase at the wrong cost per tenth; those two goals do not have to agree.",
+    text: "The most expensive tenth on the platform is the SC-Project S1 slip-on at ₹68,000, and the simulator predicts only 0.10 seconds of ET gain, which works out to ₹6.8 lakh per second of ET. If you want a quicker ET, the slip-on is the wrong purchase. If you want the bike to sound like a proper twin, it is the right purchase at the wrong cost per tenth; those two goals do not have to agree.",
   },
   {
     type: "h2",

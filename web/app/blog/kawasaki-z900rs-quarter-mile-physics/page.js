@@ -52,7 +52,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Run in MotoQuant under Aamby Valley November conditions (density altitude ≈ 1,100 m, 22°C ambient, dry asphalt, μ_peak 1.32 on the OEM Dunlop Sportmax D214 rear), with a 78 kg rider on a 203 kg dry bike, the stock-tune Z900RS gives these numbers:",
+    text: "Under Aamby Valley November conditions in MotoQuant (density altitude ≈ 1,100 m, 22°C ambient, dry asphalt, μ_peak 1.32 on the OEM Dunlop Sportmax D214 rear), with a 78 kg rider on a 203 kg dry bike, the stock-tune Z900RS gives these numbers:",
   },
   {
     type: "table",
@@ -72,11 +72,11 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The remaining gap of roughly 0.07 s is rider technique. MCN's run trapped at 199 km/h in the high-7,000 rpm range of 5th gear, which means the launch was conservative: the clutch slipped slightly long, the throttle feathered in gear 1, no two-step. The simulator uses an idealised but realistic launch that drops the clutch at peak-torque rpm, and on a bike with its torque peak at 6,500 rpm that is exactly where the Z900RS wants to launch. That is why this bike sims slightly quicker than measured rather than slower.",
+    text: "The remaining gap of roughly 0.07 s is rider technique. MCN's run trapped at 199 km/h in the high-7,000 rpm range of 5th gear, which means the launch was conservative: a slightly long clutch slip, a feathered throttle in gear 1 and no two-step. The simulator uses an idealised but realistic launch that drops the clutch at peak-torque rpm, and on the Z900RS, with its torque peak at 6,500 rpm, that is exactly where the bike wants to launch. That is why this bike sims slightly quicker than measured rather than slower.",
   },
   {
     type: "callout",
-    text: "The Z900RS launches well because its 6,500 rpm torque peak is the right place to drop the clutch on a 200 kg bike. Most litre nakeds peak at 8,500–10,000 rpm, so the launch rpm ends up either too high (wheelies) or too low (bogs). The simulator captures that.",
+    text: "The Z900RS launches well because its 6,500 rpm torque peak is the right place to drop the clutch on a 200 kg bike. Most litre nakeds make peak torque at 8,500–10,000 rpm, so the launch rpm ends up either too high (wheelies) or too low (bogs). The simulator captures that.",
   },
   {
     type: "h2",
@@ -184,7 +184,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "A shorter 15F/45R swap (₹2,800 in parts) cuts the ratios by 7%, closer to a drag-prep setup. The bike runs the whole quarter mile in 1st to 5th, and 6th becomes useless on the highway above about 160 km/h. On a stock bike it is worth roughly 0.08 s of ET. Either swap costs between ₹3,500 and ₹4,800 per tenth, by far the lowest cost-per-tenth on the Z900RS.",
+    text: "A shorter 15F/45R swap (₹2,800 in parts) shortens the gearing by 7%, closer to a drag-prep setup. The bike runs the whole quarter mile in 1st to 5th, and 6th becomes useless on the highway above about 160 km/h. On a stock bike it is worth roughly 0.08 s of ET. Either swap costs between ₹3,500 and ₹4,800 per tenth, by far the lowest cost-per-tenth on the Z900RS.",
   },
   {
     type: "h2",
@@ -192,7 +192,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The Z900RS costs roughly ₹16.5 lakh on-road in India (Kawasaki India, 2026 pricing). A handful of owners run stock or near-stock bikes at Aamby Valley meets, and most of them treat it as a road bike that goes to the strip now and then, not a dedicated drag bike. In October-November conditions at Aamby Valley an experienced rider will run a stock Z900RS in 11.1–11.3 s, which matches the simulator once you allow for the launch technique discussed earlier.",
+    text: "The Z900RS costs roughly ₹16.5 lakh on-road in India (Kawasaki India, 2026 pricing). A handful of Z900RS owners run stock or near-stock bikes at Aamby Valley meets, and most of them treat the bike as a road bike that goes to the strip now and then, not a dedicated drag bike. In October-November conditions at Aamby Valley an experienced rider will run a stock Z900RS in 11.1–11.3 s, which matches the simulator once you allow for the launch technique discussed earlier.",
   },
   {
     type: "p",
@@ -215,7 +215,7 @@ const CONTENT = [
   },
   {
     type: "callout",
-    text: "The cheapest fast path on the Z900RS is the sprocket first (₹2,800, 0.08 s), then the air filter (₹5,700, 0.04 s): ₹8,500 and 0.12 s of ET in total. Skip the exhaust unless you are also doing a flash. A slip-on without ECU work gives the engine extra airflow it cannot use, so you pay for the noise without the tenths.",
+    text: "The cheap route on the Z900RS is the sprocket first (₹2,800, 0.08 s), then the air filter (₹5,700, 0.04 s), for ₹8,500 and 0.12 s of ET in total. Skip the exhaust unless you are also doing a flash. A slip-on without ECU work gives the engine extra airflow it cannot use, so you pay for the noise without the tenths.",
   },
   {
     type: "h2",

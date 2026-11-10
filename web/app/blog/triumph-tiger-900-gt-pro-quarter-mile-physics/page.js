@@ -41,7 +41,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: "lead",
-    text: "MotoQuant simulates the 2024 Triumph Tiger 900 GT Pro at 12.081 seconds and a 196.5 km/h trap under Aamby Valley November conditions. That puts the road-biased mid-ADV triple within 2 milliseconds of the BMW F 900 GS on ET (a dead heat to three decimal places) but 3.0 km/h ahead at the trap line. For a 219 kg (kerb) 888cc inline-triple on a 19-inch cast front wheel and road-biased Metzeler Tourance Next 2 rubber, those are interesting numbers. They also show why the 2024 refresh matters. The 13 hp it added (from 95 hp on the 2020-2023 platform to 108 hp) does almost nothing for ET against the F 900 GS twin, but it changes the trap-zone story completely: the triple keeps pulling where the twin runs out of breath.",
+    text: "MotoQuant simulates the 2024 Triumph Tiger 900 GT Pro at 12.081 seconds and a 196.5 km/h trap under Aamby Valley November conditions. That puts the road-biased mid-ADV triple within 2 milliseconds of the BMW F 900 GS on ET (a dead heat to three decimal places) but 3.0 km/h ahead at the trap line. Those are interesting numbers for an 888cc inline-triple that weighs 219 kg at kerb and runs a 19-inch cast front wheel on road-biased Metzeler Tourance Next 2 rubber. They also show why the 2024 refresh matters. The 13 hp it added (from 95 hp on the 2020-2023 platform to 108 hp) does almost nothing for ET against the F 900 GS twin, but it changes the trap-zone story completely: the triple keeps pulling where the twin runs out of breath.",
   },
   {
     type: "h2",
@@ -160,7 +160,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The Daytona 660 sits in an interesting middle. It runs an 11.62 second quarter on 95 hp because its faired sport shape drops the Cd to 0.55, the same Cd as the litre-class R1 or RSV4. Its trap speed of 210.4 km/h is 14 km/h higher than the Tiger 900 GT Pro's, even though the Tiger has 13 more horsepower. In the trap zone aero matters more than power, and the Tiger 900's upright shape cannot match the Daytona's fairing.",
+    text: "The Daytona 660 is the interesting middle case. It runs an 11.62 second quarter on 95 hp because its faired sport shape drops the Cd to 0.55, the same Cd as the litre-class R1 or RSV4. Its trap speed of 210.4 km/h is 14 km/h higher than the Tiger 900 GT Pro's, even though the Tiger has 13 more horsepower. In the trap zone aero matters more than power, and the Tiger 900's upright shape cannot match the Daytona's fairing.",
   },
   {
     type: "h2",
@@ -183,11 +183,11 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The sprocket swap at the top of the table is the surprise. The OEM Tiger 900 GT Pro runs F16/R42 with a 525 chain, geared for road-touring comfort. Drop one tooth at the front to F15/R42 (final drive ratio rises from 2.625 to 2.800) and the simulator says the bike gains 0.13 seconds of ET. Almost all of it comes in the launch phase, where the lower gearing keeps the engine closer to the torque peak through the clutch slip window. The DID 525VX3 chain that fits the swap costs about ₹4,200 for the chain plus a JT front sprocket and an OEM Triumph rear, or ₹4,200 to ₹4,500 in total depending on where you source it in Pune or Bangalore. By a wide margin, that is the cheapest tenth in the cost-per-tenth column.",
+    text: "The sprocket swap at the top of the table is the surprise. The OEM Tiger 900 GT Pro runs F16/R42 with a 525 chain, geared for road-touring comfort. Drop one tooth at the front to F15/R42 (final drive ratio rises from 2.625 to 2.800) and the simulator says the bike gains 0.13 seconds of ET. Almost all of it comes in the launch phase, where the lower gearing keeps the engine closer to the torque peak through the clutch slip window. The DID 525VX3 chain that fits the swap costs about ₹4,200 for the chain plus a JT front sprocket and an OEM Triumph rear: ₹4,200 to ₹4,500 in total, depending on where you buy it in Pune or Bangalore. By a wide margin, that is the cheapest tenth in the cost-per-tenth column.",
   },
   {
     type: "p",
-    text: "Powertronic India confirms the Stage 1 flash is available for the Tiger 900 GT and Tiger 900 GT Pro variants on the 2024 ride-by-wire ECU. The flash adds roughly 7 hp at the rear wheel. Powertronic India's dyno chart shows 105 wheel hp, up from 98 stock; the 108 crank number becomes about 98 at the wheel after the standard 8-9 percent drivetrain loss on a chain-final-drive triple. The flash also remaps fuel and ignition through the midrange, where the T-plane crank does its torque work, and the simulator picks that up as a 0.05 second cut in 60-foot time on top of the back-half power gain. With the sprocket swap, the Stage 1 plus sprocket combo costs ₹42,200 and takes off 0.30 seconds, moving the Tiger 900 GT Pro from 12.08 into the 11.78 range. That is stock Street Triple 765 territory, on a bike that costs ₹2 lakh more.",
+    text: "Powertronic India confirms the Stage 1 flash is available for the Tiger 900 GT and Tiger 900 GT Pro variants on the 2024 ride-by-wire ECU. The flash adds roughly 7 hp at the rear wheel. Powertronic India's dyno chart shows 105 wheel hp, up from 98 stock; the 108 crank number becomes about 98 at the wheel after the standard 8-9 percent drivetrain loss on a chain-final-drive triple. The flash also remaps fuel and ignition through the midrange, where the T-plane crank does its torque work, and the simulator picks that up as a 0.05 second cut in 60-foot time on top of the back-half power gain. With the sprocket swap, the Stage 1 plus sprocket combo costs ₹42,200 and takes off 0.30 seconds, moving the Tiger 900 GT Pro from 12.08 into the 11.78 range: stock Street Triple 765 territory, on a bike that costs ₹2 lakh more.",
   },
   {
     type: "p",
@@ -203,7 +203,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Triumph India listed the Tiger 900 GT Pro at ₹15.95 lakh ex-showroom Delhi for the standard variant (₹16.95 lakh for the Rally Pro, with the 21-inch spoked front wheel and long-travel suspension) at the December 2023 dealer launch. On-road in Mumbai or Bangalore it comes to ₹18.50 to 19.50 lakh, including TCS, RTO, insurance and the OE Triumph touring panniers most buyers add. That puts it up against the BMW F 900 GS (₹13.75 lakh ex-showroom, noticeably cheaper), the BMW R 1300 GS (₹20.95 lakh ex-showroom, noticeably more expensive), the KTM 890 Adventure (discontinued in India and replaced by the 990 Adventure at ₹16.65 lakh), and the Suzuki V-Strom 800DE (₹10.30 lakh ex-showroom, a different segment entirely on price).",
+    text: "Triumph India listed the Tiger 900 GT Pro at ₹15.95 lakh ex-showroom Delhi for the standard variant (₹16.95 lakh for the Rally Pro, with the 21-inch spoked front wheel and long-travel suspension) at the December 2023 dealer launch. The on-road price in Mumbai or Bangalore is closer to ₹18.50 to 19.50 lakh, including TCS, RTO, insurance and the OE Triumph touring panniers most buyers add. That puts it up against the BMW F 900 GS (₹13.75 lakh ex-showroom, noticeably cheaper), the BMW R 1300 GS (₹20.95 lakh ex-showroom, noticeably more expensive), the KTM 890 Adventure (discontinued in India and replaced by the 990 Adventure at ₹16.65 lakh), and the Suzuki V-Strom 800DE (₹10.30 lakh ex-showroom, a different segment entirely on price).",
   },
   {
     type: "p",
@@ -211,7 +211,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The strip-curious Tiger 900 GT Pro owner has two paths. The cheap one is the F15 front sprocket swap for ₹4,200: a 30-minute job at any Pune workshop that gains 0.13 seconds, with no warranty implications, and is fully reversible. The serious one is Powertronic Stage 1 plus the sprocket for ₹42,200 in total, which puts the bike at roughly 11.78 seconds. That is Street Triple 765 R territory for ₹2 lakh less, on a bike that also tours and goes off-road when you want it to.",
+    text: "The strip-curious Tiger 900 GT Pro owner has two paths. The cheap one is the F15 front sprocket swap for ₹4,200: a 30-minute job at any Pune workshop. It gains 0.13 seconds, has no warranty implications and is fully reversible. The serious one is Powertronic Stage 1 plus the sprocket for ₹42,200 in total, which puts the bike at roughly 11.78 seconds. That is Street Triple 765 R territory for ₹2 lakh less, on a bike that also tours and goes off-road when you want it to.",
   },
   {
     type: "h2",
@@ -223,7 +223,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The fastest mid-ADV in India is the R 1300 GS. The cheapest is the V-Strom 800DE, and the most capable off-road are the Tiger 900 Rally Pro and the KTM 990 Adventure. By the simulator numbers, the Tiger 900 GT Pro is the best-balanced mid-ADV at this price: triple character that the parallel-twin competition cannot match, a road-touring chassis tune that the spoke-wheel ADVs trade away for dirt capability, and a Stage 1 mod path that closes the gap to the Street Triple 765 for less money than the next variant up costs.",
+    text: "The fastest mid-ADV in India is the R 1300 GS. The cheapest is the V-Strom 800DE. The Tiger 900 Rally Pro and the KTM 990 Adventure are the most capable off-road. By the simulator numbers, the Tiger 900 GT Pro is the best-balanced mid-ADV at this price: triple character that the parallel-twin competition cannot match, a road-touring chassis tune that the spoke-wheel ADVs trade away for dirt capability, and a Stage 1 mod path that closes the gap to the Street Triple 765 for less money than the next variant up costs.",
   },
   {
     type: "h2",
@@ -239,7 +239,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "For the rider who really wants the Tiger 900 GT Pro on the strip, the highest-impact gearing change is not the sprockets. It is the launch RPM. The Triumph Keihin ECU sets launch RPM conservatively at 5500 rpm to protect the slipper clutch on muddy off-road climbs. Flash it with Powertronic Stage 1 and raise launch RPM to 7000 rpm (closer to the 6850 torque peak, with a 150 rpm cushion), and the simulator says the 60-foot drops from 2.362 to 2.198 seconds and total ET by roughly 0.17 seconds. Add the F15/R42 sprocket swap and the Tiger 900 GT Pro sims at 11.78 seconds for under ₹45,000 in mods plus a flash. That is within 0.6 seconds of a stock-tune R 1300 GS, for under ₹2 lakh in mods in total.",
+    text: "For the rider who really wants the Tiger 900 GT Pro on the strip, the highest-impact gearing change is not the sprockets. It is the launch RPM. The Triumph Keihin ECU sets launch RPM conservatively at 5500 rpm to protect the slipper clutch on muddy off-road climbs. Flash it with Powertronic Stage 1 and raise launch RPM to 7000 rpm (closer to the 6850 torque peak, with a 150 rpm cushion), and the simulator says the 60-foot drops from 2.362 to 2.198 seconds and total ET by roughly 0.17 seconds. Add the F15/R42 sprocket swap and the Tiger 900 GT Pro sims at 11.78 seconds for under ₹45,000 in mods plus a flash, within 0.6 seconds of a stock-tune R 1300 GS, for under ₹2 lakh of mods in total.",
   },
   {
     type: "h2",
@@ -251,7 +251,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Two caveats. First, every number in this post is a stock-tune simulation under specific Aamby Valley November conditions. Move the same bike to Chennai MMRT in February (sea level, hot ambient, higher humidity) and the simulator drops the Tiger 900 GT Pro by roughly 0.06 seconds on density altitude alone. Move it to a high-elevation strip like Leh or Manali (rare for an ADV at this weight, but Indian Tiger 900 owners do ride those routes) and the simulator adds 0.30 to 0.40 seconds for the same bike. The order of which mods help most stays the same across venues; the absolute ETs shift with the air.",
+    text: "Two caveats. First, every number in this post is a stock-tune simulation under specific Aamby Valley November conditions. Move the same bike to Chennai MMRT in February (sea level, hot ambient, higher humidity) and the simulator drops the Tiger 900 GT Pro by roughly 0.06 seconds on density altitude alone. Move it to a high-elevation strip like Leh or Manali (rare for an ADV at this weight, but Indian Tiger 900 owners do ride those routes) and the simulator adds 0.30 to 0.40 seconds for the same bike. The ranking of which mods help most stays the same across venues; the absolute ETs shift with the air.",
   },
   {
     type: "p",
@@ -259,7 +259,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The 2024 Triumph Tiger 900 GT Pro is the most coherent mid-ADV refresh Triumph has done since the original Tiger 800 XCx in 2015. The extra 13 hp does almost nothing for ET against the F 900 GS twin, but it changes the back half of the run completely. The T-plane crank still gives the bike a torque feel below 5000 rpm that no competing parallel twin quite matches. And the Stage 1 mod path puts the strip number where a stock Street Triple 765 R sits, for less money than the Rally Pro variant of the same Tiger costs. That kind of mod-ladder accessibility has made the Tiger 900 platform the best-selling mid-ADV in India for FY25, and the simulator says the FY26 refresh keeps the platform there.",
+    text: "The 2024 Triumph Tiger 900 GT Pro is the most coherent mid-ADV refresh Triumph has done since the original Tiger 800 XCx in 2015. The T-plane crank still gives the bike a torque feel below 5000 rpm that no competing parallel twin quite matches. And the Stage 1 mod path puts the strip number where a stock Street Triple 765 R sits, for less money than the Rally Pro variant of the same Tiger costs. That kind of mod-ladder accessibility has made the Tiger 900 platform the best-selling mid-ADV in India for FY25, and the simulator says the FY26 refresh keeps the platform there.",
   },
 ];
 

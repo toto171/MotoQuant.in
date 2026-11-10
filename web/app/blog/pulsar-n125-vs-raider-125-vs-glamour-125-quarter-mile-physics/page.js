@@ -104,11 +104,11 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "On the spec sheet the Pulsar N125 and P125 lead on peak power at 11.64 hp, but the Raider 125 has the highest hp per tonne of dry mass among the new-generation 125s at 97.6. The Glamour 125 is the lightest bike here at 114 kg dry, but it gives up roughly a full horsepower to the Pulsar siblings, and that costs it 0.6 seconds of ET. The older Pulsar 125 Neon makes the most peak power in the group at 12.0 hp but is also the heaviest at 123 kg. Its 16F front sprocket lifts the overall gearing so much that the bike runs out of low-end pull below 5,000 rpm, a real problem for a commuter that spends most of its life under that figure.",
+    text: "On the spec sheet the Pulsar N125 and P125 lead on peak power at 11.64 hp, but the Raider 125 has the highest hp per tonne of dry mass among the new-generation 125s at 97.6. The Glamour 125 is the lightest bike here at 114 kg dry, but it gives up roughly a full horsepower to the Pulsar siblings, and that costs it 0.6 seconds of ET. The older Pulsar 125 Neon makes the most peak power in the group at 12.0 hp but is also the heaviest at 123 kg. Its 16F front sprocket lifts the overall gearing enough that the bike runs out of low-end pull below 5,000 rpm, a real problem for a commuter that spends most of its life under that figure.",
   },
   {
     type: "p",
-    text: "Front sprocket count is the third lever, and it matters more on these bikes than on any other class MotoQuant sims. A 125cc commuter has so little reserve torque that the ratio between countershaft and rear wheel decides whether second gear pulls cleanly off a 2,000 rpm idle or bogs. The N125 ships from Bajaj with 14F / 43R, which is shorter than the P125's 14F / 44R only on paper; it is actually 0.4 percent taller overall because the smaller rear sprocket dominates. That small difference is why the P125 sims 0.02 seconds quicker than the N125 despite being 2 kg heavier with an identical engine. The two are close to the same chassis with different bodywork and different sprocket choices.",
+    text: "Front sprocket count is the third lever, and it matters more on these bikes than on any other class MotoQuant sims. A 125cc commuter has so little reserve torque that the ratio between countershaft and rear wheel decides whether second gear pulls cleanly off a 2,000 rpm idle or bogs. The N125 ships from Bajaj with 14F / 43R, which is shorter than the P125's 14F / 44R only on paper; it is actually 0.4 percent taller overall because the smaller rear sprocket dominates. That small difference is why the P125 sims 0.02 seconds quicker than the N125 despite being 2 kg heavier with an identical engine. In practice the two are the same chassis with different bodywork and different sprocket choices.",
   },
   {
     type: "h2",
@@ -140,7 +140,7 @@ const CONTENT = [
   },
   {
     type: "callout",
-    text: "Own a Pulsar P125 and wondering whether to trade up to the N125? On ET the simulator says no; the gap is inside the noise. You would be paying for the styling, the front wheel size and roughly 8 kg less luggage capacity. Trade up for the looks, not for tenths.",
+    text: "If you own a Pulsar P125 and are wondering whether to trade up to the N125, the simulator says no on ET: the gap is inside the noise. You would be paying for the styling, the front wheel size and roughly 8 kg less luggage capacity. Trade up for the looks, not for tenths.",
   },
   {
     type: "h2",
@@ -223,7 +223,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The MotoQuant simulator at motoquant.in lets you sweep rider weight, ambient temperature, density altitude, tyre choice and the full Indian parts catalog across all four bikes side by side. The Raider 125, N125, P125 and Glamour 125 share enough mod paths (same chain pitch, same wheel size, overlapping sprocket options) to try the same 2,550 rupee budget on all four. See which platform gives back the most ET. Pick the bike, set your local conditions, and the simulator reports ET, trap speed, 60-foot time, 1/8 mile and top-gear rpm at the trap line within roughly 50 milliseconds.",
+    text: "The MotoQuant simulator at motoquant.in lets you sweep rider weight, ambient temperature, density altitude, tyre choice and the full Indian parts catalog across all four bikes side by side. The Raider 125, N125, P125 and Glamour 125 share enough mod paths (same chain pitch, same wheel size, overlapping sprocket options) that the same 2,550 rupee budget fits all four. Try it on each and see which platform gives back the most ET. Pick the bike, set your local conditions, and the simulator reports ET, trap speed, 60-foot time, 1/8 mile and top-gear rpm at the trap line within roughly 50 milliseconds.",
   },
   {
     type: "p",

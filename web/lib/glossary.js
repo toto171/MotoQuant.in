@@ -19,7 +19,7 @@ export const GLOSSARY = {
   trap: {
     label: 'Finish-line speed',
     short: 'How fast the bike is going when it crosses the quarter-mile finish line. Racers call it "trap speed".',
-    long: 'It mostly shows top-end power; your quarter-mile time also depends on the launch. A stock litre-class sport bike crosses the line at around 215 to 235 km/h.',
+    long: 'It shows top-end power. Your quarter-mile time also depends on the launch. A stock litre-class sport bike crosses the line at around 215 to 235 km/h.',
   },
   sixty: {
     label: 'First 60 ft (launch)',

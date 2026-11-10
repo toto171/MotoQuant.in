@@ -95,7 +95,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "1. Mass. The 765 R is 176 kg dry versus the Z900RS's 203 kg dry. That 27 kg counts from the launch to the trap. In first gear the bikes put identical peak wheel torque through roughly the same tire contact patch, but the 765 R has less mass to accelerate, and the advantage grows with every gear change. Mass dominates the first three gears and matters less and less as aero drag rises.",
+    text: "1. Mass. The 765 R is 176 kg dry versus the Z900RS's 203 kg dry. That 27 kg counts from the launch to the trap. In gear 1 the bikes put identical peak wheel torque through roughly the same tire contact patch, but the 765 R has less mass to accelerate, and the advantage grows with every gear change. Mass dominates the first three gears and matters less and less as aero drag rises.",
   },
   {
     type: "p",
@@ -123,7 +123,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "3. Gearing. The 16F/47R gearing is chosen for street comfort. With the 180/55ZR17 rear (rolling radius ≈ 312 mm), top speed in 6th at 11,500 rpm is roughly 258 km/h. The bike crosses the trap at approximately 210–213 km/h, deep in 5th gear and well past peak torque at 9,500 rpm. A 16/48 or 15/47 sprocket swap tightens the ratios by about 2%, which shifts the 60-foot launch window to a slightly higher RPM in gear 1 and moves the trap crossing to a slightly more favourable RPM in 5th. Net ET impact: 0.03–0.05 s. It is the cheapest tenth available on this bike.",
+    text: "3. Gearing. The 16F/47R gearing is a street-comfortable setup. With the 180/55ZR17 rear (rolling radius ≈ 312 mm), top speed in 6th at 11,500 rpm is roughly 258 km/h. The bike crosses the trap at approximately 210–213 km/h, deep in 5th gear and well past peak torque at 9,500 rpm. A 16/48 or 15/47 sprocket swap tightens the ratios by about 2%, which shifts the 60-foot launch window to a slightly higher RPM in gear 1 and moves the trap crossing to a slightly more favourable RPM in 5th. Net ET impact: 0.03–0.05 s. It is the cheapest tenth available on this bike.",
   },
   {
     type: "h2",

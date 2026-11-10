@@ -122,7 +122,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The full ₹49,050 build takes the simulated ET from 13.30 to roughly 12.55 seconds and the trap from 162 to 171 km/h. Everything in it is road-legal in India. Nothing needs a custom tune beyond the Powertronic flash, which is a piggyback that keeps the OEM ECU, and any KTM service centre or competent independent mechanic can fit the lot. If you care more about everyday rideability than absolute ET, drop the SC-Project exhaust. At ₹20,000 per tenth it is the worst cost per tenth on the list, and going back to the OEM exhaust saves twenty-four thousand rupees for only a tenth of ET. That trimmed build runs 12.67 seconds for ₹25,050.',
+    text: 'The full ₹49,050 build takes the simulated ET from 13.30 to roughly 12.55 seconds and the trap from 162 to 171 km/h. Everything in it is road-legal in India. Nothing needs a custom tune beyond the Powertronic flash, which is a piggyback that keeps the OEM ECU, and any KTM service centre or competent independent mechanic can fit the lot. If you care more about everyday rideability than absolute ET, drop the SC-Project exhaust. At ₹20,000 per tenth it is the worst cost per tenth on the list, and going back to the OEM exhaust saves twenty-four thousand rupees and loses only a tenth of ET. That trimmed build runs 12.67 seconds for ₹25,050.',
   },
   {
     type: 'p',
@@ -183,7 +183,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Three things are outside what MotoQuant can honestly model. The first is rider launch craft. The simulator assumes a clean two-step off the limiter and a perfect clutch dump at the best slip point. A real rider on the fifth pass of the day, at 38 °C track temperature, with a slightly tired clutch hand, will give back between 0.10 and 0.30 seconds. Part of the Fast Track 11.3 is their rider hitting that launch again and again. The second is engine-to-engine variation. No two LC4c singles leave Chakan making exactly the same power. Observed Indian-market dyno spreads are roughly 4 percent peak-to-peak at the crank, or roughly 0.08 seconds of ET on a stock bike before any tuning. The third is custom hardware on the Fast Track bike that is not in MotoQuant\'s catalog: ported heads, custom pistons, lightened internals, drag swingarms. The simulator can ballpark these, but it cannot replace measured dyno or weight data.',
+    text: 'Three things are outside what MotoQuant can model with confidence. The first is rider launch craft. The simulator assumes a clean two-step off the limiter and a perfect clutch dump at the best slip point. A real rider on the fifth pass of the day, at 38 °C track temperature, with a slightly tired clutch hand, will give back between 0.10 and 0.30 seconds. Part of the Fast Track 11.3 is their rider hitting that launch again and again. The second is engine-to-engine variation. No two LC4c singles leave Chakan making exactly the same power. Observed Indian-market dyno spreads are roughly 4 percent peak-to-peak at the crank, or roughly 0.08 seconds of ET on a stock bike before any tuning. The third is custom hardware on the Fast Track bike that is not in MotoQuant\'s catalog: ported heads, custom pistons, lightened internals, drag swingarms. The simulator can ballpark these, but it cannot replace measured dyno or weight data.',
   },
   {
     type: 'p',

@@ -6,7 +6,7 @@ import StructuredData, { articleSchema } from '../../StructuredData';
 const SLUG = 'yamaha-mt-125-xsr125-platform-physics';
 const TITLE = 'Yamaha MT-125 vs XSR125: same engine, 0.10s apart at the strip';
 const DESCRIPTION =
-  'MotoQuant simulates the Yamaha MT-125 at 19.123s and the XSR125 at 19.222s. They share the engine, gearbox and final drive and finish 0.10s apart. Where the tenth comes from, and why the XSR’s heritage styling pays for it in frontal area.';
+  'MotoQuant simulates the Yamaha MT-125 at 19.123s and the XSR125 at 19.222s. They share the engine, gearbox and final drive and finish 0.10s apart. Where the tenth comes from: the XSR’s heritage styling adds frontal area.';
 
 export const metadata = {
   title: 'Yamaha MT-125 vs XSR125 quarter-mile physics | MotoQuant',
@@ -95,7 +95,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The MT-125 has a 100/80 front tire, a 130/70 rear, low-set sport-naked handlebars and a forward-leaning, tucked riding position. Catalog frontal area is 0.47 m². The XSR125 has retro 110/70 front and 140/70 rear tires (a wider sidewall profile, with slightly more rolling resistance at the contact patch) and upright Sport Heritage handlebars that sit the rider more vertically. That posture adds approximately 0.01 m² of projected frontal area. Both bikes carry the same 0.78 Cd in the catalog, so the whole difference is in projected area, not in shape.',
+    text: 'The MT-125 has a 100/80 front tire, a 130/70 rear, low-set sport-naked handlebars and a forward-leaning, tucked riding position. Catalog frontal area is 0.47 m². The XSR125 has retro 110/70 front and 140/70 rear tires (a wider sidewall profile, with slightly more rolling resistance at the contact patch) and upright Sport Heritage handlebars that put the rider in a more upright posture. That posture adds approximately 0.01 m² of projected frontal area. Both bikes carry the same 0.78 Cd in the catalog, so the whole difference is in projected area, not in shape.',
   },
   {
     type: 'p',
@@ -119,7 +119,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'For an A1-licence drag racer the order is settled: the R125 is fastest, the MT-125 second, the XSR125 third. The gaps are not large in absolute terms, with the slowest bike within 0.6 s of the fastest. But when the whole run takes 19 seconds on 15 hp, half a second is a real share of the spread, and most of it sits in the bodywork and riding position, not the engine.',
+    text: 'For an A1-licence drag racer the order is settled: the R125 is fastest, the MT-125 second, the XSR125 third. The gaps are not large in absolute terms, with the slowest bike within 0.6 s of the fastest. But when the whole run takes 19 seconds on 15 hp, half a second is a big gap, and most of it sits in the bodywork and riding position, not the engine.',
   },
   {
     type: 'h2',
@@ -167,7 +167,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Yamaha sells three bikes on this platform side by side: the MT-125 (Hyper Naked, second quickest), the XSR125 (Sport Heritage, slowest, most comfortable) and the YZF-R125 (Supersport, quickest, least comfortable). The differences between them are real. They are small in seconds but large as a share of the spread, and choosing one comes down to how you want to spend Saturday afternoons: leaned forward on track tires, upright on retro tires, or somewhere in between.',
+    text: 'Yamaha sells three bikes on this platform side by side: the MT-125 (Hyper Naked, second quickest), the XSR125 (Sport Heritage, slowest, most comfortable) and the YZF-R125 (Supersport, quickest, least comfortable). The differences between them are real. They are small in seconds but large for three bikes with the same engine, and choosing one comes down to how you want to spend Saturday afternoons: leaned forward on track tires, upright on retro tires, or somewhere in between.',
   },
   {
     type: 'p',
@@ -183,7 +183,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Two caveats. First, every number in this post is a stock-tune simulation under matched Aamby Valley November conditions. Change the venue (denser air at a sea-level European track like Bruntingthorpe helps both bikes by ~0.15 s) or the rider (a 65 kg rider instead of the 78 kg default helps both by ~0.10 s) and the absolute ETs shift, but the MT-125 stays ahead of the XSR125. Second, this is one of the few platforms in the MotoQuant catalog where the Cd numbers and frontal-area estimates come from manufacturer aero data and geometric analysis of review photographs, not wind-tunnel measurement. Photographs bound the 0.01 m² frontal-area difference between the MT-125 and XSR125 well, but it is not a tunnel-measured number.',
+    text: 'Two caveats. First, every number in this post is a stock-tune simulation under matched Aamby Valley November conditions. Change the venue (denser air at a sea-level European track like Bruntingthorpe helps both bikes by ~0.15 s) or the rider (a 65 kg rider instead of the 78 kg default helps both by ~0.10 s) and the absolute ETs shift, but the MT-125 stays ahead of the XSR125. Second, this is one of the few platforms in the MotoQuant catalog where the Cd numbers and frontal-area estimates come from manufacturer aero data and geometric analysis of review photographs, not wind-tunnel measurement. The photographs put tight limits on the 0.01 m² frontal-area difference between the MT-125 and XSR125, but it is not a tunnel-measured number.',
   },
   {
     type: 'p',

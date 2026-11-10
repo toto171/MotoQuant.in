@@ -137,7 +137,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'If you are a commuter weighing the Xtreme 200S 4V against the Apache RTR 200 4V or the NS200, the drag-strip number is one input among many. The Xtreme is roughly ₹15,000 cheaper than the NS200 on-road in most cities (Hero MotoCorp 2026 pricing), the half-fairing does help comfort on long rides, and the Karizma-derived 4V head is durable. If quarter-mile time is all you care about, do not buy the Xtreme. If it is one of fifteen things you care about, the Xtreme is a perfectly defensible choice.',
+    text: 'If you are buying a commuter and weighing the Xtreme 200S 4V against the Apache RTR 200 4V or the NS200, the drag-strip number is one input among many. The Xtreme is roughly ₹15,000 cheaper than the NS200 on-road in most cities (Hero MotoCorp 2026 pricing), the half-fairing does help comfort on long rides, and the Karizma-derived 4V head is durable. If quarter-mile time is all you care about, do not buy the Xtreme. If it is one of fifteen things you care about, the Xtreme is a perfectly defensible choice.',
   },
   {
     type: 'h2',
@@ -145,7 +145,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The 200S 4V is rare at organised drag meets: most Indian 200cc strip regulars run NS200, RTR 200 4V or Duke 200 platforms because their aftermarket is larger. Aamby Valley and BIC see roughly half a dozen private Xtreme owners in a typical season, mostly on stock or near-stock bikes. The few modded Xtremes that turn up tend to stick to the cheapest mods per tenth. The simulator puts these numbers on them:',
+    text: 'The 200S 4V is rare at organised drag meets: most Indian 200cc strip regulars run NS200, RTR 200 4V or Duke 200 platforms because their aftermarket is larger. Aamby Valley and BIC see roughly half a dozen private Xtreme owners in a typical season, mostly on stock or near-stock bikes. The few modded Xtremes that turn up tend to stick to the cheapest mods per tenth. The simulator\'s numbers for those mods:',
   },
   {
     type: 'table',
@@ -192,11 +192,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Two caveats. First, every number in this post is a stock-tune simulation under specific conditions. Change the rider weight, ambient temperature, surface or launch technique and the absolute ETs shift, but the order of which mods help most stays the same. Second, work on the entry-200-300 cluster bias is ongoing. The May 2026 calibration work added Hypothesis property tests that pin the four load-bearing physics knobs to monotonic invariants, and the small-cc clutch over-clutching rewrite from April 2026 has already cut the cluster bias roughly in half. The Xtreme number you see today might tighten by another 0.3–0.5 seconds as more Indian small-cc Dragy data comes in.',
+    text: 'Two caveats. First, every number in this post is a stock-tune simulation under specific conditions. Change the rider weight, ambient temperature, surface or launch technique and the absolute ETs shift, but the ranking of which mods help most stays stable. Second, work on the entry-200-300 cluster bias is ongoing. The May 2026 calibration work added Hypothesis property tests that pin the four load-bearing physics knobs to monotonic invariants, and the small-cc clutch over-clutching rewrite from April 2026 has already cut the cluster bias roughly in half. The Xtreme number you see today might tighten by another 0.3–0.5 seconds as more Indian small-cc Dragy data comes in.',
   },
   {
     type: 'p',
-    text: 'The Hero Xtreme 200S 4V is limited by gearing and tires, not power, and two cheap parts get you most of the available ET gain. The half-fairing is for comfort and the Karizma 4V head is for durability. Past that, the timing trap at a real strip has the last word.',
+    text: 'The Hero Xtreme 200S 4V is limited by gearing and tires, not power, and two cheap parts get you most of the available ET gain.',
   },
 ];
 

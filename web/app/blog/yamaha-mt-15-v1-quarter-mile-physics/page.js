@@ -34,7 +34,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'MotoQuant simulates the Yamaha MT-15 V1 at 17.05 seconds with a 125.5 km/h trap. The bike makes 18.4 hp at 10,000 rpm and 14.7 Nm at 8,500 rpm out of a 155.09 cc DOHC four-valve single: the same engine that powers the YZF-R15 V3, minus the Variable Valve Actuation that Yamaha reserved for the R15 V3 export and the later MT-15 V2. The 1 hp gap to the R15 V3 looks small on paper. On the strip it is closer to a tenth and a half, and the reason is less the peak numbers than aero, gearing intent and how the V1 ECU manages the powerband.',
+    text: 'MotoQuant simulates the Yamaha MT-15 V1 at 17.05 seconds with a 125.5 km/h trap. The bike makes 18.4 hp at 10,000 rpm and 14.7 Nm at 8,500 rpm out of a 155.09 cc DOHC four-valve single: the same engine that powers the YZF-R15 V3, minus the Variable Valve Actuation that Yamaha reserved for the R15 V3 export and the later MT-15 V2. The 1 hp gap to the R15 V3 looks small on paper. On the strip it is closer to a tenth and a half, and the reason has more to do with aero, gearing intent and how the V1 ECU manages the powerband than with peak numbers.',
   },
   {
     type: 'h2',
@@ -46,7 +46,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The other changes matter less but add up: no clip-ons, no full fairing, no rear-set pegs, slightly taller wide handlebar, and an upright riding position. Dry mass is 134 kg versus 139 kg for the R15 V3. That sounds like an advantage, but a mass change on its own rarely shows up on a quarter-mile the way you expect when the rider position also changes the aerodynamic profile. At the trap line the MT-15 V1 carries more drag than the V3, even though it is lighter on the kerb.',
+    text: 'The other changes matter less but add up: no clip-ons, no full fairing, no rear-set pegs, slightly taller wide handlebar, and an upright riding position. Dry mass is 134 kg versus 139 kg for the R15 V3. That sounds like an advantage, but on a quarter-mile a mass change rarely shows up the way you expect when the rider position also changes the aerodynamic profile. At the trap line the MT-15 V1 carries more drag than the V3, even though it is lighter on the kerb.',
   },
   {
     type: 'h2',
@@ -161,7 +161,7 @@ const CONTENT = [
   },
   {
     type: 'callout',
-    text: 'The cheapest quick path on the MT-15 V1: 13F front sprocket plus a sport-compound 140/70-17 rear tire. That is roughly ₹3,850 for half a second of ET. Skip the slip-on unless you also want the noise; the gain is real but the cost per tenth is brutal on a bike with sub-25 hp.',
+    text: 'Fastest cheap path on the MT-15 V1: 13F front sprocket plus a sport-compound 140/70-17 rear tire. That is roughly ₹3,850 for half a second of ET. Skip the slip-on unless you also want the noise; the gain is real but the cost per tenth is brutal on a bike with sub-25 hp.',
   },
   {
     type: 'h2',
@@ -321,7 +321,7 @@ export default function PostPage() {
               >
                 Why Your R15 Won&apos;t Hit 14s
               </Link>:{' '}
-              same 155cc engine block as the MT-15 V1, with a fairing, and faster.
+              same 155cc engine block as the MT-15 V1 plus a fairing, and still faster.
             </li>
             <li>
               ·{' '}

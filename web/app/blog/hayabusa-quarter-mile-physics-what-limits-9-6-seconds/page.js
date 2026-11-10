@@ -94,7 +94,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The stock Hayabusa runs 17F/40R final drive on a 530 chain, a road ratio chosen for a 290+ km/h top speed and an easy 110 km/h cruise in 6th gear. For drag racing it is too tall in the lower gears. On the OEM ratio first gear carries the bike to about 110 km/h before redline, and the simulator shifts to second at roughly 0.9 seconds. A drag-prepped Hayabusa runs 16F/45R or even 15F/47R. That shortens first gear enough for the bike to cross 60 feet in first without a shift, and to cross the 1/8-mile mark in third instead of fourth.',
+    text: 'The stock Hayabusa runs 17F/40R final drive on a 530 chain, a road ratio chosen for a 290+ km/h top speed and an easy 110 km/h cruise in 6th gear. For drag racing it is too tall in the lower gears. On the OEM ratio, first gear carries the bike to about 110 km/h before redline, and in the simulator the bike shifts to second at roughly 0.9 seconds. A drag-prepped Hayabusa runs 16F/45R or even 15F/47R. That shortens first gear enough for the bike to cross 60 feet in first without a shift, and to cross the 1/8-mile mark in third instead of fourth.',
   },
   {
     type: 'p',
@@ -170,7 +170,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'If you want the fastest possible quarter-mile at Aamby Valley or BIC, a used Gen2 with ₹3 lakh of mods runs 9.55 seconds and a new Gen3 in showroom trim runs around 10.05 seconds. The used bike wins by half a second for less total spend. If you want a fast bike for a daily 100-kilometre commute, weekend rides to Lonavla and the odd strip day, still under warranty, the Gen3 wins on everything else. The strip ET gap between a stock Gen3 and a lightly modded Gen2 (rear tyre and sprocket only) is roughly 0.10 to 0.12 seconds, well inside what a better rider on either bike will find through practice.',
+    text: 'If you want the fastest possible quarter-mile at Aamby Valley or BIC, a used Gen2 with ₹3 lakh of mods runs 9.55 seconds and a new Gen3 in showroom trim runs around 10.05 seconds. The used bike wins by half a second for less total spend. If you want a fast bike that does a daily 100-kilometre commute, weekend rides to Lonavla and the odd strip day, and stays under warranty, the Gen3 wins on everything else. The strip ET gap between a stock Gen3 and a lightly modded Gen2 (rear tyre and sprocket only) is roughly 0.10 to 0.12 seconds, well inside what a better rider on either bike will find through practice.',
   },
   {
     type: 'p',
@@ -182,7 +182,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Every number in this post is a simulator output for specific conditions. Change the rider weight by 15 kilograms, the ambient temperature by 10 degrees Celsius, the density altitude from Aamby Valley\'s 1100 metres to MMRT Chennai\'s 78 metres, the launch RPM, or the surface from asphalt to a prepped strip, and the ETs on every line of the table above shift. The order of where the tenths come from stays the same: tyre first, gearing second, geometry third, engine fourth, and aerodynamics last for the strip and first for top speed.',
+    text: 'Every number in this post is a simulator output for specific conditions. Change the rider weight by 15 kilograms, the ambient temperature by 10 degrees Celsius, the density altitude from Aamby Valley\'s 1100 metres to MMRT Chennai\'s 78 metres, the launch RPM, or the surface from asphalt to a prepped strip, and the ETs shift on every line of the table above. The order of where the tenths come from stays the same: tyre first, gearing second, geometry third, engine fourth, and aerodynamics last for the strip and first for top speed.',
   },
   {
     type: 'p',

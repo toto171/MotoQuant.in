@@ -24,7 +24,7 @@ const SUBMODELS = [
   { n: '05', name: 'Chain & sprocket', desc: 'Sprocket ratio applied to rear-wheel torque. Chain stretch factor (efficiency reduction over service interval). Checks that sprocket tooth counts are physically valid.', file: 'submodels/chain.py' },
   { n: '06', name: 'Tyre grip', desc: 'Traction limit μ × F_z,rear, where μ starts from the tyre\'s peak friction coefficient and is adjusted for load sensitivity, tread temperature, pressure rise with temperature and track preparation. Thermal evolution: heat from slip, conduction to the road surface and convection to the air. A Pacejka Magic Formula slip curve is implemented but not yet used by the integrator.', file: 'submodels/tire.py' },
   { n: '07', name: 'Aerodynamics', desc: 'F_drag = ½·ρ·Cd·A·v². Per-bike Cd (0.42–0.92 across the catalog) and frontal area (0.35–0.78 m²). Rider tuck transition: Cd interpolates from upright to tuck posture above a speed threshold. Wind vector support.', file: 'submodels/aero.py' },
-  { n: '08', name: 'Weight transfer', desc: 'Longitudinal weight transfer: ΔF_z = m·a_x·h_cog / L_wb. Front axle load approaches zero at wheelie threshold. Rear axle load added to tire normal force for traction calculation.', file: 'submodels/weight_transfer.py' },
+  { n: '08', name: 'Weight transfer', desc: 'Longitudinal weight transfer: ΔF_z = m·a_x·h_cog / L_wb. Front axle load approaches zero at wheelie threshold. Rear axle load added to tyre normal force for traction calculation.', file: 'submodels/weight_transfer.py' },
   { n: '09', name: 'Rider dynamics', desc: 'Rider CoG height and longitudinal position; rider mass distributed across total system. Tuck factor: rider frontal area reduction at high speed. Separately tunable for different rider postures (sport tuck vs upright naked).', file: 'submodels/rider_dynamics.py' },
   { n: '10', name: 'Staging & launch', desc: 'Rollout distance, reaction time (added post-tree), two-step launch control RPM. For 2T engines, launch RPM defaults to tuned_rpm × 0.92. For 4T, configurable launch_rpm field in BikeConfig.', file: 'submodels/staging.py' },
   { n: '11', name: 'Environmental', desc: 'Air density from ISA model: ρ = P/(R_specific·T). Power correction factor: (P_std/P) × √(T_std/T). Density altitude calculation. Surface grip multiplier (asphalt, concrete, salt flat, dry lake). Wind resistance add-in.', file: 'submodels/environmental.py' },
@@ -148,7 +148,7 @@ export default function PhysicsPage() {
         <p className="text-white/75 text-base leading-relaxed mb-4">
           The <code className="font-mono text-brand-accent break-words">spec_to_bike_config()</code> function in <code className="font-mono text-brand-accent break-words">scraper/importer.py</code> converts
           a raw <code className="font-mono text-brand-accent break-words">BikeSpec</code> (scraped or hand-entered) into a validated BikeConfig. It applies
-          displacement-scaled engine inertia, chain-pitch-inferred drivetrain parameters, category-aware tire grip
+          displacement-scaled engine inertia, chain-pitch-inferred drivetrain parameters, category-aware tyre grip
           defaults, and the 150+ Tier-1 gear ratio families.
         </p>
         <p className="text-white/75 text-base leading-relaxed">
