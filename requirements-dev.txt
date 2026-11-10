@@ -32,7 +32,7 @@ hypothesis>=6.100,<7
 # files, so an unpinned CI resolving a newer ruff than the dev box flags
 # files the local `make check` calls clean (bit us 2026-08-08, the day CI
 # came back to life). Keep the window one minor wide so local == CI.
-ruff>=0.16.2,<0.17
+ruff>=0.17.4,<0.18
 
 # Coverage instrumentation for the main-push CI tier (`--cov=motoquant`).
 pytest-cov>=5,<8
