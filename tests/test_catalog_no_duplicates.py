@@ -286,25 +286,28 @@ class TestReseedWinnerIsDeterministic:
     def test_full_tie_resolves_to_earliest_declared_spec(self, reseed_module):
         """Pin the documented tie-break: earliest-declared spec wins.
 
-        Two specs can tie on BOTH year-overlap and year_from distance (the two
-        V-Strom SX 250 entries do, against the 2022-2024 row), and the winner
-        decides which physics a bike_configs row gets.
+        Two specs can tie on BOTH year-overlap and year_from distance, and the
+        winner decides which physics a bike_configs row gets. The catalog no
+        longer contains such a pair (the last one, two overlapping V-Strom SX
+        250 entries, was removed on 2026-11-10), so the tie is built from two
+        copies of one real spec.
 
         Honest scope note: this pins the BEHAVIOUR, not the implementation.
-        ``_pick_generation`` now carries an explicit declaration-index key so
-        the rule is stated rather than inherited from CPython's stable sort —
-        but because the two are equivalent by construction, this test cannot
+        ``_pick_generation`` carries an explicit declaration-index key so the
+        rule is stated rather than inherited from CPython's stable sort - but
+        because the two are equivalent by construction, this test cannot
         distinguish them and will not fail if the explicit key is dropped. It
         WILL fail if the resolution order itself changes.
         """
-        candidates = [
+        import dataclasses
+
+        base = next(
             s for s in ALL_KNOWN_BIKES if _family_key(s) == ("suzuki", "v-strom sx 250")
-        ]
-        assert len(candidates) == 2, (
-            "This pin assumes the two overlapping V-Strom SX 250 entries; "
-            f"found {len(candidates)}. Update the fixture if the catalog "
-            "changed intentionally."
         )
+        candidates = [
+            dataclasses.replace(base, year_from=2022, year_to=2024, model_code="A"),
+            dataclasses.replace(base, year_from=2022, year_to=2026, model_code="B"),
+        ]
         row = {"year_from": 2022, "year_to": 2024}
         # Both candidates overlap 2022-2024 by 3 years and share year_from,
         # so this exercises the tie-break and nothing else.
@@ -313,3 +316,78 @@ class TestReseedWinnerIsDeterministic:
             reseed_module._pick_generation(list(reversed(candidates)), row)
             is candidates[1]
         )
+
+
+# The seven same-bike pairs collapsed on 2026-11-10, and the one real
+# generation split (Fireblade SP) whose year ranges were made disjoint.
+DEDUPED_2026_11_10 = [
+    ("Royal Enfield", "Continental GT 650"),
+    ("Royal Enfield", "Interceptor 650"),
+    ("Royal Enfield", "Super Meteor 650"),
+    ("Honda", "Hornet 2.0"),
+    ("Aprilia", "Tuono 457"),
+    ("TVS", "Raider 125"),
+    ("Suzuki", "V-Strom SX 250"),
+]
+
+
+# Overlaps that are known and deliberately left: (manufacturer, model) -> why.
+KNOWN_OVERLAPS = {
+    # The 2008-2013 row is the plain 848 (code "848") carrying the EVO's name;
+    # the 2011-2013 row is the real 848 EVO. Two different bikes - the fix is a
+    # rename of the first (queued since 2026-08-08), not a merge.
+    ("ducati", "848 evo"): "848 mis-named 848 EVO; rename migration queued",
+}
+
+
+class TestNoOverlappingYearDuplicates:
+    """(d) One motorcycle, one row.
+
+    Two entries sharing a manufacturer and a year-stripped model name may not
+    have overlapping year ranges: that is the same bike entered twice, and the
+    2026-11 audit found eight such pairs whose rows disagreed by up to 0.62 s
+    of quarter-mile ET. Generations are told apart either by name
+    (``GSX-R 1000 K5`` / ``K7``) or by DISJOINT year ranges.
+    """
+
+    def test_no_two_entries_share_a_name_with_overlapping_years(self):
+        families = defaultdict(list)
+        for spec in ALL_KNOWN_BIKES:
+            families[_family_key(spec)].append(spec)
+        overlaps = [
+            f"  {_label(a)}\n  vs {_label(b)}"
+            for key, group in families.items()
+            if key not in KNOWN_OVERLAPS
+            for a, b in itertools.combinations(group, 2)
+            if _years_overlap(a, b)
+        ]
+        assert not overlaps, (
+            "The same motorcycle is entered more than once (same manufacturer "
+            "and model, overlapping years). Keep one row, or make the year "
+            "ranges disjoint if these are real generations:\n" + "\n".join(overlaps)
+        )
+
+    @pytest.mark.parametrize("manufacturer,model", DEDUPED_2026_11_10)
+    def test_collapsed_pair_has_one_row(self, manufacturer, model):
+        hits = [
+            s
+            for s in ALL_KNOWN_BIKES
+            if _family_key(s) == (manufacturer.lower(), model.lower())
+        ]
+        assert len(hits) == 1, [_label(s) for s in hits]
+
+    def test_fireblade_sp_generations_are_disjoint(self):
+        gens = sorted(
+            (s.year_from, s.year_to)
+            for s in ALL_KNOWN_BIKES
+            if _family_key(s) == ("honda", "cbr1000rr-r fireblade sp")
+        )
+        assert gens == [(2020, 2023), (2024, 2025)]
+
+    def test_known_overlaps_still_exist(self):
+        """A stale exception is a hole in the guard: drop it once it is fixed."""
+        for key in KNOWN_OVERLAPS:
+            group = [s for s in ALL_KNOWN_BIKES if _family_key(s) == key]
+            assert any(
+                _years_overlap(a, b) for a, b in itertools.combinations(group, 2)
+            ), f"{key} no longer overlaps - remove it from KNOWN_OVERLAPS"

@@ -25,6 +25,19 @@ write). Two DERIVED copies of them had gone stale (October 2026 core audit):
    parts-compatibility engine (which reads displacement, cylinder config,
    category, year, chain pitch and stroke type — all already in sync).
 
+   Since 2026-11-10 the sync is SPEC-AWARE: each row is matched to its
+   ``ALL_KNOWN_BIKES`` spec (the matcher the reseed uses) and five columns —
+   bore, stroke, compression ratio, wheelbase, seat height — are written from
+   the spec, NULL when the spec has no figure. The blob fills such gaps with
+   the reference GSX-R1000's defaults (seat height 810 mm on 535 bikes), which
+   must not be listed as the bike's own. Where a spec does carry the figure
+   it equals the blob's, so a non-NULL headline column still always equals
+   the physics. Bore and stroke are also NULL when together they contradict
+   the displacement by more than 3 %. Rows with no spec (the three
+   hand-curated reference bikes) keep the plain blob copy.
+   ``scripts/patch_2026_11_10_catalog_fixes.py`` step 1 applies the same rule
+   and lists the contradictory bikes; the two never disagree.
+
 Neither change moves a simulated ET: the physics reads only the blobs.
 Idempotent: a second run reports 0 changes.
 
@@ -58,7 +71,22 @@ def _curve_cols(engine_blob: str) -> tuple | None:
     )
 
 
+def spec_index() -> dict:
+    """(manufacturer, year-stripped model) -> [BikeSpec], as the reseed keys it."""
+    from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
+    from scripts.reseed_configs_from_specs import strip_year
+
+    idx: dict = {}
+    for s in ALL_KNOWN_BIKES:
+        key = (s.manufacturer.strip().lower(), strip_year(s.model_name).lower())
+        idx.setdefault(key, []).append(s)
+    return idx
+
+
 def apply(db_path: str, verbose: bool = False) -> dict:
+    from scripts.reseed_configs_from_specs import match_spec_to_row
+
+    specs_by_key = spec_index()
     db = MotoQuantDB(db_path)
     conn = db.connect()
     curves_updated = 0
@@ -105,12 +133,17 @@ def apply(db_path: str, verbose: bool = False) -> dict:
             curves_updated += 1
 
     for row in conn.execute(
-        """SELECT bc.*, bm.model_name FROM bike_configs bc
+        """SELECT bc.*, bm.model_name, bm.year_from AS year_from,
+                  bm.year_to AS year_to, m.name AS manufacturer
+           FROM bike_configs bc
            JOIN bike_models bm ON bm.id = bc.bike_model_id
+           JOIN manufacturers m ON m.id = bm.manufacturer_id
            WHERE bc.is_current = 1 AND bc.config_name = 'stock'"""
     ).fetchall():
-        cfg = db_row_to_config(dict(row))
-        changed = db.bikes.sync_headline_specs(row["bike_model_id"], cfg)
+        row = dict(row)
+        cfg = db_row_to_config(row)
+        spec = match_spec_to_row(row, specs_by_key)
+        changed = db.bikes.sync_headline_specs(row["bike_model_id"], cfg, spec=spec)
         if changed:
             headline_rows += 1
             headline_cells += len(changed)

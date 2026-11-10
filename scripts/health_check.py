@@ -109,7 +109,12 @@ def check_catalog() -> Check:
     db = os.environ.get("MOTOQUANT_DB", os.path.join(ROOT, "motoquant.db"))
     if not os.path.exists(db):
         c.status = "warn"
-        c.detail = "no motoquant.db (run `make db`)"
+        # `make db` only builds a three-bike STARTER database under /tmp; the
+        # shipped catalog is the tracked file.
+        c.detail = (
+            "no motoquant.db - the shipped catalog is tracked in git: restore "
+            "it with `git checkout -- motoquant.db`"
+        )
         return c
     try:
         import sqlite3

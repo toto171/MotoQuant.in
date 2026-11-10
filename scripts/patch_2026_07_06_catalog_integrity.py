@@ -121,7 +121,6 @@ RULE_FIXES: list[dict] = [
     {"brand": "HealTech", "name": "QuickShifter Controller Module", "set": _S4},
     {"brand": "Dynojet", "name": "Power Commander Auto-Tune Map", "set": _S4},
     {"brand": "AEM", "name": "Infinity Fuel Management", "set": _S4},
-    {"brand": "Dynojet", "name": "Power Commander QS", "set": _S4},
     {"brand": "Dynojet", "name": "Power Commander V Small-Displacement", "set": _S4},
     {"brand": "Bazzaz", "name": "BKN Fuel Map Controller", "set": _S4},
     # premium_universal piggybacks (displacement/category-band only rules)

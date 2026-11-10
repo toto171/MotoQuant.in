@@ -1406,6 +1406,7 @@ def import_spec(
             category=spec.category,
             source=spec.source_name,
             confidence=confidence,
+            spec=spec,
         )
 
         # Write provenance records for each known field

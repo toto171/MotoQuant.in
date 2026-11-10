@@ -1226,7 +1226,7 @@ HONDA_CBR1000RR_R_2020 = spec_from_dict(
         "model_name": "CBR1000RR-R Fireblade SP",
         "model_code": "SC82",
         "year_from": 2020,
-        "year_to": 2024,
+        "year_to": 2023,  # EPOCH 2026-11-10: SC82 2020-2023; the 2024+ update is its own row
         "category": "sport",
         "displacement_cc": 999,
         "bore_mm": 81.0,
@@ -1857,110 +1857,22 @@ SUZUKI_GSX_S1000_2021 = spec_from_dict(
 # Royal Enfield
 # ────────────────────────────────────────────────────────
 
-RE_CONTINENTAL_GT_650 = spec_from_dict(
-    {
-        "manufacturer": "Royal Enfield",
-        "model_name": "Continental GT 650",
-        "model_code": "GT650",
-        "year_from": 2020,
-        "year_to": 2024,
-        "category": "naked",
-        "displacement_cc": 648,
-        "bore_mm": 78.0,
-        "stroke_mm": 67.8,
-        "compression_ratio": 9.5,
-        "cylinders": 2,
-        "peak_power_hp": 47.0,
-        "peak_power_rpm": 7150,
-        "peak_torque_nm": 52.0,
-        "peak_torque_rpm": 5250,
-        "fuel_system": "fi",
-        "cooling": "air/oil",
-        "valve_config": "sohc",
-        "gears": 6,
-        "gear_ratios": [3.071, 2.056, 1.583, 1.292, 1.125, 1.000],
-        "front_sprocket": 16,
-        "rear_sprocket": 43,
-        "chain_pitch": "520",
-        "dry_mass_kg": 182.0,
-        "wheelbase_mm": 1400.0,
-        "front_tire_size": "110/70-17",
-        "rear_tire_size": "130/70-18",
-        "cd": 0.68,
-        "frontal_area_m2": 0.46,
-    },
-    source_name="spec_sheet",
-)
+# EPOCH 2026-11-10 (duplicate adjudication): the second Continental GT 650 entry (2020-2024, F16/R43)
+# that lived here described the SAME motorcycle as ROYAL_ENFIELD_CONTINENTAL_GT_650_2018
+# below and was removed. The surviving row is the later, source-cited one (geometry
+# adjudicated 2026-08-08); it takes this row's dry-convention mass (182 kg). See
+# reports/session_2026_11_10_epoch.md.
 
-RE_INTERCEPTOR_650 = spec_from_dict(
-    {
-        "manufacturer": "Royal Enfield",
-        "model_name": "Interceptor 650",
-        "model_code": "INT650",
-        "year_from": 2020,
-        "year_to": 2024,
-        "category": "naked",
-        "displacement_cc": 648,
-        "bore_mm": 78.0,
-        "stroke_mm": 67.8,
-        "compression_ratio": 9.5,
-        "cylinders": 2,
-        "peak_power_hp": 47.0,
-        "peak_power_rpm": 7150,
-        "peak_torque_nm": 52.0,
-        "peak_torque_rpm": 5250,
-        "fuel_system": "fi",
-        "cooling": "air/oil",
-        "valve_config": "sohc",
-        "gears": 6,
-        "gear_ratios": [3.071, 2.056, 1.583, 1.292, 1.125, 1.000],
-        "front_sprocket": 16,
-        "rear_sprocket": 46,
-        "chain_pitch": "520",
-        "dry_mass_kg": 181.0,
-        "wheelbase_mm": 1400.0,
-        "front_tire_size": "100/90-18",
-        "rear_tire_size": "130/70-18",
-        "cd": 0.76,
-        "frontal_area_m2": 0.5,
-    },
-    source_name="spec_sheet",
-)
 
-RE_SUPER_METEOR_650 = spec_from_dict(
-    {
-        "manufacturer": "Royal Enfield",
-        "model_name": "Super Meteor 650",
-        "model_code": "SM650",
-        "year_from": 2023,
-        "year_to": 2024,
-        "category": "cruiser",
-        "displacement_cc": 648,
-        "bore_mm": 78.0,
-        "stroke_mm": 67.8,
-        "compression_ratio": 9.5,
-        "cylinders": 2,
-        "peak_power_hp": 47.0,
-        "peak_power_rpm": 7250,
-        "peak_torque_nm": 52.0,
-        "peak_torque_rpm": 5650,
-        "fuel_system": "fi",
-        "cooling": "air/oil",
-        "valve_config": "sohc",
-        "gears": 6,
-        "gear_ratios": [3.071, 2.056, 1.583, 1.292, 1.125, 1.000],
-        "front_sprocket": 16,
-        "rear_sprocket": 46,
-        "chain_pitch": "520",
-        "dry_mass_kg": 221.0,
-        "wheelbase_mm": 1500.0,
-        "front_tire_size": "100/90-19",
-        "rear_tire_size": "140/70-17",
-        "cd": 0.8,
-        "frontal_area_m2": 0.56,
-    },
-    source_name="spec_sheet",
-)
+# EPOCH 2026-11-10 (duplicate adjudication): the second Interceptor 650 entry (2020-2024, F16/R46) was
+# removed for the same reason; ROYAL_ENFIELD_INTERCEPTOR_650_2018 is the single row and
+# takes this row's dry-convention mass (181 kg).
+
+
+# EPOCH 2026-11-10 (duplicate adjudication): the first Super Meteor 650 entry (2023-2024, 140/70-17
+# rear) was removed; ROYAL_ENFIELD_SUPER_METEOR_650_2023 in known_bikes_extended.py (the
+# later, source-cited entry, 2023-2026) is the single row.
+
 
 # ────────────────────────────────────────────────────────
 # Indian small-displacement (popular at Indian drag events)
@@ -3536,7 +3448,8 @@ TVS_APACHE_RTR_160_4V_2018 = spec_from_dict(
 # @ 7250 / 52 Nm @ 5250 figures here sit inside the published spread
 # (47 PS @ 7250 with 52.3 Nm @ 5150 per RE Europe; 47 bhp @ 7100 with
 # 52 Nm @ 5200 per Wikipedia), and the F17/R45 final drive still disagrees
-# with the 2020-2024 entry's F16/R43 and with gear_ratios.py's F14/R43.
+# with gear_ratios.py's F14/R43 (and with the F16/R43 of the 2020-2024
+# duplicate entry removed on 2026-11-10). Neither is sourced.
 ROYAL_ENFIELD_CONTINENTAL_GT_650_2018 = spec_from_dict(
     {
         "manufacturer": "Royal Enfield",
@@ -3555,15 +3468,19 @@ ROYAL_ENFIELD_CONTINENTAL_GT_650_2018 = spec_from_dict(
         "peak_torque_nm": 52.0,
         "peak_torque_rpm": 5250,
         "fuel_system": "fi",
-        "cooling": "liquid",
+        "cooling": "air/oil",  # air/oil-cooled twin (was mislabelled liquid)
         "valve_config": "sohc",
         "gears": 6,
         "gear_ratios": [3.692, 2.105, 1.526, 1.179, 0.966, 0.814],
         "front_sprocket": 17,
         "rear_sprocket": 45,
         "chain_pitch": "520",
-        "dry_mass_kg": 202.0,
-        "wheelbase_mm": 1412.0,
+        # EPOCH 2026-11-10: was 202.0 - a published KERB figure (sources give
+        # 198-214 kg kerb) stored as dry mass, so the importer added fluids on
+        # top of it. 182.0 is the dry-convention figure the removed duplicate
+        # carried.
+        "dry_mass_kg": 182.0,
+        "wheelbase_mm": 1398.0,  # Autocar India / 1000PS (was 1412)
         "front_tire_size": "100/90R19",
         "rear_tire_size": "130/70R17",
         "cd": 0.85,
@@ -3595,15 +3512,19 @@ ROYAL_ENFIELD_INTERCEPTOR_650_2018 = spec_from_dict(
         "peak_torque_nm": 52.0,
         "peak_torque_rpm": 5250,
         "fuel_system": "fi",
-        "cooling": "liquid",
+        "cooling": "air/oil",  # air/oil-cooled twin (was mislabelled liquid)
         "valve_config": "sohc",
         "gears": 6,
         "gear_ratios": [3.692, 2.105, 1.526, 1.179, 0.966, 0.814],
         "front_sprocket": 17,
         "rear_sprocket": 45,
         "chain_pitch": "520",
-        "dry_mass_kg": 202.0,
-        "wheelbase_mm": 1412.0,
+        # EPOCH 2026-11-10: was 202.0 - a published KERB figure (sources give
+        # 202-218 kg kerb) stored as dry mass, so the importer added fluids on
+        # top of it. 181.0 is the dry-convention figure the removed duplicate
+        # carried.
+        "dry_mass_kg": 181.0,
+        "wheelbase_mm": 1398.0,  # Autocar India (was 1412)
         "front_tire_size": "100/90R19",
         "rear_tire_size": "130/70R17",
         "cd": 0.86,
@@ -3878,7 +3799,7 @@ HONDA_HORNET_2_0_2020 = spec_from_dict(
         "model_name": "Hornet 2.0",
         "model_code": "2020",
         "year_from": 2020,
-        "year_to": 2024,
+        "year_to": 2026,  # EPOCH 2026-11-10: one row; the OBD-2B refresh kept the engine
         "category": "naked",
         "displacement_cc": 184.4,  # was 184
         "bore_mm": 61.0,  # was 64.0
@@ -3897,7 +3818,9 @@ HONDA_HORNET_2_0_2020 = spec_from_dict(
         "front_sprocket": 16,
         "rear_sprocket": 46,
         "chain_pitch": "520",
-        "dry_mass_kg": 142.0,
+        # EPOCH 2026-11-10: 142 kg is the published KERB weight (Honda India);
+        # recorded as wet so the importer does not add fluids on top of it.
+        "wet_mass_kg": 142.0,
         "wheelbase_mm": 1355.0,  # published wheelbase (was 1320)
         "front_tire_size": "100/70R17",
         "rear_tire_size": "130/70R17",
@@ -7322,40 +7245,10 @@ APRILIA_RS457_2024 = spec_from_dict(
     source_name="spec_sheet",
 )
 
-APRILIA_TUONO_457_2024 = spec_from_dict(
-    {
-        "manufacturer": "Aprilia",
-        "model_name": "Tuono 457",
-        "model_code": "T457",
-        "year_from": 2024,
-        "year_to": 2026,
-        "category": "naked",
-        "displacement_cc": 457.0,
-        "bore_mm": 69.0,
-        "stroke_mm": 61.1,
-        "compression_ratio": 13.1,
-        "cylinders": 2,
-        "peak_power_hp": 47.0,
-        "peak_power_rpm": 9400,
-        "peak_torque_nm": 43.5,
-        "peak_torque_rpm": 6700,
-        "fuel_system": "fi",
-        "cooling": "liquid",
-        "valve_config": "dohc",
-        "gears": 6,
-        "gear_ratios": [2.750, 1.938, 1.478, 1.182, 0.960, 0.821],
-        "front_sprocket": 14,
-        "rear_sprocket": 42,
-        "chain_pitch": "520",
-        "dry_mass_kg": 159.0,
-        "wheelbase_mm": 1365.0,
-        "front_tire_size": "110/70-17",
-        "rear_tire_size": "150/60-17",
-        "cd": 0.74,
-        "frontal_area_m2": 0.52,
-    },
-    source_name="spec_sheet",
-)
+# EPOCH 2026-11-10 (duplicate adjudication): the 2024-2026 Tuono 457 entry (47.0 hp) was removed; the
+# bike launched for 2025 and APRILIA_TUONO_457_2025 in known_bikes_extended.py (47.6 hp @
+# 9400, Rider / Motorcycle.com) is the single row.
+
 
 # ── Triumph (Indian market Scrambler 400X) ────────────────────────────
 TRIUMPH_SCRAMBLER_400X_2023 = spec_from_dict(
@@ -11069,8 +10962,11 @@ HONDA_CBR1000RR_R_FIREBLADE_SP_2024 = spec_from_dict(
         "front_sprocket": 17,
         "rear_sprocket": 43,
         "chain_pitch": "530",
-        "dry_mass_kg": 201.0,
-        "wheelbase_mm": 1405.0,
+        # EPOCH 2026-11-10: 201 kg is Honda's published KERB figure; it was stored
+        # as dry mass (double-counting fluids). Recorded as wet; the importer
+        # derives dry = wet - 25.
+        "wet_mass_kg": 201.0,
+        "wheelbase_mm": 1455.0,  # Honda UK 2024 SP specification (was 1405)
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "190/50ZR17",
         "cd": 0.58,
@@ -11608,39 +11504,10 @@ BAJAJ_PULSAR_P150_2023 = spec_from_dict(
     source_name="spec_sheet",
 )
 
-TVS_RAIDER_125_2022 = spec_from_dict(
-    {
-        "manufacturer": "TVS",
-        "model_name": "Raider 125",
-        "year_from": 2022,
-        "year_to": 2024,
-        "category": "naked",
-        "displacement_cc": 125,
-        "bore_mm": 52.5,
-        "stroke_mm": 57.0,
-        "compression_ratio": 9.5,
-        "cylinders": 1,
-        "peak_power_hp": 11.2,
-        "peak_power_rpm": 8500,
-        "peak_torque_nm": 10.8,
-        "peak_torque_rpm": 6500,
-        "fuel_system": "fi",
-        "cooling": "air",
-        "valve_config": "sohc",
-        "gears": 5,
-        "gear_ratios": [3.260, 2.142, 1.578, 1.300, 1.053],
-        "front_sprocket": 16,
-        "rear_sprocket": 48,
-        "chain_pitch": "428",
-        "dry_mass_kg": 130.0,
-        "wheelbase_mm": 1300.0,
-        "front_tire_size": "110/70R17",
-        "rear_tire_size": "130/70R17",
-        "cd": 0.77,
-        "frontal_area_m2": 0.34,
-    },
-    source_name="spec_sheet",
-)
+# EPOCH 2026-11-10 (duplicate adjudication): the 2022-2024 Raider 125 entry (52.5 x 57 mm, 1300 mm
+# wheelbase, 110/70 + 130/70 radials - none of which match TVS's specification) was removed;
+# TVS_RAIDER_125_2021 in known_bikes_extended.py is the single row.
+
 
 TVS_APACHE_RTR_310_2024 = spec_from_dict(
     {
@@ -11846,45 +11713,11 @@ HONDA_SP_160_2024 = spec_from_dict(
     source_name="spec_sheet",
 )
 
-# ── Honda Hornet 2.0 (2024-2025 OBD-2B refresh) ─────────────────────────
-# GEOMETRY CORRECTED 2026-08-08 — same defect and same sources as the
-# 2020-2024 entry above. This entry declared a 194 cc, 63.0 x 77.8 mm
-# engine; 63.0 x 77.8 mm sweeps 242 cc, and Honda has never sold a 194 cc
-# Hornet. The 2024 OBD-2B refresh kept the 184.4 cc air-cooled single
-# (61.0 x 63.1 mm) unchanged.
-HONDA_HORNET_2_0_2024 = spec_from_dict(
-    {
-        "manufacturer": "Honda",
-        "model_name": "Hornet 2.0",
-        "year_from": 2024,
-        "year_to": 2025,
-        "category": "naked",
-        "displacement_cc": 184.4,  # was 194 — no such Honda
-        "bore_mm": 61.0,  # was 63.0
-        "stroke_mm": 63.1,  # was 77.8 (63.0 x 77.8 sweeps 242 cc)
-        "compression_ratio": 9.8,
-        "cylinders": 1,
-        "peak_power_hp": 17.0,  # 17.03 bhp @ 8500 (was 17.3)
-        "peak_power_rpm": 8500,
-        "peak_torque_nm": 15.9,  # was 16.3 @ 6500
-        "peak_torque_rpm": 6000,
-        "fuel_system": "fi",
-        "cooling": "air",
-        "valve_config": "sohc",
-        "gears": 5,
-        "gear_ratios": [3.357, 2.210, 1.636, 1.286, 1.048],
-        "front_sprocket": 17,
-        "rear_sprocket": 44,
-        "chain_pitch": "428",
-        "dry_mass_kg": 142.0,
-        "wheelbase_mm": 1355.0,  # published wheelbase (was 1330)
-        "front_tire_size": "110/70R17",
-        "rear_tire_size": "140/70R17",
-        "cd": 0.76,
-        "frontal_area_m2": 0.36,
-    },
-    source_name="spec_sheet",
-)
+# EPOCH 2026-11-10 (duplicate adjudication): the 2024-2025 Hornet 2.0 entry that lived here was the
+# same 184.4 cc bike as HONDA_HORNET_2_0_2020 (now 2020-2026) and was removed. Its
+# cassette / F17-R44 / 428 chain / tyres disagreed with the surviving row and neither set is
+# sourced; the surviving row is the one backed by the Tier-1 gear table.
+
 
 YAMAHA_FZS_25_2023 = spec_from_dict(
     {
@@ -11920,57 +11753,9 @@ YAMAHA_FZS_25_2023 = spec_from_dict(
     source_name="spec_sheet",
 )
 
-# ── Suzuki V-Strom SX 250 (2022-2024) ───────────────────────────────────
-# GEOMETRY CORRECTED 2026-08-08. This entry carried a 67.0 x 70.5 mm
-# long-stroke single that does not exist in Suzuki's Indian line-up. The
-# V-Strom SX is built on the Gixxer 250 / SG250 oil-cooled SOHC single:
-# 76.0 x 54.9 mm, 249 cc, 26.15 bhp @ 9300 rpm, 22.2 Nm @ 7300 rpm. The
-# 1355 mm "wheelbase" was in fact the bike's OVERALL HEIGHT (2180 x 880 x
-# 1355 mm); the real wheelbase is 1440 mm. Engine, drivetrain, tyres and
-# dimensions are now aligned with the separately-keyed 2022-2026 entry in
-# known_bikes_extended.py, which carries the full citation set — the two
-# rows describe the same motorcycle and previously disagreed on every
-# engine dimension, so DB regen produced different physics for each.
-# Sources: Suzuki Motorcycle India V-Strom SX specification and 91Wheels /
-#          BikeWale / BikeDekho spec sheets (249 cc oil-cooled single,
-#          26.15 bhp @ 9300, 22.2 Nm @ 7300, 167 kg kerb, 1440 mm
-#          wheelbase, 205 mm ground clearance, 100/90-19 front and
-#          140/70-17 rear tyres);
-#          Gixxer 250 specification (76.0 x 54.9 mm shared engine).
-SUZUKI_V_STROM_SX_250_2022 = spec_from_dict(
-    {
-        "manufacturer": "Suzuki",
-        "model_name": "V-Strom SX 250",
-        "year_from": 2022,
-        "year_to": 2024,
-        "category": "adventure",
-        "displacement_cc": 249,
-        "bore_mm": 76.0,  # was 67.0 — not a Suzuki 250 dimension
-        "stroke_mm": 54.9,  # was 70.5
-        "compression_ratio": 10.7,  # was 9.3
-        "cylinders": 1,
-        "peak_power_hp": 26.1,  # 26.15 bhp @ 9300 (was 24.7 @ 8000)
-        "peak_power_rpm": 9300,
-        "peak_torque_nm": 22.2,  # was 22.9 @ 6250
-        "peak_torque_rpm": 7300,
-        "fuel_system": "fi",
-        "cooling": "air",  # oil-cooled (SOCS), was mislabelled liquid
-        "valve_config": "sohc",
-        "gears": 6,
-        # Gixxer 250 cassette + Suzuki India F14/R44 final drive.
-        "gear_ratios": [2.800, 1.895, 1.500, 1.261, 1.087, 0.960],
-        "front_sprocket": 14,
-        "rear_sprocket": 44,
-        "chain_pitch": "520",
-        "dry_mass_kg": 167.0,  # published kerb weight (was 168)
-        "wheelbase_mm": 1440.0,  # was 1355 — that is the overall HEIGHT
-        "front_tire_size": "100/90-19",
-        "rear_tire_size": "140/70-17",
-        "cd": 0.80,
-        "frontal_area_m2": 0.46,
-    },
-    source_name="spec_sheet",
-)
+# EPOCH 2026-11-10 (duplicate adjudication): the 2022-2024 V-Strom SX 250 entry (167 kg KERB stored as
+# dry mass) was removed; the 2022-2026 entry in known_bikes_extended.py is the single row.
+
 
 KTM_390_ADVENTURE_SW_2024 = spec_from_dict(
     {
@@ -12490,9 +12275,6 @@ ALL_KNOWN_BIKES = [
     # ── MV Agusta ───────────────────────────────
     MV_AGUSTA_BRUTALE_1000_RR,
     # ── Royal Enfield ───────────────────────────
-    RE_INTERCEPTOR_650,
-    RE_CONTINENTAL_GT_650,
-    RE_SUPER_METEOR_650,
     # ── Harley-Davidson ─────────────────────────
     HARLEY_SPORTSTER_S,
     HARLEY_VROD_MUSCLE,
@@ -12619,7 +12401,6 @@ ALL_KNOWN_BIKES = [
     HARLEY_X440_2023,
     # Aprilia (India)
     APRILIA_RS457_2024,
-    APRILIA_TUONO_457_2024,
     # Triumph (India)
     TRIUMPH_SCRAMBLER_400X_2023,
     # KTM (India)
@@ -12766,16 +12547,13 @@ ALL_KNOWN_BIKES = [
     # Indian-market gap-fill
     BAJAJ_PULSAR_N160_2023,
     BAJAJ_PULSAR_P150_2023,
-    TVS_RAIDER_125_2022,
     TVS_APACHE_RTR_310_2024,
     HERO_KARIZMA_XMR_250_2024,
     ROYAL_ENFIELD_CLASSIC_350_HALCYON_2024,
     ROYAL_ENFIELD_BEAR_650_2024,
     ROYAL_ENFIELD_GOAN_CLASSIC_350_2024,
     HONDA_SP_160_2024,
-    HONDA_HORNET_2_0_2024,
     YAMAHA_FZS_25_2023,
-    SUZUKI_V_STROM_SX_250_2022,
     KTM_390_ADVENTURE_SW_2024,
     BMW_G310RR_2024,
     # Vintage/classic icons

@@ -57,8 +57,8 @@ DOMAIN = "motoquant.in  ·  free & open source"
 # (2026-08-08: the benchmark tile had sat at 221 — the July-6 count — through
 # two corpus epochs because nothing audited the rendered card's numbers.)
 STATS = [
-    ("541", "bikes"),
-    ("593", "parts"),
+    ("534", "bikes"),
+    ("546", "parts"),
     ("254", "tires"),
     ("20", "venues"),
     ("250", "benchmarks"),

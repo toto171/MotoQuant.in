@@ -493,7 +493,9 @@ class BikeRepository:
         ).fetchone()
         return dict(row) if row else None
 
-    def sync_headline_specs(self, bike_model_id: int, config: BikeConfig) -> list[str]:
+    def sync_headline_specs(
+        self, bike_model_id: int, config: BikeConfig, spec=None
+    ) -> list[str]:
         """Rewrite the bike_models headline columns from ``config``.
 
         The headline columns (bore/stroke/CR/rpm points/wheelbase/...) are a
@@ -502,6 +504,12 @@ class BikeRepository:
         does not use (e.g. V-Strom SX 250 wheelbase 1355 vs 1440 in physics).
         Returns the names of the columns that changed (empty = already in
         sync). Idempotent.
+
+        ``spec`` (the bike's BikeSpec, optional): passed through to
+        ``extract_headline_specs`` so a column the spec has no figure for is
+        stored NULL instead of the reference-bike default the config carries
+        (seat height 810 mm, the GSX-R1000's bore and stroke ...). Without a
+        spec the config's values are written as before.
         """
         current = self._conn.execute(
             "SELECT * FROM bike_models WHERE id = ?", (bike_model_id,)
@@ -509,7 +517,7 @@ class BikeRepository:
         if current is None:
             return []
         changed = {}
-        for col, val in extract_headline_specs(config).items():
+        for col, val in extract_headline_specs(config, spec=spec).items():
             old = current[col]
             if isinstance(val, (int, float)) and isinstance(old, (int, float)):
                 same = math.isclose(float(old), float(val), rel_tol=1e-9, abs_tol=1e-9)
@@ -603,11 +611,15 @@ class BikeRepository:
         category: str = "sport",
         source: str = "spec_sheet",
         confidence: float = 0.7,
+        spec=None,
     ) -> tuple[int, int]:
         """
         High-level: store a BikeConfig, auto-creating manufacturer and model.
 
         Parses the config.name to extract manufacturer if not provided.
+        ``spec`` (the BikeSpec the config was built from, optional) keeps
+        reference-bike defaults out of the headline columns; see
+        ``extract_headline_specs``.
         Returns (bike_model_id, bike_config_id).
         """
         # Parse name for manufacturer
@@ -623,7 +635,7 @@ class BikeRepository:
             model_name = config.name[len(manufacturer_name) :].strip()
 
         # Extract headline specs
-        specs = extract_headline_specs(config)
+        specs = extract_headline_specs(config, spec=spec)
 
         model_id = self.create_model(
             manufacturer_id=mfr_id,

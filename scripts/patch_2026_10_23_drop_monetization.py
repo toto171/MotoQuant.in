@@ -26,6 +26,12 @@ Safety
   freelist and are reused by future writes.
 * WAL-aware: after the commit the WAL is checkpointed (TRUNCATE) so the
   change lives in the main ``.db`` file that git tracks.
+* An index that covers a doomed ``users`` column (none is created by this
+  project, but a deployment may have added one, e.g. on
+  ``stripe_customer_id``) would make SQLite refuse the ``DROP COLUMN``; such
+  indexes are dropped first and reported as ``dropped_indexes``. (Ported from
+  the equivalent 2026-11-09 patch of the parallel branch, which this script
+  supersedes: both dropped the same four tables and three columns.)
 * Old SQLite without ``ALTER TABLE ... DROP COLUMN`` (< 3.35): the columns are
   left in place and reported. That is harmless — no code reads them, and
   ``users.tier`` is ``NOT NULL DEFAULT 'free'`` so INSERTs that omit it still
@@ -63,6 +69,19 @@ def _columns(conn: sqlite3.Connection, table: str) -> list[str]:
     return [r[1] for r in conn.execute(f'PRAGMA table_info("{table}")')]
 
 
+def _indexes_on(conn: sqlite3.Connection, table: str, column: str) -> list[str]:
+    """Explicit (non-autoindex) indexes on ``table`` that cover ``column``."""
+    out = []
+    for row in conn.execute(f'PRAGMA index_list("{table}")').fetchall():
+        name = row[1]
+        if name.startswith("sqlite_autoindex"):
+            continue
+        cols = [c[2] for c in conn.execute(f'PRAGMA index_info("{name}")').fetchall()]
+        if column in cols:
+            out.append(name)
+    return out
+
+
 def _row_counts(conn: sqlite3.Connection, skip: tuple[str, ...]) -> dict[str, int]:
     counts = {
         t: conn.execute(f'SELECT COUNT(*) FROM "{t}"').fetchone()[0]
@@ -95,7 +114,8 @@ def apply(db_path: str, *, dry_run: bool = False, verbose: bool = True) -> dict:
     """Drop the monetization schema from ``db_path``.
 
     Returns a summary dict:
-      dropped_tables / dropped_columns — what actually changed this run;
+      dropped_tables / dropped_columns / dropped_indexes — what actually
+      changed this run (indexes: only those covering a dropped column);
       skipped_columns — columns this SQLite build could not drop;
       integrity — PRAGMA integrity_check result ("ok");
       rows_checked — number of surviving tables (+ sequences) verified.
@@ -111,6 +131,7 @@ def apply(db_path: str, *, dry_run: bool = False, verbose: bool = True) -> dict:
             "db": db_path,
             "dropped_tables": [],
             "dropped_columns": [],
+            "dropped_indexes": [],
             "skipped_columns": [],
             "integrity": None,
             "rows_checked": 0,
@@ -132,12 +153,23 @@ def apply(db_path: str, *, dry_run: bool = False, verbose: bool = True) -> dict:
             for table in todo["tables"]:
                 conn.execute(f'DROP TABLE IF EXISTS "{table}"')
                 summary["dropped_tables"].append(table)
+            can_drop_column = sqlite3.sqlite_version_info >= (3, 35, 0)
             for col in todo["columns"]:
+                if not can_drop_column:
+                    # SQLite < 3.35 has no DROP COLUMN — harmless leftover
+                    # (and its indexes are left alone with it).
+                    summary["skipped_columns"].append(
+                        f"{col} (SQLite {sqlite3.sqlite_version} has no DROP COLUMN)"
+                    )
+                    continue
+                # SQLite refuses to drop a column an index still covers.
+                for idx in _indexes_on(conn, "users", col):
+                    conn.execute(f'DROP INDEX "{idx}"')
+                    summary["dropped_indexes"].append(idx)
                 try:
                     conn.execute(f'ALTER TABLE users DROP COLUMN "{col}"')
                     summary["dropped_columns"].append(col)
                 except sqlite3.OperationalError as exc:
-                    # SQLite < 3.35 has no DROP COLUMN — harmless leftover.
                     summary["skipped_columns"].append(f"{col} ({exc})")
 
             integrity = conn.execute("PRAGMA integrity_check").fetchone()[0]
@@ -169,6 +201,8 @@ def apply(db_path: str, *, dry_run: bool = False, verbose: bool = True) -> dict:
         if verbose:
             print(f"  dropped tables : {summary['dropped_tables']}")
             print(f"  dropped columns: {summary['dropped_columns']}")
+            if summary["dropped_indexes"]:
+                print(f"  dropped indexes: {summary['dropped_indexes']}")
             if summary["skipped_columns"]:
                 print(f"  SKIPPED columns (old SQLite): {summary['skipped_columns']}")
             print(
