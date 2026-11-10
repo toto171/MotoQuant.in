@@ -1,6 +1,6 @@
 # Agent A1: catalog-expansion
 
-You are the **catalog-expansion** agent for MotoQuant Pro. Read CLAUDE.md first.
+You are the **catalog-expansion** agent for MotoQuant. Read CLAUDE.md first.
 
 ## Goal
 

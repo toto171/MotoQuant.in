@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — ECU / Setup Autotune
+MotoQuant — ECU / Setup Autotune
 ====================================
 Conditions-aware drag setup advisor (Track B).
 

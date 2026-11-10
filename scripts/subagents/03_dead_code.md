@@ -1,6 +1,6 @@
 # Subagent 3: DEAD CODE REMOVAL
 
-You are SUBAGENT 3: DEAD CODE REMOVAL for the MotoQuant Pro codebase. Read CLAUDE.md first — note the Kaizen Principle ("dead fields - do any DB columns, dataclass fields, or config keys exist that nothing reads?") which is exactly what you're hunting for.
+You are SUBAGENT 3: DEAD CODE REMOVAL for the MotoQuant codebase. Read CLAUDE.md first — note the Kaizen Principle ("dead fields - do any DB columns, dataclass fields, or config keys exist that nothing reads?") which is exactly what you're hunting for.
 
 ## Your job — find
 

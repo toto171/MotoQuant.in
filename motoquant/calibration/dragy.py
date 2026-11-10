@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Dragy GPS Import
+MotoQuant — Dragy GPS Import
 =================================
 Parse Dragy GPS timer CSV and JSON exports, detect run boundaries, and
 produce DragRunData for the calibration pipeline.

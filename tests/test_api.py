@@ -145,7 +145,7 @@ class TestHealthEndpoints(unittest.TestCase):
         r = client.get("/")
         self.assertEqual(r.status_code, 200)
         body = r.json()
-        self.assertEqual(body["service"], "MotoQuant Pro API")
+        self.assertEqual(body["service"], "MotoQuant API")
         self.assertEqual(body["status"], "ok")
 
     def test_health(self):

@@ -1,6 +1,6 @@
 # Subagent 6: ERROR HANDLING CLEANUP
 
-You are SUBAGENT 6: ERROR HANDLING CLEANUP for the MotoQuant Pro codebase. Read CLAUDE.md first — note the Kaizen Principle's #1 rule: **"silent failure modes — does any code swallow errors without logging or raising?"** This is the most important pass for this codebase.
+You are SUBAGENT 6: ERROR HANDLING CLEANUP for the MotoQuant codebase. Read CLAUDE.md first — note the Kaizen Principle's #1 rule: **"silent failure modes — does any code swallow errors without logging or raising?"** This is the most important pass for this codebase.
 
 ## Your job — find
 

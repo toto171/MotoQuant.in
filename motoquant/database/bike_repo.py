@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Bike Repository
+MotoQuant — Bike Repository
 ===============================
 CRUD operations for manufacturers, bike models, and bike configs.
 Handles BikeConfig ↔ DB conversion via the bridge module.

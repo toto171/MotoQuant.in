@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Parallel builds (CI matrix, several contributors or agents on one checkout)
+  // clobber each other's `.next`. NEXT_DIST_DIR gives each its own output dir;
+  // unset, this is the default `.next` that Vercel expects.
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   // ─── API proxy (same-origin → Render backend) ──────────────────────────
   // web/lib/api.js sets API_URL='' so every fetch becomes same-origin
   // (`/api/...`).  This rewrite forwards them to the Render backend.

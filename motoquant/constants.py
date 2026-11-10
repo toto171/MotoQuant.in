@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Physical Constants & Unit Conversions
+MotoQuant — Physical Constants & Unit Conversions
 ====================================================
 Single source of truth for all constants used across sub-models.
 """

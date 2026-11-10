@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MotoQuant Pro — sprocket specifications.position patch (2026-07-03 audit).
+MotoQuant — sprocket specifications.position patch (2026-07-03 audit).
 
 FOLDED 2026-07-04: every seeded sprocket now carries specifications.position
 directly from the seed sources, so this script is an idempotent no-op on a fresh

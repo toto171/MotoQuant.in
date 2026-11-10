@@ -295,7 +295,7 @@ jobs:
         run: |
           TAG="${GITHUB_REF_NAME}"
           VERSION="${TAG#v}"
-          BASE_URL="https://github.com/da25mem5s02-debug/MotoQuant_v1/releases/download/${TAG}"
+          BASE_URL="https://github.com/toto171/MotoQuant.in/releases/download/${TAG}"
           PUB_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
           # Helper: read .sig file content from the release

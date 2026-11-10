@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Phase 4B Surrogate Model Tests
+MotoQuant — Phase 4B Surrogate Model Tests
 ===============================================
 Tests for:
   surrogate_data.py — Feature extraction, Sobol sampling, SurrogateDataset

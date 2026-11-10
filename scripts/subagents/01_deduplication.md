@@ -1,6 +1,6 @@
 # Subagent 1: DEDUPLICATION
 
-You are SUBAGENT 1: DEDUPLICATION for the MotoQuant Pro codebase. Read CLAUDE.md first for the Kaizen Principle and existing hygiene notes.
+You are SUBAGENT 1: DEDUPLICATION for the MotoQuant codebase. Read CLAUDE.md first for the Kaizen Principle and existing hygiene notes.
 
 **Codebase context:** Python physics simulator for motorcycle drag racing. ~120 .py files in `motoquant/`, ~40 test files in `tests/`, plus `desktop/` (Tauri+React+TS) and `web/` (Next.js+JS) frontends.
 

@@ -6,7 +6,7 @@
 > `CLAUDE.md` is a *different* thing — a long session changelog; skim only its
 > top entry. Start here, not there.
 
-MotoQuant Pro is a first-principles physics engine for motorcycle quarter-mile
+MotoQuant is a first-principles physics engine for motorcycle quarter-mile
 drag racing, plus the product built on it (CLI, FastAPI backend, Next.js web
 app, agentic chat). Python package `motoquant/` + a seeded SQLite catalog.
 
@@ -82,12 +82,13 @@ before a big change.
 
 ## 4. Security posture (keep it)
 
-- Auth: magic-link + password (scrypt), JWT with a boot guard against the
-  default secret under billing. Don't reintroduce the `dev.` unsigned-token
-  path outside the jose-absent branch.
-- Webhooks (Stripe/Razorpay) verify signatures and **fail closed**.
-- Rate-limit + free-quota key on the **rightmost** `X-Forwarded-For` hop (single
-  trusted proxy = Render); never the client-spoofable leftmost.
+- Auth: optional accounts (magic-link + password via scrypt, JWT; no tiers).
+  An unset or publicly-known `JWT_SECRET` becomes a random per-process secret
+  with one boot warning — never a forgeable default. Don't reintroduce the
+  `dev.` unsigned-token path outside the PyJWT-absent branch.
+- Every expensive route carries a per-IP rate limit (`motoquant/ratelimit.py`);
+  the limiter keys on the **rightmost** `X-Forwarded-For` hop (single trusted
+  proxy = Render); never the client-spoofable leftmost.
 - The chat agent's `web_fetch` re-checks the SSRF guard on **every redirect
   hop**. Any server-side fetch of a user/LLM-controlled URL must do the same.
 - SQL is always parameterized. No secrets in tracked files (the health check

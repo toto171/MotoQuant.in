@@ -26,17 +26,10 @@ from motoquant.defaults import gsxr1000_k5, hayabusa_gen1
 
 # ---------------------------------------------------------------------------
 # Isolated DB -- TestMaxTimeRequestFloor POSTs to /api/simulate/top-speed and
-# /api/simulate/distance, which carry ``dependencies=[Depends(_meter_full_sim)]``.
-# _meter_full_sim records a sim_usage row via connect(), which falls back to the
-# repo's tracked motoquant.db when MOTOQUANT_DB is unset -- so without this the
-# module writes free-tier metering rows into the SHIPPED catalog. That is not
-# hypothetical: three such rows (2026-07-02/03/06, key ``anon:846488f1dc5c…``)
-# are committed on main. Same pattern as test_jobs_api.py / test_api.py.
-#
-# The 422 responses these tests assert are produced by Pydantic validation
-# BEFORE the dependency runs, so no row is written on the happy path -- but the
-# dependency still resolves for any request that validates, and relying on that
-# ordering to protect the tracked DB is exactly the fragility being removed.
+# /api/simulate/distance. MOTOQUANT_DB falls back to the repo's tracked
+# motoquant.db when unset, so point it at a throwaway tmp DB: no route in this
+# module may ever be able to write into the SHIPPED catalog. Same pattern as
+# test_jobs_api.py / test_api.py.
 # ---------------------------------------------------------------------------
 _tmp_db_file = tempfile.NamedTemporaryFile(
     prefix="motoquant_hardening_test_", suffix=".db", delete=False
@@ -141,23 +134,9 @@ class TestMaxTimeRequestFloor(unittest.TestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class TestFullSimMeteringIsIsolatedAndLive(unittest.TestCase):
-    """Pin the free-tier metering dependency at the HTTP layer.
-
-    Two regressions are guarded here, both found in the 2026-07-25 audit:
-
-    1. *Residue* — this module's metered POSTs used to write ``sim_usage``
-       rows into the repo's tracked ``motoquant.db`` because it never
-       redirected ``MOTOQUANT_DB``. Three such rows are committed on main.
-       ``test_metering_row_lands_in_the_isolated_db`` fails if the
-       module-level isolation (setUpModule / tearDownModule) is removed.
-
-    2. *Coverage* — ``_meter_full_sim`` had no HTTP-level test at all: no
-       test asserted the routes are wired to it, so silently dropping
-       ``dependencies=[Depends(_meter_full_sim)]`` from ``/api/simulate``
-       left the whole suite green while free-tier metering stopped. The
-       header assertion below fails on exactly that revert.
-    """
+class TestFullSimIsOpenAndIsolated(unittest.TestCase):
+    """/api/simulate is open (no quota, no tier) and this module's DB
+    redirect is live."""
 
     @classmethod
     def setUpClass(cls):
@@ -177,35 +156,14 @@ class TestFullSimMeteringIsIsolatedAndLive(unittest.TestCase):
         self.assertEqual(r.status_code, 200, r.text)
         return r
 
-    def test_metered_route_emits_quota_headers(self):
-        """The dependency is actually wired to /api/simulate.
-
-        Fails if ``dependencies=[Depends(_meter_full_sim)]`` is dropped from
-        the route, which is otherwise invisible to the whole suite.
-        """
+    def test_anonymous_full_sim_has_no_quota_headers(self):
         r = self._simulate()
-        self.assertIn("X-Sims-Limit", r.headers)
-        self.assertIn("X-Sims-Remaining", r.headers)
-        self.assertGreater(int(r.headers["X-Sims-Limit"]), 0)
+        self.assertNotIn("X-Sims-Limit", r.headers)
+        self.assertNotIn("X-Sims-Remaining", r.headers)
 
-    def test_metering_row_lands_in_the_isolated_db(self):
-        """The sim_usage row goes to this module's tmp DB, never the tracked one.
-
-        Fails if setUpModule stops redirecting MOTOQUANT_DB — the row would
-        then be written into the shipped catalog instead.
-        """
-        import sqlite3
-
+    def test_db_redirect_is_live(self):
+        """Fails if setUpModule stops redirecting MOTOQUANT_DB."""
         self.assertEqual(os.environ.get("MOTOQUANT_DB"), _TMP_DB_PATH)
-        self._simulate()
-        conn = sqlite3.connect(_TMP_DB_PATH)
-        try:
-            rows = conn.execute("SELECT COUNT(*) FROM sim_usage").fetchone()[0]
-        finally:
-            conn.close()
-        self.assertGreater(
-            rows, 0, "metering wrote nowhere — the dependency or the DB redirect broke"
-        )
 
 
 if __name__ == "__main__":

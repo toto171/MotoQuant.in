@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Build Optimizer
+MotoQuant — Build Optimizer
 ===============================
 Product-facing parts-build optimizer (Track B).
 

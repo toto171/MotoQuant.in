@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Seed Integrity Tests (fold-back regression guard)
+MotoQuant — Seed Integrity Tests (fold-back regression guard)
 =================================================================
 The DB pipeline used to be "seed_all() -> then run patch scripts". The manual
 patch scripts (patch_2026_04_30_fitment_normalize / patch_2026_06_11_parts_fitment

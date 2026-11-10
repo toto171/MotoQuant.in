@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Physics Monotonicity Invariants (Property-Based)
+MotoQuant — Physics Monotonicity Invariants (Property-Based)
 ================================================================
 Hypothesis-driven property tests that pin the four most load-bearing
 physical invariants of the simulation:

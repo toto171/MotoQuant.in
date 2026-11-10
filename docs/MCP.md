@@ -67,10 +67,10 @@ runtime, so a bare `pip install -e . --no-deps` is enough.
 {
   "mcpServers": {
     "motoquant": {
-      "command": "/path/to/MotoQuant_v1/.venv/bin/python",
+      "command": "/path/to/MotoQuant.in/.venv/bin/python",
       "args": ["-m", "motoquant.mcp_server", "--local"],
       "env": {
-        "MOTOQUANT_DB": "/path/to/MotoQuant_v1/motoquant.db"
+        "MOTOQUANT_DB": "/path/to/MotoQuant.in/motoquant.db"
       }
     }
   }
@@ -97,7 +97,7 @@ python -m motoquant.mcp_server --local --selftest
 | Needs | Python stdlib only | `requirements-api.txt` + the DB |
 | Latency | ~0.3 s warm, **up to ~50 s on a cold start** | ~50 ms–2 s |
 | `gearing_impact` | catalog sprockets only (see below) | any tooth count |
-| Free-tier sim quota | counts against it | not metered |
+| Rate limits | per-IP limits apply | none |
 
 The hosted backend runs on Render's **free tier**, which sleeps after 15
 minutes of inactivity. The first call after a nap can take ~50 s while the

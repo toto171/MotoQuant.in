@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Physics Engine
+MotoQuant — Physics Engine
 =============================
 Thin orchestrator that composes 12 sub-model classes into a single
 simulation loop. RK4 fixed-step integration at 1 ms timestep.

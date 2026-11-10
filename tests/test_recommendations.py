@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Smart Recommendations Engine Tests
+MotoQuant — Smart Recommendations Engine Tests
 =====================================================
 Tests for the build recommender, upgrade path generator, and
 compatibility/synergy detection.

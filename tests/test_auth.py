@@ -1,10 +1,10 @@
 """
-MotoQuant Pro — Auth module tests
+MotoQuant — Auth module tests
 ===================================
-Tests for magic-link issuance, JWT lifecycle, the default-secret boot guard,
-tier gating, and rate limiting.
+Tests for magic-link issuance, JWT lifecycle, the random-secret fallback,
+anonymous access to formerly gated routes, and rate limiting.
 All tests use in-memory SQLite — no network calls, no file system I/O beyond /tmp.
-Section 4b spawns short-lived subprocesses (the boot guard is import-time code,
+Section 4b spawns short-lived subprocesses (the secret fallback is import-time code,
 so the only honest way to exercise it is a fresh interpreter).
 
 Run with:
@@ -91,7 +91,6 @@ class TestUserCrud(unittest.TestCase):
     def test_get_or_create_new_user(self):
         user = users_repo.get_or_create_user(self.conn, "rider@test.in")
         self.assertEqual(user["email"], "rider@test.in")
-        self.assertEqual(user["tier"], "free")
         self.assertEqual(user["is_active"], 1)
 
     def test_get_or_create_idempotent(self):
@@ -103,12 +102,6 @@ class TestUserCrud(unittest.TestCase):
         users_repo.get_or_create_user(self.conn, "Rider@Test.IN")
         user = users_repo.get_user_by_email(self.conn, "rider@test.in")
         self.assertIsNotNone(user)
-
-    def test_set_user_tier(self):
-        user = users_repo.get_or_create_user(self.conn, "rider@test.in")
-        users_repo.set_user_tier(self.conn, user["id"], "pro")
-        updated = users_repo.get_user_by_id(self.conn, user["id"])
-        self.assertEqual(updated["tier"], "pro")
 
     def test_deactivate_user(self):
         user = users_repo.get_or_create_user(self.conn, "rider@test.in")
@@ -249,11 +242,11 @@ class TestJwtHelpers(unittest.TestCase):
     def test_make_and_decode_access_token(self):
         import motoquant.auth as auth_mod
 
-        token = auth_mod._make_access_token(42, "x@y.com", "pro", "jti-123")
+        token = auth_mod._make_access_token(42, "x@y.com", "jti-123")
         payload = auth_mod._decode_token(token)
         self.assertIsNotNone(payload)
         self.assertEqual(payload["sub"], "42")
-        self.assertEqual(payload["tier"], "pro")
+        self.assertNotIn("tier", payload)
         self.assertEqual(payload["type"], "access")
 
     def test_make_and_decode_refresh_token(self):
@@ -291,47 +284,36 @@ class TestJwtHelpers(unittest.TestCase):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 4b. JWT default-secret boot guard  (docs/INVARIANTS.md I7, AGENTS.md §4)
+# 4b. JWT secret fallback  (docs/INVARIANTS.md, AGENTS.md §4)
 # ══════════════════════════════════════════════════════════════════════════════
-# `motoquant/auth.py` refuses to import when JWT_SECRET is still the public
-# default AND MOTOQUANT_BILLING_ENFORCE is on — a forgeable signing key in
-# commercial mode means anyone can mint themselves a paid tier. During the open
-# beta the same condition only warns, because hard-failing there would take the
-# live beta down over a documented pre-commercial TODO.
+# The source is public, so a hardcoded default secret is forgeable. When
+# JWT_SECRET is unset (or equals the old public default) `motoquant/auth.py`
+# signs with a random per-process secret and logs ONE warning; it never
+# refuses to boot.
 #
-# INVARIANTS I7 has named `tests/test_auth.py` as this guarantee's enforcement
-# since the invariant was written, but no such test existed (weekly audit
-# 2026-07-25, §3.4). These are it.
-#
-# The guard is *module-level* code, so it cannot be exercised by importing the
-# already-imported module or by patching `auth.BILLING_ENFORCE` after the fact
-# — either would test a re-implementation rather than the guard. Each case
-# therefore boots a fresh interpreter with the real environment and asserts on
-# the real process outcome. `importlib.reload` is deliberately NOT used: it
-# would rebuild `auth.router` under the running FastAPI app that already holds
-# a reference to the old one.
+# The fallback is *module-level* code, so it cannot be exercised by importing
+# the already-imported module. Each case boots a fresh interpreter with the
+# real environment and asserts on the real process outcome. `importlib.reload`
+# is deliberately NOT used: it would rebuild `auth.router` under the running
+# FastAPI app that already holds a reference to the old one.
 
 _BOOT_PROBE = (
     "import motoquant.auth as a;"
-    "print('BOOTED default=%s enforce=%s' % (a._JWT_SECRET_IS_DEFAULT,"
-    " a.BILLING_ENFORCE))"
+    "print('BOOTED ephemeral=%s secret=%s' % (a._JWT_SECRET_IS_EPHEMERAL,"
+    " a.JWT_SECRET))"
 )
 _DEFAULT_JWT_SECRET = "dev-insecure-secret-change-me"
 
 
-def _boot_auth(*, jwt_secret=None, billing_enforce=None):
+def _boot_auth(*, jwt_secret=None):
     """Import `motoquant.auth` in a fresh interpreter under the given env.
 
-    `None` means "leave the variable unset", which is the shipped default for
-    both (render.yaml ships MOTOQUANT_BILLING_ENFORCE=false and no JWT_SECRET).
+    `None` means "leave JWT_SECRET unset", which is the shipped default.
     """
     env = dict(os.environ)
     env.pop("JWT_SECRET", None)
-    env.pop("MOTOQUANT_BILLING_ENFORCE", None)
     if jwt_secret is not None:
         env["JWT_SECRET"] = jwt_secret
-    if billing_enforce is not None:
-        env["MOTOQUANT_BILLING_ENFORCE"] = billing_enforce
     env["PYTHONPATH"] = os.pathsep.join(
         [str(REPO_ROOT), env.get("PYTHONPATH", "")]
     ).rstrip(os.pathsep)
@@ -345,201 +327,47 @@ def _boot_auth(*, jwt_secret=None, billing_enforce=None):
     )
 
 
+def _booted_secret(proc) -> str:
+    line = [ln for ln in proc.stdout.splitlines() if ln.startswith("BOOTED")][0]
+    return line.split("secret=", 1)[1]
+
+
 @unittest.skipIf(
     importlib.util.find_spec("fastapi") is None,
-    "fastapi not installed — motoquant.auth cannot be imported at all, so a "
-    "failed boot would not prove the guard fired",
+    "fastapi not installed — motoquant.auth cannot be imported at all",
 )
-class TestJwtDefaultSecretBootGuard(unittest.TestCase):
-    def test_default_secret_under_billing_refuses_to_boot(self):
-        proc = _boot_auth(billing_enforce="true")
-        self.assertNotEqual(
-            proc.returncode,
-            0,
-            "motoquant.auth booted with the public default JWT_SECRET while "
-            "billing is enforced — the boot guard is gone; tokens are forgeable "
-            "and any caller can self-upgrade to a paid tier.\n"
-            f"stdout: {proc.stdout!r}",
-        )
-        self.assertIn("RuntimeError", proc.stderr)
-        self.assertIn("JWT_SECRET", proc.stderr)
-        self.assertIn("MOTOQUANT_BILLING_ENFORCE", proc.stderr)
-        self.assertNotIn("BOOTED", proc.stdout)
-
-    def test_default_secret_set_explicitly_also_refuses(self):
-        """The guard must key on the value, not on "was the env var absent" —
-        an operator who copies the documented placeholder into their dashboard
-        is in exactly the same danger as one who never set it."""
-        proc = _boot_auth(
-            jwt_secret=_DEFAULT_JWT_SECRET,
-            billing_enforce="true",
-        )
-        self.assertNotEqual(proc.returncode, 0, proc.stdout)
-        self.assertIn("RuntimeError", proc.stderr)
-
-    def test_every_truthy_enforce_spelling_triggers_the_guard(self):
-        """`BILLING_ENFORCE` accepts 1/true/yes/on (case- and space-insensitive).
-        Every spelling that turns billing on must also arm the guard, or one of
-        them is a silent bypass."""
-        for spelling in ("1", "true", "TRUE", "  True  ", "yes", "on"):
-            with self.subTest(enforce=spelling):
-                proc = _boot_auth(billing_enforce=spelling)
-                self.assertNotEqual(
-                    proc.returncode,
-                    0,
-                    f"MOTOQUANT_BILLING_ENFORCE={spelling!r} booted on the "
-                    "default secret",
-                )
-
-    def test_real_secret_boots_under_billing(self):
-        """The guard must not be a blanket refusal: a properly configured
-        deployment has to start."""
-        proc = _boot_auth(
-            jwt_secret="a" * 64,  # stands in for 32+ random bytes, hex-encoded
-            billing_enforce="true",
-        )
-        self.assertEqual(
-            proc.returncode,
-            0,
-            f"a real JWT_SECRET was rejected under billing: {proc.stderr[-800:]}",
-        )
-        self.assertIn("BOOTED default=False enforce=True", proc.stdout)
-
-    def test_default_secret_is_allowed_in_open_beta(self):
-        """Billing off (the shipped render.yaml default) is the open-beta
-        posture: auth is advisory, so the guard only warns. Hard-failing here
-        would take the live beta down."""
-        proc = _boot_auth(billing_enforce="false")
-        self.assertEqual(
-            proc.returncode,
-            0,
-            "the boot guard fired during the open beta — this takes the live "
-            f"site down: {proc.stderr[-800:]}",
-        )
-        self.assertIn("BOOTED default=True enforce=False", proc.stdout)
-        self.assertIn("insecure public default", proc.stderr)
-
-    def test_default_secret_is_allowed_when_enforce_is_unset(self):
-        """Neither variable set — a fresh clone, and every CI job."""
+class TestJwtRandomSecretFallback(unittest.TestCase):
+    def test_unset_secret_boots_with_random_secret_and_one_warning(self):
         proc = _boot_auth()
         self.assertEqual(proc.returncode, 0, proc.stderr[-800:])
-        self.assertIn("BOOTED default=True enforce=False", proc.stdout)
+        self.assertIn("BOOTED ephemeral=True", proc.stdout)
+        secret = _booted_secret(proc)
+        self.assertNotEqual(secret, _DEFAULT_JWT_SECRET)
+        self.assertGreaterEqual(len(secret), 48)
+        self.assertEqual(proc.stderr.count("JWT_SECRET is not set"), 1)
+        self.assertIn("will not survive a restart", proc.stderr)
+
+    def test_secret_differs_between_processes(self):
+        self.assertNotEqual(_booted_secret(_boot_auth()), _booted_secret(_boot_auth()))
+
+    def test_public_default_is_treated_as_unset(self):
+        """The old hardcoded value is public: setting it explicitly must not
+        make tokens forgeable."""
+        proc = _boot_auth(jwt_secret=_DEFAULT_JWT_SECRET)
+        self.assertEqual(proc.returncode, 0, proc.stderr[-800:])
+        self.assertIn("BOOTED ephemeral=True", proc.stdout)
+        self.assertNotEqual(_booted_secret(proc), _DEFAULT_JWT_SECRET)
+
+    def test_real_secret_is_used_verbatim_without_warning(self):
+        proc = _boot_auth(jwt_secret="a" * 64)
+        self.assertEqual(proc.returncode, 0, proc.stderr[-800:])
+        self.assertIn("BOOTED ephemeral=False", proc.stdout)
+        self.assertEqual(_booted_secret(proc), "a" * 64)
+        self.assertNotIn("JWT_SECRET is not set", proc.stderr)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 5. require_tier dependency (via FastAPI TestClient)
-# ══════════════════════════════════════════════════════════════════════════════
-
-
-class TestRequireTier(unittest.TestCase):
-    """
-    Test that require_tier returns 200 for correct tier and 402 for insufficient tier.
-    Uses a minimal FastAPI test app to avoid messing with the real api.py.
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        try:
-            from fastapi import Depends as _Depends, FastAPI
-            from fastapi.testclient import TestClient
-
-            from motoquant.auth import require_tier
-        except ImportError:
-            cls.skipTest(None, "fastapi not installed")
-            return
-
-        test_app = FastAPI()
-
-        @test_app.get("/pro-feature")
-        def pro_only(_auth: dict = _Depends(require_tier("pro"))):
-            return {"ok": True}
-
-        @test_app.get("/studio-feature")
-        def studio_only(_auth: dict = _Depends(require_tier("studio"))):
-            return {"ok": True}
-
-        cls.client = TestClient(test_app, raise_server_exceptions=False)
-
-    def setUp(self):
-        # These tests exercise ENFORCED billing; the module default is the
-        # freemium-beta passthrough (False) since June 2026.
-        import motoquant.auth as auth_mod
-
-        self._orig_enforce = auth_mod.BILLING_ENFORCE
-        auth_mod.BILLING_ENFORCE = True
-
-    def tearDown(self):
-        import motoquant.auth as auth_mod
-
-        auth_mod.BILLING_ENFORCE = self._orig_enforce
-
-    def _make_token(self, tier: str) -> str:
-        """Create an access token for a fake user.
-
-        Uses the current JWT-lib state so the issue and decode paths agree —
-        forcing the lib off here (as this helper used to) would mint an
-        unsigned "dev." token that the 2026-07-02 security fix now rejects
-        whenever a JWT lib is actually installed (which it is in CI).
-        """
-        import motoquant.auth as auth_mod
-
-        return auth_mod._make_access_token(999, "t@t.in", tier, "jti-test")
-
-    def _patch_session_valid(self):
-        """Patch DB session check to always return True."""
-        return patch("motoquant.auth._users.is_session_valid", return_value=True)
-
-    def _patch_get_user(self, tier: str):
-        """Patch DB user lookup to return a fake user with given tier."""
-        fake_user = {"id": 999, "email": "t@t.in", "tier": tier, "is_active": 1}
-        return patch("motoquant.auth._users.get_user_by_id", return_value=fake_user)
-
-    def test_pro_user_accesses_pro_feature(self):
-        token = self._make_token("pro")
-        with self._patch_session_valid(), self._patch_get_user("pro"):
-            res = self.client.get(
-                "/pro-feature",
-                headers={"Authorization": f"Bearer {token}"},
-            )
-        self.assertEqual(res.status_code, 200)
-
-    def test_free_user_gets_402_on_pro_feature(self):
-        token = self._make_token("free")
-        with self._patch_session_valid(), self._patch_get_user("free"):
-            res = self.client.get(
-                "/pro-feature",
-                headers={"Authorization": f"Bearer {token}"},
-            )
-        self.assertEqual(res.status_code, 402)
-        body = res.json()
-        self.assertEqual(body["detail"]["error"], "upgrade_required")
-        self.assertEqual(body["detail"]["required_tier"], "pro")
-
-    def test_pro_user_gets_402_on_studio_feature(self):
-        token = self._make_token("pro")
-        with self._patch_session_valid(), self._patch_get_user("pro"):
-            res = self.client.get(
-                "/studio-feature",
-                headers={"Authorization": f"Bearer {token}"},
-            )
-        self.assertEqual(res.status_code, 402)
-
-    def test_studio_user_accesses_studio_feature(self):
-        token = self._make_token("studio")
-        with self._patch_session_valid(), self._patch_get_user("studio"):
-            res = self.client.get(
-                "/studio-feature",
-                headers={"Authorization": f"Bearer {token}"},
-            )
-        self.assertEqual(res.status_code, 200)
-
-    def test_unauthenticated_request_gets_401(self):
-        res = self.client.get("/pro-feature")
-        self.assertEqual(res.status_code, 401)
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# 6. Magic-link endpoint rate-limit (via FastAPI TestClient)
+# 5. Magic-link endpoint rate-limit (via FastAPI TestClient)
 # ══════════════════════════════════════════════════════════════════════════════
 
 
@@ -651,7 +479,7 @@ class TestEmailBackendResolution(unittest.TestCase):
     Regression cover for a silent production bug: MOTOQUANT_EMAIL_BACKEND
     defaulted to "stdout" and the send guard read
     ``if EMAIL_BACKEND == "stdout" or not SMTP_HOST``, so the first clause
-    short-circuited true unconditionally. Following docs/PAYMENTS_SETUP.md
+    short-circuited true unconditionally. Following the setup runbook
     exactly (set SMTP_HOST/PORT/USER/PASS/FROM — the only vars that doc named)
     sent no mail at all, while the API still answered "Sign-in link sent."
     Resend was documented in three places and had no implementation whatsoever.
@@ -876,67 +704,56 @@ if __name__ == "__main__":
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 6. Freemium-beta passthrough (BILLING_ENFORCE = False — the default)
+# 6. get_optional_user — attribution without gating
 # ══════════════════════════════════════════════════════════════════════════════
 
 
-class TestRequireTierBetaMode(unittest.TestCase):
-    """With billing enforcement OFF (open-beta default), require_tier lets
-    anonymous requests through with {} and attaches users when a valid
-    token is present — never 401/402."""
+class TestGetOptionalUser(unittest.TestCase):
+    """get_optional_user returns None for anonymous / invalid callers and the
+    user dict for a valid token — it never raises or blocks."""
 
     @classmethod
     def setUpClass(cls):
         from fastapi import Depends as _Depends, FastAPI
         from fastapi.testclient import TestClient
 
-        from motoquant.auth import require_tier
+        from motoquant.auth import get_optional_user
 
         app = FastAPI()
 
-        @app.get("/pro-feature")
-        def pro_only(auth: dict = _Depends(require_tier("pro"))):
-            return {"ok": True, "attributed": bool(auth.get("id"))}
+        @app.get("/open-feature")
+        def open_route(user: dict | None = _Depends(get_optional_user)):
+            return {"ok": True, "attributed": bool(user and user.get("id"))}
 
         cls.client = TestClient(app, raise_server_exceptions=False)
 
-    def setUp(self):
-        import motoquant.auth as auth_mod
-
-        self._orig = auth_mod.BILLING_ENFORCE
-        auth_mod.BILLING_ENFORCE = False
-
-    def tearDown(self):
-        import motoquant.auth as auth_mod
-
-        auth_mod.BILLING_ENFORCE = self._orig
-
-    def test_anonymous_passes_in_beta(self):
-        res = self.client.get("/pro-feature")
+    def test_anonymous_passes(self):
+        res = self.client.get("/open-feature")
         self.assertEqual(res.status_code, 200)
         self.assertFalse(res.json()["attributed"])
 
-    def test_authenticated_user_attached_in_beta(self):
+    def test_authenticated_user_attached(self):
         import motoquant.auth as auth_mod
 
-        # Use the real JWT-lib state so issue/decode agree (see _make_token note).
-        token = auth_mod._make_access_token(7, "beta@t.in", "free", "jti-beta")
-        fake_user = {"id": 7, "email": "beta@t.in", "tier": "free", "is_active": 1}
+        # Use the real JWT-lib state so issue/decode agree.
+        token = auth_mod._make_access_token(7, "beta@t.in", "jti-beta")
+        fake_user = {"id": 7, "email": "beta@t.in", "is_active": 1}
         with (
             patch("motoquant.auth._users.is_session_valid", return_value=True),
             patch("motoquant.auth._users.get_user_by_id", return_value=fake_user),
         ):
             res = self.client.get(
-                "/pro-feature", headers={"Authorization": f"Bearer {token}"}
+                "/open-feature", headers={"Authorization": f"Bearer {token}"}
             )
         self.assertEqual(res.status_code, 200)
         self.assertTrue(res.json()["attributed"])
 
-    def test_invalid_token_does_not_error_in_beta(self):
+    def test_invalid_token_does_not_error(self):
         res = self.client.get(
-            "/pro-feature", headers={"Authorization": "Bearer garbage"}
+            "/open-feature", headers={"Authorization": "Bearer garbage"}
         )
         self.assertEqual(res.status_code, 200)
+        self.assertFalse(res.json()["attributed"])
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1004,7 +821,7 @@ class TestPasswordRoutes(unittest.TestCase):
         self.assertEqual(res.status_code, 201)
         body = res.json()
         self.assertIn("access_token", body)
-        self.assertEqual(body["tier"], "free")
+        self.assertNotIn("tier", body)
 
     def test_register_duplicate_email_409(self):
         self._register()
@@ -1110,30 +927,15 @@ class TestPasswordRoutes(unittest.TestCase):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 8. Paid-tooling tier gate — /api/optimize/* + /api/autotune/* (roadmap A1-1)
+# 8. Formerly tier-gated routes are open — /api/optimize/* + /api/autotune/*
 # ══════════════════════════════════════════════════════════════════════════════
 
 
-class TestPaidToolingTierGate(unittest.TestCase):
-    """The build optimiser + ECU autotune surface (sync + job variants) is
-    pro-tier gated via Depends(require_tier("pro")).
+class TestToolingRoutesAreOpen(unittest.TestCase):
+    """The build optimiser + ECU autotune surface (sync + job variants) has no
+    auth or tier gate: anonymous callers reach it (the per-IP rate limit is
+    the cost fuse)."""
 
-    The gate is INERT until MOTOQUANT_BILLING_ENFORCE is truthy:
-      * billing OFF (freemium-beta default) → anonymous requests pass the gate
-        exactly as before (no 401/402 regression);
-      * billing ON + no token             → 401 (authentication required);
-      * billing ON + authenticated free   → 402 (upgrade_required — genuine
-        payment-required path, mirroring /api/simulate/save).
-
-    Only the auth gate is under test here, so the request bodies are kept
-    minimal (a preset bike) and responses are checked for the gate status,
-    not the downstream simulation result.  TestClient is built with
-    raise_server_exceptions=False so a downstream 5xx surfaces as a response
-    rather than bubbling out of the client (the gate assertions never depend
-    on the body running).
-    """
-
-    # Every route gated in this change, with a minimal valid JSON body.
     ROUTES = (
         ("/api/optimize/build", {"bike_preset": "gsxr1000_k5", "budget_inr": 60000}),
         (
@@ -1157,99 +959,22 @@ class TestPaidToolingTierGate(unittest.TestCase):
             raise unittest.SkipTest("fastapi not installed")
         cls.client = TestClient(app, raise_server_exceptions=False)
 
-    def setUp(self):
-        import motoquant.auth as auth_mod
-
-        self._orig_enforce = auth_mod.BILLING_ENFORCE
-
-    def tearDown(self):
-        import motoquant.auth as auth_mod
-
-        auth_mod.BILLING_ENFORCE = self._orig_enforce
-
-    def _set_enforce(self, value: bool):
-        import motoquant.auth as auth_mod
-
-        auth_mod.BILLING_ENFORCE = value
-
-    def _make_token(self, tier: str) -> str:
-        import motoquant.auth as auth_mod
-
-        return auth_mod._make_access_token(999, "t@t.in", tier, "jti-tooling")
-
-    # (1) NO REGRESSION: billing OFF (default) → gate is inert, anonymous passes.
-    def test_billing_off_routes_pass_anonymously(self):
-        self._set_enforce(False)
+    def test_anonymous_requests_are_not_auth_blocked(self):
         for path, body in self.ROUTES:
             with self.subTest(route=path):
                 res = self.client.post(path, json=body)
                 self.assertNotIn(
                     res.status_code,
-                    (401, 402),
-                    f"{path} unexpectedly auth-blocked with billing OFF: "
+                    (401, 402, 403),
+                    f"{path} auth-blocked an anonymous caller: "
                     f"{res.status_code} {res.text[:200]}",
                 )
 
-    # (2a) billing ON + no token → 401 (require_tier's unauthenticated branch).
-    def test_billing_on_no_token_gets_401(self):
-        self._set_enforce(True)
-        for path, body in self.ROUTES:
+    def test_billing_surface_is_gone(self):
+        for path in (
+            "/api/payments/config",
+            "/api/subscriptions/status",
+            "/api/payments/checkout",
+        ):
             with self.subTest(route=path):
-                res = self.client.post(path, json=body)
-                self.assertEqual(
-                    res.status_code,
-                    401,
-                    f"{path}: expected 401 with billing ON + no token, "
-                    f"got {res.status_code} {res.text[:200]}",
-                )
-
-    # (2b) billing ON + authenticated free-tier user → 402 payment required.
-    def test_billing_on_free_user_gets_402(self):
-        self._set_enforce(True)
-        token = self._make_token("free")
-        fake_user = {"id": 999, "email": "t@t.in", "tier": "free", "is_active": 1}
-        for path, body in self.ROUTES:
-            with self.subTest(route=path):
-                with (
-                    patch("motoquant.auth._users.is_session_valid", return_value=True),
-                    patch(
-                        "motoquant.auth._users.get_user_by_id", return_value=fake_user
-                    ),
-                ):
-                    res = self.client.post(
-                        path,
-                        json=body,
-                        headers={"Authorization": f"Bearer {token}"},
-                    )
-                self.assertEqual(
-                    res.status_code,
-                    402,
-                    f"{path}: expected 402 for free-tier user, "
-                    f"got {res.status_code} {res.text[:200]}",
-                )
-                self.assertEqual(res.json()["detail"]["error"], "upgrade_required")
-
-    # billing ON + authenticated pro-tier user → gate passes (not 401/402).
-    def test_billing_on_pro_user_passes_gate(self):
-        self._set_enforce(True)
-        token = self._make_token("pro")
-        fake_user = {"id": 999, "email": "t@t.in", "tier": "pro", "is_active": 1}
-        for path, body in self.ROUTES:
-            with self.subTest(route=path):
-                with (
-                    patch("motoquant.auth._users.is_session_valid", return_value=True),
-                    patch(
-                        "motoquant.auth._users.get_user_by_id", return_value=fake_user
-                    ),
-                ):
-                    res = self.client.post(
-                        path,
-                        json=body,
-                        headers={"Authorization": f"Bearer {token}"},
-                    )
-                self.assertNotIn(
-                    res.status_code,
-                    (401, 402),
-                    f"{path}: pro user unexpectedly gate-blocked "
-                    f"{res.status_code} {res.text[:200]}",
-                )
+                self.assertEqual(self.client.get(path).status_code, 404)

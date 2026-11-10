@@ -1,4 +1,4 @@
-# MotoQuant Pro — developer entry point.
+# MotoQuant — developer entry point.
 #
 # The one interface every contributor (human or AI) should use. It encodes the
 # same commands CI runs, so "green locally" ≈ "green in CI". Run `make` (or
@@ -17,7 +17,7 @@ FAST_TESTS := tests/test_validation.py tests/test_scraper.py \
 
 .PHONY: help
 help: ## Show this help
-	@echo "MotoQuant Pro — make targets:"
+	@echo "MotoQuant — make targets:"
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 	  | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
 	@echo ""

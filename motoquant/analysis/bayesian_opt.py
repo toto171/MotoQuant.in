@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Bayesian Optimization Engine for Build Tuning
+MotoQuant — Bayesian Optimization Engine for Build Tuning
 ==============================================================
 Multi-variable budget-constrained motorcycle build optimization using BoTorch.
 

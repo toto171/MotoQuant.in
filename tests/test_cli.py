@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — CLI Integration Tests
+MotoQuant — CLI Integration Tests
 ======================================
 Tests for both Phase 1 (legacy) and Phase 2 (subcommand) CLI paths.
 Uses in-process function calls with captured stdout to avoid subprocess
@@ -750,7 +750,7 @@ class TestLegacyMode:
         """--quiet should suppress output."""
         _, out = capture_output(legacy_main, ["--bike", "k5", "--quiet"])
         # Quiet mode should have minimal output (no banner, no splits table)
-        assert "MotoQuant Pro" not in out
+        assert "MotoQuant" not in out
 
 
 # ═══════════════════════════════════════════

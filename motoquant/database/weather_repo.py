@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Weather Repository
+MotoQuant — Weather Repository
 ==================================
 Live weather API integration + historical record storage.
 

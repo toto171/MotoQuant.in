@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Scrapling-backed polite fetch layer (dev-side tooling)
+MotoQuant — Scrapling-backed polite fetch layer (dev-side tooling)
 ======================================================================
 Escalating three-tier fetcher for bike-data scraping runs:
 

@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Bikez.com Scraper
+MotoQuant — Bikez.com Scraper
 =================================
 Scrapes motorcycle specifications from bikez.com.
 

@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — FastAPI Web Server
+MotoQuant — FastAPI Web Server
 ====================================
 REST API wrapper around the MotoQuant physics engine and database.
 Serves the motoquant.in web simulator, public leaderboard, and bike library.
@@ -45,7 +45,6 @@ from fastapi import (
     HTTPException,
     Query,
     Request,
-    Response,
     UploadFile,
 )
 from fastapi.middleware.cors import CORSMiddleware
@@ -60,25 +59,14 @@ from typing_extensions import TypedDict
 from .defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 from .models import BikeConfig
 from .physics import MotoQuantEngine
-from .ratelimit import rate_limit
+from .ratelimit import heavy_gate_for, rate_limit
 
 # ─── Auth dependency (imported early so Depends() default-args resolve) ───────
-# Wrapped in try/except so the server still starts without python-jose installed
+# Wrapped in try/except so the server still starts without PyJWT installed
 # (tests stub this out; production must have all deps in requirements-api.txt).
 try:
-    from .auth import (
-        get_optional_user as get_optional_user,  # noqa: PLC0414
-        require_tier as require_tier,  # noqa: PLC0414
-    )
+    from .auth import get_optional_user as get_optional_user  # noqa: PLC0414
 except ImportError:  # pragma: no cover
-
-    def require_tier(_tier: str):  # type: ignore[misc]
-        """Stub — replace by installing python-jose[cryptography]."""
-
-        def _noop() -> dict:
-            return {}
-
-        return _noop  # callers wrap with Depends(require_tier(...))
 
     def get_optional_user() -> dict | None:  # type: ignore[misc]
         """Stub — no auth layer, so every caller is anonymous."""
@@ -88,7 +76,7 @@ except ImportError:  # pragma: no cover
 # ─── App init ─────────────────────────────────────────────────────────────
 
 app = FastAPI(
-    title="MotoQuant Pro API",
+    title="MotoQuant API",
     description="First-principles motorcycle drag racing simulator -- motoquant.in",
     version="0.3.0",
     docs_url="/docs",
@@ -330,8 +318,8 @@ class SimulateRequest(BaseModel):
     )
 
     # Optional overrides (applied on top of the selected bike's defaults).
-    # Bounds mirror the paid routes (OptimizeBuildRequest/AutotuneRequest) so
-    # the free sim surface can't be fed physically-impossible values that make
+    # Bounds mirror the optimizer routes (OptimizeBuildRequest/AutotuneRequest) so
+    # the sim surface can't be fed physically-impossible values that make
     # the engine return ET=0.0 nonsense as a 200 success.
     power_boost_pct: float = Field(
         0.0,
@@ -691,7 +679,7 @@ def _apply_parts_to_config(
 @app.get("/")
 def root():
     return {
-        "service": "MotoQuant Pro API",
+        "service": "MotoQuant API",
         "version": "0.3.0",
         "tagline": "The physics of faster",
         "docs": "/docs",
@@ -738,103 +726,6 @@ def sentry_test():
         "MotoQuant Sentry self-test — this event is deliberate "
         "(MOTOQUANT_SENTRY_SELFTEST is set)"
     )
-
-
-# ─────────────────────────────────────────────────────────────────────────
-# Free-tier sim metering (commercial launch, July 2026)
-# ─────────────────────────────────────────────────────────────────────────
-# FULL simulations (sync + job-backed, top-speed, distance) are metered per
-# identity per UTC day via motoquant/usage.py. Quick sims stay unmetered --
-# the web UI fires them on every slider move, so a daily cap there would
-# break the live-preview UX; the full run with charts is the free-tier
-# quota unit. During the open beta (MOTOQUANT_BILLING_ENFORCE falsy) the
-# quota is advisory: counts are recorded, X-Sims-Remaining is exposed, but
-# nothing is blocked. Flipping the env var arms the 402.
-
-
-def _sim_identity_and_tier(request: Request) -> tuple[str, str]:
-    """Resolve the metering identity: user id when a valid bearer token is
-    present, else a hashed client IP (never stored raw -- privacy page)."""
-    authz = request.headers.get("authorization", "")
-    if authz.lower().startswith("bearer "):
-        try:
-            from . import auth as _auth
-            from .usage import user_identity
-
-            payload = _auth._decode_token(authz.split(" ", 1)[1])
-            if payload and payload.get("type") == "access":
-                conn = _auth._get_conn()
-                try:
-                    user = _auth._users.get_user_by_id(conn, int(payload["sub"]))
-                finally:
-                    conn.close()
-                if user:
-                    return user_identity(user["id"]), user.get("tier", "free")
-        except Exception:  # noqa: BLE001 -- metering must never break sims
-            pass
-    from .ratelimit import client_ip
-    from .usage import anon_identity
-
-    # Same trusted-proxy client-IP derivation as the rate limiter — the rightmost
-    # X-Forwarded-For hop, never the spoofable leftmost one (see client_ip).
-    return anon_identity(client_ip(request)), "free"
-
-
-def _meter_sims(request: Request, response: Response, n: int) -> None:
-    """Count ``n`` full sims for this caller and (when billing is enforced)
-    402 free-tier callers past the daily quota.
-
-    ``n`` is the number of RK4 runs the route actually performs, so the
-    quota unit stays "one full simulation" no matter how many the endpoint
-    bundles — /api/simulate/compare runs two and used to charge nothing,
-    which was a straight quota bypass (2026-07-25 audit §3.4)."""
-    try:
-        from .database.connection import connect as _db_connect
-        from .usage import record_and_check
-
-        identity, tier = _sim_identity_and_tier(request)
-        conn = _db_connect()
-        try:
-            st = record_and_check(conn, identity, tier=tier, n=n)
-        finally:
-            conn.close()
-    except Exception:  # noqa: BLE001 -- metering must never break sims
-        logging.getLogger(__name__).warning("sim metering failed", exc_info=True)
-        return
-    if st.limit is not None:
-        response.headers["X-Sims-Limit"] = str(st.limit)
-        response.headers["X-Sims-Remaining"] = str(st.remaining)
-    if not st.allowed:
-        try:
-            from . import auth as _auth
-        except Exception:  # noqa: BLE001
-            return
-        if _auth.BILLING_ENFORCE:
-            raise HTTPException(
-                402,
-                detail={
-                    "error": "quota_exceeded",
-                    "message": (
-                        f"Free tier includes {st.limit} full simulations per "
-                        "day. Upgrade to Pro for unlimited runs."
-                    ),
-                    "upgrade_url": f"{os.environ.get('MOTOQUANT_BASE_URL', 'https://motoquant.in')}/pricing",
-                },
-            )
-
-
-def _meter_full_sim(request: Request, response: Response) -> None:
-    """FastAPI dependency: meter one full sim (the common case)."""
-    _meter_sims(request, response, 1)
-
-
-def _meter_full_sims(n: int):
-    """FastAPI dependency factory for routes that run ``n`` full sims."""
-
-    def _dep(request: Request, response: Response) -> None:
-        _meter_sims(request, response, n)
-
-    return _dep
 
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -1367,14 +1258,11 @@ def _simulate_impl(req: SimulateRequest, progress=None):
 @app.post(
     "/api/simulate",
     dependencies=[
-        # Cost fuse (2026-08-11 hardening): metering alone is advisory while
-        # MOTOQUANT_BILLING_ENFORCE is off, so an anonymous loop could run
-        # unlimited full RK4 sims. 30/60s is generous for human-paced UI use
-        # and fatal to loops. Bucket shared with /api/jobs/simulate — the
-        # client falls back between the two (deploy-skew contract), so a
-        # split bucket would double the effective limit.
+        # Cost fuse: 30/60s is generous for human-paced UI use and fatal to
+        # loops. Bucket shared with /api/jobs/simulate — the client falls
+        # back between the two (deploy-skew contract), so a split bucket
+        # would double the effective limit.
         Depends(rate_limit("simulate", 30, 60.0)),
-        Depends(_meter_full_sim),
     ],
 )
 def simulate(req: SimulateRequest):
@@ -1384,11 +1272,8 @@ def simulate(req: SimulateRequest):
 
 @app.post(
     "/api/simulate/quick",
-    # Rate-limited but deliberately UNMETERED (pinned design: quick stays
-    # free — the slider UI auto-runs it). The limit exists because each call
-    # is still a full RK4 pass (~50-100 ms CPU; TWO passes with part_ids),
-    # and the route previously had neither fuse (2026-08-11 hardening).
-    # Live-mode drags answer client-side now, so 30/60s covers real use.
+    # Each call is a full RK4 pass (~50-100 ms CPU; TWO passes with
+    # part_ids). Live-mode drags answer client-side, so 30/60s covers real use.
     dependencies=[Depends(rate_limit("quick_sim", 30, 60.0))],
 )
 def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
@@ -1595,7 +1480,6 @@ def _topspeed_impl(req: TopSpeedRequest, progress=None) -> TopSpeedResultDict:
         # Same cost-fuse rationale as /api/simulate (2026-08-11 hardening);
         # bucket shared with /api/jobs/topspeed.
         Depends(rate_limit("topspeed", 30, 60.0)),
-        Depends(_meter_full_sim),
     ],
 )
 def simulate_top_speed(req: TopSpeedRequest) -> TopSpeedResultDict:
@@ -1630,7 +1514,12 @@ class DistanceRunRequest(BaseModel):
     max_time_s: float = Field(120.0, ge=0.1, le=300.0)
 
 
-@app.post("/api/simulate/distance", dependencies=[Depends(_meter_full_sim)])
+@app.post(
+    "/api/simulate/distance",
+    # Distance runs go up to 20 km / 300 s of sim time, so this is the
+    # heaviest single-run route; keep it tighter than /api/simulate.
+    dependencies=[Depends(rate_limit("distance", 10, 60.0))],
+)
 def simulate_distance(req: DistanceRunRequest) -> DistanceResultDict:
     """
     Run the simulation to an arbitrary target distance.
@@ -1867,16 +1756,15 @@ class SaveRunRequest(BaseModel):
 )
 def save_simulation(
     req: SaveRunRequest,
-    auth_user: dict = Depends(require_tier("pro")),  # noqa: B008
+    auth_user: dict | None = Depends(get_optional_user),  # noqa: B008
 ):
     """Persist a single sim result to sim_runs. Resolves the incoming
     bike_models.id to a bike_configs.id using the seed's 1:1 mapping.
 
-    Rate-limited per IP (2026-07-25 audit): the route is effectively
-    anonymous during the beta (`require_tier` passes everyone through while
-    MOTOQUANT_BILLING_ENFORCE is falsy) and it trusts the client-supplied ET,
-    so an unfused loop simply owns /api/leaderboard. The field bounds above
-    stop absurd values; this stops volume.
+    Open to anonymous callers; a valid bearer token attributes the run to
+    the account (the "garage"). Rate-limited per IP: the route trusts the
+    client-supplied ET, so an unfused loop would simply own /api/leaderboard.
+    The field bounds above stop absurd values; this stops volume.
     """
     from . import __version__
 
@@ -2205,16 +2093,12 @@ def _compare_impl(req: CompareRequest, progress=None):
 
 @app.post(
     "/api/simulate/compare",
-    dependencies=[Depends(_meter_full_sims(2))],
+    # Two full RK4 passes per call. Bucket shared with /api/jobs/compare
+    # (deploy-skew fallback contract) so a split bucket cannot double the limit.
+    dependencies=[Depends(rate_limit("compare", 15, 60.0))],
 )
 def simulate_compare(req: CompareRequest):
-    """Run two builds side-by-side and return full results for both.
-
-    Metered at TWO sim units (2026-07-25 audit §3.4): this runs two full RK4
-    passes and was charging nothing, so it was the cheapest way to bypass the
-    free-tier quota entirely. /api/simulate/quick stays unmetered by design —
-    the slider UI auto-runs it on every drag.
-    """
+    """Run two builds side-by-side and return full results for both."""
     return _compare_impl(req)
 
 
@@ -2226,9 +2110,7 @@ def simulate_compare(req: CompareRequest):
 # Starlette spools a large part to a temp file, but `.read()` pulls all of it
 # back into memory and it is then written to a SECOND temp file — so a single
 # unauthenticated POST of a few hundred MB is an OOM kill plus a disk fill on
-# the 512 MB Render instance. (The `require_tier("studio")` gate does not stop
-# it: require_tier passes anonymous callers through whenever
-# MOTOQUANT_BILLING_ENFORCE is falsy, which render.yaml ships as the default.)
+# the 512 MB Render instance.
 #
 # 25 MB is ~100x the largest realistic Dragy/dyno export, which are text CSVs
 # of a few hundred KB.
@@ -2271,17 +2153,15 @@ async def _read_upload_capped(file: UploadFile) -> bytes:
 
 @app.post(
     "/api/calibrate/dragy",
-    # The studio tier gate is inert while MOTOQUANT_BILLING_ENFORCE is off,
-    # so during beta these uploads are effectively anonymous and each one
-    # parses up to 25 MB in memory (2026-08-11 hardening). 6/60s is plenty
-    # for a human uploading timeslips; a loop gets cut off fast.
+    # Uploads are open to anonymous callers and each one parses up to 25 MB
+    # in memory. 6/60s is plenty for a human uploading timeslips; a loop gets
+    # cut off fast.
     dependencies=[Depends(rate_limit("calibrate_upload", 6, 60.0))],
 )
 async def upload_dragy(
     file: UploadFile = File(..., description="Dragy CSV or JSON export"),
     bike_id: int | None = Form(None, description="Bike to overlay sim against"),
     bike_preset: str | None = Form(None),
-    _auth: dict = Depends(require_tier("studio")),  # noqa: B008
 ):
     """
     Upload a Dragy GPS file, parse it, and optionally overlay against simulation.
@@ -2413,7 +2293,6 @@ async def upload_dyno(
     temp_c: float | None = Form(None, description="Ambient temperature during run [C]"),
     pressure_kpa: float | None = Form(None, description="Barometric pressure [kPa]"),
     rh_pct: float = Form(0.0, description="Relative humidity [%]"),
-    _auth: dict = Depends(require_tier("studio")),  # noqa: B008
 ):
     """Upload a dyno CSV, parse it with SAE J1349 correction, return power/torque curve."""
     log = logging.getLogger(__name__)
@@ -3741,9 +3620,6 @@ class ChatResponse(BaseModel):
       - if error == "llm_not_configured": show a banner telling the operator
         to set the provider key (GROQ_API_KEY by default — see LLM_PROVIDER).
       - if error == "rate_limited": show a polite retry-in-a-minute note.
-      - if error == "quota_exceeded": the caller's free daily sim quota is
-        spent (classic mode only — in agent mode the model relays it in
-        prose); show error_detail plus an upgrade CTA.
       - if error == "parse_failed" / "sim_failed" / "agent_failed": show
         error_detail.
       - if error == None: render summary text; agent mode additionally
@@ -3781,41 +3657,6 @@ class ChatResponse(BaseModel):
     error_detail: str | None = None
 
 
-def _make_chat_meter(request: Request):
-    """Capture the caller's sim-quota identity at route time; return a
-    meter(n)->bool callback the agent's tool executor calls per full sim.
-
-    Returns True when the sim may run. Metering failures never block chat.
-    """
-    try:
-        identity, tier = _sim_identity_and_tier(request)
-    except Exception:  # noqa: BLE001
-        return None
-
-    def meter(n: int) -> bool:
-        try:
-            from .database.connection import connect as _db_connect
-            from .usage import record_and_check
-
-            conn = _db_connect()
-            try:
-                st = record_and_check(conn, identity, tier=tier, n=max(1, int(n)))
-            finally:
-                conn.close()
-            if st is not None and not st.allowed:
-                from . import auth as _auth
-
-                return not _auth.BILLING_ENFORCE
-            return True
-        except Exception:  # noqa: BLE001 — metering must never break chat
-            logging.getLogger(__name__).warning(
-                "chat sim metering failed", exc_info=True
-            )
-            return True
-
-    return meter
-
-
 def _get_surrogate_pair():
     """Lazy surrogate accessor shared with the optimizer routes."""
     global _SURROGATE, _SURROGATE_SOURCE
@@ -3826,22 +3667,7 @@ def _get_surrogate_pair():
     return _SURROGATE, _SURROGATE_SOURCE
 
 
-def _chat_tier(user: dict | None) -> str | None:
-    """Caller's subscription tier for the agent executor. None == anonymous.
-
-    The chat agent can reach the three pro-gated surfaces (build optimizer,
-    ECU autotune, outlaw pipeline), so it must inherit the caller's tier —
-    otherwise flipping MOTOQUANT_BILLING_ENFORCE would 401 the direct routes
-    while /api/chat happily ran the same work for free (2026-07-25 audit
-    §3.5). The gate itself lives in llm/agent.py and is inert while billing
-    is off.
-    """
-    if not user:
-        return None
-    return str(user.get("tier") or "free")
-
-
-def _chat_impl(req: ChatRequest, client, meter_cb, progress=None, tier=None) -> dict:
+def _chat_impl(req: ChatRequest, client, progress=None, heavy_gate=None) -> dict:
     """Run one chat turn (agent or classic). Returns a ChatResponse dict."""
     db = _get_db_facade()
     if db is None:
@@ -3855,10 +3681,6 @@ def _chat_impl(req: ChatRequest, client, meter_cb, progress=None, tier=None) -> 
             db,
             client=client,
             run_summary=req.run_summary,
-            # Classic mode runs 1-25 real RK4 sims per request and was
-            # entirely unmetered until now. No tier plumbing needed: this
-            # pipeline has no pro-gated tools.
-            meter_cb=meter_cb,
         )
         return {
             "raw_query": result.raw_query,
@@ -3891,9 +3713,8 @@ def _chat_impl(req: ChatRequest, client, meter_cb, progress=None, tier=None) -> 
         client=client,
         history=history,
         progress_cb=progress,
-        meter_cb=meter_cb,
         surrogate_getter=_get_surrogate_pair,
-        tier=tier,
+        heavy_gate=heavy_gate,
     )
     return {
         "raw_query": result.raw_query,
@@ -3909,6 +3730,18 @@ def _chat_impl(req: ChatRequest, client, meter_cb, progress=None, tier=None) -> 
     }
 
 
+def _enforce_classic_chat_limit(req: ChatRequest, request: Request) -> None:
+    """Extra per-IP fuse for mode="classic" chat.
+
+    Classic mode runs 1-25 real RK4 sims per request (choose_bike simulates
+    up to 25 candidates, rank up to 15) with no per-message budget like the
+    agent executor's, so on top of the shared 20/60s chat bucket it gets its
+    own much tighter one.
+    """
+    if req.mode == "classic":
+        rate_limit("chat_classic", 4, 60.0)(request)
+
+
 @app.post(
     "/api/chat",
     response_model=ChatResponse,
@@ -3918,18 +3751,16 @@ def chat(
     req: ChatRequest,
     request: Request,
     client=Depends(get_llm_client),
-    user: dict | None = Depends(get_optional_user),  # noqa: B008
 ) -> ChatResponse:
     """End-to-end NL chat (agent mode by default; mode='classic' for the
     legacy pipeline).
 
     Always returns 200 with `error` populated on failure modes the user
-    can recover from (bike not found, LLM not configured, rate limited,
-    quota exhausted). Returns 503 only if the database itself is
-    unreachable. The caller's tier (anonymous when unauthenticated) is
-    passed to the agent so its pro-gated tools match the direct routes.
+    can recover from (bike not found, LLM not configured, LLM rate limited).
+    Returns 503 only if the database itself is unreachable.
     """
-    payload = _chat_impl(req, client, _make_chat_meter(request), tier=_chat_tier(user))
+    _enforce_classic_chat_limit(req, request)
+    payload = _chat_impl(req, client, heavy_gate=heavy_gate_for(request))
     suggestions = payload.pop("bike_suggestions", None) or []
     return ChatResponse(
         **payload,
@@ -3946,7 +3777,6 @@ def job_chat(
     req: ChatRequest,
     request: Request,
     client=Depends(get_llm_client),
-    user: dict | None = Depends(get_optional_user),  # noqa: B008
 ):
     """Start a chat turn as a background job with live progress + Stop.
 
@@ -3954,15 +3784,10 @@ def job_chat(
     0.5-CPU prod tier exceeds comfortable request time — same rationale as
     every other /api/jobs/* route. Poll GET /api/jobs/{id}; result is the
     ChatResponse-shaped dict.
-
-    Identity and tier are captured HERE, on the request thread, because the
-    job body runs later on a worker with no Request in scope.
     """
-    meter = _make_chat_meter(request)
-    tier = _chat_tier(user)
-    return _start_job(
-        "chat", lambda progress: _chat_impl(req, client, meter, progress, tier)
-    )
+    _enforce_classic_chat_limit(req, request)
+    gate = heavy_gate_for(request)
+    return _start_job("chat", lambda progress: _chat_impl(req, client, progress, gate))
 
 
 # ------- END ws/backend-surrogate-pricing additions ----------------------
@@ -3973,12 +3798,7 @@ def job_chat(
 
 # ═══════════════════════════════════════════════════════════════════════════
 # BUILD OPTIMIZER + ECU AUTOTUNE  (/api/optimize/*, /api/autotune/*)  — Track B
-# Pro-tier gated: these are the paid tooling surface (distinct from the free
-# demo routes like /simulate/quick, /simulate/compare, and /chat). The
-# require_tier("pro") dependency is INERT until MOTOQUANT_BILLING_ENFORCE is
-# truthy — with billing off (the freemium-beta default) every request passes
-# anonymously exactly as before; with billing on, an unauthenticated call gets
-# 401 and a lower-tier user gets 402 (upgrade CTA). Still rate-limited.
+# Open to everyone; rate-limited per IP (the heavy routes pin the 0.5-CPU instance).
 # The optimizer scores candidates through the loaded surrogate when available and
 # in-envelope, else falls back to the full physics sim — so it always answers.
 # ═══════════════════════════════════════════════════════════════════════════
@@ -4106,7 +3926,6 @@ def _optimize_impl(req: OptimizeBuildRequest, progress=None):
 )
 def optimize_build_route(
     req: OptimizeBuildRequest,
-    _auth: dict = Depends(require_tier("pro")),  # noqa: B008
 ):
     """Synchronous build optimiser (see ``_optimize_impl``)."""
     return _optimize_impl(req)
@@ -4235,7 +4054,6 @@ def _autotune_impl(req: AutotuneRequest, progress=None):
 )
 def autotune_ecu_route(
     req: AutotuneRequest,
-    _auth: dict = Depends(require_tier("pro")),  # noqa: B008
 ):
     """Synchronous autotune (see ``_autotune_impl``)."""
     return _autotune_impl(req)
@@ -4270,7 +4088,6 @@ def _start_job(kind: str, runner) -> dict:
         # Cost fuse shared with the sync /api/simulate route it wraps
         # (2026-08-11 hardening) — see that route for the rationale.
         Depends(rate_limit("simulate", 30, 60.0)),
-        Depends(_meter_full_sim),
     ],
 )
 def job_simulate(req: SimulateRequest):
@@ -4284,7 +4101,6 @@ def job_simulate(req: SimulateRequest):
     dependencies=[
         # Cost fuse shared with the sync /api/simulate/top-speed route.
         Depends(rate_limit("topspeed", 30, 60.0)),
-        Depends(_meter_full_sim),
     ],
 )
 def job_topspeed(req: TopSpeedRequest):
@@ -4299,7 +4115,6 @@ def job_topspeed(req: TopSpeedRequest):
 )
 def job_optimize(
     req: OptimizeBuildRequest,
-    _auth: dict = Depends(require_tier("pro")),  # noqa: B008
 ):
     """Start the build optimiser as a background job (real progress)."""
     return _start_job("optimize", lambda progress: _optimize_impl(req, progress))
@@ -4312,7 +4127,6 @@ def job_optimize(
 )
 def job_autotune(
     req: AutotuneRequest,
-    _auth: dict = Depends(require_tier("pro")),  # noqa: B008
 ):
     """Start the ECU autotune as a background job (real progress)."""
     return _start_job("autotune", lambda progress: _autotune_impl(req, progress))
@@ -4392,24 +4206,19 @@ def _outlaw_impl(req: OutlawRequest, progress=None) -> dict:
 )
 def job_outlaw(
     req: OutlawRequest,
-    _auth: dict = Depends(require_tier("pro")),  # noqa: B008
 ):
     """Start the composed outlaw/open-class build as a background job."""
-    # Pro tier is unmetered, so the tier gate is the access control here.
     return _start_job("outlaw", lambda progress: _outlaw_impl(req, progress))
 
 
 @app.post(
     "/api/jobs/compare",
     status_code=202,
-    dependencies=[Depends(_meter_full_sims(2))],
+    # Same shared bucket as the sync /api/simulate/compare route it wraps.
+    dependencies=[Depends(rate_limit("compare", 15, 60.0))],
 )
 def job_compare(req: CompareRequest):
-    """Start an A-vs-B comparison as a background job (real progress).
-
-    Metered at two sim units, matching the sync /api/simulate/compare route
-    it wraps — the two must stay behaviourally identical (deploy-skew
-    fallback contract), so they gained the meter together."""
+    """Start an A-vs-B comparison as a background job (real progress)."""
     return _start_job("compare", lambda progress: _compare_impl(req, progress))
 
 
@@ -4477,22 +4286,15 @@ async def _start_keepwarm_loop() -> None:
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# AUTH / SUBSCRIPTIONS / PAYMENTS router mounts (Phase 6 — June 2026)
-# The S5 routers existed since April but were never mounted (the
-# "reserved for Stream 5" comment above) — /api/auth/* 404'd in prod while
-# three routes were already tier-gated. Mounting is wrapped so a missing
-# optional dep (python-jose, email-validator) can never block boot:
-# require_tier already degrades to a no-op stub in that case.
+# AUTH router mount + saved-run "garage"
+# Accounts are optional and exist only to save runs. Mounting is wrapped so a
+# missing optional dep (PyJWT, email-validator) can never block boot.
 # ═══════════════════════════════════════════════════════════════════════════
 
 try:
     from .auth import get_current_user as _get_current_user, router as _auth_router
-    from .payments import router as _payments_router
-    from .subscriptions import router as _subscriptions_router
 
     app.include_router(_auth_router, prefix="/api/auth")
-    app.include_router(_subscriptions_router, prefix="/api/subscriptions")
-    app.include_router(_payments_router, prefix="/api/payments")
 
     @app.get("/api/me/runs")
     def my_runs(
@@ -4525,13 +4327,11 @@ try:
             return {"runs": [], "count": 0}
 
 except ImportError as _exc:  # pragma: no cover — optional-deps fallback
-    logging.getLogger(__name__).warning(
-        "Auth/subscriptions/payments routers not mounted: %s", _exc
-    )
+    logging.getLogger(__name__).warning("Auth router not mounted: %s", _exc)
 
 
 @app.on_event("startup")
-async def _ensure_phase6_schema() -> None:
+async def _ensure_account_schema() -> None:
     """Guarded ALTERs so pre-June-2026 DBs gain run-attribution + auth tables."""
     try:
         db = _get_db()
@@ -4547,19 +4347,15 @@ async def _ensure_phase6_schema() -> None:
             db.commit()
         except sqlite3.OperationalError:
             pass  # column already exists
-        from .database import (
-            subscriptions_repo as _subs_repo,
-            users_repo as _users_repo,
-        )
+        from .database import users_repo as _users_repo
         from .database.connection import connect as _db_connect
 
         conn = _db_connect()
         try:
             _users_repo.ensure_tables(conn)
-            _subs_repo.ensure_tables(conn)
         finally:
             conn.close()
     except Exception:  # noqa: BLE001 — schema top-up is best-effort
         logging.getLogger(__name__).warning(
-            "phase6 schema ensure failed", exc_info=True
+            "account schema ensure failed", exc_info=True
         )

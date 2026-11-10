@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Spec Importer
+MotoQuant — Spec Importer
 =============================
 Converts validated BikeSpec → BikeConfig and upserts into MotoQuantDB.
 

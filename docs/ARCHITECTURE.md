@@ -47,7 +47,7 @@ flowchart TD
     SR --> API["api.py (FastAPI)"]
     REPOS --> API
     subgraph AppLayer["Application layer"]
-        AUTH["auth / payments /<br/>subscriptions / usage / ratelimit"]
+        AUTH["auth / ratelimit"]
         JOBS["jobs.py<br/>async progress"]
         ANALYSIS["analysis/<br/>roi, optimizer, surrogate"]
         LLM["llm/<br/>agentic chat"]
@@ -129,9 +129,8 @@ flowchart TD
 | `motoquant/scraper/fetcher.py` | `PoliteFetcher` — dev-only Scrapling-backed scraping (cache → robots.txt → rate limit → tier escalation). Soft-imported; **not** a production dependency | `PoliteFetcher.fetch()` |
 | `motoquant/api.py` | FastAPI app + all HTTP routes | grep `@app.` |
 | `motoquant/run.py` | CLI (`python -m motoquant.run <subcommand>`) | `main()` |
-| `motoquant/auth.py` | Magic-link + password auth, JWT, `require_tier()` | bottom (endpoints) |
-| `motoquant/payments.py` `subscriptions.py` | Stripe/Razorpay checkout + webhooks, license keys | webhook handlers |
-| `motoquant/usage.py` `ratelimit.py` | Free-tier sim metering, per-IP rate limiting | `usage.py` |
+| `motoquant/auth.py` | Optional accounts: magic-link + password auth, JWT, saved-run attribution | bottom (endpoints) |
+| `motoquant/ratelimit.py` | Per-IP rate limiting (every expensive route) | `rate_limit()` |
 | `motoquant/jobs.py` | In-memory async job registry (progress + cancel) | `create_job()` |
 | `motoquant/observability.py` | Sentry wiring (env-gated, no-op without DSN) | top of file |
 | `web/` | Next.js frontend (app router, components, `lib/api.js`) | `web/app/page.js` |
@@ -148,7 +147,7 @@ flowchart TD
 | Tune physics accuracy | `category_profiles.py` (per-cluster knobs) or `submodels/` | **must not** move K5/R1/Hayabusa baselines; regenerate the surrogate |
 | Add an API route | `api.py` | add a test in `tests/test_api.py`; for slow work use `jobs.py` |
 | Add a part / tire | `database/seed_catalogs/`, then reseed | tighten fitment rules; `tests/test_catalog_integration.py` guards leaks |
-| Change auth/billing | `auth.py`, `payments.py`, `subscriptions.py` | `MOTOQUANT_BILLING_ENFORCE` gates enforcement |
+| Change auth | `auth.py`, `database/users_repo.py` | set `JWT_SECRET` in deployed envs |
 | Add a chat capability | `llm/agent.py` (tools), `llm/runner.py` | budget/iteration caps live in the executor |
 
 ---

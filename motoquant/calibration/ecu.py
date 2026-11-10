@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — ECU Log Import
+MotoQuant — ECU Log Import
 ================================
 Parse motorcycle ECU data logger exports and extract physics-relevant
 channels for simulation overlay and calibration.

@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Configuration Import/Export
+MotoQuant — Configuration Import/Export
 ==========================================
 JSON serialization for BikeConfig and all sub-parameter dataclasses.
 Enables saving, loading, and sharing bike configurations.

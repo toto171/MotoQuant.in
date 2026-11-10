@@ -84,7 +84,7 @@ EXTRA_ARGS="$*"
 
 # ─── The master prompt — Claude reads this and orchestrates ──────────────
 read -r -d '' MASTER_PROMPT << 'PROMPT' || true
-You are running in autonomous-ops mode for the MotoQuant Pro project. Read CLAUDE.md and docs/AUTONOMOUS_OPERATIONS_PLAYBOOK.md first to understand the system you're operating.
+You are running in autonomous-ops mode for the MotoQuant project. Read CLAUDE.md and docs/AUTONOMOUS_OPERATIONS_PLAYBOOK.md first to understand the system you're operating.
 
 Your job for THIS SESSION:
 

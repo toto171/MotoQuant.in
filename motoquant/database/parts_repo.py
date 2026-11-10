@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Parts Repository
+MotoQuant — Parts Repository
 ================================
 CRUD for drag-relevant performance parts with Indian market pricing.
 

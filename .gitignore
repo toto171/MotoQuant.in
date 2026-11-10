@@ -102,6 +102,7 @@ artifacts/**/*.log
 # Node
 node_modules/
 .next/
+.next-*/
 
 # Scrape checkpoints
 *_checkpoint.json

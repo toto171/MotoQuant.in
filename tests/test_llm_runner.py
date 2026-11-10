@@ -45,11 +45,8 @@ def setUpModule():
     then RESTORED the session value in its tearDownModule — leaving this
     module's ``/api/chat`` calls reading the tracked motoquant.db.
 
-    That was harmless while chat was unmetered. It stopped being harmless
-    when classic-mode chat sims joined the free-tier meter (2026-07-25 audit
-    §3.5): ``pytest tests/test_api.py tests/test_llm_runner.py`` wrote real
-    sim_usage rows into the shipped catalog. Same class of leak as commit
-    e873308; same fix as tests/test_jobs_api.py.
+    Leaving it unset would let ``/api/chat`` calls read (and any write path
+    dirty) the tracked motoquant.db. Same fix as tests/test_jobs_api.py.
     """
     global _PRIOR_MOTOQUANT_DB
     current = os.environ.get("MOTOQUANT_DB")

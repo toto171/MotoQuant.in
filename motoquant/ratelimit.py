@@ -4,7 +4,7 @@ Why this exists: /api/chat spends real LLM-provider tokens per call, and
 /api/optimize/build + /api/autotune/ecu each pin the 0.5-CPU Render
 instance for seconds-to-minutes of RK4 work. Before commercial launch,
 one scraper hitting any of these can exhaust the LLM quota or take the
-paid service down for everyone. This mirrors motoquant/auth.py's
+service down for everyone. This mirrors motoquant/auth.py's
 in-process login-failure limiter: stdlib-only, per-instance (fine for a
 single-replica deployment), resets on restart by design.
 
@@ -39,8 +39,7 @@ RATE_LIMIT_ENABLED = os.environ.get("MOTOQUANT_RATE_LIMIT", "true").lower() not 
 
 def client_ip(request: Request) -> str:
     """Best-effort client IP behind the trusted proxy — the ONE place this repo
-    derives a client identity from a request (rate-limit bucketing AND free-tier
-    quota metering both call it).
+    derives a client identity from a request (rate-limit bucketing).
 
     Render terminates TLS upstream and *appends* the peer it observed to
     X-Forwarded-For, so with exactly one trusted proxy the RIGHTMOST hop is
@@ -80,6 +79,24 @@ def check(key: str, limit: int, window_s: float) -> tuple[bool, int]:
         if count > limit:
             return False, max(1, int(window_s - (now - t0)) + 1)
         return True, 0
+
+
+def heavy_gate_for(request: Request, name: str = "optimize", limit: int = 6):
+    """Build a ``() -> bool`` fuse bound to this request's client IP.
+
+    Captured at route time (job bodies run later on a worker with no Request
+    in scope). Each call counts one hit against the same per-IP bucket the
+    direct optimize/autotune routes use, so asking the chat agent for the
+    heavy tools cannot out-run calling them directly."""
+    ip = client_ip(request)
+
+    def _gate() -> bool:
+        if not RATE_LIMIT_ENABLED:
+            return True
+        allowed, _ = check(f"{name}:{ip}", limit, 60.0)
+        return allowed
+
+    return _gate
 
 
 def rate_limit(name: str, limit: int, window_s: float = 60.0):

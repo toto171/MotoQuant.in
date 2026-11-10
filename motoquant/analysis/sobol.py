@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Sobol Sensitivity Analysis
+MotoQuant — Sobol Sensitivity Analysis
 ==========================================
 Global sensitivity analysis (GSA) for the quarter-mile simulation.
 

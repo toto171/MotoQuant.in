@@ -1,13 +1,13 @@
 #!/bin/sh
-# MotoQuant Pro — container entrypoint.
+# MotoQuant — container entrypoint.
 #
 # Account-durability boot logic (June 2026):
 #   The image ships a baked, seeded DB at /app/motoquant.db (the build-time
 #   catalog: bikes/parts/tires/venues). When MOTOQUANT_DB points somewhere
 #   ELSE — e.g. a Render persistent disk at /data/motoquant.db — we seed that
 #   path ONCE from the baked copy on first boot, then never touch it again.
-#   Subsequent deploys keep the disk's DB (with its accumulated users, saved
-#   runs, and subscriptions) instead of overwriting it with the image copy.
+#   Subsequent deploys keep the disk's DB (with its accumulated users and saved
+#   runs) instead of overwriting it with the image copy.
 #
 #   On the free tier (no disk), MOTOQUANT_DB defaults to the baked path, the
 #   seed-path == target-path check below short-circuits, and behaviour is

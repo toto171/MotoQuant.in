@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Tire Repository
+MotoQuant — Tire Repository
 ===============================
 CRUD for the tire library — the most sim-critical component database.
 

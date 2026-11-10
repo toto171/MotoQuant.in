@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Database Seeder
+MotoQuant — Database Seeder
 ===============================
 Migrate Phase 1 hardcoded defaults into the database.
 

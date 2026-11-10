@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Generate the MotoQuant Pro Open Graph / social-share card.
+"""Generate the MotoQuant Open Graph / social-share card.
 
 Renders web/public/og-image.png at 1200x630 (the canonical OG size) with the
-brand identity: near-black cockpit background, the "MotoQuant Pro" wordmark,
+brand identity: near-black cockpit background, the "MotoQuant" wordmark,
 the "The physics of faster" tagline, brand-orange accents, and the canonical
 catalog stats. Re-runnable and deterministic — running it again reproduces the
 same PNG byte-for-byte (modulo Pillow version), which is exactly what the
@@ -49,7 +49,7 @@ WHITE = (255, 255, 255)
 WHITE_70 = (200, 200, 205)
 WHITE_45 = (150, 150, 156)
 
-TITLE = "MotoQuant Pro"
+TITLE = "MotoQuant"
 TAGLINE = "The physics of faster"
 DOMAIN = "motoquant.in"
 
@@ -207,7 +207,7 @@ def main() -> None:
         os.path.join(here, "..", "web", "public", "og-image.png")
     )
     ap = argparse.ArgumentParser(
-        description="Generate the MotoQuant Pro OG card (1200x630)."
+        description="Generate the MotoQuant OG card (1200x630)."
     )
     ap.add_argument(
         "--out",

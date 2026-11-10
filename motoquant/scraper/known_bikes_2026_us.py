@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — US-Market Drag-Icon Expansion (July 2026)
+MotoQuant — US-Market Drag-Icon Expansion (July 2026)
 =========================================================
 12 curated US-market drag icons: Harley-Davidson Milwaukee-Eight Softails,
 Evolution Sportsters, Indian PowerPlus / SpeedPlus / Thunderstroke cruisers,

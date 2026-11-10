@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Import Idempotency Regression Tests
+MotoQuant — Import Idempotency Regression Tests
 ===================================================
 Guards the de-duplication fix in ``bike_repo.create_model`` / ``create_config``.
 

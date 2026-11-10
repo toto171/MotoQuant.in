@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Category Profiles
+MotoQuant — Category Profiles
 ==================================
 
 Canonical 8-cluster taxonomy + per-cluster physics knobs. Single source of

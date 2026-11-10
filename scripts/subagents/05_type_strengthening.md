@@ -1,6 +1,6 @@
 # Subagent 5: TYPE STRENGTHENING
 
-You are SUBAGENT 5: TYPE STRENGTHENING for the MotoQuant Pro codebase. Read CLAUDE.md first.
+You are SUBAGENT 5: TYPE STRENGTHENING for the MotoQuant codebase. Read CLAUDE.md first.
 
 ## Context
 

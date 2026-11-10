@@ -409,20 +409,6 @@ class TestAgentLoop(unittest.TestCase):
         ]
         self.assertEqual(len(errs), 2)
 
-    def test_meter_quota_blocks_sims(self):
-        client, _ = _scripted_client(
-            [[("run_simulation", {"bike_id": 11})], "quota message relayed"]
-        )
-        res = run_agent_chat(
-            "sim it",
-            _get_db(),
-            client=client,
-            meter_cb=lambda n: False,
-        )
-        self.assertEqual(res.sims_run, 0)
-        self.assertFalse(res.tool_trace[0]["ok"])
-        self.assertIn("quota", res.tool_trace[0]["error"])
-
     def test_rate_limit_is_typed(self):
         def boom(kind, kwargs):
             raise LLMRateLimitError("429 slow down")

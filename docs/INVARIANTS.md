@@ -83,9 +83,11 @@ check, and the release checklist.
 ## I7 — Security guarantees
 
 **What / Why / Enforcement.**
-- **Webhooks fail closed.** Unset signing secret ⇒ reject, never trust. (Stripe
-  + Razorpay signature verification, constant-time.) — `tests/test_payments.py`.
-- **Client IP for rate-limit/quota = rightmost `X-Forwarded-For` hop** (single
+- **Every expensive route is rate-limited per IP** (sims, compare, optimize,
+  autotune, outlaw, chat incl. the tighter classic-mode bucket, calibrate
+  uploads), and the chat agent's heavy tools share the optimize/autotune
+  bucket. — `tests/test_chat_fuses.py`, `tests/test_public_route_fuses.py`.
+- **Client IP for rate-limiting = rightmost `X-Forwarded-For` hop** (single
   trusted proxy). The leftmost is client-spoofable. Implemented in
   `client_ip()` (`motoquant/ratelimit.py`). **Partially enforced:**
   `test_x_forwarded_for_distinguishes_clients` in `tests/test_ratelimit.py`
@@ -96,14 +98,12 @@ check, and the release checklist.
 - **`web_fetch` re-checks the SSRF guard on every redirect hop** and bounds the
   whole chain to one timeout. Any server-side fetch of a user/LLM-controlled URL
   must too. — `tests/test_webtools_ssrf.py`.
-- **`motoquant.auth` refuses to *import* while `JWT_SECRET` is the public
-  default and `MOTOQUANT_BILLING_ENFORCE` is truthy** — a forgeable signing key
-  in commercial mode is a free self-upgrade to any paid tier. With billing off
-  (the shipped open-beta posture) the same condition only logs a warning, since
-  hard-failing there would take the live beta down over a documented
-  pre-commercial TODO. The guard keys on the secret's *value*, not on whether
-  the env var was set. — `tests/test_auth.py::TestJwtDefaultSecretBootGuard`
-  (boots a fresh interpreter per case; the guard is module-level code, so
+- **`motoquant.auth` never signs with a public secret.** If `JWT_SECRET` is
+  unset or equals the old public default, a random per-process secret is
+  generated and one warning is logged (sessions do not survive a restart until
+  `JWT_SECRET` is set). It never refuses to boot. The guard keys on the
+  secret's *value*. — `tests/test_auth.py::TestJwtRandomSecretFallback` (boots
+  a fresh interpreter per case; the guard is module-level code, so
   reload/monkeypatch would test a re-implementation instead).
 - **SQL is always parameterized.** No f-string/format into queries with user
   data.

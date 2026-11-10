@@ -4,16 +4,13 @@ Pre-revenue gaps on the unauthenticated public routes (2026-07-25 audit §3.4).
 Four routes that anyone on the internet can drive, each of which spent
 something real without a ceiling:
 
-1. ``/api/simulate/compare`` runs TWO full RK4 passes and metered nothing, so
-   it was the cheapest way to bypass the free-tier sim quota entirely. Now
-   charged 2 units. ``/api/simulate/quick`` stays unmetered *by design* — the
-   slider UI auto-runs it on every drag — and the last test in that class pins
-   that exclusion so a future "meter everything" pass cannot break the UX.
+1. ``/api/simulate/compare`` runs TWO full RK4 passes; it and its job twin
+   share one per-IP rate-limit bucket so the cost is fused.
 2. ``/api/telemetry/event`` writes the funnel numbers the roadmap reads
    (``signup_completed``, ``sim_run_success``) with no auth, no rate limit and
    no body cap; once ``POSTHOG_API_KEY`` is set each beacon also spawned an
    UNBOUNDED thread.
-3. ``/api/simulate/save`` is effectively anonymous during the beta, trusts the
+3. ``/api/simulate/save`` is open to anonymous callers, trusts the
    client-supplied ET, and took an unbounded ``notes`` string — twenty calls
    own the public leaderboard.
 4. ``/api/pricing/refresh/{id}?force=true`` bypassed the freshness cache, so a
@@ -22,8 +19,8 @@ something real without a ceiling:
 
 Everything is driven through the real routes (docs/INVARIANTS.md I8) and each
 test fails if its fix is reverted. MOTOQUANT_DB is redirected at import and
-re-asserted at run time because the metered routes write ``sim_usage`` rows —
-see the comment in tests/test_jobs_api.py for why that matters.
+re-asserted at run time so no route can write into the tracked catalog — see
+the comment in tests/test_jobs_api.py for why that matters.
 """
 
 from __future__ import annotations
@@ -103,18 +100,6 @@ def _init_schema():
 _PRICED_PART_ID = 4242
 
 
-def _usage_total() -> int:
-    """Total metered sim units recorded in the isolated DB."""
-    conn = sqlite3.connect(_TMP_DB_PATH)
-    try:
-        row = conn.execute("SELECT COALESCE(SUM(count), 0) FROM sim_usage").fetchone()
-        return int(row[0]) if row else 0
-    except sqlite3.OperationalError:  # table not created yet == nothing metered
-        return 0
-    finally:
-        conn.close()
-
-
 class _RouteTest(unittest.TestCase):
     """Shared TestClient + limiter reset."""
 
@@ -143,48 +128,48 @@ class _RouteTest(unittest.TestCase):
 # ───────────────────────────────────────────────────────────────────
 
 
-class TestCompareIsMetered(_RouteTest):
+class TestCompareIsFused(_RouteTest):
     _COMPARE_BODY = {
         "a_bike_preset": "gsxr1000_k5",
         "b_bike_preset": "hayabusa_gen1",
     }
 
-    def test_compare_charges_two_sim_units(self):
-        """Two RK4 runs must cost two quota units, not zero."""
-        before = _usage_total()
-        r = self.client.post("/api/simulate/compare", json=self._COMPARE_BODY)
-        self.assertEqual(r.status_code, 200, r.text)
-        self.assertEqual(
-            _usage_total() - before,
-            2,
-            "compare did not charge exactly 2 sim units — the meter "
-            "dependency is missing or charging the wrong count",
-        )
+    def test_compare_is_rate_limited_per_ip(self):
+        codes = [
+            self.client.post(
+                "/api/simulate/compare", json=self._COMPARE_BODY
+            ).status_code
+            for _ in range(17)
+        ]
+        self.assertEqual(codes[0], 200)
+        self.assertEqual(codes[-1], 429, codes)
 
-    def test_compare_exposes_remaining_header(self):
-        r = self.client.post("/api/simulate/compare", json=self._COMPARE_BODY)
-        self.assertEqual(r.status_code, 200, r.text)
-        self.assertIn("X-Sims-Remaining", r.headers)
-        self.assertIn("X-Sims-Limit", r.headers)
+    def test_job_compare_shares_the_bucket(self):
+        """The job twin must not double the effective limit (deploy-skew
+        fallback contract: clients alternate between the two). Drain the
+        shared bucket directly, then both entry points must refuse."""
+        from motoquant import ratelimit
 
-    def test_job_compare_is_metered_too(self):
-        """The job twin must match the sync route (deploy-skew contract)."""
-        before = _usage_total()
-        r = self.client.post("/api/jobs/compare", json=self._COMPARE_BODY)
-        self.assertEqual(r.status_code, 202, r.text)
-        self.assertEqual(_usage_total() - before, 2)
+        key = "compare:testclient"
+        for _ in range(15):
+            ratelimit.check(key, 15, 60.0)
+        for path in ("/api/jobs/compare", "/api/simulate/compare"):
+            r = self.client.post(path, json=self._COMPARE_BODY)
+            self.assertEqual(r.status_code, 429, f"{path}: {r.text}")
 
-    def test_quick_sim_stays_unmetered_by_design(self):
-        """Pins the deliberate exclusion: the slider UI auto-runs quick."""
-        before = _usage_total()
+    def test_sim_routes_carry_no_quota_headers(self):
         r = self.client.post("/api/simulate/quick", json={"bike_preset": "gsxr1000_k5"})
         self.assertEqual(r.status_code, 200, r.text)
-        self.assertEqual(
-            _usage_total(),
-            before,
-            "/api/simulate/quick became metered — it must not be, the web "
-            "UI fires it on every slider move",
-        )
+        self.assertNotIn("X-Sims-Remaining", r.headers)
+        self.assertNotIn("X-Sims-Limit", r.headers)
+
+    def test_distance_route_is_rate_limited(self):
+        body = {"bike_preset": "gsxr1000_k5", "distance_m": 100.0, "max_time_s": 5.0}
+        codes = [
+            self.client.post("/api/simulate/distance", json=body).status_code
+            for _ in range(12)
+        ]
+        self.assertIn(429, codes, codes)
 
 
 # ───────────────────────────────────────────────────────────────────
@@ -471,6 +456,49 @@ class TestPricingForceFloor(_RouteTest):
             conn.commit()
         finally:
             conn.close()
+
+
+class TestEveryExpensiveRouteIsRateLimited(unittest.TestCase):
+    """Route-table pin: with the daily quota gone, per-IP limits are the cost
+    fuse, so each expensive POST route must carry a ``rate_limit`` dependency."""
+
+    EXPENSIVE = {
+        "/api/simulate",
+        "/api/simulate/quick",
+        "/api/simulate/top-speed",
+        "/api/simulate/distance",
+        "/api/simulate/compare",
+        "/api/optimize/build",
+        "/api/autotune/ecu",
+        "/api/calibrate/dragy",
+        "/api/calibrate/dyno",
+        "/api/chat",
+        "/api/jobs/chat",
+        "/api/jobs/simulate",
+        "/api/jobs/topspeed",
+        "/api/jobs/optimize",
+        "/api/jobs/autotune",
+        "/api/jobs/outlaw",
+        "/api/jobs/compare",
+    }
+
+    def test_all_have_a_rate_limit_dependency(self):
+        from motoquant.api import app
+
+        seen = set()
+        for r in app.routes:
+            methods = getattr(r, "methods", None) or set()
+            if "POST" not in methods or r.path not in self.EXPENSIVE:
+                continue
+            seen.add(r.path)
+            names = [
+                getattr(d.call, "__qualname__", "") for d in r.dependant.dependencies
+            ]
+            self.assertTrue(
+                any("rate_limit" in n for n in names),
+                f"{r.path} has no rate_limit dependency: {names}",
+            )
+        self.assertEqual(seen, self.EXPENSIVE)
 
 
 if __name__ == "__main__":

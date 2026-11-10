@@ -1,6 +1,6 @@
 # Subagent 2: TYPE CONSOLIDATION
 
-You are SUBAGENT 2: TYPE CONSOLIDATION for the MotoQuant Pro codebase. Read CLAUDE.md first.
+You are SUBAGENT 2: TYPE CONSOLIDATION for the MotoQuant codebase. Read CLAUDE.md first.
 
 ## Context
 

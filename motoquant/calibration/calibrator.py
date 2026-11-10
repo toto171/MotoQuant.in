@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Auto-Calibration Loop
+MotoQuant — Auto-Calibration Loop
 ========================================
 Fit physics parameters (aero.cd, tires.mu_peak, and optionally others)
 from real GPS run data (DragRunData) by minimising the overlay cost function.

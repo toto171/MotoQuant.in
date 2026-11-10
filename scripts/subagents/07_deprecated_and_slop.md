@@ -1,6 +1,6 @@
 # Subagent 7: DEPRECATED CODE AND AI SLOP
 
-You are SUBAGENT 7: DEPRECATED CODE AND AI SLOP for the MotoQuant Pro codebase. Read CLAUDE.md first.
+You are SUBAGENT 7: DEPRECATED CODE AND AI SLOP for the MotoQuant codebase. Read CLAUDE.md first.
 
 ## Your job — find, in two parts
 

@@ -1,5 +1,5 @@
 """
-MotoQuant Pro â Database Connection Manager
+MotoQuant â Database Connection Manager
 ==========================================
 Handles SQLite connection lifecycle, schema initialization, migrations,
 and provides a single entry-point (MotoQuantDB) for all repository access.
@@ -397,7 +397,7 @@ def connect(db_path=None):
 
 def row_conn(db_path=None) -> sqlite3.Connection:
     """``connect()`` with ``sqlite3.Row`` as the row factory — the exact shape
-    auth / payments / subscriptions each need. Centralised so the row-factory
+    auth needs. Centralised so the row-factory
     (and any future per-request connection tuning) lives in one place instead
     of being copy-pasted into every module's ``_get_conn``.
     """

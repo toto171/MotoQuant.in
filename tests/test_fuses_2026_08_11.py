@@ -36,14 +36,10 @@ import unittest
 from motoquant import ratelimit
 
 # ---------------------------------------------------------------------------
-# Isolated DB -- the metered routes exercised here (/api/simulate,
-# /api/simulate/top-speed, /api/simulate/distance, /api/simulate/compare and
-# the /api/jobs twins) carry ``Depends(_meter_full_sim)``, which records a
-# sim_usage row via connect(). connect() falls back to the repo's tracked
-# motoquant.db when MOTOQUANT_DB is unset -- so without this redirect the
-# module would write free-tier metering residue into the SHIPPED catalog
-# (the exact failure test_hardening_2026_07_13.py documents: three such rows
-# were once committed on main). Same pattern as that module / test_api.py.
+# Isolated DB -- connect() falls back to the repo's tracked motoquant.db when
+# MOTOQUANT_DB is unset, so redirect it: nothing exercised here may write into
+# the SHIPPED catalog. Same pattern as test_hardening_2026_07_13.py /
+# test_api.py.
 # ---------------------------------------------------------------------------
 _tmp_db_file = tempfile.NamedTemporaryFile(
     prefix="motoquant_fuses_test_", suffix=".db", delete=False
@@ -153,9 +149,8 @@ class _FuseTestBase(unittest.TestCase):
 
 
 class TestQuickSimFuse(_FuseTestBase):
-    """/api/simulate/quick previously had NO fuse at all (unmetered by
-    pinned design + unlimited): each call is a full RK4 pass, two with
-    part_ids. Bucket "quick_sim", 30/60s."""
+    """/api/simulate/quick is fused per IP: each call is a full RK4 pass,
+    two with part_ids. Bucket "quick_sim", 30/60s."""
 
     def test_burst_31_is_429_with_rate_limited_detail_and_retry_after(self):
         for i in range(30):
@@ -220,8 +215,8 @@ class TestFullSimSharedBuckets(_FuseTestBase):
 
 
 class TestCalibrateUploadFuse(_FuseTestBase):
-    """Both calibration uploads parse up to 25 MB in memory and the studio
-    tier gate is inert during beta — bucket "calibrate_upload", 6/60s,
+    """Both calibration uploads parse up to 25 MB in memory and are open to
+    anonymous callers — bucket "calibrate_upload", 6/60s,
     SHARED so alternating dragy/dyno doesn't double the effective limit."""
 
     def _dragy(self):

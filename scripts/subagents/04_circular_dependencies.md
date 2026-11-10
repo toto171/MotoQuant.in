@@ -1,6 +1,6 @@
 # Subagent 4: CIRCULAR DEPENDENCIES
 
-You are SUBAGENT 4: CIRCULAR DEPENDENCIES for the MotoQuant Pro codebase. Read CLAUDE.md first.
+You are SUBAGENT 4: CIRCULAR DEPENDENCIES for the MotoQuant codebase. Read CLAUDE.md first.
 
 ## Your job — find
 

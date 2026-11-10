@@ -28,10 +28,9 @@ python-multipart>=0.0.18,<1.0
 # Database
 # (sqlite3 is stdlib -- no extra package needed)
 
-# Auth and subscriptions (commercial launch)
+# Optional accounts (saved runs)
 PyJWT>=2.8,<3
 email-validator>=2.0.0,<3
-razorpay>=1.4.0,<3
 
 # NL chat layer (POST /api/chat, `motoquant chat`).
 # The LLMClient supports multiple providers selected via the LLM_PROVIDER
@@ -44,9 +43,9 @@ razorpay>=1.4.0,<3
 anthropic>=0.34.0,<1.0
 openai>=1.40.0,<3
 
-# Chat-agent web lookup (motoquant/llm/webtools.py). requests already ships
-# transitively via the razorpay SDK — pinned here explicitly so a dependency
-# bump can never silently remove the agent's web_search/web_fetch tools.
+# Chat-agent web lookup (motoquant/llm/webtools.py). requests is pinned
+# explicitly so a dependency bump can never silently remove the agent's
+# web_search/web_fetch tools.
 # Optional env: SEARCH_PROVIDER=brave|serper + SEARCH_API_KEY for a paid
 # search API; without a key the DuckDuckGo HTML fallback is used.
 # MOTOQUANT_WEB_TOOLS=0 disables web tools entirely.
