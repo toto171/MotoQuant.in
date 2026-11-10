@@ -1,7 +1,5 @@
 // Server-component layout whose only purpose is to own the <head> metadata
-// for /autotune. The actual page (page.js) is 'use client' and therefore
-// cannot export `metadata` itself — App Router pulls it from the nearest
-// server layout instead.
+// for /autotune (page.js composes the page chrome and the client tool).
 //
 // NOTE: do not hard-code catalog counts (bike / parts / venue numbers) in
 // the copy below — those are in flux and reconciled separately. Describe
@@ -9,10 +7,9 @@
 
 import StructuredData, { SITE_URL } from '../StructuredData';
 
-const TITLE =
-  'Motorcycle ECU Autotune India — Density-Altitude-Aware Setup Sheet Calculator';
+const TITLE = 'Race-day setup for your motorcycle — gearing, launch RPM and tyre pressure';
 const DESCRIPTION =
-  'Free motorcycle ECU autotune for Indian drag strips — enter your bike, venue, and weather, and MotoQuant computes the live density altitude and returns a printable setup sheet: gearing (front + rear sprocket + final drive), launch RPM, tyre pressure, and fuel/timing guidance. Each recommendation comes with the predicted quarter-mile ET delta. Pre-configured for Aamby Valley, MMRT, BIC, Kari and 16 more venues.';
+  'Free race-day setup tool for Indian drag strips. Pick your bike and where you are racing, and MotoQuant works out how the air and altitude change your power, then suggests gearing (sprockets), launch RPM, tyre pressure and fuel/timing guidance. Gearing and launch advice come with the simulated quarter-mile time change; tyre and fuel advice are general guidance. Works for Aamby Valley, MMRT, BIC, Kari and more.';
 
 export const metadata = {
   title: TITLE,
@@ -51,7 +48,7 @@ export const metadata = {
         url: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'MotoQuant ECU Autotune — density-altitude-aware setup sheet',
+        alt: 'MotoQuant race-day setup — gearing, launch RPM and tyre pressure',
       },
     ],
   },
@@ -68,7 +65,7 @@ const breadcrumb = {
   '@type': 'BreadcrumbList',
   itemListElement: [
     { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-    { '@type': 'ListItem', position: 2, name: 'ECU Autotune', item: `${SITE_URL}/autotune` },
+    { '@type': 'ListItem', position: 2, name: 'Race-day setup', item: `${SITE_URL}/autotune` },
   ],
 };
 

@@ -1,55 +1,61 @@
-name: Calibration data upload
-description: Submit a real Dragy run, dyno sheet, or ECU log to improve the model.
-title: "[calibration] "
+name: Dyno sheet or ECU log
+description: A dyno pull or an ECU data log that can check or improve a bike's engine model. For a quarter-mile run, use "Submit a timeslip" instead.
+title: "Calibration data: "
 labels: ["calibration", "data"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for capturing data. Real runs are the main ingredient that takes the model from "conservative synthetic" to "calibrated per bike".
-        **Do not attach** raw files in this issue. Open a PR that adds them under `calibration_data/<bike-slug>/<date>/` and link it here.
+        Thanks for capturing data. A real power curve is the best way to replace the estimated curve a bike's model starts from. Attach the file by dragging it into the "Files" box below; GitHub accepts CSV, TXT and ZIP. Only share data you recorded or have the right to share.
 
   - type: dropdown
     id: kind
     attributes:
       label: Data type
       options:
-        - Dragy GPS (CSV or VBO-derived CSV)
         - Dyno sheet (DynoJet CSV, generic metric CSV, MoTeC export)
         - ECU log (Woolich, Power Commander PC-Link, MoTeC i2)
-        - Multiple of the above
+        - Both
     validations:
       required: true
 
   - type: input
     id: bike
     attributes:
-      label: Bike (make / model / year / any mods)
+      label: Bike (make, model, year)
     validations:
       required: true
 
-  - type: input
-    id: venue
+  - type: dropdown
+    id: stock
     attributes:
-      label: Venue
-      placeholder: e.g. Aamby Valley, MMRT, private strip
+      label: Was the bike stock?
+      options:
+        - Stock
+        - Modified (list the changes below)
+    validations:
+      required: true
+
+  - type: textarea
+    id: mods
+    attributes:
+      label: Changes from stock
 
   - type: textarea
     id: conditions
     attributes:
-      label: Track conditions
-      description: Temperature, humidity, pressure (or altitude), surface condition. The more detail, the better the calibration.
+      label: Conditions
+      description: For a dyno, the correction standard used (SAE J1349, DIN, uncorrected) and the room temperature and pressure. For a log, the weather and the venue.
 
   - type: textarea
-    id: runs
+    id: files
     attributes:
-      label: Run summary
-      description: Best ET, trap speed, notable splits, anything unusual (tyre spin, mis-shift, aborted launch).
+      label: Files
+      description: Drag the file into this box.
     validations:
       required: true
 
-  - type: input
-    id: pr_link
+  - type: textarea
+    id: notes
     attributes:
-      label: Linked PR with the raw files
-      placeholder: "#123"
+      label: Notes

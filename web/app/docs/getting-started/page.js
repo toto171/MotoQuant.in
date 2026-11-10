@@ -1,16 +1,14 @@
-import { Suspense } from 'react';
 import Link from 'next/link';
-import CodeComment from '../../../components/CodeComment';
-import RunSimCta from './RunSimCta';
+import Term from '../../../components/Term';
 
 export const metadata = {
-  title: 'Getting Started — Run Your First Motorcycle Quarter-Mile Simulation',
-  description: 'Step-by-step guide to running your first motorcycle quarter-mile drag simulation in MotoQuant Pro — pick from 541 bikes, choose Aamby Valley or MMRT or BIC as your venue, dial in rider weight + power delta + mass, and interpret the ET, 60-foot, and trap speed output. No physics PhD required.',
+  title: 'Getting started — your first quarter-mile time in five minutes',
+  description:
+    'A five-minute walkthrough of MotoQuant: pick one of 534 bikes, read your quarter-mile time, change rider weight and location, add parts, find the best parts for your budget and get a race-day setup. Free and open source.',
   keywords: [
     'motoquant getting started',
     'how to use motorcycle drag simulator',
     'motorcycle quarter mile simulation guide',
-    'first drag simulation tutorial',
     'how to predict motorcycle quarter mile time',
     'motorcycle 60 ft time guide',
     'aamby valley simulation setup',
@@ -18,152 +16,178 @@ export const metadata = {
   alternates: { canonical: 'https://motoquant.in/docs/getting-started' },
 };
 
+const REPO = 'https://github.com/toto171/MotoQuant.in';
+
 function Step({ n, title, children }) {
   return (
-    <div className="flex gap-5 mb-10">
-      <div className="shrink-0 w-8 h-8 rounded-full bg-brand-orange/15 border border-brand-orange/40 flex items-center justify-center font-mono text-sm font-bold text-brand-orange">
-        {n}
+    <section className="mb-10 flex gap-4">
+      <span className="step-badge shrink-0" aria-hidden="true">{n}</span>
+      <div className="min-w-0 flex-1">
+        <h2 className="mb-2 font-display text-xl font-semibold text-white">{title}</h2>
+        <div className="space-y-3 text-base leading-relaxed text-white/75">{children}</div>
       </div>
-      <div className="flex-1">
-        <h3 className="font-display font-bold text-lg text-white mb-2">{title}</h3>
-        <div className="text-white/70 text-sm leading-relaxed space-y-3">{children}</div>
-      </div>
-    </div>
+    </section>
+  );
+}
+
+function A({ href, children, external }) {
+  const cls = 'text-accent underline-offset-2 hover:underline';
+  return external ? (
+    <a href={href} target="_blank" rel="noopener noreferrer" className={cls}>{children}</a>
+  ) : (
+    <Link href={href} className={cls}>{children}</Link>
   );
 }
 
 function Code({ children }) {
   return (
-    <code className="block bg-black/50 border border-brand-orange/15 rounded-lg px-4 py-3 font-mono text-xs text-brand-accent my-3 overflow-x-auto">
-      {children}
-    </code>
+    <pre className="my-3 overflow-x-auto rounded-lg border border-white/10 bg-asphalt-3 px-4 py-3 font-mono text-sm text-white/85">
+      <code>{children}</code>
+    </pre>
   );
-}
-
-function InlineCode({ children }) {
-  return <code className="bg-white/10 px-1.5 py-0.5 rounded font-mono text-xs text-brand-accent">{children}</code>;
 }
 
 export default function GettingStartedPage() {
   return (
     <article>
-      <header className="mb-12">
-        <CodeComment className="mb-3">getting started · zero to first run</CodeComment>
-        <h1 className="font-display font-bold text-4xl text-white mb-4 tracking-tight">Your First Simulation</h1>
-        <p className="text-white/60 text-base leading-relaxed">
-          MotoQuant runs in the browser — no installation required to simulate. The REST API
-          is optional for advanced workflows. Start here.
+      <header className="mb-10">
+        <p className="eyebrow mb-2">Getting started</p>
+        <h1 className="mb-3 font-display text-3xl font-bold tracking-tight text-white md:text-4xl">
+          Your first quarter-mile time in five minutes
+        </h1>
+        <p className="text-base leading-relaxed text-white/70">
+          MotoQuant runs in your browser, is free, and does not need an account. You do not need to
+          know any physics. Every term with a dotted underline explains itself when you tap it, and
+          the full list is in the <A href="/docs/glossary">glossary</A>.
         </p>
       </header>
 
-      {/* Quick path */}
-      <section className="mb-14">
-        <h2 className="font-display font-bold text-2xl text-white mb-6">Option A — Web Simulator (instant, no account)</h2>
-        <Step n="1" title="Open the simulator">
-          <p>Navigate to <Link href="/simulator" className="text-brand-accent hover:text-brand-orange transition-colors font-mono">/simulator</Link>. No account required.</p>
-        </Step>
-        <Step n="2" title="Pick your bike">
-          <p>Use the category tabs (Indian Sport / Indian Naked / Royal Enfield / Dream Bikes) or the search box to find your bike. The widget defaults to the Suzuki Hayabusa Gen1 — one of the best-validated bikes in the catalog.</p>
-          <p>If your bike is not listed, use the <Link href="/bikes" className="text-brand-accent hover:text-brand-orange transition-colors">"Suggest a bike"</Link> form on the Bikes page. We add community-requested bikes regularly.</p>
-        </Step>
-        <Step n="3" title="Set your conditions">
-          <p>The three sliders control:</p>
-          <ul className="list-disc list-inside space-y-1 text-white/60 text-sm mt-2">
-            <li><strong className="text-white">Rider weight</strong> — your weight in kg. Affects total system mass and CoG height.</li>
-            <li><strong className="text-white">Power boost</strong> — percentage modifier on peak power and torque. Use this to simulate mods without selecting individual parts.</li>
-            <li><strong className="text-white">Mass change</strong> — kg added or removed. Positive = added weight (pillion, luggage). Negative = weight reduction (stripped bodywork).</li>
-          </ul>
-        </Step>
-        <Step n="4" title="Set your venue (optional)">
-          <p>Click <strong className="text-white">Race location</strong> and either select a named venue (Aamby Valley, MMRT, BIC, Santa Pod, etc.) or enter your GPS coordinates. The simulator loads seasonal weather data automatically — density altitude, temperature, humidity, surface grip.</p>
-          <p>If you skip this, the simulation runs at ISA sea-level conditions (15°C, 101.325 kPa, 0 m).</p>
-        </Step>
-        <Step n="5" title="Run and read the results">
-          <p>Press <strong className="text-white">Run Simulation</strong>. Results appear in under a second:</p>
-          <ul className="list-disc list-inside space-y-1 text-white/60 text-sm mt-2">
-            <li><strong className="text-white">Quarter-Mile ET</strong> — elapsed time at 402.336 m, in seconds.</li>
-            <li><strong className="text-white">Trap Speed</strong> — velocity at the 402 m mark, in km/h.</li>
-            <li><strong className="text-white">Split Timeline</strong> — 60 ft, ⅛ mile, and ¼ mile ETs.</li>
-            <li><strong className="text-white">Peak Power</strong> — effective power after altitude correction.</li>
-          </ul>
-        </Step>
-      </section>
-
-
-      {/* API */}
-      <section className="mb-14">
-        <h2 className="font-display font-bold text-2xl text-white mb-6">Option B — REST API</h2>
-        <p className="text-white/70 text-sm leading-relaxed mb-6">
-          The API is public and CORS-open. No authentication for basic simulation (rate-limited to 60 req/min per IP).
+      <Step n="1" title="Pick a bike and read your time">
+        <p>
+          Open the <A href="/simulator">simulator</A>. It starts in <strong className="text-white">Simple</strong> mode.
+          Under <strong className="text-white">Choose your bike</strong>, search for yours or tap one of the popular
+          bikes. Your result appears straight away: a sentence in plain words, then the numbers.
         </p>
-        <Step n="1" title="Quick sim">
-          <Code>{`POST https://motoquant-api.onrender.com/api/simulate/quick
-Content-Type: application/json
-
-{
-  "bike_id": 1,
-  "rider_mass_kg": 70,
-  "power_boost_pct": 0,
-  "mass_delta_kg": 0
-}`}
-          </Code>
-          <p>Returns: <InlineCode>et_quarter_s</InlineCode>, <InlineCode>trap_speed_kmh</InlineCode>, <InlineCode>et_60ft_s</InlineCode>, <InlineCode>et_eighth_s</InlineCode>, <InlineCode>peak_power_hp</InlineCode>, <InlineCode>bike_name</InlineCode>.</p>
-        </Step>
-        <Step n="2" title="Full sim with timeseries">
-          <Code>{`POST /api/simulate
-{
-  "bike_id": 1,
-  "rider_mass_kg": 70,
-  "power_boost_pct": 0,
-  "use_adaptive_dt": false
-}`}
-          </Code>
-          <p>Returns everything from quick sim plus <InlineCode>timeseries</InlineCode>: arrays of velocity, RPM, gear, acceleration, power at every 10 ms step.</p>
-        </Step>
-        <Step n="3" title="Interactive docs">
-          <p>Full OpenAPI interactive docs (try-it-now) are available at:</p>
-          <Code>https://motoquant-api.onrender.com/docs</Code>
-        </Step>
-      </section>
-
-      {/* Reading the chart */}
-      <section>
-        <h2 className="font-display font-bold text-2xl text-white mb-6">Reading the Simulation Chart</h2>
-        <p className="text-white/70 text-sm leading-relaxed mb-4">
-          The full simulator page shows a 4-panel chart:
+        <p>
+          That first number is an <Term k="instant_estimate">instant estimate</Term>. Press{' '}
+          <strong className="text-white">Run the full simulation</strong> any time you want the exact splits and charts.
+          If your bike is missing, the <A href="/bikes">Bikes page</A> has a form to suggest it.
         </p>
-        <div className="space-y-4">
-          {[
-            { label: 'Speed (km/h)', desc: 'Velocity over time. The slope of this curve is your instantaneous acceleration. A steep slope in first gear, flattening out toward trap speed.' },
-            { label: 'RPM', desc: 'Engine RPM over time. You should see it rise to redline in each gear, drop at each upshift, then rise again. If RPM is flat for long periods, the clutch is slipping.' },
-            { label: 'Acceleration (g)', desc: 'Longitudinal g-force. Typically 0.3–0.6g at launch for street bikes, 0.5–0.9g for built drag bikes. The ET reference line marks where ¼ mile falls on the time axis.' },
-            { label: 'Power (kW)', desc: 'Wheel power delivered to the road. This is lower than engine power due to drivetrain losses, clutch slip during engagement, and tyre slip.' },
-          ].map(item => (
-            <div key={item.label} className="card flex gap-4 p-4">
-              <div className="font-mono text-xs text-brand-orange w-32 shrink-0 pt-0.5">{item.label}</div>
-              <div className="text-sm text-white/70">{item.desc}</div>
-            </div>
-          ))}
+      </Step>
+
+      <Step n="2" title="Understand the numbers">
+        <ul className="list-disc space-y-2 pl-5">
+          <li>
+            <Term k="et">Quarter-mile time</Term>: how long the bike takes to cover 402 m from a standing start.
+            Smaller is quicker.
+          </li>
+          <li>
+            <Term k="trap">Finish-line speed</Term>: how fast it is going as it crosses the line.
+          </li>
+          <li>
+            <Term k="sixty">First 60 ft (launch)</Term>: how well it gets off the line. A good launch saves more time than
+            extra power.
+          </li>
+          <li>
+            <Term k="eighth">Halfway — ⅛ mile</Term>: the time at the halfway point, which many strips also time.
+          </li>
+        </ul>
+      </Step>
+
+      <Step n="3" title="Set your weight and where you are racing">
+        <p>
+          Change <strong className="text-white">Rider weight with gear</strong> to match you. Under{' '}
+          <strong className="text-white">Where are you racing? (optional)</strong> pick a drag strip, or enter a place.
+          Thin, hot air makes a bike slower, so the result adjusts for altitude and weather
+          (<Term k="da">air and altitude</Term>).
+        </p>
+        <p className="rounded-xl border border-white/10 bg-asphalt-2 px-4 py-3 text-sm text-white/75">
+          <strong className="text-white">If you do not choose a location</strong>, the simulation uses its default
+          conditions: Aamby Valley, 679 m altitude, 22 °C, 40 % humidity. That is not sea level, so a time at
+          the default can differ from one at your local strip. The simulator shows the conditions it used right next
+          to every result, so you always know what a number was calculated for.
+        </p>
+      </Step>
+
+      <Step n="4" title="Switch to Advanced to add parts and compare">
+        <p>
+          The <strong className="text-white">Simple | Advanced</strong> switch is at the top of the simulator. Advanced is
+          the full workbench. You can:
+        </p>
+        <ul className="list-disc space-y-1 pl-5">
+          <li>add <strong className="text-white">Parts and mods</strong> from a catalog that only shows parts that fit your bike;</li>
+          <li>change <Term k="power_boost">engine power</Term> and <Term k="mass_delta">weight added or removed</Term>;</li>
+          <li>pick different tyres and set the <Term k="da">air and altitude</Term> by hand;</li>
+          <li>see <Term k="top_speed">top speed</Term>, charts, <Term k="splits">splits</Term> and a <strong className="text-white">Compare</strong> tab for two bikes side by side;</li>
+          <li>upload your own <Term k="dragy">Dragy</Term> or <Term k="dyno">dyno</Term> data under <strong className="text-white">My data</strong>.</li>
+        </ul>
+      </Step>
+
+      <Step n="5" title="Find the best parts for your budget">
+        <p>
+          Not sure what to buy? Open <A href="/optimize">Best parts for your budget</A>, pick your bike, set how much you
+          want to spend and what kind of build you want. MotoQuant tests every part that fits and shows the
+          combination that makes the bike quickest, with the <Term k="cost_per_tenth">cost per tenth of a second</Term> for each part.
+        </p>
+      </Step>
+
+      <Step n="6" title="Get a race-day setup">
+        <p>
+          <A href="/autotune">Race-day setup</A> suggests <Term k="gearing">gearing</Term>, <Term k="launch_rpm">launch RPM</Term>{' '}
+          and tyre pressure for the air you will actually race in, and tells you how much time each change is worth.
+        </p>
+      </Step>
+
+      <Step n="7" title="Save and share a run">
+        <p>
+          Press <strong className="text-white">Share</strong> to copy a link that opens the same bike, parts and conditions in
+          the simulator. Press <strong className="text-white">Save</strong> to keep the run in this browser: it appears on{' '}
+          <A href="/runs">Your runs</A> with a timeslip link you can send to anyone. Only exact results can be saved, never
+          instant estimates. There is no account, so saved runs stay on the device where you saved them.
+        </p>
+      </Step>
+
+      <Step n="8" title="For developers">
+        <p>
+          MotoQuant is open source (Apache-2.0). The same engine is a Python package, a command line tool, an HTTP API
+          and an MCP server. Source and issues are on <A external href={REPO}>GitHub</A>.
+        </p>
+        <Code>{`git clone ${REPO}.git
+cd MotoQuant.in
+pip install -e .
+python -m motoquant.run bikes --search hayabusa
+python -m motoquant.run sim --bike-id 1 --venue-id 1`}</Code>
+        <p>
+          <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-sm">make install</code> installs every dependency, and{' '}
+          <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-sm">make api</code> starts the HTTP API on
+          port 8000 with interactive docs at <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-sm">/docs</code>. The
+          hosted API has the same docs at <A external href="https://motoquant-api.onrender.com/docs">motoquant-api.onrender.com/docs</A>.
+        </p>
+        <Code>{`curl -X POST https://motoquant-api.onrender.com/api/simulate/quick \\
+  -H "Content-Type: application/json" \\
+  -d '{"bike_id": 1, "rider_mass_kg": 70}'`}</Code>
+        <p>To let an AI assistant such as Claude run simulations for you, add the MCP server:</p>
+        <Code>{`claude mcp add motoquant -- python -m motoquant.mcp_server`}</Code>
+        <p>
+          More in the <A external href={`${REPO}/blob/main/docs/MCP.md`}>MCP guide</A> and the{' '}
+          <A external href={`${REPO}#readme`}>README</A>.
+        </p>
+      </Step>
+
+      <div className="mt-12 border-t border-white/10 pt-8">
+        <p className="mb-4 text-sm font-semibold text-white">Keep reading</p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Link href="/docs/glossary" className="card card-hover block p-4">
+            <div className="mb-1 font-display font-semibold text-white">Glossary →</div>
+            <div className="text-sm text-white/65">Every term in plain English.</div>
+          </Link>
+          <Link href="/docs/physics" className="card card-hover block p-4">
+            <div className="mb-1 font-display font-semibold text-white">How the physics works →</div>
+            <div className="text-sm text-white/65">The engineering behind every prediction.</div>
+          </Link>
         </div>
-      </section>
-
-      {/* EXP-014 — presence test: bottom CTA before the Next nav cards */}
-      <Suspense fallback={null}>
-        <RunSimCta />
-      </Suspense>
-
-      {/* Next steps */}
-      <div className="mt-14 pt-8 border-t border-brand-orange/10">
-        <div className="label-mono mb-4">Next</div>
-        <div className="grid sm:grid-cols-2 gap-4">
-          <Link href="/docs/physics" className="card card-hover block p-4 group">
-            <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Physics Whitepaper →</div>
-            <div className="text-xs text-white/50">15 sub-models, equations, and validation methodology.</div>
-          </Link>
-          <Link href="/docs/validation" className="card card-hover block p-4 group">
-            <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Validation Data →</div>
-            <div className="text-xs text-white/50">Benchmark table, per-cluster accuracy, and methodology.</div>
-          </Link>
+        <div className="mt-8">
+          <Link href="/simulator" className="btn-primary">Open the simulator</Link>
         </div>
       </div>
     </article>

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MotoQuant Pro — OEM tire-fitment integrity patch (2026-08-08).
+MotoQuant — OEM tire-fitment integrity patch (2026-08-08).
 
 Cleans the shipped-DB damage left by the two `bike_tire_fitments` defects the
 2026-07-25 weekly audit found (§3.3b). Both root causes are fixed in the seed

@@ -7,8 +7,6 @@ import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
 import PageHero from '../../components/PageHero';
 import AccuracyExplorer from '../../components/AccuracyExplorer';
-import ScoreboardDigits, { ScoreboardCounter } from '../../components/ScoreboardDigits';
-import { Reveal } from '../../components/Reveal';
 import accuracyData from './accuracy_data.json';
 
 // Aggregate hero tiles — DERIVED from accuracy_data.json, never hardcoded.
@@ -19,9 +17,9 @@ import accuracyData from './accuracy_data.json';
 // (2026-07-25 audit). Reading them from the data makes that impossible: a
 // regenerated accuracy_data.json now updates the hero automatically.
 const HERO_TILES = [
-  { value: accuracyData.n_matched, label: 'MATCHED RUNS' },
-  { value: accuracyData.distribution.within_0_10, label: 'WITHIN ±0.10s' },
-  { value: accuracyData.distribution.within_0_20, label: 'WITHIN ±0.20s' },
+  { value: accuracyData.n_matched, label: 'Matched runs' },
+  { value: accuracyData.distribution.within_0_10, label: 'Within ±0.10s' },
+  { value: accuracyData.distribution.within_0_20, label: 'Within ±0.20s' },
 ];
 
 export default function ValidationPage() {
@@ -30,32 +28,36 @@ export default function ValidationPage() {
       <SiteNav />
       <main id="main" className="min-h-screen bg-asphalt-0">
         <PageHero
-          kicker="Accuracy report · weighted benchmark sweep"
-          title={
-            <>
-              How <span className="text-gradient-orange">honest</span> is the physics?
-            </>
-          }
-          sub="276 benchmarks matched to catalog bikes, cross-checked against published Cycle World, Sport Rider, MCN and MotoStatz timeslips. Weighted mean absolute error 0.26s, bias +0.007s, and the three reference baselines preserved to four decimals since July 13, 2026."
+          kicker="Accuracy"
+          title="How accurate is the simulator?"
+          sub={`We compare it with 250 published timeslips from Cycle World, Sport Rider, MCN and MotoStatz (${accuracyData.n_matched} bike-to-timeslip matches). On average it is within about a quarter of a second, and neither systematically quick nor slow.`}
         >
-          <Reveal y={14} duration={0.6} delay={0.22}>
-            <div className="mt-2 flex flex-wrap gap-x-10 gap-y-4">
-              {HERO_TILES.map((s) => (
-                <div key={s.label} className="flex flex-col gap-1.5">
-                  <ScoreboardCounter value={s.value} h={28} />
-                  <span className="label-mono">{s.label}</span>
-                </div>
-              ))}
-              <div className="flex flex-col gap-1.5">
-                <div className="flex items-end gap-1">
-                  <span className="mb-0.5 font-mono text-sm text-white/50" aria-hidden="true">±</span>
-                  <ScoreboardDigits value="0.007" h={28} label="±0.007s" />
-                  <span className="mb-0.5 font-mono text-xs text-white/40" aria-hidden="true">s</span>
-                </div>
-                <span className="label-mono">TOP-10 MEAN |Δ|</span>
+          <p className="max-w-2xl rounded-xl border border-accent/25 bg-accent/5 px-4 py-3 text-base leading-relaxed text-white/85">
+            <strong className="font-semibold text-white">In short:</strong> every dot below is one real run against what
+            MotoQuant predicted. Dots on the diagonal line are perfect predictions. The weak spots are small bikes and
+            two-strokes, where good timeslips are scarce, and we mark them clearly. Small bikes are the weakest class, and many
+            still carry a known gearing limitation, documented in{' '}
+            <a
+              href="https://github.com/toto171/MotoQuant.in/blob/main/reports/gearing_experiment_2026_11_10.md"
+              className="text-accent underline underline-offset-2 hover:text-accent-bright"
+              rel="noopener"
+            >
+              the repository
+            </a>
+            .
+          </p>
+          <div className="mt-2 flex flex-wrap gap-x-10 gap-y-4">
+            {HERO_TILES.map((s) => (
+              <div key={s.label} className="flex flex-col gap-1">
+                <p className="font-display text-3xl font-bold tabular-nums text-accent">{s.value}</p>
+                <p className="text-sm text-white/65">{s.label}</p>
               </div>
+            ))}
+            <div className="flex flex-col gap-1">
+              <p className="font-display text-3xl font-bold tabular-nums text-accent">±0.006 s</p>
+              <p className="text-sm text-white/65">Top-10 mean error</p>
             </div>
-          </Reveal>
+          </div>
         </PageHero>
         <AccuracyExplorer data={accuracyData} />
       </main>

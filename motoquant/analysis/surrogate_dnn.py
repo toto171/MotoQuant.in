@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — DNN Surrogate Model (Phase 4A)
-===============================================
+MotoQuant — DNN Surrogate Model (Phase 4A)
+==========================================
 4-layer MLP trained on the same Sobol-sampled dataset as the XGBoost surrogate
 (Phase 4B), but with significantly more model capacity to capture the complex
 nonlinear physics interactions that XGBoost's piecewise-linear trees miss.

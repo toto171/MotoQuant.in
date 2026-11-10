@@ -52,17 +52,13 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 _REPO_DB = _REPO_ROOT / "motoquant.db"
 _PATCH = _REPO_ROOT / "scripts" / "patch_2026_08_08_quickshifter_overrides.py"
 
-# The eight SKUs the audit found dead, keyed by their stable part_number,
+# The SKUs the audit found dead that are still in the catalog (the other five
+# of the original eight were invented products and were removed 2026-11-10), keyed by their stable part_number,
 # with the shift time the data fix gives them. Kept here (rather than imported
 # from the patch) so a silent edit to the patch's table fails this test.
 DEAD_EIGHT: dict[str, float] = {
     "HT-QS-MOD": 60.0,  # HealTech QuickShifter Controller Module
     "QS-HM-4": 70.0,  # HM QS Mid-Range
-    "QS-TRA-5": 60.0,  # Translogic QS Pro V2
-    "QS-DYN-6": 55.0,  # Dynojet Power Commander QS
-    "QS-GPR-7": 60.0,  # GPR Gear Box QS
-    "QS-HEL-8": 60.0,  # Helix QS Universal
-    "QS-SHI-9": 60.0,  # Shift Assist Pro
     "QS-BON-10": 60.0,  # Bonamici Racing Quick Shifter
 }
 

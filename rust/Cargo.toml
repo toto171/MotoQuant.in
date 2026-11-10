@@ -1,0 +1,28 @@
+# MotoQuant Rust core — Cargo workspace.
+#
+# Python (motoquant/physics.py) is the REFERENCE implementation. This workspace
+# is an accelerator: the same run() loop, transliterated float-op for float-op,
+# consumed through motoquant/native.py (PyO3, feature "python") and in the
+# browser through a raw-C-ABI wasm32 build (web/lib/engine.js).
+# See docs/RUST_CORE.md for the schema + regen contract.
+[workspace]
+members = ["motoquant-core"]
+resolver = "2"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+# PyO3 converts Rust panics into Python exceptions; that needs unwinding, so
+# the native profile keeps panic = "unwind" (the default).
+
+# Small, panic=abort profile for the committed browser engine
+# (web/public/engine/motoquant_core.wasm). Build with:
+#   cargo build -p motoquant-core --profile wasm-release --target wasm32-unknown-unknown
+[profile.wasm-release]
+inherits = "release"
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

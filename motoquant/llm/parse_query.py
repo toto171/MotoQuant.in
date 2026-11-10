@@ -276,7 +276,7 @@ TOOL_SCHEMA: dict[str, Any] = {
 
 
 SYSTEM_PROMPT = """\
-You are a query parser for MotoQuant Pro, a motorcycle drag-racing simulator.
+You are a query parser for MotoQuant, a motorcycle drag-racing simulator.
 
 The user describes what they want. Extract structured parameters and submit \
 them via the submit_sim_query tool. Do not respond in plain text -- always \

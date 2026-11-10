@@ -1,4 +1,4 @@
-# MotoQuant Pro — developer entry point.
+# MotoQuant — developer entry point.
 #
 # The one interface every contributor (human or AI) should use. It encodes the
 # same commands CI runs, so "green locally" ≈ "green in CI". Run `make` (or
@@ -11,13 +11,14 @@ PY ?= python3
 PYTEST ?= $(PY) -m pytest
 FAST_TESTS := tests/test_validation.py tests/test_scraper.py \
               tests/test_two_stroke.py tests/test_compatibility.py \
-              tests/test_submodel_kaizen.py tests/test_category_dispatch.py
+              tests/test_submodel_kaizen.py tests/test_category_dispatch.py \
+              tests/test_docs_truth_2026_11.py
 
 .DEFAULT_GOAL := help
 
 .PHONY: help
 help: ## Show this help
-	@echo "MotoQuant Pro — make targets:"
+	@echo "MotoQuant — make targets:"
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 	  | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
 	@echo ""
@@ -26,14 +27,19 @@ help: ## Show this help
 
 # ── Setup ──────────────────────────────────────────────────────────────────
 .PHONY: install
-install: ## Install runtime + dev dependencies and the package (editable)
-	$(PY) -m pip install -r requirements-api.txt -r requirements-dev.txt
-	$(PY) -m pip install -e .
+install: ## Install the package (editable) with its runtime + dev dependencies
+	$(PY) -m pip install -e ".[dev]"
 
 .PHONY: db
-db: ## Initialise + seed a fresh dev database (motoquant.db ships seeded)
-	$(PY) -m motoquant.run db init
-	$(PY) -m motoquant.run db seed
+DEV_DB ?= /tmp/motoquant-dev.db
+
+db: ## Fresh STARTER dev DB at $(DEV_DB): 3 reference bikes + tires/parts/venues (the tracked motoquant.db is the full catalog)
+	rm -f $(DEV_DB)
+	$(PY) -m motoquant.run --db $(DEV_DB) db init
+	$(PY) -m motoquant.run --db $(DEV_DB) db seed
+	@echo "Dev DB at $(DEV_DB) -- use it with MOTOQUANT_DB=$(DEV_DB)"
+	@echo "It holds the three reference bikes only; add the curated catalog with:"
+	@echo "  $(PY) -m motoquant.run --db $(DEV_DB) import --known-bikes"
 
 .PHONY: lock
 lock: ## Regenerate requirements-api.lock (clean-venv resolve of requirements-api.txt)
@@ -70,6 +76,32 @@ baselines: ## Assert the K5/R1/Hayabusa reference baselines are bit-identical
 audit: ## Check headline stats (bike/part/tire counts) are in sync sitewide
 	$(PY) scripts/audit_headline_stats.py
 	$(PY) web/scripts/gen_bike_ids.py --check
+
+# ── Rebuilding the catalog and its caches ─────────────────────────────────
+# The catalog database is built from the curated specs by a fixed chain of
+# idempotent scripts. RESEED_DB defaults to the tracked file; point it at a
+# copy to try a change first (make reseed RESEED_DB=/tmp/mq.db).
+RESEED_DB ?= motoquant.db
+RESEED_CHAIN := reseed_configs_from_specs \
+  patch_2026_07_06_reference_configs patch_2026_07_06_catalog_integrity \
+  patch_2026_07_06_tire_dedup patch_2026_07_13_scrape_data \
+  patch_2026_08_08_fitment_integrity patch_2026_08_08_quickshifter_overrides \
+  patch_2026_10_23_drop_monetization patch_2026_10_24_parts_data \
+  patch_2026_10_24_config_sync patch_2026_11_05_reference_rows \
+  patch_2026_11_10_catalog_fixes patch_2026_11_10_epoch \
+  patch_2026_11_10_remove_accounts
+
+.PHONY: reseed
+reseed: ## Rebuild the catalog's bike configs from the specs, then run every data patch in order
+	@for s in $(RESEED_CHAIN); do \
+	  echo "== $$s"; MOTOQUANT_DB=$(abspath $(RESEED_DB)) $(PY) scripts/$$s.py || exit 1; \
+	done
+
+.PHONY: regen
+regen: ## Regenerate everything that caches the physics: regression snapshot, stock leaderboard, browser surrogate export
+	MOTOQUANT_DB=$(abspath motoquant.db) $(PY) scripts/generate_regression_snapshot.py
+	MOTOQUANT_DB=$(abspath motoquant.db) $(PY) scripts/gen_stock_leaderboard.py
+	$(PY) scripts/gen_surrogate_web.py
 
 .PHONY: surrogate-web
 surrogate-web: ## Regenerate the in-browser surrogate assets (run after ANY reseed/retune/surrogate regen)
@@ -121,3 +153,42 @@ web-build: ## Production build of the frontend (what Vercel runs)
 clean: ## Remove Python caches and build artefacts
 	find . -type d -name __pycache__ -prune -exec rm -rf {} + 2>/dev/null || true
 	rm -rf .pytest_cache .ruff_cache *.egg-info build dist coverage.xml
+
+# ── Rust physics core (optional accelerator; Python stays the reference) ───
+# docs/RUST_CORE.md. `native` builds the PyO3 extension (motoquant_core) and
+# installs it into the current interpreter; `native-test` is the cargo +
+# pytest gate and FAILS (never skips) when the extension is missing, built
+# for another schema, or built from different Rust sources than this checkout
+# (MOTOQUANT_REQUIRE_NATIVE=1); `native-parity` is the full Python-vs-Rust
+# bit-parity sweep (every catalog bike fixed + adaptive + top speed, plus the
+# stress variants — ~1,870 cases); `native-parity-quick` is the CI-sized
+# slice; `wasm` rebuilds the committed browser engine + fixtures and proves
+# parity under node.
+RUST_DIR := rust
+NODE ?= node
+
+.PHONY: native
+native: ## Build + install the Rust physics core (PyO3 abi3 wheel via maturin)
+	@$(PY) -m maturin --version >/dev/null 2>&1 || $(PY) -m pip install "maturin>=1.5,<2"
+	rm -rf $(RUST_DIR)/target/wheels
+	cd $(RUST_DIR) && $(PY) -m maturin build --release --locked -m motoquant-core/Cargo.toml -o target/wheels
+	$(PY) -m pip install --force-reinstall --no-deps $(RUST_DIR)/target/wheels/motoquant_core-*.whl
+	$(PY) -c "from motoquant import native; print(native.native_info())"
+
+.PHONY: native-test
+native-test: ## Rust unit + fixture tests (cargo) and the pytest native gate (fails if the build is missing/stale)
+	cd $(RUST_DIR) && cargo test -p motoquant-core --release --locked
+	MOTOQUANT_REQUIRE_NATIVE=1 $(PYTEST) tests/test_native_engine.py tests/test_engine_select.py -q
+
+.PHONY: native-parity
+native-parity: ## FULL Python-vs-Rust parity sweep (every catalog bike × fixed/adaptive/top speed + stress) + bench
+	$(PY) scripts/check_native_parity.py
+
+.PHONY: native-parity-quick
+native-parity-quick: ## CI-sized parity slice (refs + 40-bike sample + 1/6 of the stress set)
+	$(PY) scripts/check_native_parity.py --quick --no-bench
+
+.PHONY: wasm
+wasm: ## Rebuild web/public/engine/*.wasm + fixtures, then prove parity under node
+	$(PY) scripts/gen_engine_web.py --build
+	$(NODE) web/scripts/engine-parity.mjs

@@ -6,6 +6,7 @@ Not used in acceleration simulation, available for future modes.
 """
 
 from ..models import BikeConfig
+from .cog import system_cog
 
 
 class BrakingModel:
@@ -29,8 +30,11 @@ class BrakingModel:
         mu_front up 5% (a reasonable approximation: braking transfers
         weight forward, front tire runs at ideal slip while rear unloads).
         """
-        h = self.cfg.chassis.cog_height_m
-        L = self.cfg.chassis.wheelbase_m
+        # 2026-10 epoch round 2: the load transfer acts at the combined
+        # bike + rider CoG (submodels/cog.py), as in the acceleration model.
+        cog = system_cog(self.cfg)
+        h = cog.height_m
+        L = cog.wheelbase_m
         mu_peak = getattr(self.cfg.tires, "mu_peak", 1.1)
         mu_front = mu_peak * 1.05  # front carries most braking load
         mu_rear = mu_peak * 0.90  # rear unloads under deceleration

@@ -75,11 +75,23 @@ class TestStructure:
         # (delta_et_s = recommended - stock since July 6, 2026: <= 0 = not slower)
         assert g["delta_et_s"] <= 1e-6
 
-    def test_launch_recommendation_present(self, sea):
+    def test_launch_recommendation_is_honest(self, sea):
+        # The K5 reference has no two-step, so every candidate is simulated
+        # with one holding the RPM. The sim responds, so a number is given —
+        # with the note that it needs launch control — or, when the quickest
+        # verified setup does not use it, no number at all.
         lr = sea.launch_rpm
-        assert lr["recommended_rpm"] > 0
         assert lr["delta_et_s"] <= 1e-6
         assert len(lr["candidates"]) >= 2
+        assert len({c["et_s"] for c in lr["candidates"]}) > 1  # the knob is live
+        assert lr["reason"]
+        if lr["adjustable"]:
+            assert lr["recommended_rpm"] > 0
+            assert lr["requires_two_step"] is lr["changed"]
+        else:
+            assert lr["recommended_rpm"] is None
+            assert lr["changed"] is False
+        assert ("launch_rpm" in sea.combined["knobs"]) is bool(lr["changed"])
 
     def test_tyre_and_fuel_guidelines(self, sea):
         assert sea.tyre_pressure["rear_psi"] <= sea.tyre_pressure["stock_rear_psi"]

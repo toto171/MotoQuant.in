@@ -1,8 +1,18 @@
 # ADR-0005: Desktop app discontinued — the hosted web app is the product
 
-**Status:** Accepted (supersedes [ADR-0001](0001-tauri-python-sidecar.md))
+**Status:** Accepted (supersedes [ADR-0001](0001-tauri-python-sidecar.md));
+amended by [ADR-0006](0006-open-source-pivot.md)
 **Date:** 2026-07-06
 **Deciders:** Hritwik Mudhai (operator decision)
+
+> **Update 2026-10-23:** the `desktop/` reference scaffold was deleted, along
+> with the retired desktop `release.yml` workflow, as part of the open-source
+> pivot ([ADR-0006](0006-open-source-pivot.md)). The scaffold called the
+> license-key endpoints, which no longer exist. `docs/INSTALL.md` and
+> `docs/RELEASE.md` moved to `docs/archive/`, which was itself removed from
+> the tree on 2026-11-10. The "license keys survive" clause below is
+> superseded: MotoQuant is free, with no license keys. The scaffold and the
+> archived docs are still in git history if a native client is ever revived.
 
 ## Context
 

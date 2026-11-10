@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Parts Compatibility Tests
-=========================================
+MotoQuant — Parts Compatibility Tests
+=====================================
 Unit tests for the fitment rules engine (no DB required).
 """
 

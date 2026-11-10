@@ -1,0 +1,97 @@
+name: Docs truth
+
+# The docs must not point at things that do not exist: relative links, `make`
+# targets, CLI subcommands, CODEOWNERS paths, packaging metadata, the licence
+# and retired product wording (tests/test_docs_truth_2026_11.py,
+# docs/KNOWN_TRAPS.md T25).
+#
+# CI (ci.yml) is path-filtered to code, so a docs-only change never runs it.
+# This small job covers exactly those changes. It also installs the package
+# the way the README says to (`pip install -e .`), so a broken install recipe
+# fails here. It is not a deploy gate: deploy.yml does not listen to it.
+
+# Least-privilege: read-only checkout; no tokens, no artifacts.
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**.md"
+      - "docs/**"
+      - "skills/**"
+      - ".github/CODEOWNERS"
+      - "Makefile"
+      - "pyproject.toml"
+      - "requirements-api.txt"
+      - "requirements-dev.txt"
+      - "LICENSE"
+      - "NOTICE"
+      - "motoquant/__init__.py"
+      - "motoquant/run.py"
+      - "web/app/contact/page.js"
+      - "tests/test_docs_truth_2026_11.py"
+      - ".github/workflows/docs-truth.yml"
+  pull_request:
+    branches: [main]
+    # (same list as push — kept literal, no YAML anchors)
+    paths:
+      - "**.md"
+      - "docs/**"
+      - "skills/**"
+      - ".github/CODEOWNERS"
+      - "Makefile"
+      - "pyproject.toml"
+      - "requirements-api.txt"
+      - "requirements-dev.txt"
+      - "LICENSE"
+      - "NOTICE"
+      - "motoquant/__init__.py"
+      - "motoquant/run.py"
+      - "web/app/contact/page.js"
+      - "tests/test_docs_truth_2026_11.py"
+      - ".github/workflows/docs-truth.yml"
+
+concurrency:
+  group: docs-truth-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docs-truth:
+    name: Docs match the tree
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements-api.txt
+            pyproject.toml
+
+      - name: Install the package as the README says
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install pytest
+
+      - name: The installed version is the one in motoquant/__init__.py
+        run: |
+          python - <<'PY'
+          from importlib.metadata import version
+          import motoquant
+          assert version("motoquant") == motoquant.__version__, (
+              version("motoquant"), motoquant.__version__)
+          print("motoquant", motoquant.__version__)
+          PY
+
+      - name: Docs truth
+        run: pytest tests/test_docs_truth_2026_11.py -q

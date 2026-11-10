@@ -2,10 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── IGNITION design system (v5, July 2026) — see web/DESIGN.md ───────────
-   Class NAMES are stable across redesigns (.card, .btn-primary/ghost/danger,
-   .input-base, …) so untouched content pages re-skin automatically.
-   Implementations are v4. */
+/* ── CLARITY design system (v6, November 2026) — see web/DESIGN.md ─────────
+   All colour is a CSS variable (space-separated RGB channels) so Tailwind's
+   opacity syntax keeps working: `text-white/60`, `bg-white/[0.04]`, etc.
+   `white` = foreground ink, `black` = deepest background — they invert in
+   the light theme. Class NAMES are stable across redesigns. */
+
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --fg: 255 255 255;
+  --bg-deep: 0 0 0;
+  --surface-0: 9 9 11;
+  --surface-1: 14 14 17;
+  --surface-2: 21 21 25;
+  --surface-3: 30 30 35;
+  --surface-4: 46 46 52;
+  --accent: 255 94 31;
+  --accent-bright: 255 143 87;
+  --accent-deep: 204 64 0;
+  --go: 52 211 120;
+  --stage: 245 178 40;
+  --foul: 248 96 96;
+  --on-accent: 12 10 9;
+  --card-shadow: none;
+  --card-shadow-hover: 0 8px 30px rgb(0 0 0 / 0.45);
+  --overlay-shadow: 0 24px 60px rgb(0 0 0 / 0.55);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --fg: 17 18 22;
+  --bg-deep: 255 255 255;
+  --surface-0: 250 250 249;
+  --surface-1: 255 255 255;
+  --surface-2: 255 255 255;
+  --surface-3: 244 244 242;
+  --surface-4: 226 226 222;
+  --accent: 214 69 8;
+  --accent-bright: 234 88 12;
+  --accent-deep: 174 52 4;
+  --go: 21 128 61;
+  --stage: 161 98 7;
+  --foul: 200 30 30;
+  --on-accent: 255 255 255;
+  --card-shadow: 0 1px 2px rgb(17 18 22 / 0.05), 0 4px 16px rgb(17 18 22 / 0.05);
+  --card-shadow-hover: 0 2px 4px rgb(17 18 22 / 0.06), 0 10px 28px rgb(17 18 22 / 0.1);
+  --overlay-shadow: 0 24px 60px rgb(17 18 22 / 0.18);
+}
+
+/* No-JS fallback: follow the OS until the theme script has run. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    color-scheme: light;
+    --fg: 17 18 22;
+    --bg-deep: 255 255 255;
+    --surface-0: 250 250 249;
+    --surface-1: 255 255 255;
+    --surface-2: 255 255 255;
+    --surface-3: 244 244 242;
+    --surface-4: 226 226 222;
+    --accent: 214 69 8;
+    --accent-bright: 234 88 12;
+    --accent-deep: 174 52 4;
+    --go: 21 128 61;
+    --stage: 161 98 7;
+    --foul: 200 30 30;
+    --on-accent: 255 255 255;
+    --card-shadow: 0 1px 2px rgb(17 18 22 / 0.05), 0 4px 16px rgb(17 18 22 / 0.05);
+    --card-shadow-hover: 0 2px 4px rgb(17 18 22 / 0.06), 0 10px 28px rgb(17 18 22 / 0.1);
+    --overlay-shadow: 0 24px 60px rgb(17 18 22 / 0.18);
+  }
+}
 
 /* ── Mobile horizontal-overflow safety net (load-bearing since Apr 2026) ── */
 html,
@@ -23,27 +91,32 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #27272a;
+  background: rgb(var(--surface-4));
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #ff5e1f;
+  background: rgb(var(--accent));
 }
 
-/* Text selection — volt */
+/* Text selection */
 ::selection {
-  background-color: rgba(255, 94, 31, 0.3);
-  color: white;
+  background-color: rgb(var(--accent) / 0.3);
+  color: rgb(var(--fg));
 }
 
 /* Base styles */
 html {
   scroll-behavior: smooth;
 }
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
 
 body {
-  background-color: #050506;
-  color: white;
+  background-color: rgb(var(--surface-0));
+  color: rgb(var(--fg));
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -52,12 +125,18 @@ body {
 @layer components {
   /* ── Surfaces ─────────────────────────────────────────────────────────── */
   .card {
-    @apply rounded-xl border border-white/[0.08] bg-asphalt-2/80;
+    @apply rounded-2xl border border-white/10 bg-asphalt-2;
+    box-shadow: var(--card-shadow);
+  }
+  .card-pad {
+    @apply p-5 md:p-6;
   }
   .card-hover {
     @apply transition-[border-color,background-color,transform,box-shadow]
-      duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-asphalt-2
-      hover:shadow-[0_8px_30px_rgba(0,0,0,0.45)];
+      duration-200 hover:-translate-y-0.5 hover:border-white/25;
+  }
+  .card-hover:hover {
+    box-shadow: var(--card-shadow-hover);
   }
   @media (prefers-reduced-motion: reduce) {
     .card-hover {
@@ -65,50 +144,49 @@ body {
     }
   }
 
-  /* ── Buttons — the ONE run/stop vocabulary sitewide ──────────────────── */
+  /* ── Buttons — one vocabulary sitewide ───────────────────────────────── */
   .btn-primary {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl
-      bg-accent px-5 font-display text-sm font-bold text-black
+    @apply inline-flex h-12 items-center justify-center gap-2 rounded-xl
+      bg-accent px-6 font-display text-base font-bold text-on-accent
       transition-all duration-200
-      hover:bg-accent-bright hover:shadow-volt-soft
+      hover:bg-accent-bright
       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/70
       focus-visible:ring-offset-2 focus-visible:ring-offset-asphalt-0
-      disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-accent
-      disabled:hover:shadow-none;
+      disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-accent;
   }
   .btn-ghost {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl
-      border border-white/[0.12] bg-white/[0.03] px-5 font-display
-      text-sm font-semibold text-white/85
+    @apply inline-flex h-12 items-center justify-center gap-2 rounded-xl
+      border border-white/15 bg-white/[0.03] px-5 font-display
+      text-base font-semibold text-white/85
       transition-colors duration-200
-      hover:border-white/30 hover:text-white
-      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40
+      hover:border-white/35 hover:bg-white/[0.06] hover:text-white
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60
       focus-visible:ring-offset-2 focus-visible:ring-offset-asphalt-0
       disabled:cursor-not-allowed disabled:opacity-40;
   }
   .btn-danger {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl
+    @apply inline-flex h-12 items-center justify-center gap-2 rounded-xl
       border border-signal-foul/40 bg-signal-foul/10 px-5 font-display
-      text-sm font-semibold text-signal-foul
+      text-base font-semibold text-signal-foul
       transition-colors duration-200
       hover:border-signal-foul/70 hover:bg-signal-foul/20
       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal-foul/60
       focus-visible:ring-offset-2 focus-visible:ring-offset-asphalt-0
       disabled:cursor-not-allowed disabled:opacity-40;
   }
-  /* ActionButton's active state: amber = staged/running; hover flips to
-     foul red — the stop affordance. */
+  /* ActionButton's active state: amber = running; hover flips to foul red —
+     the stop affordance. */
   .btn-running {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl
+    @apply inline-flex h-12 items-center justify-center gap-2 rounded-xl
       border border-signal-stage/40 bg-signal-stage/10 px-5 text-signal-stage
       transition-colors duration-200 hover:border-signal-foul/60 hover:text-signal-foul
       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal-stage/60
       focus-visible:ring-offset-2 focus-visible:ring-offset-asphalt-0;
   }
+  /* Compact buttons keep a 44px tap target. */
   .btn-sm {
-    @apply h-9 px-4 text-xs;
+    @apply h-11 px-4 text-sm;
   }
-  /* Tactile press — cheapest physical micro-interaction there is. */
   .btn-primary,
   .btn-ghost,
   .btn-danger,
@@ -124,17 +202,63 @@ body {
     }
   }
 
-  /* ── Inputs ───────────────────────────────────────────────────────────── */
+  /* ── Forms ────────────────────────────────────────────────────────────── */
   .input-base {
-    @apply h-11 w-full rounded-xl border border-white/[0.08] bg-asphalt-3 px-3.5
-      text-sm text-white placeholder:text-white/30
-      focus:border-accent/60 focus:outline-none
-      focus:ring-1 focus:ring-accent/40;
+    @apply h-12 w-full rounded-xl border border-white/[0.12] bg-asphalt-3 px-3.5
+      text-base text-white placeholder:text-white/45
+      focus:border-accent focus:outline-none
+      focus:ring-2 focus:ring-accent/30;
+  }
+  .field-label {
+    @apply mb-1.5 block text-sm font-medium text-white/80;
+  }
+  .field-hint {
+    @apply mt-1 text-xs text-white/55;
   }
 
-  /* ── Label voice ──────────────────────────────────────────────────────── */
+  /* ── Label voices ─────────────────────────────────────────────────────── */
+  /* The ONE permitted uppercase: a small section eyebrow, max one/section. */
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-wider text-accent;
+  }
+  /* Legacy name, calmed: sentence-case-friendly small label (not mono). */
   .label-mono {
-    @apply font-mono text-[10px] font-medium uppercase tracking-[0.25em] text-white/45;
+    @apply font-sans text-xs font-medium text-white/60;
+  }
+
+  /* Numbered step marker: 24px accent-outline circle. */
+  .step-badge {
+    @apply inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full
+      border border-accent bg-accent/10 font-display text-xs font-bold text-accent;
+  }
+
+  /* Label left / value right result row. */
+  .stat-row {
+    @apply flex items-baseline justify-between gap-4 border-b border-white/[0.08] py-2.5
+      text-sm text-white/70;
+  }
+  .stat-row:last-child {
+    @apply border-b-0;
+  }
+  .stat-row > :last-child {
+    @apply text-right font-mono font-medium tabular-nums text-white;
+  }
+
+  /* Two-option switch (Simple | Advanced). Use role="tablist" on the wrapper
+     and aria-selected (or aria-pressed) on each child button. */
+  .seg-control {
+    @apply inline-flex h-11 items-stretch gap-1 rounded-xl border border-white/[0.12]
+      bg-asphalt-3 p-1;
+  }
+  .seg-control > button {
+    @apply inline-flex items-center justify-center rounded-lg px-4 font-display
+      text-sm font-semibold text-white/65 transition-colors
+      hover:text-white
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/70;
+  }
+  .seg-control > button[aria-selected='true'],
+  .seg-control > button[aria-pressed='true'] {
+    @apply bg-accent text-on-accent;
   }
 
   /* ── Skeleton shimmer ─────────────────────────────────────────────────── */
@@ -149,7 +273,7 @@ body {
     background: linear-gradient(
       90deg,
       transparent,
-      rgba(255, 255, 255, 0.07),
+      rgb(var(--fg) / 0.07),
       transparent
     );
     animation: mq-shimmer 1.6s ease-in-out infinite;
@@ -160,11 +284,9 @@ body {
     }
   }
 
-  /* ── v4: Timeslip — the signature result surface ─────────────────────────
-     Perforated (dashed) top & bottom edges like the printed slip from the
-     timing booth. Compose rows with .timeslip-row. */
+  /* ── Timeslip — the printed-slip result surface (perforated edges) ───── */
   .timeslip {
-    @apply relative border-x border-white/[0.08] bg-asphalt-1 px-5 py-5;
+    @apply relative border-x border-white/[0.1] bg-asphalt-1 px-5 py-5;
   }
   .timeslip::before,
   .timeslip::after {
@@ -175,7 +297,7 @@ body {
     height: 1px;
     background-image: repeating-linear-gradient(
       90deg,
-      rgba(255, 255, 255, 0.28) 0 6px,
+      rgb(var(--fg) / 0.28) 0 6px,
       transparent 6px 12px
     );
   }
@@ -193,10 +315,10 @@ body {
     @apply border-b-0;
   }
 
-  /* ── v4: Chips — small mono status/meta pills ────────────────────────── */
+  /* ── Chips — small status/meta pills (calm: sentence case, not mono) ── */
   .chip {
-    @apply inline-flex h-6 items-center gap-1 rounded border border-white/[0.12]
-      px-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/65;
+    @apply inline-flex h-6 items-center gap-1 rounded-md border border-white/[0.14]
+      px-2 text-xs font-medium text-white/70;
   }
   .chip-volt {
     @apply border-accent/35 bg-accent/[0.08] text-accent;
@@ -211,10 +333,10 @@ body {
     @apply border-signal-foul/35 bg-signal-foul/[0.08] text-signal-foul;
   }
   .chip-mint {
-    @apply border-mint/35 bg-mint/[0.08] text-mint;
+    @apply border-signal-go/35 bg-signal-go/[0.08] text-signal-go;
   }
 
-  /* ── v4: Delta chips — ET sign convention: negative = faster = green ── */
+  /* ── Delta chips — quarter-mile time: negative = quicker = green ───── */
   .delta-down {
     @apply font-mono tabular-nums text-signal-go;
   }
@@ -222,12 +344,12 @@ body {
     @apply font-mono tabular-nums text-signal-foul;
   }
 
-  /* ── v4: Centerline — the strip's dashed centerline as a divider ─────── */
+  /* ── Centerline — dashed divider ─────────────────────────────────────── */
   .centerline {
     @apply h-px w-full;
     background-image: repeating-linear-gradient(
       90deg,
-      rgba(255, 255, 255, 0.15) 0 8px,
+      rgb(var(--fg) / 0.15) 0 8px,
       transparent 8px 16px
     );
   }
@@ -235,7 +357,7 @@ body {
     @apply w-px;
     background-image: repeating-linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.07) 0 10px,
+      rgb(var(--fg) / 0.1) 0 10px,
       transparent 10px 22px
     );
   }
@@ -249,7 +371,7 @@ body {
 
 /* Utility classes */
 @layer utilities {
-  /* legacy name — now a volt gradient (blog/content compatibility) */
+  /* legacy names — an accent gradient (blog/content compatibility) */
   .text-gradient-orange {
     @apply bg-gradient-to-br from-accent-bright via-accent to-accent-deep bg-clip-text text-transparent;
   }
@@ -258,14 +380,14 @@ body {
   }
 
   .glow-orange {
-    box-shadow: 0 0 32px rgba(201, 242, 49, 0.22), 0 0 64px rgba(201, 242, 49, 0.08);
+    box-shadow: 0 0 32px rgb(var(--accent) / 0.22), 0 0 64px rgb(var(--accent) / 0.08);
   }
 
   .glass {
     @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.08];
   }
 
-  /* kept for any legacy usage; v4 pages do not mount a grain overlay */
+  /* kept for any legacy usage; pages do not mount a grain overlay */
   .grain {
     position: fixed;
     inset: 0;
@@ -277,7 +399,7 @@ body {
   }
 }
 
-/* ── CodeComment label line (kept API — v4 renders as label voice) ── */
+/* ── CodeComment label line (kept API) ── */
 @keyframes cc-blink {
   0%,
   49% {
@@ -313,5 +435,18 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .route-fade {
     animation: none;
+  }
+}
+
+/* Visible keyboard focus on every native control that has no bespoke ring. */
+:where(a, button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid rgb(var(--accent));
+  outline-offset: 2px;
+}
+
+/* Keep page content clear of the fixed mobile tool bar (see MobileToolBar). */
+@media (max-width: 1023.98px) {
+  body:has(.mq-toolbar) {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom));
   }
 }

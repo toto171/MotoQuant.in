@@ -8,9 +8,12 @@ invariant deliberately, change its enforcement and this doc in the same PR.
 
 ## I1 — Reference baselines are bit-identical
 
-**What.** `GSX-R 1000 K5 = 9.9331 s`, `YZF-R1 4C8 = 10.1436 s`,
-`Hayabusa Gen1 = 10.3633 s` (full precision in `scripts/check_baselines.py`).
-Refactors must produce Δ = 0.0000.
+**What.** `GSX-R 1000 K5 = 10.0436 s`, `YZF-R1 4C8 = 10.1092 s`,
+`Hayabusa Gen1 = 10.1100 s` (full precision in `scripts/check_baselines.py`).
+Refactors must produce Δ = 0.0000. Re-pinned 2026-11-05 by the deliberate
+2026-10/11 accuracy epoch (previous pins 9.9331 / 10.1436 / 10.3633;
+evidence `reports/acc_final_2026_11_05.json`). Since that epoch ET is timed
+from the 1-ft beam rollout: ET = t(402.336 m) − t(0.3048 m).
 
 **Why.** These three are the only hand-curated, human-validated configs. They
 are the fixed point the whole physics model is trusted against. If a "harmless"
@@ -83,28 +86,35 @@ check, and the release checklist.
 ## I7 — Security guarantees
 
 **What / Why / Enforcement.**
-- **Webhooks fail closed.** Unset signing secret ⇒ reject, never trust. (Stripe
-  + Razorpay signature verification, constant-time.) — `tests/test_payments.py`.
-- **Client IP for rate-limit/quota = rightmost `X-Forwarded-For` hop** (single
-  trusted proxy). The leftmost is client-spoofable. Implemented in
-  `client_ip()` (`motoquant/ratelimit.py`). **Partially enforced:**
-  `test_x_forwarded_for_distinguishes_clients` in `tests/test_ratelimit.py`
-  pins that the header is used for keying, but it sends a *single-hop* value,
-  so it cannot tell rightmost from leftmost; nothing currently pins the hop
-  selection, and `tests/test_api.py` (named here previously) has no
-  `X-Forwarded-For` test at all. A multi-hop case is the missing pin.
+- **Everything is free; per-IP fuses replace quotas.** There are no tiers, no
+  quota and no payment code (ADR-0006). Every compute-heavy public route
+  carries a `rate_limit(...)` dependency, and chat also has a per-IP daily cap
+  (`MOTOQUANT_CHAT_DAILY_LIMIT`, default 200; `0` disables), which is the
+  LLM-bill fuse. Rate-limit buckets expire on their **own** window, so a
+  short-window call can never evict a daily counter. —
+  `tests/test_public_route_fuses.py`, `tests/test_chat_fuses.py` (the chat
+  agent's heavy tools draw on the optimize bucket; classic chat has its own
+  tighter one), `tests/test_ratelimit.py::TestPerKeyWindows`,
+  `tests/test_open_source_pivot.py::TestChatDailyCap`, and
+  `tests/test_open_source_pivot.py::TestMonetizationIsGone` (no payment or
+  subscription routes, no quota headers, no paywall can creep back).
+- **Client IP for rate limiting = the N-th `X-Forwarded-For` hop from the
+  right, for N = trusted proxy hops** (`MOTOQUANT_TRUSTED_PROXY_HOPS`; unset =
+  1 on Render or behind a loopback/unix/private-network proxy, else 0 = key
+  on the socket peer). The leftmost hop is client-spoofable and is never
+  used. Implemented in `client_ip()` (`motoquant/ratelimit.py`). Enforced
+  by `tests/test_fixwave_sec_xff.py` (multi-hop selection, spoofing without
+  a trusted proxy, invalid values failing closed) and
+  `test_x_forwarded_for_distinguishes_clients` in `tests/test_ratelimit.py`.
 - **`web_fetch` re-checks the SSRF guard on every redirect hop** and bounds the
   whole chain to one timeout. Any server-side fetch of a user/LLM-controlled URL
   must too. — `tests/test_webtools_ssrf.py`.
-- **`motoquant.auth` refuses to *import* while `JWT_SECRET` is the public
-  default and `MOTOQUANT_BILLING_ENFORCE` is truthy** — a forgeable signing key
-  in commercial mode is a free self-upgrade to any paid tier. With billing off
-  (the shipped open-beta posture) the same condition only logs a warning, since
-  hard-failing there would take the live beta down over a documented
-  pre-commercial TODO. The guard keys on the secret's *value*, not on whether
-  the env var was set. — `tests/test_auth.py::TestJwtDefaultSecretBootGuard`
-  (boots a fresh interpreter per case; the guard is module-level code, so
-  reload/monkeypatch would test a re-implementation instead).
+- **No accounts, and nothing a visitor sends is shown to other visitors.**
+  Saved runs stay in the browser; timeslips re-simulate the setup in their
+  link, so a shared time is always one the physics produced. The POST routes
+  are an explicit allow-list of computations, and no route accepts PUT, PATCH
+  or DELETE. — `tests/test_open_source_pivot.py` (`TestNoAccounts`,
+  `TestPublicWriteSurface`).
 - **SQL is always parameterized.** No f-string/format into queries with user
   data.
 - **No secrets in tracked files.** — `scripts/health_check.py` secret scan,
@@ -120,3 +130,22 @@ re-implement the fix inside the test.
 
 **Enforcement.** Code review + this doc. When adding a regression test, ask:
 "would this fail on `git revert` of the fix?"
+
+## I9 — The docs do not promise what the tree does not have
+
+**What.** In the live docs (README, CONTRIBUTING, AGENTS, SECURITY, the
+`docs/` guides, the `skills/motoquant` reference): every relative link
+resolves, every `make` target and CLI subcommand named exists, every
+CODEOWNERS pattern matches a tracked file, the packaging metadata matches the
+files it points at, the licence named is the one the repository uses
+(Apache-2.0), there is one version number (`motoquant.__version__`), and the
+retired product wording (paid tiers, the old "Pro" name, usage quotas) does
+not appear.
+
+**Why.** Each of these drifted at least once: a setup recipe that installed no
+dependencies, a `make` target that did not exist, a CODEOWNERS path with no
+file behind it, two different licences named in two places.
+
+**Enforcement.** `tests/test_docs_truth_2026_11.py` (in `make test-fast` and
+the PR fast tier) and the `Docs truth` workflow, which runs it on docs-only
+changes that the code-filtered CI would skip.

@@ -19,10 +19,13 @@ on:
     paths:
       - "web/**"
       - ".github/workflows/web-verify.yml"
+      # web/scripts/lib.test.mjs reads the issue forms it prefills
+      - ".github/ISSUE_TEMPLATE/**"
   pull_request:
     paths:
       - "web/**"
       - ".github/workflows/web-verify.yml"
+      - ".github/ISSUE_TEMPLATE/**"
 
 jobs:
   verify:
@@ -48,6 +51,11 @@ jobs:
       # This catches null-byte tails and truncation in <1 second.
       - name: Source integrity (npm run verify)
         run: node scripts/verify-web.mjs
+
+      # Saved runs and timeslip links (lib/runs.js, lib/timeslip.js). Pure
+      # functions, no install needed.
+      - name: Unit tests (lib)
+        run: node --test scripts/*.test.mjs
 
       # Step 2 — full install, then real build. Catches every other
       # JSX/TSX issue that the integrity check is too loose to detect.

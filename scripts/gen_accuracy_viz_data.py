@@ -14,6 +14,12 @@ three reference baselines, so the frontend can render a real-vs-sim scatter,
 a residual distribution, a per-cluster breakdown, and a best-predictions table
 from ONE committed file.
 
+Binding + source weights come from ``phys_weighted_sweep.bind`` (->
+``sweep_lib.bind_benchmark_for_record``), under the headline rule set by
+default (``--rules legacy`` reproduces a pre-epoch dataset). Each row is
+scored under its benchmark's timing convention
+(``sweep_lib.timing_convention``) when the sweep stored the matching run.
+
 Usage:
     # 1) run the weighted sweep so chunk_*.json exist (default /tmp/mq_sweep):
     MOTOQUANT_DB=motoquant.db python scripts/phys_weighted_sweep.py run /tmp/mq_sweep 800
@@ -28,21 +34,29 @@ import argparse
 import json
 import statistics as st
 import sys
+from datetime import date
 from pathlib import Path
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from motoquant import MotoQuantEngine  # noqa: E402
 from motoquant.defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8  # noqa: E402
-from scripts.phys_weighted_sweep import _bench_map, source_weight  # noqa: E402
-from scripts.sweep_lib import source_quality  # noqa: E402
-from scripts.sweep_with_clusters import (  # noqa: E402
-    _model_specificity_score,
-    _wb_match,
-    cluster_for,
+from motoquant.engine_select import make_engine  # noqa: E402
+from scripts.phys_weighted_sweep import (  # noqa: E402
+    HEADLINE_RULES,
+    RULES,
+    _bench_map,
+    bind,
 )
+from scripts.sweep_lib import (  # noqa: E402
+    bind_benchmark_for_record,
+    sim_et_for_convention,
+    source_quality,
+    source_quality_legacy,
+    timing_convention,
+)
+from scripts.sweep_with_clusters import cluster_for  # noqa: E402
 
 # Human labels for the cluster keys the sweep emits (cluster_for() returns
 # hyphenated keys).
@@ -64,39 +78,72 @@ CLUSTER_LABELS = {
 }
 
 
-def _match_benchmark(rec, bm):
-    """Mirror phys_weighted_sweep.report()'s per-row best-benchmark pick."""
-    m_lo = rec["manufacturer"].lower()
-    mod_lo = rec["model"].lower()
-    yf = rec.get("year_from") or 0
-    yt = rec.get("year_to") or yf
-    best = None
-    best_score = -1
-    best_in = False
-    for (bmf, bmod), entries in bm.items():
-        if not (_wb_match(bmf, m_lo) and _wb_match(bmod, mod_lo)):
-            continue
-        in_e = None
-        for byear, te, tt, src in entries:
-            if yf <= byear <= yt or (not yt and yf == byear):
-                in_e = (te, tt, src)
-                break
-        fb = (entries[0][1], entries[0][2], entries[0][3])
-        chosen = in_e if in_e is not None else fb
-        e_in = in_e is not None
-        sc = _model_specificity_score(bmod)
-        if e_in and not best_in:
-            best, best_score, best_in = chosen, sc, True
-        elif e_in == best_in and sc > best_score:
-            best, best_score = chosen, sc
-    return best
+def bind_record(rec, bm, rules=HEADLINE_RULES):
+    """Bind one swept record under ``rules`` — the SAME binding + source
+    weights the published sweep uses (``phys_weighted_sweep.bind`` ->
+    ``sweep_lib.bind_benchmark_for_record``; one implementation, 2026-10
+    epoch policy by default). Returns ``(real_et, real_trap, src, weight)``
+    or ``None``.
+
+    Before 2026-10 round 2 this script carried its own copy of the LEGACY
+    binding (first in-range entry, else the group's first entry whatever its
+    year) and then scored it with the EPOCH weights — a mixed rule set the
+    sweep never used, so the /validation explorer could disagree with the
+    headline it sits next to.
+    """
+    return bind(rec, bm, rules)
+
+
+def quality_label(src, rules=HEADLINE_RULES):
+    """The source-quality label matching ``rules``' weights."""
+    if rules == "legacy":
+        return source_quality_legacy(src)[1]
+    return source_quality(src)[1]
+
+
+def _match_benchmark(rec, bm, policy="legacy"):
+    """Legacy-rule binding helper, kept as a thin delegate to
+    ``sweep_lib.bind_benchmark_for_record`` (no logic of its own) for
+    callers that compare against the pre-epoch rule
+    (tests/test_epoch_tune_scripts.py). ``main()`` does not use it — it binds
+    through :func:`bind_record`. Returns ``(real_et, real_trap, src)`` or
+    ``None``."""
+    return bind_benchmark_for_record(
+        rec["manufacturer"],
+        rec["model"],
+        rec.get("year_from"),
+        rec.get("year_to"),
+        bm,
+        policy=policy,
+    )
+
+
+def scored_sim_et(rec, src):
+    """``(sim_et, fell_back)`` — the record's sim ET under the benchmark's
+    timing convention (``sweep_lib.timing_convention``): a ``first_motion``
+    row is scored on the record's ``sim_et_first_motion`` run when the sweep
+    stored one. A sweep that only ran the default 1-ft rollout has no such
+    run; the row then falls back to ``sim_et`` with ``fell_back=True`` and
+    :func:`main` reports how many rows did (the output schema is unchanged)."""
+    et = sim_et_for_convention(rec, src)
+    if et is None:
+        return rec["sim_et"], timing_convention(src) != "rollout_1ft"
+    return et, False
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--state-dir", default="/tmp/mq_sweep")
     ap.add_argument("--out", default="web/app/validation/accuracy_data.json")
-    ap.add_argument("--stamp", default="2026-07-04", help="dataset date label")
+    ap.add_argument(
+        "--stamp", default=date.today().isoformat(), help="dataset date label"
+    )
+    ap.add_argument(
+        "--rules",
+        default=HEADLINE_RULES,
+        choices=sorted(RULES),
+        help="binding + source-weight rule set (default: the headline rules)",
+    )
     args = ap.parse_args()
 
     sd = Path(args.state_dir)
@@ -111,17 +158,19 @@ def main() -> int:
     bm = _bench_map()
     bikes = []
     by_cluster: dict[str, list] = {}
+    fell_back = 0
     for rec in rows:
         if rec.get("error") or rec.get("sim_et") is None:
             continue
-        best = _match_benchmark(rec, bm)
-        if best is None:
+        hit = bind_record(rec, bm, args.rules)
+        if hit is None:
             continue
-        real_et, real_trap, src = best
-        sim_et = round(float(rec["sim_et"]), 4)
+        real_et, real_trap, src, w = hit
+        et, fb = scored_sim_et(rec, src)
+        fell_back += fb
+        sim_et = round(float(et), 4)
         delta = round(sim_et - real_et, 4)
-        w = source_weight(src)
-        _, qual = source_quality(src)
+        qual = quality_label(src, args.rules)
         cl = cluster_for(
             rec["manufacturer"],
             rec["model"],
@@ -169,7 +218,7 @@ def main() -> int:
         ("R1", yzfr1_4c8),
         ("Hayabusa", hayabusa_gen1),
     ]:
-        r = MotoQuantEngine(fn()).run(use_adaptive_dt=False, max_time=26.0)
+        r = make_engine(fn()).run(use_adaptive_dt=False, max_time=26.0)
         refs[label] = round(float(r.time_quarter), 4)
 
     allitems = [(b["delta"], b["weight"]) for b in bikes]
@@ -205,6 +254,11 @@ def main() -> int:
         f"bias={out['overall']['w_bias']:+.4f}s | "
         f"within 0.10s={out['distribution']['within_0_10']} 0.20s={out['distribution']['within_0_20']}"
     )
+    if fell_back:
+        print(
+            f"WARNING: {fell_back} first-motion benchmark rows were scored on the "
+            "default 1-ft-rollout sim (the sweep stored no sim_et_first_motion)."
+        )
     return 0
 
 

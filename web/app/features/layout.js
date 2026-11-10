@@ -4,8 +4,8 @@
 
 import StructuredData, { SITE_URL } from '../StructuredData';
 
-const TITLE = "Features — Physics Drag Sim, Parts ROI, Dragy Import, Build Optimiser (India)";
-const DESCRIPTION = "What you get inside MotoQuant Pro: 15 first-principles physics sub-models (Pacejka tires, RK4 solver, weight transfer, two-stroke expansion-chamber), 541-bike catalog covering Hayabusa to R15 V4 to NS400Z, parts ROI with cost-per-tenth in INR, budget-aware build optimiser, Dragy GPS calibration, A vs B compare, and the smart recommendations engine.";
+const TITLE = "What you can do with MotoQuant — free quarter-mile simulator for motorcycles";
+const DESCRIPTION = "Pick a bike from the 534-bike catalog and see its quarter-mile time, find the best parts for your budget, get a race-day setup for your strip, compare two bikes, check your own timeslips and save and share runs. Free and open source.";
 
 export const metadata = {
   title: TITLE,
@@ -21,7 +21,6 @@ export const metadata = {
     "cost per tenth calculator",
     "cost per tenth inr",
     "dragy import software",
-    "pacejka tire model motorcycle",
     "motorcycle physics simulator features",
     "budget aware build optimiser",
     "knapsack drag bike parts",
@@ -36,7 +35,6 @@ export const metadata = {
     "kawasaki ninja zx-4r quarter mile india",
     "kawasaki ninja 400 india drag",
     "ecu flash cost india motorcycle",
-    "magic formula tire motorcycle",
     "motorcycle 60 ft calculator",
     "yamaha mt-15 v1 simulator",
     "altitude correction motorcycle power",

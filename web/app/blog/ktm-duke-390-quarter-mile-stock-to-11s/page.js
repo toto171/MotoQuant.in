@@ -48,7 +48,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'MotoQuant runs the 2022 KTM Duke 390 against Aamby Valley November conditions — density altitude around 1,100 m, ambient 22°C, relative humidity 55 percent, dry concrete with the OEM Metzeler Sportec M5 rear tire at μ_peak ≈ 1.10. A 70 kg rider in the upright Duke stance. Two-step launch off the limiter at 5,800 rpm. Adaptive RK4 solver, 1 ms timestep. The bike pulls 13.30 seconds with a 162 km/h trap.',
+    text: 'MotoQuant runs the 2022 KTM Duke 390 against Aamby Valley November conditions — density altitude around 1,100 m, ambient 22°C, relative humidity 40 percent, dry asphalt with the OEM Metzeler Sportec M5 rear tire at μ_peak ≈ 1.10. A 70 kg rider in the upright Duke stance. Two-step launch off the limiter at 5,800 rpm. Adaptive RK4 solver, 1 ms timestep. The bike pulls 13.30 seconds with a 162 km/h trap.',
   },
   {
     type: 'table',
@@ -166,16 +166,16 @@ const CONTENT = [
     type: 'table',
     rows: [
       ['Venue', 'Nov DA', 'Stock Duke ET (sim)', 'After ₹49k build (sim)'],
-      ['MMRT Chennai', '~150 m', '13.05 s', '12.30 s'],
-      ['Buddh International Circuit', '~250 m', '13.10 s', '12.35 s'],
-      ['Aamby Valley', '~1,100 m', '13.30 s', '12.55 s'],
-      ['Kari Speedway Coimbatore', '~600 m', '13.18 s', '12.43 s'],
+      ['MMRT Chennai', '~600 m', '13.05 s', '12.30 s'],
+      ['Buddh International Circuit', '~490 m', '13.10 s', '12.35 s'],
+      ['Aamby Valley', '~1,120 m', '13.30 s', '12.55 s'],
+      ['Kari Speedway Coimbatore', '~790 m', '13.18 s', '12.43 s'],
       ['Leh (reference, not a real strip)', '~3,500 m', '13.95 s', '13.20 s'],
     ],
   },
   {
     type: 'p',
-    text: 'The roughly 0.25 second swing between MMRT and Aamby Valley is the largest accuracy-relevant variable on a stock Duke 390. If you have ever wondered why the Pune-area Duke 390 community runs three to four tenths slower than the Chennai community at apparently similar mod levels, this is most of the answer. The other half is the surface — Aamby Valley\'s concrete is consistent but harder than MMRT\'s freshly-laid asphalt, and the launch coefficient differs by about three percent between the two surfaces. None of this is news to active Indian drag racers, but it is worth running through the simulator before booking flights for a specific Valley Run weekend.',
+    text: 'The times in this table come from the engine as it stood in May 2026; the DA column uses the current catalog\'s November normals. On the current engine a stock 2017-2023 Duke 390 is 0.19 s quicker at MMRT than at Aamby Valley in November, and BIC edges MMRT because of MMRT\'s humidity (see the venue comparison post). The roughly 0.2 second swing between MMRT and Aamby Valley is the largest accuracy-relevant variable on a stock Duke 390. If you have ever wondered why the Pune-area Duke 390 community runs three to four tenths slower than the Chennai community at apparently similar mod levels, this is a large part of the answer. None of this is news to active Indian drag racers, but it is worth running through the simulator before booking flights for a specific Valley Run weekend.',
   },
   {
     type: 'h2',
@@ -187,7 +187,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'What the simulator can do is answer practical questions with documented physics. "Will a sprocket swap and a sticky tire get my Duke 390 under 13 seconds at MMRT?" Yes, sim says 12.78 seconds. "Is the SC-Project slip-on worth ₹24,000?" Sim says no — twenty thousand rupees per tenth is the worst ROI on the practical Indian mod list. "What is the cheapest path to a 12-second Duke 390?" Sim says roughly ₹49,000 across five mods, plus a strip at sea level and a rider who can launch the bike cleanly. The simulator is honest about the cluster bias band of ±0.4 seconds; if you upload a Dragy timeslip, it tightens that band to your specific bike.',
+    text: 'What the simulator can do is answer practical questions with documented physics. "Will a sprocket swap and a sticky tire get my Duke 390 under 13 seconds at MMRT?" Yes, sim says 12.78 seconds. "Is the SC-Project slip-on worth ₹24,000?" Sim says no — twenty thousand rupees per tenth is the worst ROI on the practical Indian mod list. "What is the cheapest path to a 12-second Duke 390?" Sim says roughly ₹49,000 across five mods, plus a strip at sea level and a rider who can launch the bike cleanly. The simulator is honest about the cluster bias band of ±0.4 seconds; if you have a Dragy timeslip, submit it through the "Submit a timeslip" form; a reviewed run joins the benchmark set.',
   },
   {
     type: 'h2',
@@ -195,11 +195,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The MotoQuant simulator at motoquant.in carries the 2022 KTM Duke 390 in its catalog of 541 bikes, alongside the 2024 third-generation Duke 390 (the longer-stroke 399 cc version), the RC 390, the Adventure 390, and 14 other 390-class platforms. The parts catalog has Powertronic, DNA, Eurogrip, SC-Project, Akrapovic, JT sprockets, DID chains, and a few dozen other Indian-relevant aftermarket options, each priced in INR and fitment-checked against the bike. You can sweep rider weight, ambient temperature, density altitude, tire compound, sprocket combinations, and any subset of compatible mods; the engine returns ET, trap, splits, and a cost-per-tenth ranking in roughly fifty milliseconds per simulation.',
+    text: 'The MotoQuant simulator at motoquant.in carries the 2022 KTM Duke 390 in its catalog of 534 bikes, alongside the 2024 third-generation Duke 390 (the longer-stroke 399 cc version), the RC 390, the Adventure 390, and 14 other 390-class platforms. The parts catalog has Powertronic, DNA, Eurogrip, SC-Project, Akrapovic, JT sprockets, DID chains, and a few dozen other Indian-relevant aftermarket options, each priced in INR and fitment-checked against the bike. You can sweep rider weight, ambient temperature, density altitude, tire compound, sprocket combinations, and any subset of compatible mods; the engine returns ET, trap, splits, and a cost-per-tenth ranking in roughly fifty milliseconds per simulation.',
   },
   {
     type: 'p',
-    text: 'The free tier covers unlimited stock-tune simulations. Pro unlocks the full parts-ROI engine, the cluster-bias-aware Dragy calibrator, and the build optimiser that solves the 0/1 knapsack of "best ET under ₹X budget" exactly. The Fast Track Racing 11.342 second pass is not on the free tier — but the path from a stock 13.30 to a realistic 12.55 absolutely is, and that is the gap that matters to most Duke 390 owners.',
+    text: 'MotoQuant is free and open source, and it includes the full parts-ROI engine and the build optimiser that solves the 0/1 knapsack of "best ET under ₹X budget" exactly. The Fast Track Racing 11.342 second pass is out of reach for a stock-plus-bolt-ons build — but the path from a stock 13.30 to a realistic 12.55 absolutely is, and that is the gap that matters to most Duke 390 owners.',
   },
 ];
 
@@ -247,7 +247,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -270,7 +270,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -298,7 +298,7 @@ export default function PostPage() {
             {['KTM', 'Duke 390', 'Indian 400cc', 'drag mods', 'cost per tenth'].map((t) => (
               <span
                 key={t}
-                className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
               >
                 {t}
               </span>
@@ -307,7 +307,7 @@ export default function PostPage() {
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             KTM Duke 390 Quarter Mile: From 13.3s Stock to an 11.342s Record
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             01 June 2026 · 13 min read · MotoQuant Blog
           </div>
         </div>
@@ -323,9 +323,9 @@ export default function PostPage() {
           </div>
           <Link
             href="/simulator"
-            className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
+            className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
           >
-            Run sim →
+            Open the simulator →
           </Link>
         </div>
 
@@ -388,13 +388,6 @@ export default function PostPage() {
                 Browse the full bike catalog
               </Link>{' '}
               — 2022 Duke 390, 2024 Gen 3 Duke 390, RC 390, Adventure 390, and 14 other 390-class platforms with full spec sheets and OEM tire fitments.
-            </li>
-            <li>
-              ·{' '}
-              <Link href="/pricing" className="text-brand-accent hover:text-brand-orange transition-colors">
-                Pricing
-              </Link>{' '}
-              — free tier covers stock-tune Duke 390 simulations; Pro unlocks the parts-ROI engine, the Dragy calibrator, and the build optimiser.
             </li>
           </ul>
         </div>

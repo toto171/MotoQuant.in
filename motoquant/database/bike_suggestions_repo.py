@@ -1,12 +1,14 @@
 """
-MotoQuant Pro — Bike Suggestions Repository
-===========================================
-Stores user-submitted bike addition requests from the web form at
-``motoquant.in/bikes`` (and the matching ``POST /api/bikes/suggest`` endpoint).
+MotoQuant — Bike Suggestions Repository
+=======================================
+Stores estimated bikes that are missing from the catalog, for a maintainer to
+review. Only callers that opt in write here (``simulate_estimated_bike(...,
+log_suggestion=True)``, e.g. local CLI use); the public chat agent does not.
+Riders suggest bikes through the public issue tracker, not through this table.
 
 Workflow
 --------
-    web form → POST /api/bikes/suggest → repo.create(...)
+    opt-in estimate → repo.create(...)
         ↓
     (human review later)
         ↓

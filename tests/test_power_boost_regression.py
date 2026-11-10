@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import copy
 import unittest
+from pathlib import Path
 
 import motoquant
 from motoquant.database.bridge import db_row_to_config
@@ -27,8 +28,15 @@ from tests._helpers import live_db_copy
 
 
 def _open_db():
-    """Open DB via writable-fs copy (dodges FUSE-mount sqlite I/O errors)."""
-    return live_db_copy()
+    """Open a writable copy of the SHIPPED catalog.
+
+    Pinned to the repo motoquant.db: bare live_db_copy() prefers
+    $MOTOQUANT_DB, which sibling modules point at freshly seeded tmp DBs, so
+    this stale-DB guard would validate a DB that matches spec_to_bike_config
+    by construction instead of the artifact that ships.
+    """
+    repo_db = Path(__file__).resolve().parent.parent / "motoquant.db"
+    return live_db_copy(repo_db if repo_db.exists() else None)
 
 
 def _load_db_r15_v3():
@@ -163,9 +171,9 @@ class TestReferenceBaselines(unittest.TestCase):
     in CLAUDE.md's session entry. Never widen the delta to "make the test pass".
     """
 
-    K5_BASELINE_S = 9.9331
-    R1_BASELINE_S = 10.1436
-    HAYABUSA_BASELINE_S = 10.3633
+    K5_BASELINE_S = 10.0436
+    R1_BASELINE_S = 10.1092
+    HAYABUSA_BASELINE_S = 10.1100
     BASELINE_TOLERANCE = 0.001  # 1 ms — sim is exact to 4 decimals
 
     def test_k5(self):

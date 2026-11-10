@@ -1,14 +1,13 @@
 'use client';
 
 /**
- * MobileToolBar — app-style fixed bottom tab bar for the five product tools
- * (IGNITION v5 skin). Rendered only below lg and only on tool routes, where
- * the hamburger drawer buried the product two taps deep. Mounted once from
- * SiteNav so every page gets it without per-page wiring.
+ * MobileToolBar — app-style fixed bottom tab bar for the five tools
+ * (CLARITY v6). Rendered only below lg and only on tool routes, where the
+ * hamburger drawer would bury the product two taps deep. Mounted once from
+ * SiteNav. Labels (paths unchanged): Simulate / Upgrades / Setup / Bikes / Board.
  *
- * Translucent blur so overlapping the page tail stays readable; safe-area
- * inset respected for gesture-nav phones. Active tab = signal-orange text +
- * orange tint pill (the one accent detail in this viewport strip).
+ * Adds the `mq-toolbar` class; globals.css pads <body> while it is mounted so
+ * it never covers page content. Safe-area inset respected.
  */
 
 import Link from 'next/link';
@@ -17,8 +16,8 @@ import { Bike, Gauge, Trophy, Wrench, Zap } from 'lucide-react';
 
 const TOOLS = [
   { href: '/simulator', label: 'Simulate', icon: Gauge },
-  { href: '/optimize', label: 'Optimize', icon: Wrench },
-  { href: '/autotune', label: 'Tune', icon: Zap },
+  { href: '/optimize', label: 'Upgrades', icon: Wrench },
+  { href: '/autotune', label: 'Setup', icon: Zap },
   { href: '/bikes', label: 'Bikes', icon: Bike },
   { href: '/leaderboard', label: 'Board', icon: Trophy },
 ];
@@ -35,7 +34,7 @@ export default function MobileToolBar() {
   return (
     <nav
       aria-label="Tools"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-white/[0.08] bg-asphalt-0/95 backdrop-blur-xl lg:hidden"
+      className="mq-toolbar fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-asphalt-0/95 backdrop-blur-xl lg:hidden"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className="mx-auto flex max-w-md items-stretch justify-around">
@@ -47,18 +46,18 @@ export default function MobileToolBar() {
               key={t.href}
               href={t.href}
               aria-current={active ? 'page' : undefined}
-              className={`flex min-w-[56px] flex-col items-center gap-1 px-2 pb-2 pt-2 transition-colors ${
-                active ? 'text-accent' : 'text-white/45 hover:text-white/80'
+              className={`flex min-h-[56px] min-w-[56px] flex-1 flex-col items-center justify-center gap-0.5 px-1 py-1.5 transition-colors ${
+                active ? 'text-accent' : 'text-white/60 hover:text-white'
               }`}
             >
               <span
                 className={`flex h-7 w-12 items-center justify-center rounded-full transition-colors ${
-                  active ? 'bg-accent/10' : 'bg-transparent'
+                  active ? 'bg-accent/15' : 'bg-transparent'
                 }`}
               >
                 <Icon size={18} aria-hidden="true" />
               </span>
-              <span className="font-mono text-[9px] uppercase tracking-[0.18em]">{t.label}</span>
+              <span className="text-xs font-medium">{t.label}</span>
             </Link>
           );
         })}

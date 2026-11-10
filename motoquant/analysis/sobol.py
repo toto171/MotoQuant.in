@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Sobol Sensitivity Analysis
-==========================================
+MotoQuant — Sobol Sensitivity Analysis
+======================================
 Global sensitivity analysis (GSA) for the quarter-mile simulation.
 
 Identifies which bike/setup parameters drive the most variance in
@@ -50,8 +50,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from .. import engine_select
 from ..models import BikeConfig
-from ..physics import MotoQuantEngine
 
 # ─────────────────────────────────────────────────────────────────
 # Parameter specification
@@ -82,6 +82,13 @@ class SobolParamSpec:
 # Ten parameters that physically dominate drag-strip ET variance.
 # Bounds are deliberately wide to capture the full operating envelope
 # of road-legal and light-prep motorcycles.
+#
+# Bike-geometry parameters (Cd, frontal area, rolling radius) are RELATIVE to
+# the bike's own nominal value (October 2026): the old absolute windows
+# (Cd 0.55-0.95, area 0.38-0.62 m², radius 0.28-0.33 m) excluded the nominal
+# Cd of 36% of catalog bikes (catalog Cd spans 0.30-0.92), so for those bikes
+# every sample used a Cd the bike never has and the indices described a
+# different machine than base_et_s.
 DEFAULT_PARAM_BOUNDS: dict[str, SobolParamSpec] = {
     "peak_power": SobolParamSpec(
         path="engine.peak_power_hp",
@@ -99,17 +106,17 @@ DEFAULT_PARAM_BOUNDS: dict[str, SobolParamSpec] = {
     ),
     "aero_cd": SobolParamSpec(
         path="aero.cd",
-        low=0.55,
-        high=0.95,
-        kind="absolute",
-        description="Drag coefficient Cd",
+        low=0.85,
+        high=1.15,
+        kind="relative",
+        description="Drag coefficient Cd (±15% of nominal)",
     ),
     "frontal_area": SobolParamSpec(
         path="aero.frontal_area_m2",
-        low=0.38,
-        high=0.62,
-        kind="absolute",
-        description="Frontal area (m²)",
+        low=0.85,
+        high=1.15,
+        kind="relative",
+        description="Frontal area (±15% of nominal)",
     ),
     "tire_mu": SobolParamSpec(
         path="tires.mu_peak",
@@ -120,18 +127,15 @@ DEFAULT_PARAM_BOUNDS: dict[str, SobolParamSpec] = {
     ),
     "rolling_radius": SobolParamSpec(
         path="tires.rear_rolling_radius_m",
-        low=0.280,
-        high=0.330,
-        kind="absolute",
-        description="Rear rolling radius (m)",
+        low=0.95,
+        high=1.05,
+        kind="relative",
+        description="Rear rolling radius (±5% of nominal)",
     ),
-    "reaction_time": SobolParamSpec(
-        path="staging.reaction_time_ms",
-        low=0.0,
-        high=500.0,
-        kind="absolute",
-        description="Reaction time (ms)",
-    ),
+    # No "reaction_time" entry: the ET is timed from the start beam, so the
+    # rider's reaction time never changes it — a dead dimension that only
+    # diluted every other index (tests/test_analysis_fixes_2026_11.py checks
+    # each default parameter moves the ET).
     "redline_rpm": SobolParamSpec(
         path="engine.redline_rpm",
         low=0.90,
@@ -263,6 +267,49 @@ def _set_nested(obj, path: str, value) -> bool:
     return True
 
 
+def scale_dyno_to_peak_power(cfg: BikeConfig, nominal_hp: float) -> None:
+    """Scale ``cfg``'s stored dyno torque curve by new/nominal peak power.
+
+    The physics engine reads the dyno curve, not ``peak_power_hp``, so a
+    perturbed ``peak_power_hp`` alone changes nothing. Applies to naturally
+    aspirated configs with a stored curve whose peak power moved; mutates
+    ``cfg`` in place.
+    """
+    from ..models import DynoCurve  # lazy import to avoid circular dependency
+
+    new_hp = cfg.engine.peak_power_hp
+    hp_changed = abs(new_hp - nominal_hp) > 0.05
+    has_dyno = cfg.engine.dyno_curve is not None
+    is_na = not cfg.forced_induction.is_boosted
+
+    if hp_changed and has_dyno and is_na and nominal_hp > 1.0:
+        ratio = new_hp / nominal_hp
+        dc = cfg.engine.dyno_curve
+        cfg.engine.dyno_curve = DynoCurve(
+            rpm=dc.rpm.copy(),
+            torque_nm=dc.torque_nm * ratio,
+            is_at_wheel=dc.is_at_wheel,
+        )
+
+
+def prepare_config_for_specs(
+    config: BikeConfig, specs: list[SobolParamSpec]
+) -> BikeConfig:
+    """Return the config the Sobol sampler perturbs.
+
+    If any spec perturbs ``drivetrain.final_drive_ratio``, the gearing is
+    normalised onto that field (``final_ratio`` prefers sprocket teeth over
+    ``final_drive_ratio`` for chain bikes, so a sampled ratio would be written
+    but never read and the sensitivity would falsely read ~0). The effective
+    ratio is preserved, so the all-centre run is bit-identical. Works on a
+    copy; otherwise returns ``config`` itself.
+    """
+    if any(s.path == "drivetrain.final_drive_ratio" for s in specs):
+        config = copy.deepcopy(config)
+        config.drivetrain.set_effective_final_drive(config.drivetrain.final_ratio)
+    return config
+
+
 def _apply_sample_row(
     base_config: BikeConfig,
     specs: list[SobolParamSpec],
@@ -286,8 +333,6 @@ def _apply_sample_row(
     Without this, the physics engine ignores the ``peak_power_hp`` field (it
     uses the dyno curve directly), making the power sensitivity appear as zero.
     """
-    from ..models import DynoCurve  # lazy import to avoid circular dependency
-
     cfg = copy.deepcopy(base_config)
     nominal_hp = base_config.engine.peak_power_hp  # capture before any mutations
 
@@ -302,19 +347,7 @@ def _apply_sample_row(
 
     # Dyno curve scaling: if peak_power_hp was perturbed and the config has a
     # dyno curve, scale the torque array so the physics engine sees the change.
-    new_hp = cfg.engine.peak_power_hp
-    hp_changed = abs(new_hp - nominal_hp) > 0.05
-    has_dyno = cfg.engine.dyno_curve is not None
-    is_na = not cfg.forced_induction.is_boosted
-
-    if hp_changed and has_dyno and is_na and nominal_hp > 1.0:
-        ratio = new_hp / nominal_hp
-        dc = cfg.engine.dyno_curve
-        cfg.engine.dyno_curve = DynoCurve(
-            rpm=dc.rpm.copy(),
-            torque_nm=dc.torque_nm * ratio,
-            is_at_wheel=dc.is_at_wheel,
-        )
+    scale_dyno_to_peak_power(cfg, nominal_hp)
 
     return cfg
 
@@ -322,7 +355,7 @@ def _apply_sample_row(
 def _run_et(config: BikeConfig) -> float:
     """Run a simulation and return quarter-mile ET in seconds."""
     try:
-        engine = MotoQuantEngine(config)
+        engine = engine_select.make_engine(config)
         result = engine.run()
         return result.time_quarter
     except Exception as exc:
@@ -398,16 +431,9 @@ def compute_sobol_indices(
     specs = [param_specs[k] for k in keys]
     k = len(specs)
 
-    # If any spec perturbs drivetrain.final_drive_ratio, normalise the config's
-    # gearing onto that field. final_ratio prefers sprocket teeth over
-    # final_drive_ratio for chain bikes, so without this the sampled ratio is
-    # written but never read (the sensitivity would falsely read ~0). Setting
-    # final_drive_ratio to the current *effective* ratio keeps the nominal
-    # (all-centre) run bit-identical while making the knob live. Work on a copy
-    # so the caller's config is untouched.
-    if any(s.path == "drivetrain.final_drive_ratio" for s in specs):
-        config = copy.deepcopy(config)
-        config.drivetrain.set_effective_final_drive(config.drivetrain.final_ratio)
+    # Make a sampled final_drive_ratio live (see prepare_config_for_specs);
+    # works on a copy so the caller's config is untouched.
+    config = prepare_config_for_specs(config, specs)
 
     # Read nominal values once (for relative-kind params)
     nominal_values: list[float] = []

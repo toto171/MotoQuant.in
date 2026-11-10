@@ -1,0 +1,9206 @@
+{
+ "note": "Evidence for reports/session_2026_11_10_epoch.md. Spec path, run(use_adaptive_dt=False, max_time=26.0); matching/weights identical to scripts/phys_weighted_sweep.py. hi_conf = source weight >= 0.7 (instrumented + magazine). Top speed: run_top_speed(max_time=90) scored like scripts/topspeed_sweep.py. Gearing flags: scripts/check_gearing_plausibility.py criteria.",
+ "stages": {
+  "step0_baseline": {
+   "overall": {
+    "n": 276,
+    "w_sum": 198.8,
+    "w_mean_abs": 0.2629,
+    "w_bias": 0.0073,
+    "raw_mean_abs": 0.3724,
+    "raw_bias": -0.0366
+   },
+   "clusters": {
+    "cruiser-1300+": {
+     "n": 5,
+     "w_sum": 3.5,
+     "w_mean_abs": 0.2091,
+     "w_bias": 0.0364,
+     "raw_mean_abs": 0.2091,
+     "raw_bias": 0.0364
+    },
+    "entry-150-200": {
+     "n": 13,
+     "w_sum": 7.6,
+     "w_mean_abs": 0.7015,
+     "w_bias": -0.0105,
+     "raw_mean_abs": 1.1514,
+     "raw_bias": -0.3125
+    },
+    "entry-200-300": {
+     "n": 14,
+     "w_sum": 7.2,
+     "w_mean_abs": 0.2311,
+     "w_bias": -0.0181,
+     "raw_mean_abs": 0.5128,
+     "raw_bias": 0.3192
+    },
+    "litre-sport-195+": {
+     "n": 30,
+     "w_sum": 23.1,
+     "w_mean_abs": 0.1466,
+     "w_bias": 0.0271,
+     "raw_mean_abs": 0.1451,
+     "raw_bias": 0.0257
+    },
+    "litre-sport-600-1000": {
+     "n": 72,
+     "w_sum": 60.4,
+     "w_mean_abs": 0.1755,
+     "w_bias": -0.009,
+     "raw_mean_abs": 0.1787,
+     "raw_bias": -0.0242
+    },
+    "mid-twin-300-500": {
+     "n": 8,
+     "w_sum": 4.7,
+     "w_mean_abs": 0.3614,
+     "w_bias": -0.0383,
+     "raw_mean_abs": 0.3724,
+     "raw_bias": -0.086
+    },
+    "mid-twin-500-700": {
+     "n": 17,
+     "w_sum": 12.6,
+     "w_mean_abs": 0.1451,
+     "w_bias": 0.001,
+     "raw_mean_abs": 0.1404,
+     "raw_bias": 0.0055
+    },
+    "other": {
+     "n": 42,
+     "w_sum": 26.4,
+     "w_mean_abs": 0.3238,
+     "w_bias": 0.0191,
+     "raw_mean_abs": 0.3683,
+     "raw_bias": -0.0314
+    },
+    "single-300-500": {
+     "n": 16,
+     "w_sum": 7.8,
+     "w_mean_abs": 0.5086,
+     "w_bias": 0.0298,
+     "raw_mean_abs": 1.3274,
+     "raw_bias": -0.5091
+    },
+    "small-i4-screamer": {
+     "n": 2,
+     "w_sum": 1.7,
+     "w_mean_abs": 0.9622,
+     "w_bias": 0.1335,
+     "raw_mean_abs": 1.0174,
+     "raw_bias": 0.313
+    },
+    "sport-twin-600-1300": {
+     "n": 48,
+     "w_sum": 38.5,
+     "w_mean_abs": 0.2459,
+     "w_bias": 0.0063,
+     "raw_mean_abs": 0.266,
+     "raw_bias": -0.0219
+    },
+    "two-stroke": {
+     "n": 9,
+     "w_sum": 5.3,
+     "w_mean_abs": 0.6416,
+     "w_bias": 0.0774,
+     "raw_mean_abs": 0.6102,
+     "raw_bias": 0.0845
+    }
+   },
+   "hi_conf": {
+    "n": 200,
+    "w_sum": 179.0,
+    "w_mean_abs": 0.2287,
+    "w_bias": 0.0316,
+    "raw_mean_abs": 0.2291,
+    "raw_bias": 0.0322
+   },
+   "lo_conf": {
+    "n": 76,
+    "w_sum": 19.8,
+    "w_mean_abs": 0.5722,
+    "w_bias": -0.2129,
+    "raw_mean_abs": 0.7495,
+    "raw_bias": -0.2176
+   },
+   "hi_conf_sub400": {
+    "n": 26,
+    "w_sum": 24.8,
+    "w_mean_abs": 0.3912,
+    "w_bias": 0.0475,
+    "raw_mean_abs": 0.3985,
+    "raw_bias": 0.0592
+   },
+   "hi_conf_400plus": {
+    "n": 174,
+    "w_sum": 154.2,
+    "w_mean_abs": 0.2025,
+    "w_bias": 0.0291,
+    "raw_mean_abs": 0.2038,
+    "raw_bias": 0.0281
+   },
+   "lo_conf_sub400": {
+    "n": 31,
+    "w_sum": 6.1,
+    "w_mean_abs": 0.9683,
+    "w_bias": -0.2783,
+    "raw_mean_abs": 1.3323,
+    "raw_bias": -0.336
+   },
+   "hi_conf_clusters": {
+    "cruiser-1300+": {
+     "n": 5,
+     "w_sum": 3.5,
+     "w_mean_abs": 0.2091,
+     "w_bias": 0.0364,
+     "raw_mean_abs": 0.2091,
+     "raw_bias": 0.0364
+    },
+    "entry-150-200": {
+     "n": 7,
+     "w_sum": 7.0,
+     "w_mean_abs": 0.6087,
+     "w_bias": 0.0518,
+     "raw_mean_abs": 0.6087,
+     "raw_bias": 0.0518
+    },
+    "entry-200-300": {
+     "n": 6,
+     "w_sum": 6.0,
+     "w_mean_abs": 0.1738,
+     "w_bias": -0.1056,
+     "raw_mean_abs": 0.1738,
+     "raw_bias": -0.1056
+    },
+    "litre-sport-195+": {
+     "n": 30,
+     "w_sum": 23.1,
+     "w_mean_abs": 0.1466,
+     "w_bias": 0.0271,
+     "raw_mean_abs": 0.1451,
+     "raw_bias": 0.0257
+    },
+    "litre-sport-600-1000": {
+     "n": 62,
+     "w_sum": 56.6,
+     "w_mean_abs": 0.1615,
+     "w_bias": 0.0086,
+     "raw_mean_abs": 0.1569,
+     "raw_bias": 0.0017
+    },
+    "mid-twin-300-500": {
+     "n": 3,
+     "w_sum": 3.0,
+     "w_mean_abs": 0.2533,
+     "w_bias": 0.15,
+     "raw_mean_abs": 0.2533,
+     "raw_bias": 0.15
+    },
+    "mid-twin-500-700": {
+     "n": 12,
+     "w_sum": 11.7,
+     "w_mean_abs": 0.1428,
+     "w_bias": 0.0091,
+     "raw_mean_abs": 0.142,
+     "raw_bias": 0.0117
+    },
+    "other": {
+     "n": 25,
+     "w_sum": 21.7,
+     "w_mean_abs": 0.2784,
+     "w_bias": 0.0778,
+     "raw_mean_abs": 0.2875,
+     "raw_bias": 0.09
+    },
+    "single-300-500": {
+     "n": 6,
+     "w_sum": 6.0,
+     "w_mean_abs": 0.2998,
+     "w_bias": 0.2103,
+     "raw_mean_abs": 0.2998,
+     "raw_bias": 0.2103
+    },
+    "small-i4-screamer": {
+     "n": 2,
+     "w_sum": 1.7,
+     "w_mean_abs": 0.9622,
+     "w_bias": 0.1335,
+     "raw_mean_abs": 1.0174,
+     "raw_bias": 0.313
+    },
+    "sport-twin-600-1300": {
+     "n": 36,
+     "w_sum": 34.5,
+     "w_mean_abs": 0.2311,
+     "w_bias": 0.019,
+     "raw_mean_abs": 0.2315,
+     "raw_bias": 0.0135
+    },
+    "two-stroke": {
+     "n": 6,
+     "w_sum": 4.2,
+     "w_mean_abs": 0.5939,
+     "w_bias": 0.0731,
+     "raw_mean_abs": 0.5939,
+     "raw_bias": 0.0731
+    }
+   },
+   "within_010": 75,
+   "within_020": 138,
+   "topspeed": {
+    "all": {
+     "n": 83,
+     "mean_abs": 28.1,
+     "bias": 24.34,
+     "median_abs": 21.9,
+     "within_10": 24,
+     "within_20": 41
+    },
+    "sub400": {
+     "n": 29,
+     "mean_abs": 35.53,
+     "bias": 35.53,
+     "median_abs": 29.9,
+     "within_10": 2,
+     "within_20": 10
+    },
+    "400plus": {
+     "n": 54,
+     "mean_abs": 24.11,
+     "bias": 18.33,
+     "median_abs": 16.8,
+     "within_10": 22,
+     "within_20": 31
+    },
+    "plateau_count": 458
+   },
+   "gearing_flags": {
+    "n_flagged": 152,
+    "n_total": 538,
+    "buckets": {
+     "tier1-unverified": 22,
+     "generic-primary": 117,
+     "tall-by-design": 10,
+     "explicit-spec": 3
+    }
+   }
+  },
+  "step1_duplicates_shipped": {
+   "overall": {
+    "n": 273,
+    "w_sum": 198.1,
+    "w_mean_abs": 0.262,
+    "w_bias": 0.0087,
+    "raw_mean_abs": 0.3724,
+    "raw_bias": -0.0351
+   },
+   "clusters": {
+    "cruiser-1300+": {
+     "n": 5,
+     "w_sum": 3.5,
+     "w_mean_abs": 0.2091,
+     "w_bias": 0.0364,
+     "raw_mean_abs": 0.2091,
+     "raw_bias": 0.0364
+    },
+    "entry-150-200": {
+     "n": 13,
+     "w_sum": 7.6,
+     "w_mean_abs": 0.7015,
+     "w_bias": -0.0105,
+     "raw_mean_abs": 1.1514,
+     "raw_bias": -0.3125
+    },
+    "entry-200-300": {
+     "n": 14,
+     "w_sum": 7.2,
+     "w_mean_abs": 0.2311,
+     "w_bias": -0.0181,
+     "raw_mean_abs": 0.5128,
+     "raw_bias": 0.3192
+    },
+    "litre-sport-195+": {
+     "n": 30,
+     "w_sum": 23.1,
+     "w_mean_abs": 0.1453,
+     "w_bias": 0.0283,
+     "raw_mean_abs": 0.1437,
+     "raw_bias": 0.0271
+    },
+    "litre-sport-600-1000": {
+     "n": 72,
+     "w_sum": 60.4,
+     "w_mean_abs": 0.1755,
+     "w_bias": -0.009,
+     "raw_mean_abs": 0.1787,
+     "raw_bias": -0.0242
+    },
+    "mid-twin-300-500": {
+     "n": 8,
+     "w_sum": 4.7,
+     "w_mean_abs": 0.3614,
+     "w_bias": -0.0383,
+     "raw_mean_abs": 0.3724,
+     "raw_bias": -0.086
+    },
+    "mid-twin-500-700": {
+     "n": 16,
+     "w_sum": 12.5,
+     "w_mean_abs": 0.1462,
+     "w_bias": -0.0008,
+     "raw_mean_abs": 0.149,
+     "raw_bias": -0.0087
+    },
+    "other": {
+     "n": 42,
+     "w_sum": 26.4,
+     "w_mean_abs": 0.3238,
+     "w_bias": 0.0191,
+     "raw_mean_abs": 0.3683,
+     "raw_bias": -0.0314
+    },
+    "single-300-500": {
+     "n": 16,
+     "w_sum": 7.8,
+     "w_mean_abs": 0.5086,
+     "w_bias": 0.0298,
+     "raw_mean_abs": 1.3274,
+     "raw_bias": -0.5091
+    },
+    "small-i4-screamer": {
+     "n": 2,
+     "w_sum": 1.7,
+     "w_mean_abs": 0.9622,
+     "w_bias": 0.1335,
+     "raw_mean_abs": 1.0174,
+     "raw_bias": 0.313
+    },
+    "sport-twin-600-1300": {
+     "n": 46,
+     "w_sum": 37.9,
+     "w_mean_abs": 0.2413,
+     "w_bias": 0.0134,
+     "raw_mean_abs": 0.2544,
+     "raw_bias": -0.0075
+    },
+    "two-stroke": {
+     "n": 9,
+     "w_sum": 5.3,
+     "w_mean_abs": 0.6416,
+     "w_bias": 0.0774,
+     "raw_mean_abs": 0.6102,
+     "raw_bias": 0.0845
+    }
+   },
+   "hi_conf": {
+    "n": 200,
+    "w_sum": 179.0,
+    "w_mean_abs": 0.2285,
+    "w_bias": 0.0318,
+    "raw_mean_abs": 0.2289,
+    "raw_bias": 0.0324
+   },
+   "lo_conf": {
+    "n": 73,
+    "w_sum": 19.1,
+    "w_mean_abs": 0.5762,
+    "w_bias": -0.208,
+    "raw_mean_abs": 0.7657,
+    "raw_bias": -0.2201
+   },
+   "hi_conf_sub400": {
+    "n": 26,
+    "w_sum": 24.8,
+    "w_mean_abs": 0.3912,
+    "w_bias": 0.0475,
+    "raw_mean_abs": 0.3985,
+    "raw_bias": 0.0592
+   },
+   "hi_conf_400plus": {
+    "n": 174,
+    "w_sum": 154.2,
+    "w_mean_abs": 0.2023,
+    "w_bias": 0.0293,
+    "raw_mean_abs": 0.2035,
+    "raw_bias": 0.0284
+   },
+   "lo_conf_sub400": {
+    "n": 31,
+    "w_sum": 6.1,
+    "w_mean_abs": 0.9683,
+    "w_bias": -0.2783,
+    "raw_mean_abs": 1.3323,
+    "raw_bias": -0.336
+   },
+   "hi_conf_clusters": {
+    "cruiser-1300+": {
+     "n": 5,
+     "w_sum": 3.5,
+     "w_mean_abs": 0.2091,
+     "w_bias": 0.0364,
+     "raw_mean_abs": 0.2091,
+     "raw_bias": 0.0364
+    },
+    "entry-150-200": {
+     "n": 7,
+     "w_sum": 7.0,
+     "w_mean_abs": 0.6087,
+     "w_bias": 0.0518,
+     "raw_mean_abs": 0.6087,
+     "raw_bias": 0.0518
+    },
+    "entry-200-300": {
+     "n": 6,
+     "w_sum": 6.0,
+     "w_mean_abs": 0.1738,
+     "w_bias": -0.1056,
+     "raw_mean_abs": 0.1738,
+     "raw_bias": -0.1056
+    },
+    "litre-sport-195+": {
+     "n": 30,
+     "w_sum": 23.1,
+     "w_mean_abs": 0.1453,
+     "w_bias": 0.0283,
+     "raw_mean_abs": 0.1437,
+     "raw_bias": 0.0271
+    },
+    "litre-sport-600-1000": {
+     "n": 62,
+     "w_sum": 56.6,
+     "w_mean_abs": 0.1615,
+     "w_bias": 0.0086,
+     "raw_mean_abs": 0.1569,
+     "raw_bias": 0.0017
+    },
+    "mid-twin-300-500": {
+     "n": 3,
+     "w_sum": 3.0,
+     "w_mean_abs": 0.2533,
+     "w_bias": 0.15,
+     "raw_mean_abs": 0.2533,
+     "raw_bias": 0.15
+    },
+    "mid-twin-500-700": {
+     "n": 12,
+     "w_sum": 11.7,
+     "w_mean_abs": 0.1428,
+     "w_bias": 0.0091,
+     "raw_mean_abs": 0.142,
+     "raw_bias": 0.0117
+    },
+    "other": {
+     "n": 25,
+     "w_sum": 21.7,
+     "w_mean_abs": 0.2784,
+     "w_bias": 0.0778,
+     "raw_mean_abs": 0.2875,
+     "raw_bias": 0.09
+    },
+    "single-300-500": {
+     "n": 6,
+     "w_sum": 6.0,
+     "w_mean_abs": 0.2998,
+     "w_bias": 0.2103,
+     "raw_mean_abs": 0.2998,
+     "raw_bias": 0.2103
+    },
+    "small-i4-screamer": {
+     "n": 2,
+     "w_sum": 1.7,
+     "w_mean_abs": 0.9622,
+     "w_bias": 0.1335,
+     "raw_mean_abs": 1.0174,
+     "raw_bias": 0.313
+    },
+    "sport-twin-600-1300": {
+     "n": 36,
+     "w_sum": 34.5,
+     "w_mean_abs": 0.2311,
+     "w_bias": 0.019,
+     "raw_mean_abs": 0.2315,
+     "raw_bias": 0.0135
+    },
+    "two-stroke": {
+     "n": 6,
+     "w_sum": 4.2,
+     "w_mean_abs": 0.5939,
+     "w_bias": 0.0731,
+     "raw_mean_abs": 0.5939,
+     "raw_bias": 0.0731
+    }
+   },
+   "within_010": 74,
+   "within_020": 137,
+   "topspeed": {
+    "all": {
+     "n": 83,
+     "mean_abs": 27.8,
+     "bias": 24.04,
+     "median_abs": 21.9,
+     "within_10": 24,
+     "within_20": 41
+    },
+    "sub400": {
+     "n": 29,
+     "mean_abs": 35.53,
+     "bias": 35.53,
+     "median_abs": 29.9,
+     "within_10": 2,
+     "within_20": 10
+    },
+    "400plus": {
+     "n": 54,
+     "mean_abs": 23.65,
+     "bias": 17.87,
+     "median_abs": 16.8,
+     "within_10": 22,
+     "within_20": 31
+    },
+    "plateau_count": 451
+   },
+   "gearing_flags": {
+    "n_flagged": 148,
+    "n_total": 531,
+    "buckets": {
+     "tier1-unverified": 21,
+     "generic-primary": 114,
+     "tall-by-design": 10,
+     "explicit-spec": 3
+    }
+   }
+  },
+  "step1_variantA_not_chosen": {
+   "overall": {
+    "n": 273,
+    "w_sum": 198.1,
+    "w_mean_abs": 0.2635,
+    "w_bias": 0.0073,
+    "raw_mean_abs": 0.3754,
+    "raw_bias": -0.0372
+   },
+   "clusters": {
+    "cruiser-1300+": {
+     "n": 5,
+     "w_sum": 3.5,
+     "w_mean_abs": 0.2091,
+     "w_bias": 0.0364,
+     "raw_mean_abs": 0.2091,
+     "raw_bias": 0.0364
+    },
+    "entry-150-200": {
+     "n": 13,
+     "w_sum": 7.6,
+     "w_mean_abs": 0.7015,
+     "w_bias": -0.0105,
+     "raw_mean_abs": 1.1514,
+     "raw_bias": -0.3125
+    },
+    "entry-200-300": {
+     "n": 14,
+     "w_sum": 7.2,
+     "w_mean_abs": 0.2311,
+     "w_bias": -0.0181,
+     "raw_mean_abs": 0.5128,
+     "raw_bias": 0.3192
+    },
+    "litre-sport-195+": {
+     "n": 30,
+     "w_sum": 23.1,
+     "w_mean_abs": 0.1453,
+     "w_bias": 0.0283,
+     "raw_mean_abs": 0.1437,
+     "raw_bias": 0.0271
+    },
+    "litre-sport-600-1000": {
+     "n": 72,
+     "w_sum": 60.4,
+     "w_mean_abs": 0.1755,
+     "w_bias": -0.009,
+     "raw_mean_abs": 0.1787,
+     "raw_bias": -0.0242
+    },
+    "mid-twin-300-500": {
+     "n": 8,
+     "w_sum": 4.7,
+     "w_mean_abs": 0.3614,
+     "w_bias": -0.0383,
+     "raw_mean_abs": 0.3724,
+     "raw_bias": -0.086
+    },
+    "mid-twin-500-700": {
+     "n": 16,
+     "w_sum": 12.5,
+     "w_mean_abs": 0.1456,
+     "w_bias": 0.0016,
+     "raw_mean_abs": 0.1443,
+     "raw_bias": 0.0106
+    },
+    "other": {
+     "n": 42,
+     "w_sum": 26.4,
+     "w_mean_abs": 0.3238,
+     "w_bias": 0.0191,
+     "raw_mean_abs": 0.3683,
+     "raw_bias": -0.0314
+    },
+    "single-300-500": {
+     "n": 16,
+     "w_sum": 7.8,
+     "w_mean_abs": 0.5086,
+     "w_bias": 0.0298,
+     "raw_mean_abs": 1.3274,
+     "raw_bias": -0.5091
+    },
+    "small-i4-screamer": {
+     "n": 2,
+     "w_sum": 1.7,
+     "w_mean_abs": 0.9622,
+     "w_bias": 0.1335,
+     "raw_mean_abs": 1.0174,
+     "raw_bias": 0.313
+    },
+    "sport-twin-600-1300": {
+     "n": 46,
+     "w_sum": 37.9,
+     "w_mean_abs": 0.2491,
+     "w_bias": 0.0056,
+     "raw_mean_abs": 0.2737,
+     "raw_bias": -0.0268
+    },
+    "two-stroke": {
+     "n": 9,
+     "w_sum": 5.3,
+     "w_mean_abs": 0.6416,
+     "w_bias": 0.0774,
+     "raw_mean_abs": 0.6102,
+     "raw_bias": 0.0845
+    }
+   },
+   "hi_conf": {
+    "n": 200,
+    "w_sum": 179.0,
+    "w_mean_abs": 0.2285,
+    "w_bias": 0.0318,
+    "raw_mean_abs": 0.2289,
+    "raw_bias": 0.0324
+   },
+   "lo_conf": {
+    "n": 73,
+    "w_sum": 19.1,
+    "w_mean_abs": 0.5912,
+    "w_bias": -0.2219,
+    "raw_mean_abs": 0.7768,
+    "raw_bias": -0.228
+   },
+   "hi_conf_sub400": {
+    "n": 26,
+    "w_sum": 24.8,
+    "w_mean_abs": 0.3912,
+    "w_bias": 0.0475,
+    "raw_mean_abs": 0.3985,
+    "raw_bias": 0.0592
+   },
+   "hi_conf_400plus": {
+    "n": 174,
+    "w_sum": 154.2,
+    "w_mean_abs": 0.2023,
+    "w_bias": 0.0293,
+    "raw_mean_abs": 0.2035,
+    "raw_bias": 0.0284
+   },
+   "lo_conf_sub400": {
+    "n": 31,
+    "w_sum": 6.1,
+    "w_mean_abs": 0.9683,
+    "w_bias": -0.2783,
+    "raw_mean_abs": 1.3323,
+    "raw_bias": -0.336
+   },
+   "hi_conf_clusters": {
+    "cruiser-1300+": {
+     "n": 5,
+     "w_sum": 3.5,
+     "w_mean_abs": 0.2091,
+     "w_bias": 0.0364,
+     "raw_mean_abs": 0.2091,
+     "raw_bias": 0.0364
+    },
+    "entry-150-200": {
+     "n": 7,
+     "w_sum": 7.0,
+     "w_mean_abs": 0.6087,
+     "w_bias": 0.0518,
+     "raw_mean_abs": 0.6087,
+     "raw_bias": 0.0518
+    },
+    "entry-200-300": {
+     "n": 6,
+     "w_sum": 6.0,
+     "w_mean_abs": 0.1738,
+     "w_bias": -0.1056,
+     "raw_mean_abs": 0.1738,
+     "raw_bias": -0.1056
+    },
+    "litre-sport-195+": {
+     "n": 30,
+     "w_sum": 23.1,
+     "w_mean_abs": 0.1453,
+     "w_bias": 0.0283,
+     "raw_mean_abs": 0.1437,
+     "raw_bias": 0.0271
+    },
+    "litre-sport-600-1000": {
+     "n": 62,
+     "w_sum": 56.6,
+     "w_mean_abs": 0.1615,
+     "w_bias": 0.0086,
+     "raw_mean_abs": 0.1569,
+     "raw_bias": 0.0017
+    },
+    "mid-twin-300-500": {
+     "n": 3,
+     "w_sum": 3.0,
+     "w_mean_abs": 0.2533,
+     "w_bias": 0.15,
+     "raw_mean_abs": 0.2533,
+     "raw_bias": 0.15
+    },
+    "mid-twin-500-700": {
+     "n": 12,
+     "w_sum": 11.7,
+     "w_mean_abs": 0.1428,
+     "w_bias": 0.0091,
+     "raw_mean_abs": 0.142,
+     "raw_bias": 0.0117
+    },
+    "other": {
+     "n": 25,
+     "w_sum": 21.7,
+     "w_mean_abs": 0.2784,
+     "w_bias": 0.0778,
+     "raw_mean_abs": 0.2875,
+     "raw_bias": 0.09
+    },
+    "single-300-500": {
+     "n": 6,
+     "w_sum": 6.0,
+     "w_mean_abs": 0.2998,
+     "w_bias": 0.2103,
+     "raw_mean_abs": 0.2998,
+     "raw_bias": 0.2103
+    },
+    "small-i4-screamer": {
+     "n": 2,
+     "w_sum": 1.7,
+     "w_mean_abs": 0.9622,
+     "w_bias": 0.1335,
+     "raw_mean_abs": 1.0174,
+     "raw_bias": 0.313
+    },
+    "sport-twin-600-1300": {
+     "n": 36,
+     "w_sum": 34.5,
+     "w_mean_abs": 0.2311,
+     "w_bias": 0.019,
+     "raw_mean_abs": 0.2315,
+     "raw_bias": 0.0135
+    },
+    "two-stroke": {
+     "n": 6,
+     "w_sum": 4.2,
+     "w_mean_abs": 0.5939,
+     "w_bias": 0.0731,
+     "raw_mean_abs": 0.5939,
+     "raw_bias": 0.0731
+    }
+   },
+   "within_010": 73,
+   "within_020": 135,
+   "topspeed": {
+    "all": {
+     "n": 83,
+     "mean_abs": 28.29,
+     "bias": 24.53,
+     "median_abs": 21.9,
+     "within_10": 24,
+     "within_20": 41
+    },
+    "sub400": {
+     "n": 29,
+     "mean_abs": 35.53,
+     "bias": 35.53,
+     "median_abs": 29.9,
+     "within_10": 2,
+     "within_20": 10
+    },
+    "400plus": {
+     "n": 54,
+     "mean_abs": 24.39,
+     "bias": 18.61,
+     "median_abs": 16.8,
+     "within_10": 22,
+     "within_20": 31
+    },
+    "plateau_count": 451
+   },
+   "gearing_flags": {
+    "n_flagged": 147,
+    "n_total": 531,
+    "buckets": {
+     "tier1-unverified": 20,
+     "generic-primary": 114,
+     "tall-by-design": 10,
+     "explicit-spec": 3
+    }
+   }
+  },
+  "step2_gearing_no_retune_NOT_SHIPPED": {
+   "overall": {
+    "n": 273,
+    "w_sum": 198.1,
+    "w_mean_abs": 0.2762,
+    "w_bias": -0.0076,
+    "raw_mean_abs": 0.3722,
+    "raw_bias": -0.0646
+   },
+   "clusters": {
+    "cruiser-1300+": {
+     "n": 5,
+     "w_sum": 3.5,
+     "w_mean_abs": 0.2091,
+     "w_bias": 0.0364,
+     "raw_mean_abs": 0.2091,
+     "raw_bias": 0.0364
+    },
+    "entry-150-200": {
+     "n": 13,
+     "w_sum": 7.6,
+     "w_mean_abs": 0.7362,
+     "w_bias": -0.0624,
+     "raw_mean_abs": 1.1496,
+     "raw_bias": -0.411
+    },
+    "entry-200-300": {
+     "n": 14,
+     "w_sum": 7.2,
+     "w_mean_abs": 0.5804,
+     "w_bias": -0.4351,
+     "raw_mean_abs": 0.5814,
+     "raw_bias": -0.0896
+    },
+    "litre-sport-195+": {
+     "n": 30,
+     "w_sum": 23.1,
+     "w_mean_abs": 0.1453,
+     "w_bias": 0.0283,
+     "raw_mean_abs": 0.1437,
+     "raw_bias": 0.0271
+    },
+    "litre-sport-600-1000": {
+     "n": 72,
+     "w_sum": 60.4,
+     "w_mean_abs": 0.172,
+     "w_bias": -0.0055,
+     "raw_mean_abs": 0.1728,
+     "raw_bias": -0.0183
+    },
+    "mid-twin-300-500": {
+     "n": 8,
+     "w_sum": 4.7,
+     "w_mean_abs": 0.3953,
+     "w_bias": -0.0831,
+     "raw_mean_abs": 0.3724,
+     "raw_bias": -0.1439
+    },
+    "mid-twin-500-700": {
+     "n": 16,
+     "w_sum": 12.5,
+     "w_mean_abs": 0.1427,
+     "w_bias": 0.0045,
+     "raw_mean_abs": 0.1409,
+     "raw_bias": 0.0013
+    },
+    "other": {
+     "n": 42,
+     "w_sum": 26.4,
+     "w_mean_abs": 0.3298,
+     "w_bias": 0.0131,
+     "raw_mean_abs": 0.3808,
+     "raw_bias": -0.0439
+    },
+    "single-300-500": {
+     "n": 16,
+     "w_sum": 7.8,
+     "w_mean_abs": 0.509,
+     "w_bias": 0.0582,
+     "raw_mean_abs": 1.2698,
+     "raw_bias": -0.5522
+    },
+    "small-i4-screamer": {
+     "n": 2,
+     "w_sum": 1.7,
+     "w_mean_abs": 0.9622,
+     "w_bias": 0.1335,
+     "raw_mean_abs": 1.0174,
+     "raw_bias": 0.313
+    },
+    "sport-twin-600-1300": {
+     "n": 46,
+     "w_sum": 37.9,
+     "w_mean_abs": 0.2402,
+     "w_bias": 0.0144,
+     "raw_mean_abs": 0.2534,
+     "raw_bias": -0.0066
+    },
+    "two-stroke": {
+     "n": 9,
+     "w_sum": 5.3,
+     "w_mean_abs": 0.6416,
+     "w_bias": 0.0774,
+     "raw_mean_abs": 0.6102,
+     "raw_bias": 0.0845
+    }
+   },
+   "hi_conf": {
+    "n": 200,
+    "w_sum": 179.0,
+    "w_mean_abs": 0.2453,
+    "w_bias": 0.0171,
+    "raw_mean_abs": 0.2438,
+    "raw_bias": 0.0193
+   },
+   "lo_conf": {
+    "n": 73,
+    "w_sum": 19.1,
+    "w_mean_abs": 0.5659,
+    "w_bias": -0.2387,
+    "raw_mean_abs": 0.724,
+    "raw_bias": -0.2945
+   },
+   "hi_conf_sub400": {
+    "n": 26,
+    "w_sum": 24.8,
+    "w_mean_abs": 0.5179,
+    "w_bias": -0.0566,
+    "raw_mean_abs": 0.5193,
+    "raw_bias": -0.0401
+   },
+   "hi_conf_400plus": {
+    "n": 174,
+    "w_sum": 154.2,
+    "w_mean_abs": 0.2014,
+    "w_bias": 0.0289,
+    "raw_mean_abs": 0.2027,
+    "raw_bias": 0.0282
+   },
+   "lo_conf_sub400": {
+    "n": 31,
+    "w_sum": 6.1,
+    "w_mean_abs": 0.9865,
+    "w_bias": -0.4247,
+    "raw_mean_abs": 1.2548,
+    "raw_bias": -0.532
+   },
+   "hi_conf_clusters": {
+    "cruiser-1300+": {
+     "n": 5,
+     "w_sum": 3.5,
+     "w_mean_abs": 0.2091,
+     "w_bias": 0.0364,
+     "raw_mean_abs": 0.2091,
+     "raw_bias": 0.0364
+    },
+    "entry-150-200": {
+     "n": 7,
+     "w_sum": 7.0,
+     "w_mean_abs": 0.6509,
+     "w_bias": 0.0095,
+     "raw_mean_abs": 0.6509,
+     "raw_bias": 0.0095
+    },
+    "entry-200-300": {
+     "n": 6,
+     "w_sum": 6.0,
+     "w_mean_abs": 0.6218,
+     "w_bias": -0.5555,
+     "raw_mean_abs": 0.6218,
+     "raw_bias": -0.5555
+    },
+    "litre-sport-195+": {
+     "n": 30,
+     "w_sum": 23.1,
+     "w_mean_abs": 0.1453,
+     "w_bias": 0.0283,
+     "raw_mean_abs": 0.1437,
+     "raw_bias": 0.0271
+    },
+    "litre-sport-600-1000": {
+     "n": 62,
+     "w_sum": 56.6,
+     "w_mean_abs": 0.1615,
+     "w_bias": 0.0086,
+     "raw_mean_abs": 0.1569,
+     "raw_bias": 0.0017
+    },
+    "mid-twin-300-500": {
+     "n": 3,
+     "w_sum": 3.0,
+     "w_mean_abs": 0.2984,
+     "w_bias": 0.1031,
+     "raw_mean_abs": 0.2984,
+     "raw_bias": 0.1031
+    },
+    "mid-twin-500-700": {
+     "n": 12,
+     "w_sum": 11.7,
+     "w_mean_abs": 0.1437,
+     "w_bias": 0.0101,
+     "raw_mean_abs": 0.1433,
+     "raw_bias": 0.013
+    },
+    "other": {
+     "n": 25,
+     "w_sum": 21.7,
+     "w_mean_abs": 0.2784,
+     "w_bias": 0.0778,
+     "raw_mean_abs": 0.2875,
+     "raw_bias": 0.09
+    },
+    "single-300-500": {
+     "n": 6,
+     "w_sum": 6.0,
+     "w_mean_abs": 0.2849,
+     "w_bias": 0.2844,
+     "raw_mean_abs": 0.2849,
+     "raw_bias": 0.2844
+    },
+    "small-i4-screamer": {
+     "n": 2,
+     "w_sum": 1.7,
+     "w_mean_abs": 0.9622,
+     "w_bias": 0.1335,
+     "raw_mean_abs": 1.0174,
+     "raw_bias": 0.313
+    },
+    "sport-twin-600-1300": {
+     "n": 36,
+     "w_sum": 34.5,
+     "w_mean_abs": 0.2299,
+     "w_bias": 0.0202,
+     "raw_mean_abs": 0.23,
+     "raw_bias": 0.015
+    },
+    "two-stroke": {
+     "n": 6,
+     "w_sum": 4.2,
+     "w_mean_abs": 0.5939,
+     "w_bias": 0.0731,
+     "raw_mean_abs": 0.5939,
+     "raw_bias": 0.0731
+    }
+   },
+   "within_010": 73,
+   "within_020": 135,
+   "topspeed": {
+    "all": {
+     "n": 83,
+     "mean_abs": 25.76,
+     "bias": 21.95,
+     "median_abs": 18.0,
+     "within_10": 27,
+     "within_20": 44
+    },
+    "sub400": {
+     "n": 29,
+     "mean_abs": 29.69,
+     "bias": 29.55,
+     "median_abs": 24.3,
+     "within_10": 5,
+     "within_20": 13
+    },
+    "400plus": {
+     "n": 54,
+     "mean_abs": 23.65,
+     "bias": 17.87,
+     "median_abs": 16.8,
+     "within_10": 22,
+     "within_20": 31
+    },
+    "plateau_count": 416
+   },
+   "gearing_flags": {
+    "n_flagged": 46,
+    "n_total": 531,
+    "buckets": {
+     "tier1-unverified": 10,
+     "class-inferred": 9,
+     "sibling-inferred": 8,
+     "tall-by-design": 8,
+     "generic-primary": 8,
+     "explicit-spec": 3
+    }
+   }
+  },
+  "step2b_sibling_and_matcher_only_NOT_SHIPPED": {
+   "overall": {
+    "n": 273,
+    "w_sum": 198.1,
+    "w_mean_abs": 0.2619,
+    "w_bias": 0.0089,
+    "raw_mean_abs": 0.3721,
+    "raw_bias": -0.0347
+   },
+   "clusters": {
+    "cruiser-1300+": {
+     "n": 5,
+     "w_sum": 3.5,
+     "w_mean_abs": 0.2091,
+     "w_bias": 0.0364,
+     "raw_mean_abs": 0.2091,
+     "raw_bias": 0.0364
+    },
+    "entry-150-200": {
+     "n": 13,
+     "w_sum": 7.6,
+     "w_mean_abs": 0.7404,
+     "w_bias": -0.0494,
+     "raw_mean_abs": 1.1742,
+     "raw_bias": -0.3352
+    },
+    "entry-200-300": {
+     "n": 14,
+     "w_sum": 7.2,
+     "w_mean_abs": 0.2311,
+     "w_bias": -0.0181,
+     "raw_mean_abs": 0.5128,
+     "raw_bias": 0.3192
+    },
+    "litre-sport-195+": {
+     "n": 30,
+     "w_sum": 23.1,
+     "w_mean_abs": 0.1453,
+     "w_bias": 0.0283,
+     "raw_mean_abs": 0.1437,
+     "raw_bias": 0.0271
+    },
+    "litre-sport-600-1000": {
+     "n": 72,
+     "w_sum": 60.4,
+     "w_mean_abs": 0.1755,
+     "w_bias": -0.009,
+     "raw_mean_abs": 0.1787,
+     "raw_bias": -0.0242
+    },
+    "mid-twin-300-500": {
+     "n": 8,
+     "w_sum": 4.7,
+     "w_mean_abs": 0.3379,
+     "w_bias": -0.0619,
+     "raw_mean_abs": 0.3585,
+     "raw_bias": -0.0998
+    },
+    "mid-twin-500-700": {
+     "n": 16,
+     "w_sum": 12.5,
+     "w_mean_abs": 0.1427,
+     "w_bias": 0.0045,
+     "raw_mean_abs": 0.1409,
+     "raw_bias": 0.0013
+    },
+    "other": {
+     "n": 42,
+     "w_sum": 26.4,
+     "w_mean_abs": 0.3238,
+     "w_bias": 0.0191,
+     "raw_mean_abs": 0.3683,
+     "raw_bias": -0.0314
+    },
+    "single-300-500": {
+     "n": 16,
+     "w_sum": 7.8,
+     "w_mean_abs": 0.4886,
+     "w_bias": 0.0782,
+     "raw_mean_abs": 1.3177,
+     "raw_bias": -0.4855
+    },
+    "small-i4-screamer": {
+     "n": 2,
+     "w_sum": 1.7,
+     "w_mean_abs": 0.9622,
+     "w_bias": 0.1335,
+     "raw_mean_abs": 1.0174,
+     "raw_bias": 0.313
+    },
+    "sport-twin-600-1300": {
+     "n": 46,
+     "w_sum": 37.9,
+     "w_mean_abs": 0.2412,
+     "w_bias": 0.0135,
+     "raw_mean_abs": 0.2545,
+     "raw_bias": -0.0076
+    },
+    "two-stroke": {
+     "n": 9,
+     "w_sum": 5.3,
+     "w_mean_abs": 0.6416,
+     "w_bias": 0.0774,
+     "raw_mean_abs": 0.6102,
+     "raw_bias": 0.0845
+    }
+   },
+   "hi_conf": {
+    "n": 200,
+    "w_sum": 179.0,
+    "w_mean_abs": 0.2287,
+    "w_bias": 0.0317,
+    "raw_mean_abs": 0.2291,
+    "raw_bias": 0.0323
+   },
+   "lo_conf": {
+    "n": 73,
+    "w_sum": 19.1,
+    "w_mean_abs": 0.5733,
+    "w_bias": -0.2052,
+    "raw_mean_abs": 0.7639,
+    "raw_bias": -0.2183
+   },
+   "hi_conf_sub400": {
+    "n": 26,
+    "w_sum": 24.8,
+    "w_mean_abs": 0.3969,
+    "w_bias": 0.0508,
+    "raw_mean_abs": 0.4039,
+    "raw_bias": 0.0623
+   },
+   "hi_conf_400plus": {
+    "n": 174,
+    "w_sum": 154.2,
+    "w_mean_abs": 0.2017,
+    "w_bias": 0.0287,
+    "raw_mean_abs": 0.2029,
+    "raw_bias": 0.0279
+   },
+   "lo_conf_sub400": {
+    "n": 31,
+    "w_sum": 6.1,
+    "w_mean_abs": 0.9683,
+    "w_bias": -0.2783,
+    "raw_mean_abs": 1.3323,
+    "raw_bias": -0.336
+   },
+   "hi_conf_clusters": {
+    "cruiser-1300+": {
+     "n": 5,
+     "w_sum": 3.5,
+     "w_mean_abs": 0.2091,
+     "w_bias": 0.0364,
+     "raw_mean_abs": 0.2091,
+     "raw_bias": 0.0364
+    },
+    "entry-150-200": {
+     "n": 7,
+     "w_sum": 7.0,
+     "w_mean_abs": 0.6509,
+     "w_bias": 0.0095,
+     "raw_mean_abs": 0.6509,
+     "raw_bias": 0.0095
+    },
+    "entry-200-300": {
+     "n": 6,
+     "w_sum": 6.0,
+     "w_mean_abs": 0.1738,
+     "w_bias": -0.1056,
+     "raw_mean_abs": 0.1738,
+     "raw_bias": -0.1056
+    },
+    "litre-sport-195+": {
+     "n": 30,
+     "w_sum": 23.1,
+     "w_mean_abs": 0.1453,
+     "w_bias": 0.0283,
+     "raw_mean_abs": 0.1437,
+     "raw_bias": 0.0271
+    },
+    "litre-sport-600-1000": {
+     "n": 62,
+     "w_sum": 56.6,
+     "w_mean_abs": 0.1615,
+     "w_bias": 0.0086,
+     "raw_mean_abs": 0.1569,
+     "raw_bias": 0.0017
+    },
+    "mid-twin-300-500": {
+     "n": 3,
+     "w_sum": 3.0,
+     "w_mean_abs": 0.2164,
+     "w_bias": 0.1131,
+     "raw_mean_abs": 0.2164,
+     "raw_bias": 0.1131
+    },
+    "mid-twin-500-700": {
+     "n": 12,
+     "w_sum": 11.7,
+     "w_mean_abs": 0.1437,
+     "w_bias": 0.0101,
+     "raw_mean_abs": 0.1433,
+     "raw_bias": 0.013
+    },
+    "other": {
+     "n": 25,
+     "w_sum": 21.7,
+     "w_mean_abs": 0.2784,
+     "w_bias": 0.0778,
+     "raw_mean_abs": 0.2875,
+     "raw_bias": 0.09
+    },
+    "single-300-500": {
+     "n": 6,
+     "w_sum": 6.0,
+     "w_mean_abs": 0.2738,
+     "w_bias": 0.2732,
+     "raw_mean_abs": 0.2738,
+     "raw_bias": 0.2732
+    },
+    "small-i4-screamer": {
+     "n": 2,
+     "w_sum": 1.7,
+     "w_mean_abs": 0.9622,
+     "w_bias": 0.1335,
+     "raw_mean_abs": 1.0174,
+     "raw_bias": 0.313
+    },
+    "sport-twin-600-1300": {
+     "n": 36,
+     "w_sum": 34.5,
+     "w_mean_abs": 0.2309,
+     "w_bias": 0.0192,
+     "raw_mean_abs": 0.2313,
+     "raw_bias": 0.0136
+    },
+    "two-stroke": {
+     "n": 6,
+     "w_sum": 4.2,
+     "w_mean_abs": 0.5939,
+     "w_bias": 0.0731,
+     "raw_mean_abs": 0.5939,
+     "raw_bias": 0.0731
+    }
+   },
+   "within_010": 74,
+   "within_020": 139
+  },
+  "step3_gearing_plus_best_plausible_retune_NOT_SHIPPED": {
+   "overall": {
+    "n": 273,
+    "w_sum": 198.1,
+    "w_mean_abs": 0.2722,
+    "w_bias": 0.0012,
+    "raw_mean_abs": 0.3714,
+    "raw_bias": -0.0526
+   },
+   "clusters": {
+    "cruiser-1300+": {
+     "n": 5,
+     "w_sum": 3.5,
+     "w_mean_abs": 0.2091,
+     "w_bias": 0.0364,
+     "raw_mean_abs": 0.2091,
+     "raw_bias": 0.0364
+    },
+    "entry-150-200": {
+     "n": 13,
+     "w_sum": 7.6,
+     "w_mean_abs": 0.7362,
+     "w_bias": -0.0624,
+     "raw_mean_abs": 1.1496,
+     "raw_bias": -0.411
+    },
+    "entry-200-300": {
+     "n": 14,
+     "w_sum": 7.2,
+     "w_mean_abs": 0.4698,
+     "w_bias": -0.1937,
+     "raw_mean_abs": 0.5656,
+     "raw_bias": 0.1454
+    },
+    "litre-sport-195+": {
+     "n": 30,
+     "w_sum": 23.1,
+     "w_mean_abs": 0.1453,
+     "w_bias": 0.0283,
+     "raw_mean_abs": 0.1437,
+     "raw_bias": 0.0271
+    },
+    "litre-sport-600-1000": {
+     "n": 72,
+     "w_sum": 60.4,
+     "w_mean_abs": 0.172,
+     "w_bias": -0.0055,
+     "raw_mean_abs": 0.1728,
+     "raw_bias": -0.0183
+    },
+    "mid-twin-300-500": {
+     "n": 8,
+     "w_sum": 4.7,
+     "w_mean_abs": 0.3953,
+     "w_bias": -0.0831,
+     "raw_mean_abs": 0.3724,
+     "raw_bias": -0.1439
+    },
+    "mid-twin-500-700": {
+     "n": 16,
+     "w_sum": 12.5,
+     "w_mean_abs": 0.1427,
+     "w_bias": 0.0045,
+     "raw_mean_abs": 0.1409,
+     "raw_bias": 0.0013
+    },
+    "other": {
+     "n": 42,
+     "w_sum": 26.4,
+     "w_mean_abs": 0.3298,
+     "w_bias": 0.0131,
+     "raw_mean_abs": 0.3808,
+     "raw_bias": -0.0439
+    },
+    "single-300-500": {
+     "n": 16,
+     "w_sum": 7.8,
+     "w_mean_abs": 0.509,
+     "w_bias": 0.0582,
+     "raw_mean_abs": 1.2698,
+     "raw_bias": -0.5522
+    },
+    "small-i4-screamer": {
+     "n": 2,
+     "w_sum": 1.7,
+     "w_mean_abs": 0.9622,
+     "w_bias": 0.1335,
+     "raw_mean_abs": 1.0174,
+     "raw_bias": 0.313
+    },
+    "sport-twin-600-1300": {
+     "n": 46,
+     "w_sum": 37.9,
+     "w_mean_abs": 0.2402,
+     "w_bias": 0.0144,
+     "raw_mean_abs": 0.2534,
+     "raw_bias": -0.0066
+    },
+    "two-stroke": {
+     "n": 9,
+     "w_sum": 5.3,
+     "w_mean_abs": 0.6416,
+     "w_bias": 0.0774,
+     "raw_mean_abs": 0.6102,
+     "raw_bias": 0.0845
+    }
+   },
+   "hi_conf": {
+    "n": 200,
+    "w_sum": 179.0,
+    "w_mean_abs": 0.2405,
+    "w_bias": 0.0257,
+    "raw_mean_abs": 0.2396,
+    "raw_bias": 0.0271
+   },
+   "lo_conf": {
+    "n": 73,
+    "w_sum": 19.1,
+    "w_mean_abs": 0.5689,
+    "w_bias": -0.2291,
+    "raw_mean_abs": 0.7327,
+    "raw_bias": -0.2708
+   },
+   "hi_conf_sub400": {
+    "n": 26,
+    "w_sum": 24.8,
+    "w_mean_abs": 0.4835,
+    "w_bias": 0.0062,
+    "raw_mean_abs": 0.4865,
+    "raw_bias": 0.0197
+   },
+   "hi_conf_400plus": {
+    "n": 174,
+    "w_sum": 154.2,
+    "w_mean_abs": 0.2014,
+    "w_bias": 0.0289,
+    "raw_mean_abs": 0.2027,
+    "raw_bias": 0.0282
+   },
+   "lo_conf_sub400": {
+    "n": 31,
+    "w_sum": 6.1,
+    "w_mean_abs": 0.9959,
+    "w_bias": -0.3949,
+    "raw_mean_abs": 1.2752,
+    "raw_bias": -0.4761
+   },
+   "hi_conf_clusters": {
+    "cruiser-1300+": {
+     "n": 5,
+     "w_sum": 3.5,
+     "w_mean_abs": 0.2091,
+     "w_bias": 0.0364,
+     "raw_mean_abs": 0.2091,
+     "raw_bias": 0.0364
+    },
+    "entry-150-200": {
+     "n": 7,
+     "w_sum": 7.0,
+     "w_mean_abs": 0.6509,
+     "w_bias": 0.0095,
+     "raw_mean_abs": 0.6509,
+     "raw_bias": 0.0095
+    },
+    "entry-200-300": {
+     "n": 6,
+     "w_sum": 6.0,
+     "w_mean_abs": 0.4795,
+     "w_bias": -0.2962,
+     "raw_mean_abs": 0.4795,
+     "raw_bias": -0.2962
+    },
+    "litre-sport-195+": {
+     "n": 30,
+     "w_sum": 23.1,
+     "w_mean_abs": 0.1453,
+     "w_bias": 0.0283,
+     "raw_mean_abs": 0.1437,
+     "raw_bias": 0.0271
+    },
+    "litre-sport-600-1000": {
+     "n": 62,
+     "w_sum": 56.6,
+     "w_mean_abs": 0.1615,
+     "w_bias": 0.0086,
+     "raw_mean_abs": 0.1569,
+     "raw_bias": 0.0017
+    },
+    "mid-twin-300-500": {
+     "n": 3,
+     "w_sum": 3.0,
+     "w_mean_abs": 0.2984,
+     "w_bias": 0.1031,
+     "raw_mean_abs": 0.2984,
+     "raw_bias": 0.1031
+    },
+    "mid-twin-500-700": {
+     "n": 12,
+     "w_sum": 11.7,
+     "w_mean_abs": 0.1437,
+     "w_bias": 0.0101,
+     "raw_mean_abs": 0.1433,
+     "raw_bias": 0.013
+    },
+    "other": {
+     "n": 25,
+     "w_sum": 21.7,
+     "w_mean_abs": 0.2784,
+     "w_bias": 0.0778,
+     "raw_mean_abs": 0.2875,
+     "raw_bias": 0.09
+    },
+    "single-300-500": {
+     "n": 6,
+     "w_sum": 6.0,
+     "w_mean_abs": 0.2849,
+     "w_bias": 0.2844,
+     "raw_mean_abs": 0.2849,
+     "raw_bias": 0.2844
+    },
+    "small-i4-screamer": {
+     "n": 2,
+     "w_sum": 1.7,
+     "w_mean_abs": 0.9622,
+     "w_bias": 0.1335,
+     "raw_mean_abs": 1.0174,
+     "raw_bias": 0.313
+    },
+    "sport-twin-600-1300": {
+     "n": 36,
+     "w_sum": 34.5,
+     "w_mean_abs": 0.2299,
+     "w_bias": 0.0202,
+     "raw_mean_abs": 0.23,
+     "raw_bias": 0.015
+    },
+    "two-stroke": {
+     "n": 6,
+     "w_sum": 4.2,
+     "w_mean_abs": 0.5939,
+     "w_bias": 0.0731,
+     "raw_mean_abs": 0.5939,
+     "raw_bias": 0.0731
+    }
+   },
+   "within_010": 74,
+   "within_020": 135,
+   "topspeed": {
+    "all": {
+     "n": 83,
+     "mean_abs": 25.75,
+     "bias": 21.94,
+     "median_abs": 17.9,
+     "within_10": 27,
+     "within_20": 44
+    },
+    "sub400": {
+     "n": 29,
+     "mean_abs": 29.68,
+     "bias": 29.54,
+     "median_abs": 24.3,
+     "within_10": 5,
+     "within_20": 13
+    },
+    "400plus": {
+     "n": 54,
+     "mean_abs": 23.65,
+     "bias": 17.87,
+     "median_abs": 16.8,
+     "within_10": 22,
+     "within_20": 31
+    },
+    "plateau_count": 416
+   },
+   "gearing_flags": {
+    "n_flagged": 47,
+    "n_total": 531,
+    "buckets": {
+     "tier1-unverified": 11,
+     "class-inferred": 9,
+     "sibling-inferred": 8,
+     "tall-by-design": 8,
+     "generic-primary": 8,
+     "explicit-spec": 3
+    }
+   }
+  }
+ },
+ "step2_per_bike": [
+  {
+   "bike": "KTM Duke 200 (2017)",
+   "disp_cc": 199,
+   "primary_before": 2.2,
+   "primary_step2": 2.2,
+   "et_before": 16.0433,
+   "et_step2": 16.0433,
+   "et_step3": 16.0433,
+   "benchmark_et": 16.1,
+   "weight": 1.0,
+   "source": "MotoStatz (GPS instrumented)",
+   "cluster": "entry-150-200",
+   "vmax_before": 156.8,
+   "vmax_step2": 156.8
+  },
+  {
+   "bike": "KTM Duke 390 (2017)",
+   "disp_cc": 373,
+   "primary_before": 2.2,
+   "primary_step2": 2.2,
+   "et_before": 14.1282,
+   "et_step2": 14.1282,
+   "et_step3": 14.1282,
+   "benchmark_et": 14.0,
+   "weight": 1.0,
+   "source": "Motorcycle Consumer News (Duke 390 14.02 @ 91.88 mph)",
+   "cluster": "single-300-500",
+   "vmax_before": 184.1,
+   "vmax_step2": 184.1
+  },
+  {
+   "bike": "KTM RC 390 (2022)",
+   "disp_cc": 373,
+   "primary_before": 2.2,
+   "primary_step2": 2.2,
+   "et_before": 13.7063,
+   "et_step2": 13.7063,
+   "et_step3": 13.7063,
+   "benchmark_et": 13.16,
+   "weight": 1.0,
+   "source": "MotoStatz (Dragy, RC 390 373cc, 99 mph trap)",
+   "cluster": "single-300-500",
+   "vmax_before": 213.3,
+   "vmax_step2": 213.3
+  },
+  {
+   "bike": "KTM Duke 250 (2017)",
+   "disp_cc": 248,
+   "primary_before": 2.2,
+   "primary_step2": 2.2,
+   "et_before": 15.4793,
+   "et_step2": 15.4793,
+   "et_step3": 15.5047,
+   "benchmark_et": 15.5,
+   "weight": 1.0,
+   "source": "Otomotifnet Racelogic instrumented 402m test, Sentul circuit (Indonesia)",
+   "cluster": "entry-200-300",
+   "vmax_before": 161.4,
+   "vmax_step2": 161.4
+  },
+  {
+   "bike": "Bajaj Pulsar NS 200 (2017)",
+   "disp_cc": 199,
+   "primary_before": 2.1,
+   "primary_step2": 2.1,
+   "et_before": 16.6508,
+   "et_step2": 16.6508,
+   "et_step3": 16.6508,
+   "benchmark_et": 15.7,
+   "weight": 0.1,
+   "source": "DERIVED (0-100 ~9.7-10s x1.6, ZigWheels/TopSpeedIndia)",
+   "cluster": "entry-150-200",
+   "vmax_before": 155.0,
+   "vmax_step2": 155.0
+  },
+  {
+   "bike": "Bajaj Pulsar RS 200 (2015)",
+   "disp_cc": 199,
+   "primary_before": 2.1,
+   "primary_step2": 2.1,
+   "et_before": 16.242,
+   "et_step2": 16.242,
+   "et_step3": 16.242,
+   "benchmark_et": 15.7,
+   "weight": 0.1,
+   "source": "DERIVED (0-100 \u00d7 1.6, \u00b10.7s)",
+   "cluster": "entry-150-200",
+   "vmax_before": 199.9,
+   "vmax_step2": 199.9
+  },
+  {
+   "bike": "Bajaj Dominar 400 (2019)",
+   "disp_cc": 373,
+   "primary_before": 2.1,
+   "primary_step2": 2.1,
+   "et_before": 14.614,
+   "et_step2": 14.614,
+   "et_step3": 14.614,
+   "benchmark_et": 13.2,
+   "weight": 0.1,
+   "source": "DERIVED (0-100 8.23s x1.6, CarBlogIndia; top speed 148 km/h)",
+   "cluster": "single-300-500",
+   "vmax_before": 177.5,
+   "vmax_step2": 177.5
+  },
+  {
+   "bike": "Bajaj Pulsar 220F (2007)",
+   "disp_cc": 220,
+   "primary_before": 2.1,
+   "primary_step2": 3.063,
+   "et_before": 16.7976,
+   "et_step2": 16.7362,
+   "et_step3": 17.0093,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 146.1,
+   "vmax_step2": 148.9
+  },
+  {
+   "bike": "TVS Apache RR 310 (2018)",
+   "disp_cc": 312,
+   "primary_before": 2.0,
+   "primary_step2": 2.929,
+   "et_before": 15.0685,
+   "et_step2": 14.7124,
+   "et_step3": 14.7124,
+   "benchmark_et": 15.46,
+   "weight": 0.5,
+   "source": "FastestLaps + BikeWale (verified stock)",
+   "cluster": "single-300-500",
+   "vmax_before": 221.3,
+   "vmax_step2": 220.8
+  },
+  {
+   "bike": "TVS Apache RTR 200 4V (2016)",
+   "disp_cc": 197,
+   "primary_before": 3.1,
+   "primary_step2": 3.1,
+   "et_before": 18.9529,
+   "et_step2": 18.9529,
+   "et_step3": 18.9529,
+   "benchmark_et": 18.1,
+   "weight": 1.0,
+   "source": "Otomotif Racelogic instrumented 402m comparo vs Pulsar 200NS (Indonesia, carb)",
+   "cluster": "entry-150-200",
+   "vmax_before": 127.5,
+   "vmax_step2": 127.5
+  },
+  {
+   "bike": "TVS Apache RTR 160 4V (2018)",
+   "disp_cc": 159,
+   "primary_before": 2.0,
+   "primary_step2": 3.043,
+   "et_before": 17.8328,
+   "et_step2": 17.378,
+   "et_step3": 17.378,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 140.0,
+   "vmax_step2": 139.5
+  },
+  {
+   "bike": "Royal Enfield Himalayan 450 (2024)",
+   "disp_cc": 452,
+   "primary_before": 1.8,
+   "primary_step2": 2.078,
+   "et_before": 14.8865,
+   "et_step2": 15.0343,
+   "et_step3": 15.0343,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 167.1,
+   "vmax_step2": 166.3
+  },
+  {
+   "bike": "Yamaha YZF-R15 V4 (2021)",
+   "disp_cc": 155,
+   "primary_before": 3.042,
+   "primary_step2": 3.042,
+   "et_before": 18.3702,
+   "et_step2": 18.3702,
+   "et_step3": 18.3702,
+   "benchmark_et": 17.62,
+   "weight": 1.0,
+   "source": "MotoStatz 2021 (instrumented)",
+   "cluster": "entry-150-200",
+   "vmax_before": 155.6,
+   "vmax_step2": 155.6
+  },
+  {
+   "bike": "Yamaha MT-15 V2 (2021)",
+   "disp_cc": 155,
+   "primary_before": 3.042,
+   "primary_step2": 3.042,
+   "et_before": 18.9445,
+   "et_step2": 18.9445,
+   "et_step3": 18.9445,
+   "benchmark_et": 19.6,
+   "weight": 1.0,
+   "source": "OtoRider GPS-instrumented 402m test (Indonesia)",
+   "cluster": "entry-150-200",
+   "vmax_before": 129.3,
+   "vmax_step2": 129.3
+  },
+  {
+   "bike": "Yamaha FZ-X (2021)",
+   "disp_cc": 149,
+   "primary_before": 2.0,
+   "primary_step2": 3.042,
+   "et_before": 20.035,
+   "et_step2": 19.5816,
+   "et_step3": 19.5816,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 119.3,
+   "vmax_step2": 121.3
+  },
+  {
+   "bike": "Honda CBR 250R (2011)",
+   "disp_cc": 249,
+   "primary_before": 1.9,
+   "primary_step2": 1.9,
+   "et_before": 15.8418,
+   "et_step2": 15.8418,
+   "et_step3": 15.8633,
+   "benchmark_et": 15.86,
+   "weight": 0.5,
+   "source": "MotorBikeCatalog 2011 (verified, 81.2 mph)",
+   "cluster": "entry-200-300",
+   "vmax_before": 204.5,
+   "vmax_step2": 204.5
+  },
+  {
+   "bike": "Honda CB 300R (2019)",
+   "disp_cc": 286,
+   "primary_before": 2.176,
+   "primary_step2": 3.084,
+   "et_before": 15.8872,
+   "et_step2": 15.5052,
+   "et_step3": 15.7391,
+   "benchmark_et": 15.1,
+   "weight": 0.1,
+   "source": "DERIVED (rushlane 0-100 6.2s; MotorBikeCatalog QM ~15.1s)",
+   "cluster": "entry-200-300",
+   "vmax_before": 163.0,
+   "vmax_step2": 162.1
+  },
+  {
+   "bike": "Honda Hornet 2.0 (2020)",
+   "disp_cc": 184.4,
+   "primary_before": 2.0,
+   "primary_step2": 3.051,
+   "et_before": 17.3589,
+   "et_step2": 17.2384,
+   "et_step3": 17.2384,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 136.4,
+   "vmax_step2": 140.8
+  },
+  {
+   "bike": "Kawasaki Ninja 300 (2013)",
+   "disp_cc": 296,
+   "primary_before": 3.087,
+   "primary_step2": 3.087,
+   "et_before": 14.2988,
+   "et_step2": 14.2988,
+   "et_step3": 14.6452,
+   "benchmark_et": 14.1,
+   "weight": 1.0,
+   "source": "MotoStatz GPS test (instrumented)",
+   "cluster": "entry-200-300",
+   "vmax_before": 236.5,
+   "vmax_step2": 236.5
+  },
+  {
+   "bike": "Kawasaki Ninja 400 (2018)",
+   "disp_cc": 399,
+   "primary_before": 2.073,
+   "primary_step2": 2.073,
+   "et_before": 13.2308,
+   "et_step2": 13.2308,
+   "et_step3": 13.2308,
+   "benchmark_et": 12.98,
+   "weight": 0.5,
+   "source": "MotoStatz 2018",
+   "cluster": "mid-twin-300-500",
+   "vmax_before": 217.3,
+   "vmax_step2": 217.3
+  },
+  {
+   "bike": "Triumph Speed 400 (2023)",
+   "disp_cc": 398,
+   "primary_before": 1.9,
+   "primary_step2": 2.083,
+   "et_before": 14.883,
+   "et_step2": 14.7302,
+   "et_step3": 14.7302,
+   "benchmark_et": 14.5,
+   "weight": 0.1,
+   "source": "Derived from 0-100 (bikewale 2023)",
+   "cluster": "single-300-500",
+   "vmax_before": 174.5,
+   "vmax_step2": 176.8
+  },
+  {
+   "bike": "Hero Xtreme 160R (2020)",
+   "disp_cc": 163,
+   "primary_before": 2.1,
+   "primary_step2": 3.045,
+   "et_before": 18.2626,
+   "et_step2": 18.1047,
+   "et_step3": 18.1047,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 134.1,
+   "vmax_step2": 133.5
+  },
+  {
+   "bike": "KTM 390 Duke (2023)",
+   "disp_cc": 373,
+   "primary_before": 1.85,
+   "primary_step2": 2.2,
+   "et_before": 13.76,
+   "et_step2": 13.9982,
+   "et_step3": 13.9982,
+   "benchmark_et": 14.0,
+   "weight": 1.0,
+   "source": "Motorcycle Consumer News (Duke 390 14.02 @ 91.88 mph)",
+   "cluster": "single-300-500",
+   "vmax_before": 190.2,
+   "vmax_step2": 189.4
+  },
+  {
+   "bike": "Honda CBR500R (2022)",
+   "disp_cc": 471,
+   "primary_before": 2.029,
+   "primary_step2": 2.029,
+   "et_before": 13.3731,
+   "et_step2": 13.3731,
+   "et_step3": 13.3731,
+   "benchmark_et": 13.51,
+   "weight": 0.1,
+   "source": "MotoStatz 2022 (DERIVED)",
+   "cluster": "mid-twin-300-500",
+   "vmax_before": 243.9,
+   "vmax_step2": 243.9
+  },
+  {
+   "bike": "QJ Motor SRK 400 (2022)",
+   "disp_cc": 400,
+   "primary_before": 1.85,
+   "primary_step2": 2.073,
+   "et_before": 14.059,
+   "et_step2": 14.0314,
+   "et_step3": 14.0314,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 182.6,
+   "vmax_step2": 183.0
+  },
+  {
+   "bike": "Bajaj Pulsar 200 (2007)",
+   "disp_cc": 199,
+   "primary_before": 1.85,
+   "primary_step2": 3.056,
+   "et_before": 18.1541,
+   "et_step2": 17.4127,
+   "et_step3": 17.4127,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 132.9,
+   "vmax_step2": 132.5
+  },
+  {
+   "bike": "Bajaj Pulsar NS200 (2012)",
+   "disp_cc": 199.5,
+   "primary_before": 1.85,
+   "primary_step2": 2.1,
+   "et_before": 16.8792,
+   "et_step2": 16.5832,
+   "et_step3": 16.5832,
+   "benchmark_et": 17.3,
+   "weight": 1.0,
+   "source": "Otomotif Racelogic instrumented 402m comparo (Indonesia, Kawasaki Bajaj Pulsar 200NS)",
+   "cluster": "entry-150-200",
+   "vmax_before": 146.4,
+   "vmax_step2": 146.3
+  },
+  {
+   "bike": "Bajaj Avenger Cruise 220 (2015)",
+   "disp_cc": 219.9,
+   "primary_before": 1.92,
+   "primary_step2": 3.063,
+   "et_before": 18.3132,
+   "et_step2": 17.6569,
+   "et_step3": 17.6847,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 127.2,
+   "vmax_step2": 128.2
+  },
+  {
+   "bike": "Bajaj Avenger Street 220 (2015)",
+   "disp_cc": 219.9,
+   "primary_before": 1.92,
+   "primary_step2": 3.063,
+   "et_before": 18.1715,
+   "et_step2": 17.5327,
+   "et_step3": 17.5603,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 130.0,
+   "vmax_step2": 130.4
+  },
+  {
+   "bike": "Bajaj Pulsar N250 (2021)",
+   "disp_cc": 249.07,
+   "primary_before": 1.85,
+   "primary_step2": 3.072,
+   "et_before": 16.6935,
+   "et_step2": 16.1766,
+   "et_step3": 16.4158,
+   "benchmark_et": 15.45,
+   "weight": 0.1,
+   "source": "DERIVED (0-100 \u00d7 1.6, \u00b10.7s)",
+   "cluster": "entry-200-300",
+   "vmax_before": 148.2,
+   "vmax_step2": 138.3
+  },
+  {
+   "bike": "Bajaj Pulsar F250 (2021)",
+   "disp_cc": 249.07,
+   "primary_before": 1.9,
+   "primary_step2": 3.072,
+   "et_before": 16.1639,
+   "et_step2": 15.7358,
+   "et_step3": 15.9754,
+   "benchmark_et": 15.0,
+   "weight": 0.1,
+   "source": "DERIVED (faired N250 sibling, ~0.9s quicker than N250; CarBlogIndia)",
+   "cluster": "entry-200-300",
+   "vmax_before": 184.8,
+   "vmax_step2": 138.3
+  },
+  {
+   "bike": "Bajaj Pulsar NS400Z (2024)",
+   "disp_cc": 373.3,
+   "primary_before": 1.85,
+   "primary_step2": 2.326,
+   "et_before": 15.1429,
+   "et_step2": 14.6816,
+   "et_step3": 14.6816,
+   "benchmark_et": 14.1,
+   "weight": 0.1,
+   "source": "DERIVED (0-100 \u00d7 1.6, \u00b10.7s)",
+   "cluster": "single-300-500",
+   "vmax_before": 170.2,
+   "vmax_step2": 171.7
+  },
+  {
+   "bike": "TVS Apache RTR 200 (2007)",
+   "disp_cc": 197.75,
+   "primary_before": 1.85,
+   "primary_step2": 3.056,
+   "et_before": 17.3861,
+   "et_step2": 16.7338,
+   "et_step3": 16.7338,
+   "benchmark_et": 16.0,
+   "weight": 0.1,
+   "source": "DERIVED (0-100 ~9-10s x1.6 2V VBox, IndianAutosBlog)",
+   "cluster": "entry-150-200",
+   "vmax_before": 139.9,
+   "vmax_step2": 137.3
+  },
+  {
+   "bike": "TVS Ronin 225 (2022)",
+   "disp_cc": 225.9,
+   "primary_before": 1.85,
+   "primary_step2": 3.065,
+   "et_before": 17.5799,
+   "et_step2": 16.9819,
+   "et_step3": 17.1519,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 136.7,
+   "vmax_step2": 129.3
+  },
+  {
+   "bike": "Yamaha FZ25 (2017)",
+   "disp_cc": 249.0,
+   "primary_before": 1.85,
+   "primary_step2": 3.072,
+   "et_before": 17.1826,
+   "et_step2": 16.6301,
+   "et_step3": 16.8524,
+   "benchmark_et": 16.0,
+   "weight": 0.1,
+   "source": "DERIVED (0-100 \u00d7 1.6, \u00b10.7s)",
+   "cluster": "entry-200-300",
+   "vmax_before": 141.5,
+   "vmax_step2": 138.2
+  },
+  {
+   "bike": "Yamaha YZF-R15 V3 (2018)",
+   "disp_cc": 155.0,
+   "primary_before": 3.042,
+   "primary_step2": 3.042,
+   "et_before": 18.3286,
+   "et_step2": 18.3286,
+   "et_step3": 18.3286,
+   "benchmark_et": 17.62,
+   "weight": 1.0,
+   "source": "MotoStatz 2020 (instrumented)",
+   "cluster": "entry-150-200",
+   "vmax_before": 154.9,
+   "vmax_step2": 154.9
+  },
+  {
+   "bike": "Yamaha YZF-R3 (2015)",
+   "disp_cc": 321.0,
+   "primary_before": 1.9,
+   "primary_step2": 2.841,
+   "et_before": 13.845,
+   "et_step2": 13.7071,
+   "et_step3": 13.7071,
+   "benchmark_et": 14.0,
+   "weight": 1.0,
+   "source": "MotoStatz GPS test (instrumented)",
+   "cluster": "mid-twin-300-500",
+   "vmax_before": 236.3,
+   "vmax_step2": 209.5
+  },
+  {
+   "bike": "Yamaha MT-03 (2020)",
+   "disp_cc": 321.0,
+   "primary_before": 1.85,
+   "primary_step2": 2.841,
+   "et_before": 14.3398,
+   "et_step2": 14.111,
+   "et_step3": 14.111,
+   "benchmark_et": 14.05,
+   "weight": 0.1,
+   "source": "AccelerationTimes 2020 (DERIVED)",
+   "cluster": "mid-twin-300-500",
+   "vmax_before": 181.3,
+   "vmax_step2": 182.4
+  },
+  {
+   "bike": "Honda H'ness CB350 (2020)",
+   "disp_cc": 348.36,
+   "primary_before": 1.92,
+   "primary_step2": 2.572,
+   "et_before": 17.3588,
+   "et_step2": 17.1849,
+   "et_step3": 17.1849,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 134.0,
+   "vmax_step2": 132.2
+  },
+  {
+   "bike": "Honda CB350RS (2021)",
+   "disp_cc": 348.36,
+   "primary_before": 1.85,
+   "primary_step2": 2.572,
+   "et_before": 17.3075,
+   "et_step2": 17.0557,
+   "et_step3": 17.0557,
+   "benchmark_et": 15.5,
+   "weight": 0.1,
+   "source": "DERIVED (0-100 \u00d7 1.6, \u00b10.7s)",
+   "cluster": "single-300-500",
+   "vmax_before": 137.8,
+   "vmax_step2": 132.7
+  },
+  {
+   "bike": "Honda CB300F (2022)",
+   "disp_cc": 293.52,
+   "primary_before": 1.85,
+   "primary_step2": 3.086,
+   "et_before": 16.3849,
+   "et_step2": 15.9459,
+   "et_step3": 16.1908,
+   "benchmark_et": 15.2,
+   "weight": 0.1,
+   "source": "DERIVED (293cc CB300R platform, ~15.2s)",
+   "cluster": "entry-200-300",
+   "vmax_before": 149.0,
+   "vmax_step2": 145.3
+  },
+  {
+   "bike": "Suzuki Gixxer SF 250 (2019)",
+   "disp_cc": 249.0,
+   "primary_before": 1.9,
+   "primary_step2": 3.072,
+   "et_before": 15.6007,
+   "et_step2": 15.2749,
+   "et_step3": 15.5392,
+   "benchmark_et": 16.1,
+   "weight": 0.1,
+   "source": "DERIVED (0-100 \u00d7 1.6, \u00b10.7s)",
+   "cluster": "entry-200-300",
+   "vmax_before": 203.5,
+   "vmax_step2": 153.9
+  },
+  {
+   "bike": "Suzuki Gixxer 250 (2019)",
+   "disp_cc": 249.0,
+   "primary_before": 1.85,
+   "primary_step2": 3.072,
+   "et_before": 16.1571,
+   "et_step2": 15.7783,
+   "et_step3": 16.0458,
+   "benchmark_et": 16.1,
+   "weight": 0.1,
+   "source": "DERIVED (0-100 \u00d7 1.6, \u00b10.7s)",
+   "cluster": "entry-200-300",
+   "vmax_before": 152.5,
+   "vmax_step2": 149.9
+  },
+  {
+   "bike": "Suzuki Intruder 250 (2018)",
+   "disp_cc": 249.0,
+   "primary_before": 1.92,
+   "primary_step2": 3.072,
+   "et_before": 16.4867,
+   "et_step2": 16.1437,
+   "et_step3": 16.3917,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 144.0,
+   "vmax_step2": 142.3
+  },
+  {
+   "bike": "Mahindra Mojo XT300 (2015)",
+   "disp_cc": 294.72,
+   "primary_before": 1.9,
+   "primary_step2": 3.087,
+   "et_before": 15.3901,
+   "et_step2": 15.3181,
+   "et_step3": 15.5886,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 181.0,
+   "vmax_step2": 163.0
+  },
+  {
+   "bike": "Hyosung GT250R (2008)",
+   "disp_cc": 249.0,
+   "primary_before": 1.9,
+   "primary_step2": 3.072,
+   "et_before": 15.99,
+   "et_step2": 15.2432,
+   "et_step3": 15.4661,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 201.6,
+   "vmax_step2": 170.7
+  },
+  {
+   "bike": "Hyosung GT650R (2010)",
+   "disp_cc": 647.0,
+   "primary_before": 1.9,
+   "primary_step2": 2.095,
+   "et_before": 11.9519,
+   "et_step2": 12.0008,
+   "et_step3": 12.0008,
+   "benchmark_et": 12.84,
+   "weight": 0.7,
+   "source": "Cycle World test (via Digest Africa)",
+   "cluster": "sport-twin-600-1300",
+   "vmax_before": 289.7,
+   "vmax_step2": 264.1
+  },
+  {
+   "bike": "Hero Karizma R (2003)",
+   "disp_cc": 223.0,
+   "primary_before": 1.9,
+   "primary_step2": 3.064,
+   "et_before": 17.8316,
+   "et_step2": 17.0181,
+   "et_step3": 17.0483,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 165.1,
+   "vmax_step2": 132.9
+  },
+  {
+   "bike": "Hero Karizma XMR 210 (2023)",
+   "disp_cc": 210.0,
+   "primary_before": 1.9,
+   "primary_step2": 3.06,
+   "et_before": 16.1207,
+   "et_step2": 15.3423,
+   "et_step3": 15.4977,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 206.1,
+   "vmax_step2": 177.1
+  },
+  {
+   "bike": "Hero Xpulse 200 (2019)",
+   "disp_cc": 199.6,
+   "primary_before": 1.85,
+   "primary_step2": 3.056,
+   "et_before": 18.048,
+   "et_step2": 17.7145,
+   "et_step3": 17.7145,
+   "benchmark_et": 21.6,
+   "weight": 0.1,
+   "source": "DERIVED (0-100 13.5s x1.6 4V, Autocar India; top ~123 km/h)",
+   "cluster": "entry-150-200",
+   "vmax_before": 128.8,
+   "vmax_step2": 126.8
+  },
+  {
+   "bike": "Royal Enfield Classic 350 (2021)",
+   "disp_cc": 349.34,
+   "primary_before": 1.92,
+   "primary_step2": 2.562,
+   "et_before": 18.1828,
+   "et_step2": 17.7903,
+   "et_step3": 17.7903,
+   "benchmark_et": 22.5,
+   "weight": 0.1,
+   "source": "DERIVED (0-100 ~14s x1.6, ZigWheels; top speed ~115-120 km/h)",
+   "cluster": "single-300-500",
+   "vmax_before": 128.0,
+   "vmax_step2": 130.2
+  },
+  {
+   "bike": "Royal Enfield Meteor 350 (2020)",
+   "disp_cc": 349.34,
+   "primary_before": 1.92,
+   "primary_step2": 2.562,
+   "et_before": 18.018,
+   "et_step2": 17.6794,
+   "et_step3": 17.6794,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 130.5,
+   "vmax_step2": 131.1
+  },
+  {
+   "bike": "Royal Enfield Hunter 350 (2022)",
+   "disp_cc": 349.34,
+   "primary_before": 1.85,
+   "primary_step2": 2.562,
+   "et_before": 17.5797,
+   "et_step2": 17.2651,
+   "et_step3": 17.2651,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 138.8,
+   "vmax_step2": 135.7
+  },
+  {
+   "bike": "Royal Enfield Thunderbird 350 (2012)",
+   "disp_cc": 346.0,
+   "primary_before": 1.92,
+   "primary_step2": 2.595,
+   "et_before": 18.1428,
+   "et_step2": 17.7492,
+   "et_step3": 17.7492,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 131.5,
+   "vmax_step2": 130.0
+  },
+  {
+   "bike": "Royal Enfield Bullet 500 (2008)",
+   "disp_cc": 499.0,
+   "primary_before": 1.92,
+   "primary_step2": 2.082,
+   "et_before": 16.2742,
+   "et_step2": 16.1921,
+   "et_step3": 16.1921,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 144.9,
+   "vmax_step2": 144.2
+  },
+  {
+   "bike": "Royal Enfield Himalayan 411 (2016)",
+   "disp_cc": 411.0,
+   "primary_before": 1.85,
+   "primary_step2": 2.074,
+   "et_before": 17.1461,
+   "et_step2": 16.9546,
+   "et_step3": 16.9546,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 137.5,
+   "vmax_step2": 139.7
+  },
+  {
+   "bike": "Royal Enfield Scram 411 (2022)",
+   "disp_cc": 411.0,
+   "primary_before": 1.85,
+   "primary_step2": 2.074,
+   "et_before": 16.7814,
+   "et_step2": 16.614,
+   "et_step3": 16.614,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 143.6,
+   "vmax_step2": 144.3
+  },
+  {
+   "bike": "Royal Enfield Guerrilla 450 (2024)",
+   "disp_cc": 452.0,
+   "primary_before": 1.85,
+   "primary_step2": 2.078,
+   "et_before": 14.985,
+   "et_step2": 14.7843,
+   "et_step3": 14.7843,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 171.8,
+   "vmax_step2": 171.7
+  },
+  {
+   "bike": "Jawa Jawa 42 (2018)",
+   "disp_cc": 293.9,
+   "primary_before": 1.85,
+   "primary_step2": 3.086,
+   "et_before": 16.2821,
+   "et_step2": 15.7207,
+   "et_step3": 15.9843,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 149.8,
+   "vmax_step2": 141.3
+  },
+  {
+   "bike": "Jawa Perak (2020)",
+   "disp_cc": 334.0,
+   "primary_before": 1.92,
+   "primary_step2": 2.713,
+   "et_before": 16.2481,
+   "et_step2": 15.9884,
+   "et_step3": 15.9884,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 147.1,
+   "vmax_step2": 147.4
+  },
+  {
+   "bike": "Yezdi Roadster (2022)",
+   "disp_cc": 334.0,
+   "primary_before": 1.85,
+   "primary_step2": 2.713,
+   "et_before": 16.3294,
+   "et_step2": 15.7091,
+   "et_step3": 15.7091,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 155.2,
+   "vmax_step2": 155.5
+  },
+  {
+   "bike": "Yezdi Scrambler (2022)",
+   "disp_cc": 334.0,
+   "primary_before": 1.85,
+   "primary_step2": 2.713,
+   "et_before": 16.513,
+   "et_step2": 15.8007,
+   "et_step3": 15.8007,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 152.0,
+   "vmax_step2": 151.9
+  },
+  {
+   "bike": "Yezdi Adventure (2022)",
+   "disp_cc": 334.0,
+   "primary_before": 1.85,
+   "primary_step2": 2.713,
+   "et_before": 16.7826,
+   "et_step2": 16.0987,
+   "et_step3": 16.0987,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 147.3,
+   "vmax_step2": 147.3
+  },
+  {
+   "bike": "Benelli 302R (2017)",
+   "disp_cc": 300.0,
+   "primary_before": 1.9,
+   "primary_step2": 3.048,
+   "et_before": 14.6928,
+   "et_step2": 14.5157,
+   "et_step3": 14.5157,
+   "benchmark_et": 15.8,
+   "weight": 0.5,
+   "source": "MotorbikeCatalog 2017",
+   "cluster": "mid-twin-300-500",
+   "vmax_before": 226.0,
+   "vmax_step2": 221.5
+  },
+  {
+   "bike": "Benelli TNT 300 (2018)",
+   "disp_cc": 300.0,
+   "primary_before": 1.85,
+   "primary_step2": 3.048,
+   "et_before": 15.252,
+   "et_step2": 14.9667,
+   "et_step3": 14.9667,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 171.9,
+   "vmax_step2": 171.8
+  },
+  {
+   "bike": "Benelli Imperiale 400 (2019)",
+   "disp_cc": 374.0,
+   "primary_before": 1.92,
+   "primary_step2": 2.319,
+   "et_before": 18.0567,
+   "et_step2": 17.7644,
+   "et_step3": 17.7644,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 131.5,
+   "vmax_step2": 131.4
+  },
+  {
+   "bike": "Benelli 502C (2020)",
+   "disp_cc": 500.0,
+   "primary_before": 1.92,
+   "primary_step2": 1.95,
+   "et_before": 14.0882,
+   "et_step2": 14.1014,
+   "et_step3": 14.1014,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 174.7,
+   "vmax_step2": 174.7
+  },
+  {
+   "bike": "CFMoto 300NK (2024)",
+   "disp_cc": 292.4,
+   "primary_before": 1.85,
+   "primary_step2": 3.086,
+   "et_before": 15.4173,
+   "et_step2": 15.4141,
+   "et_step3": 15.7304,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 158.6,
+   "vmax_step2": 157.2
+  },
+  {
+   "bike": "CFMoto 450NK (2024)",
+   "disp_cc": 449.5,
+   "primary_before": 1.85,
+   "primary_step2": 2.077,
+   "et_before": 13.6593,
+   "et_step2": 13.5372,
+   "et_step3": 13.5372,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 184.4,
+   "vmax_step2": 184.7
+  },
+  {
+   "bike": "CFMoto 650NK (2023)",
+   "disp_cc": 649.3,
+   "primary_before": 1.85,
+   "primary_step2": 2.095,
+   "et_before": 13.3441,
+   "et_step2": 13.1368,
+   "et_step3": 13.1368,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 195.1,
+   "vmax_step2": 199.9
+  },
+  {
+   "bike": "CFMoto 300SR (2024)",
+   "disp_cc": 292.4,
+   "primary_before": 1.9,
+   "primary_step2": 3.086,
+   "et_before": 14.9424,
+   "et_step2": 14.9491,
+   "et_step3": 15.2601,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 210.1,
+   "vmax_step2": 168.6
+  },
+  {
+   "bike": "BMW G310R (2017)",
+   "disp_cc": 313.0,
+   "primary_before": 1.85,
+   "primary_step2": 2.92,
+   "et_before": 16.3617,
+   "et_step2": 15.2234,
+   "et_step3": 15.2234,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 163.4,
+   "vmax_step2": 165.2
+  },
+  {
+   "bike": "BMW G310GS (2017)",
+   "disp_cc": 313.0,
+   "primary_before": 1.85,
+   "primary_step2": 2.92,
+   "et_before": 16.8703,
+   "et_step2": 15.5558,
+   "et_step3": 15.5558,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 154.6,
+   "vmax_step2": 154.7
+  },
+  {
+   "bike": "BMW G310RR (2021)",
+   "disp_cc": 312.2,
+   "primary_before": 1.9,
+   "primary_step2": 2.928,
+   "et_before": 15.2758,
+   "et_step2": 15.047,
+   "et_step3": 15.047,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 212.4,
+   "vmax_step2": 177.2
+  },
+  {
+   "bike": "Harley-Davidson X440 (2023)",
+   "disp_cc": 440.0,
+   "primary_before": 1.92,
+   "primary_step2": 2.077,
+   "et_before": 16.1934,
+   "et_step2": 16.2591,
+   "et_step3": 16.2591,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 143.1,
+   "vmax_step2": 142.0
+  },
+  {
+   "bike": "Aprilia RS 457 (2024)",
+   "disp_cc": 457.0,
+   "primary_before": 1.9,
+   "primary_step2": 2.078,
+   "et_before": 12.8657,
+   "et_step2": 12.949,
+   "et_step3": 12.949,
+   "benchmark_et": 13.3,
+   "weight": 0.5,
+   "source": "FastestLaps 2024",
+   "cluster": "mid-twin-300-500",
+   "vmax_before": 255.4,
+   "vmax_step2": 254.4
+  },
+  {
+   "bike": "Triumph Scrambler 400X (2023)",
+   "disp_cc": 398.15,
+   "primary_before": 1.85,
+   "primary_step2": 2.081,
+   "et_before": 14.8455,
+   "et_step2": 14.6709,
+   "et_step3": 14.6709,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 166.0,
+   "vmax_step2": 165.4
+  },
+  {
+   "bike": "KTM Duke 390 (2013)",
+   "disp_cc": 373.2,
+   "primary_before": 1.85,
+   "primary_step2": 2.2,
+   "et_before": 13.9716,
+   "et_step2": 14.1109,
+   "et_step3": 14.1109,
+   "benchmark_et": 14.0,
+   "weight": 1.0,
+   "source": "Motorcycle Consumer News (Duke 390 14.02 @ 91.88 mph)",
+   "cluster": "single-300-500",
+   "vmax_before": 178.4,
+   "vmax_step2": 178.5
+  },
+  {
+   "bike": "KTM 390 Adventure (2020)",
+   "disp_cc": 373.2,
+   "primary_before": 1.85,
+   "primary_step2": 2.2,
+   "et_before": 14.4128,
+   "et_step2": 14.3409,
+   "et_step3": 14.3409,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 171.3,
+   "vmax_step2": 171.5
+  },
+  {
+   "bike": "Honda CB500F (2019)",
+   "disp_cc": 471.0,
+   "primary_before": 1.85,
+   "primary_step2": 2.029,
+   "et_before": 13.7594,
+   "et_step2": 13.6487,
+   "et_step3": 13.6487,
+   "benchmark_et": 13.36,
+   "weight": 1.0,
+   "source": "MotoStatz (GPS instrumented)",
+   "cluster": "mid-twin-300-500",
+   "vmax_before": 188.9,
+   "vmax_step2": 188.4
+  },
+  {
+   "bike": "Kawasaki Versys 650 (2015)",
+   "disp_cc": 649.0,
+   "primary_before": 1.85,
+   "primary_step2": 2.095,
+   "et_before": 12.6765,
+   "et_step2": 12.7779,
+   "et_step3": 12.7779,
+   "benchmark_et": 12.9,
+   "weight": 0.5,
+   "source": "zeroto60times aggregator listing",
+   "cluster": "mid-twin-500-700",
+   "vmax_before": 206.1,
+   "vmax_step2": 205.8
+  },
+  {
+   "bike": "Kawasaki Z400 (2019)",
+   "disp_cc": 399.0,
+   "primary_before": 1.85,
+   "primary_step2": 2.073,
+   "et_before": 13.5455,
+   "et_step2": 13.6536,
+   "et_step3": 13.6536,
+   "benchmark_et": 13.34,
+   "weight": 1.0,
+   "source": "MotoStatz (Dragy, stock instrumented, 98 mph trap)",
+   "cluster": "mid-twin-300-500",
+   "vmax_before": 184.8,
+   "vmax_step2": 185.3
+  },
+  {
+   "bike": "Suzuki V-Strom 650 (DL650) (2012)",
+   "disp_cc": 645.0,
+   "primary_before": 1.85,
+   "primary_step2": 1.901,
+   "et_before": 12.6509,
+   "et_step2": 12.6668,
+   "et_step3": 12.6668,
+   "benchmark_et": 12.54,
+   "weight": 0.7,
+   "source": "Motorcycle Consumer-News data quoted by zeroto60times (magazine)",
+   "cluster": "mid-twin-500-700",
+   "vmax_before": 211.8,
+   "vmax_step2": 209.7
+  },
+  {
+   "bike": "KTM 690 Duke R (2012)",
+   "disp_cc": 690.0,
+   "primary_before": 1.85,
+   "primary_step2": 2.095,
+   "et_before": 11.7936,
+   "et_step2": 11.9328,
+   "et_step3": 11.9328,
+   "benchmark_et": 12.3,
+   "weight": 0.5,
+   "source": "FastestLaps figure (no trap published)",
+   "cluster": "litre-sport-600-1000",
+   "vmax_before": 216.4,
+   "vmax_step2": 216.7
+  },
+  {
+   "bike": "Husqvarna Vitpilen 701 (2018)",
+   "disp_cc": 693.0,
+   "primary_before": 1.85,
+   "primary_step2": 2.095,
+   "et_before": 11.7872,
+   "et_step2": 11.9127,
+   "et_step3": 11.9127,
+   "benchmark_et": 12.1,
+   "weight": 0.5,
+   "source": "zeroto60times aggregator (no trap published)",
+   "cluster": "litre-sport-600-1000",
+   "vmax_before": 221.0,
+   "vmax_step2": 221.0
+  },
+  {
+   "bike": "Honda RS150R (Malaysia) (2017)",
+   "disp_cc": 149.16,
+   "primary_before": 1.9,
+   "primary_step2": 3.042,
+   "et_before": 16.7434,
+   "et_step2": 16.3845,
+   "et_step3": 16.3845,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 170.6,
+   "vmax_step2": 170.6
+  },
+  {
+   "bike": "Honda Winner X (Vietnam) (2019)",
+   "disp_cc": 149.16,
+   "primary_before": 1.9,
+   "primary_step2": 3.042,
+   "et_before": 17.3081,
+   "et_step2": 16.8072,
+   "et_step3": 16.8072,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 166.7,
+   "vmax_step2": 167.1
+  },
+  {
+   "bike": "Honda Supra GTR 150 (Indonesia) (2018)",
+   "disp_cc": 149.16,
+   "primary_before": 1.9,
+   "primary_step2": 3.042,
+   "et_before": 17.133,
+   "et_step2": 16.6659,
+   "et_step3": 16.6659,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 168.2,
+   "vmax_step2": 168.9
+  },
+  {
+   "bike": "Honda Sonic 150R (Indonesia) (2015)",
+   "disp_cc": 149.16,
+   "primary_before": 1.9,
+   "primary_step2": 3.042,
+   "et_before": 17.063,
+   "et_step2": 16.4587,
+   "et_step3": 16.4587,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 173.1,
+   "vmax_step2": 173.4
+  },
+  {
+   "bike": "Honda CB150R StreetFire (Indonesia) (2017)",
+   "disp_cc": 149.16,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 18.0372,
+   "et_step2": 17.404,
+   "et_step3": 17.404,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 134.5,
+   "vmax_step2": 134.7
+  },
+  {
+   "bike": "Honda CBR150R (Indonesia) (2021)",
+   "disp_cc": 149.16,
+   "primary_before": 1.9,
+   "primary_step2": 3.042,
+   "et_before": 17.0979,
+   "et_step2": 16.4769,
+   "et_step3": 16.4769,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 180.3,
+   "vmax_step2": 181.1
+  },
+  {
+   "bike": "Honda CBR250RR (Indonesia) (2017)",
+   "disp_cc": 249.7,
+   "primary_before": 1.9,
+   "primary_step2": 3.072,
+   "et_before": 14.606,
+   "et_step2": 13.7998,
+   "et_step3": 14.1346,
+   "benchmark_et": 14.6,
+   "weight": 1.0,
+   "source": "Indonesian VBox test 2017 (instrumented, 14.55-14.7s @ 89-92mph)",
+   "cluster": "entry-200-300",
+   "vmax_before": 242.9,
+   "vmax_step2": 241.6
+  },
+  {
+   "bike": "Yamaha Y15ZR (Malaysia) (2015)",
+   "disp_cc": 149.7,
+   "primary_before": 1.9,
+   "primary_step2": 3.042,
+   "et_before": 16.8586,
+   "et_step2": 16.6128,
+   "et_step3": 16.6128,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 169.3,
+   "vmax_step2": 147.1
+  },
+  {
+   "bike": "Yamaha Y15ZR V2 (Malaysia) (2021)",
+   "disp_cc": 149.7,
+   "primary_before": 1.9,
+   "primary_step2": 3.042,
+   "et_before": 16.9136,
+   "et_step2": 16.6379,
+   "et_step3": 16.6379,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 169.6,
+   "vmax_step2": 147.1
+  },
+  {
+   "bike": "Yamaha Exciter 150 (Vietnam) (2015)",
+   "disp_cc": 149.7,
+   "primary_before": 1.9,
+   "primary_step2": 3.042,
+   "et_before": 16.8354,
+   "et_step2": 16.5798,
+   "et_step3": 16.5798,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 169.7,
+   "vmax_step2": 147.1
+  },
+  {
+   "bike": "Yamaha Exciter 155 VVA (Vietnam) (2021)",
+   "disp_cc": 155.0,
+   "primary_before": 1.9,
+   "primary_step2": 3.042,
+   "et_before": 17.0289,
+   "et_step2": 16.2992,
+   "et_step3": 16.2992,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 176.6,
+   "vmax_step2": 178.1
+  },
+  {
+   "bike": "Yamaha YZF-R25 (Indonesia) (2014)",
+   "disp_cc": 249.0,
+   "primary_before": 1.9,
+   "primary_step2": 3.072,
+   "et_before": 15.3873,
+   "et_step2": 14.544,
+   "et_step3": 14.7921,
+   "benchmark_et": 15.5,
+   "weight": 1.0,
+   "source": "Otomotifnet VBox/Racelogic (instrumented 0-402m 15.5s, top 158 km/h)",
+   "cluster": "entry-200-300",
+   "vmax_before": 228.1,
+   "vmax_step2": 192.5
+  },
+  {
+   "bike": "Kawasaki Ninja RR Mono 250 (Indonesia) (2014)",
+   "disp_cc": 249.0,
+   "primary_before": 1.9,
+   "primary_step2": 3.072,
+   "et_before": 15.2952,
+   "et_step2": 14.814,
+   "et_step3": 15.0853,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 214.0,
+   "vmax_step2": 181.9
+  },
+  {
+   "bike": "Bajaj Pulsar N160 (2023)",
+   "disp_cc": 164.82,
+   "primary_before": 1.85,
+   "primary_step2": 3.045,
+   "et_before": 18.4438,
+   "et_step2": 17.5425,
+   "et_step3": 17.5425,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 149.2,
+   "vmax_step2": 144.0
+  },
+  {
+   "bike": "Bajaj Pulsar P150 (2023)",
+   "disp_cc": 149,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 18.0699,
+   "et_step2": 18.0222,
+   "et_step3": 18.0222,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 140.7,
+   "vmax_step2": 140.6
+  },
+  {
+   "bike": "TVS Apache RTR 310 (2024)",
+   "disp_cc": 313,
+   "primary_before": 1.9,
+   "primary_step2": 2.92,
+   "et_before": 15.4997,
+   "et_step2": 14.7447,
+   "et_step3": 14.7447,
+   "benchmark_et": 15.3,
+   "weight": 0.1,
+   "source": "DERIVED (RR 310 platform 312cc; RR 310 verified 15.46 @135 FastestLaps)",
+   "cluster": "single-300-500",
+   "vmax_before": 224.4,
+   "vmax_step2": 221.4
+  },
+  {
+   "bike": "Hero Karizma XMR 250 (2024)",
+   "disp_cc": 249,
+   "primary_before": 1.9,
+   "primary_step2": 3.072,
+   "et_before": 15.1983,
+   "et_step2": 15.11,
+   "et_step3": 15.3893,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 213.4,
+   "vmax_step2": 209.2
+  },
+  {
+   "bike": "Royal Enfield Classic 350 Halcyon (2024)",
+   "disp_cc": 349,
+   "primary_before": 1.92,
+   "primary_step2": 2.565,
+   "et_before": 17.6427,
+   "et_step2": 18.219,
+   "et_step3": 18.219,
+   "benchmark_et": 22.5,
+   "weight": 0.1,
+   "source": "DERIVED (0-100 ~14s x1.6, ZigWheels; top speed ~115-120 km/h)",
+   "cluster": "single-300-500",
+   "vmax_before": 146.0,
+   "vmax_step2": 114.0
+  },
+  {
+   "bike": "Royal Enfield Bear 650 (2024)",
+   "disp_cc": 648,
+   "primary_before": 1.85,
+   "primary_step2": 2.095,
+   "et_before": 14.5506,
+   "et_step2": 14.73,
+   "et_step3": 14.73,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 186.6,
+   "vmax_step2": 187.2
+  },
+  {
+   "bike": "Royal Enfield Goan Classic 350 (2024)",
+   "disp_cc": 349,
+   "primary_before": 1.92,
+   "primary_step2": 2.565,
+   "et_before": 17.6427,
+   "et_step2": 18.219,
+   "et_step3": 18.219,
+   "benchmark_et": 22.5,
+   "weight": 0.1,
+   "source": "DERIVED (0-100 ~14s x1.6, ZigWheels; top speed ~115-120 km/h)",
+   "cluster": "single-300-500",
+   "vmax_before": 146.0,
+   "vmax_step2": 114.0
+  },
+  {
+   "bike": "Honda SP 160 (2024)",
+   "disp_cc": 160,
+   "primary_before": 1.85,
+   "primary_step2": 3.044,
+   "et_before": 18.6487,
+   "et_step2": 17.8528,
+   "et_step3": 17.8528,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 146.3,
+   "vmax_step2": 145.3
+  },
+  {
+   "bike": "Yamaha FZS 25 (2023)",
+   "disp_cc": 249,
+   "primary_before": 1.85,
+   "primary_step2": 3.072,
+   "et_before": 16.9111,
+   "et_step2": 16.3608,
+   "et_step3": 16.5741,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 158.7,
+   "vmax_step2": 154.4
+  },
+  {
+   "bike": "KTM 390 Adventure SW (2024)",
+   "disp_cc": 373,
+   "primary_before": 1.85,
+   "primary_step2": 2.329,
+   "et_before": 14.3689,
+   "et_step2": 14.5707,
+   "et_step3": 14.5707,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 175.3,
+   "vmax_step2": 178.3
+  },
+  {
+   "bike": "BMW G 310 RR (2024)",
+   "disp_cc": 313,
+   "primary_before": 1.9,
+   "primary_step2": 2.92,
+   "et_before": 15.3749,
+   "et_step2": 14.7381,
+   "et_step3": 14.7381,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 223.6,
+   "vmax_step2": 221.4
+  },
+  {
+   "bike": "Yamaha SR400 (2014)",
+   "disp_cc": 399,
+   "primary_before": 1.92,
+   "primary_step2": 2.073,
+   "et_before": 16.8697,
+   "et_step2": 16.9519,
+   "et_step3": 16.9519,
+   "benchmark_et": 16.7,
+   "weight": 0.5,
+   "source": "0to60times aggregator (no trap published)",
+   "cluster": "single-300-500",
+   "vmax_before": 153.6,
+   "vmax_step2": 151.8
+  },
+  {
+   "bike": "Hero Xtreme 200S 4V (2023)",
+   "disp_cc": 199.6,
+   "primary_before": 1.85,
+   "primary_step2": 3.056,
+   "et_before": 17.7591,
+   "et_step2": 17.2055,
+   "et_step3": 17.2055,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 146.0,
+   "vmax_step2": 145.7
+  },
+  {
+   "bike": "Aprilia Tuareg 660 (2022)",
+   "disp_cc": 659,
+   "primary_before": 1.85,
+   "primary_step2": 1.75,
+   "et_before": 12.4472,
+   "et_step2": 12.3758,
+   "et_step3": 12.3758,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 205.4,
+   "vmax_step2": 205.8
+  },
+  {
+   "bike": "TVS Apache RTR 180 (2009)",
+   "disp_cc": 177.4,
+   "primary_before": 1.85,
+   "primary_step2": 3.049,
+   "et_before": 18.0631,
+   "et_step2": 17.1357,
+   "et_step3": 17.1357,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 139.0,
+   "vmax_step2": 142.5
+  },
+  {
+   "bike": "Hero Mavrick 440 (2024)",
+   "disp_cc": 440.0,
+   "primary_before": 1.85,
+   "primary_step2": 2.077,
+   "et_before": 15.7595,
+   "et_step2": 15.8253,
+   "et_step3": 15.8253,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 157.1,
+   "vmax_step2": 158.5
+  },
+  {
+   "bike": "Yamaha Tenere 700 (2019)",
+   "disp_cc": 689,
+   "primary_before": 1.85,
+   "primary_step2": 1.866,
+   "et_before": 12.6318,
+   "et_step2": 12.6453,
+   "et_step3": 12.6453,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 205.1,
+   "vmax_step2": 205.5
+  },
+  {
+   "bike": "Bajaj Pulsar NS160 (2017)",
+   "disp_cc": 160.3,
+   "primary_before": 1.85,
+   "primary_step2": 3.044,
+   "et_before": 18.4534,
+   "et_step2": 17.8209,
+   "et_step3": 17.8209,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 135.9,
+   "vmax_step2": 137.2
+  },
+  {
+   "bike": "Honda CB Hornet 160R (2016)",
+   "disp_cc": 162.71,
+   "primary_before": 1.85,
+   "primary_step2": 3.044,
+   "et_before": 18.4949,
+   "et_step2": 17.9208,
+   "et_step3": 17.9208,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 130.6,
+   "vmax_step2": 135.7
+  },
+  {
+   "bike": "Hero Xtreme 250R (2024)",
+   "disp_cc": 249.1,
+   "primary_before": 1.85,
+   "primary_step2": 3.072,
+   "et_before": 15.1779,
+   "et_step2": 15.0271,
+   "et_step3": 15.3378,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 167.7,
+   "vmax_step2": 166.7
+  },
+  {
+   "bike": "Yamaha XSR700 (2018)",
+   "disp_cc": 689,
+   "primary_before": 1.85,
+   "primary_step2": 1.866,
+   "et_before": 11.9906,
+   "et_step2": 11.9966,
+   "et_step3": 11.9966,
+   "benchmark_et": 12.22,
+   "weight": 1.0,
+   "source": "MotoStatz 2022 (Dragy, stock instrumented best-of-N)",
+   "cluster": "sport-twin-600-1300",
+   "vmax_before": 222.3,
+   "vmax_step2": 222.6
+  },
+  {
+   "bike": "KTM 390 Duke Gen 3 (2024)",
+   "disp_cc": 399,
+   "primary_before": 1.85,
+   "primary_step2": 2.073,
+   "et_before": 13.7275,
+   "et_step2": 13.7943,
+   "et_step3": 13.7943,
+   "benchmark_et": 13.3,
+   "weight": 1.0,
+   "source": "MotoStatz 2024 (Dragy, stock instrumented, 96.3 mph trap)",
+   "cluster": "single-300-500",
+   "vmax_before": 207.4,
+   "vmax_step2": 207.0
+  },
+  {
+   "bike": "Triumph Speed T4 (2024)",
+   "disp_cc": 349,
+   "primary_before": 1.85,
+   "primary_step2": 2.565,
+   "et_before": 15.6578,
+   "et_step2": 15.7227,
+   "et_step3": 15.7227,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 162.2,
+   "vmax_step2": 162.4
+  },
+  {
+   "bike": "Honda CB200X (2022)",
+   "disp_cc": 184,
+   "primary_before": 1.85,
+   "primary_step2": 3.051,
+   "et_before": 18.1909,
+   "et_step2": 17.2152,
+   "et_step3": 17.2152,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 143.7,
+   "vmax_step2": 146.1
+  },
+  {
+   "bike": "Kawasaki Eliminator 450 (2024)",
+   "disp_cc": 451,
+   "primary_before": 1.92,
+   "primary_step2": 2.078,
+   "et_before": 13.5727,
+   "et_step2": 13.674,
+   "et_step3": 13.674,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 196.8,
+   "vmax_step2": 194.4
+  },
+  {
+   "bike": "Honda NX500 (2024)",
+   "disp_cc": 471.0,
+   "primary_before": 1.85,
+   "primary_step2": 2.029,
+   "et_before": 13.5997,
+   "et_step2": 13.6792,
+   "et_step3": 13.6792,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 184.0,
+   "vmax_step2": 184.8
+  },
+  {
+   "bike": "Bajaj Pulsar 150 (2009)",
+   "disp_cc": 149.5,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 18.4762,
+   "et_step2": 18.1795,
+   "et_step3": 18.1795,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 132.6,
+   "vmax_step2": 131.5
+  },
+  {
+   "bike": "Honda Shine 125 (2019)",
+   "disp_cc": 123.94,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 19.6071,
+   "et_step2": 19.0904,
+   "et_step3": 19.0904,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 119.5,
+   "vmax_step2": 120.3
+  },
+  {
+   "bike": "Suzuki Gixxer 155 (2014)",
+   "disp_cc": 154.9,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 19.0491,
+   "et_step2": 18.4696,
+   "et_step3": 18.4696,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 131.0,
+   "vmax_step2": 128.6
+  },
+  {
+   "bike": "KTM 250 Adventure (2020)",
+   "disp_cc": 248.8,
+   "primary_before": 1.85,
+   "primary_step2": 3.072,
+   "et_before": 16.5111,
+   "et_step2": 15.4421,
+   "et_step3": 15.4974,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 166.2,
+   "vmax_step2": 165.8
+  },
+  {
+   "bike": "Hero Splendor Plus (2020)",
+   "disp_cc": 97.2,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 21.2508,
+   "et_step2": 20.825,
+   "et_step3": 20.825,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 108.2,
+   "vmax_step2": 107.5
+  },
+  {
+   "bike": "Honda SP 125 (2019)",
+   "disp_cc": 124.94,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 19.6747,
+   "et_step2": 19.107,
+   "et_step3": 19.107,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 121.0,
+   "vmax_step2": 122.2
+  },
+  {
+   "bike": "Bajaj Pulsar NS125 (2021)",
+   "disp_cc": 124.4,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 19.3589,
+   "et_step2": 19.058,
+   "et_step3": 19.058,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 124.8,
+   "vmax_step2": 125.8
+  },
+  {
+   "bike": "KTM 125 Duke (2017)",
+   "disp_cc": 124.7,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 18.3461,
+   "et_step2": 18.0082,
+   "et_step3": 18.0082,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 140.9,
+   "vmax_step2": 133.6
+  },
+  {
+   "bike": "Husqvarna Svartpilen 250 (2024)",
+   "disp_cc": 248.76,
+   "primary_before": 1.85,
+   "primary_step2": 3.072,
+   "et_before": 15.2183,
+   "et_step2": 15.2889,
+   "et_step3": 15.6038,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 178.4,
+   "vmax_step2": 149.4
+  },
+  {
+   "bike": "Honda CB125R (2018)",
+   "disp_cc": 124.9,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 17.6197,
+   "et_step2": 17.3583,
+   "et_step3": 17.3583,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 146.2,
+   "vmax_step2": 146.6
+  },
+  {
+   "bike": "Royal Enfield Classic 650 (2025)",
+   "disp_cc": 648,
+   "primary_before": 1.92,
+   "primary_step2": 2.0,
+   "et_before": 14.0356,
+   "et_step2": 14.0788,
+   "et_step3": 14.0788,
+   "benchmark_et": 14.1,
+   "weight": 0.1,
+   "source": "DERIVED (648 twin, heavy classic cruiser body)",
+   "cluster": "mid-twin-500-700",
+   "vmax_before": 182.6,
+   "vmax_step2": 183.8
+  },
+  {
+   "bike": "Honda CBR300R (2014)",
+   "disp_cc": 286,
+   "primary_before": 1.9,
+   "primary_step2": 3.084,
+   "et_before": 15.4152,
+   "et_step2": 14.8014,
+   "et_step3": 15.065,
+   "benchmark_et": 15.79,
+   "weight": 1.0,
+   "source": "Sport Rider 2015 (Cycle World sportbike-performance-numbers, timing-strip)",
+   "cluster": "entry-200-300",
+   "vmax_before": 211.5,
+   "vmax_step2": 188.4
+  },
+  {
+   "bike": "Kawasaki Versys-X 300 (2017)",
+   "disp_cc": 296,
+   "primary_before": 1.85,
+   "primary_step2": 3.087,
+   "et_before": 14.5293,
+   "et_step2": 14.6886,
+   "et_step3": 15.1035,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 189.6,
+   "vmax_step2": 185.2
+  },
+  {
+   "bike": "TVS Apache RTR 160 2V (2018)",
+   "disp_cc": 159.7,
+   "primary_before": 2.0,
+   "primary_step2": 3.043,
+   "et_before": 18.4054,
+   "et_step2": 17.8267,
+   "et_step3": 17.8267,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 135.9,
+   "vmax_step2": 135.8
+  },
+  {
+   "bike": "Honda Unicorn (2020)",
+   "disp_cc": 162.71,
+   "primary_before": 1.85,
+   "primary_step2": 3.044,
+   "et_before": 18.937,
+   "et_step2": 18.5489,
+   "et_step3": 18.5489,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 130.4,
+   "vmax_step2": 131.4
+  },
+  {
+   "bike": "Yamaha FZ-S FI V3 (2019)",
+   "disp_cc": 149.0,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 18.9951,
+   "et_step2": 18.6717,
+   "et_step3": 18.6717,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 125.9,
+   "vmax_step2": 123.9
+  },
+  {
+   "bike": "Bajaj Pulsar N150 (2022)",
+   "disp_cc": 149.68,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 18.6086,
+   "et_step2": 18.1847,
+   "et_step3": 18.1847,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 132.2,
+   "vmax_step2": 132.2
+  },
+  {
+   "bike": "Hero XPulse 200T (2021)",
+   "disp_cc": 199.6,
+   "primary_before": 1.85,
+   "primary_step2": 3.056,
+   "et_before": 17.5858,
+   "et_step2": 17.5863,
+   "et_step3": 17.5863,
+   "benchmark_et": 21.6,
+   "weight": 0.1,
+   "source": "DERIVED (XPulse 200 platform, touring variant)",
+   "cluster": "entry-150-200",
+   "vmax_before": 138.6,
+   "vmax_step2": 120.9
+  },
+  {
+   "bike": "Bajaj Avenger Street 160 (2016)",
+   "disp_cc": 160.03,
+   "primary_before": 1.92,
+   "primary_step2": 3.044,
+   "et_before": 18.9072,
+   "et_step2": 18.3649,
+   "et_step3": 18.3649,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 129.2,
+   "vmax_step2": 129.0
+  },
+  {
+   "bike": "Kawasaki Ninja 500 (2024)",
+   "disp_cc": 451,
+   "primary_before": 1.9,
+   "primary_step2": 2.078,
+   "et_before": 13.0964,
+   "et_step2": 13.1783,
+   "et_step3": 13.1783,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 244.5,
+   "vmax_step2": 223.6
+  },
+  {
+   "bike": "Yamaha MT-25 (2014)",
+   "disp_cc": 249,
+   "primary_before": 1.85,
+   "primary_step2": 3.072,
+   "et_before": 15.27,
+   "et_step2": 14.8336,
+   "et_step3": 15.1714,
+   "benchmark_et": 15.6,
+   "weight": 1.0,
+   "source": "Otomotifnet VBox/Racelogic (instrumented 0-402m 15.6s, top 147 km/h)",
+   "cluster": "entry-200-300",
+   "vmax_before": 181.6,
+   "vmax_step2": 177.9
+  },
+  {
+   "bike": "TVS Apache RTR 165 RP (2024)",
+   "disp_cc": 164.9,
+   "primary_before": 1.85,
+   "primary_step2": 3.045,
+   "et_before": 18.0331,
+   "et_step2": 17.0231,
+   "et_step3": 17.0231,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 145.1,
+   "vmax_step2": 147.2
+  },
+  {
+   "bike": "Honda CRF300L Rally (2021)",
+   "disp_cc": 286.0,
+   "primary_before": 1.85,
+   "primary_step2": 3.084,
+   "et_before": 15.1406,
+   "et_step2": 15.3914,
+   "et_step3": 15.7154,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 158.6,
+   "vmax_step2": 158.6
+  },
+  {
+   "bike": "Royal Enfield Bullet 350 (2023)",
+   "disp_cc": 349.34,
+   "primary_before": 1.92,
+   "primary_step2": 2.562,
+   "et_before": 17.9924,
+   "et_step2": 17.6201,
+   "et_step3": 17.6201,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 128.1,
+   "vmax_step2": 130.3
+  },
+  {
+   "bike": "Bajaj Pulsar P125 (2024)",
+   "disp_cc": 124.4,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 19.3468,
+   "et_step2": 18.9431,
+   "et_step3": 18.9431,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 122.1,
+   "vmax_step2": 124.9
+  },
+  {
+   "bike": "Suzuki Gixxer SF 150 (2019)",
+   "disp_cc": 154.9,
+   "primary_before": 1.9,
+   "primary_step2": 3.042,
+   "et_before": 18.6467,
+   "et_step2": 18.0379,
+   "et_step3": 18.0379,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 164.1,
+   "vmax_step2": 134.4
+  },
+  {
+   "bike": "Kawasaki KLX 230 (2020)",
+   "disp_cc": 233.0,
+   "primary_before": 1.85,
+   "primary_step2": 3.067,
+   "et_before": 16.7903,
+   "et_step2": 16.8601,
+   "et_step3": 17.1317,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 139.5,
+   "vmax_step2": 125.7
+  },
+  {
+   "bike": "Yamaha MT-125 (2020)",
+   "disp_cc": 125,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 18.0937,
+   "et_step2": 17.7413,
+   "et_step3": 17.7413,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 133.5,
+   "vmax_step2": 133.5
+  },
+  {
+   "bike": "Bajaj Pulsar N125 (2024)",
+   "disp_cc": 124.4,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 19.3336,
+   "et_step2": 18.8987,
+   "et_step3": 18.8987,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 122.4,
+   "vmax_step2": 124.0
+  },
+  {
+   "bike": "Hero Glamour 125 (2020)",
+   "disp_cc": 124.7,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 19.7464,
+   "et_step2": 19.3335,
+   "et_step3": 19.3335,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 119.5,
+   "vmax_step2": 118.2
+  },
+  {
+   "bike": "TVS Raider 125 (2021)",
+   "disp_cc": 124.8,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 19.343,
+   "et_step2": 18.9307,
+   "et_step3": 18.9307,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 124.0,
+   "vmax_step2": 124.7
+  },
+  {
+   "bike": "KTM RC 125 (2017)",
+   "disp_cc": 124.7,
+   "primary_before": 1.9,
+   "primary_step2": 3.042,
+   "et_before": 17.2155,
+   "et_step2": 16.9946,
+   "et_step3": 16.9946,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 181.0,
+   "vmax_step2": 134.0
+  },
+  {
+   "bike": "Hero Hunk 160R (2022)",
+   "disp_cc": 163.2,
+   "primary_before": 1.85,
+   "primary_step2": 3.045,
+   "et_before": 19.5204,
+   "et_step2": 18.2303,
+   "et_step3": 18.2303,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 135.4,
+   "vmax_step2": 135.6
+  },
+  {
+   "bike": "Honda CB500X (2019)",
+   "disp_cc": 471,
+   "primary_before": 1.85,
+   "primary_step2": 2.029,
+   "et_before": 13.8093,
+   "et_step2": 13.6957,
+   "et_step3": 13.6957,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 185.6,
+   "vmax_step2": 184.4
+  },
+  {
+   "bike": "Jawa 42 Bobber (2023)",
+   "disp_cc": 334,
+   "primary_before": 1.92,
+   "primary_step2": 2.713,
+   "et_before": 15.5782,
+   "et_step2": 15.3574,
+   "et_step3": 15.3574,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 182.1,
+   "vmax_step2": 177.0
+  },
+  {
+   "bike": "Suzuki GSX-S125 (2017)",
+   "disp_cc": 124,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 18.6103,
+   "et_step2": 17.8957,
+   "et_step3": 17.8957,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 137.2,
+   "vmax_step2": 137.1
+  },
+  {
+   "bike": "Honda CMX500 Rebel (2017)",
+   "disp_cc": 471,
+   "primary_before": 1.92,
+   "primary_step2": 2.029,
+   "et_before": 13.8981,
+   "et_step2": 13.8307,
+   "et_step3": 13.8307,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 177.2,
+   "vmax_step2": 178.1
+  },
+  {
+   "bike": "CFMoto 450SR (2022)",
+   "disp_cc": 449,
+   "primary_before": 1.9,
+   "primary_step2": 2.077,
+   "et_before": 12.6964,
+   "et_step2": 12.775,
+   "et_step3": 12.775,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 260.5,
+   "vmax_step2": 259.8
+  },
+  {
+   "bike": "Kawasaki Z500 (2024)",
+   "disp_cc": 451,
+   "primary_before": 1.85,
+   "primary_step2": 2.078,
+   "et_before": 13.4181,
+   "et_step2": 13.5661,
+   "et_step3": 13.5661,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 197.9,
+   "vmax_step2": 193.6
+  },
+  {
+   "bike": "Bajaj Freedom 125 (2024)",
+   "disp_cc": 125,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 21.4218,
+   "et_step2": 20.9432,
+   "et_step3": 20.9432,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 110.6,
+   "vmax_step2": 111.6
+  },
+  {
+   "bike": "Yamaha Tracer 7 (2020)",
+   "disp_cc": 689,
+   "primary_before": 1.9,
+   "primary_step2": 1.866,
+   "et_before": 11.9199,
+   "et_step2": 11.9088,
+   "et_step3": 11.9088,
+   "benchmark_et": 12.4,
+   "weight": 0.1,
+   "source": "DERIVED (689 CP2; MT-07 12.13 base + touring weight)",
+   "cluster": "sport-twin-600-1300",
+   "vmax_before": 284.2,
+   "vmax_step2": 283.7
+  },
+  {
+   "bike": "Honda Grom MSX125 (2022)",
+   "disp_cc": 124,
+   "primary_before": 1.9,
+   "primary_step2": 3.042,
+   "et_before": 19.5786,
+   "et_step2": 19.0514,
+   "et_step3": 19.0514,
+   "benchmark_et": 21.02,
+   "weight": 0.3,
+   "source": "hondagrom.net owner drag-strip timeslip (stock)",
+   "cluster": "other",
+   "vmax_before": 144.7,
+   "vmax_step2": 144.9
+  },
+  {
+   "bike": "Hero Xtreme 200R (2018)",
+   "disp_cc": 199.6,
+   "primary_before": 1.85,
+   "primary_step2": 3.056,
+   "et_before": 17.5982,
+   "et_step2": 17.4441,
+   "et_step3": 17.4441,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 140.6,
+   "vmax_step2": 140.5
+  },
+  {
+   "bike": "Honda X-Blade 160 (2018)",
+   "disp_cc": 162.71,
+   "primary_before": 1.85,
+   "primary_step2": 3.044,
+   "et_before": 19.3349,
+   "et_step2": 18.4783,
+   "et_step3": 18.4783,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 128.9,
+   "vmax_step2": 129.5
+  },
+  {
+   "bike": "Honda Monkey 125 (2022)",
+   "disp_cc": 124,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 20.3715,
+   "et_step2": 19.8556,
+   "et_step3": 19.8556,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 114.0,
+   "vmax_step2": 114.5
+  },
+  {
+   "bike": "CFMoto 450MT (2024)",
+   "disp_cc": 449,
+   "primary_before": 1.85,
+   "primary_step2": 2.077,
+   "et_before": 13.6424,
+   "et_step2": 13.7567,
+   "et_step3": 13.7567,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 190.6,
+   "vmax_step2": 190.5
+  },
+  {
+   "bike": "Honda CL500 (2023)",
+   "disp_cc": 471,
+   "primary_before": 1.85,
+   "primary_step2": 2.029,
+   "et_before": 13.5721,
+   "et_step2": 13.6535,
+   "et_step3": 13.6535,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 187.4,
+   "vmax_step2": 187.7
+  },
+  {
+   "bike": "Suzuki GSX-R125 (2017)",
+   "disp_cc": 124,
+   "primary_before": 1.9,
+   "primary_step2": 3.042,
+   "et_before": 17.4868,
+   "et_step2": 17.0842,
+   "et_step3": 17.0842,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 184.9,
+   "vmax_step2": 171.9
+  },
+  {
+   "bike": "Husqvarna Svartpilen 125 (2024)",
+   "disp_cc": 124,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 17.935,
+   "et_step2": 17.5264,
+   "et_step3": 17.5264,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 146.1,
+   "vmax_step2": 146.1
+  },
+  {
+   "bike": "Kawasaki KLX300 (2021)",
+   "disp_cc": 292,
+   "primary_before": 1.85,
+   "primary_step2": 3.086,
+   "et_before": 14.7966,
+   "et_step2": 16.6645,
+   "et_step3": 17.0127,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 161.4,
+   "vmax_step2": 111.7
+  },
+  {
+   "bike": "BSA Gold Star 650 (2022)",
+   "disp_cc": 652,
+   "primary_before": 1.85,
+   "primary_step2": 2.095,
+   "et_before": 14.2271,
+   "et_step2": 14.046,
+   "et_step3": 14.046,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 194.3,
+   "vmax_step2": 197.0
+  },
+  {
+   "bike": "Hero Passion XPro 110 (2024)",
+   "disp_cc": 110,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 21.3456,
+   "et_step2": 20.7555,
+   "et_step3": 20.7555,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 103.7,
+   "vmax_step2": 101.4
+  },
+  {
+   "bike": "KTM 690 SMC R (2019)",
+   "disp_cc": 693.0,
+   "primary_before": 1.85,
+   "primary_step2": 2.095,
+   "et_before": 11.9369,
+   "et_step2": 12.0945,
+   "et_step3": 12.0945,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 217.2,
+   "vmax_step2": 211.6
+  },
+  {
+   "bike": "Husqvarna 701 Supermoto (2016)",
+   "disp_cc": 692.7,
+   "primary_before": 1.85,
+   "primary_step2": 2.095,
+   "et_before": 11.8278,
+   "et_step2": 11.9873,
+   "et_step3": 11.9873,
+   "benchmark_et": 12.5,
+   "weight": 0.5,
+   "source": "zeroto60times aggregator (no trap published)",
+   "cluster": "litre-sport-600-1000",
+   "vmax_before": 218.0,
+   "vmax_step2": 218.3
+  },
+  {
+   "bike": "Suzuki V-Strom SX 250 (2022)",
+   "disp_cc": 249.0,
+   "primary_before": 1.85,
+   "primary_step2": 3.072,
+   "et_before": 16.1518,
+   "et_step2": 15.7779,
+   "et_step3": 16.0476,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 150.5,
+   "vmax_step2": 148.9
+  },
+  {
+   "bike": "Bajaj Pulsar NS200 BS6 (2020)",
+   "disp_cc": 199.5,
+   "primary_before": 2.1,
+   "primary_step2": 2.1,
+   "et_before": 16.2625,
+   "et_step2": 16.2625,
+   "et_step3": 16.2625,
+   "benchmark_et": 16.0,
+   "weight": 0.1,
+   "source": "DERIVED (0-100 ~10.3s x1.6 BS6, BikeDekho)",
+   "cluster": "entry-150-200",
+   "vmax_before": 157.9,
+   "vmax_step2": 157.9
+  },
+  {
+   "bike": "Honda SP160 (2023)",
+   "disp_cc": 163.7,
+   "primary_before": 1.85,
+   "primary_step2": 3.045,
+   "et_before": 19.3119,
+   "et_step2": 18.6424,
+   "et_step3": 18.6424,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 129.7,
+   "vmax_step2": 130.5
+  },
+  {
+   "bike": "Benelli TRK 502 (2017)",
+   "disp_cc": 499.6,
+   "primary_before": 1.85,
+   "primary_step2": 1.95,
+   "et_before": 14.3681,
+   "et_step2": 14.3007,
+   "et_step3": 14.3007,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 164.7,
+   "vmax_step2": 166.7
+  },
+  {
+   "bike": "Bajaj Pulsar NS250 (2024)",
+   "disp_cc": 248.8,
+   "primary_before": 1.85,
+   "primary_step2": 3.072,
+   "et_before": 15.8176,
+   "et_step2": 15.5208,
+   "et_step3": 15.8123,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 161.3,
+   "vmax_step2": 144.1
+  },
+  {
+   "bike": "Royal Enfield Scram 450 (2024)",
+   "disp_cc": 452.0,
+   "primary_before": 1.85,
+   "primary_step2": 2.078,
+   "et_before": 14.7466,
+   "et_step2": 14.8718,
+   "et_step3": 14.8718,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 168.2,
+   "vmax_step2": 166.5
+  },
+  {
+   "bike": "KTM RC 390 Gen 3 (2024)",
+   "disp_cc": 373.2,
+   "primary_before": 2.2,
+   "primary_step2": 2.2,
+   "et_before": 13.5882,
+   "et_step2": 13.5882,
+   "et_step3": 13.5882,
+   "benchmark_et": 13.16,
+   "weight": 1.0,
+   "source": "MotoStatz (Dragy, RC 390 platform; Gen3 399cc engine)",
+   "cluster": "single-300-500",
+   "vmax_before": 240.0,
+   "vmax_step2": 240.0
+  },
+  {
+   "bike": "Hero Xpulse 210 (2025)",
+   "disp_cc": 210.04,
+   "primary_before": 1.85,
+   "primary_step2": 3.06,
+   "et_before": 16.2654,
+   "et_step2": 16.123,
+   "et_step3": 16.4062,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 146.1,
+   "vmax_step2": 146.0
+  },
+  {
+   "bike": "Honda CL250 (2023)",
+   "disp_cc": 249.0,
+   "primary_before": 1.85,
+   "primary_step2": 1.9,
+   "et_before": 16.0896,
+   "et_step2": 16.023,
+   "et_step3": 16.0427,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 168.3,
+   "vmax_step2": 168.4
+  },
+  {
+   "bike": "Kawasaki W230 (2024)",
+   "disp_cc": 233.0,
+   "primary_before": 1.85,
+   "primary_step2": 3.067,
+   "et_before": 17.2941,
+   "et_step2": 17.3435,
+   "et_step3": 17.5752,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 142.2,
+   "vmax_step2": 111.0
+  },
+  {
+   "bike": "Hero Xtreme 125R (2024)",
+   "disp_cc": 124.7,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 19.8514,
+   "et_step2": 19.3251,
+   "et_step3": 19.3251,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 119.4,
+   "vmax_step2": 120.4
+  },
+  {
+   "bike": "Yamaha MT-15 V1 (2019)",
+   "disp_cc": 155.09,
+   "primary_before": 3.042,
+   "primary_step2": 3.042,
+   "et_before": 18.784,
+   "et_step2": 18.784,
+   "et_step3": 18.784,
+   "benchmark_et": 19.6,
+   "weight": 1.0,
+   "source": "OtoRider GPS-instrumented 402m test (Indonesia)",
+   "cluster": "entry-150-200",
+   "vmax_before": 129.4,
+   "vmax_step2": 129.4
+  },
+  {
+   "bike": "Bajaj Pulsar 125 Neon (2019)",
+   "disp_cc": 124.4,
+   "primary_before": 1.85,
+   "primary_step2": 3.042,
+   "et_before": 19.5655,
+   "et_step2": 18.9402,
+   "et_step3": 18.9402,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 122.5,
+   "vmax_step2": 123.9
+  },
+  {
+   "bike": "Honda CB400X (2023-2026) (2023)",
+   "disp_cc": 399.0,
+   "primary_before": 1.85,
+   "primary_step2": 2.073,
+   "et_before": 13.5345,
+   "et_step2": 13.3779,
+   "et_step3": 13.3779,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 198.2,
+   "vmax_step2": 196.7
+  },
+  {
+   "bike": "Kawasaki KLR 650 (2022-2024) (2022)",
+   "disp_cc": 651.0,
+   "primary_before": 1.85,
+   "primary_step2": 2.095,
+   "et_before": 14.8866,
+   "et_step2": 14.7415,
+   "et_step3": 14.7415,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 164.4,
+   "vmax_step2": 164.9
+  },
+  {
+   "bike": "Honda CRF250L (2021-2024) (2021)",
+   "disp_cc": 249.0,
+   "primary_before": 1.85,
+   "primary_step2": 1.9,
+   "et_before": 15.8589,
+   "et_step2": 15.8155,
+   "et_step3": 15.8364,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 152.5,
+   "vmax_step2": 152.3
+  },
+  {
+   "bike": "Aprilia Tuono 457 (2025-2026) (2025)",
+   "disp_cc": 457.3,
+   "primary_before": 1.85,
+   "primary_step2": 2.078,
+   "et_before": 13.0079,
+   "et_step2": 13.1169,
+   "et_step3": 13.1169,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 212.5,
+   "vmax_step2": 212.3
+  },
+  {
+   "bike": "Yamaha Tenere 700 World Raid (2022-2026) (2022)",
+   "disp_cc": 689,
+   "primary_before": 1.85,
+   "primary_step2": 1.866,
+   "et_before": 12.7654,
+   "et_step2": 12.7756,
+   "et_step3": 12.7756,
+   "benchmark_et": null,
+   "weight": null,
+   "source": null,
+   "cluster": null,
+   "vmax_before": 206.2,
+   "vmax_step2": 206.6
+  }
+ ],
+ "retune_grids": {
+  "entry-200-300": [
+   {
+    "overrides": {
+     "over_clutch_factor": 0.4,
+     "max_engine_decel_rads2": 200,
+     "parasitic_mult": 0.85,
+     "mu_peak_scale": 1.12
+    },
+    "all": [
+     14,
+     0.5804,
+     -0.4351
+    ],
+    "hi": [
+     6,
+     0.6218,
+     -0.5555
+    ],
+    "lo": [
+     8,
+     0.3734,
+     0.1671
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      -0.021
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.199
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.8
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.956
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.989
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.766
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      -0.018
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.405
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.727
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.736
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.63
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.746
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.825
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.322
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.4,
+     "max_engine_decel_rads2": 200,
+     "parasitic_mult": 0.85,
+     "mu_peak_scale": 1.0
+    },
+    "all": [
+     14,
+     0.4757,
+     -0.2063
+    ],
+    "hi": [
+     6,
+     0.4863,
+     -0.3075
+    ],
+    "lo": [
+     8,
+     0.4227,
+     0.3001
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      -0.014
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.536
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.473
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.718
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.739
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.438
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      -0.018
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.624
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.949
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.96
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.831
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.973
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.575
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.069
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.4,
+     "max_engine_decel_rads2": 200,
+     "parasitic_mult": 1.0,
+     "mu_peak_scale": 1.12
+    },
+    "all": [
+     14,
+     0.5724,
+     -0.4212
+    ],
+    "hi": [
+     6,
+     0.6124,
+     -0.5427
+    ],
+    "lo": [
+     8,
+     0.3724,
+     0.1864
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      -0.0
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.209
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.792
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.943
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.974
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.756
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.004
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.421
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.745
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.753
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.652
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.765
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.81
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.306
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.4,
+     "max_engine_decel_rads2": 200,
+     "parasitic_mult": 1.0,
+     "mu_peak_scale": 1.0
+    },
+    "all": [
+     14,
+     0.4698,
+     -0.1937
+    ],
+    "hi": [
+     6,
+     0.4795,
+     -0.2962
+    ],
+    "lo": [
+     8,
+     0.4213,
+     0.3188
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      0.005
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.545
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.465
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.708
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.725
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.429
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.003
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.639
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.966
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.975
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.852
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.991
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.561
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.054
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.3,
+     "max_engine_decel_rads2": 200,
+     "parasitic_mult": 0.85,
+     "mu_peak_scale": 1.12
+    },
+    "all": [
+     14,
+     0.5804,
+     -0.4351
+    ],
+    "hi": [
+     6,
+     0.6218,
+     -0.5555
+    ],
+    "lo": [
+     8,
+     0.3734,
+     0.1671
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      -0.021
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.199
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.8
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.956
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.989
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.766
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      -0.018
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.405
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.727
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.736
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.63
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.746
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.825
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.322
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.3,
+     "max_engine_decel_rads2": 200,
+     "parasitic_mult": 0.85,
+     "mu_peak_scale": 1.0
+    },
+    "all": [
+     14,
+     0.4757,
+     -0.2063
+    ],
+    "hi": [
+     6,
+     0.4863,
+     -0.3075
+    ],
+    "lo": [
+     8,
+     0.4227,
+     0.3001
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      -0.014
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.536
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.473
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.718
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.739
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.438
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      -0.018
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.624
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.949
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.96
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.831
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.973
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.575
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.069
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.3,
+     "max_engine_decel_rads2": 200,
+     "parasitic_mult": 1.0,
+     "mu_peak_scale": 1.12
+    },
+    "all": [
+     14,
+     0.5724,
+     -0.4212
+    ],
+    "hi": [
+     6,
+     0.6124,
+     -0.5427
+    ],
+    "lo": [
+     8,
+     0.3724,
+     0.1864
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      -0.0
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.209
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.792
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.943
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.974
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.756
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.004
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.421
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.745
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.753
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.652
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.765
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.81
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.306
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.3,
+     "max_engine_decel_rads2": 200,
+     "parasitic_mult": 1.0,
+     "mu_peak_scale": 1.0
+    },
+    "all": [
+     14,
+     0.4698,
+     -0.1937
+    ],
+    "hi": [
+     6,
+     0.4795,
+     -0.2962
+    ],
+    "lo": [
+     8,
+     0.4213,
+     0.3188
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      0.005
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.545
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.465
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.708
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.725
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.429
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.003
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.639
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.966
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.975
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.852
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.991
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.561
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.054
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.2,
+     "max_engine_decel_rads2": 200,
+     "parasitic_mult": 0.85,
+     "mu_peak_scale": 1.12
+    },
+    "all": [
+     14,
+     0.5804,
+     -0.4351
+    ],
+    "hi": [
+     6,
+     0.6218,
+     -0.5555
+    ],
+    "lo": [
+     8,
+     0.3734,
+     0.1671
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      -0.021
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.199
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.8
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.956
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.989
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.766
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      -0.018
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.405
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.727
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.736
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.63
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.746
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.825
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.322
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.2,
+     "max_engine_decel_rads2": 200,
+     "parasitic_mult": 0.85,
+     "mu_peak_scale": 1.0
+    },
+    "all": [
+     14,
+     0.4757,
+     -0.2063
+    ],
+    "hi": [
+     6,
+     0.4863,
+     -0.3075
+    ],
+    "lo": [
+     8,
+     0.4227,
+     0.3001
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      -0.014
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.536
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.473
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.718
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.739
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.438
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      -0.018
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.624
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.949
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.96
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.831
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.973
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.575
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.069
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.2,
+     "max_engine_decel_rads2": 200,
+     "parasitic_mult": 1.0,
+     "mu_peak_scale": 1.12
+    },
+    "all": [
+     14,
+     0.5724,
+     -0.4212
+    ],
+    "hi": [
+     6,
+     0.6124,
+     -0.5427
+    ],
+    "lo": [
+     8,
+     0.3724,
+     0.1864
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      -0.0
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.209
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.792
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.943
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.974
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.756
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.004
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.421
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.745
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.753
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.652
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.765
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.81
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.306
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.2,
+     "max_engine_decel_rads2": 200,
+     "parasitic_mult": 1.0,
+     "mu_peak_scale": 1.0
+    },
+    "all": [
+     14,
+     0.4698,
+     -0.1937
+    ],
+    "hi": [
+     6,
+     0.4795,
+     -0.2962
+    ],
+    "lo": [
+     8,
+     0.4213,
+     0.3188
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      0.005
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.545
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.465
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.708
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.725
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.429
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.003
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.639
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.966
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.975
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.852
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.991
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.561
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.054
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.1,
+     "max_engine_decel_rads2": 200,
+     "parasitic_mult": 0.85,
+     "mu_peak_scale": 1.12
+    },
+    "all": [
+     14,
+     0.5804,
+     -0.4351
+    ],
+    "hi": [
+     6,
+     0.6218,
+     -0.5555
+    ],
+    "lo": [
+     8,
+     0.3734,
+     0.1671
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      -0.021
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.199
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.8
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.956
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.989
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.766
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      -0.018
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.405
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.727
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.736
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.63
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.746
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.825
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.322
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.1,
+     "max_engine_decel_rads2": 200,
+     "parasitic_mult": 0.85,
+     "mu_peak_scale": 1.0
+    },
+    "all": [
+     14,
+     0.4757,
+     -0.2063
+    ],
+    "hi": [
+     6,
+     0.4863,
+     -0.3075
+    ],
+    "lo": [
+     8,
+     0.4227,
+     0.3001
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      -0.014
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.536
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.473
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.718
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.739
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.438
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      -0.018
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.624
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.949
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.96
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.831
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.973
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.575
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.069
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.1,
+     "max_engine_decel_rads2": 200,
+     "parasitic_mult": 1.0,
+     "mu_peak_scale": 1.12
+    },
+    "all": [
+     14,
+     0.5724,
+     -0.4212
+    ],
+    "hi": [
+     6,
+     0.6124,
+     -0.5427
+    ],
+    "lo": [
+     8,
+     0.3724,
+     0.1864
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      -0.0
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.209
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.792
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.943
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.974
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.756
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.004
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.421
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.745
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.753
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.652
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.765
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.81
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.306
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.1,
+     "max_engine_decel_rads2": 200,
+     "parasitic_mult": 1.0,
+     "mu_peak_scale": 1.0
+    },
+    "all": [
+     14,
+     0.4698,
+     -0.1937
+    ],
+    "hi": [
+     6,
+     0.4795,
+     -0.2962
+    ],
+    "lo": [
+     8,
+     0.4213,
+     0.3188
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      0.005
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.545
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.465
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.708
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.725
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.429
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.003
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.639
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.966
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.975
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.852
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.991
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.561
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.054
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.4,
+     "max_engine_decel_rads2": 100,
+     "parasitic_mult": 0.85,
+     "mu_peak_scale": 1.12
+    },
+    "all": [
+     14,
+     0.5711,
+     -0.3976
+    ],
+    "hi": [
+     6,
+     0.6042,
+     -0.5202
+    ],
+    "lo": [
+     8,
+     0.4055,
+     0.2154
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      0.046
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.206
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.767
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.865
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.979
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.762
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.089
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.419
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.729
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.738
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.646
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.749
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.822
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.319
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.4,
+     "max_engine_decel_rads2": 100,
+     "parasitic_mult": 0.85,
+     "mu_peak_scale": 1.0
+    },
+    "all": [
+     14,
+     0.4833,
+     -0.1873
+    ],
+    "hi": [
+     6,
+     0.4895,
+     -0.294
+    ],
+    "lo": [
+     8,
+     0.4526,
+     0.3462
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      0.046
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.541
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.469
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.712
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.736
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.434
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.089
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.627
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.951
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.962
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.834
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.976
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.572
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.066
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.4,
+     "max_engine_decel_rads2": 100,
+     "parasitic_mult": 1.0,
+     "mu_peak_scale": 1.12
+    },
+    "all": [
+     14,
+     0.5709,
+     -0.3828
+    ],
+    "hi": [
+     6,
+     0.6011,
+     -0.5064
+    ],
+    "lo": [
+     8,
+     0.4203,
+     0.2353
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      0.067
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.217
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.757
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.851
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.963
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.752
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.111
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.437
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.748
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.755
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.67
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.768
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.807
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.303
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.4,
+     "max_engine_decel_rads2": 100,
+     "parasitic_mult": 1.0,
+     "mu_peak_scale": 1.0
+    },
+    "all": [
+     14,
+     0.4841,
+     -0.1743
+    ],
+    "hi": [
+     6,
+     0.4875,
+     -0.2822
+    ],
+    "lo": [
+     8,
+     0.4668,
+     0.3652
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      0.067
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.549
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.461
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.701
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.722
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.424
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.111
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.642
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.968
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.978
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.855
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.993
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.558
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.051
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.4,
+     "max_engine_decel_rads2": 50,
+     "parasitic_mult": 0.85,
+     "mu_peak_scale": 1.12
+    },
+    "all": [
+     14,
+     0.5677,
+     -0.3722
+    ],
+    "hi": [
+     6,
+     0.5947,
+     -0.4953
+    ],
+    "lo": [
+     8,
+     0.4328,
+     0.2432
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      0.082
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.217
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.738
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.811
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.965
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.756
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.146
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.436
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.735
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.742
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.665
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.75
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.821
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.317
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.4,
+     "max_engine_decel_rads2": 50,
+     "parasitic_mult": 0.85,
+     "mu_peak_scale": 1.0
+    },
+    "all": [
+     14,
+     0.4898,
+     -0.1753
+    ],
+    "hi": [
+     6,
+     0.4925,
+     -0.2845
+    ],
+    "lo": [
+     8,
+     0.4766,
+     0.3707
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      0.081
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.543
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.466
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.698
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.734
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.432
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.145
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.628
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.953
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.963
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.835
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.977
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.571
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.065
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.4,
+     "max_engine_decel_rads2": 50,
+     "parasitic_mult": 1.0,
+     "mu_peak_scale": 1.12
+    },
+    "all": [
+     14,
+     0.5675,
+     -0.3569
+    ],
+    "hi": [
+     6,
+     0.5914,
+     -0.481
+    ],
+    "lo": [
+     8,
+     0.4482,
+     0.2637
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      0.103
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.229
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.727
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.796
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.948
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.746
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.169
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.455
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.754
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.76
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.69
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.769
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.806
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.301
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.4,
+     "max_engine_decel_rads2": 50,
+     "parasitic_mult": 1.0,
+     "mu_peak_scale": 1.0
+    },
+    "all": [
+     14,
+     0.4906,
+     -0.1622
+    ],
+    "hi": [
+     6,
+     0.4906,
+     -0.2726
+    ],
+    "lo": [
+     8,
+     0.491,
+     0.3899
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      0.102
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.552
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.459
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.687
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.721
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.422
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.168
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.643
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.97
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.979
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.856
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.995
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.557
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.05
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.2,
+     "max_engine_decel_rads2": 100,
+     "parasitic_mult": 0.85,
+     "mu_peak_scale": 1.12
+    },
+    "all": [
+     14,
+     0.5711,
+     -0.3976
+    ],
+    "hi": [
+     6,
+     0.6042,
+     -0.5202
+    ],
+    "lo": [
+     8,
+     0.4055,
+     0.2154
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      0.046
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.206
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.767
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.865
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.979
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.762
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.089
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.419
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.729
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.738
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.646
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.749
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.822
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.319
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.2,
+     "max_engine_decel_rads2": 100,
+     "parasitic_mult": 0.85,
+     "mu_peak_scale": 1.0
+    },
+    "all": [
+     14,
+     0.4833,
+     -0.1873
+    ],
+    "hi": [
+     6,
+     0.4895,
+     -0.294
+    ],
+    "lo": [
+     8,
+     0.4526,
+     0.3462
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      0.046
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.541
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.469
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.712
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.736
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.434
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.089
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.627
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.951
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.962
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.834
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.976
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.572
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.066
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.2,
+     "max_engine_decel_rads2": 100,
+     "parasitic_mult": 1.0,
+     "mu_peak_scale": 1.12
+    },
+    "all": [
+     14,
+     0.5709,
+     -0.3828
+    ],
+    "hi": [
+     6,
+     0.6011,
+     -0.5064
+    ],
+    "lo": [
+     8,
+     0.4203,
+     0.2353
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      0.067
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.217
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.757
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.851
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.963
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.752
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.111
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.437
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.748
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.755
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.67
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.768
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.807
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.303
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.2,
+     "max_engine_decel_rads2": 100,
+     "parasitic_mult": 1.0,
+     "mu_peak_scale": 1.0
+    },
+    "all": [
+     14,
+     0.4841,
+     -0.1743
+    ],
+    "hi": [
+     6,
+     0.4875,
+     -0.2822
+    ],
+    "lo": [
+     8,
+     0.4668,
+     0.3652
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      0.067
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.549
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.461
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.701
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.722
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.424
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.111
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.642
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.968
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.978
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.855
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.993
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.558
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.051
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.0,
+     "max_engine_decel_rads2": 0.0,
+     "parasitic_mult": 0.85,
+     "mu_peak_scale": 1.12
+    },
+    "all": [
+     14,
+     0.5638,
+     -0.3416
+    ],
+    "hi": [
+     6,
+     0.5839,
+     -0.4648
+    ],
+    "lo": [
+     8,
+     0.4635,
+     0.2744
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      0.119
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.239
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.699
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.754
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.943
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.749
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.205
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.459
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.748
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.753
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.691
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.752
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.819
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.315
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.0,
+     "max_engine_decel_rads2": 0.0,
+     "parasitic_mult": 0.85,
+     "mu_peak_scale": 1.0
+    },
+    "all": [
+     14,
+     0.4964,
+     -0.1625
+    ],
+    "hi": [
+     6,
+     0.4953,
+     -0.2743
+    ],
+    "lo": [
+     8,
+     0.5016,
+     0.3962
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      0.118
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.545
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.464
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.682
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.733
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.43
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.205
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.63
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.954
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.965
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.837
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.979
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.569
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.063
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.0,
+     "max_engine_decel_rads2": 0.0,
+     "parasitic_mult": 1.0,
+     "mu_peak_scale": 1.12
+    },
+    "all": [
+     14,
+     0.5636,
+     -0.3256
+    ],
+    "hi": [
+     6,
+     0.5804,
+     -0.4498
+    ],
+    "lo": [
+     8,
+     0.4794,
+     0.2954
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      0.14
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.252
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.688
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.739
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.926
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.738
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.228
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.479
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.768
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.771
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.718
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.771
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.804
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.3
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.0,
+     "max_engine_decel_rads2": 0.0,
+     "parasitic_mult": 1.0,
+     "mu_peak_scale": 1.0
+    },
+    "all": [
+     14,
+     0.4972,
+     -0.1492
+    ],
+    "hi": [
+     6,
+     0.4934,
+     -0.2622
+    ],
+    "lo": [
+     8,
+     0.5162,
+     0.4156
+    ],
+    "bikes": [
+     [
+      "Duke 250",
+      1.0,
+      0.14
+     ],
+     [
+      "Ninja 300",
+      1.0,
+      0.554
+     ],
+     [
+      "CBR250RR (Indonesia)",
+      1.0,
+      -0.457
+     ],
+     [
+      "YZF-R25 (Indonesia)",
+      1.0,
+      -0.67
+     ],
+     [
+      "CBR300R",
+      1.0,
+      -0.719
+     ],
+     [
+      "MT-25",
+      1.0,
+      -0.42
+     ],
+     [
+      "CBR 250R",
+      0.5,
+      0.228
+     ],
+     [
+      "CB 300R",
+      0.1,
+      0.645
+     ],
+     [
+      "Pulsar N250",
+      0.1,
+      0.971
+     ],
+     [
+      "Pulsar F250",
+      0.1,
+      0.981
+     ],
+     [
+      "FZ25",
+      0.1,
+      0.858
+     ],
+     [
+      "CB300F",
+      0.1,
+      0.996
+     ],
+     [
+      "Gixxer SF 250",
+      0.1,
+      -0.555
+     ],
+     [
+      "Gixxer 250",
+      0.1,
+      -0.048
+     ]
+    ]
+   }
+  ],
+  "entry-150-200": [
+   {
+    "overrides": {
+     "over_clutch_factor": 0.5,
+     "max_engine_decel_rads2": 150,
+     "parasitic_mult": 0.85
+    },
+    "all": [
+     13,
+     0.7362,
+     -0.0624
+    ],
+    "hi": [
+     7,
+     0.6509,
+     0.0095
+    ],
+    "lo": [
+     6,
+     1.7314,
+     -0.9017
+    ],
+    "bikes": [
+     [
+      "Duke 200",
+      1.0,
+      -0.057
+     ],
+     [
+      "Apache RTR 200 4V",
+      1.0,
+      0.853
+     ],
+     [
+      "YZF-R15 V4",
+      1.0,
+      0.75
+     ],
+     [
+      "MT-15 V2",
+      1.0,
+      -0.655
+     ],
+     [
+      "Pulsar NS200",
+      1.0,
+      -0.717
+     ],
+     [
+      "YZF-R15 V3",
+      1.0,
+      0.709
+     ],
+     [
+      "MT-15 V1",
+      1.0,
+      -0.816
+     ],
+     [
+      "Pulsar NS 200",
+      0.1,
+      0.951
+     ],
+     [
+      "Pulsar RS 200",
+      0.1,
+      0.542
+     ],
+     [
+      "Apache RTR 200",
+      0.1,
+      0.734
+     ],
+     [
+      "Xpulse 200",
+      0.1,
+      -3.886
+     ],
+     [
+      "XPulse 200T",
+      0.1,
+      -4.014
+     ],
+     [
+      "Pulsar NS200 BS6",
+      0.1,
+      0.263
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.5,
+     "max_engine_decel_rads2": 100,
+     "parasitic_mult": 0.85
+    },
+    "all": [
+     13,
+     0.7332,
+     -0.0184
+    ],
+    "hi": [
+     7,
+     0.6456,
+     0.0552
+    ],
+    "lo": [
+     6,
+     1.7546,
+     -0.8776
+    ],
+    "bikes": [
+     [
+      "Duke 200",
+      1.0,
+      -0.022
+     ],
+     [
+      "Apache RTR 200 4V",
+      1.0,
+      0.891
+     ],
+     [
+      "YZF-R15 V4",
+      1.0,
+      0.798
+     ],
+     [
+      "MT-15 V2",
+      1.0,
+      -0.613
+     ],
+     [
+      "Pulsar NS200",
+      1.0,
+      -0.664
+     ],
+     [
+      "YZF-R15 V3",
+      1.0,
+      0.764
+     ],
+     [
+      "MT-15 V1",
+      1.0,
+      -0.768
+     ],
+     [
+      "Pulsar NS 200",
+      0.1,
+      0.996
+     ],
+     [
+      "Pulsar RS 200",
+      0.1,
+      0.588
+     ],
+     [
+      "Apache RTR 200",
+      0.1,
+      0.735
+     ],
+     [
+      "Xpulse 200",
+      0.1,
+      -3.884
+     ],
+     [
+      "XPulse 200T",
+      0.1,
+      -4.012
+     ],
+     [
+      "Pulsar NS200 BS6",
+      0.1,
+      0.312
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.5,
+     "max_engine_decel_rads2": 50,
+     "parasitic_mult": 0.85
+    },
+    "all": [
+     13,
+     0.734,
+     0.0279
+    ],
+    "hi": [
+     7,
+     0.6444,
+     0.1033
+    ],
+    "lo": [
+     6,
+     1.7791,
+     -0.8523
+    ],
+    "bikes": [
+     [
+      "Duke 200",
+      1.0,
+      0.015
+     ],
+     [
+      "Apache RTR 200 4V",
+      1.0,
+      0.931
+     ],
+     [
+      "YZF-R15 V4",
+      1.0,
+      0.849
+     ],
+     [
+      "MT-15 V2",
+      1.0,
+      -0.568
+     ],
+     [
+      "Pulsar NS200",
+      1.0,
+      -0.608
+     ],
+     [
+      "YZF-R15 V3",
+      1.0,
+      0.823
+     ],
+     [
+      "MT-15 V1",
+      1.0,
+      -0.717
+     ],
+     [
+      "Pulsar NS 200",
+      0.1,
+      1.043
+     ],
+     [
+      "Pulsar RS 200",
+      0.1,
+      0.636
+     ],
+     [
+      "Apache RTR 200",
+      0.1,
+      0.738
+     ],
+     [
+      "Xpulse 200",
+      0.1,
+      -3.883
+     ],
+     [
+      "XPulse 200T",
+      0.1,
+      -4.011
+     ],
+     [
+      "Pulsar NS200 BS6",
+      0.1,
+      0.363
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.5,
+     "max_engine_decel_rads2": 150,
+     "parasitic_mult": 1.0
+    },
+    "all": [
+     13,
+     0.7309,
+     -0.0547
+    ],
+    "hi": [
+     7,
+     0.6446,
+     0.0159
+    ],
+    "lo": [
+     6,
+     1.7381,
+     -0.8789
+    ],
+    "bikes": [
+     [
+      "Duke 200",
+      1.0,
+      -0.035
+     ],
+     [
+      "Apache RTR 200 4V",
+      1.0,
+      0.853
+     ],
+     [
+      "YZF-R15 V4",
+      1.0,
+      0.75
+     ],
+     [
+      "MT-15 V2",
+      1.0,
+      -0.655
+     ],
+     [
+      "Pulsar NS200",
+      1.0,
+      -0.694
+     ],
+     [
+      "YZF-R15 V3",
+      1.0,
+      0.709
+     ],
+     [
+      "MT-15 V1",
+      1.0,
+      -0.816
+     ],
+     [
+      "Pulsar NS 200",
+      0.1,
+      0.974
+     ],
+     [
+      "Pulsar RS 200",
+      0.1,
+      0.565
+     ],
+     [
+      "Apache RTR 200",
+      0.1,
+      0.754
+     ],
+     [
+      "Xpulse 200",
+      0.1,
+      -3.861
+     ],
+     [
+      "XPulse 200T",
+      0.1,
+      -3.99
+     ],
+     [
+      "Pulsar NS200 BS6",
+      0.1,
+      0.284
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.5,
+     "max_engine_decel_rads2": 50,
+     "parasitic_mult": 1.0
+    },
+    "all": [
+     13,
+     0.7344,
+     0.0358
+    ],
+    "hi": [
+     7,
+     0.6442,
+     0.1099
+    ],
+    "lo": [
+     6,
+     1.7863,
+     -0.829
+    ],
+    "bikes": [
+     [
+      "Duke 200",
+      1.0,
+      0.037
+     ],
+     [
+      "Apache RTR 200 4V",
+      1.0,
+      0.931
+     ],
+     [
+      "YZF-R15 V4",
+      1.0,
+      0.849
+     ],
+     [
+      "MT-15 V2",
+      1.0,
+      -0.568
+     ],
+     [
+      "Pulsar NS200",
+      1.0,
+      -0.585
+     ],
+     [
+      "YZF-R15 V3",
+      1.0,
+      0.823
+     ],
+     [
+      "MT-15 V1",
+      1.0,
+      -0.717
+     ],
+     [
+      "Pulsar NS 200",
+      0.1,
+      1.067
+     ],
+     [
+      "Pulsar RS 200",
+      0.1,
+      0.66
+     ],
+     [
+      "Apache RTR 200",
+      0.1,
+      0.76
+     ],
+     [
+      "Xpulse 200",
+      0.1,
+      -3.859
+     ],
+     [
+      "XPulse 200T",
+      0.1,
+      -3.987
+     ],
+     [
+      "Pulsar NS200 BS6",
+      0.1,
+      0.386
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "over_clutch_factor": 0.0,
+     "max_engine_decel_rads2": 0,
+     "parasitic_mult": 1.0
+    },
+    "all": [
+     13,
+     0.7414,
+     0.0847
+    ],
+    "hi": [
+     7,
+     0.6495,
+     0.1606
+    ],
+    "lo": [
+     6,
+     1.8133,
+     -0.8012
+    ],
+    "bikes": [
+     [
+      "Duke 200",
+      1.0,
+      0.075
+     ],
+     [
+      "Apache RTR 200 4V",
+      1.0,
+      0.973
+     ],
+     [
+      "YZF-R15 V4",
+      1.0,
+      0.902
+     ],
+     [
+      "MT-15 V2",
+      1.0,
+      -0.521
+     ],
+     [
+      "Pulsar NS200",
+      1.0,
+      -0.527
+     ],
+     [
+      "YZF-R15 V3",
+      1.0,
+      0.885
+     ],
+     [
+      "MT-15 V1",
+      1.0,
+      -0.663
+     ],
+     [
+      "Pulsar NS 200",
+      0.1,
+      1.116
+     ],
+     [
+      "Pulsar RS 200",
+      0.1,
+      0.71
+     ],
+     [
+      "Apache RTR 200",
+      0.1,
+      0.77
+     ],
+     [
+      "Xpulse 200",
+      0.1,
+      -3.857
+     ],
+     [
+      "XPulse 200T",
+      0.1,
+      -3.986
+     ],
+     [
+      "Pulsar NS200 BS6",
+      0.1,
+      0.439
+     ]
+    ]
+   }
+  ],
+  "mid-twin-300-500": [
+   {
+    "overrides": {
+     "max_engine_decel_rads2": 400,
+     "mu_peak_scale": 1.2
+    },
+    "all": [
+     8,
+     0.3953,
+     -0.0831
+    ],
+    "hi": [
+     3,
+     0.2984,
+     0.1031
+    ],
+    "lo": [
+     5,
+     0.5664,
+     -0.4117
+    ],
+    "bikes": [
+     [
+      "YZF-R3",
+      1.0,
+      -0.293
+     ],
+     [
+      "CB500F",
+      1.0,
+      0.289
+     ],
+     [
+      "Z400",
+      1.0,
+      0.314
+     ],
+     [
+      "Ninja 400",
+      0.5,
+      0.251
+     ],
+     [
+      "302R",
+      0.5,
+      -1.284
+     ],
+     [
+      "RS 457",
+      0.5,
+      -0.351
+     ],
+     [
+      "CBR500R",
+      0.1,
+      -0.137
+     ],
+     [
+      "MT-03",
+      0.1,
+      0.061
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "max_engine_decel_rads2": 200,
+     "mu_peak_scale": 1.2
+    },
+    "all": [
+     8,
+     0.4228,
+     -0.0482
+    ],
+    "hi": [
+     3,
+     0.3428,
+     0.1529
+    ],
+    "lo": [
+     5,
+     0.5638,
+     -0.403
+    ],
+    "bikes": [
+     [
+      "YZF-R3",
+      1.0,
+      -0.285
+     ],
+     [
+      "CB500F",
+      1.0,
+      0.421
+     ],
+     [
+      "Z400",
+      1.0,
+      0.323
+     ],
+     [
+      "Ninja 400",
+      0.5,
+      0.26
+     ],
+     [
+      "302R",
+      0.5,
+      -1.275
+     ],
+     [
+      "RS 457",
+      0.5,
+      -0.343
+     ],
+     [
+      "CBR500R",
+      0.1,
+      -0.13
+     ],
+     [
+      "MT-03",
+      0.1,
+      0.069
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "max_engine_decel_rads2": 400,
+     "mu_peak_scale": 1.1
+    },
+    "all": [
+     8,
+     0.4039,
+     0.1138
+    ],
+    "hi": [
+     3,
+     0.3436,
+     0.2897
+    ],
+    "lo": [
+     5,
+     0.5102,
+     -0.1966
+    ],
+    "bikes": [
+     [
+      "YZF-R3",
+      1.0,
+      -0.081
+     ],
+     [
+      "CB500F",
+      1.0,
+      0.423
+     ],
+     [
+      "Z400",
+      1.0,
+      0.527
+     ],
+     [
+      "Ninja 400",
+      0.5,
+      0.467
+     ],
+     [
+      "302R",
+      0.5,
+      -1.073
+     ],
+     [
+      "RS 457",
+      0.5,
+      -0.129
+     ],
+     [
+      "CBR500R",
+      0.1,
+      0.062
+     ],
+     [
+      "MT-03",
+      0.1,
+      0.27
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "max_engine_decel_rads2": 200,
+     "mu_peak_scale": 1.1
+    },
+    "all": [
+     8,
+     0.4093,
+     0.1257
+    ],
+    "hi": [
+     3,
+     0.3527,
+     0.3039
+    ],
+    "lo": [
+     5,
+     0.5091,
+     -0.1889
+    ],
+    "bikes": [
+     [
+      "YZF-R3",
+      1.0,
+      -0.073
+     ],
+     [
+      "CB500F",
+      1.0,
+      0.449
+     ],
+     [
+      "Z400",
+      1.0,
+      0.536
+     ],
+     [
+      "Ninja 400",
+      0.5,
+      0.475
+     ],
+     [
+      "302R",
+      0.5,
+      -1.066
+     ],
+     [
+      "RS 457",
+      0.5,
+      -0.121
+     ],
+     [
+      "CBR500R",
+      0.1,
+      0.069
+     ],
+     [
+      "MT-03",
+      0.1,
+      0.278
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "max_engine_decel_rads2": 400,
+     "mu_peak_scale": 1.0
+    },
+    "all": [
+     8,
+     0.5689,
+     0.3983
+    ],
+    "hi": [
+     3,
+     0.5689,
+     0.5689
+    ],
+    "lo": [
+     5,
+     0.569,
+     0.0971
+    ],
+    "bikes": [
+     [
+      "YZF-R3",
+      1.0,
+      0.228
+     ],
+     [
+      "CB500F",
+      1.0,
+      0.665
+     ],
+     [
+      "Z400",
+      1.0,
+      0.813
+     ],
+     [
+      "Ninja 400",
+      0.5,
+      0.753
+     ],
+     [
+      "302R",
+      0.5,
+      -0.802
+     ],
+     [
+      "RS 457",
+      0.5,
+      0.194
+     ],
+     [
+      "CBR500R",
+      0.1,
+      0.353
+     ],
+     [
+      "MT-03",
+      0.1,
+      0.571
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "max_engine_decel_rads2": 0,
+     "over_clutch_factor": 0.0,
+     "mu_peak_scale": 1.0
+    },
+    "all": [
+     8,
+     0.5835,
+     0.4159
+    ],
+    "hi": [
+     3,
+     0.5874,
+     0.5874
+    ],
+    "lo": [
+     5,
+     0.5765,
+     0.1133
+    ],
+    "bikes": [
+     [
+      "YZF-R3",
+      1.0,
+      0.245
+     ],
+     [
+      "CB500F",
+      1.0,
+      0.686
+     ],
+     [
+      "Z400",
+      1.0,
+      0.831
+     ],
+     [
+      "Ninja 400",
+      0.5,
+      0.771
+     ],
+     [
+      "302R",
+      0.5,
+      -0.788
+     ],
+     [
+      "RS 457",
+      0.5,
+      0.211
+     ],
+     [
+      "CBR500R",
+      0.1,
+      0.368
+     ],
+     [
+      "MT-03",
+      0.1,
+      0.588
+     ]
+    ]
+   }
+  ],
+  "single-300-500": [
+   {
+    "overrides": {
+     "max_engine_decel_rads2": 50,
+     "mu_peak_override": 1.18
+    },
+    "all": [
+     16,
+     0.509,
+     0.0582
+    ],
+    "hi": [
+     6,
+     0.2849,
+     0.2844
+    ],
+    "lo": [
+     10,
+     1.2559,
+     -0.6958
+    ],
+    "bikes": [
+     [
+      "Duke 390",
+      1.0,
+      0.128
+     ],
+     [
+      "RC 390",
+      1.0,
+      0.546
+     ],
+     [
+      "390 Duke",
+      1.0,
+      -0.002
+     ],
+     [
+      "Duke 390",
+      1.0,
+      0.111
+     ],
+     [
+      "390 Duke Gen 3",
+      1.0,
+      0.494
+     ],
+     [
+      "RC 390 Gen 3",
+      1.0,
+      0.428
+     ],
+     [
+      "Apache RR 310",
+      0.5,
+      -0.748
+     ],
+     [
+      "SR400",
+      0.5,
+      0.252
+     ],
+     [
+      "Dominar 400",
+      0.1,
+      1.414
+     ],
+     [
+      "Speed 400",
+      0.1,
+      0.23
+     ],
+     [
+      "Pulsar NS400Z",
+      0.1,
+      0.582
+     ],
+     [
+      "CB350RS",
+      0.1,
+      1.556
+     ],
+     [
+      "Classic 350",
+      0.1,
+      -4.71
+     ],
+     [
+      "Apache RTR 310",
+      0.1,
+      -0.555
+     ],
+     [
+      "Classic 350 Halcyon",
+      0.1,
+      -4.281
+     ],
+     [
+      "Goan Classic 350",
+      0.1,
+      -4.281
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "max_engine_decel_rads2": 0,
+     "over_clutch_factor": 0.0,
+     "mu_peak_override": 1.18
+    },
+    "all": [
+     16,
+     0.5103,
+     0.0613
+    ],
+    "hi": [
+     6,
+     0.2862,
+     0.2862
+    ],
+    "lo": [
+     10,
+     1.2574,
+     -0.6881
+    ],
+    "bikes": [
+     [
+      "Duke 390",
+      1.0,
+      0.13
+     ],
+     [
+      "RC 390",
+      1.0,
+      0.548
+     ],
+     [
+      "390 Duke",
+      1.0,
+      -0.0
+     ],
+     [
+      "Duke 390",
+      1.0,
+      0.113
+     ],
+     [
+      "390 Duke Gen 3",
+      1.0,
+      0.496
+     ],
+     [
+      "RC 390 Gen 3",
+      1.0,
+      0.43
+     ],
+     [
+      "Apache RR 310",
+      0.5,
+      -0.746
+     ],
+     [
+      "SR400",
+      0.5,
+      0.254
+     ],
+     [
+      "Dominar 400",
+      0.1,
+      1.416
+     ],
+     [
+      "Speed 400",
+      0.1,
+      0.263
+     ],
+     [
+      "Pulsar NS400Z",
+      0.1,
+      0.621
+     ],
+     [
+      "CB350RS",
+      0.1,
+      1.557
+     ],
+     [
+      "Classic 350",
+      0.1,
+      -4.673
+     ],
+     [
+      "Apache RTR 310",
+      0.1,
+      -0.547
+     ],
+     [
+      "Classic 350 Halcyon",
+      0.1,
+      -4.28
+     ],
+     [
+      "Goan Classic 350",
+      0.1,
+      -4.28
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "max_engine_decel_rads2": 50,
+     "mu_peak_override": 1.1
+    },
+    "all": [
+     16,
+     0.6972,
+     0.2852
+    ],
+    "hi": [
+     6,
+     0.5337,
+     0.5337
+    ],
+    "lo": [
+     10,
+     1.2422,
+     -0.5432
+    ],
+    "bikes": [
+     [
+      "Duke 390",
+      1.0,
+      0.369
+     ],
+     [
+      "RC 390",
+      1.0,
+      0.789
+     ],
+     [
+      "390 Duke",
+      1.0,
+      0.264
+     ],
+     [
+      "Duke 390",
+      1.0,
+      0.371
+     ],
+     [
+      "390 Duke Gen 3",
+      1.0,
+      0.726
+     ],
+     [
+      "RC 390 Gen 3",
+      1.0,
+      0.683
+     ],
+     [
+      "Apache RR 310",
+      0.5,
+      -0.551
+     ],
+     [
+      "SR400",
+      0.5,
+      0.393
+     ],
+     [
+      "Dominar 400",
+      0.1,
+      1.634
+     ],
+     [
+      "Speed 400",
+      0.1,
+      0.355
+     ],
+     [
+      "Pulsar NS400Z",
+      0.1,
+      0.655
+     ],
+     [
+      "CB350RS",
+      0.1,
+      1.682
+     ],
+     [
+      "Classic 350",
+      0.1,
+      -4.674
+     ],
+     [
+      "Apache RTR 310",
+      0.1,
+      -0.403
+     ],
+     [
+      "Classic 350 Halcyon",
+      0.1,
+      -4.119
+     ],
+     [
+      "Goan Classic 350",
+      0.1,
+      -4.119
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "max_engine_decel_rads2": 50,
+     "mu_peak_override": null
+    },
+    "all": [
+     16,
+     0.5732,
+     0.1318
+    ],
+    "hi": [
+     6,
+     0.3731,
+     0.3731
+    ],
+    "lo": [
+     10,
+     1.2401,
+     -0.6728
+    ],
+    "bikes": [
+     [
+      "Duke 390",
+      1.0,
+      0.215
+     ],
+     [
+      "RC 390",
+      1.0,
+      0.634
+     ],
+     [
+      "390 Duke",
+      1.0,
+      0.093
+     ],
+     [
+      "Duke 390",
+      1.0,
+      0.203
+     ],
+     [
+      "390 Duke Gen 3",
+      1.0,
+      0.575
+     ],
+     [
+      "RC 390 Gen 3",
+      1.0,
+      0.519
+     ],
+     [
+      "Apache RR 310",
+      0.5,
+      -0.681
+     ],
+     [
+      "SR400",
+      0.5,
+      0.223
+     ],
+     [
+      "Dominar 400",
+      0.1,
+      1.492
+     ],
+     [
+      "Speed 400",
+      0.1,
+      0.278
+     ],
+     [
+      "Pulsar NS400Z",
+      0.1,
+      0.621
+     ],
+     [
+      "CB350RS",
+      0.1,
+      1.598
+     ],
+     [
+      "Classic 350",
+      0.1,
+      -4.673
+     ],
+     [
+      "Apache RTR 310",
+      0.1,
+      -0.503
+     ],
+     [
+      "Classic 350 Halcyon",
+      0.1,
+      -4.317
+     ],
+     [
+      "Goan Classic 350",
+      0.1,
+      -4.317
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "max_engine_decel_rads2": 100,
+     "mu_peak_override": 1.18
+    },
+    "all": [
+     16,
+     0.5103,
+     0.0613
+    ],
+    "hi": [
+     6,
+     0.2862,
+     0.2862
+    ],
+    "lo": [
+     10,
+     1.2574,
+     -0.6881
+    ],
+    "bikes": [
+     [
+      "Duke 390",
+      1.0,
+      0.13
+     ],
+     [
+      "RC 390",
+      1.0,
+      0.548
+     ],
+     [
+      "390 Duke",
+      1.0,
+      -0.0
+     ],
+     [
+      "Duke 390",
+      1.0,
+      0.113
+     ],
+     [
+      "390 Duke Gen 3",
+      1.0,
+      0.496
+     ],
+     [
+      "RC 390 Gen 3",
+      1.0,
+      0.43
+     ],
+     [
+      "Apache RR 310",
+      0.5,
+      -0.746
+     ],
+     [
+      "SR400",
+      0.5,
+      0.254
+     ],
+     [
+      "Dominar 400",
+      0.1,
+      1.416
+     ],
+     [
+      "Speed 400",
+      0.1,
+      0.263
+     ],
+     [
+      "Pulsar NS400Z",
+      0.1,
+      0.621
+     ],
+     [
+      "CB350RS",
+      0.1,
+      1.557
+     ],
+     [
+      "Classic 350",
+      0.1,
+      -4.673
+     ],
+     [
+      "Apache RTR 310",
+      0.1,
+      -0.547
+     ],
+     [
+      "Classic 350 Halcyon",
+      0.1,
+      -4.28
+     ],
+     [
+      "Goan Classic 350",
+      0.1,
+      -4.28
+     ]
+    ]
+   },
+   {
+    "overrides": {
+     "max_engine_decel_rads2": 50,
+     "mu_peak_override": 1.25
+    },
+    "all": [
+     16,
+     0.4556,
+     -0.0936
+    ],
+    "hi": [
+     6,
+     0.2119,
+     0.1118
+    ],
+    "lo": [
+     10,
+     1.2681,
+     -0.7781
+    ],
+    "bikes": [
+     [
+      "Duke 390",
+      1.0,
+      -0.046
+     ],
+     [
+      "RC 390",
+      1.0,
+      0.369
+     ],
+     [
+      "390 Duke",
+      1.0,
+      -0.194
+     ],
+     [
+      "Duke 390",
+      1.0,
+      -0.06
+     ],
+     [
+      "390 Duke Gen 3",
+      1.0,
+      0.355
+     ],
+     [
+      "RC 390 Gen 3",
+      1.0,
+      0.247
+     ],
+     [
+      "Apache RR 310",
+      0.5,
+      -0.871
+     ],
+     [
+      "SR400",
+      0.5,
+      0.155
+     ],
+     [
+      "Dominar 400",
+      0.1,
+      1.262
+     ],
+     [
+      "Speed 400",
+      0.1,
+      0.262
+     ],
+     [
+      "Pulsar NS400Z",
+      0.1,
+      0.621
+     ],
+     [
+      "CB350RS",
+      0.1,
+      1.489
+     ],
+     [
+      "Classic 350",
+      0.1,
+      -4.673
+     ],
+     [
+      "Apache RTR 310",
+      0.1,
+      -0.576
+     ],
+     [
+      "Classic 350 Halcyon",
+      0.1,
+      -4.406
+     ],
+     [
+      "Goan Classic 350",
+      0.1,
+      -4.406
+     ]
+    ]
+   }
+  ]
+ }
+}

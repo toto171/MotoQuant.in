@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Database Layer Tests
-====================================
+MotoQuant — Database Layer Tests
+================================
 Tests for the Phase 2 database layer:
   - Schema creation and seeding
   - BikeConfig round-trip fidelity (THE critical test)

@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Dyno Curve Import
-===================================
+MotoQuant — Dyno Curve Import
+=============================
 Parse dynamometer output files (CSV), apply SAE J1349 atmospheric correction,
 and return a DynoCurve ready for injection into BikeConfig.engine.dyno_curve.
 
@@ -13,18 +13,27 @@ MoTeC lite : tab-separated channel export with "Engine Speed" + "Engine Power" c
 SAE J1349 Correction
 --------------------
 The standard correction factor adjusts measured power to what would be produced at
-"standard" conditions: 25 °C, 98.9 kPa absolute (14.343 psia), 0% humidity.
+"standard" conditions: 25 °C, 99 kPa dry-air pressure, 0% humidity.
 
-    CF = (99.0 / Pd) × √(Tm / 298.15)
+    CF = 1.18 × (99.0 / Pd) × √(Tm / 298.15) − 0.18
 
 where:
-    Pd = dry air pressure [kPa]  = total barometric pressure − saturated vapour pressure
+    Pd = dry air pressure [kPa]  = total barometric pressure − water vapour pressure
     Tm = inlet air temperature [K]
+
+The 1.18 / −0.18 terms are the standard's mechanical-efficiency allowance
+(SAE J1349 JUN90 / AUG2004, and DynoJet's "SAE" mode): friction losses do
+not scale with air density, so only ~85% of the deviation in indicated power
+is corrected. Without them every deviation from CF = 1 is overstated by 18%.
 
 Power_corrected = Power_measured × CF
 
-If no ambient conditions are provided (temp, pressure, humidity), the measured
-power is returned uncorrected and the caller is warned.
+Ambient inputs are validated: pressure must be absolute barometric pressure
+(kPa, or unambiguously hPa / bar / inHg / psi — auto-converted with a logged
+note), temperature −30…60 °C, humidity 0…100 %. Both temperature and pressure
+are required for a correction; with neither, the measured power is returned
+uncorrected (CF = 1.0); with only one, DynoInputError is raised rather than
+silently skipping the correction.
 
 Public API
 ----------
@@ -36,13 +45,17 @@ Public API
 """
 
 import csv
+import logging
 import math
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
 import numpy as np
 
 from ..models import DynoCurve
+
+log = logging.getLogger(__name__)
 
 # ─── Constants ────────────────────────────────────────────────────────────
 
@@ -54,6 +67,29 @@ LBFT_TO_NM: float = 1.35582
 # SAE J1349 standard reference conditions
 SAE_REF_TEMP_K: float = 298.15  # 25 °C
 SAE_REF_PRESSURE_KPA: float = 99.0  # kPa dry air
+# SAE J1349 mechanical-efficiency terms: CF = A·(99/Pd)·√(T/298) − B
+SAE_CF_SCALE: float = 1.18
+SAE_CF_OFFSET: float = 0.18
+
+# Plausible ambient inputs (absolute barometric pressure 60-110 kPa covers
+# sea level to ~4,000 m). Values outside are input mistakes, not weather.
+PRESSURE_KPA_RANGE: tuple[float, float] = (60.0, 110.0)
+TEMP_C_RANGE: tuple[float, float] = (-30.0, 60.0)
+RH_PCT_RANGE: tuple[float, float] = (0.0, 100.0)
+# J1349's recommended correction window; outside it CF is still applied but
+# a note is logged (high-altitude dynos legitimately exceed it).
+SAE_CF_ADVISORY_RANGE: tuple[float, float] = (0.85, 1.20)
+
+# Pressure units we auto-convert. Each unit's plausible span (the kPa range
+# expressed in that unit) is disjoint from the others, so a value maps to at
+# most one unit. DynoJet sheets print barometer in inHg (29.92 = sea level).
+_PRESSURE_UNITS: tuple[tuple[str, float], ...] = (
+    ("kPa", 1.0),
+    ("hPa", 0.1),
+    ("bar", 100.0),
+    ("inHg", 3.386389),
+    ("psi", 6.894757),
+)
 
 RPM_MIN: float = 500.0
 RPM_MAX: float = 22000.0
@@ -63,6 +99,10 @@ PEAK_TORQUE_NM_MAX: float = 5000.0
 
 class DynoParseError(Exception):
     """Raised when a dyno file cannot be parsed or contains invalid data."""
+
+
+class DynoInputError(DynoParseError, ValueError):
+    """Raised when the ambient conditions passed for SAE correction are invalid."""
 
 
 # ─── Result container ─────────────────────────────────────────────────────
@@ -120,24 +160,82 @@ def _saturated_vapour_pressure_kpa(temp_c: float) -> float:
     return p_mmhg * 0.133322  # mmHg → kPa
 
 
+def normalize_pressure_kpa(pressure: float) -> tuple[float, str | None]:
+    """
+    Return (pressure_kpa, note) for a barometric reading in kPa, or in an
+    unambiguous other unit (hPa/mbar, bar, inHg, psi) which is converted.
+
+    ``note`` is None when the value was already kPa, else a human-readable
+    description of the conversion. Raises DynoInputError when the value fits
+    no unit's plausible span (e.g. 50 — neither kPa nor anything else).
+    """
+    p = float(pressure)
+    if not math.isfinite(p):
+        raise DynoInputError(f"pressure must be a finite number, got {pressure!r}")
+    lo, hi = PRESSURE_KPA_RANGE
+    for unit, to_kpa in _PRESSURE_UNITS:
+        kpa = p * to_kpa
+        if lo <= kpa <= hi:
+            if unit == "kPa":
+                return kpa, None
+            return kpa, f"pressure {p:g} read as {unit} -> {kpa:.2f} kPa"
+    raise DynoInputError(
+        f"pressure {p:g} is not a plausible absolute barometric pressure: "
+        f"expected {lo:g}-{hi:g} kPa (or the same range in hPa, bar, inHg or psi)"
+    )
+
+
+def _validate_ambient(temp_c: float, pressure_kpa: float, rh_pct: float) -> None:
+    """Raise DynoInputError unless temp/pressure(kPa)/RH are physically plausible."""
+    checks = (
+        ("temp_c", temp_c, TEMP_C_RANGE, "°C"),
+        ("pressure_kpa", pressure_kpa, PRESSURE_KPA_RANGE, "kPa"),
+        ("rh_pct", rh_pct, RH_PCT_RANGE, "%"),
+    )
+    for name, value, (lo, hi), unit in checks:
+        if value is None or not math.isfinite(float(value)):
+            raise DynoInputError(f"{name} must be a finite number, got {value!r}")
+        if not (lo <= float(value) <= hi):
+            raise DynoInputError(
+                f"{name}={float(value):g} is outside the plausible range "
+                f"{lo:g}-{hi:g} {unit}"
+            )
+
+
 def sae_j1349_correction_factor(
     temp_c: float,
     pressure_kpa: float,
     rh_pct: float = 0.0,
 ) -> float:
     """
-    Compute SAE J1349 atmospheric correction factor.
+    Compute the SAE J1349 atmospheric correction factor.
+
+        CF = 1.18 × (99 / Pd) × √(T / 298.15) − 0.18
+
+    Pd is the dry-air partial pressure (barometric minus water-vapour
+    pressure) and T the inlet air temperature in kelvin. The 1.18 / −0.18
+    terms are the standard's mechanical-efficiency allowance; the friction-
+    free form ``(99/Pd)·√(T/298)`` (used here until 2026-10-24) overstates
+    every deviation from 1.0 by 18% — e.g. 35 °C / 95 kPa / 60% RH gave
+    CF 1.098 where J1349 (and DynoJet's SAE mode) gives 1.116.
 
     Parameters
     ----------
-    temp_c       : Inlet air temperature [°C]
-    pressure_kpa : Absolute barometric pressure [kPa]
+    temp_c       : Inlet air temperature [°C], −30…60
+    pressure_kpa : Absolute barometric pressure [kPa], 60…110
     rh_pct       : Relative humidity [%] (0–100)
 
     Returns
     -------
     float : Correction factor — multiply measured power by this.
+
+    Raises
+    ------
+    DynoInputError (a ValueError) when an input is outside its plausible
+    range. Pressure in inHg/bar/hPa must be converted first — see
+    ``normalize_pressure_kpa`` (parse_dyno_file does this automatically).
     """
+    _validate_ambient(temp_c, pressure_kpa, rh_pct)
     temp_k = temp_c + 273.15
     p_sat = _saturated_vapour_pressure_kpa(temp_c)
     p_vapour = (rh_pct / 100.0) * p_sat
@@ -146,14 +244,15 @@ def sae_j1349_correction_factor(
     # NOTE the direction of the temperature ratio: sqrt(Tm / Tref), NOT
     # sqrt(Tref / Tm). This shipped inverted until the 2026-07-25 audit, which
     # contradicted BOTH the SAE J1349 standard and this module's own documented
-    # formula at the top of the file (`CF = (99.0 / Pd) x sqrt(Tm / 298.15)`).
+    # formula at the top of the file.
     #
     # Physically: hot air is less dense, so the engine makes LESS power on the
     # dyno, and the correction to standard 25 C must scale it UP -> CF must rise
     # with temperature. The inverted form fell instead, so a 190 hp run measured
     # on a 40 C Pune/Chennai dyno day was reported as 185.4 hp when SAE requires
-    # 194.7 hp -- a ~5% error in the wrong direction, growing to ~8% at 0 C.
-    cf = (SAE_REF_PRESSURE_KPA / p_dry) * math.sqrt(temp_k / SAE_REF_TEMP_K)
+    # 195.6 hp -- a ~5% error in the wrong direction, growing to ~8% at 0 C.
+    density_ratio = (SAE_REF_PRESSURE_KPA / p_dry) * math.sqrt(temp_k / SAE_REF_TEMP_K)
+    cf = SAE_CF_SCALE * density_ratio - SAE_CF_OFFSET
     return float(cf)
 
 
@@ -183,14 +282,88 @@ def _detect_power_unit(header: list[str], col_idx: int) -> str:
     return "kw"  # default for unlabelled or "(kw)" headers
 
 
-def _detect_torque_unit(header: list[str], col_idx: int) -> str:
-    """Infer torque unit from column header text."""
+def _detect_torque_unit(header: list[str], col_idx: int) -> str | None:
+    """Torque unit named by the column header, or None when it names none.
+
+    A bare 'TQ' / 'Torque' label returns None so the caller can infer the
+    unit (see _resolve_torque_unit) instead of assuming Nm: DynoJet's own
+    'RPM,WHP,TQ' export is lb-ft, and reading it as Nm cut the injected
+    torque curve by 26%.
+    """
     if col_idx < 0:
-        return "nm"
+        return None
     label = header[col_idx].lower()
-    if "lb" in label or "ft" in label or "lbft" in label or "ftlb" in label:
+    # 'ft' only as a token (lb-ft, ft-lb, '(ft)'), never inside a word: a bare
+    # substring test read 'Shaft Torque' as lb-ft.
+    if "lb" in label or re.search(r"(?<![a-z])ft(?![a-z])", label):
         return "lbft"
-    return "nm"
+    if re.search(r"(?<![a-z])(nm|n\.m|n-m|newton)", label):
+        return "nm"
+    return None
+
+
+def _power_torque_ratio(
+    rpm: np.ndarray, power_kw: np.ndarray, torque_raw: np.ndarray
+) -> float | None:
+    """Median of (torque·ω / power) over rows with real power and torque.
+
+    ≈ 1.0 when the torque column is Nm, ≈ 0.7376 (1 / 1.35582) when it is
+    lb-ft. None when there are too few usable rows to judge.
+    """
+    mask = (power_kw > 1.0) & (torque_raw > 0) & (rpm > 1000)
+    if int(mask.sum()) < 3:
+        return None
+    omega = rpm[mask] * (2 * math.pi / 60)
+    return float(np.median(torque_raw[mask] * omega / 1000.0 / power_kw[mask]))
+
+
+def _resolve_torque_unit(
+    labelled_unit: str | None,
+    power_unit: str,
+    has_power_col: bool,
+    rpm: np.ndarray,
+    power_kw: np.ndarray,
+    torque_raw: np.ndarray,
+    metadata: dict,
+) -> str:
+    """Decide the torque unit, cross-checking against the power channel.
+
+    * Unit named in the header -> use it, but warn (and record in metadata)
+      when power and torque disagree by more than 5% under that unit.
+    * Unnamed, with a power column -> infer from consistency: torque·ω/P is
+      1.0 for Nm and 0.7376 for lb-ft. If the data is too ambiguous, fall
+      back to the dyno convention: lb-ft when power is in hp, Nm otherwise.
+    * Unnamed, no power column -> Nm (logged, since it is an assumption).
+    """
+    ratio = _power_torque_ratio(rpm, power_kw, torque_raw) if has_power_col else None
+    lbft_ratio = 1.0 / LBFT_TO_NM
+
+    if labelled_unit is not None:
+        if ratio is not None:
+            expected = 1.0 if labelled_unit == "nm" else lbft_ratio
+            mismatch = abs(ratio / expected - 1.0)
+            if mismatch > 0.05:
+                metadata["power_torque_mismatch_pct"] = round(mismatch * 100, 1)
+                log.warning(
+                    "Dyno file: power and torque columns disagree by %.1f%% "
+                    "(torque labelled %s); the torque column feeds the curve",
+                    mismatch * 100,
+                    labelled_unit,
+                )
+        return labelled_unit
+
+    if ratio is not None:
+        err_nm = abs(math.log(ratio))
+        err_lbft = abs(math.log(ratio / lbft_ratio))
+        if min(err_nm, err_lbft) < math.log(1.15):
+            unit = "nm" if err_nm < err_lbft else "lbft"
+            metadata["torque_unit_inferred"] = unit
+            return unit
+
+    unit = "lbft" if (has_power_col and power_unit == "hp") else "nm"
+    metadata["torque_unit_assumed"] = unit
+    log.warning("Dyno file: torque column names no unit; assuming %s", unit)
+    return unit
 
 
 def _to_kw(values: np.ndarray, unit: str) -> np.ndarray:
@@ -269,7 +442,7 @@ def _parse_csv(path: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict, st
         raise DynoParseError(f"Cannot find power or torque column in: {header}")
 
     pwr_unit = _detect_power_unit(header, pwr_col)
-    tq_unit = _detect_torque_unit(header, tq_col)
+    tq_label_unit = _detect_torque_unit(header, tq_col)
 
     rpms, pwrs, torqs = [], [], []
     for row in data_rows:
@@ -292,7 +465,15 @@ def _parse_csv(path: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict, st
 
     rpm_arr = np.array(rpms)
     pwr_arr = _to_kw(np.array(pwrs), pwr_unit)
-    tq_arr = _to_nm(np.array(torqs), tq_unit)
+    tq_raw = np.array(torqs)
+    tq_unit = (
+        _resolve_torque_unit(
+            tq_label_unit, pwr_unit, pwr_col != -1, rpm_arr, pwr_arr, tq_raw, metadata
+        )
+        if tq_col != -1
+        else "nm"
+    )
+    tq_arr = _to_nm(tq_raw, tq_unit)
 
     # Sort by RPM (some dynos export descending)
     order = np.argsort(rpm_arr)
@@ -362,10 +543,8 @@ def _parse_motec_lite(
         "kw" if "kw" in pwr_unit_str else ("hp" if "hp" in pwr_unit_str else "kw")
     )
 
-    tq_unit_str = (
-        units[tq_col].lower() if tq_col != -1 and tq_col < len(units) else "nm"
-    )
-    tq_unit = "lbft" if ("lb" in tq_unit_str or "ft" in tq_unit_str) else "nm"
+    tq_unit_str = units[tq_col] if tq_col != -1 and tq_col < len(units) else ""
+    tq_label_unit = _detect_torque_unit([tq_unit_str], 0) if tq_unit_str else None
 
     rpms, pwrs, torqs = [], [], []
     for line in lines[data_start:]:
@@ -389,10 +568,19 @@ def _parse_motec_lite(
 
     rpm_arr = np.array(rpms)
     pwr_arr = _to_kw(np.array(pwrs), pwr_unit)
-    tq_arr = _to_nm(np.array(torqs), tq_unit)
+    tq_raw = np.array(torqs)
+    metadata: dict = {}
+    tq_unit = (
+        _resolve_torque_unit(
+            tq_label_unit, pwr_unit, pwr_col != -1, rpm_arr, pwr_arr, tq_raw, metadata
+        )
+        if tq_col != -1
+        else "nm"
+    )
+    tq_arr = _to_nm(tq_raw, tq_unit)
 
     order = np.argsort(rpm_arr)
-    return rpm_arr[order], pwr_arr[order], tq_arr[order], {}, "motec_lite"
+    return rpm_arr[order], pwr_arr[order], tq_arr[order], metadata, "motec_lite"
 
 
 # ─── Post-processing ──────────────────────────────────────────────────────
@@ -453,8 +641,12 @@ def parse_dyno_file(
     Parameters
     ----------
     path         : Path to .csv or .txt dyno file
-    temp_c       : Ambient temperature during dyno run [°C]. If None, no correction applied.
-    pressure_kpa : Absolute barometric pressure during run [kPa]. If None, no correction.
+    temp_c       : Ambient temperature during dyno run [°C], −30…60. Pass with
+                   pressure_kpa, or omit both for an uncorrected curve.
+    pressure_kpa : Absolute barometric pressure during run [kPa], 60…110. A
+                   value that is unambiguously hPa, bar, inHg (DynoJet sheets,
+                   e.g. 29.92) or psi is converted, with a note in
+                   ``raw_metadata['pressure_input_note']``.
     rh_pct       : Relative humidity [%] (0–100).
     is_at_wheel  : True = chassis (wheel) dyno; False = engine dyno.
 
@@ -465,6 +657,8 @@ def parse_dyno_file(
     Raises
     ------
     DynoParseError  : File format unrecognised or data invalid.
+    DynoInputError  : Ambient inputs implausible, or only one of temp/pressure
+                      given (subclass of DynoParseError and ValueError).
     FileNotFoundError
     """
     path = Path(path)
@@ -492,7 +686,32 @@ def parse_dyno_file(
 
     # SAE J1349 correction
     if temp_c is not None and pressure_kpa is not None:
-        cf = sae_j1349_correction_factor(temp_c, pressure_kpa, rh_pct)
+        p_kpa, note = normalize_pressure_kpa(pressure_kpa)
+        if note:
+            log.warning("Dyno SAE correction: %s", note)
+            metadata["pressure_input_note"] = note
+        if rh_pct is None:
+            rh_pct = 0.0
+        cf = sae_j1349_correction_factor(temp_c, p_kpa, rh_pct)
+        metadata["ambient"] = {
+            "temp_c": float(temp_c),
+            "pressure_kpa": round(p_kpa, 3),
+            "rh_pct": float(rh_pct),
+        }
+        lo, hi = SAE_CF_ADVISORY_RANGE
+        if not (lo <= cf <= hi):
+            note = (
+                f"SAE CF {cf:.3f} is outside J1349's recommended "
+                f"{lo:g}-{hi:g} window — double-check the ambient inputs"
+            )
+            log.warning("Dyno SAE correction: %s", note)
+            metadata["cf_advisory"] = note
+    elif temp_c is not None or pressure_kpa is not None:
+        missing = "pressure_kpa" if pressure_kpa is None else "temp_c"
+        raise DynoInputError(
+            f"SAE correction needs both temp_c and pressure_kpa; {missing} is "
+            "missing (omit both for an uncorrected curve)"
+        )
     else:
         cf = 1.0  # uncorrected
 

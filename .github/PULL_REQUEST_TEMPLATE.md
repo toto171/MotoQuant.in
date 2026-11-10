@@ -1,69 +1,35 @@
 <!--
-Thanks for contributing to MotoQuant Pro.
-First time here? Read AGENTS.md (the working contract) and docs/INVARIANTS.md (what must never break).
-Fill every section. Delete sections that don't apply (e.g. "Physics benchmark deltas" for a docs-only PR), but don't delete the Kaizen checklist.
-Run `make check` (fast gate) and `make test` (full suite) before opening this PR.
+Thanks for contributing. By opening this pull request you agree that your
+contribution is licensed under Apache-2.0, like the rest of the project.
+First time? Read AGENTS.md (the working rules) and CONTRIBUTING.md.
+Delete any section that does not apply.
 -->
 
-## What changed
+## What and why
 
-<!-- One paragraph. What did you change and why? The diff shows the "what" — tell us the "why". -->
-
-## Linked issue
+<!-- What changed, and why. The diff shows the what; tell us the why. -->
 
 Closes #
 
-## Type
+## How I checked it
 
-- [ ] Bugfix
-- [ ] New feature
-- [ ] Physics / sub-model change
-- [ ] Database schema change
-- [ ] Bike / parts / tire data
-- [ ] Calibration data (Dragy / dyno / ECU log)
-- [ ] Desktop (Tauri + React) or Web (Next.js) frontend
-- [ ] Docs / tooling / CI
+<!-- Commands you ran and what they printed. `make check` at minimum;
+     `make test` before asking for review. -->
 
-## Test plan
+## Reference times (physics, sub-models, defaults, category profiles or importer)
 
-<!-- How did you verify the change? Paste commands + relevant output. -->
+<!-- Paste the output of `make baselines`. Any change here needs the full
+     accuracy sweep as evidence (docs/adr/0002-pinned-reference-baselines.md). -->
 
-```
-python -m pytest tests/ -q
-```
+## Data (bikes, parts, tyres, benchmarks)
 
-## Physics benchmark deltas (required if you touched `motoquant/physics.py`, any `submodels/*`, `defaults.py`, or `category_profiles.py`)
+<!-- One source per value: manual, manufacturer page, magazine test or
+     timeslip. Unsourced data is not merged. -->
 
-<!-- Paste the output of `python scripts/check_baselines.py` — the single
-     source of truth for the pinned references (bit-identical contract,
-     see docs/INVARIANTS.md). Do NOT hardcode target numbers here; they
-     move only on a deliberate epoch (ADR-0002). -->
+## Checklist
 
-```
-python scripts/check_baselines.py
-```
-
-| Bike | Pinned | This PR | Δ |
-|---|---|---|---|
-| K5 |  |  |  |
-| R1 |  |  |  |
-| Hayabusa |  |  |  |
-
-## Kaizen checklist (from CLAUDE.md)
-
-- [ ] No silent failure modes (no swallowed exceptions, no helpers that accept invalid paths silently).
-- [ ] Data ↔ model paths match (seed / DB / config keys hit real dataclass fields — no `UserWarning` from `bridge.apply_part_to_config`).
-- [ ] No bypass paths — modifications flow through every active code path (e.g. if you scaled a dyno curve, `peak_power_hp` is also updated).
-- [ ] Every new public function has at least one test that would fail if the function did nothing.
-- [ ] Numerical sanity checked — simulation deltas are physically plausible.
-- [ ] No dead DB columns / dataclass fields / config keys introduced.
-- [ ] Backwards-compatible for renamed fields (grepped all uses, updated, full suite green).
-
-## Collaborator checklist
-
-- [ ] `python -m pytest tests/ -q` is green locally.
-- [ ] `ruff check .` and `ruff format --check .` are clean.
-- [ ] If this is a desktop / web PR: `npx tsc --noEmit` green in `desktop/` and `npm run build` green in `web/`.
-- [ ] Updated `CLAUDE.md` → "Current State" and the relevant phase checklist if this was substantive.
-- [ ] No secrets, API keys, or `.env` files in the diff.
-- [ ] Commit messages are imperative-mood ("Add …", "Fix …"), subject ≤ 72 chars.
+- [ ] `make check` passes and `make test` is green.
+- [ ] Every new function has a test that fails if the function does nothing.
+- [ ] Anything that caches the physics is regenerated (`make regen`) if simulated times moved.
+- [ ] Web changes build (`make web-build`); changed counts pass `make audit`.
+- [ ] No credentials, `.env` files or personal data in the diff.

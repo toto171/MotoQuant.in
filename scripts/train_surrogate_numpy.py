@@ -105,6 +105,15 @@ def _train_once(
     return best
 
 
+def _repo_relative(path) -> str:
+    """``path`` relative to the repository root, else just its file name."""
+    root = Path(__file__).resolve().parent.parent
+    try:
+        return str(Path(path).resolve().relative_to(root))
+    except ValueError:
+        return Path(path).name
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--data", default="/tmp/mq/surr-data/motoquant_surrogate_v2.npz")
@@ -197,7 +206,9 @@ def main() -> None:
                     {
                         "version": 2,
                         "trained": time.strftime("%Y-%m-%d"),
-                        "data": str(a.data),
+                        # Repo-relative when possible: an absolute path
+                        # would publish the trainer's local layout.
+                        "data": _repo_relative(a.data),
                         "n_train": int(len(tr_i)),
                         "n_val": int(nva),
                         "hidden": list(hidden),

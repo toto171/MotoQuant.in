@@ -61,7 +61,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Running the CBR150R in MotoQuant under matched Aamby Valley November conditions (density altitude roughly 1,100 m, 22°C ambient, dry concrete surface, μ_peak 1.18 on the OEM 130/70-17 rear at IRC SCT-001 reference grip), with a 70 kg rider in tuck position on the 136 kg dry bike, produces the following:",
+    text: "Running the CBR150R in MotoQuant under matched Aamby Valley November conditions (density altitude roughly 1,100 m, 22°C ambient, dry asphalt surface, μ_peak 1.18 on the OEM 130/70-17 rear at IRC SCT-001 reference grip), with a 70 kg rider in tuck position on the 136 kg dry bike, produces the following:",
   },
   {
     type: "table",
@@ -79,7 +79,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Strip the documented +1.84 s entry-150-200 cluster bias and the CBR150R lands within 0.4 seconds of the MotoStatz instrumented runs — which is well inside repeatability for a 17 hp bike at a 70 kg rider weight. The bias is structural; it affects every bike in the 125-200 cc band roughly equally and has been narrowing pass over pass as the calibrator ingests more real-world timeslips. The relative ordering — CBR150R quicker than R15 V4 quicker than Y15ZR V2 — is what the simulator gets right with confidence.",
+    text: "Strip the documented +1.84 s entry-150-200 cluster bias and the CBR150R lands within 0.4 seconds of the MotoStatz instrumented runs — which is well inside repeatability for a 17 hp bike at a 70 kg rider weight. The bias is structural; it affects every bike in the 125-200 cc band roughly equally and it narrows as more real-world timeslips join the benchmark set. The relative ordering — CBR150R quicker than R15 V4 quicker than Y15ZR V2 — is what the simulator gets right with confidence.",
   },
   {
     type: "callout",
@@ -201,7 +201,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Two caveats. First, the absolute ETs in this post are simulator output under specific conditions — change the rider weight, the surface, the temperature, or the launch technique and the numbers shift. The CBR150R will run quicker than 18.42 seconds at the strip in real life; expect 16.6 to 17.5 s depending on rider technique, with the MotoStatz instrumented test as the published reference point. Second, the +1.84 s cluster bias is a known artefact of how the model treats clutch slip on sub-20 hp bikes. Future calibrator passes will narrow it as the Indian and SE Asia Dragy submission corpus grows.",
+    text: "Two caveats. First, the absolute ETs in this post are simulator output under specific conditions — change the rider weight, the surface, the temperature, or the launch technique and the numbers shift. The CBR150R will run quicker than 18.42 seconds at the strip in real life; expect 16.6 to 17.5 s depending on rider technique, with the MotoStatz instrumented test as the published reference point. Second, the +1.84 s cluster bias is a known artefact of how the model treats clutch slip on sub-20 hp bikes. Future accuracy passes will narrow it as more Indian and South-East Asian timeslips are submitted.",
   },
   {
     type: "p",
@@ -258,7 +258,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -281,7 +281,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -311,7 +311,7 @@ export default function PostPage() {
               (t) => (
                 <span
                   key={t}
-                  className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                  className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
                 >
                   {t}
                 </span>
@@ -321,7 +321,7 @@ export default function PostPage() {
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             Honda CBR150R Quarter-Mile Physics: 17hp SE Asia Sport Single
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             26 May 2026 · 11 min read · MotoQuant Blog
           </div>
         </div>
@@ -388,16 +388,6 @@ export default function PostPage() {
               — every spec, every gear ratio, every Cd value used by the
               simulator.
             </li>
-            <li>
-              ·{" "}
-              <Link
-                href="/pricing"
-                className="text-brand-accent hover:text-brand-orange transition-colors"
-              >
-                MotoQuant Pricing
-              </Link>{" "}
-              — Free for street tuners; Pro for shops and racing teams.
-            </li>
           </ul>
         </div>
 
@@ -415,9 +405,9 @@ export default function PostPage() {
           </div>
           <Link
             href="/simulator?bike=honda-cbr150r"
-            className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
+            className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
           >
-            Run sim →
+            Open the simulator →
           </Link>
         </div>
       </article>

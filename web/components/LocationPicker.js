@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useId } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, AlertCircle, Check, Locate, X } from 'lucide-react';
 import { API_URL } from '../lib/api';
 import SimProgress from './SimProgress';
+import Term from './Term';
 
 /**
  * LocationPicker — asks the backend to resolve a race venue from text,
@@ -29,6 +30,9 @@ import SimProgress from './SimProgress';
  *   onResolved      (env) => void — called with the resolved env payload
  *   onCleared       () => void     — called when the user clears the picker
  *   compact         boolean        — tighter layout for sidebar use
+ *
+ * Restyled for CLARITY v6 (plain labels, sentence case, 44 px tap targets,
+ * 16 px inputs). Props are unchanged.
  */
 
 // Haversine distance in km between two GPS points
@@ -42,6 +46,8 @@ function haversineKm(lat1, lon1, lat2, lon2) {
     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(a));
 }
+
+const isIndia = (c) => ['IN', 'INDIA'].includes(String(c || '').toUpperCase());
 
 // Module-level cache so we don't refetch /api/venues on every mount
 let _cachedVenues = null;
@@ -64,6 +70,7 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [venues, setVenues] = useState([]);
+  const uid = useId().replace(/:/g, '');
 
   useEffect(() => {
     let mounted = true;
@@ -79,12 +86,12 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
   const quickPickVenues = useMemo(() => {
     if (!venues.length) return [];
     const indianFirst = [...venues].sort((a, b) => {
-      const aIN = (a.country || '').toUpperCase() === 'IN' ? 0 : 1;
-      const bIN = (b.country || '').toUpperCase() === 'IN' ? 0 : 1;
+      const aIN = isIndia(a.country) ? 0 : 1;
+      const bIN = isIndia(b.country) ? 0 : 1;
       if (aIN !== bIN) return aIN - bIN;
       return (a.name || '').localeCompare(b.name || '');
     });
-    return indianFirst.slice(0, compact ? 6 : 8);
+    return indianFirst.slice(0, compact ? 7 : 8);
   }, [venues, compact]);
 
   const resolve = useCallback(
@@ -190,24 +197,24 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
   return (
     <div className={`w-full ${compact ? '' : 'p-1'}`}>
       {!value ? (
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           {quickPickVenues.length > 0 && (
             <div>
-              <p className="label-mono mb-1.5">Quick pick</p>
-              <div className="flex flex-wrap gap-1.5">
+              <p className="field-label">Pick a track</p>
+              <div className="flex flex-wrap gap-2" role="group" aria-label="Known tracks">
                 {quickPickVenues.map((v) => (
                   <button
                     key={v.id}
                     type="button"
                     onClick={() => pickVenue(v)}
                     disabled={loading}
-                    className="chip transition-colors hover:border-accent/40 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-white/15 px-3.5 text-sm font-medium text-white/80 transition-colors hover:border-accent/60 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/70 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <MapPin size={10} className="text-white/40" aria-hidden="true" />
-                    {v.name}
+                    <MapPin size={14} className="shrink-0 text-white/55" aria-hidden="true" />
+                    <span>{v.name}</span>
                     {v.altitude_m != null && (
-                      <span className="text-[9px] text-white/40 ml-0.5 tabular-nums">
-                        {Math.round(v.altitude_m)}m
+                      <span className="text-xs tabular-nums text-white/55">
+                        {Math.round(v.altitude_m)} m
                       </span>
                     )}
                   </button>
@@ -217,37 +224,46 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
           )}
 
           <form onSubmit={handleText} className="space-y-2">
+            <label htmlFor={`${uid}-place`} className="field-label">
+              Or search for a place
+            </label>
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={15} />
+                <MapPin
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/55"
+                  size={16}
+                  aria-hidden="true"
+                />
                 <input
+                  id={`${uid}-place`}
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Or type any city / venue (e.g. Pune)"
+                  placeholder="A city or track, e.g. Pune"
+                  autoComplete="off"
                   disabled={loading}
-                  className="input-base pl-9 font-mono disabled:opacity-50"
+                  className="input-base pl-9 disabled:opacity-50"
                 />
               </div>
               <button
                 type="submit"
                 disabled={loading || !query.trim()}
-                className="btn-primary btn-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                className="btn-primary btn-sm disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Set
+                Set location
               </button>
             </div>
             <button
               type="button"
               onClick={useMyLocation}
               disabled={loading}
-              className="inline-flex items-center gap-1.5 text-xs font-mono text-white/50 hover:text-white transition-colors disabled:opacity-50"
+              className="inline-flex min-h-[44px] items-center gap-2 text-sm font-medium text-white/70 transition-colors hover:text-white disabled:opacity-50"
             >
-              <Locate size={12} aria-hidden="true" />
-              Use my GPS location
+              <Locate size={16} aria-hidden="true" />
+              Use my current location
             </button>
             {/* Staged progress while resolving (replaces the old spinner) */}
-            {loading && <SimProgress active compact label="Resolving" className="mt-1" />}
+            {loading && <SimProgress active compact label="Finding conditions" className="mt-1" />}
           </form>
         </div>
       ) : (
@@ -257,12 +273,13 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
       <AnimatePresence>
         {error && (
           <motion.div
+            role="alert"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-2 p-2 bg-signal-foul/10 border border-signal-foul/30 rounded-lg text-signal-foul text-xs flex items-start gap-2"
+            className="mt-2 flex items-start gap-2 rounded-lg border border-signal-foul/30 bg-signal-foul/10 p-2.5 text-sm text-signal-foul"
           >
-            <AlertCircle size={13} className="shrink-0 mt-0.5" /> {error}
+            <AlertCircle size={16} className="mt-0.5 shrink-0" aria-hidden="true" /> {error}
           </motion.div>
         )}
       </AnimatePresence>
@@ -273,60 +290,64 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
 function ResolvedCard({ value, onClear, compact }) {
   const source = value?.source || 'unknown';
   const label =
-    value?._label || value?.venue_name || value?.location_name || 'Resolved location';
+    value?._label || value?.venue_name || value?.location_name || 'Chosen location';
 
   const rows = [
-    { label: 'Temp', v: value?.temperature_c, suffix: '°C', dec: 1 },
-    { label: 'Humidity', v: value?.humidity_pct, suffix: '%', dec: 0 },
-    { label: 'Pressure', v: value?.pressure_hpa, suffix: ' hPa', dec: 0 },
+    { label: 'Temperature', v: value?.temperature_c, suffix: ' °C', dec: 1 },
+    { label: 'Humidity', v: value?.humidity_pct, suffix: ' %', dec: 0 },
     { label: 'Altitude', v: value?.altitude_m, suffix: ' m', dec: 0 },
     { label: 'Air density', v: value?.air_density_kgm3, suffix: ' kg/m³', dec: 3 },
-    { label: 'Density alt', v: value?.density_altitude_m, suffix: ' m', dec: 0, highlight: true },
-  ];
+    { label: 'da', v: value?.density_altitude_m, suffix: ' m', dec: 0, highlight: true },
+  ].filter((r) => r.v != null);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 5 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-lg border border-signal-go/30 bg-signal-go/[0.05] p-3"
+      className="rounded-xl border border-signal-go/30 bg-signal-go/[0.06] p-3.5"
     >
-      <div className="flex items-start justify-between mb-2">
-        <div className="flex items-center gap-2 min-w-0 flex-1">
-          <Check size={14} className="text-signal-go shrink-0" aria-hidden="true" />
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <Check size={16} className="shrink-0 text-signal-go" aria-hidden="true" />
           <div className="min-w-0">
-            <p className="font-display text-sm font-semibold text-white truncate">
-              {label}
-            </p>
-            <p className="text-[10px] font-mono text-white/50 uppercase tracking-wider">
+            <p className="truncate font-display text-sm font-semibold text-white">{label}</p>
+            <p className="text-xs text-white/60">
               {source === 'seeded_venue'
-                ? 'Matched seeded venue'
+                ? 'Known drag strip'
                 : source === 'openweathermap'
-                  ? 'Live weather (OpenWeatherMap)'
-                  : source}
+                  ? 'Live weather'
+                  : 'Conditions found'}
               {value?.fetched_at &&
                 ` · ${new Date(value.fetched_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
             </p>
           </div>
         </div>
         <button
+          type="button"
           onClick={onClear}
-          className="p-1 -mt-1 -mr-1 text-white/50 hover:text-white transition-colors"
+          className="-mr-1.5 -mt-1.5 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-white/60 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/70"
           aria-label="Clear location"
         >
-          <X size={14} />
+          <X size={16} aria-hidden="true" />
         </button>
       </div>
 
-      <div className={`grid ${compact ? 'grid-cols-3 gap-x-2 gap-y-1.5' : 'grid-cols-3 gap-2'} mt-2`}>
-        {rows.map((r, i) => (
-          <div key={i} className="text-left">
-            <p className="text-[9px] font-mono uppercase tracking-wider text-white/40">{r.label}</p>
-            <p className={`text-xs font-mono tabular-nums mt-0.5 ${r.highlight ? 'text-accent' : 'text-white/85'}`}>
-              {r.v == null ? '—' : `${Number(r.v).toFixed(r.dec)}${r.suffix}`}
-            </p>
-          </div>
-        ))}
-      </div>
+      {rows.length > 0 && (
+        <dl className={`mt-2 grid grid-cols-2 gap-x-3 gap-y-2 ${compact ? 'sm:grid-cols-3' : 'sm:grid-cols-3'}`}>
+          {rows.map((r) => (
+            <div key={r.label} className="text-left">
+              <dt className="text-xs text-white/60">
+                {r.label === 'da' ? <Term k="da">Effective altitude</Term> : r.label}
+              </dt>
+              <dd
+                className={`mt-0.5 font-mono text-sm tabular-nums ${r.highlight ? 'text-accent' : 'text-white/90'}`}
+              >
+                {`${Number(r.v).toFixed(r.dec)}${r.suffix}`}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      )}
     </motion.div>
   );
 }
@@ -338,8 +359,20 @@ function ResolvedCard({ value, onClear, compact }) {
 export function environmentOverridesFromLocation(value) {
   if (!value) return {};
   const out = {};
-  if (value.temperature_c != null) out.ambient_temp_c = value.temperature_c;
-  if (value.humidity_pct != null) out.humidity_pct = value.humidity_pct;
-  if (value.matched_venue_id != null) out.venue_id = value.matched_venue_id;
+  // Same bounds as the API (-30..60 °C, 0..100 %): never send what it would reject.
+  if (value.temperature_c != null) out.ambient_temp_c = Math.max(-30, Math.min(60, value.temperature_c));
+  if (value.humidity_pct != null) out.humidity_pct = Math.max(0, Math.min(100, value.humidity_pct));
+  if (value.matched_venue_id != null) {
+    out.venue_id = value.matched_venue_id;
+  } else {
+    // Not a known venue: send the place itself so the server simulates the
+    // altitude it was resolved at (a known venue is sent by id instead).
+    const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+    const label = value.venue_name || value.location_name || value._label || value.resolved_name;
+    if (label) out.location = label;
+    if (num(value.latitude) != null) out.lat = value.latitude;
+    if (num(value.longitude) != null) out.lon = value.longitude;
+    if (num(value.altitude_m) != null) out.altitude_m = value.altitude_m;
+  }
   return out;
 }

@@ -55,7 +55,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Running the Continental GT 650 in MotoQuant under Aamby Valley November conditions (density altitude ~1,100 m, 22°C ambient, dry concrete with the OEM Pirelli Phantom Sportscomp 130/70-18 rear at μ_peak 1.20) and a 78 kg rider on the 182 kg dry bike produces the following stock-tune output:",
+    text: "Running the Continental GT 650 in MotoQuant under Aamby Valley November conditions (density altitude ~1,100 m, 22°C ambient, dry asphalt with the OEM Pirelli Phantom Sportscomp 130/70-18 rear at μ_peak 1.20) and a 78 kg rider on the 182 kg dry bike produces the following stock-tune output:",
   },
   {
     type: "table",
@@ -110,7 +110,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "2. Launch and clutch. With 52 Nm at 5,250 rpm and a healthy slipper clutch, the GT 650 has an easy launch window. Drop the clutch around 4,000 rpm and the engine pulls cleanly without bogging; bring it above 6,000 and the rear tire — on stock Pirelli Phantoms at μ_peak 1.20 — does not break traction even on warm Indian concrete. The mid-twin-500-700 cluster fix from May 2026 raised the over-clutching factor for this band, which means the simulator now lets the GT launch closer to its peak-torque rpm without snatching. The launch is not where the GT loses time; the launch is one of the things it does well.",
+    text: "2. Launch and clutch. With 52 Nm at 5,250 rpm and a healthy slipper clutch, the GT 650 has an easy launch window. Drop the clutch around 4,000 rpm and the engine pulls cleanly without bogging; bring it above 6,000 and the rear tire — on stock Pirelli Phantoms at μ_peak 1.20 — does not break traction even on warm Indian asphalt. The mid-twin-500-700 cluster fix from May 2026 raised the over-clutching factor for this band, which means the simulator now lets the GT launch closer to its peak-torque rpm without snatching. The launch is not where the GT loses time; the launch is one of the things it does well.",
   },
   {
     type: "p",
@@ -282,7 +282,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -305,7 +305,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -339,7 +339,7 @@ export default function PostPage() {
             ].map((t) => (
               <span
                 key={t}
-                className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
               >
                 {t}
               </span>
@@ -348,7 +348,7 @@ export default function PostPage() {
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             Royal Enfield Continental GT 650 Quarter-Mile Physics
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             18 May 2026 · 10 min read · MotoQuant Blog
           </div>
         </div>
@@ -415,16 +415,6 @@ export default function PostPage() {
               — every spec, every gear ratio, every Cd value used by the
               simulator.
             </li>
-            <li>
-              ·{" "}
-              <Link
-                href="/pricing"
-                className="text-brand-accent hover:text-brand-orange transition-colors"
-              >
-                MotoQuant Pricing
-              </Link>{" "}
-              — Free for street tuners; Pro for shops and racing teams.
-            </li>
           </ul>
         </div>
 
@@ -441,9 +431,9 @@ export default function PostPage() {
           </div>
           <Link
             href="/simulator?bike=re-continental-gt-650"
-            className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
+            className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
           >
-            Run sim →
+            Open the simulator →
           </Link>
         </div>
       </article>

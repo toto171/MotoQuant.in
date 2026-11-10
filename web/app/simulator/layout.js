@@ -6,9 +6,9 @@
 import StructuredData, { SITE_URL } from '../StructuredData';
 
 const TITLE =
-  'Motorcycle Quarter-Mile Calculator — Physics-Based ET Predictor for 541 Bikes';
+  'Motorcycle Quarter-Mile Calculator — Physics-Based ET Predictor for 534 Bikes';
 const DESCRIPTION =
-  'Free physics-based motorcycle quarter-mile calculator — not a power-to-weight formula. Predict ET, trap speed, and 60-ft split for 541 bikes at Aamby Valley, MMRT, BIC, and 17 more venues. Tweak rider weight, power delta, mass, and conditions live. Validated to ±0.2s on GSX-R K5, YZF-R1, and Hayabusa.';
+  'Free physics-based motorcycle quarter-mile calculator — not a power-to-weight formula. Predict ET, trap speed, and 60-ft split for 534 bikes at Aamby Valley, MMRT, BIC, and 17 more venues. Tweak rider weight, power delta, mass, and conditions live. Validated to ±0.2s on GSX-R K5, YZF-R1, and Hayabusa.';
 
 export const metadata = {
   title: TITLE,
@@ -55,7 +55,6 @@ export const metadata = {
     'bajaj pulsar 125 neon quarter mile',
     'suzuki gsx-r600 k8 quarter mile',
     'motorcycle 60 ft calculator',
-    'pacejka tire model motorcycle',
     'harley nightster rh975 quarter mile',
     'husqvarna svartpilen 250 quarter mile india',
     'honda cb125r drag time',
@@ -71,7 +70,6 @@ export const metadata = {
     'aamby valley airstrip drag race december 2026',
     'kawasaki ninja h2 sx vs hayabusa india',
     'street triple 765 rs quarter mile india',
-    'pacejka motorcycle tire model calculator',
     'motorcycle build optimizer india',
     'motorcycle ecu autotune india',
     'density altitude motorcycle drag racing',
@@ -89,7 +87,7 @@ export const metadata = {
         url: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'MotoQuant Pro Simulator — live quarter-mile drag simulation for 541 motorcycles',
+        alt: 'MotoQuant Simulator — live quarter-mile drag simulation for 534 motorcycles',
       },
     ],
   },
@@ -121,19 +119,20 @@ function webApplicationSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
-    name: 'MotoQuant Pro Quarter-Mile Simulator',
+    name: 'MotoQuant Quarter-Mile Simulator',
     url: `${SITE_URL}/simulator`,
     applicationCategory: 'AutomotiveApplication',
     operatingSystem: 'Any (web browser)',
     browserRequirements: 'Requires JavaScript and modern browser (Chrome 90+, Safari 14+, Firefox 88+)',
     isAccessibleForFree: true,
+    license: 'https://www.apache.org/licenses/LICENSE-2.0',
     offers: {
       '@type': 'Offer',
       price: '0',
       priceCurrency: 'INR',
     },
     featureList: [
-      '541 motorcycles in catalog',
+      '534 motorcycles in catalog',
       '20 drag strip venues with seasonal weather',
       'ET + trap + splits in <1 second',
       'Dragy GPS import for calibration',

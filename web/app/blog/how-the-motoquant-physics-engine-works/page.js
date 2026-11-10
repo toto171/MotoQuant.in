@@ -6,11 +6,10 @@ import ScoreboardDigits from '../../../components/ScoreboardDigits';
 
 export const metadata = {
   title: 'How the MotoQuant Physics Engine Works — MotoQuant Blog',
-  description: 'A first-principles tour of the 15-sub-model RK4 physics engine that powers MotoQuant Pro. From engine torque curves to Pacejka tire models to launch slip dynamics — what we simulate, what we validate against, and what the residual error actually means.',
+  description: 'A first-principles tour of the 15-sub-model RK4 physics engine that powers MotoQuant. From engine torque curves to tyre grip and temperature to launch slip dynamics — what we simulate, what we validate against, and what the residual error actually means.',
   keywords: [
     'motorcycle physics simulation',
     'drag racing simulator',
-    'Pacejka tire model',
     'RK4 motorcycle dynamics',
     'first-principles motorcycle physics',
     'MotoQuant engine',
@@ -20,7 +19,7 @@ export const metadata = {
   alternates: { canonical: 'https://motoquant.in/blog/how-the-motoquant-physics-engine-works' },
   openGraph: {
     title: 'How the MotoQuant Physics Engine Works',
-    description: '15 sub-models, RK4 integration at 1ms, validated against 250 published drag-strip benchmarks (August 2026 sweep). Reference baselines accurate to 4 decimals. A tour of what is under the hood.',
+    description: '15 sub-models, RK4 integration at 1ms, validated against 250 published drag-strip benchmarks (November 2026 sweep). Reference baselines accurate to 4 decimals. A tour of what is under the hood.',
     url: 'https://motoquant.in/blog/how-the-motoquant-physics-engine-works',
     type: 'article',
     publishedTime: '2026-04-27T00:00:00Z',
@@ -30,7 +29,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'MotoQuant Pro is a first-principles physics simulator for motorcycle quarter-mile drag racing. It is built around 15 independent sub-models — engine, clutch, drivetrain, chain, tires, aero, weight transfer, rider dynamics, staging, environmental, parasitic losses, rolling resistance, braking, wheelie, forced induction — coupled by a fixed-step RK4 integrator running at one-millisecond resolution. This post is a tour of what each sub-model does, what we validate against, and where the simulator is honest about its limits.',
+    text: 'MotoQuant is a first-principles physics simulator for motorcycle quarter-mile drag racing. It is built around 15 independent sub-models — engine, clutch, drivetrain, chain, tires, aero, weight transfer, rider dynamics, staging, environmental, parasitic losses, rolling resistance, braking, wheelie, forced induction — coupled by a fixed-step RK4 integrator running at one-millisecond resolution. This post is a tour of what each sub-model does, what we validate against, and where the simulator is honest about its limits.',
   },
   {
     type: 'h2',
@@ -90,7 +89,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'In practice, getting the right gear ratios for 541 different bikes was its own multi-month effort. We maintain a Tier-1 lookup table with 150+ named-model entries derived from service manuals (R15 V4: 14F/48R, primary 2.83, gears 2.833 / 1.875 / 1.429 / 1.16 / 0.963 / 0.84 — those numbers come from the YZF-R15 service manual, not from a forum). Bikes without a Tier-1 entry fall back to category-based defaults (sport-1000, naked-mid, cruiser-big, etc.) which are still better than generic numbers but lose the per-model flavor.',
+    text: 'In practice, getting the right gear ratios for 534 different bikes was its own multi-month effort. We maintain a Tier-1 lookup table with 150+ named-model entries derived from service manuals (R15 V4: 14F/48R, primary 2.83, gears 2.833 / 1.875 / 1.429 / 1.16 / 0.963 / 0.84 — those numbers come from the YZF-R15 service manual, not from a forum). Bikes without a Tier-1 entry fall back to category-based defaults (sport-1000, naked-mid, cruiser-big, etc.) which are still better than generic numbers but lose the per-model flavor.',
   },
   {
     type: 'p',
@@ -98,15 +97,15 @@ const CONTENT = [
   },
   {
     type: 'h2',
-    text: 'Sub-Model 5: Tires (Pacejka with Thermal)',
+    text: 'Sub-Model 5: Tires (Grip and Thermal)',
   },
   {
     type: 'p',
-    text: 'Tire physics is a Pacejka Magic Formula model. Given a slip ratio and a load (vertical force on the tire), the model returns the longitudinal force the tire can deliver. The shape of the curve is controlled by four parameters per tire: B (stiffness), C (shape), D (peak), and E (curvature). These come from a tire library of 254 tires across 16 manufacturers — drag slicks, sport touring, race compounds, Indian commuter rubber (MRF, CEAT), all with calibrated Pacejka coefficients.',
+    text: 'The tire model returns the most longitudinal force the rear tire can deliver: a peak friction coefficient (μ_peak) times the load on the tire. μ_peak falls with load, follows the tread temperature through an optimum window, changes with tire pressure as the tire heats, and scales with the track surface and any prep. Each of the 254 tires in the library (drag slicks, sport touring, race compounds, Indian commuter rubber from MRF and CEAT) carries its own μ_peak and thermal window. The library also stores Pacejka Magic Formula coefficients (B, C, D, E) for every tire, and the full slip curve is coded, but the integrator does not use it yet: a launch is limited by the peak, not by where on the slip curve the tire sits.',
   },
   {
     type: 'p',
-    text: 'Peak longitudinal force occurs at a slip ratio of roughly 0.07–0.15 for road tires. That is why launches with deliberate wheel spin can be faster than perfect-traction launches — you are operating at the peak of the slip-vs-force curve instead of below it. Above the peak, force falls off rapidly, which is why aggressive throttle on a smoking tire is slower than measured throttle.',
+    text: 'On a real tire, peak longitudinal force occurs at a slip ratio of roughly 0.07–0.15. That is why launches with a little wheel spin can be faster than perfect-traction launches, and why a smoking tire is slower than measured throttle: above the peak, force falls off. Wiring that slip curve into the integrator is on the roadmap; it would move the pinned reference times, so it waits for a deliberate accuracy pass.',
   },
   {
     type: 'p',
@@ -118,7 +117,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Aero is straightforward: F_drag = 0.5 × rho × v² × Cd × A. The interesting part is that Cd × A is time-varying. The rider transitions from an upright staging stance to a tucked aerodynamic position over roughly 2 seconds after launch, dropping Cd × A by 30–40 %. We model this transition with a sigmoid curve — at 0 seconds, the rider is upright (Cd × A = ~0.55); at 2 seconds, fully tucked (Cd × A = ~0.32). Cd and frontal area come from per-bike values; we measured or estimated each one of the 541 bikes individually after discovering that 71 % of the catalog had inherited a generic 0.32 Cd that is closer to a passenger car than a motorcycle.',
+    text: 'Aero is straightforward: F_drag = 0.5 × rho × v² × Cd × A. The interesting part is that Cd × A is time-varying. The rider transitions from an upright staging stance to a tucked aerodynamic position over roughly 2 seconds after launch, dropping Cd × A by 30–40 %. We model this transition with a sigmoid curve — at 0 seconds, the rider is upright (Cd × A = ~0.55); at 2 seconds, fully tucked (Cd × A = ~0.32). Cd and frontal area come from per-bike values; we measured or estimated each one of the 534 bikes individually after discovering that 71 % of the catalog had inherited a generic 0.32 Cd that is closer to a passenger car than a motorcycle.',
   },
   {
     type: 'p',
@@ -142,15 +141,15 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'We maintain a list of 250 published drag-strip benchmarks (276 matched to a catalog bike) — sourced from Cycle World, Sport Rider, MCN, Motorcycle Consumer News, MotorcycleDaily, MotoStatz, FastestLaps, and Indian Autos Mag where the magazine published the actual instrumented timeslip. For each benchmark, we run the simulator at the test-day environmental conditions and compare predicted ET against measured ET. Each source is weighted by quality (instrumented timeslip 1.0, magazine 0.7, aggregator 0.5, derived 0.1) and the delta gets bucketed by class on a cylinder-aware 12-cluster taxonomy (litre-sport-195+, litre-sport-600-1000, sport-twin-600-1300, singles-300-500, entry-150-200, two-stroke, etc.) so we can see where the physics is honest and where it has systematic bias.',
+    text: 'We maintain a list of 250 published drag-strip benchmarks (263 matched to a catalog bike) — sourced from Cycle World, Sport Rider, MCN, Motorcycle Consumer News, MotorcycleDaily, MotoStatz, FastestLaps, and Indian Autos Mag where the magazine published the actual instrumented timeslip. For each benchmark, we run the simulator at the test-day environmental conditions and compare predicted ET against measured ET. Each source is weighted by quality (instrumented timeslip 1.0, magazine 0.7, aggregator 0.5, derived 0.1) and the delta gets bucketed by class on a cylinder-aware 12-cluster taxonomy (litre-sport-195+, litre-sport-600-1000, sport-twin-600-1300, singles-300-500, entry-150-200, two-stroke, etc.) so we can see where the physics is honest and where it has systematic bias.',
   },
   {
     type: 'p',
-    text: 'Three reference baselines are protected absolutely: GSX-R 1000 K5 (9.9331 s), YZF-R1 4C8 (10.1436 s), and Hayabusa Gen1 (10.3633 s). Every code change must preserve these to four decimals. They are the regression test that catches "improvements" that secretly broke the engine.',
+    text: 'Three reference baselines are protected absolutely: GSX-R 1000 K5 (10.0436 s), YZF-R1 4C8 (10.1092 s), and Hayabusa Gen1 (10.1100 s). Every code change must preserve these to four decimals. They are the regression test that catches "improvements" that secretly broke the engine.',
   },
   {
     type: 'p',
-    text: 'Current state across 276 matched benchmarks (August 2026 sweep): overall source-quality-weighted mean absolute error is 0.263 seconds, weighted bias is essentially zero (+0.007 s — meaning the simulator is no longer systematically optimistic or pessimistic). Across the ten cleanest validated runs the mean absolute error is ±0.007 s, and 138 of the 276 benchmarks fall within ±0.20 s. The 195+ hp class is the tightest at 0.147 s weighted |Δ|. The small-cc and 2-stroke clusters have higher variance, partly because their published benchmarks are themselves uncertain (most Indian small-cc ETs are estimated from 0–100 km/h times rather than measured timeslips).',
+    text: 'Current state across 263 matched benchmarks (10 November 2026 sweep): the overall source-quality-weighted mean absolute error is 0.25 seconds, and the weighted bias is essentially zero (+0.023 s), so the simulator is not systematically optimistic or pessimistic. Across the ten cleanest validated runs the mean absolute error is ±0.006 s, and 130 of the 263 benchmarks fall within ±0.20 s. The litre sport classes are the tightest: 0.146 s weighted |Δ| for 600–1000 cc fours and triples, 0.171 s for 195 hp and up. The small-cc and 2-stroke clusters have higher variance, partly because their published benchmarks are themselves uncertain (most Indian small-cc ETs are estimated from 0–100 km/h times rather than measured timeslips).',
   },
   {
     type: 'h2',
@@ -166,7 +165,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The path forward is measured data, not more model complexity. Phase 3 of the project is a Dragy GPS calibrator — a CLI that takes a real Dragy timeslip from your bike on your strip, fits the simulator parameters to your run, and produces a personalized config that matches your build. Once that is in production, the validation loop closes: stock-bike benchmarks become user-uploaded measurements rather than magazine claims.',
+    text: 'The path forward is measured data, plus sourced gearing for the small bikes, not more model complexity. The calibration module (motoquant/calibration/calibrator.py) can already fit drag coefficient and tyre grip to a Dragy run when you run it yourself; the website only lines your run up against the simulation and keeps nothing. The validation loop closes as riders submit timeslips through the "Submit a timeslip" form and reviewed runs join the benchmark set.',
   },
   {
     type: 'h2',
@@ -178,7 +177,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The sub-models are tested independently. test_validation.py exercises physics conservation laws (energy in == energy out + heat). test_no_silent_failures.py runs all 541 catalog bikes and asserts each finishes within the time budget or is on an explicit DNF whitelist for vintage low-power 2-strokes. test_submodel_kaizen.py catches silent failure modes in clutch, tire thermal, braking, and rider dynamics. The full suite passes 174 fast tests; integration tests exercise the surrogate models, ROI engine, and recommendations layer.',
+    text: 'The sub-models are tested independently. test_validation.py exercises physics conservation laws (energy in == energy out + heat). test_no_silent_failures.py runs all 534 catalog bikes and asserts each finishes within the time budget or is on an explicit DNF whitelist for vintage low-power 2-strokes. test_submodel_kaizen.py catches silent failure modes in clutch, tire thermal, braking, and rider dynamics. The full suite has about 6,200 tests; integration tests exercise the surrogate models, ROI engine, and recommendations layer.',
   },
   {
     type: 'h2',
@@ -229,7 +228,7 @@ const articleSchema = {
   '@context': 'https://schema.org',
   '@type': 'Article',
   headline: 'How the MotoQuant Physics Engine Works',
-  description: 'A first-principles tour of the 15-sub-model RK4 physics engine that powers MotoQuant Pro.',
+  description: 'A first-principles tour of the 15-sub-model RK4 physics engine that powers MotoQuant.',
   author: { '@type': 'Organization', name: 'MotoQuant' },
   publisher: { '@type': 'Organization', name: 'MotoQuant', logo: { '@type': 'ImageObject', url: 'https://motoquant.in/logo.png' } },
   datePublished: '2026-04-27',
@@ -250,7 +249,7 @@ export default function Page() {
         <header className="mb-10">
           <div className="flex flex-wrap gap-1.5 mb-4">
             {['physics', 'engine', 'validation', 'methodology'].map(t => (
-              <span key={t} className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide">
+              <span key={t} className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent">
                 {t}
               </span>
             ))}
@@ -279,26 +278,26 @@ export default function Page() {
           {/* Reference baselines — timing-board panel */}
           <div className="relative overflow-hidden rounded-xl border border-brand-orange/20 bg-ink-1/60 p-5 mt-6">
             <span aria-hidden="true" className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent" />
-            <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-4">
-              Reference baselines · preserved across all releases
+            <div className="text-xs text-white/60 mb-4">
+              Reference baselines · held to four decimals by CI
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
-                ['GSX-R 1000 K5', '9.9331'],
-                ['YZF-R1 4C8', '10.1436'],
-                ['Hayabusa Gen1', '10.3633'],
+                ['GSX-R 1000 K5', '10.0436'],
+                ['YZF-R1 4C8', '10.1092'],
+                ['Hayabusa Gen1', '10.1100'],
               ].map(([bike, et]) => (
                 <div key={bike}>
                   <div className="flex items-end gap-1">
-                    <ScoreboardDigits value={et} h={22} color="#FFFFFF" label={`${et} seconds`} />
-                    <span className="font-mono text-[10px] text-white/40 mb-0.5">s</span>
+                    <ScoreboardDigits value={et} h={22} label={`${et} seconds`} />
+                    <span className="font-mono text-[10px] text-white/60 mb-0.5">s</span>
                   </div>
-                  <div className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">{bike}</div>
+                  <div className="mt-1.5 text-xs text-white/60">{bike}</div>
                 </div>
               ))}
             </div>
-            <p className="text-white/40 text-xs mt-4">
-              All claims about cluster bias, mean absolute error, and within-tolerance fractions in this post reflect the August 2026 sweep against 250 published benchmarks (276 matched).
+            <p className="text-white/60 text-xs mt-4">
+              All claims about cluster bias, mean absolute error, and within-tolerance fractions in this post reflect the 10 November 2026 sweep against 250 published benchmarks (263 matched).
             </p>
           </div>
         </footer>

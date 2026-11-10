@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Indian Retailer Depth Parts Catalog
-====================================================
+MotoQuant — Indian Retailer Depth Parts Catalog
+===============================================
 Seeds ~85 high-depth Indian-market performance parts across 14 categories:
   - Exhausts (20 parts): slip-on + full systems for Indian 200-650cc platforms
   - Air filters (12 parts): K&N, BMC, DNA, Sprint Filter (commuter to litre)

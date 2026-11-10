@@ -13,7 +13,7 @@ headline numbers in `SKILL.md`.
 | **Trap speed** | Speed at the finish line. Tracks power-to-weight closely and is nearly immune to launch quality, so a bike that traps high but runs a slow ET has a launch problem, not a power problem. |
 | **60-foot** | Time over the first 18.288 m. The launch-quality number — traction, clutch work, wheelie limit and gearing all show up here. |
 | **330-foot / eighth mile (660 ft) / 1000-foot** | Intermediate splits. The eighth mile is a class in its own right for small-bore and street bikes. |
-| **Rollout** | The ~0.3 m the front wheel rolls between breaking the stage beam and starting the clock. Strip timeslips include it, so a real slip can read slightly quicker than a rollout-free simulation of the same run. |
+| **Rollout** | The ~0.3 m (1 ft) the bike rolls before the front wheel clears the stage beam and the clock starts. Strip timeslips, most magazine tests and Dragy time from the beam, and so does MotoQuant since the 2026-11 accuracy epoch: ET = t(402.336 m) − t(0.3048 m). A first-motion figure for the same run is a few tenths longer. |
 | **Staging** | Rolling forward until the pre-stage and stage beams are broken. "Deep staging" trades reaction time for a shorter effective run. |
 | **Reaction time** | Time from green to the bike leaving the beam. It is a racer stat, not a bike stat, and is not part of ET. |
 | **Red light / foul** | Leaving before green. Instant loss regardless of ET. |
@@ -68,6 +68,6 @@ headline numbers in `SKILL.md`.
 | `CategoryProfile` | The knob set attached to a cluster: over-clutch factor, engine-decel limit, launch floor, grip scale. |
 | `mu_peak` | Peak tire friction coefficient. Rear-tire only — drive traction is rear physics. |
 | Pacejka B/C/D/E | Magic-formula tire coefficients; `D` is essentially peak grip. |
-| Pinned baselines | GSX-R 1000 K5 **9.9331 s**, YZF-R1 4C8 **10.1436 s**, Hayabusa Gen1 **10.3633 s** — bit-identical, CI-gated. Any change that moves them is a regression unless deliberately re-based with a full benchmark sweep. |
+| Pinned baselines | GSX-R 1000 K5 **10.0436 s**, YZF-R1 4C8 **10.1092 s**, Hayabusa Gen1 **10.1100 s** — bit-identical, CI-gated. Any change that moves them is a regression unless deliberately re-based with a full benchmark sweep. |
 | Surrogate | A trained numpy model that approximates the simulator for fast search inside the build optimizer. It is a *cache of the physics*, regenerated whenever the physics changes. |
-| Weighted benchmark sweep | The accuracy measurement: every catalog bike simulated against published real-world ETs, each weighted by source quality (instrumented 1.0 → derived 0.1). Current: **277 matched, weighted mean \|error\| 0.2721 s, bias −0.0047 s**. |
+| Weighted benchmark sweep | The accuracy measurement: every catalog bike simulated against published real-world ETs, each weighted by source quality (instrumented 1.0 → derived 0.1). Current (2026-11-10): **263 matched, weighted mean \|error\| 0.2495 s, bias +0.0226 s** (`reports/acc_final_2026_11_10.json`). |

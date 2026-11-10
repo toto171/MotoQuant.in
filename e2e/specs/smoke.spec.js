@@ -2,27 +2,28 @@
 'use strict';
 
 /**
- * Landing → quick-sim smoke suite.
+ * Landing → calculator smoke suite.
  *
  * Two checks, deliberately small and resilient:
  *   1. the landing page loads (title + hero visible, no uncaught JS errors);
- *   2. the embedded Live Simulator quick-sim happy path works end-to-end
- *      (keep the default bike, click the ¼-mile run button, assert a real
- *      ET result panel renders).
+ *   2. the landing calculator's happy path works end-to-end (keep the default
+ *      bike, press "Calculate my time", assert the exact result renders).
  *
- * Selector strategy (verified against web/components/SimulatorWidget.js +
- * web/app/page.js on 2026-07-04):
- *   - Hero H1 text is "The physics of faster." (page.js:412).
- *   - The quick-sim run button's accessible name is "Quarter-Mile ET"
- *     (SimulatorWidget.js:592) — targeted by role=button so it can't clash
- *     with the identical result-panel LABEL text (a <p>, SimulatorWidget.js:651).
- *   - "Trap Speed" (SimulatorWidget.js:665) and "Split Timeline"
- *     (SimulatorWidget.js:681) render ONLY inside the result panel, so their
- *     appearance is a reliable "the quick sim returned" signal. Both strings
- *     are unique on the landing page (grep-verified).
+ * Selector strategy (verified against web/app/page.js and
+ * web/components/SimulatorWidget.js, design system v6, on 2026-11-10 by
+ * running this suite against a local stack):
+ *   - Hero H1 reads "Know your quarter-mile time before you race."
+ *   - The run button's accessible name is "Calculate my time". The same words
+ *     appear in two hint sentences, so it is targeted by role=button.
+ *   - "First 60 ft (launch)" and "Finish-line speed" are rows of the EXACT
+ *     result only (the server simulation). The instant estimate that appears
+ *     first has neither, so their appearance is the "the server answered"
+ *     signal.
+ *   - The result ends with a conditions line ("Conditions: …") built from the
+ *     API's `environment` block: every result must say what air it is for.
  *
- * The widget defaults to Sim mode + Quarter-Mile + the first Indian-Sport
- * bike (KTM RC 390), so the happy path needs no bike selection.
+ * The calculator starts on a default bike, so the happy path needs no bike
+ * selection.
  */
 
 const { test, expect } = require('@playwright/test');
@@ -67,18 +68,19 @@ test.describe('MotoQuant landing smoke', () => {
 
     await page.goto('/', { waitUntil: 'domcontentloaded' });
 
-    // Title comes from web/app/layout.js metadata.title.default.
+    // <title> comes from the root layout metadata.
     await expect(page).toHaveTitle(/MotoQuant/i);
 
-    // Hero H1: "The physics of faster." (.first() defends against any
-    // future stray h1 on the page).
+    // The hero H1 is server-rendered, so it is in the DOM immediately.
     const hero = page.getByRole('heading', { level: 1 }).first();
     await expect(hero).toBeVisible();
-    await expect(hero).toContainText(/physics/i);
+    await expect(hero).toContainText(/quarter-mile time/i);
 
-    // Let mount-time fetches (e.g. the catalog fetch the widget fires on
-    // mount) settle so any late console.error is captured before we assert.
-    await page.waitForTimeout(1500);
+    // The calculator section is on the page.
+    await expect(page.getByRole('button', { name: 'Calculate my time' })).toBeVisible();
+
+    // Give hydration + first paint a moment to surface any runtime error.
+    await page.waitForLoadState('load');
 
     expect(
       errors,
@@ -86,25 +88,31 @@ test.describe('MotoQuant landing smoke', () => {
     ).toEqual([]);
   });
 
-  test('quick-sim happy path renders an ET result', async ({ page }) => {
+  test('calculator happy path renders an exact quarter-mile result', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
 
-    // The run button (role=button, name "Quarter-Mile ET"). Playwright
-    // auto-scrolls it into view before clicking, so no manual scroll needed.
-    const runBtn = page.getByRole('button', { name: /Quarter-Mile ET/i });
+    // The button stays disabled until the bike list has loaded.
+    const runBtn = page.getByRole('button', { name: 'Calculate my time' });
     await expect(runBtn).toBeVisible();
+    await expect(runBtn).toBeEnabled({ timeout: 60_000 });
     await runBtn.click();
 
-    // Result-panel-only markers — their presence means the quick sim
-    // returned and rendered. Generous timeout tolerates API cold start.
-    await expect(page.getByText('Trap Speed')).toBeVisible({ timeout: 60_000 });
-    await expect(page.getByText('Split Timeline')).toBeVisible({ timeout: 60_000 });
+    // Rows that only the exact (server) result has. Generous timeout: the
+    // first hit may wait out an API cold start.
+    // (Each label is a glossary term, rendered as a button; "Finish-line
+    // speed" also occurs in page copy, so both are matched by role.)
+    await expect(
+      page.getByRole('button', { name: 'First 60 ft (launch)', exact: true }),
+    ).toBeVisible({ timeout: 60_000 });
+    await expect(
+      page.getByRole('button', { name: 'Finish-line speed', exact: true }),
+    ).toBeVisible();
 
-    // The ¼-mile split row renders the ET to 3 decimals + an "s" suffix
-    // (SimulatorWidget.js:731). Assert a real quarter-mile ET number showed
-    // up rather than just chrome. The seven-segment SegEt board also renders
-    // the ET, so at least one "<n>.<3dp>s" is guaranteed once the run lands.
-    await expect(page.getByText('¼ mile')).toBeVisible();
-    await expect(page.getByText(/\d+\.\d{3}\s*s/).first()).toBeVisible();
+    // A real time and a real speed, e.g. "1.90 s" and "235 km/h".
+    await expect(page.getByText(/^\d+\.\d{2} s$/).first()).toBeVisible();
+    await expect(page.getByText(/^\d{2,3} km\/h$/).first()).toBeVisible();
+
+    // Every result states the conditions it was computed for.
+    await expect(page.getByText(/Conditions:/).first()).toBeVisible();
   });
 });

@@ -1,7 +1,5 @@
 // Server-component layout whose only purpose is to own the <head> metadata
-// for /optimize. The actual page (page.js) is 'use client' and therefore
-// cannot export `metadata` itself — App Router pulls it from the nearest
-// server layout instead.
+// for /optimize (page.js composes the page chrome and the client tool).
 //
 // NOTE: do not hard-code catalog counts (bike / parts / venue numbers) in
 // the copy below — those are in flux and reconciled separately. Describe
@@ -9,10 +7,9 @@
 
 import StructuredData, { SITE_URL } from '../StructuredData';
 
-const TITLE =
-  'Motorcycle Build Optimizer India — Budget-Constrained Parts ROI Calculator';
+const TITLE = 'Best parts for your budget — motorcycle upgrade planner for India';
 const DESCRIPTION =
-  'Free motorcycle build optimizer for Indian riders — enter your bike and budget in INR, and MotoQuant runs a physics-based 0/1 knapsack across every compatible exhaust, ECU, sprocket, and air filter. Returns the build that minimises your quarter-mile ET (or maximises trap speed), with cost-per-tenth, part synergies, and the next-best upgrade highlighted. Built for Hayabusa, R15, Duke 390, NS200, Interceptor 650, and 490+ more.';
+  'Free motorcycle upgrade planner for Indian riders. Enter your bike and a budget in rupees and MotoQuant tests every compatible exhaust, ECU, sprocket and air filter, then shows the combination that makes your quarter-mile quickest (or your finish-line speed highest), with the cost per tenth of a second, parts that work well together and the best next upgrade.';
 
 export const metadata = {
   title: TITLE,
@@ -51,7 +48,7 @@ export const metadata = {
         url: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'MotoQuant Build Optimizer — budget-constrained parts ROI',
+        alt: 'MotoQuant — best parts for your budget',
       },
     ],
   },
@@ -68,7 +65,7 @@ const breadcrumb = {
   '@type': 'BreadcrumbList',
   itemListElement: [
     { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-    { '@type': 'ListItem', position: 2, name: 'Build Optimizer', item: `${SITE_URL}/optimize` },
+    { '@type': 'ListItem', position: 2, name: 'Best parts for your budget', item: `${SITE_URL}/optimize` },
   ],
 };
 

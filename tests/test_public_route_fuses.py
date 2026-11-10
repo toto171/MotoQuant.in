@@ -1,39 +1,34 @@
 """
-Pre-revenue gaps on the unauthenticated public routes (2026-07-25 audit §3.4).
+Ceilings on the unauthenticated public routes (2026-07-25 audit §3.4, revised
+for the open-source pivot 2026-10-23 — every route is free and anonymous, so
+these fuses are the ONLY thing between a loop and the shared instance).
 
-Four routes that anyone on the internet can drive, each of which spent
-something real without a ceiling:
-
-1. ``/api/simulate/compare`` runs TWO full RK4 passes and metered nothing, so
-   it was the cheapest way to bypass the free-tier sim quota entirely. Now
-   charged 2 units. ``/api/simulate/quick`` stays unmetered *by design* — the
-   slider UI auto-runs it on every drag — and the last test in that class pins
-   that exclusion so a future "meter everything" pass cannot break the UX.
-2. ``/api/telemetry/event`` writes the funnel numbers the roadmap reads
-   (``signup_completed``, ``sim_run_success``) with no auth, no rate limit and
-   no body cap; once ``POSTHOG_API_KEY`` is set each beacon also spawned an
-   UNBOUNDED thread.
-3. ``/api/simulate/save`` is effectively anonymous during the beta, trusts the
-   client-supplied ET, and took an unbounded ``notes`` string — twenty calls
-   own the public leaderboard.
-4. ``/api/pricing/refresh/{id}?force=true`` bypassed the freshness cache, so a
-   repeat loop aimed the 44 s worst-case outbound fetch at one retailer URL
-   forever.
+1. ``/api/simulate/compare`` (+ its ``/api/jobs/compare`` twin) runs TWO full
+   RK4 passes per call. Its only protection used to be the sim-quota meter;
+   it is now rate-limited on ONE shared ``compare`` bucket (15/60 s) so the
+   web client's sync/job fallback cannot double the effective limit.
+2. ``/api/telemetry/event`` writes the usage numbers the roadmap reads
+   (``sim_run_success``, …) with no auth, so it carries a rate limit and a
+   body cap; once ``POSTHOG_API_KEY`` is set (opt-in) each beacon also used
+   to spawn an UNBOUNDED thread.
+3. Every expensive POST route carries a rate limit (route-table pin). The
+   anonymous writers this file used to fuse (saved runs, bike suggestions,
+   spec corrections, price refresh) were removed on 2026-11-10; the
+   allow-list in tests/test_open_source_pivot.py stops a new one appearing
+   unreviewed.
 
 Everything is driven through the real routes (docs/INVARIANTS.md I8) and each
 test fails if its fix is reverted. MOTOQUANT_DB is redirected at import and
-re-asserted at run time because the metered routes write ``sim_usage`` rows —
-see the comment in tests/test_jobs_api.py for why that matters.
+re-asserted at run time — see the comment in tests/test_jobs_api.py for why
+that matters.
 """
 
 from __future__ import annotations
 
 import os
-import sqlite3
 import sys
 import tempfile
 import unittest
-from datetime import datetime, timedelta, timezone
 
 _tmp_db_file = tempfile.NamedTemporaryFile(
     prefix="motoquant_route_fuses_", suffix=".db", delete=False
@@ -103,18 +98,6 @@ def _init_schema():
 _PRICED_PART_ID = 4242
 
 
-def _usage_total() -> int:
-    """Total metered sim units recorded in the isolated DB."""
-    conn = sqlite3.connect(_TMP_DB_PATH)
-    try:
-        row = conn.execute("SELECT COALESCE(SUM(count), 0) FROM sim_usage").fetchone()
-        return int(row[0]) if row else 0
-    except sqlite3.OperationalError:  # table not created yet == nothing metered
-        return 0
-    finally:
-        conn.close()
-
-
 class _RouteTest(unittest.TestCase):
     """Shared TestClient + limiter reset."""
 
@@ -139,52 +122,56 @@ class _RouteTest(unittest.TestCase):
 
 
 # ───────────────────────────────────────────────────────────────────
-# 1. /api/simulate/compare quota bypass
+# 1. /api/simulate/compare + /api/jobs/compare — shared rate limit
 # ───────────────────────────────────────────────────────────────────
 
 
-class TestCompareIsMetered(_RouteTest):
-    _COMPARE_BODY = {
-        "a_bike_preset": "gsxr1000_k5",
-        "b_bike_preset": "hayabusa_gen1",
-    }
+class TestCompareIsFused(_RouteTest):
+    """Bursts use an unknown preset (404 before any RK4 work) or an
+    out-of-bounds field (422) — the route-level rate-limit dependency has
+    already counted the hit either way, so no sim ever runs."""
 
-    def test_compare_charges_two_sim_units(self):
-        """Two RK4 runs must cost two quota units, not zero."""
-        before = _usage_total()
-        r = self.client.post("/api/simulate/compare", json=self._COMPARE_BODY)
-        self.assertEqual(r.status_code, 200, r.text)
-        self.assertEqual(
-            _usage_total() - before,
-            2,
-            "compare did not charge exactly 2 sim units — the meter "
-            "dependency is missing or charging the wrong count",
+    _LIMIT = 15
+    _UNKNOWN = {"a_bike_preset": "no_such_preset", "b_bike_preset": "no_such"}
+    _INVALID = {"a_power_boost_pct": 9999.0}  # fails Field(le=200) → 422
+
+    def _assert_rate_limited(self, r):
+        self.assertEqual(r.status_code, 429, r.text[:300])
+        detail = r.json()["detail"]
+        self.assertEqual(detail["error"], "rate_limited")
+        self.assertIn("compare", detail["message"])
+        self.assertTrue(r.headers.get("Retry-After"))
+
+    def test_sync_burst_429s_and_job_route_shares_the_bucket(self):
+        for _ in range(self._LIMIT):
+            r = self.client.post("/api/simulate/compare", json=self._UNKNOWN)
+            self.assertEqual(r.status_code, 404, r.text[:300])
+        self._assert_rate_limited(
+            self.client.post("/api/simulate/compare", json=self._UNKNOWN)
+        )
+        # A split bucket (or a dropped decorator) would answer 202/422 here.
+        self._assert_rate_limited(
+            self.client.post("/api/jobs/compare", json=self._INVALID)
         )
 
-    def test_compare_exposes_remaining_header(self):
-        r = self.client.post("/api/simulate/compare", json=self._COMPARE_BODY)
-        self.assertEqual(r.status_code, 200, r.text)
-        self.assertIn("X-Sims-Remaining", r.headers)
-        self.assertIn("X-Sims-Limit", r.headers)
-
-    def test_job_compare_is_metered_too(self):
-        """The job twin must match the sync route (deploy-skew contract)."""
-        before = _usage_total()
-        r = self.client.post("/api/jobs/compare", json=self._COMPARE_BODY)
-        self.assertEqual(r.status_code, 202, r.text)
-        self.assertEqual(_usage_total() - before, 2)
-
-    def test_quick_sim_stays_unmetered_by_design(self):
-        """Pins the deliberate exclusion: the slider UI auto-runs quick."""
-        before = _usage_total()
-        r = self.client.post("/api/simulate/quick", json={"bike_preset": "gsxr1000_k5"})
-        self.assertEqual(r.status_code, 200, r.text)
-        self.assertEqual(
-            _usage_total(),
-            before,
-            "/api/simulate/quick became metered — it must not be, the web "
-            "UI fires it on every slider move",
+    def test_job_burst_drains_the_sync_route_too(self):
+        for _ in range(self._LIMIT):
+            r = self.client.post("/api/jobs/compare", json=self._INVALID)
+            self.assertEqual(r.status_code, 422, r.text[:300])
+        self._assert_rate_limited(
+            self.client.post("/api/simulate/compare", json=self._UNKNOWN)
         )
+
+    def test_compare_still_works_under_the_limit(self):
+        r = self.client.post(
+            "/api/simulate/compare",
+            json={"a_bike_preset": "gsxr1000_k5", "b_bike_preset": "hayabusa_gen1"},
+        )
+        self.assertEqual(r.status_code, 200, r.text[:300])
+        self.assertIn("delta", r.json())
+        # The retired sim-quota meter's headers must be gone for good.
+        self.assertNotIn("X-Sims-Remaining", r.headers)
+        self.assertNotIn("X-Sims-Limit", r.headers)
 
 
 # ───────────────────────────────────────────────────────────────────
@@ -295,182 +282,54 @@ class TestTelemetryFuses(_RouteTest):
         )
 
 
-# ───────────────────────────────────────────────────────────────────
-# 3. /api/simulate/save — anonymous leaderboard writer
-# ───────────────────────────────────────────────────────────────────
+class TestEveryExpensiveRouteIsRateLimited(unittest.TestCase):
+    """Route-table pin (ported from PR #127): with the daily quota gone,
+    per-IP limits are the cost fuse, so each expensive POST route must carry a
+    ``rate_limit`` dependency — including the surrogate routes, which had none
+    before the port, the weather resolver (it spends a shared upstream
+    allowance) and the telemetry beacon."""
 
+    EXPENSIVE = {
+        "/api/simulate",
+        "/api/simulate/quick",
+        "/api/simulate/top-speed",
+        "/api/simulate/distance",
+        "/api/simulate/compare",
+        "/api/optimize/build",
+        "/api/autotune/ecu",
+        "/api/calibrate/dragy",
+        "/api/calibrate/dyno",
+        "/api/chat",
+        "/api/jobs/chat",
+        "/api/jobs/simulate",
+        "/api/jobs/topspeed",
+        "/api/jobs/optimize",
+        "/api/jobs/autotune",
+        "/api/jobs/outlaw",
+        "/api/jobs/compare",
+        "/api/venues/resolve",
+        "/api/telemetry/event",
+        "/api/surrogate/predict",
+        "/api/surrogate/compare",
+    }
 
-class TestSaveRunFuses(_RouteTest):
-    _GOOD = {"bike_id": 1, "et_quarter_s": 10.5, "trap_speed_kmh": 220.0}
+    def test_all_have_a_rate_limit_dependency(self):
+        from motoquant.api import app
 
-    def test_unbounded_notes_rejected(self):
-        r = self.client.post(
-            "/api/simulate/save", json={**self._GOOD, "notes": "x" * 5000}
-        )
-        self.assertEqual(
-            r.status_code, 422, "unbounded notes still accepted on a public writer"
-        )
-
-    def test_reasonable_notes_still_accepted(self):
-        """The bound must not break the real use case."""
-        r = self.client.post(
-            "/api/simulate/save",
-            json={**self._GOOD, "notes": "K5, 32C, street tyres, 2nd run"},
-        )
-        # 404 (no bike_config in this bare DB) proves validation passed and
-        # the handler ran — the assertion here is "not a 422".
-        self.assertNotEqual(r.status_code, 422, r.text)
-
-    def test_is_rate_limited(self):
-        codes = [
-            self.client.post("/api/simulate/save", json=self._GOOD).status_code
-            for _ in range(14)
-        ]
-        self.assertIn(
-            429,
-            codes,
-            f"save-run never rate-limited — 20 calls own the leaderboard: {set(codes)}",
-        )
-
-    def test_field_bounds_from_2026_07_06_survive(self):
-        """Guards the older ET/trap bounds against accidental removal."""
-        self.assertEqual(
-            self.client.post(
-                "/api/simulate/save", json={**self._GOOD, "et_quarter_s": -3.0}
-            ).status_code,
-            422,
-        )
-        self.assertEqual(
-            self.client.post(
-                "/api/simulate/save", json={**self._GOOD, "trap_speed_kmh": 1200.0}
-            ).status_code,
-            422,
-        )
-
-
-# ───────────────────────────────────────────────────────────────────
-# 4. /api/pricing/refresh — force=true bypassed the cache
-# ───────────────────────────────────────────────────────────────────
-
-
-class TestPricingForceFloor(_RouteTest):
-    def _set_last_fetch(self, when: datetime):
-        conn = sqlite3.connect(_TMP_DB_PATH)
-        try:
-            conn.execute(
-                "DELETE FROM part_prices WHERE part_id = ?", (_PRICED_PART_ID,)
+        seen = set()
+        for r in app.routes:
+            methods = getattr(r, "methods", None) or set()
+            if "POST" not in methods or r.path not in self.EXPENSIVE:
+                continue
+            seen.add(r.path)
+            names = [
+                getattr(d.call, "__qualname__", "") for d in r.dependant.dependencies
+            ]
+            self.assertTrue(
+                any("rate_limit" in n for n in names),
+                f"{r.path} has no rate_limit dependency: {names}",
             )
-            conn.execute(
-                "INSERT INTO part_prices "
-                "(part_id, retailer, source_url, price_inr, in_stock, fetched_at) "
-                "VALUES (?, 'TestRetailer', 'https://example.invalid/part', "
-                "49000, 1, ?)",
-                (_PRICED_PART_ID, when.isoformat()),
-            )
-            conn.commit()
-        finally:
-            conn.close()
-
-    def _refresh(self, force=True):
-        return self.client.post(
-            f"/api/pricing/refresh/{_PRICED_PART_ID}?force={'true' if force else 'false'}"
-        )
-
-    def test_force_within_the_hour_does_not_refetch(self):
-        """The whole point: force must not be an unlimited outbound lever."""
-        self._set_last_fetch(datetime.now(timezone.utc) - timedelta(minutes=5))
-
-        import motoquant.database.pricing_refresh as pr_mod
-
-        calls = []
-        original = pr_mod.fetch_live_price
-        pr_mod.fetch_live_price = lambda *a, **k: calls.append(1)
-        try:
-            r = self._refresh(force=True)
-        finally:
-            pr_mod.fetch_live_price = original
-
-        self.assertEqual(r.status_code, 200, r.text)
-        body = r.json()
-        self.assertEqual(
-            body["status"],
-            "floor_cached",
-            "force=true re-fetched a price checked 5 minutes ago",
-        )
-        self.assertEqual(calls, [], "an outbound fetch was made despite the floor")
-        # The floor must be documented in the response, not silent.
-        self.assertIsNotNone(body.get("note"))
-        self.assertIn("minute", body["note"])
-        # And the cached price is returned rather than a null.
-        self.assertEqual(body["price_inr"], 49000)
-
-    def test_force_outside_the_floor_still_refetches(self):
-        """The floor is one hour, not a permanent cache."""
-        self._set_last_fetch(datetime.now(timezone.utc) - timedelta(hours=3))
-
-        import motoquant.database.pricing_refresh as pr_mod
-
-        calls = []
-        original = pr_mod.fetch_live_price
-
-        def _fake(*a, **k):
-            calls.append(k.get("force"))
-            return None  # "fetch_failed" path — no network in tests
-
-        pr_mod.fetch_live_price = _fake
-        try:
-            r = self._refresh(force=True)
-        finally:
-            pr_mod.fetch_live_price = original
-
-        self.assertEqual(r.status_code, 200, r.text)
-        self.assertEqual(r.json()["status"], "fetch_failed")
-        self.assertEqual(calls, [True], "force=true no longer reaches the fetcher")
-
-    def test_floor_only_applies_to_force(self):
-        """force=false keeps its own 14-day logic inside fetch_live_price."""
-        self._set_last_fetch(datetime.now(timezone.utc) - timedelta(minutes=5))
-
-        import motoquant.database.pricing_refresh as pr_mod
-
-        calls = []
-        original = pr_mod.fetch_live_price
-
-        def _fake(*a, **k):
-            calls.append(k.get("force"))
-            return None
-
-        pr_mod.fetch_live_price = _fake
-        try:
-            r = self._refresh(force=False)
-        finally:
-            pr_mod.fetch_live_price = original
-
-        self.assertEqual(r.status_code, 200, r.text)
-        self.assertEqual(calls, [False])
-
-    def test_naive_timestamps_are_treated_as_utc(self):
-        """fetched_at is written by isoformat(); older rows carry no tz."""
-        naive = (datetime.now(timezone.utc) - timedelta(minutes=5)).replace(tzinfo=None)
-        self._set_last_fetch_naive(naive)
-        r = self._refresh(force=True)
-        self.assertEqual(r.json()["status"], "floor_cached")
-
-    def _set_last_fetch_naive(self, when: datetime):
-        conn = sqlite3.connect(_TMP_DB_PATH)
-        try:
-            conn.execute(
-                "DELETE FROM part_prices WHERE part_id = ?", (_PRICED_PART_ID,)
-            )
-            conn.execute(
-                "INSERT INTO part_prices "
-                "(part_id, retailer, source_url, price_inr, in_stock, fetched_at) "
-                "VALUES (?, 'TestRetailer', 'u', 49000, 1, ?)",
-                (_PRICED_PART_ID, when.isoformat()),
-            )
-            conn.commit()
-        finally:
-            conn.close()
+        self.assertEqual(seen, self.EXPENSIVE)
 
 
 if __name__ == "__main__":

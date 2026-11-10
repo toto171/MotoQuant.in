@@ -1,0 +1,65 @@
+name: Suggest a bike
+description: A motorcycle you want in the simulator. Fill in what you know; make and model are enough.
+title: "Add "
+labels: ["bike request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks. Each bike in the catalog is built from published figures, so a link to the manufacturer's specification sheet or a magazine road test is the most useful thing you can add. The website's "Suggest a bike" form fills this in for you.
+
+  - type: input
+    id: make
+    attributes:
+      label: Make
+      placeholder: Suzuki
+    validations:
+      required: true
+
+  - type: input
+    id: model
+    attributes:
+      label: Model
+      placeholder: GSX-R 1000 K9
+    validations:
+      required: true
+
+  - type: input
+    id: year
+    attributes:
+      label: Year
+      placeholder: "2009"
+
+  - type: input
+    id: displacement_cc
+    attributes:
+      label: Engine size (cc)
+
+  - type: input
+    id: peak_power_hp
+    attributes:
+      label: Peak power (hp)
+
+  - type: input
+    id: dry_mass_kg
+    attributes:
+      label: Dry weight (kg)
+      description: Without fuel and fluids. Say so in the notes if your figure is a kerb (wet) weight.
+
+  - type: input
+    id: category
+    attributes:
+      label: Type of bike
+      placeholder: Sport, naked, cruiser, adventure, scooter
+
+  - type: input
+    id: source_url
+    attributes:
+      label: Where the figures come from
+      description: A specification sheet, owner's manual or road test.
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Variants, markets, or anything else we should know.

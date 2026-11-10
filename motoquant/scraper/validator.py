@@ -1,11 +1,12 @@
 """
-MotoQuant Pro — Spec Validator
-==============================
+MotoQuant — Spec Validator
+==========================
 Physical-bounds checking and confidence scoring for scraped BikeSpec objects.
 
 Validation checks:
   - Displacement vs bore/stroke consistency
-  - Power/displacement ratio (sanity: 0.3–3.0 HP/cc)
+  - Power/displacement ratio (sanity: 0.05–0.33 HP/cc 4T, x1.8 for 2T)
+  - Power at the torque peak <= rated power; torque at the power peak <= rated torque
   - Torque/power relationship (peak torque = peak power × 5252 / RPM)
   - Mass range (100–500 kg)
   - Gear ratio ordering (each gear must be lower than previous)
@@ -75,9 +76,45 @@ BOUNDS = {
     "speed_limiter_kmh": (120, 340),
 }
 
-# HP per cc sanity range (naturally aspirated)
+# HP per cc sanity range. The ceiling is for a 4-stroke street engine: the
+# hottest catalog entry is the supercharged Ninja H2R at 0.31 hp/cc and the
+# best NA superbikes sit near 0.22-0.25 (it was 3.0 — ~10x too loose, so a
+# 599 cc / 450 hp typo validated with no warning at all). 2-strokes get
+# HP_PER_CC_2T_FACTOR on top (a power stroke every revolution). Above the
+# ceiling is a warning; above HP_PER_CC_ERROR_FACTOR x the ceiling is an error
+# (no production engine, boosted or not, gets there — a units/typo problem).
 HP_PER_CC_MIN = 0.05  # lawnmower / scooter
-HP_PER_CC_MAX = 3.0  # highly tuned race engine
+HP_PER_CC_MAX = 0.33
+HP_PER_CC_2T_FACTOR = 1.8
+HP_PER_CC_ERROR_FACTOR = 2.0
+
+# Power/torque consistency. With peak torque T_pk at rpm n_T and peak power
+# P_pk at rpm n_P, a real curve must satisfy T_pk*w(n_T) <= P_pk (the torque
+# peak cannot already out-power the power peak) and P_pk/w(n_P) <= T_pk (the
+# torque at the power peak cannot exceed the peak torque). Rated figures come
+# from different test standards, so a few % of slack is normal; above
+# POWER_TORQUE_SLACK it is a physically inconsistent spec (confidence-gated:
+# warning + an extra score penalty), above POWER_TORQUE_ERROR it is an error.
+# The YZF-R9 entry (93 Nm @ 11500 = 150 hp > its rated 117.4 hp, 1.28x)
+# validated with one soft warning and simmed 0.38 s fast.
+POWER_TORQUE_SLACK = 1.05
+POWER_TORQUE_ERROR = 1.50
+INCONSISTENT_TAG = "Physically inconsistent"
+INCONSISTENT_PENALTY = 0.07  # on top of the per-warning penalty
+
+# Unit auto-correction. Only in the physically meaningful direction, and only
+# when the converted value lands inside the bounds: a value entered in the
+# smaller unit (kW for hp, lb-ft for Nm) reads LOW; a mass entered in lbs
+# reads HIGH. (The old code multiplied an implausibly HIGH hp by 0.7457 —
+# hp->kW, the inverse of the fix it claimed — and turned 450 "Nm" into 610 Nm,
+# accepting both out-of-bounds results.)
+#   field: (side the wrong-unit value falls on, factor, wrong unit, right unit)
+UNIT_CORRECTIONS = {
+    "peak_power_hp": ("low", 1.341, "kW", "HP"),
+    "peak_torque_nm": ("low", 1.356, "ft-lb", "Nm"),
+    "dry_mass_kg": ("high", 0.4536, "lbs", "kg"),
+    "wet_mass_kg": ("high", 0.4536, "lbs", "kg"),
+}
 
 # Expected torque at peak-power RPM: T_Nm = HP × 9550 / RPM
 # Allow 30% tolerance (cam timing, measurement variation)
@@ -89,18 +126,6 @@ TIRE_SIZE_RE = re.compile(
     r"^\d{2,3}[/\\]\d{2,3}(?:[ZR]?R?|-)\d{2}[WH]?$", re.IGNORECASE
 )
 
-CATEGORY_AERO_DEFAULTS = {
-    "sport": (0.32, 0.45),
-    "naked": (0.40, 0.52),
-    "cruiser": (0.50, 0.55),
-    "adventure": (0.45, 0.55),
-    "touring": (0.52, 0.58),
-    "scooter": (0.45, 0.35),
-}
-
-# Default gear ratios for inline-4 sport bikes (close-ratio)
-DEFAULT_GEAR_RATIOS_6 = [2.600, 2.105, 1.750, 1.500, 1.333, 1.200]
-DEFAULT_GEAR_RATIOS_5 = [2.600, 2.000, 1.650, 1.400, 1.250]
 
 # ────────────────────────────────────────────────────────
 # Helpers
@@ -129,8 +154,17 @@ def validate_spec(spec: BikeSpec) -> ValidationResult:
     """
     Validate a BikeSpec and return a ValidationResult.
 
-    Auto-corrects obvious issues (unit conversions) and flags
+    Auto-corrects obvious unit mistakes in place (see ``UNIT_CORRECTIONS``;
+    each is reported in ``corrected_fields`` and as a warning) and flags
     inconsistencies as warnings vs. errors.
+
+    It does NOT fill in missing fields: a missing ``cd`` / ``gear_ratios`` is
+    reported in ``defaulted_fields`` and left ``None`` so the importer's own
+    defaults (category aero, the Tier-1 service-manual gear lookup) apply.
+    Writing generic I4 ratios and a car-like Cd 0.32 into the spec here used
+    to bypass those lookups — an R15 V4 lost its real cassette and 24 km/h of
+    top speed, and the reseed path (which never validates) diverged from
+    import.
 
     Errors → spec should not be imported.
     Warnings → spec can be imported with lower confidence.
@@ -138,6 +172,7 @@ def validate_spec(spec: BikeSpec) -> ValidationResult:
     errors = []
     warnings = []
     corrected = {}
+    defaulted = {}
 
     # ── Required fields ────────────────────────────────────────────────
     if not spec.manufacturer:
@@ -150,34 +185,22 @@ def validate_spec(spec: BikeSpec) -> ValidationResult:
         val = getattr(spec, field_name, None)
         if val is None:
             continue
-        if not _in_bounds(val, lo, hi):
-            # Try unit correction before flagging error
-            if field_name == "peak_power_hp" and 5 <= val * 0.7457 <= 500:
-                # Looks like kW was entered as HP — convert
-                corrected[field_name] = val * 0.7457
-                setattr(spec, field_name, val * 0.7457)
+        if _in_bounds(val, lo, hi):
+            continue
+        fix = UNIT_CORRECTIONS.get(field_name)
+        if fix is not None:
+            side, factor, wrong_unit, right_unit = fix
+            on_side = val < lo if side == "low" else val > hi
+            fixed = val * factor
+            if on_side and _in_bounds(fixed, lo, hi):
+                corrected[field_name] = fixed
+                setattr(spec, field_name, fixed)
                 warnings.append(
-                    f"{field_name}: {val} looks like kW, converted to "
-                    f"{val * 0.7457:.1f} HP"
+                    f"{field_name}: {val} looks like {wrong_unit}, converted to "
+                    f"{fixed:.1f} {right_unit}"
                 )
-            elif field_name == "peak_torque_nm" and 5 <= val * 0.7457 <= 400:
-                # Looks like ft-lb was entered as Nm — convert
-                corrected[field_name] = val * 1.356
-                setattr(spec, field_name, val * 1.356)
-                warnings.append(
-                    f"{field_name}: {val} looks like ft-lb, converted to "
-                    f"{val * 1.356:.1f} Nm"
-                )
-            elif field_name == "dry_mass_kg" and 80 <= val * 0.4536 <= 500:
-                # Looks like lbs
-                corrected[field_name] = val * 0.4536
-                setattr(spec, field_name, val * 0.4536)
-                warnings.append(
-                    f"{field_name}: {val} looks like lbs, converted to "
-                    f"{val * 0.4536:.1f} kg"
-                )
-            else:
-                errors.append(f"{field_name}={val} out of bounds [{lo}, {hi}]")
+                continue
+        errors.append(f"{field_name}={val} out of bounds [{lo}, {hi}]")
 
     # ── Displacement consistency ───────────────────────────────────────
     if spec.bore_mm and spec.stroke_mm and spec.cylinders and spec.displacement_cc:
@@ -192,16 +215,19 @@ def validate_spec(spec: BikeSpec) -> ValidationResult:
     # ── Power/displacement ratio ───────────────────────────────────────
     if spec.peak_power_hp and spec.displacement_cc:
         ratio = spec.peak_power_hp / spec.displacement_cc
-        # 2-strokes make roughly 2× the power of same-displacement 4T (power
-        # stroke every rev). Top-end race 2T (TZ250, RS125 GP) easily exceed
-        # HP_PER_CC_MAX; widen the upper sanity bound for them.
-        hp_cc_max = HP_PER_CC_MAX * (1.8 if spec.stroke_type == 2 else 1.0)
-        if ratio > hp_cc_max:
+        is_2t = spec.stroke_type == 2
+        hp_cc_max = HP_PER_CC_MAX * (HP_PER_CC_2T_FACTOR if is_2t else 1.0)
+        label = "2T" if is_2t else "4T"
+        if ratio > hp_cc_max * HP_PER_CC_ERROR_FACTOR:
+            errors.append(
+                f"Power/displacement ratio {ratio:.2f} HP/cc is physically "
+                f"implausible (> {hp_cc_max * HP_PER_CC_ERROR_FACTOR:.2f} for a "
+                f"{label} engine) — check units / typo."
+            )
+        elif ratio > hp_cc_max:
             warnings.append(
                 f"Power/displacement ratio {ratio:.2f} HP/cc is very high "
-                f"(max ~{hp_cc_max} for "
-                f"{'2T NA' if spec.stroke_type == 2 else '4T NA'}). "
-                "Possibly forced induction?"
+                f"(max ~{hp_cc_max:.2f} for {label}). Possibly forced induction?"
             )
         elif ratio < HP_PER_CC_MIN:
             warnings.append(f"Power/displacement ratio {ratio:.2f} HP/cc is very low")
@@ -218,6 +244,9 @@ def validate_spec(spec: BikeSpec) -> ValidationResult:
                 f"({diff_pct * 100:.0f}% off). "
                 f"Peak torque RPM may differ from peak power RPM."
             )
+
+    # ── Power/torque physical consistency ──────────────────────────────
+    _check_power_torque_consistency(spec, warnings, errors)
 
     # ── Mass sanity ────────────────────────────────────────────────────
     if spec.dry_mass_kg and spec.wet_mass_kg:
@@ -249,23 +278,13 @@ def validate_spec(spec: BikeSpec) -> ValidationResult:
                 f"{attr}='{size}' does not match standard format (e.g. 120/70ZR17)"
             )
 
-    # ── Auto-fill Cd from category if missing ──────────────────────────
-    if spec.cd is None and spec.category in CATEGORY_AERO_DEFAULTS:
-        cd, fa = CATEGORY_AERO_DEFAULTS[spec.category]
-        spec.cd = cd
-        if spec.frontal_area_m2 is None:
-            spec.frontal_area_m2 = fa
-        corrected["cd"] = cd
-        corrected["frontal_area_m2"] = fa
-
-    # ── Gear ratios default if missing ─────────────────────────────────
+    # ── Fields the importer will default (reported, never written) ─────
+    if spec.cd is None:
+        defaulted["cd"] = f"category aero default ({spec.category})"
+    if spec.frontal_area_m2 is None:
+        defaulted["frontal_area_m2"] = f"category aero default ({spec.category})"
     if spec.gear_ratios is None and spec.gears:
-        if spec.gears == 6:
-            spec.gear_ratios = DEFAULT_GEAR_RATIOS_6[:]
-            corrected["gear_ratios"] = "default_6speed"
-        elif spec.gears == 5:
-            spec.gear_ratios = DEFAULT_GEAR_RATIOS_5[:]
-            corrected["gear_ratios"] = "default_5speed"
+        defaulted["gear_ratios"] = f"Tier-1/Tier-2 gear lookup ({spec.gears}-speed)"
 
     is_valid = len(errors) == 0
     return ValidationResult(
@@ -273,7 +292,38 @@ def validate_spec(spec: BikeSpec) -> ValidationResult:
         warnings=warnings,
         errors=errors,
         corrected_fields=corrected,
+        defaulted_fields=defaulted,
     )
+
+
+def _check_power_torque_consistency(
+    spec: BikeSpec, warnings: list[str], errors: list[str]
+) -> None:
+    """Power at the torque peak / torque at the power peak vs the rated peaks."""
+    hp, n_p = spec.peak_power_hp, spec.peak_power_rpm
+    tq, n_t = spec.peak_torque_nm, spec.peak_torque_rpm
+    if not (hp and n_p and tq and n_t):
+        return
+    p_peak_w = hp * 745.7
+    p_at_tq_peak = tq * n_t * 2 * math.pi / 60
+    t_at_p_peak = p_peak_w / (n_p * 2 * math.pi / 60)
+    worst = max(p_at_tq_peak / p_peak_w, t_at_p_peak / tq)
+    detail = (
+        f"{tq:.0f} Nm @ {n_t:.0f} rpm = {p_at_tq_peak / 745.7:.0f} hp at the "
+        f"torque peak vs rated {hp:.0f} hp @ {n_p:.0f} rpm "
+        f"(needs {t_at_p_peak:.0f} Nm there); worst ratio {worst:.2f}x"
+    )
+    if worst > POWER_TORQUE_ERROR:
+        errors.append(f"{INCONSISTENT_TAG} power/torque: {detail}")
+    elif worst > POWER_TORQUE_SLACK:
+        warnings.append(f"{INCONSISTENT_TAG} power/torque: {detail}")
+    if spec.stroke_type != 2 and n_t > n_p:
+        # At the torque peak dP/dw = T > 0, so power is still rising: a
+        # 4-stroke cannot peak in torque above its power peak.
+        errors.append(
+            f"peak_torque_rpm {n_t:.0f} > peak_power_rpm {n_p:.0f} is impossible "
+            "for a 4-stroke (power is still rising at the torque peak)"
+        )
 
 
 def score_spec(spec: BikeSpec, result: ValidationResult) -> float:
@@ -311,8 +361,12 @@ def score_spec(spec: BikeSpec, result: ValidationResult) -> float:
             )
             base += weight * field_conf
 
-    # Penalty: 0.03 per warning, 0.10 per error (errors also block import)
-    warning_penalty = len(result.warnings) * 0.03
+    # Penalty: 0.03 per warning, 0.10 per error (errors also block import).
+    # A physically inconsistent power/torque pair is confidence-gated: it costs
+    # INCONSISTENT_PENALTY on top of its warning.
+    warning_penalty = len(result.warnings) * 0.03 + INCONSISTENT_PENALTY * sum(
+        1 for w in result.warnings if w.startswith(INCONSISTENT_TAG)
+    )
     error_penalty = len(result.errors) * 0.10
 
     # Bonus: verified from two sources → +0.10

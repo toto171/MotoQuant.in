@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * SimProgress — real progress bar for simulation work (IGNITION v5).
+ * SimProgress — real progress bar for simulation work (CLARITY v6).
  *
  * Replaces the old rotating spinners across the site. Two data modes:
  *
@@ -99,14 +99,14 @@ export default function SimProgress({
       <div className={`flex items-center gap-2 ${className}`} {...aria}>
         <style>{SWEEP_CSS}</style>
         <div className="w-24 h-1 rounded-full bg-asphalt-4 overflow-hidden">{fill}</div>
-        <span className="font-mono text-[10px] text-signal-stage tabular-nums whitespace-nowrap">
+        <span className="text-xs font-medium text-signal-stage tabular-nums whitespace-nowrap">
           {pct != null ? `${pct}%` : `${label}…`}
         </span>
         {onStop && (
           <button
             type="button"
             onClick={onStop}
-            className="font-mono text-[10px] text-white/45 hover:text-signal-foul transition-colors whitespace-nowrap"
+            className="text-xs font-medium text-white/60 hover:text-signal-foul transition-colors whitespace-nowrap"
           >
             ■ Stop
           </button>
@@ -119,9 +119,9 @@ export default function SimProgress({
     <div className={className} {...aria}>
       <style>{SWEEP_CSS}</style>
       <div className="flex items-baseline justify-between mb-1.5 gap-3">
-        <span className="label-mono text-signal-stage truncate">{caption}</span>
+        <span className="truncate text-sm font-medium text-signal-stage">{caption}</span>
         {pct != null && (
-          <span className="text-xs font-mono font-bold text-signal-stage tabular-nums shrink-0">
+          <span className="text-sm font-semibold text-signal-stage tabular-nums shrink-0">
             {pct}%
           </span>
         )}
@@ -129,7 +129,7 @@ export default function SimProgress({
           <button
             type="button"
             onClick={onStop}
-            className="label-mono hover:text-signal-foul transition-colors shrink-0"
+            className="shrink-0 text-sm font-medium text-white/60 transition-colors hover:text-signal-foul"
           >
             ■ Stop
           </button>

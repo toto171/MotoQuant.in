@@ -30,12 +30,11 @@ except ImportError:  # pragma: no cover
     HAS_FASTAPI = False
 
 # ---------------------------------------------------------------------------
-# Isolated DB -- the metered routes (/api/jobs/simulate, /api/jobs/topspeed)
-# record sim_usage rows via connect(), which falls back to the repo's tracked
-# motoquant.db when MOTOQUANT_DB is unset. Point it at a throwaway tmp DB so
-# a suite run never dirties the working tree (same pattern as test_api.py).
-# No seeding needed: these tests use bike_presets only, and record_and_check
-# creates the sim_usage table on demand.
+# Isolated DB -- the job routes run through the real app, and connect() falls
+# back to the repo's tracked motoquant.db when MOTOQUANT_DB is unset. Point it
+# at a throwaway tmp DB so a suite run never dirties the working tree (the
+# retired sim-quota meter once leaked rows into it exactly this way; same
+# pattern as test_api.py). No seeding needed: these tests use bike_presets.
 # ---------------------------------------------------------------------------
 _tmp_db_file = tempfile.NamedTemporaryFile(
     prefix="motoquant_jobs_test_", suffix=".db", delete=False
@@ -124,7 +123,7 @@ class TestEngineProgressCallback(unittest.TestCase):
         # Bit-identical ET — the callback must not touch the physics.
         self.assertEqual(et_with_cb, et_plain)
         # And both still sit on the pinned K5 reference baseline.
-        self.assertAlmostEqual(et_plain, 9.9331, places=3)
+        self.assertAlmostEqual(et_plain, 10.0436, places=3)
 
         self.assertGreater(len(fractions), 10)
         self.assertTrue(
@@ -291,7 +290,7 @@ class TestJobsRoutes(unittest.TestCase):
         final, snapshots = _poll_until_finished(self.client, body["job_id"])
         self.assertEqual(final["status"], "done", final.get("error"))
         # The job result is the same payload the sync route returns.
-        self.assertAlmostEqual(final["result"]["et_quarter_s"], 9.9331, places=2)
+        self.assertAlmostEqual(final["result"]["et_quarter_s"], 10.0436, places=2)
         self.assertIn("timeseries", final["result"])
 
         progress = [s["progress"] for s in snapshots]
@@ -337,7 +336,7 @@ class TestJobsRoutes(unittest.TestCase):
         self.assertIn("a", result)
         self.assertIn("b", result)
         self.assertIn("delta", result)
-        self.assertAlmostEqual(result["a"]["et_quarter_s"], 9.9331, places=2)
+        self.assertAlmostEqual(result["a"]["et_quarter_s"], 10.0436, places=2)
         # B is 20 kg lighter → must be faster.
         self.assertEqual(result["delta"]["faster"], "B")
 

@@ -1,0 +1,779 @@
+{
+ "_doc": "2026-10/11 accuracy epoch (ADR-0002), FINAL authoritative sweep on the shipped code (round-3 knobs; litre_sport_195p = alt_litre195_margin by owner decision 2026-11-05). Produced by scripts/phys_weighted_sweep.py run/report (NativeEngine, bit-identical to the Python reference) over all 538 catalog specs. Top-level 'references'/'n_bikes_swept'/'clusters'/'overall' keep the reports/acc_final_2026_08_08.json shape and use the EPOCH headline rules (epoch binding + epoch source weights, per-row timing: 1-ft rollout or first motion as each benchmark row was timed). 'published_metric_c' is the EXACT 2026-08-08 published metric (HEAD 0bd0ea2 labels, legacy binding + weights) on the shipped model, copied from reports/acc_epoch3_2026_11_03.json (re-measured 2026-11-05). Trap in km/h (sim - published).",
+ "references": {
+  "K5": 10.0436,
+  "R1": 10.1092,
+  "Hayabusa": 10.11
+ },
+ "n_bikes_swept": 538,
+ "clusters": {
+  "cruiser-1300+": {
+   "n": 4,
+   "w_sum": 2.8,
+   "w_mean_abs": 0.2196,
+   "w_bias": 0.0342,
+   "raw_mean_abs": 0.2196
+  },
+  "entry-150-200": {
+   "n": 13,
+   "w_sum": 7.6,
+   "w_mean_abs": 0.6508,
+   "w_bias": -0.1056,
+   "raw_mean_abs": 1.154
+  },
+  "entry-200-300": {
+   "n": 14,
+   "w_sum": 7.2,
+   "w_mean_abs": 0.3248,
+   "w_bias": 0.2652,
+   "raw_mean_abs": 0.6458
+  },
+  "litre-sport-195+": {
+   "n": 29,
+   "w_sum": 21.4,
+   "w_mean_abs": 0.1678,
+   "w_bias": -0.0072,
+   "raw_mean_abs": 0.1682
+  },
+  "litre-sport-600-1000": {
+   "n": 76,
+   "w_sum": 64.6,
+   "w_mean_abs": 0.1462,
+   "w_bias": -0.0163,
+   "raw_mean_abs": 0.1478
+  },
+  "mid-twin-300-500": {
+   "n": 8,
+   "w_sum": 4.7,
+   "w_mean_abs": 0.3551,
+   "w_bias": 0.189,
+   "raw_mean_abs": 0.3267
+  },
+  "mid-twin-500-700": {
+   "n": 7,
+   "w_sum": 2.6,
+   "w_mean_abs": 0.2056,
+   "w_bias": 0.1441,
+   "raw_mean_abs": 0.285
+  },
+  "other": {
+   "n": 41,
+   "w_sum": 25.2,
+   "w_mean_abs": 0.3666,
+   "w_bias": 0.1537,
+   "raw_mean_abs": 0.3941
+  },
+  "single-300-500": {
+   "n": 17,
+   "w_sum": 6.8,
+   "w_mean_abs": 0.6195,
+   "w_bias": -0.2654,
+   "raw_mean_abs": 1.3389
+  },
+  "small-i4-screamer": {
+   "n": 2,
+   "w_sum": 1.1,
+   "w_mean_abs": 0.27,
+   "w_bias": -0.1945,
+   "raw_mean_abs": 0.3352
+  },
+  "sport-twin-600-1300": {
+   "n": 46,
+   "w_sum": 35.0,
+   "w_mean_abs": 0.2098,
+   "w_bias": -0.0039,
+   "raw_mean_abs": 0.2194
+  },
+  "two-stroke": {
+   "n": 9,
+   "w_sum": 4.5,
+   "w_mean_abs": 0.3391,
+   "w_bias": 0.2593,
+   "raw_mean_abs": 0.5397
+  }
+ },
+ "overall": {
+  "n": 266,
+  "w_sum": 183.5,
+  "w_mean_abs": 0.2493,
+  "w_bias": 0.0225,
+  "raw_mean_abs": 0.3766
+ },
+ "engine": "NativeEngine",
+ "rules": "epoch",
+ "timing": "row",
+ "trap_clusters": {
+  "cruiser-1300+": {
+   "n": 3,
+   "w_mean_abs_kmh": 6.29,
+   "w_bias_kmh": 6.29,
+   "raw_mean_abs_kmh": 6.29
+  },
+  "entry-150-200": {
+   "n": 13,
+   "w_mean_abs_kmh": 4.02,
+   "w_bias_kmh": -0.28,
+   "raw_mean_abs_kmh": 4.1
+  },
+  "entry-200-300": {
+   "n": 14,
+   "w_mean_abs_kmh": 5.41,
+   "w_bias_kmh": 4.31,
+   "raw_mean_abs_kmh": 6.23
+  },
+  "litre-sport-195+": {
+   "n": 28,
+   "w_mean_abs_kmh": 7.62,
+   "w_bias_kmh": 4.85,
+   "raw_mean_abs_kmh": 7.6
+  },
+  "litre-sport-600-1000": {
+   "n": 75,
+   "w_mean_abs_kmh": 5.21,
+   "w_bias_kmh": 3.86,
+   "raw_mean_abs_kmh": 5.19
+  },
+  "mid-twin-300-500": {
+   "n": 8,
+   "w_mean_abs_kmh": 5.4,
+   "w_bias_kmh": 1.62,
+   "raw_mean_abs_kmh": 5.24
+  },
+  "mid-twin-500-700": {
+   "n": 7,
+   "w_mean_abs_kmh": 5.91,
+   "w_bias_kmh": -2.2,
+   "raw_mean_abs_kmh": 4.64
+  },
+  "other": {
+   "n": 38,
+   "w_mean_abs_kmh": 7.09,
+   "w_bias_kmh": 3.08,
+   "raw_mean_abs_kmh": 9.1
+  },
+  "single-300-500": {
+   "n": 13,
+   "w_mean_abs_kmh": 3.38,
+   "w_bias_kmh": 1.49,
+   "raw_mean_abs_kmh": 5.55
+  },
+  "small-i4-screamer": {
+   "n": 2,
+   "w_mean_abs_kmh": 6.68,
+   "w_bias_kmh": 6.68,
+   "raw_mean_abs_kmh": 4.82
+  },
+  "sport-twin-600-1300": {
+   "n": 43,
+   "w_mean_abs_kmh": 6.84,
+   "w_bias_kmh": 3.48,
+   "raw_mean_abs_kmh": 7.15
+  },
+  "two-stroke": {
+   "n": 8,
+   "w_mean_abs_kmh": 9.02,
+   "w_bias_kmh": 2.18,
+   "raw_mean_abs_kmh": 9.92
+  }
+ },
+ "trap_overall": {
+  "n": 252,
+  "w_mean_abs_kmh": 6.08,
+  "w_bias_kmh": 3.43,
+  "raw_mean_abs_kmh": 6.55
+ },
+ "by_rules": {
+  "epoch": {
+   "binding_policy": "epoch",
+   "timing": "row",
+   "n_timing_fallback": 0,
+   "clusters": {
+    "cruiser-1300+": {
+     "n": 4,
+     "w_sum": 2.8,
+     "w_mean_abs": 0.2196,
+     "w_bias": 0.0342,
+     "raw_mean_abs": 0.2196
+    },
+    "entry-150-200": {
+     "n": 13,
+     "w_sum": 7.6,
+     "w_mean_abs": 0.6508,
+     "w_bias": -0.1056,
+     "raw_mean_abs": 1.154
+    },
+    "entry-200-300": {
+     "n": 14,
+     "w_sum": 7.2,
+     "w_mean_abs": 0.3248,
+     "w_bias": 0.2652,
+     "raw_mean_abs": 0.6458
+    },
+    "litre-sport-195+": {
+     "n": 29,
+     "w_sum": 21.4,
+     "w_mean_abs": 0.1678,
+     "w_bias": -0.0072,
+     "raw_mean_abs": 0.1682
+    },
+    "litre-sport-600-1000": {
+     "n": 76,
+     "w_sum": 64.6,
+     "w_mean_abs": 0.1462,
+     "w_bias": -0.0163,
+     "raw_mean_abs": 0.1478
+    },
+    "mid-twin-300-500": {
+     "n": 8,
+     "w_sum": 4.7,
+     "w_mean_abs": 0.3551,
+     "w_bias": 0.189,
+     "raw_mean_abs": 0.3267
+    },
+    "mid-twin-500-700": {
+     "n": 7,
+     "w_sum": 2.6,
+     "w_mean_abs": 0.2056,
+     "w_bias": 0.1441,
+     "raw_mean_abs": 0.285
+    },
+    "other": {
+     "n": 41,
+     "w_sum": 25.2,
+     "w_mean_abs": 0.3666,
+     "w_bias": 0.1537,
+     "raw_mean_abs": 0.3941
+    },
+    "single-300-500": {
+     "n": 17,
+     "w_sum": 6.8,
+     "w_mean_abs": 0.6195,
+     "w_bias": -0.2654,
+     "raw_mean_abs": 1.3389
+    },
+    "small-i4-screamer": {
+     "n": 2,
+     "w_sum": 1.1,
+     "w_mean_abs": 0.27,
+     "w_bias": -0.1945,
+     "raw_mean_abs": 0.3352
+    },
+    "sport-twin-600-1300": {
+     "n": 46,
+     "w_sum": 35.0,
+     "w_mean_abs": 0.2098,
+     "w_bias": -0.0039,
+     "raw_mean_abs": 0.2194
+    },
+    "two-stroke": {
+     "n": 9,
+     "w_sum": 4.5,
+     "w_mean_abs": 0.3391,
+     "w_bias": 0.2593,
+     "raw_mean_abs": 0.5397
+    }
+   },
+   "overall": {
+    "n": 266,
+    "w_sum": 183.5,
+    "w_mean_abs": 0.2493,
+    "w_bias": 0.0225,
+    "raw_mean_abs": 0.3766
+   },
+   "trap_clusters": {
+    "cruiser-1300+": {
+     "n": 3,
+     "w_mean_abs_kmh": 6.29,
+     "w_bias_kmh": 6.29,
+     "raw_mean_abs_kmh": 6.29
+    },
+    "entry-150-200": {
+     "n": 13,
+     "w_mean_abs_kmh": 4.02,
+     "w_bias_kmh": -0.28,
+     "raw_mean_abs_kmh": 4.1
+    },
+    "entry-200-300": {
+     "n": 14,
+     "w_mean_abs_kmh": 5.41,
+     "w_bias_kmh": 4.31,
+     "raw_mean_abs_kmh": 6.23
+    },
+    "litre-sport-195+": {
+     "n": 28,
+     "w_mean_abs_kmh": 7.62,
+     "w_bias_kmh": 4.85,
+     "raw_mean_abs_kmh": 7.6
+    },
+    "litre-sport-600-1000": {
+     "n": 75,
+     "w_mean_abs_kmh": 5.21,
+     "w_bias_kmh": 3.86,
+     "raw_mean_abs_kmh": 5.19
+    },
+    "mid-twin-300-500": {
+     "n": 8,
+     "w_mean_abs_kmh": 5.4,
+     "w_bias_kmh": 1.62,
+     "raw_mean_abs_kmh": 5.24
+    },
+    "mid-twin-500-700": {
+     "n": 7,
+     "w_mean_abs_kmh": 5.91,
+     "w_bias_kmh": -2.2,
+     "raw_mean_abs_kmh": 4.64
+    },
+    "other": {
+     "n": 38,
+     "w_mean_abs_kmh": 7.09,
+     "w_bias_kmh": 3.08,
+     "raw_mean_abs_kmh": 9.1
+    },
+    "single-300-500": {
+     "n": 13,
+     "w_mean_abs_kmh": 3.38,
+     "w_bias_kmh": 1.49,
+     "raw_mean_abs_kmh": 5.55
+    },
+    "small-i4-screamer": {
+     "n": 2,
+     "w_mean_abs_kmh": 6.68,
+     "w_bias_kmh": 6.68,
+     "raw_mean_abs_kmh": 4.82
+    },
+    "sport-twin-600-1300": {
+     "n": 43,
+     "w_mean_abs_kmh": 6.84,
+     "w_bias_kmh": 3.48,
+     "raw_mean_abs_kmh": 7.15
+    },
+    "two-stroke": {
+     "n": 8,
+     "w_mean_abs_kmh": 9.02,
+     "w_bias_kmh": 2.18,
+     "raw_mean_abs_kmh": 9.92
+    }
+   },
+   "trap_overall": {
+    "n": 252,
+    "w_mean_abs_kmh": 6.08,
+    "w_bias_kmh": 3.43,
+    "raw_mean_abs_kmh": 6.55
+   }
+  },
+  "legacy": {
+   "binding_policy": "legacy",
+   "timing": "row",
+   "n_timing_fallback": 0,
+   "clusters": {
+    "cruiser-1300+": {
+     "n": 5,
+     "w_sum": 3.5,
+     "w_mean_abs": 0.1933,
+     "w_bias": 0.045,
+     "raw_mean_abs": 0.1933
+    },
+    "entry-150-200": {
+     "n": 13,
+     "w_sum": 7.6,
+     "w_mean_abs": 0.6508,
+     "w_bias": -0.1056,
+     "raw_mean_abs": 1.154
+    },
+    "entry-200-300": {
+     "n": 14,
+     "w_sum": 7.2,
+     "w_mean_abs": 0.3248,
+     "w_bias": 0.2652,
+     "raw_mean_abs": 0.6458
+    },
+    "litre-sport-195+": {
+     "n": 30,
+     "w_sum": 23.1,
+     "w_mean_abs": 0.1656,
+     "w_bias": -0.0228,
+     "raw_mean_abs": 0.1635
+    },
+    "litre-sport-600-1000": {
+     "n": 79,
+     "w_sum": 68.4,
+     "w_mean_abs": 0.1462,
+     "w_bias": -0.0191,
+     "raw_mean_abs": 0.1468
+    },
+    "mid-twin-300-500": {
+     "n": 8,
+     "w_sum": 4.7,
+     "w_mean_abs": 0.3551,
+     "w_bias": 0.189,
+     "raw_mean_abs": 0.3267
+    },
+    "mid-twin-500-700": {
+     "n": 7,
+     "w_sum": 2.6,
+     "w_mean_abs": 0.2056,
+     "w_bias": 0.1441,
+     "raw_mean_abs": 0.285
+    },
+    "other": {
+     "n": 42,
+     "w_sum": 26.4,
+     "w_mean_abs": 0.3631,
+     "w_bias": 0.1335,
+     "raw_mean_abs": 0.3904
+    },
+    "single-300-500": {
+     "n": 19,
+     "w_sum": 9.3,
+     "w_mean_abs": 0.5252,
+     "w_bias": -0.2584,
+     "raw_mean_abs": 1.2314
+    },
+    "small-i4-screamer": {
+     "n": 2,
+     "w_sum": 1.5,
+     "w_mean_abs": 0.3086,
+     "w_bias": -0.032,
+     "raw_mean_abs": 0.3352
+    },
+    "sport-twin-600-1300": {
+     "n": 48,
+     "w_sum": 38.5,
+     "w_mean_abs": 0.2222,
+     "w_bias": 0.0244,
+     "raw_mean_abs": 0.2279
+    },
+    "two-stroke": {
+     "n": 9,
+     "w_sum": 5.3,
+     "w_mean_abs": 0.4566,
+     "w_bias": 0.3719,
+     "raw_mean_abs": 0.5397
+    }
+   },
+   "overall": {
+    "n": 276,
+    "w_sum": 198.1,
+    "w_mean_abs": 0.2519,
+    "w_bias": 0.0236,
+    "raw_mean_abs": 0.3709
+   },
+   "trap_clusters": {
+    "cruiser-1300+": {
+     "n": 4,
+     "w_mean_abs_kmh": 6.68,
+     "w_bias_kmh": 6.68,
+     "raw_mean_abs_kmh": 6.68
+    },
+    "entry-150-200": {
+     "n": 13,
+     "w_mean_abs_kmh": 4.02,
+     "w_bias_kmh": -0.28,
+     "raw_mean_abs_kmh": 4.1
+    },
+    "entry-200-300": {
+     "n": 14,
+     "w_mean_abs_kmh": 5.41,
+     "w_bias_kmh": 4.31,
+     "raw_mean_abs_kmh": 6.23
+    },
+    "litre-sport-195+": {
+     "n": 29,
+     "w_mean_abs_kmh": 7.46,
+     "w_bias_kmh": 4.77,
+     "raw_mean_abs_kmh": 7.67
+    },
+    "litre-sport-600-1000": {
+     "n": 78,
+     "w_mean_abs_kmh": 5.51,
+     "w_bias_kmh": 4.06,
+     "raw_mean_abs_kmh": 5.49
+    },
+    "mid-twin-300-500": {
+     "n": 8,
+     "w_mean_abs_kmh": 5.4,
+     "w_bias_kmh": 1.62,
+     "raw_mean_abs_kmh": 5.24
+    },
+    "mid-twin-500-700": {
+     "n": 7,
+     "w_mean_abs_kmh": 5.91,
+     "w_bias_kmh": -2.2,
+     "raw_mean_abs_kmh": 4.64
+    },
+    "other": {
+     "n": 38,
+     "w_mean_abs_kmh": 7.15,
+     "w_bias_kmh": 3.22,
+     "raw_mean_abs_kmh": 9.1
+    },
+    "single-300-500": {
+     "n": 15,
+     "w_mean_abs_kmh": 3.24,
+     "w_bias_kmh": 1.99,
+     "raw_mean_abs_kmh": 5.27
+    },
+    "small-i4-screamer": {
+     "n": 2,
+     "w_mean_abs_kmh": 5.58,
+     "w_bias_kmh": 5.58,
+     "raw_mean_abs_kmh": 4.82
+    },
+    "sport-twin-600-1300": {
+     "n": 45,
+     "w_mean_abs_kmh": 6.96,
+     "w_bias_kmh": 2.81,
+     "raw_mean_abs_kmh": 7.18
+    },
+    "two-stroke": {
+     "n": 8,
+     "w_mean_abs_kmh": 9.98,
+     "w_bias_kmh": -0.74,
+     "raw_mean_abs_kmh": 9.92
+    }
+   },
+   "trap_overall": {
+    "n": 261,
+    "w_mean_abs_kmh": 6.21,
+    "w_bias_kmh": 3.33,
+    "raw_mean_abs_kmh": 6.62
+   }
+  }
+ },
+ "timing_uniform_1ft": {
+  "binding_policy": "epoch",
+  "timing": "1ft",
+  "n_timing_fallback": 0,
+  "clusters": {
+   "cruiser-1300+": {
+    "n": 4,
+    "w_sum": 2.8,
+    "w_mean_abs": 0.2196,
+    "w_bias": 0.0342,
+    "raw_mean_abs": 0.2196
+   },
+   "entry-150-200": {
+    "n": 13,
+    "w_sum": 7.6,
+    "w_mean_abs": 0.7212,
+    "w_bias": -0.3005,
+    "raw_mean_abs": 1.1952
+   },
+   "entry-200-300": {
+    "n": 14,
+    "w_sum": 7.2,
+    "w_mean_abs": 0.2766,
+    "w_bias": 0.0548,
+    "raw_mean_abs": 0.6211
+   },
+   "litre-sport-195+": {
+    "n": 29,
+    "w_sum": 21.4,
+    "w_mean_abs": 0.1678,
+    "w_bias": -0.0072,
+    "raw_mean_abs": 0.1682
+   },
+   "litre-sport-600-1000": {
+    "n": 76,
+    "w_sum": 64.6,
+    "w_mean_abs": 0.1462,
+    "w_bias": -0.0163,
+    "raw_mean_abs": 0.1478
+   },
+   "mid-twin-300-500": {
+    "n": 8,
+    "w_sum": 4.7,
+    "w_mean_abs": 0.3551,
+    "w_bias": 0.189,
+    "raw_mean_abs": 0.3267
+   },
+   "mid-twin-500-700": {
+    "n": 7,
+    "w_sum": 2.6,
+    "w_mean_abs": 0.2056,
+    "w_bias": 0.1441,
+    "raw_mean_abs": 0.285
+   },
+   "other": {
+    "n": 41,
+    "w_sum": 25.2,
+    "w_mean_abs": 0.3666,
+    "w_bias": 0.1537,
+    "raw_mean_abs": 0.3941
+   },
+   "single-300-500": {
+    "n": 17,
+    "w_sum": 6.8,
+    "w_mean_abs": 0.6195,
+    "w_bias": -0.2654,
+    "raw_mean_abs": 1.3389
+   },
+   "small-i4-screamer": {
+    "n": 2,
+    "w_sum": 1.1,
+    "w_mean_abs": 0.5467,
+    "w_bias": -0.4712,
+    "raw_mean_abs": 0.4874
+   },
+   "sport-twin-600-1300": {
+    "n": 46,
+    "w_sum": 35.0,
+    "w_mean_abs": 0.2098,
+    "w_bias": -0.0039,
+    "raw_mean_abs": 0.2194
+   },
+   "two-stroke": {
+    "n": 9,
+    "w_sum": 4.5,
+    "w_mean_abs": 0.3391,
+    "w_bias": 0.2593,
+    "raw_mean_abs": 0.5397
+   }
+  },
+  "overall": {
+   "n": 266,
+   "w_sum": 183.5,
+   "w_mean_abs": 0.252,
+   "w_bias": 0.0046,
+   "raw_mean_abs": 0.3785
+  },
+  "trap_clusters": {
+   "cruiser-1300+": {
+    "n": 3,
+    "w_mean_abs_kmh": 6.29,
+    "w_bias_kmh": 6.29,
+    "raw_mean_abs_kmh": 6.29
+   },
+   "entry-150-200": {
+    "n": 13,
+    "w_mean_abs_kmh": 4.02,
+    "w_bias_kmh": -0.28,
+    "raw_mean_abs_kmh": 4.1
+   },
+   "entry-200-300": {
+    "n": 14,
+    "w_mean_abs_kmh": 5.41,
+    "w_bias_kmh": 4.31,
+    "raw_mean_abs_kmh": 6.23
+   },
+   "litre-sport-195+": {
+    "n": 28,
+    "w_mean_abs_kmh": 7.62,
+    "w_bias_kmh": 4.85,
+    "raw_mean_abs_kmh": 7.6
+   },
+   "litre-sport-600-1000": {
+    "n": 75,
+    "w_mean_abs_kmh": 5.21,
+    "w_bias_kmh": 3.86,
+    "raw_mean_abs_kmh": 5.19
+   },
+   "mid-twin-300-500": {
+    "n": 8,
+    "w_mean_abs_kmh": 5.4,
+    "w_bias_kmh": 1.62,
+    "raw_mean_abs_kmh": 5.24
+   },
+   "mid-twin-500-700": {
+    "n": 7,
+    "w_mean_abs_kmh": 5.91,
+    "w_bias_kmh": -2.2,
+    "raw_mean_abs_kmh": 4.64
+   },
+   "other": {
+    "n": 38,
+    "w_mean_abs_kmh": 7.09,
+    "w_bias_kmh": 3.08,
+    "raw_mean_abs_kmh": 9.1
+   },
+   "single-300-500": {
+    "n": 13,
+    "w_mean_abs_kmh": 3.38,
+    "w_bias_kmh": 1.49,
+    "raw_mean_abs_kmh": 5.55
+   },
+   "small-i4-screamer": {
+    "n": 2,
+    "w_mean_abs_kmh": 6.68,
+    "w_bias_kmh": 6.68,
+    "raw_mean_abs_kmh": 4.82
+   },
+   "sport-twin-600-1300": {
+    "n": 43,
+    "w_mean_abs_kmh": 6.84,
+    "w_bias_kmh": 3.48,
+    "raw_mean_abs_kmh": 7.15
+   },
+   "two-stroke": {
+    "n": 8,
+    "w_mean_abs_kmh": 9.02,
+    "w_bias_kmh": 2.18,
+    "raw_mean_abs_kmh": 9.92
+   }
+  },
+  "trap_overall": {
+   "n": 252,
+   "w_mean_abs_kmh": 6.08,
+   "w_bias_kmh": 3.43,
+   "raw_mean_abs_kmh": 6.55
+  }
+ },
+ "published_metric_c": {
+  "labels": "HEAD 0bd0ea2 (as published 2026-08-08)",
+  "rules": "legacy",
+  "timing": "row",
+  "overall": {
+   "n": 276,
+   "w_sum": 198.8,
+   "w_mean_abs": 0.2639,
+   "w_bias": 0.0292,
+   "raw_mean_abs": 0.3824
+  },
+  "trap": {
+   "n": 261,
+   "w_mean_abs_kmh": 6.39,
+   "w_bias_kmh": 3.11,
+   "raw_mean_abs_kmh": 6.83,
+   "w_bias_pct": 1.57
+  },
+  "published_2026_08_08": {
+   "n": 276,
+   "w_sum": 198.8,
+   "w_mean_abs": 0.2629,
+   "w_bias": 0.0073,
+   "raw_mean_abs": 0.3724
+  },
+  "source": "reports/acc_epoch3_2026_11_03.json headline.c_legacy_head_row"
+ },
+ "topspeed": {
+  "benchmarks_matched": 83,
+  "mean_abs_delta_kmh": 12.9,
+  "median_abs_delta_kmh": 11.4,
+  "bias_kmh": 7.0,
+  "within_10_kmh": 36,
+  "within_20_kmh": 67,
+  "within_30_kmh": 75,
+  "plateau_count": 83
+ },
+ "t60_overall": {
+  "mean_s": 1.998,
+  "min_s": 1.62
+ },
+ "mass_gate_summary": {
+  "catalog_dry_inversions": 2,
+  "inverted": [
+   "Ducati Panigale V4R",
+   "BMW HP4 Race"
+  ],
+  "references_monotone": {
+   "K5": true,
+   "R1": true,
+   "Hayabusa": true
+  }
+ },
+ "previous_pins": {
+  "K5": 9.9331,
+  "R1": 10.1436,
+  "Hayabusa": 10.3633
+ }
+}

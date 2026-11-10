@@ -4,7 +4,6 @@ import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 import CodeComment from '../../../components/CodeComment';
 import ScoreboardDigits from '../../../components/ScoreboardDigits';
-import InlineSimCta from './InlineSimCta';
 
 export const metadata = {
   title: 'The Physics of a Perfect Launch — MotoQuant Blog',
@@ -67,7 +66,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The Pacejka tire model — which MotoQuant implements — shows that peak longitudinal force occurs at a slip ratio of roughly 0.07–0.15 for most road tyres. That means a small amount of wheel spin is desirable: the tyre is generating more force than it would if it were locked to ground speed. Too much spin (>0.30) and you are on the slope where traction falls off steeply.',
+    text: 'Tyre models such as Pacejka\'s Magic Formula put peak longitudinal force at a slip ratio of roughly 0.07–0.15 for most road tyres. That means a small amount of wheel spin is desirable: the tyre is generating more force than it would if it were locked to ground speed. Too much spin (>0.30) and you are on the slope where traction falls off steeply.',
   },
   {
     type: 'p',
@@ -123,21 +122,13 @@ const CONTENT = [
   },
 ];
 
-function Prose({ content, inlineCta }) {
-  // GROWTH_EXP_004: inject InlineSimCta after the Nth H2 (mid-scroll) when
-  // variant=B. Index is the count of H2 blocks already rendered; inject after
-  // the 2nd H2 (i.e. midway between intro and conclusion). Variant A renders
-  // an empty fragment in the same slot so DOM ordering stays identical for
-  // both arms.
-  const INJECT_AFTER_H2_COUNT = 2;
-  let h2Seen = 0;
+function Prose({ content }) {
 
   return (
     <div className="max-w-2xl mx-auto">
       {content.map((block, i) => {
         const nodes = [];
         if (block.type === 'h2') {
-          h2Seen += 1;
           nodes.push(
             <h2 key={i} className="font-display font-bold text-2xl md:text-3xl text-white mt-12 mb-4 tracking-tight">{block.text}</h2>
           );
@@ -153,15 +144,8 @@ function Prose({ content, inlineCta }) {
           );
         } else {
           nodes.push(
-            <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">{block.text}</p>
+            <p key={i} className="text-white/75 text-base leading-relaxed mb-5">{block.text}</p>
           );
-        }
-        // Inject the inline CTA slot directly after the Nth H2 *and its
-        // following paragraph cluster*. We attach it after the H2 itself
-        // so the slot lives at the natural section boundary, not before
-        // the heading.
-        if (block.type === 'h2' && h2Seen === INJECT_AFTER_H2_COUNT) {
-          nodes.push(<div key={`exp004-slot-${i}`}>{inlineCta}</div>);
         }
         return nodes;
       })}
@@ -179,14 +163,14 @@ export default function PostPage() {
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
             {['physics', 'launch control', 'clutch'].map(t => (
-              <span key={t} className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide">{t}</span>
+              <span key={t} className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent">{t}</span>
             ))}
           </div>
           <CodeComment className="mb-4">staging lane · the first 0.4 s</CodeComment>
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             The Physics of a Perfect Launch
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-6">
+          <div className="text-sm text-white/60 mb-6">
             24 April 2026 · 8 min read · MotoQuant Blog
           </div>
 
@@ -195,24 +179,15 @@ export default function PostPage() {
             <span aria-hidden="true" className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent" />
             <span className="flex items-end gap-1.5">
               <ScoreboardDigits value="1.7-2.1" h={26} label="1.7 to 2.1 seconds" />
-              <span className="font-mono text-xs text-white/40 mb-0.5">s</span>
+              <span className="font-mono text-xs text-white/60 mb-0.5">s</span>
             </span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-0.5">
+            <span className="text-xs text-white/60 mb-0.5">
               typical 60-ft · decided in the first 0.4 s
             </span>
           </div>
         </div>
 
-        {/* GROWTH_EXP_004: inline mid-scroll CTA. Variant A renders nothing
-            (control = end-of-post CTA only). Variant B renders a pull-quote-
-            style sim CTA after the 2nd H2. Suspense boundary required because
-            InlineSimCta uses useSearchParams() and this page is otherwise
-            statically prerendered. */}
-        <Prose content={CONTENT} inlineCta={
-          <Suspense fallback={null}>
-            <InlineSimCta />
-          </Suspense>
-        } />
+        <Prose content={CONTENT} />
 
         {/* CTA */}
         <div className="max-w-2xl mx-auto mt-16 glass rounded-xl p-6 border border-brand-orange/25 flex flex-col sm:flex-row items-center gap-4">
@@ -220,8 +195,8 @@ export default function PostPage() {
             <div className="font-display font-bold text-white mb-1">Test your own launch physics</div>
             <div className="text-white/60 text-sm">Free simulator — pick your bike, adjust rider weight, and watch the 60-ft time change.</div>
           </div>
-          <Link href="/simulator" className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">
-            Run sim →
+          <Link href="/simulator" className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">
+            Open the simulator →
           </Link>
         </div>
       </article>

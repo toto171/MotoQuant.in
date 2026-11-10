@@ -79,7 +79,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Both bikes are run in MotoQuant under matched Aamby Valley November conditions — density altitude around 1,100 m, 22°C ambient, dry concrete, a 70 kg rider, OEM tire compounds. The Ninja 400 runs on Dunlop Sportmax GPR-300 front (120/70-17) and rear (160/60-17) at μ_peak ≈ 1.08. The ZX-4R runs on Dunlop Sportmax Roadsport 2 front (110/70-17) and rear (150/60-17) at μ_peak ≈ 1.10. Both are production sport-touring compounds, not drag slicks.",
+    text: "Both bikes are run in MotoQuant under matched Aamby Valley November conditions — density altitude around 1,100 m, 22°C ambient, dry asphalt, a 70 kg rider, OEM tire compounds. The Ninja 400 runs on Dunlop Sportmax GPR-300 front (120/70-17) and rear (160/60-17) at μ_peak ≈ 1.08. The ZX-4R runs on Dunlop Sportmax Roadsport 2 front (110/70-17) and rear (150/60-17) at μ_peak ≈ 1.10. Both are production sport-touring compounds, not drag slicks.",
   },
   {
     type: "table",
@@ -253,7 +253,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "MotoQuant models 20 venues. The two most commonly used Indian strip venues for 400cc bikes are Aamby Valley (Sahyadri Sports Complex, 1,050 m altitude, November is peak season with DA ~1,100 m) and MMRT Chennai (78 m altitude, high humidity, warmer air year-round). The contrast between venues matters for both bikes.",
+    text: "MotoQuant models 20 venues. The two most commonly used Indian strip venues for 400cc bikes are Aamby Valley (679 m altitude, November DA about 1,100 m) and MMRT Chennai (78 m altitude, high humidity, warmer air year-round). The contrast between venues matters for both bikes.",
   },
   {
     type: "p",
@@ -334,7 +334,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -357,7 +357,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -392,7 +392,7 @@ export default function PostPage() {
             ].map((t) => (
               <span
                 key={t}
-                className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
               >
                 {t}
               </span>
@@ -402,7 +402,7 @@ export default function PostPage() {
             Kawasaki Ninja 400 vs ZX-4R: Parallel Twin vs Inline-Four at the
             Strip
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             22 May 2026 · 12 min read · MotoQuant Blog
           </div>
         </div>
@@ -466,18 +466,8 @@ export default function PostPage() {
               >
                 Browse the full bike catalog
               </Link>{" "}
-              — 541 bikes with individual Cd, gear ratios, and physics params
+              — 534 bikes with individual Cd, gear ratios, and physics params
               pre-loaded.
-            </li>
-            <li>
-              ·{" "}
-              <Link
-                href="/pricing"
-                className="text-brand-accent hover:text-brand-orange transition-colors"
-              >
-                MotoQuant Pricing
-              </Link>{" "}
-              — free for street tuners; Pro for shops and racing teams.
             </li>
           </ul>
         </div>
@@ -496,9 +486,9 @@ export default function PostPage() {
           </div>
           <Link
             href="/simulator?bike=kawasaki-ninja-400"
-            className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
+            className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
           >
-            Run sim →
+            Open the simulator →
           </Link>
         </div>
       </article>

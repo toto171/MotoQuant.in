@@ -1,9 +1,9 @@
 'use client';
 
 /**
- * ActionButton — the one run/stop button pattern (IGNITION v5).
+ * ActionButton — the one run/stop button pattern (CLARITY v6).
  *
- * Pairs with useAsyncTask: idle it's the signal-orange primary button; while the task
+ * Pairs with useAsyncTask: idle it's the accent primary button; while the task
  * runs it flips to the amber .btn-running "■ Stop — NN%" state with live
  * progress — real percentage when the backend reports it (job-backed sims),
  * an animated sweep strip otherwise (plain fetches, cold starts). The button
@@ -62,7 +62,7 @@ export default function ActionButton({
       aria-label={stoppable ? `Stop — ${verb}` : verb}
       className={`btn-running relative overflow-hidden ${className}`}
     >
-      <span className="relative z-10 flex items-center gap-2 font-mono text-sm">
+      <span className="relative z-10 flex items-center gap-2 font-display text-base font-semibold tabular-nums">
         {stoppable && <span aria-hidden="true">■</span>}
         <span>
           {stoppable ? 'Stop' : verb}

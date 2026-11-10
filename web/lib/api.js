@@ -27,15 +27,7 @@
 //    `web/.env.local` so the fetches go to your local uvicorn.
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
-// 2) API_URL_DIRECT — same env override, but falls back to the absolute
-//    Render URL instead of the rewrite. Used by the auth + billing surfaces
-//    (AuthProvider, /login, /pricing, /account) which were built against the
-//    direct cross-origin base and must keep identical fetch/cookie semantics
-//    even when NEXT_PUBLIC_API_URL is unset.
-export const API_URL_DIRECT =
-  process.env.NEXT_PUBLIC_API_URL || 'https://motoquant-api.onrender.com';
-
-// 3) serverApiBase(fallback) — for server-side code (sitemap.js, metadata
+// 2) serverApiBase(fallback) — for server-side code (sitemap.js, metadata
 //    layouts) that runs at build/ISR time where a relative URL cannot work.
 //    Resolution order: public env override, then the server-only
 //    MOTOQUANT_INTERNAL_API_URL, then the caller-supplied absolute fallback
@@ -76,7 +68,9 @@ async function postJson(path, body, signal) {
         /* keep the status-only message */
       }
     }
-    throw new Error(msg);
+    const err = new Error(msg);
+    err.status = res.status;
+    throw err;
   }
   return res.json();
 }
@@ -104,8 +98,27 @@ function optimizeBuildBody({
   rider_weight_kg,
   venue_id,
   max_candidates,
+  location,
+  lat,
+  lon,
+  altitude_m,
+  ambient_temp_c,
+  track_temp_c,
+  humidity_pct,
+  pressure_hpa,
 }) {
   const body = { bike_id, budget_inr };
+  // Optional race conditions — same fields (and meaning) as the autotune route.
+  if (location != null && location !== '') body.location = location;
+  if (lat != null && lon != null) {
+    body.lat = lat;
+    body.lon = lon;
+  }
+  if (altitude_m != null) body.altitude_m = altitude_m;
+  if (ambient_temp_c != null) body.ambient_temp_c = ambient_temp_c;
+  if (track_temp_c != null) body.track_temp_c = track_temp_c;
+  if (humidity_pct != null) body.humidity_pct = humidity_pct;
+  if (pressure_hpa != null) body.pressure_hpa = pressure_hpa;
   if (goal != null) body.goal = goal;
   if (profile != null) body.profile = profile;
   if (rider_weight_kg != null) body.rider_weight_kg = rider_weight_kg;
@@ -178,6 +191,28 @@ export async function cancelJob(jobId) {
   return postJson(`/api/jobs/${jobId}/cancel`);
 }
 
+// Sleep for `ms`, but resolve early when the tab becomes visible again or the
+// network comes back, so a resumed job is re-polled immediately.
+function sleepOrWake(ms) {
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', onVis);
+      if (typeof window !== 'undefined') window.removeEventListener('online', finish);
+      resolve();
+    };
+    const onVis = () => {
+      if (document.visibilityState === 'visible') finish();
+    };
+    const timer = setTimeout(finish, ms);
+    if (typeof document !== 'undefined') document.addEventListener('visibilitychange', onVis);
+    if (typeof window !== 'undefined') window.addEventListener('online', finish);
+  });
+}
+
 export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 350, signal } = {}) {
   onProgress?.({ status: 'connecting', progress: null, stage: '' });
   let started;
@@ -185,7 +220,10 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
     started = await startJob(kind, body, signal);
   } catch (e) {
     if (e?.name === 'AbortError') throw e;
-    if (fallbackPath && /API error (404|405)/.test(e.message || '')) {
+    if (
+      fallbackPath &&
+      (e?.status === 404 || e?.status === 405 || /API error (404|405)/.test(e?.message || ''))
+    ) {
       onProgress?.({ status: 'running', progress: null, stage: '' });
       return postJson(fallbackPath, body, signal);
     }
@@ -208,7 +246,10 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
   //  - 404: in-memory registry lost the job (restart) — confirm 3× in a row
   //  - interval backs off 350 ms → 800 ms → 1.5 s as the job ages
   let t0 = Date.now();
-  let lastSuccessAt = Date.now();
+  // Tolerance window runs from the FIRST failure of the current streak (reset
+  // on any successful poll) so a laptop sleep / backgrounded tab does not
+  // cancel a healthy job on the first failed poll after waking.
+  let firstFailAt = null;
   let lostCount = 0;
   let restarts = 0;
   for (;;) {
@@ -231,7 +272,7 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
     }
 
     if (j != null) {
-      lastSuccessAt = Date.now();
+      firstFailAt = null;
       lostCount = 0;
       if (signal?.aborted) throw aborted();
       if (j.status === 'cancelled') throw new DOMException('Aborted', 'AbortError');
@@ -262,11 +303,13 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
             'Progress lost and the engine is not reachable — please run again'
           );
         }
-        lastSuccessAt = Date.now();
+        firstFailAt = null;
         t0 = Date.now(); // restart the poll-interval backoff for the new job
         continue;
       }
-    } else if (Date.now() - lastSuccessAt > 150_000) {
+    } else if (firstFailAt == null) {
+      firstFailAt = Date.now();
+    } else if (Date.now() - firstFailAt > 150_000) {
       cancelJob(started.job_id).catch(() => {}); // don't leave a zombie burning CPU
       throw new Error(
         'Connection lost while the simulation was running — check your network and run again'
@@ -275,7 +318,7 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
 
     const age = Date.now() - t0;
     const interval = age > 60_000 ? 1500 : age > 10_000 ? 800 : pollMs;
-    await new Promise((r) => setTimeout(r, interval));
+    await sleepOrWake(interval);
     if (signal?.aborted) throw aborted();
   }
 }
@@ -350,38 +393,67 @@ export function chatJob(query, messages, { signal, onProgress } = {}) {
   });
 }
 
-/**
- * Persist a simulation result to sim_runs (leaderboard + account Garage).
- * Anonymous saves work; pass the AuthProvider access token to bind the run
- * to the signed-in user so it shows in their Garage.
- *
- * @param {object} body  {bike_id, venue_id?, et_quarter_s, trap_speed_kmh,
- *                        et_60ft_s?, et_eighth_s?, et_1000ft_s?, notes?}
- * @param {string|null} accessToken
- */
-export async function saveRun(body, accessToken = null, signal) {
-  const res = await fetch(`${API_URL}/api/simulate/save`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-    },
-    body: JSON.stringify(body),
-    signal,
-  });
-  if (!res.ok) {
-    let msg = `API error ${res.status}`;
-    try {
-      const j = await res.json();
-      if (j?.detail) {
-        msg = typeof j.detail === 'string' ? j.detail : JSON.stringify(j.detail);
-      }
-    } catch {
-      /* keep the status-only message */
+// ── Bike catalog (shared, memoised) ─────────────────────────────────────
+// One in-flight promise for the full catalog (limit=2000). Cached for the
+// page lifetime; a failure clears the cache so the next call retries.
+let _catalogPromise = null;
+export function getBikeCatalog() {
+  if (_catalogPromise) return _catalogPromise;
+  _catalogPromise = (async () => {
+    const res = await fetch(`${API_URL}/api/bikes?limit=2000`);
+    if (!res.ok) {
+      const err = new Error(`API error ${res.status}`);
+      err.status = res.status;
+      throw err;
     }
-    throw new Error(msg);
+    const data = await res.json();
+    return Array.isArray(data) ? data : data.bikes || data.items || [];
+  })();
+  _catalogPromise.catch(() => {
+    _catalogPromise = null;
+  });
+  return _catalogPromise;
+}
+
+// ── Parts catalog + per-bike compatibility (two cheap requests) ─────────
+// The full catalog is fetched ONCE per page load (no bike id → no per-bike
+// annotation, and the list omits fitment_rules/specifications by default).
+// Which parts fit a given bike is a separate ids-only request, so changing
+// bike costs a few KB instead of re-downloading the whole catalog.
+let _partsPromise = null;
+export function getPartsCatalog() {
+  if (_partsPromise) return _partsPromise;
+  _partsPromise = (async () => {
+    // include_rules adds each part's `specifications` (slot position/type for the
+    // picker's one-per-slot rule); the response is gzipped (~55 KB).
+    const res = await fetch(`${API_URL}/api/parts?limit=5000&include_rules=true`);
+    if (!res.ok) {
+      const err = new Error(`API error ${res.status}`);
+      err.status = res.status;
+      throw err;
+    }
+    const data = await res.json();
+    return Array.isArray(data?.parts) ? data.parts : [];
+  })();
+  _partsPromise.catch(() => {
+    _partsPromise = null;
+  });
+  return _partsPromise;
+}
+
+/** Ids of the parts that fit `bikeId` (abortable). Resolves to a number[]. */
+export async function getCompatiblePartIds(bikeId, signal) {
+  const res = await fetch(
+    `${API_URL}/api/parts?bike_id=${encodeURIComponent(bikeId)}&compatible_only=true&limit=5000&fields=id`,
+    { signal },
+  );
+  if (!res.ok) {
+    const err = new Error(`API error ${res.status}`);
+    err.status = res.status;
+    throw err;
   }
-  return res.json();
+  const data = await res.json();
+  return Array.isArray(data?.part_ids) ? data.part_ids : [];
 }
 
 // ── Part display label ──────────────────────────────────────────────────

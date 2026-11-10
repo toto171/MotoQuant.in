@@ -84,6 +84,7 @@ def _qualifies_for_usd_reprice(p: dict) -> bool:
     """Mirrors action 2's gate — sample selection only (see above)."""
     return (
         p["id"] not in patch_mod.EXCLUDE_USD_REPRICE_IDS
+        and p["id"] not in patch_mod.REMOVED_FROM_CATALOG_IDS
         and p.get("price_usd") is not None
         and p.get("price_inr") is None
         and patch_mod._is_http(p.get("source_url"))
@@ -294,7 +295,10 @@ class TestScrapeDataPatchMutates(unittest.TestCase):
         on how many were reverted — the counts SCRAPE_REPORT.md documents."""
         expected_totals = {
             "inr_reprice": 72,
-            "usd_reprice": 210,
+            # 210 in SCRAPE_REPORT.md; five of those rows were template-stamped
+            # parts removed from the catalog on 2026-11-10 and are now in
+            # REMOVED_FROM_CATALOG_IDS.
+            "usd_reprice": 205,
             "discontinued": 6,
             "fictional_brand_renames": 25,
             "tire_family_status": 48,

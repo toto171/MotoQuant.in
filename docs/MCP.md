@@ -58,8 +58,9 @@ Windows: `%APPDATA%\Claude\`) and restart the app:
 
 `python` must be a interpreter that can `import motoquant` — either the repo's
 virtualenv (`/path/to/.venv/bin/python`) or a checkout installed with
-`pip install -e .`. In HTTP mode nothing beyond the stdlib is needed at
-runtime, so a bare `pip install -e . --no-deps` is enough.
+`pip install -e .` (which also installs the runtime dependencies). In HTTP
+mode nothing beyond the stdlib is needed at runtime, so a bare
+`pip install -e . --no-deps` is enough.
 
 ### Local (no network, full fidelity)
 
@@ -67,17 +68,18 @@ runtime, so a bare `pip install -e . --no-deps` is enough.
 {
   "mcpServers": {
     "motoquant": {
-      "command": "/path/to/MotoQuant_v1/.venv/bin/python",
+      "command": "/path/to/MotoQuant.in/.venv/bin/python",
       "args": ["-m", "motoquant.mcp_server", "--local"],
       "env": {
-        "MOTOQUANT_DB": "/path/to/MotoQuant_v1/motoquant.db"
+        "MOTOQUANT_DB": "/path/to/MotoQuant.in/motoquant.db"
       }
     }
   }
 }
 ```
 
-Local mode needs `pip install -r requirements-api.txt` (it imports
+Local mode needs the runtime dependencies (`pip install -e .`, or
+`pip install -r requirements-api.txt`; it imports
 `motoquant.api` so the MCP tools and the REST routes cannot drift apart).
 
 ### Verify without a client
@@ -97,7 +99,7 @@ python -m motoquant.mcp_server --local --selftest
 | Needs | Python stdlib only | `requirements-api.txt` + the DB |
 | Latency | ~0.3 s warm, **up to ~50 s on a cold start** | ~50 ms–2 s |
 | `gearing_impact` | catalog sprockets only (see below) | any tooth count |
-| Free-tier sim quota | counts against it | not metered |
+| Rate limits | the hosted API's per-IP fuses apply (HTTP 429 when tripped) | none |
 
 The hosted backend runs on Render's **free tier**, which sleeps after 15
 minutes of inactivity. The first call after a nap can take ~50 s while the
@@ -215,7 +217,7 @@ network: handshake, `tools/list` schema validation, `tools/call` in local mode
 against a **temp copy** of `motoquant.db`, both `gearing_impact` paths (the
 HTTP one served by a loopback stub), and every malformed-input branch. The
 gearing test asserts that setup A at the K5's stock 17/42 reproduces the pinned
-`9.9331 s` baseline — proof the sprocket override rides the production config
+`10.0436 s` baseline — proof the sprocket override rides the production config
 builder rather than a parallel implementation.
 
 ```bash
@@ -237,16 +239,16 @@ and will happily over-claim on your behalf.
 
 ## Honest limits
 
-* Accuracy is **weighted mean |error| ≈ 0.26 s over 276 matched benchmarks**
-  (`reports/acc_final_2026_08_08.json`). Good for ranking builds and answering
+* Accuracy is **weighted mean |error| ≈ 0.25 s over 263 matched benchmarks**
+  (`reports/acc_final_2026_11_10.json`). Good for ranking builds and answering
   what-ifs; not a promise that a given bike will run an exact ET.
 * Top-speed predictions are weaker than ET: over 83 matched top-speed
-  benchmarks the mean |error| is ~28 km/h and the fleet still carries a
-  ~+24 km/h bias after the speed-limiter and gearing passes
-  (`reports/sweep_topspeed_2026-08-08.json`).
+  benchmarks the mean |error| is ~13 km/h with a ~+7 km/h (sim fast) bias
+  (`reports/acc_final_2026_11_10.json` `topspeed`).
 * The parts catalog is Indian-market priced (INR) and does not cover engine
   internals (cams, big-bore) — "stage 3" is approximated with bolt-on power
   adders.
 * Simulations assume a competent launch. There is no rider-skill knob.
-* The hosted free tier meters anonymous sims; heavy interactive use should run
-  local mode.
+* The hosted API is free but rate-limited per IP; heavy interactive or
+  batch use should run local mode (or your own self-hosted instance, see
+  [SELF_HOSTING.md](SELF_HOSTING.md)).

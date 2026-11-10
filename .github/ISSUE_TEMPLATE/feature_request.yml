@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Before filing: check CLAUDE.md → "Full Project Roadmap". If your idea is already in a future phase, comment there instead of opening a new issue.
+        Before filing: check docs/ROADMAP.md and search existing issues. If your idea is already planned, comment on the existing issue instead of opening a new one.
 
   - type: textarea
     id: problem
@@ -33,14 +33,15 @@ body:
   - type: dropdown
     id: phase
     attributes:
-      label: Which phase does this belong to?
+      label: Which area does this belong to?
       options:
-        - Phase 1 — Core physics (additions)
-        - Phase 2 — Database / ingestion
-        - Phase 3 — Validation / calibration
-        - Phase 4 — AI / optimisation
-        - Phase 5 — Desktop app
-        - Phase 6 — Commercial launch
+        - Physics / sub-models
+        - Catalog data / ingestion
+        - Validation / calibration
+        - AI / optimisation / chat
+        - Web app / UX
+        - Self-hosting / deployment
+        - Docs / contributor experience
         - Out of scope — please discuss first
     validations:
       required: true

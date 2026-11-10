@@ -309,14 +309,18 @@ def _wrun(task):
         FEATURE_NAMES,
         _extract_nominal_features,
     )
-    from motoquant.physics import MotoQuantEngine
+
+    # The Rust core when it is active (bit-identical labels on a host whose
+    # math it reproduces exactly — engine_select's 'auto' contract), else the
+    # Python reference. ~65x faster for a full regen.
+    from motoquant.engine_select import make_engine
 
     try:
         row = _W_ROWS[task["bmid"]]
         cfg = apply_knobs(_config_for_row(row), task["knobs"])
         feat = _extract_nominal_features(cfg)
         fvec = [float(feat[k]) for k in FEATURE_NAMES]
-        res = MotoQuantEngine(cfg).run()
+        res = make_engine(cfg).run()
         et, trap = res.time_quarter, res.speed_quarter
         ok = (
             et is not None

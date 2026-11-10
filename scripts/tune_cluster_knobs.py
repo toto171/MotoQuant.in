@@ -7,6 +7,19 @@ evaluated per cluster so a candidate knob-set re-sims only the bikes it can
 affect. Profiles are runtime-looked-up, so no DB reseed is needed between
 candidate evaluations.
 
+Binding + weights delegate to scripts/sweep_lib (bind_benchmark_for_record,
+the ONE binding implementation). ``MQ_RULES=epoch`` (default, the 2026-10
+headline rules) or ``MQ_RULES=legacy`` (pre-epoch binding + classifier)
+selects the rule set. Simulations use motoquant.engine_select.make_engine
+(the Rust core when built and current — bit-identical, ~50x faster). Each
+row is simmed under its benchmark's timing convention
+(``sweep_lib.rollout_m_for_source``: 1-ft rollout, or 0.0 for rows timed
+from first motion).
+
+For the joint ET + trap retune with cross-validation see
+scripts/tune_epoch_2026_10_24.py; this script stays the quick per-cluster
+grid probe.
+
 Usage:
   python scripts/tune_cluster_knobs.py baseline OUT_JSON
       Sim every benchmark-matched bike once with current profiles; write the
@@ -23,6 +36,7 @@ Usage:
 import json
 import logging
 import multiprocessing as mp
+import os
 import sys
 import warnings
 from pathlib import Path
@@ -31,19 +45,16 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 logging.getLogger("motoquant").setLevel(logging.ERROR)
 warnings.filterwarnings("ignore")
 
-from motoquant import (
-    MotoQuantEngine,  # noqa: E402
-    category_profiles as cp,  # noqa: E402
-)
+from motoquant import category_profiles as cp  # noqa: E402
+from motoquant.engine_select import make_engine  # noqa: E402
 from motoquant.scraper.importer import spec_to_bike_config  # noqa: E402
 from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES  # noqa: E402
-from scripts.sweep_lib import source_weight  # noqa: E402
-from scripts.sweep_with_clusters import (  # noqa: E402
-    _model_specificity_score,
-    _wb_match,
-    cluster_for,
+from scripts.phys_weighted_sweep import RULES, _bench_map  # noqa: E402
+from scripts.sweep_lib import (  # noqa: E402
+    bind_benchmark_for_record,
+    rollout_m_for_source,
 )
-from scripts.validation_sweep import BENCHMARKS  # noqa: E402
+from scripts.sweep_with_clusters import cluster_for  # noqa: E402
 
 # Map sweep-cluster labels (dashes) -> category_tag (underscores)
 CLUSTER_TO_TAG = {
@@ -62,46 +73,32 @@ CLUSTER_TO_TAG = {
 }
 
 
-def _bench_map():
-    bm = {}
-    for bmfr, bmodel, byear, tgt_et, tgt_trap, src in BENCHMARKS:
-        bm.setdefault((bmfr.lower(), bmodel.lower()), []).append(
-            (byear, tgt_et, tgt_trap, src)
-        )
-    return bm
+def _rules() -> str:
+    rules = os.environ.get("MQ_RULES", "epoch").strip().lower() or "epoch"
+    if rules not in RULES:
+        raise SystemExit(f"MQ_RULES={rules!r}: expected one of {sorted(RULES)}")
+    return rules
 
 
-def build_matches():
-    """Benchmark-match every spec (knob-independent). Returns match rows."""
+def build_matches(rules=None):
+    """Benchmark-bind every spec (knob-independent). Returns match rows."""
+    rules = rules or _rules()
+    policy, wfn = RULES[rules]
     bm = _bench_map()
     matches = []
     for i, spec in enumerate(ALL_KNOWN_BIKES):
-        m_lo = spec.manufacturer.lower()
-        mod_lo = spec.model_name.lower()
-        yf = spec.year_from or 0
-        yt = spec.year_to or yf
-        best = None
-        best_score = -1
-        best_in = False
-        for (bmf, bmod), entries in bm.items():
-            if not (_wb_match(bmf, m_lo) and _wb_match(bmod, mod_lo)):
-                continue
-            in_e = None
-            for byear, te, tt, src in entries:
-                if yf <= byear <= yt or (not yt and yf == byear):
-                    in_e = (te, tt, src)
-                    break
-            fb = (entries[0][1], entries[0][2], entries[0][3])
-            chosen = in_e if in_e is not None else fb
-            e_in = in_e is not None
-            sc = _model_specificity_score(bmod)
-            if e_in and not best_in:
-                best, best_score, best_in = chosen, sc, True
-            elif e_in == best_in and sc > best_score:
-                best, best_score = chosen, sc
-        if best is None:
+        hit = bind_benchmark_for_record(
+            spec.manufacturer,
+            spec.model_name,
+            spec.year_from,
+            spec.year_to,
+            bm,
+            policy=policy,
+            weight_fn=wfn,
+        )
+        if hit is None:
             continue
-        te, tt, src = best
+        te, tt, src = hit
         cl = cluster_for(
             spec.manufacturer,
             spec.model_name,
@@ -118,8 +115,10 @@ def build_matches():
                 "model": spec.model_name,
                 "cluster": cl,
                 "target_et": te,
-                "weight": source_weight(src),
+                "target_trap": tt,
+                "weight": wfn(src),
                 "source": src,
+                "rollout_m": rollout_m_for_source(src),
             }
         )
     return matches
@@ -135,20 +134,26 @@ def _apply_overrides(overrides_by_tag):
 
 
 def _sim_one(args):
-    i, overrides_by_tag = args
+    i, rollout_m, overrides_by_tag = args
     _apply_overrides(overrides_by_tag)
     spec = ALL_KNOWN_BIKES[i]
     try:
         cfg = spec_to_bike_config(spec)
-        r = MotoQuantEngine(cfg).run(use_adaptive_dt=False, max_time=26.0)
-        return (i, float(r.time_quarter) if r.finished_quarter else None)
+        kw = {} if rollout_m is None else {"rollout_m": rollout_m}
+        r = make_engine(cfg).run(use_adaptive_dt=False, max_time=26.0, **kw)
+        if not r.finished_quarter:
+            return (i, None)
+        return (i, (float(r.time_quarter), float(r.speed_quarter * 3.6)))
     except Exception:
         return (i, None)
 
 
-def sim_batch(indices, overrides_by_tag=None, procs=4):
+def sim_batch(indices, overrides_by_tag=None, procs=4, rollouts=None):
+    """{i: (et, trap) | None}; ``rollouts`` maps i -> rollout_m (the row's
+    timing convention; default = the engine's 1-ft rollout)."""
     overrides_by_tag = overrides_by_tag or {}
-    args = [(i, overrides_by_tag) for i in indices]
+    rollouts = rollouts or {}
+    args = [(i, rollouts.get(i), overrides_by_tag) for i in indices]
     with mp.Pool(procs) as pool:
         return dict(pool.map(_sim_one, args))
 
@@ -160,30 +165,52 @@ def wstats(rows):
     wabs = sum(abs(r["delta"]) * r["weight"] for r in rows) / W
     wbias = sum(r["delta"] * r["weight"] for r in rows) / W
     raw = sum(abs(r["delta"]) for r in rows) / len(rows)
-    return {
+    out = {
         "n": len(rows),
         "w_sum": round(W, 2),
         "w_mean_abs": round(wabs, 4),
         "w_bias": round(wbias, 4),
         "raw_mean_abs": round(raw, 4),
     }
+    tr = [r for r in rows if r.get("trap_delta") is not None]
+    if tr:
+        WT = sum(r["weight"] for r in tr) or 1e-9
+        out["trap_w_mean_abs_kmh"] = round(
+            sum(abs(r["trap_delta"]) * r["weight"] for r in tr) / WT, 2
+        )
+        out["trap_w_bias_kmh"] = round(
+            sum(r["trap_delta"] * r["weight"] for r in tr) / WT, 2
+        )
+    return out
+
+
+def _scored(m, res):
+    et, trap = res
+    return {
+        **m,
+        "sim_et": round(et, 4),
+        "sim_trap": round(trap, 2),
+        "delta": round(et - m["target_et"], 4),
+        "trap_delta": round(trap - m["target_trap"], 2) if m["target_trap"] else None,
+    }
 
 
 def cmd_baseline(out_json):
     matches = build_matches()
-    ets = sim_batch([m["i"] for m in matches])
+    ets = sim_batch(
+        [m["i"] for m in matches], rollouts={m["i"]: m["rollout_m"] for m in matches}
+    )
     rows = []
     for m in matches:
-        et = ets.get(m["i"])
-        if et is None:
+        res = ets.get(m["i"])
+        if res is None:
             continue
-        rows.append(
-            {**m, "sim_et": round(et, 4), "delta": round(et - m["target_et"], 4)}
-        )
+        rows.append(_scored(m, res))
     by_cluster = {}
     for r in rows:
         by_cluster.setdefault(r["cluster"], []).append(r)
     out = {
+        "rules": _rules(),
         "overall": wstats(rows),
         "clusters": {cl: wstats(v) for cl, v in sorted(by_cluster.items())},
         "rows": sorted(rows, key=lambda r: -abs(r["delta"]) * r["weight"]),
@@ -205,13 +232,17 @@ def cmd_grid(cluster, grid_json, out_json=None):
         return
     results = []
     for cand in grid:
-        ets = sim_batch([m["i"] for m in matches], {tag: cand})
+        ets = sim_batch(
+            [m["i"] for m in matches],
+            {tag: cand},
+            rollouts={m["i"]: m["rollout_m"] for m in matches},
+        )
         rows = []
         for m in matches:
-            et = ets.get(m["i"])
-            if et is None:
+            res = ets.get(m["i"])
+            if res is None:
                 continue
-            rows.append({**m, "delta": et - m["target_et"]})
+            rows.append(_scored(m, res))
         st = wstats(rows)
         results.append({"overrides": cand, **st})
         print(json.dumps(results[-1]))

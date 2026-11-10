@@ -1,36 +1,32 @@
 import Link from 'next/link';
 import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
-import CodeComment from '../../components/CodeComment';
 import { Reveal } from '../../components/Reveal';
 import ScoreboardDigits from '../../components/ScoreboardDigits';
-import TerminalCtaVariant from './TerminalCtaVariant';
 
 export const metadata = {
-  title: 'Whitepaper — MotoQuant Pro Physics Engine (Pacejka Tire Model + RK4)',
+  title: 'Whitepaper — MotoQuant Physics Engine (15 Sub-Models + RK4)',
   description:
-    'MotoQuant Pro whitepaper: a free Pacejka tire-model motorcycle quarter-mile calculator built on 15 sub-models and RK4 integration at 1 ms, validated against 250 source-quality-weighted benchmarks across a cylinder-aware 12-cluster taxonomy. Reference baselines K5 / R1 / Hayabusa accurate to four decimals across every commit.',
+    'MotoQuant whitepaper: a free, open-source motorcycle quarter-mile simulator built on 15 sub-models and RK4 integration at 1 ms, checked against 250 published tests weighted by source quality across a cylinder-aware 12-cluster taxonomy. Three reference bikes are held to four decimals by CI.',
   alternates: { canonical: 'https://motoquant.in/whitepaper' },
   keywords: [
     'motoquant whitepaper',
     'motorcycle physics engine whitepaper',
-    'pacejka tire model motorcycle',
-    'pacejka motorcycle tire model calculator',
-    'motorcycle quarter mile calculator pacejka',
+    'motorcycle quarter mile calculator',
     'rk4 motorcycle simulation',
     '15 sub-model drag simulator',
     'motorcycle drag racing physics paper',
   ],
   openGraph: {
-    title: 'MotoQuant Pro — Physics Engine Whitepaper (Pacejka + RK4)',
+    title: 'MotoQuant — Physics Engine Whitepaper (15 Sub-Models + RK4)',
     description:
-      '15 sub-models. RK4 at 1 ms. Pacejka tire model. 12-cluster cylinder-aware taxonomy. Source-quality weighted validation. Reference baselines accurate to four decimals.',
+      '15 sub-models. RK4 at 1 ms. 12-cluster cylinder-aware taxonomy. Validation weighted by source quality. Reference bikes held to four decimals.',
     url: 'https://motoquant.in/whitepaper',
     type: 'article',
   },
 };
 
-const ABSTRACT = `MotoQuant Pro is a first-principles physics engine for predicting motorcycle quarter-mile drag-racing elapsed times. The model couples 15 independent sub-models — engine torque (Willans friction), Pacejka tire grip with thermal evolution, gear-shift and clutch slip dynamics, weight transfer and rider centre-of-gravity shift, aerodynamic drag with per-bike Cd × A, environmental conditions (density altitude, surface μ, ambient temp), and parasitic loss budget — through a fixed-step fourth-order Runge–Kutta integrator running at one-millisecond resolution. As of the August 2026 sweep we validate against 250 source-quality-weighted published quarter-mile benchmarks (276 matched) across a cylinder-aware 12-cluster taxonomy. Overall weighted bias is +0.007 s; weighted mean absolute error is 0.263 s. Within instrumented-magazine-data clusters (litre-sport ≥195 hp), weighted bias is +0.027 s and |Δ| is 0.147 s; across the ten cleanest validated runs the mean absolute error is ±0.007 s. Three reference baselines — GSX-R 1000 K5, YZF-R1 4C8, and Suzuki Hayabusa Gen1 — are preserved exactly to the fourth decimal place across every code change since July 13, 2026.`;
+const ABSTRACT = `MotoQuant is a first-principles physics engine for predicting motorcycle quarter-mile drag-racing elapsed times. The model couples 15 independent sub-models — engine torque (Willans friction), rear-tyre grip with load sensitivity and thermal evolution, gear-shift and clutch slip dynamics, weight transfer and rider centre-of-gravity shift, aerodynamic drag with per-bike Cd × A, environmental conditions (density altitude, surface μ, ambient temp), and parasitic loss budget — through a fixed-step fourth-order Runge–Kutta integrator running at one-millisecond resolution. In the 10 November 2026 sweep the model is checked against 250 published quarter-mile tests, weighted by source quality (263 matches to catalog bikes), across a cylinder-aware 12-cluster taxonomy. Overall weighted bias is +0.023 s and the weighted mean absolute error is 0.25 s. Litre sport bikes, where most benchmarks come from instrumented magazine tests, are off by 0.15 to 0.17 s on average (weighted); across the ten cleanest validated runs the mean absolute error is ±0.006 s. Three reference baselines (GSX-R 1000 K5, YZF-R1 4C8 and Suzuki Hayabusa Gen1) are held exactly to the fourth decimal place by CI, and move only in a deliberate, sweep-justified accuracy pass.`;
 
 const SECTIONS = [
   {
@@ -39,7 +35,7 @@ const SECTIONS = [
     title: 'Introduction',
     body: [
       'Motorcycle drag racing in India has grown rapidly across Aamby Valley (Lonavala, Maharashtra), MMRT Chennai, the Buddh International Circuit, Kari Motor Speedway (Coimbatore), and the Hyderabad strips. The community has outgrown the available tooling: spreadsheet calculators that treat power-to-weight as the sole input, regression-based estimators trained on limited international data, and per-bike rules of thumb that fail to generalise across mass, aero, gearing, traction, and venue conditions.',
-      'MotoQuant Pro is built to fill that gap. We aim for an open, audit-able simulator whose every coefficient traces back to a physical measurement — not a fitted curve. This whitepaper documents the architecture, validation methodology, and the honest residual error budget against which we benchmark every release.',
+      'MotoQuant is built to fill that gap. We aim for an open, audit-able simulator whose every coefficient traces back to a physical measurement — not a fitted curve. This whitepaper documents the architecture, validation methodology, and the honest residual error budget against which we benchmark every release.',
     ],
   },
   {
@@ -57,8 +53,8 @@ const SECTIONS = [
         'drivetrain — gear ratios, primary/final drive, clutch slip ratio, shift time',
         'clutch — basket inertia, slipper-clutch ramp, engagement RPM and curve, lockup transition',
         'chain — drive efficiency, sprocket geometry, chain pitch (428 / 520 / 525 / 530)',
-        'tire — Pacejka magic formula with thermal evolution, slip ratio, slip angle, peak μ, optimum temperature',
-        'aero — drag coefficient × frontal area per-bike (Cd × A range 0.293–0.68 m²)',
+        'tire — peak friction coefficient with load sensitivity, tread temperature (heat balance and optimum window), pressure from temperature and track preparation; a Pacejka slip curve is coded but not yet used by the integrator',
+        'aero — drag coefficient × frontal area per-bike (Cd × A from 0.20 to 0.60 m² across the catalog)',
         'weight_transfer — longitudinal load shift, front/rear normal force, traction limit',
         'rider_dynamics — centre-of-gravity shift on launch and during run, tucked / sit-up Cd × A transition',
         'staging — staged-position rollout (~1 ft), reaction-time floor, two-step launch RPM',
@@ -84,7 +80,7 @@ const SECTIONS = [
     n: '4',
     title: 'Validation methodology',
     body: [
-      'As of the August 2026 sweep we benchmark against 250 published quarter-mile elapsed times (276 matched to a catalog bike) where the bike, year range, and venue conditions are unambiguous. Sources are classified by quality and weighted accordingly:',
+      'The 10 November 2026 sweep benchmarks against 250 published quarter-mile elapsed times (263 matched to a catalog bike) where the bike, year range, and venue conditions are unambiguous. Sources are classified by quality and weighted accordingly:',
     ],
     list: {
       title: 'Source-quality weights',
@@ -93,12 +89,12 @@ const SECTIONS = [
         'magazine (MCN, RideApart, BikeWale published article)               — weight 0.7',
         'aggregator (FastestLaps, MotoStatz)                                  — weight 0.5',
         'forum or unverified timeslip                                         — weight 0.3',
-        'unknown / single-source                                              — weight 0.4',
+        'unknown / single-source                                              — weight 0.5',
         'derived (0–100 km/h × 1.6 multiplier with declared ±0.7 s)           — weight 0.1',
       ],
     },
     extra: [
-      'Per-cluster bias and weighted MAE are reported with N (sample size) so the reader can judge which clusters are statistically meaningful. Clusters dominated by derived benchmarks (the Indian small-cc and 2T entries) inherit the underlying ±0.7 s data uncertainty regardless of model fidelity.',
+      'Per-cluster bias and weighted MAE are reported with N (sample size) so the reader can judge which clusters are statistically meaningful. Derived benchmarks (mostly Indian small-cc entries) carry a declared ±0.7 s uncertainty and are down-weighted to 0.1 for that reason.',
     ],
   },
   {
@@ -108,23 +104,23 @@ const SECTIONS = [
     table: {
       head: ['Cluster', 'N', 'Weighted bias', 'Weighted |Δ|'],
       rows: [
-        ['Litre Sport ≥195 hp',          '30',  '+0.027 s', '0.147 s'],
-        ['Litre Sport 600–1000 (I4/I3)', '72',  '−0.009 s', '0.176 s'],
-        ['Sport Twin 600–1300',          '48',  '+0.006 s', '0.246 s'],
-        ['Mid-Twin 500–700',             '17',  '+0.001 s', '0.145 s'],
-        ['Mid-Twin 300–500',             '8',   '−0.038 s', '0.361 s'],
-        ['Single 300–500',               '16',  '+0.030 s', '0.509 s'],
-        ['Entry 200–300',                '14',  '−0.018 s', '0.231 s'],
-        ['Entry 150–200',                '13',  '−0.011 s', '0.702 s'],
-        ['Small-cc I4 screamer',         '2',   '+0.134 s', '0.962 s'],
-        ['Two-stroke',                   '9',   '+0.077 s', '0.642 s'],
-        ['Cruiser 1300+',                '5',   '+0.036 s', '0.209 s'],
-        ['Other',                        '42',  '+0.019 s', '0.324 s'],
-        ['All clusters · weighted',      '276', '+0.007 s', '0.263 s'],
+        ['Litre Sport ≥195 hp',          '29',  '−0.011 s', '0.171 s'],
+        ['Litre Sport 600–1000 (I4/I3)', '76',  '−0.016 s', '0.146 s'],
+        ['Sport Twin 600–1300',          '44',  '−0.001 s', '0.208 s'],
+        ['Mid-Twin 500–700',             '6',   '+0.135 s', '0.199 s'],
+        ['Mid-Twin 300–500',             '8',   '+0.189 s', '0.355 s'],
+        ['Single 300–500',               '17',  '−0.265 s', '0.620 s'],
+        ['Entry 200–300',                '14',  '+0.265 s', '0.325 s'],
+        ['Entry 150–200',                '13',  '−0.106 s', '0.651 s'],
+        ['Small-cc I4 screamer',         '2',   '−0.195 s', '0.270 s'],
+        ['Two-stroke',                   '9',   '+0.259 s', '0.339 s'],
+        ['Cruiser 1300+',                '4',   '+0.034 s', '0.220 s'],
+        ['Other',                        '41',  '+0.154 s', '0.367 s'],
+        ['All clusters · weighted',      '263', '+0.023 s', '0.25 s'],
       ],
     },
     body: [
-      'The most accurate clusters are litre-sport ≥195 hp (+0.027 s weighted bias, 0.147 s weighted MAE) and mid-twin 500–700 (+0.001 s bias, 0.145 s weighted MAE) — well within the ±0.20 s tolerance the modern instrumented Cycle World and Sport Rider tests themselves report as 1-σ test-to-test variation; across the ten cleanest validated runs the mean absolute error is ±0.007 s. Overall weighted bias of +0.007 s indicates the model is essentially centred at zero, and 138 of the 276 matched benchmarks fall within ±0.20 s (75 within ±0.10 s, 42 within ±0.05 s). The remaining residual is bounded by benchmark-data quality, not by physics model fidelity: the small-cc and two-stroke clusters draw heavily from derived benchmarks with declared ±0.7 s uncertainty, fundamentally limiting validation precision regardless of how well the physics is modelled.',
+      'The most accurate clusters are the litre sport bikes: 600–1000 cc fours and triples (−0.016 s weighted bias, 0.146 s weighted MAE over 76 matches) and the 195 hp and up group (−0.011 s, 0.171 s over 29). Both sit within the ±0.20 s that instrumented Cycle World and Sport Rider tests show between runs of the same bike, and across the ten cleanest validated runs the mean absolute error is ±0.006 s. Overall weighted bias is +0.023 s, so the model is close to centred, and 130 of the 263 matched benchmarks fall within ±0.20 s (72 within ±0.10 s, 42 within ±0.05 s). The rest of the error has two sources. One is benchmark quality: the small-cc clusters include derived benchmarks with a declared ±0.7 s uncertainty. The other is the model: small bikes, singles and two-strokes carry biases of a quarter of a second in either direction, and many small bikes still run a generic primary gear ratio (reports/gearing_experiment_2026_11_10.md).',
     ],
   },
   {
@@ -137,13 +133,13 @@ const SECTIONS = [
     table: {
       head: ['Bike', 'Year', 'Power', 'Reference ET', 'Δ (current)'],
       rows: [
-        ['Suzuki GSX-R 1000 K5',  '2005', '178 hp', '9.9331 s', '±0.0000 s'],
-        ['Yamaha YZF-R1 4C8',     '2007', '180 hp', '10.1436 s', '±0.0000 s'],
-        ['Suzuki Hayabusa Gen1',  '1999', '197 hp', '10.3633 s', '±0.0000 s'],
+        ['Suzuki GSX-R 1000 K5',  '2005', '178 hp', '10.0436 s', '±0.0000 s'],
+        ['Yamaha YZF-R1 4C8',     '2007', '180 hp', '10.1092 s', '±0.0000 s'],
+        ['Suzuki Hayabusa Gen1',  '1999', '197 hp', '10.1100 s', '±0.0000 s'],
       ],
     },
     body2: [
-      'These baselines were re-pinned on July 13, 2026 as part of a physics-recalibration epoch paired with a benchmark-corpus expansion (221 → 250 unique tests); since that pin they have not drifted across catalog expansions, physics tuning passes, importer changes, or further cluster-taxonomy revisions. Drift protection comes from a full-catalog regression golden rather than a special-cased tuning constraint on these three bikes, and a regression in any of them still fails CI immediately.',
+      'These baselines were last re-pinned on 5 November 2026 by the 2026-10/11 accuracy epoch, which moved them from 9.9331 / 10.1436 / 10.3633 s with a full weighted sweep as evidence (since that epoch, ET is timed from the 1-ft rollout beam, as at a drag strip). Between deliberate passes like that one they do not move: a full-catalog regression golden backs them up, and a change of a ten-thousandth of a second in any of the three fails CI.',
     ],
   },
   {
@@ -151,13 +147,13 @@ const SECTIONS = [
     n: '7',
     title: 'Reproducibility',
     body: [
-      'MotoQuant Pro is open to external audit. The simulator code, all sub-model coefficients, the 541-bike catalog, the 593-part library, and every venue\'s seasonal weather profile are inspectable. Every parts ROI calculation is deterministic given the bike configuration and venue conditions. We publish:',
+      'MotoQuant is open to external audit. The simulator code, all sub-model coefficients, the 534-bike catalog, the 546-part library, and every venue\'s seasonal weather profile are inspectable. Every parts ROI calculation is deterministic given the bike configuration and venue conditions. We publish:',
     ],
     list: {
       title: '',
       items: [
         'reports/ directory with full validation sweeps (JSON + Markdown summaries) — one report per release',
-        'tests/ — 4,393 regression tests covering catalog integrity, physics, API, and silent-failure detection across all 541 bikes',
+        'tests/ — about 6,200 tests covering catalog integrity, physics, API, and silent-failure detection across all 534 bikes',
         '/docs/validation — the complete benchmark table with per-bike sources',
         '/validation — the interactive real-vs-simulated accuracy explorer',
         'CLAUDE.md — the project diary, with every design decision and trade-off recorded chronologically',
@@ -172,8 +168,8 @@ const SECTIONS = [
     n: '8',
     title: 'Known limitations',
     body: [
-      'We are honest about where the model is bounded. The two-stroke cluster still carries a +0.146 s weighted bias and a 0.537 s weighted |Δ| because piston-port 2T launch dynamics include an off-pipe / on-pipe transition whose integral-of-power-over-time is not perfectly captured by the current expansion-chamber Gaussian curve. The Indian entry small-cc cluster (entry-150-200) carries the largest weighted |Δ| in the corpus at 0.820 s — bias-centred at +0.018 s but noise-dominated, bounded by the declared ±0.7 s uncertainty of its derived benchmarks; reaching the published ≤0.05 s stretch goal requires per-bike Dragy / VBox-measured stock data, not further physics tuning.',
-      'The cruiser 1300+ cluster has only N=3 and the small-cc I4 screamer cluster only N=2 — too small to draw statistically meaningful conclusions. The Apache RTR 200 4V is a documented outlier (sim 18.7 s vs derived 15.9 s) where the derived benchmark is suspiciously fast for a 20.5 hp / 153 kg bike; we have flagged it for audit but have not adjusted the model on the strength of one data point.',
+      'We are honest about where the model is bounded. The two-stroke cluster still carries a +0.077 s weighted bias and a 0.642 s weighted |Δ| because piston-port 2T launch dynamics include an off-pipe / on-pipe transition whose integral-of-power-over-time is not perfectly captured by the current expansion-chamber Gaussian curve. The Indian entry small-cc cluster (entry-150-200) carries the largest weighted |Δ| of any cluster with ten or more benchmarks at 0.702 s — bias-centred at −0.011 s but widely scattered. Its derived benchmarks carry a declared ±0.7 s uncertainty, but six of its seven instrumented rows also miss by 0.4–0.9 s, in both directions, and many small bikes still carry a known gearing limitation (reports/session_2026_11_10_epoch.md). Closing the gap needs both per-bike Dragy / VBox-measured stock data and sourced gearing for the benchmarked small bikes.',
+      'The cruiser 1300+ cluster has only N=5 and the small-cc I4 screamer cluster only N=2 — too small to draw statistically meaningful conclusions. The Apache RTR 200 4V is a documented outlier: the simulator gives 18.95 s against an instrumented 18.1 s, a 0.85 s miss on a high-confidence row; we have not adjusted the model on the strength of one data point.',
     ],
   },
   {
@@ -181,8 +177,8 @@ const SECTIONS = [
     n: '9',
     title: 'Roadmap',
     body: [
-      'Three open work items, in priority order: (1) replace derived benchmark entries with measured Dragy / VBox runs from the Indian community; (2) port the remaining unused profile knobs (Pacejka C, chain efficiency override, tuck transition time, engine inertia multiplier) into their respective sub-models so future tuning passes have richer per-cluster expression; (3) audit the residual spread on the 300–500cc twin and single clusters to determine whether it is derived-benchmark noise, gear-cassette catalog drift, or a physics model gap.',
-      'A Phase 5 calibrator-v2 will accept user-uploaded Dragy logs and contribute their measured ETs back to the benchmark corpus on opt-in. This closes the data-quality loop the small-cc clusters need without requiring any change to the physics model itself.',
+      'Three open work items, in priority order: (1) instrumented Dragy or VBOX timeslips for small bikes and two-strokes, to replace derived benchmark entries; (2) sourced primary gear ratios for small bikes, applied together with a re-tune of the small-bike launch and drivetrain losses, because applying the sourced gearing alone made the weighted error worse (reports/gearing_experiment_2026_11_10.md); (3) a launch model fitted to measured 60-ft times.',
+      'Timeslips reach the project through the "Submit a timeslip" form on GitHub. A maintainer reviews each one before it joins the benchmark set, and every accepted instrumented run tightens the weighted sweep.',
     ],
   },
   {
@@ -190,9 +186,9 @@ const SECTIONS = [
     n: '10',
     title: 'Citation',
     body: [
-      'If you reference this whitepaper or use MotoQuant Pro outputs in your own analysis, please cite as:',
+      'If you reference this whitepaper or use MotoQuant outputs in your own analysis, please cite as:',
     ],
-    citation: 'Singh, R. & Desai, A. (2026). MotoQuant Pro: A first-principles drag-racing physics engine for motorcycles. Pune, India. https://motoquant.in/whitepaper',
+    citation: 'Singh, R. & Desai, A. (2026). MotoQuant: A first-principles drag-racing physics engine for motorcycles. Pune, India. https://motoquant.in/whitepaper',
   },
 ];
 
@@ -200,27 +196,27 @@ function Section({ s }) {
   return (
     <section id={s.id} className="scroll-mt-24 mb-16">
       <div className="flex items-baseline gap-4 mb-5">
-        <span className="font-mono text-white/40 text-sm tabular-nums">§{s.n}</span>
-        <h2 className="font-display font-bold text-3xl tracking-tight text-white">
+        <span className="font-mono text-white/60 text-sm tabular-nums">§{s.n}</span>
+        <h2 className="font-display font-bold text-2xl md:text-3xl tracking-tight text-white">
           {s.title}
         </h2>
       </div>
       {s.body && s.body.map((p, i) => (
-        <p key={`b${i}`} className="text-white/65 leading-relaxed mb-4">
+        <p key={`b${i}`} className="text-white/75 leading-relaxed mb-4">
           {p}
         </p>
       ))}
       {s.list && (
         <div className="card my-6 p-5">
           {s.list.title && (
-            <div className="label-mono mb-3">
+            <div className="mb-3 text-sm font-semibold text-white/80">
               {s.list.title}
             </div>
           )}
           <ul className="space-y-2 text-sm text-white/65 leading-relaxed">
             {s.list.items.map((item, i) => (
               <li key={i} className="flex gap-3">
-                <span className="text-white/40 shrink-0">›</span>
+                <span className="text-white/60 shrink-0">›</span>
                 <span>{item}</span>
               </li>
             ))}
@@ -236,7 +232,7 @@ function Section({ s }) {
                   {s.table.head.map((h, i) => (
                     <th
                       key={i}
-                      className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45"
+                      className="text-left px-4 py-3 text-xs font-medium text-white/60 whitespace-nowrap"
                     >
                       {h}
                     </th>
@@ -275,17 +271,17 @@ function Section({ s }) {
         </div>
       )}
       {s.body2 && s.body2.map((p, i) => (
-        <p key={`b2${i}`} className="text-white/65 leading-relaxed mb-4">
+        <p key={`b2${i}`} className="text-white/75 leading-relaxed mb-4">
           {p}
         </p>
       ))}
       {s.extra && s.extra.map((p, i) => (
-        <p key={`e${i}`} className="text-white/65 leading-relaxed mb-4">
+        <p key={`e${i}`} className="text-white/75 leading-relaxed mb-4">
           {p}
         </p>
       ))}
       {s.citation && (
-        <pre className="card my-4 p-5 text-xs font-mono text-white/75 whitespace-pre-wrap leading-relaxed">
+        <pre className="card my-4 p-5 text-sm font-mono text-white/75 whitespace-pre-wrap break-words leading-relaxed">
           {s.citation}
         </pre>
       )}
@@ -303,39 +299,38 @@ export default function WhitepaperPage() {
           {/* Cover */}
           <Reveal>
           <div className="mb-16 pb-12">
-            <CodeComment className="mb-4">formal specification · rk4 · 1ms</CodeComment>
-            <div className="label-mono mb-4">
-              Whitepaper · Version 1.0 · April 30, 2026 · validation data: August 2026 sweep
+            <div className="text-sm text-white/60 mb-4">
+              Whitepaper · Version 1.0 · April 30, 2026 · validation data: November 2026 sweep
             </div>
             <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-white mb-6">
-              MotoQuant Pro:<br />A first-principles drag-racing <span className="text-accent">physics engine</span> for motorcycles
+              MotoQuant:<br />A first-principles drag-racing <span className="text-accent">physics engine</span> for motorcycles
             </h1>
             <p className="text-white/65 text-base mb-2">
               Ritwik Singh &nbsp;·&nbsp; Arya Desai
             </p>
-            <p className="text-white/40 text-sm font-mono">
-              MotoQuant Pro &middot; Pune, India &middot;{' '}
+            <p className="text-white/60 text-sm font-mono">
+              MotoQuant &middot; Pune, India &middot;{' '}
               <a href="mailto:motoquant@gmail.com" className="text-white/70 hover:text-white transition-colors">
                 motoquant@gmail.com
               </a>
             </p>
 
             {/* Top-level stats — timing-board tiles, regenerated from the
-                8 August 2026 sweep (reports/acc_final_2026_08_08.json): 250 benchmarks,
-                276 matched, weighted bias +0.007 s. Same corpus as /features and
+                10 November 2026 sweep (reports/acc_final_2026_11_10.json): 250 benchmarks,
+                263 matches, weighted bias +0.023 s. Same corpus as /features and
                 /docs/validation. */}
             <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { seg: '15', label: 'Sub-models' },
-                { seg: '541', label: 'Catalog bikes' },
+                { seg: '534', label: 'Catalog bikes' },
                 { seg: '250', label: 'Weighted benchmarks' },
-                { seg: '0.007', pre: '+', post: 's', label: 'Weighted bias' },
+                { seg: '0.023', pre: '+', post: 's', label: 'Weighted bias' },
               ].map(t => (
                 <div key={t.label} className="card p-4">
                   <div className="flex items-end justify-center gap-1">
-                    {t.pre && <span className="font-mono text-sm text-white/40 mb-0.5">{t.pre}</span>}
+                    {t.pre && <span className="font-mono text-sm text-white/60 mb-0.5">{t.pre}</span>}
                     <ScoreboardDigits value={t.seg} h={24} label={`${t.pre || ''}${t.seg}${t.post || ''}`} />
-                    {t.post && <span className="font-mono text-sm text-white/40 mb-0.5">{t.post}</span>}
+                    {t.post && <span className="font-mono text-sm text-white/60 mb-0.5">{t.post}</span>}
                   </div>
                   <div className="label-mono mt-2 text-center">{t.label}</div>
                 </div>
@@ -347,19 +342,24 @@ export default function WhitepaperPage() {
 
           {/* Abstract */}
           <section id="abstract" className="mb-16 scroll-mt-24">
-            <div className="label-mono mb-3">Abstract</div>
-            <p className="text-white/75 leading-relaxed text-[15px] border-l-2 border-accent/60 pl-5">
+            <p className="mb-6 rounded-xl border border-accent/25 bg-accent/5 px-4 py-3 text-base leading-relaxed text-white/85">
+              <strong className="font-semibold text-white">In short:</strong> MotoQuant predicts a motorcycle&apos;s
+              quarter-mile time from physics, not from a fitted curve. This paper explains how it works, how we
+              check it against 250 published results, and where it is still weak.
+            </p>
+            <h2 className="mb-3 font-display text-xl font-semibold text-white">Abstract</h2>
+            <p className="text-white/75 leading-relaxed text-base border-l-2 border-accent/60 pl-5">
               {ABSTRACT}
             </p>
           </section>
 
           {/* Table of contents */}
           <nav id="toc" className="mb-16 scroll-mt-24">
-            <div className="label-mono mb-3">Contents</div>
+            <h2 className="mb-3 font-display text-xl font-semibold text-white">Contents</h2>
             <ol className="space-y-2 columns-1 sm:columns-2 gap-x-10">
               {SECTIONS.map(s => (
                 <li key={s.id} className="flex items-baseline gap-3 break-inside-avoid">
-                  <span className="font-mono text-white/40 text-sm tabular-nums">§{s.n}</span>
+                  <span className="font-mono text-white/60 text-sm tabular-nums">§{s.n}</span>
                   <a
                     href={`#${s.id}`}
                     className="text-white/75 hover:text-white transition-colors text-sm"
@@ -376,23 +376,24 @@ export default function WhitepaperPage() {
 
           {/* Footer / next steps */}
           <div className="mt-20 pt-10 border-t border-white/5">
-            <div className="label-mono mb-3">
-              Continue reading
-            </div>
+            <h2 className="mb-3 font-display text-xl font-semibold text-white">Continue reading</h2>
             <div className="grid sm:grid-cols-3 gap-4">
               <Link href="/docs/physics" className="group card card-hover p-5">
                 <div className="font-display font-semibold text-white group-hover:text-accent transition-colors">
-                  Physics docs →
+                  How the physics works →
                 </div>
-                <div className="text-sm text-white/55 mt-1">Sub-model deep-dives.</div>
+                <div className="text-sm text-white/65 mt-1">Sub-model deep-dives.</div>
               </Link>
               <Link href="/docs/validation" className="group card card-hover p-5">
                 <div className="font-display font-semibold text-white group-hover:text-accent transition-colors">
-                  Validation data →
+                  Accuracy data →
                 </div>
-                <div className="text-sm text-white/55 mt-1">Per-bike benchmark table.</div>
+                <div className="text-sm text-white/65 mt-1">Per-bike benchmark table.</div>
               </Link>
-              <TerminalCtaVariant />
+              <Link href="/simulator" className="group card card-hover border-accent/40 p-5">
+                <div className="font-display font-semibold text-accent">Open the simulator →</div>
+                <div className="text-sm text-white/65 mt-1">See the engine for yourself.</div>
+              </Link>
             </div>
           </div>
         </article>

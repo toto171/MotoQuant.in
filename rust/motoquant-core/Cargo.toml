@@ -1,0 +1,24 @@
+[package]
+name = "motoquant-core"
+version = "0.1.0"
+edition = "2021"
+description = "Bit-parity Rust port of the MotoQuant quarter-mile physics loop (Python is the reference)."
+publish = false
+
+[lib]
+name = "motoquant_core"
+# rlib: cargo test / benches; cdylib: the PyO3 extension module and the wasm32 engine.
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = []
+# PyO3 extension module `motoquant_core` (built by maturin; see Makefile `native`).
+python = ["dep:pyo3"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+# float_roundtrip: serde_json's default float parser is "best effort" and can be
+# off by one ULP; the engine's parity contract needs the exact double Python
+# serialised (repr round-trip), so the correctly-rounded parser is mandatory.
+serde_json = { version = "1", features = ["float_roundtrip"] }
+pyo3 = { version = "0.25", optional = true, features = ["extension-module", "abi3-py39"] }

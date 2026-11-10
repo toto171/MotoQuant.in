@@ -29,14 +29,17 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 logging.getLogger("motoquant").setLevel(logging.ERROR)
 warnings.filterwarnings("ignore")
 
-from motoquant import MotoQuantEngine
 from motoquant.defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
+from motoquant.engine_select import make_engine
 from motoquant.scraper.importer import spec_to_bike_config
 from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
 from scripts.sweep_lib import (
+    SIM_ET_KEY,
+    TIMING_ROLLOUT_M,
     bind_benchmark_for_record,
     build_bench_map,
     model_specificity_score as _model_specificity_score,  # noqa: F401  (re-export, pinned by tests)
+    timing_convention,
     wb_match as _wb_match,  # noqa: F401  (re-export)
 )
 from scripts.validation_sweep import BENCHMARKS
@@ -94,7 +97,7 @@ def run_sweep(out_path):
         ("Hayabusa", hayabusa_gen1),
     ]:
         cfg = fn()
-        r = MotoQuantEngine(cfg).run(use_adaptive_dt=False, max_time=26.0)
+        r = make_engine(cfg).run(use_adaptive_dt=False, max_time=26.0)
         results.append(
             {
                 "kind": "reference",
@@ -108,11 +111,21 @@ def run_sweep(out_path):
             }
         )
 
+    # Benchmarks — score-and-pick (the second of the options weighed in the 2026-05-25 matcher review):
+    # for each catalog row, pick the *most-specific* in-range benchmark.
+    # Logic lives in sweep_lib.bind_benchmark_for_record, shared with the
+    # other drivers; since the 2026-10 data epoch it runs the "epoch" policy
+    # (highest-weight in-range entry; out-of-year fallbacks only via
+    # sweep_lib.SAME_PLATFORM_FALLBACKS). Bound BEFORE simulating so a row
+    # whose benchmark is timed from first motion (sweep_lib.timing_convention)
+    # also gets a rollout_m=0.0 run to be scored on.
+    bench_map = build_bench_map(BENCHMARKS)
+
     # Catalog sweep
     for i, spec in enumerate(ALL_KNOWN_BIKES):
         try:
             cfg = spec_to_bike_config(spec)
-            r = MotoQuantEngine(cfg).run(use_adaptive_dt=False, max_time=26.0)
+            r = make_engine(cfg).run(use_adaptive_dt=False, max_time=26.0)
             rec = {
                 "kind": "catalog",
                 "manufacturer": spec.manufacturer,
@@ -139,6 +152,32 @@ def run_sweep(out_path):
                 else None,
                 "elapsed_s": float(r.elapsed_time_s),
             }
+            hit = bind_benchmark_for_record(
+                spec.manufacturer,
+                spec.model_name,
+                spec.year_from,
+                spec.year_to,
+                bench_map,
+            )
+            if hit is not None and rec["sim_et"] is not None:
+                tgt_et, tgt_trap, src = hit
+                conv = timing_convention(src)
+                if conv != "rollout_1ft":
+                    r_fm = make_engine(cfg).run(
+                        use_adaptive_dt=False,
+                        max_time=26.0,
+                        rollout_m=TIMING_ROLLOUT_M[conv],
+                    )
+                    rec[SIM_ET_KEY[conv]] = (
+                        float(r_fm.time_quarter) if r_fm.finished_quarter else None
+                    )
+                scored = rec.get(SIM_ET_KEY[conv])
+                rec["bench_et"] = float(tgt_et)
+                rec["bench_trap_kmh"] = float(tgt_trap)
+                rec["bench_src"] = src
+                rec["timing_convention"] = conv
+                if scored is not None:
+                    rec["delta_et"] = float(scored - tgt_et)
         except Exception as exc:
             rec = {
                 "kind": "catalog",
@@ -147,29 +186,6 @@ def run_sweep(out_path):
                 "error": f"{type(exc).__name__}: {exc}"[:200],
             }
         results.append(rec)
-
-    # Attach benchmarks — score-and-pick (Option 2 from DISPATCH_INBOX
-    # 2026-05-25): for each catalog row, pick the *most-specific* in-range
-    # benchmark (out-of-range fallback). Logic lives in
-    # sweep_lib.bind_benchmark_for_record, shared with the other drivers.
-    bench_map = build_bench_map(BENCHMARKS)
-
-    for rec in results:
-        if rec.get("kind") != "catalog" or rec.get("error"):
-            continue
-        best_match = bind_benchmark_for_record(
-            rec["manufacturer"],
-            rec["model"],
-            rec.get("year_from"),
-            rec.get("year_to"),
-            bench_map,
-        )
-        if best_match is not None and rec.get("sim_et") is not None:
-            tgt_et, tgt_trap, src = best_match
-            rec["bench_et"] = float(tgt_et)
-            rec["bench_trap_kmh"] = float(tgt_trap)
-            rec["bench_src"] = src
-            rec["delta_et"] = float(rec["sim_et"] - tgt_et)
 
     took = time.time() - t0
     summary = _summarize(results)
@@ -265,7 +281,7 @@ def _summarize(results):
 def _print_summary(s):
     print("\n=== REFERENCES ===")
     for label, et in s.get("references", {}).items():
-        targets = {"K5": 9.9331, "R1": 10.1436, "Hayabusa": 10.3633}
+        targets = {"K5": 10.0436, "R1": 10.1092, "Hayabusa": 10.1100}
         t = targets.get(label, 0)
         print(f"  {label:10} ET={et:.4f}  target={t:.4f}  Δ={et - t:+.4f}")
     print(

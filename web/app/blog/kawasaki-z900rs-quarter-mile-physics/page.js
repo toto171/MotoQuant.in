@@ -52,7 +52,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Running the Z900RS in MotoQuant under Aamby Valley November conditions (density altitude ≈ 1,100 m, 22°C ambient, dry concrete, μ_peak 1.32 on the OEM Dunlop Sportmax D214 rear), with a 78 kg rider on a 203 kg dry bike, produces the following stock-tune numbers:",
+    text: "Running the Z900RS in MotoQuant under Aamby Valley November conditions (density altitude ≈ 1,100 m, 22°C ambient, dry asphalt, μ_peak 1.32 on the OEM Dunlop Sportmax D214 rear), with a 78 kg rider on a 203 kg dry bike, produces the following stock-tune numbers:",
   },
   {
     type: "table",
@@ -288,7 +288,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -311,7 +311,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -340,7 +340,7 @@ export default function PostPage() {
             {["Kawasaki", "Z900RS", "retro naked", "physics"].map((t) => (
               <span
                 key={t}
-                className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
               >
                 {t}
               </span>
@@ -349,7 +349,7 @@ export default function PostPage() {
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             Kawasaki Z900RS Quarter-Mile Physics: Retro Tax on a 948cc I4
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             22 May 2026 · 10 min read · MotoQuant Blog
           </div>
         </div>
@@ -414,16 +414,6 @@ export default function PostPage() {
               — every spec, every gear ratio, every Cd value used by the
               simulator.
             </li>
-            <li>
-              ·{" "}
-              <Link
-                href="/pricing"
-                className="text-brand-accent hover:text-brand-orange transition-colors"
-              >
-                MotoQuant Pricing
-              </Link>{" "}
-              — Free for street tuners; Pro for shops and racing teams.
-            </li>
           </ul>
         </div>
 
@@ -441,9 +431,9 @@ export default function PostPage() {
           </div>
           <Link
             href="/simulator?bike=kawasaki-z900rs"
-            className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
+            className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
           >
-            Run sim →
+            Open the simulator →
           </Link>
         </div>
       </article>

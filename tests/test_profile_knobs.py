@@ -7,12 +7,13 @@ that were declared in the profile dataclass but never read by physics).
 
 Two invariant classes:
 
-1. NO-OP AT DEFAULTS — every registered profile ships
-   ``mu_peak_override=None``, ``launch_rpm_factor=None`` and
-   ``cd_floor=0.25`` (below every catalog Cd: min effective Cd across all
-   502 specs is ~0.276 after the rider model's 0.92 race-crouch factor).
-   Wiring the knobs must therefore leave the pinned reference baselines
-   bit-identical.
+1. NO-OP AT DEFAULTS — the knobs at their default values (
+   ``mu_peak_override=None``, ``launch_rpm_factor=None``,
+   ``cd_floor=0.25`` — below every catalog Cd: min effective Cd across all
+   502 specs is ~0.276 after the rider model's 0.92 race-crouch factor)
+   are bit-identical no-ops. Since the 2026-10/11 epoch a few profiles arm
+   ``launch_rpm_factor`` / ``wheelie_margin``; the exact armed set is
+   pinned below.
 
 2. LIVENESS — each knob, when set to a non-default value on a synthetic
    profile, MUST move the ET.  This is the whole point of the wiring: the
@@ -31,9 +32,9 @@ from motoquant.defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 _SYNTH_TAG = "test_synth_profile_knobs"
 
 _BASELINES = {
-    "K5": (gsxr1000_k5, 9.9331),
-    "R1": (yzfr1_4c8, 10.1436),
-    "Hayabusa": (hayabusa_gen1, 10.3633),
+    "K5": (gsxr1000_k5, 10.0436),
+    "R1": (yzfr1_4c8, 10.1092),
+    "Hayabusa": (hayabusa_gen1, 10.1100),
 }
 
 
@@ -42,10 +43,12 @@ def _et(cfg) -> float:
 
 
 def _et_with_profile(**knobs) -> float:
-    """Run K5 under a synthetic profile cloned from litre_sport_195p with
-    the given knob overrides, cleaning up the registry afterwards."""
+    """Run K5 under a synthetic profile cloned from the profile the K5
+    actually runs (reference_litre_195p since the 2026-10 epoch — it was
+    litre_sport_195p before) with the given knob overrides, cleaning up the
+    registry afterwards."""
     prof = dataclasses.replace(
-        cp.get_profile(cp.CATEGORY_LITRE_SPORT_195P), name=_SYNTH_TAG, **knobs
+        cp.get_profile(gsxr1000_k5().category_tag), name=_SYNTH_TAG, **knobs
     )
     cp._PROFILES[_SYNTH_TAG] = prof
     try:
@@ -87,27 +90,32 @@ def test_default_knob_values_are_bit_identical():
 # rationale) and moved single_300_500's override 1.10 → 1.18.
 # Any OTHER profile arming a knob must still be a conscious, test-updating
 # change — that is this guard's job.
-ACTIVE_MU_OVERRIDES = {
-    "sport_twin_600_1300": 1.31,
-    "single_300_500": 1.18,
+#
+# 2026-10/11 accuracy epoch (ADR-0002; reports/acc_epoch3_2026_11_03.json,
+# reports/acc_final_2026_11_05.json): every grip knob was re-selected FROM
+# NEUTRAL. The shipped set arms NO mu_peak_override and NO mu_peak_scale
+# (all rated rubber, 1.0); the class bias correctors of 2026-07/08 (1.08 /
+# 1.31 / 1.18 ...) are history. The launch is instead shaped by the round-3
+# wheelie_margin knob (+ one gate-constrained launch_rpm_factor), pinned
+# below.
+ACTIVE_MU_OVERRIDES: dict[str, float] = {}
+
+ACTIVE_MU_SCALES: dict[str, float] = {}
+
+# Round-3 launch knobs. litre_sport_195p 0.69 = the CV choice shipped by
+# OWNER DECISION 2026-11-05 ('alt_litre195_margin') over the gate escape.
+ACTIVE_WHEELIE_MARGINS = {
+    "litre_sport_195p": 0.69,
+    "litre_sport_600_1000": 0.72,
+    "sport_twin_600_1300": 0.75,
+    "two_stroke": 0.66,
+    "other": 0.66,
+    "reference_litre_195p": 0.72,
 }
 
-ACTIVE_MU_SCALES = {
-    "litre_sport_195p": 1.08,
-    "litre_sport_600_1000": 1.07,
-    "sport_twin_600_1300": 1.085,
-    "mid_twin_500_700": 1.14,
-    # 2026-08-08 crank-semantics retune (see category_profiles.py comments
-    # + reports/session_2026_08_08_full_night_run.md): mid_twin_300_500
-    # 1.12 -> 1.20, small_i4_screamer 1.30 -> 1.00 (the 1.30 was fit to the
-    # pre-instrumented optimistic ZX-25R row), entry_200_300 newly active
-    # at 1.12. Final weighted sweep: w|d| 0.2721 -> 0.2645, bias +0.0089.
-    "mid_twin_300_500": 1.20,
-    "two_stroke": 1.15,
-    "cruiser_1300p": 1.20,
-    "other": 1.15,
-    "small_i4_screamer": 1.00,
-    "entry_200_300": 1.12,
+ACTIVE_LAUNCH_RPM_FACTORS = {
+    # gate-constrained 'margin+lr' choice (1199 Panigale mass inversion)
+    "sport_twin_600_1300": 0.50,
 }
 
 # July 17, 2026: the LIVE CategoryProfile knob inventory, pinned as an exact
@@ -126,6 +134,9 @@ LIVE_PROFILE_KNOBS = {
     "mu_peak_scale",
     "parasitic_mult",
     "launch_rpm_factor",
+    # 2026-10/11 epoch round 3: wired in physics.py (and the Rust core,
+    # schema 5); liveness-tested below.
+    "wheelie_margin",
 }
 
 
@@ -154,7 +165,14 @@ def test_every_registered_profile_ships_expected_knob_values():
         assert prof.mu_peak_scale == expected_scale, (
             f"{tag}: mu_peak_scale {prof.mu_peak_scale} != {expected_scale}"
         )
-        assert prof.launch_rpm_factor is None, f"{tag}: launch_rpm_factor active"
+        expected_lr = ACTIVE_LAUNCH_RPM_FACTORS.get(tag)
+        assert prof.launch_rpm_factor == expected_lr, (
+            f"{tag}: launch_rpm_factor {prof.launch_rpm_factor} != {expected_lr}"
+        )
+        expected_margin = ACTIVE_WHEELIE_MARGINS.get(tag, 1.0)
+        assert prof.wheelie_margin == expected_margin, (
+            f"{tag}: wheelie_margin {prof.wheelie_margin} != {expected_margin}"
+        )
         # 0.276 = catalog minimum effective Cd (0.30 × 0.92 race crouch);
         # any floor below that is structurally inert.
         assert prof.cd_floor < 0.276, f"{tag}: cd_floor {prof.cd_floor} is active"
@@ -162,10 +180,14 @@ def test_every_registered_profile_ships_expected_knob_values():
 
 def test_mu_peak_scale_moves_et():
     """Liveness for the July-13 epoch knob: scaling grip down must slow a
-    traction-limited litre bike substantially (production engine path)."""
+    litre bike substantially (production engine path). Since the 2026-10/11
+    epoch the K5 launch is wheelie-limited (combined bike + rider CoG
+    ceiling), so grip binds over less of the pass: x0.80 now costs ~0.25 s
+    (it cost >0.3 s when the launch was traction-limited). The threshold is
+    a liveness bound, not an accuracy band."""
     base = _et(gsxr1000_k5())
     low_grip = _et_with_profile(mu_peak_scale=0.80)
-    assert low_grip > base + 0.3, (
+    assert low_grip > base + 0.15, (
         f"mu_peak_scale is dead: {low_grip:.4f} vs base {base:.4f}"
     )
 
@@ -199,3 +221,19 @@ def test_cd_floor_moves_et():
     base = _et(gsxr1000_k5())
     draggy = _et_with_profile(cd_floor=1.2)
     assert draggy > base + 0.1, f"cd_floor is dead: {draggy:.4f} vs base {base:.4f}"
+
+
+def test_wheelie_margin_moves_et():
+    """Liveness for the round-3 epoch knob: holding a smaller share of the
+    wheelie ceiling to the 60-ft line must slow the wheelie-limited K5
+    launch; riding the full ceiling (1.0) must be quicker than the shipped
+    reference margin."""
+    base = _et(gsxr1000_k5())
+    timid = _et_with_profile(wheelie_margin=0.50)
+    full = _et_with_profile(wheelie_margin=1.0)
+    assert timid > base + 0.05, (
+        f"wheelie_margin is dead (timid): {timid:.4f} vs base {base:.4f}"
+    )
+    assert full < base - 0.01, (
+        f"wheelie_margin is dead (full ceiling): {full:.4f} vs base {base:.4f}"
+    )

@@ -67,10 +67,15 @@ INSTRUCTIONS = (
     "MotoQuant simulates motorcycle quarter-mile drag runs from first "
     "principles (RK4 over 15 physics sub-models), not from lookup tables. "
     "Pick a bike with search_bikes (or a bike_preset), then simulate. "
-    "ET is elapsed time over 402.3 m; trap speed is the speed crossing that "
-    "line; the 60-foot split is the launch-quality number. All et_delta_s "
-    "values are after-minus-before, so negative means faster. Published "
-    "accuracy: weighted mean |error| ~0.27 s across 277 matched real-world "
+    "ET is elapsed time over 402.3 m timed from the 1-ft beam rollout; trap "
+    "speed is the speed crossing that line; the 60-foot split is the "
+    "launch-quality number. All et_delta_s "
+    "values are after-minus-before, so negative means faster. Every "
+    "simulation result carries an environment block naming the conditions "
+    "it was computed for (venue or default, altitude, air, surface) — quote "
+    "them with the number; parts_skipped lists requested part ids that were "
+    "not fitted. Published "
+    "accuracy: weighted mean |error| ~0.25 s across 263 matched real-world "
     "benchmarks — good for ranking builds and what-ifs, not for claiming a "
     "specific bike will run an exact ET."
 )
@@ -208,16 +213,44 @@ class LocalBackend:
     # only resolved by the request layer. Calling them as plain functions
     # means EVERY parameter must be passed explicitly — an omitted one binds a
     # ``Query`` object straight into SQLite ("type 'Query' is not supported").
+    @staticmethod
+    def _route_kwargs(fn: Callable[..., Any], values: dict) -> dict:
+        """Explicit keyword arguments for calling a GET route as a function.
+
+        Every parameter the route declares gets a value: the caller's when it
+        names one, otherwise the plain default behind the route's
+        ``Query(...)`` declaration. A parameter the route does not declare is
+        dropped, so the same call works whichever query parameters this
+        checkout's route has.
+        """
+        import inspect
+
+        from fastapi.params import Param
+
+        out: dict[str, Any] = {}
+        for name, param in inspect.signature(fn).parameters.items():
+            if name in values:
+                out[name] = values[name]
+                continue
+            default = param.default
+            if isinstance(default, Param):
+                default = default.default
+                if default is ... or type(default).__name__ == "PydanticUndefinedType":
+                    continue  # required and not supplied: let the call say so
+            if default is not inspect.Parameter.empty:
+                out[name] = default
+        return out
+
     def list_bikes(self, **kw: Any) -> dict:
         api = self._mod()
-        return self._call(
-            api.list_bikes,
-            search=kw.get("search"),
-            manufacturer=kw.get("manufacturer"),
-            category=kw.get("category"),
-            limit=kw.get("limit") or 100,
-            offset=kw.get("offset") or 0,
-        )
+        values = {
+            "search": kw.get("search"),
+            "manufacturer": kw.get("manufacturer"),
+            "category": kw.get("category"),
+            "limit": kw.get("limit") or 100,
+            "offset": kw.get("offset") or 0,
+        }
+        return self._call(api.list_bikes, **self._route_kwargs(api.list_bikes, values))
 
     def get_bike(self, bike_id: int) -> dict:
         api = self._mod()
@@ -229,15 +262,16 @@ class LocalBackend:
 
     def list_parts(self, **kw: Any) -> dict:
         api = self._mod()
-        return self._call(
-            api.list_parts,
-            category=kw.get("category"),
-            category_id=None,
-            bike_id=kw.get("bike_id"),
-            compatible_only=bool(kw.get("compatible_only", True)),
-            search=kw.get("search"),
-            limit=kw.get("limit") or 500,
-        )
+        values = {
+            "category": kw.get("category"),
+            "category_id": None,
+            "bike_id": kw.get("bike_id"),
+            "bike_preset": kw.get("bike_preset"),
+            "compatible_only": bool(kw.get("compatible_only", True)),
+            "search": kw.get("search"),
+            "limit": kw.get("limit") or 500,
+        }
+        return self._call(api.list_parts, **self._route_kwargs(api.list_parts, values))
 
     def simulate_quick(self, payload: dict) -> dict:
         api = self._mod()
@@ -259,7 +293,7 @@ class LocalBackend:
         fields ``DrivetrainParams.final_ratio`` actually reads.
         """
         api = self._mod()
-        from .physics import MotoQuantEngine
+        from .engine_select import make_engine
 
         def _run() -> dict:
             cfg = api._build_config(
@@ -276,8 +310,8 @@ class LocalBackend:
             cfg = copy.deepcopy(cfg)
             cfg.drivetrain.front_sprocket = int(front)
             cfg.drivetrain.rear_sprocket = int(rear)
-            sim = MotoQuantEngine(cfg).run()
-            return {
+            sim = make_engine(cfg).run()
+            out = {
                 "front_sprocket": int(front),
                 "rear_sprocket": int(rear),
                 "final_drive_ratio": round(rear / front, 4),
@@ -287,6 +321,12 @@ class LocalBackend:
                 "et_eighth_s": round(float(sim.time_eighth), 4),
                 "bike_name": cfg.name,
             }
+            # The same conditions block the sim routes return, when the API
+            # module provides it.
+            echo = getattr(api, "_environment_echo", None)
+            if echo is not None:
+                out["environment"] = echo(cfg)
+            return out
 
         return self._call(_run)
 
@@ -415,6 +455,32 @@ def _slim_bike(row: dict) -> dict:
     return out
 
 
+def _carry_conditions(out: dict, res: dict) -> dict:
+    """Copy onto ``out`` what a result was computed FOR: the ``environment``
+    block (venue / altitude / air / surface the simulation used, and whether
+    it is the default) and ``parts_skipped`` (requested part ids that were not
+    fitted). Without them a number has no stated conditions and a part that
+    silently did not fit looks applied."""
+    if res.get("environment"):
+        out["environment"] = res["environment"]
+    if res.get("parts_skipped"):
+        out["parts_skipped"] = res["parts_skipped"]
+    if res.get("parts_skipped_detail"):  # id + reason for each skipped part
+        out["parts_skipped_detail"] = res["parts_skipped_detail"]
+    return out
+
+
+def _skipped_reason(res: dict) -> str:
+    """One sentence on why the API skipped parts (empty when it gave none)."""
+    details = [
+        str(d.get("detail") or d.get("reason") or "").strip()
+        for d in (res.get("parts_skipped_detail") or [])
+        if isinstance(d, dict)
+    ]
+    details = [d for d in details if d]
+    return " ".join(dict.fromkeys(details))
+
+
 def _slim_sim(res: dict) -> dict:
     """Quick-sim response → compact, unit-suffixed result."""
     out = {
@@ -426,6 +492,7 @@ def _slim_sim(res: dict) -> dict:
         "peak_power_hp": res.get("peak_power_hp"),
         "total_mass_kg": res.get("total_mass_kg"),
     }
+    _carry_conditions(out, res)
     if res.get("parts_applied"):
         out["parts_applied"] = [
             {
@@ -507,7 +574,7 @@ def _t_simulate_top_speed(backend: Any, args: dict) -> dict:
     )
     payload["include_timeseries"] = False
     res = backend.top_speed(payload)
-    return {
+    out = {
         "bike": res.get("bike_name"),
         "top_speed_kmh": res.get("terminal_velocity_kmh"),
         "top_speed_mph": res.get("terminal_velocity_mph"),
@@ -516,11 +583,13 @@ def _t_simulate_top_speed(backend: Any, args: dict) -> dict:
         "terminal_gear": res.get("terminal_gear"),
         "terminal_rpm": res.get("terminal_rpm"),
         "reached_plateau": res.get("reached_plateau"),
-        "note": (
-            "Unrestricted unless the bike carries a factory speed limiter. "
-            "Top-speed accuracy is weaker than ET accuracy (fleet bias ~+25 km/h)."
-        ),
     }
+    _carry_conditions(out, res)
+    out["note"] = (
+        "Unrestricted unless the bike carries a factory speed limiter. "
+        "Top-speed accuracy is weaker than ET accuracy (mean |error| ~13 km/h, fleet bias ~+7 km/h)."
+    )
+    return out
 
 
 def _t_compare_bikes(backend: Any, args: dict) -> dict:
@@ -551,7 +620,7 @@ def _t_compare_bikes(backend: Any, args: dict) -> dict:
     res = backend.compare(payload)
 
     def summary(side_res: dict) -> dict:
-        return {
+        side_out = {
             "bike": side_res.get("bike_name"),
             "et_s": side_res.get("et_quarter_s"),
             "trap_kmh": side_res.get("trap_speed_kmh"),
@@ -560,9 +629,14 @@ def _t_compare_bikes(backend: Any, args: dict) -> dict:
             "peak_power_hp": side_res.get("peak_power_hp"),
             "total_mass_kg": side_res.get("total_mass_kg"),
         }
+        # parts_skipped is per side; the conditions are shared (top level).
+        for key in ("parts_skipped", "parts_skipped_detail"):
+            if side_res.get(key):
+                side_out[key] = side_res[key]
+        return side_out
 
     delta = res.get("delta", {})
-    return {
+    out = {
         "a": summary(res.get("a", {})),
         "b": summary(res.get("b", {})),
         "delta": {
@@ -571,8 +645,11 @@ def _t_compare_bikes(backend: Any, args: dict) -> dict:
             "faster": delta.get("faster"),
             "cost_diff_inr": delta.get("cost_diff_inr"),
         },
-        "note": "delta.et_s is B minus A — negative means B is faster.",
     }
+    if res.get("environment"):
+        out["environment"] = res["environment"]
+    out["note"] = "delta.et_s is B minus A — negative means B is faster."
+    return out
 
 
 def _t_list_venues(backend: Any, _args: dict) -> dict:
@@ -629,15 +706,17 @@ def _t_part_impact(backend: Any, args: dict) -> dict:
     modded = backend.simulate_quick(dict(base, part_ids=[part_id]))
     applied = modded.get("parts_applied") or []
     if not applied:
+        why = _skipped_reason(modded)
         raise ToolError(
-            f"Part {part_id} was not applied — it may not exist, or it is not "
-            "compatible with this bike. Use search_parts with bike_id first."
+            f"Part {part_id} was not applied"
+            + (f": {why}" if why else " — it may not exist, or it is not compatible")
+            + " Use search_parts with bike_id to list parts that fit this bike."
         )
     et_a = float(stock["et_quarter_s"])
     et_b = float(modded["et_quarter_s"])
     cost = modded.get("build_cost_inr") or 0.0
     gain_s = et_a - et_b
-    return {
+    out = {
         "part": {
             "id": applied[0].get("id"),
             "name": f"{applied[0].get('brand', '')} {applied[0].get('name', '')}".strip(),
@@ -653,8 +732,11 @@ def _t_part_impact(backend: Any, args: dict) -> dict:
         "cost_per_tenth_inr": (
             round(cost / (gain_s * 10.0), 0) if cost and gain_s > 1e-6 else None
         ),
-        "note": "et_delta_s is after minus before — negative means faster.",
     }
+    # Both runs share one request, so one conditions block covers them.
+    _carry_conditions(out, modded)
+    out["note"] = "et_delta_s is after minus before — negative means faster."
+    return out
 
 
 def _sprocket_index(backend: Any, args: dict) -> tuple[dict[int, int], dict[int, int]]:
@@ -668,6 +750,12 @@ def _sprocket_index(backend: Any, args: dict) -> tuple[dict[int, int], dict[int,
     kw: dict[str, Any] = {"category": "sprocket", "limit": 500}
     if args.get("bike_id"):
         kw["bike_id"] = int(args["bike_id"])
+        kw["compatible_only"] = True
+    elif args.get("bike_preset"):
+        # A preset is judged by its catalog row, exactly as the sim routes do
+        # (an API without this parameter ignores it and returns every sprocket;
+        # the compare call below then reports any it could not fit).
+        kw["bike_preset"] = str(args["bike_preset"])
         kw["compatible_only"] = True
     front: dict[int, int] = {}
     rear: dict[int, int] = {}
@@ -720,9 +808,13 @@ def _t_gearing_impact(backend: Any, args: dict) -> dict:
 
     base = _sim_payload(args)
 
+    environment = None
     if getattr(backend, "supports_direct_gearing", False):
         a = backend.simulate_gearing(base, front_a, rear_a)
         b = backend.simulate_gearing(base, front_b, rear_b)
+        # Both setups ran in the same conditions: report them once.
+        environment = a.pop("environment", None)
+        b.pop("environment", None)
         method = "direct sprocket override (local physics)"
     else:
         front_idx, rear_idx = _sprocket_index(backend, args)
@@ -745,6 +837,28 @@ def _t_gearing_impact(backend: Any, args: dict) -> dict:
         payload["b_part_ids"] = ids_b
         res = backend.compare(payload)
         ra, rb = res.get("a", {}), res.get("b", {})
+        environment = res.get("environment") or None
+        # A sprocket the API did not fit means that side ran on other gearing
+        # than the one named: the comparison would be a fiction, so refuse it.
+        unfitted = [
+            (tag, side_res)
+            for tag, side_res in (("A", ra), ("B", rb))
+            if side_res.get("parts_skipped")
+        ]
+        if unfitted:
+            why = " ".join(
+                dict.fromkeys(w for w in (_skipped_reason(r) for _, r in unfitted) if w)
+            )
+            raise ToolError(
+                "The hosted API did not fit the catalog sprocket(s) for setup "
+                + " and ".join(
+                    f"{tag} (part ids {r['parts_skipped']})" for tag, r in unfitted
+                )
+                + " to this bike, so no gearing comparison was made."
+                + (f" {why}" if why else "")
+                + " Pass bike_id so only sprockets that fit are used, or run the "
+                "MCP server with MOTOQUANT_MCP_LOCAL=1 for arbitrary tooth counts."
+            )
 
         def _side(side_res: dict, f_t: int, r_t: int) -> dict:
             return {
@@ -761,10 +875,10 @@ def _t_gearing_impact(backend: Any, args: dict) -> dict:
         a, b = _side(ra, front_a, rear_a), _side(rb, front_b, rear_b)
         method = (
             "catalog sprocket parts via /api/simulate/compare (hosted API"
-            f"{'' if args.get('bike_id') else ', fitment NOT checked — no bike_id'})"
+            f"{'' if args.get('bike_id') else ', sprockets chosen for the preset bike'})"
         )
 
-    return {
+    out = {
         "bike": a.get("bike_name"),
         "a": a,
         "b": b,
@@ -779,12 +893,15 @@ def _t_gearing_impact(backend: Any, args: dict) -> dict:
             else "tie",
         },
         "method": method,
-        "note": (
-            "Deltas are B minus A — negative means B is faster. A numerically "
-            "taller rear sprocket shortens the final drive: quicker off the line, "
-            "lower top speed, and an extra shift may cost more than it gains."
-        ),
     }
+    if environment:
+        out["environment"] = environment
+    out["note"] = (
+        "Deltas are B minus A — negative means B is faster. A numerically "
+        "taller rear sprocket shortens the final drive: quicker off the line, "
+        "lower top speed, and an extra shift may cost more than it gains."
+    )
+    return out
 
 
 # ─── Tool registry ────────────────────────────────────────────────────────
@@ -803,7 +920,7 @@ TOOLS: list[dict[str, Any]] = [
     {
         "name": "search_bikes",
         "description": (
-            "Search the 541-bike catalog by free text, manufacturer or category. "
+            "Search the 534-bike catalog by free text, manufacturer or category. "
             "Returns catalog ids to feed the simulation tools. Always start here "
             "when the user names a bike."
         ),
@@ -910,7 +1027,7 @@ TOOLS: list[dict[str, Any]] = [
     {
         "name": "search_parts",
         "description": (
-            "Search the 593-part catalog. Pass bike_id to return ONLY parts that "
+            "Search the 546-part catalog. Pass bike_id to return ONLY parts that "
             "actually fit that bike (chain pitch, engine layout, displacement, "
             "stroke type are all checked)."
         ),
@@ -1065,7 +1182,7 @@ class MCPServer:
             "capabilities": {"tools": {"listChanged": False}},
             "serverInfo": {
                 "name": SERVER_NAME,
-                "title": "MotoQuant Pro — motorcycle drag physics",
+                "title": "MotoQuant — motorcycle drag physics",
                 "version": SERVER_VERSION,
             },
             "instructions": INSTRUCTIONS,

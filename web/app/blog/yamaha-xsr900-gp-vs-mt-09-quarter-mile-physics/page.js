@@ -82,7 +82,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running both bikes under matched Aamby Valley November conditions — 1050 m density altitude, 22°C ambient, dry concrete with stock OEM Bridgestone Battlax tires at μ_peak around 1.18, 75 kg rider, two-step launch from peak-torque rpm — produces the following:',
+    text: 'Running both bikes under matched Aamby Valley November conditions — about 1,100 m density altitude, 22°C ambient, dry asphalt with stock OEM Bridgestone Battlax tires at μ_peak around 1.18, 75 kg rider, two-step launch from peak-torque rpm — produces the following:',
   },
   {
     type: 'table',
@@ -142,7 +142,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The CP3 platform is a well-instrumented test bed. Cycle World benchmarked the 2024 XSR900 GP at 11.0-11.4 seconds with ~205 km/h trap in their instrumented test (March 2024 issue), and MCN clocked the 2024 MT-09 at 10.8-11.0 seconds with ~210 km/h trap (April 2024 first-ride). MotoQuant\'s simulator output sits just at the fast end of both bands. The reason is the venue: published magazine tests are usually run at sea-level with high humidity and tire temperatures that are not always optimal. The Aamby Valley simulation above runs at 1050 m density altitude with low humidity — the bikes lose roughly 3-4 percent crank power to the altitude but gain consistently in the aero portion of the run because air density is also lower.',
+    text: 'The CP3 platform is a well-instrumented test bed. Cycle World benchmarked the 2024 XSR900 GP at 11.0-11.4 seconds with ~205 km/h trap in their instrumented test (March 2024 issue), and MCN clocked the 2024 MT-09 at 10.8-11.0 seconds with ~210 km/h trap (April 2024 first-ride). MotoQuant\'s simulator output sits just at the fast end of both bands. The reason is the venue: published magazine tests are usually run at sea-level with high humidity and tire temperatures that are not always optimal. The Aamby Valley simulation above runs at about 1,100 m density altitude with low humidity — the bikes lose about 10 percent of their power to the thin air and get some of it back in the aero portion of the run, where lower air density means less drag.',
   },
   {
     type: 'p',
@@ -150,7 +150,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'See the broader methodology in the post on how the MotoQuant physics engine works — it covers the 15-sub-model RK4 architecture, the Pacejka tire model, the clutch slip dynamics, and the validation gates that lock the Suzuki GSX-R 1000 K5 baseline at 9.9331 seconds across every commit.',
+    text: 'See the broader methodology in the post on how the MotoQuant physics engine works — it covers the 15-sub-model RK4 architecture, the tyre grip model, the clutch slip dynamics, and the validation gates that lock the Suzuki GSX-R 1000 K5 baseline at 10.0436 seconds across every commit.',
   },
   {
     type: 'h2',
@@ -210,7 +210,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Two final caveats. First, every number in this post is a stock-tune simulation under specific conditions. Change rider weight by 15 kg, change ambient temperature by 10°C, change track surface from concrete to asphalt, and the absolute ETs shift on both bikes — but the relative ordering (MT-09 wins the quarter, GP wins the top-speed run) stays stable. Second, the Indian CBU pricing reflects 2026 retailer data and shifts every quarter; the parts-ROI engine inside the simulator pulls live pricing where it can and falls back to formula-based landing-cost math (USD × 84 × 1.30 import duty × 1.18 GST + ₹1500 freight) where it cannot.',
+    text: 'Two final caveats. First, every number in this post is a stock-tune simulation under specific conditions. Change rider weight by 15 kg, change ambient temperature by 10°C, change the track surface from asphalt to a prepped strip, and the absolute ETs shift on both bikes — but the relative ordering (MT-09 wins the quarter, GP wins the top-speed run) stays stable. Second, the Indian CBU pricing reflects 2026 retailer data and shifts every quarter; the parts catalog uses retailer prices where it has them and falls back to formula-based landing-cost math (USD × 84 × 1.30 import duty × 1.18 GST + ₹1500 freight) where it cannot.',
   },
   {
     type: 'p',
@@ -262,7 +262,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -285,7 +285,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -314,7 +314,7 @@ export default function PostPage() {
             {['Yamaha', 'XSR900 GP', 'MT-09', 'CP3 triple', 'platform physics', 'comparison'].map((t) => (
               <span
                 key={t}
-                className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
               >
                 {t}
               </span>
@@ -323,7 +323,7 @@ export default function PostPage() {
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             Yamaha XSR900 GP vs MT-09: Where the Heritage Tax Is Paid
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             18 May 2026 · 11 min read · MotoQuant Blog
           </div>
         </div>
@@ -369,13 +369,6 @@ export default function PostPage() {
               </Link>{' '}
               — MT-09, XSR900, XSR900 GP, Tracer 9 GT, and 340+ other bikes with full spec sheets.
             </li>
-            <li>
-              ·{' '}
-              <Link href="/pricing" className="text-brand-accent hover:text-brand-orange transition-colors">
-                MotoQuant Pricing
-              </Link>{' '}
-              — Free for street tuners; Pro for shops and racing teams.
-            </li>
           </ul>
         </div>
 
@@ -389,9 +382,9 @@ export default function PostPage() {
           </div>
           <Link
             href="/simulator?bike=yamaha-mt-09"
-            className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
+            className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
           >
-            Run sim →
+            Open the simulator →
           </Link>
         </div>
       </article>

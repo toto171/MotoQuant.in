@@ -1,21 +1,23 @@
 # AGENTS.md — working agreement for any contributor (human or AI)
 
-> This is the **canonical, model-agnostic contract** for changing this repo.
-> It is short on purpose. Read it fully before your first edit. It applies to
-> every AI coding tool (Claude, Cursor, Copilot, Gemini, …) and every human.
-> `CLAUDE.md` is a *different* thing — a long session changelog; skim only its
-> top entry. Start here, not there.
+> This is the **canonical contract** for changing this repo. It is short on
+> purpose. Read it fully before your first edit. It applies to every human
+> and every AI coding tool; `CLAUDE.md` and `.github/copilot-instructions.md`
+> only point back here.
 
-MotoQuant Pro is a first-principles physics engine for motorcycle quarter-mile
-drag racing, plus the product built on it (CLI, FastAPI backend, Next.js web
-app, agentic chat). Python package `motoquant/` + a seeded SQLite catalog.
+MotoQuant is a free, open-source (Apache-2.0) first-principles physics engine
+for motorcycle quarter-mile drag racing, plus the product built on it (CLI,
+FastAPI backend, Next.js web app, agentic chat, MCP server). Python package
+`motoquant/` + a seeded SQLite catalog. There are no paid tiers, quotas or
+license keys, and none may be reintroduced
+([ADR-0006](docs/adr/0006-open-source-pivot.md)).
 
 ## 0. The prime directive (never violate)
 
 Three reference bikes are pinned **bit-identical** and CI-gated:
 
 ```
-GSX-R 1000 K5 → 9.9331 s   YZF-R1 4C8 → 10.1436 s   Hayabusa Gen1 → 10.3633 s
+GSX-R 1000 K5 → 10.0436 s   YZF-R1 4C8 → 10.1092 s   Hayabusa Gen1 → 10.1100 s
 ```
 
 Any change that moves them by even 1e-9 s is a regression — no matter how
@@ -48,9 +50,10 @@ before a big change.
 1. **Never `git add -A` / `git add .`** — stage explicit file paths. The tree
    routinely holds unrelated WIP.
 2. **Never commit `motoquant.db` churn** unless you *intended* a data change.
-   Opening the DB in a test rewrites SQLite pages with no content change; if
-   `git diff` shows it modified but row counts are unchanged, `git checkout --
-   motoquant.db`.
+   Opening the DB through the CLI or a test rewrites it with no content
+   change (even `bikes --search`; KNOWN_TRAPS T2), so run read-only commands
+   against a copy (`--db /tmp/mq.db`). If `git diff` shows it modified but row
+   counts are unchanged, `git checkout -- motoquant.db`.
 3. **Regression tests must exercise the production path** (DB round-trip for
    `/api/simulate?bike_id=N`, HTTP for API bugs). A test that re-implements the
    fix and asserts its own math is worthless.
@@ -63,17 +66,24 @@ before a big change.
 6. **When you touch `web/**`, run `make web-build`** (that's what Vercel runs).
    `useSearchParams()` must sit inside a `<Suspense>` boundary or the static
    build fails.
-7. **Don't rewrite `CLAUDE.md`** — it's a fragile single-paragraph changelog;
-   prepend one line at most. Put substantive write-ups in `reports/`.
-8. **Verify file length after a large Write** (`wc -l`) — write tools can
-   truncate; a suspiciously short file lost its tail.
+7. **Caches of the physics are regenerated with the change that moves it:**
+   the regression snapshot, the stock leaderboard, the instant-estimate model
+   and the browser engine fixtures (see the regeneration list in
+   [CONTRIBUTING.md](CONTRIBUTING.md)).
+8. **Record what you measured.** A change that moves accuracy carries its
+   sweep result in the pull request; a larger investigation gets a short
+   write-up in `reports/`.
 
 ## 3. Where things live
 
 - **Architecture / "where does X live?"** → [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
   (module map + data-flow diagram).
 - **Day-one orientation** → [docs/ONBOARDING.md](docs/ONBOARDING.md).
-- **Dev workflow detail** → [CONTRIBUTING.md](CONTRIBUTING.md).
+- **Dev workflow detail** → [CONTRIBUTING.md](CONTRIBUTING.md) (incl. how
+  contributions are licensed: Apache-2.0, inbound = outbound).
+- **Running / deploying it** → [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md).
+- **Community policy** → [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md),
+  [SECURITY.md](SECURITY.md) (report vulnerabilities privately).
 - **Why things are the way they are** → [docs/adr/](docs/adr/) (Architecture
   Decision Records — read before relitigating a settled decision).
 - **What must never break** → [docs/INVARIANTS.md](docs/INVARIANTS.md).
@@ -82,12 +92,17 @@ before a big change.
 
 ## 4. Security posture (keep it)
 
-- Auth: magic-link + password (scrypt), JWT with a boot guard against the
-  default secret under billing. Don't reintroduce the `dev.` unsigned-token
-  path outside the jose-absent branch.
-- Webhooks (Stripe/Razorpay) verify signatures and **fail closed**.
-- Rate-limit + free-quota key on the **rightmost** `X-Forwarded-For` hop (single
-  trusted proxy = Render); never the client-spoofable leftmost.
+- There are **no accounts** and **no anonymous writes that other visitors
+  see**. Saved runs live in the visitor's browser; a timeslip link carries its
+  setup and the page re-simulates it. Every POST route is on the allow-list in
+  `tests/test_open_source_pivot.py::PUBLIC_POST_ROUTES`; anything that would
+  publish visitor input belongs in the issue tracker, not a new route.
+- Everything is free, so **per-IP rate limits are the abuse fuse**. Every
+  compute-heavy public route gets a `rate_limit(...)` dependency, plus the
+  daily chat cap (`MOTOQUANT_CHAT_DAILY_LIMIT`) for the LLM bill. Buckets
+  key on the client IP derived from `X-Forwarded-For` only for the trusted
+  proxy hops (`MOTOQUANT_TRUSTED_PROXY_HOPS`; auto = 1 on Render), never the
+  client-spoofable leftmost hop.
 - The chat agent's `web_fetch` re-checks the SSRF guard on **every redirect
   hop**. Any server-side fetch of a user/LLM-controlled URL must do the same.
 - SQL is always parameterized. No secrets in tracked files (the health check
@@ -97,8 +112,9 @@ before a big change.
 
 - Imperative subject ≤ 72 chars; explain the *why* in the body.
 - One logical change per commit (atomic). Test each batch.
-- Author email must be a real, provider-registered address (Vercel rejects
-  unknown committer emails on deploy).
+- Use your real git identity. Contributions are licensed Apache-2.0
+  (inbound = outbound); no CLA. Never commit credentials, and never ask a
+  contributor for one. Normal `git` over your own fork is all you need.
 - Open PRs as **draft**; fill the PR template; put the K5/R1/Hayabusa delta
   table in any physics-adjacent PR.
 - CI must be green (`make test` + `make check` locally first).

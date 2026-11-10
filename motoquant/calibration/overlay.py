@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Sim vs Real Overlay
-=====================================
+MotoQuant — Sim vs Real Overlay
+===============================
 Compare a simulation run (SimResult) against a real GPS run (DragRunData).
 Produces residuals, RMSE, and a rich comparison report.
 
@@ -24,6 +24,13 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
+from ..constants import (
+    EIGHTH_MILE_M,
+    QUARTER_MILE_M,
+    SIXTY_FOOT_M,
+    THOUSAND_FT_M,
+    THREE30_FT_M,
+)
 from ..physics import SimResult
 from .dragy import DragRunData
 
@@ -137,6 +144,16 @@ def compare_runs(
     Both runs must start at t=0 (launch). The real run is assumed to have been
     trimmed by parse_dragy_file() so timestamps[0] == 0.
 
+    Timing convention: the real run is timed FROM REST (the parsers re-zero at
+    the back-extrapolated motion onset; there is no 1-ft rollout in a GPS /
+    ECU log), so the simulation's ET, trap speed and splits are taken from
+    rest too. Pass a sim run with ``rollout_m=0.0`` (what the calibrator, the
+    API overlay and the CLI overlay do). A sim that was timed after a rollout
+    (the default ``run()``: ``sim.rollout_m`` = 1 ft, ET ~0.3 s shorter) is
+    NOT compared on its beam-relative splits: its from-rest times are read
+    off its own position channel instead, so the comparison is like with like
+    whichever way the sim was run.
+
     Parameters
     ----------
     real : DragRunData  — from parse_dragy_file()
@@ -155,9 +172,10 @@ def compare_runs(
     if len(sim.t) < 3:
         raise OverlayError("Sim result has fewer than 3 timesteps.")
 
-    # ── Scalar ET and trap speed ───────────────────────────────────────────
-    sim_et = float(sim.time_quarter)
-    sim_trap = float(sim.speed_quarter)  # already in m/s
+    # ── Scalar ET and trap speed (from rest, like the real run) ───────────
+    sim_splits_all = _sim_splits(sim)
+    sim_et = float(sim_splits_all["1320ft"])
+    sim_trap = float(sim.speed_quarter)  # already in m/s (speed at x = 402 m)
 
     et_error_s = sim_et - real.et_quarter
     et_error_pct = 100.0 * et_error_s / real.et_quarter if real.et_quarter > 0 else 0.0
@@ -189,7 +207,7 @@ def compare_runs(
 
     # ── Split-by-split errors ─────────────────────────────────────────────
     real_splits = real.splits()
-    sim_splits = _sim_splits(sim)
+    sim_splits = sim_splits_all
     split_errors = {}
     for name in real_splits:
         if name in sim_splits:
@@ -259,14 +277,36 @@ def compute_cost(comparison: RunComparison, weights: dict | None = None) -> floa
 
 
 def _sim_splits(sim: SimResult) -> dict[str, float]:
-    """Extract standard splits from a SimResult."""
-    return {
+    """Standard splits of a SimResult, timed FROM REST.
+
+    A run made with ``rollout_m=0.0`` already stores from-rest splits and
+    they are returned as they are. For a run timed after a rollout (the
+    strip-style default) the stored splits are beam-relative — ~0.3 s shorter
+    than a GPS / ECU log of the same pass — so the from-rest time at each mark
+    is read off the position channel instead (``SimResult.time_speed_at``; a
+    mark the run never reached keeps its stored 0.0, as before).
+    """
+    stored = {
         "60ft": sim.time_60ft,
         "330ft": sim.time_330ft,
         "660ft": sim.time_eighth,
         "1000ft": sim.time_1000ft,
         "1320ft": sim.time_quarter,
     }
+    if not (float(getattr(sim, "rollout_m", 0.0) or 0.0) > 0.0):
+        return stored
+    marks = {
+        "60ft": SIXTY_FOOT_M,
+        "330ft": THREE30_FT_M,
+        "660ft": EIGHTH_MILE_M,
+        "1000ft": THOUSAND_FT_M,
+        "1320ft": QUARTER_MILE_M,
+    }
+    out = {}
+    for name, dist in marks.items():
+        hit = sim.time_speed_at(dist)
+        out[name] = float(hit[0]) if hit is not None else stored[name]
+    return out
 
 
 def print_multi_run_stats(comparisons: list[RunComparison]) -> None:

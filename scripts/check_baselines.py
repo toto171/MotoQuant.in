@@ -27,10 +27,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # The pinned targets (see docs/INVARIANTS.md). These are the exact values the
 # current engine produces; the contract is Δ = 0.0000, i.e. bit-identical.
+# Re-pinned 2026-11-05 by the deliberate 2026-10/11 accuracy epoch (ADR-0002;
+# reports/acc_final_2026_11_05.json). Previous pins: 9.9331 / 10.1436 / 10.3633.
 BASELINES = {
-    "GSX-R 1000 K5": ("gsxr1000_k5", 9.933056382451884),
-    "YZF-R1 4C8": ("yzfr1_4c8", 10.143589715692835),
-    "Hayabusa Gen1": ("hayabusa_gen1", 10.363345081274984),
+    "GSX-R 1000 K5": ("gsxr1000_k5", 10.043600805570911),
+    "YZF-R1 4C8": ("yzfr1_4c8", 10.10920982866053),
+    "Hayabusa Gen1": ("hayabusa_gen1", 10.110001443831809),
 }
 
 

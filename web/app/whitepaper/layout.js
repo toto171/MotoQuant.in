@@ -4,8 +4,8 @@
 
 import StructuredData, { SITE_URL } from '../StructuredData';
 
-const TITLE = "Whitepaper — The Physics Behind MotoQuant Pro";
-const DESCRIPTION = "Complete technical whitepaper for the MotoQuant Pro motorcycle drag simulator: RK4 integrator at 1 ms step, Pacejka magic-formula tire model with thermal evolution, SAE J1349 dyno correction, weighted-benchmark validation methodology against 74 published timeslips, 15 sub-model architecture, and the K5/R1/Hayabusa reference baselines. Read this before you trust the predicted quarter-mile numbers.";
+const TITLE = "Whitepaper — The Physics Behind MotoQuant";
+const DESCRIPTION = "Complete technical whitepaper for the MotoQuant motorcycle drag simulator: RK4 integrator at 1 ms step, rear-tyre grip with load sensitivity and thermal evolution, SAE J1349 dyno correction, validation against 250 published tests weighted by source quality, 15 sub-model architecture, and the K5/R1/Hayabusa reference baselines. Read this before you trust the predicted quarter-mile numbers.";
 
 export const metadata = {
   title: TITLE,
@@ -14,7 +14,6 @@ export const metadata = {
   keywords: [
     "drag simulator whitepaper",
     "motorcycle physics paper",
-    "pacejka tire model india",
     "rk4 motorcycle simulator",
     "first principles motorcycle drag simulation",
     "motorcycle quarter mile physics whitepaper",
@@ -30,7 +29,6 @@ export const metadata = {
     "density altitude motorcycle drag racing",
     "density altitude correction formula motorcycle",
     "rk4 1ms integrator motorcycle physics",
-    "pacejka magic formula motorcycle thermal",
     "weighted benchmark validation 74 timeslips",
     "ktm 1390 super duke r evo physics",
   ],

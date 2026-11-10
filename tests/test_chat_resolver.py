@@ -97,11 +97,17 @@ class TestScoreCandidate(unittest.TestCase):
 
 
 def _live_db_path():
-    """Locate motoquant.db — skip these tests if absent."""
+    """Locate the SHIPPED motoquant.db — skip these tests if absent.
+
+    The repo DB comes first on purpose: sibling modules repoint
+    $MOTOQUANT_DB at freshly seeded (sometimes empty) tmp DBs, which made
+    these Live tests depend on collection order. The env var stays as the
+    fallback for checkouts that ship no repo DB.
+    """
     for cand in [
-        os.environ.get("MOTOQUANT_DB"),
-        "motoquant.db",
         os.path.join(os.path.dirname(__file__), "..", "motoquant.db"),
+        "motoquant.db",
+        os.environ.get("MOTOQUANT_DB"),
     ]:
         if cand and os.path.exists(cand):
             return cand

@@ -1,26 +1,28 @@
+# The Dockerfile copies only what the API needs (motoquant/, rust/,
+# motoquant.db, the surrogate artifact, LICENSE, NOTICE and the lockfile).
+# This list keeps everything else out of the build context so builds stay
+# small and fast. Patterns without a leading **/ match the repository root.
 .git
-.gitignore
-__pycache__
+.github
 **/__pycache__
-*.pyc
-*.db-shm
-*.db-wal
-*.pkl
-*.npz
-*.zip
-*.docx
+**/*.pyc
 .pytest_cache
 .ruff_cache
-.fuse_hidden*
+.hypothesis
+.venv
+venv
+*.db-shm
+*.db-wal
 tests/
 web/
+e2e/
+docs/
+reports/
+scripts/
+skills/
 node_modules/
-.venv/
-venv/
-pytest-cache-files-*/
-motoquant_scrape_checkpoint.json
-CLAUDE.md
 *.md
-Dockerfile
-railway.toml
-nixpacks.toml
+# Rust: the builder stage compiles rust/ from source; never send local build
+# output (rust/target can be several GB) or the parity fixtures.
+rust/target
+rust/fixtures

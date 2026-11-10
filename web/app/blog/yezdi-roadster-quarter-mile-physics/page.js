@@ -56,7 +56,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running the Roadster in MotoQuant with a 78 kg rider, OEM Ceat Zoom-X rear (μ_peak 1.20), 22°C ambient, dry concrete, and density altitude ~1100 m (Aamby Valley November), the stock-tune numbers come out as follows:',
+    text: 'Running the Roadster in MotoQuant with a 78 kg rider, OEM Ceat Zoom-X rear (μ_peak 1.20), 22°C ambient, dry asphalt, and density altitude ~1100 m (Aamby Valley November), the stock-tune numbers come out as follows:',
   },
   {
     type: 'table',
@@ -173,7 +173,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Indian motorcycle review culture has historically treated the 334 cc class as a city-cycle MPG category rather than a performance category, which is part of why no magazine has run an instrumented ET on this bike in the four years it has been on sale. That gap is the reason this post exists: there is genuine information missing from the public record about what a stock Yezdi Roadster does at the quarter mile, and the MotoQuant simulator is the best tool available to fill that gap when no Dragy timeslip data has surfaced. The 15.42-second figure above is a stock-tune estimate under specific Aamby Valley conditions. The real number from a competent rider at MMRT Chennai (sea level, higher density air, dry concrete) would likely come in at 15.0 to 15.2 seconds. That gap is the documented venue delta, not a simulator error.',
+    text: 'Indian motorcycle review culture has historically treated the 334 cc class as a city-cycle MPG category rather than a performance category, which is part of why no magazine has run an instrumented ET on this bike in the four years it has been on sale. That gap is the reason this post exists: there is genuine information missing from the public record about what a stock Yezdi Roadster does at the quarter mile, and the MotoQuant simulator is the best tool available to fill that gap when no Dragy timeslip data has surfaced. The 15.42-second figure above is a stock-tune estimate under specific Aamby Valley conditions. The real number from a competent rider at MMRT Chennai (sea level, higher density air, dry asphalt) would likely come in at 15.0 to 15.2 seconds. That gap is the documented venue delta, not a simulator error.',
   },
   {
     type: 'h2',
@@ -241,7 +241,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -264,7 +264,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -293,7 +293,7 @@ export default function PostPage() {
             {['Yezdi', 'Roadster 334', 'BG6 platform', 'Indian retro', 'physics'].map((t) => (
               <span
                 key={t}
-                className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
               >
                 {t}
               </span>
@@ -302,7 +302,7 @@ export default function PostPage() {
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             Yezdi Roadster Quarter-Mile Physics: 334cc Neo-Retro at the Strip
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             18 May 2026 · 11 min read · MotoQuant Blog
           </div>
         </div>
@@ -348,13 +348,6 @@ export default function PostPage() {
               </Link>{' '}
               — including the Roadster, Scrambler, Adventure 334, and Jawa 42 Bobber 350 platform-mates.
             </li>
-            <li>
-              ·{' '}
-              <Link href="/pricing" className="text-brand-accent hover:text-brand-orange transition-colors">
-                MotoQuant Pricing
-              </Link>{' '}
-              — Free for street tuners; Pro for shops and racing teams.
-            </li>
           </ul>
         </div>
 
@@ -368,9 +361,9 @@ export default function PostPage() {
           </div>
           <Link
             href="/simulator?bike=yezdi-roadster"
-            className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
+            className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
           >
-            Run sim →
+            Open the simulator →
           </Link>
         </div>
       </article>

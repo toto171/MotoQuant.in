@@ -17,8 +17,8 @@ HTTP 200 success rather than rejecting the input:
    ``humidity_pct: 1e9`` returned ``et_quarter_s: 0.0``.
 
 Both are driven through the real routes per docs/INVARIANTS.md I8. The module
-redirects MOTOQUANT_DB at import (and re-asserts at run time) because the
-metered sim routes record ``sim_usage`` rows — see the comment in
+redirects MOTOQUANT_DB at import (and re-asserts at run time) so no route-level
+writer can leave rows in the shipped catalog — see the comment in
 tests/test_jobs_api.py.
 """
 
@@ -142,9 +142,8 @@ class TestCalibrationUploadCap(unittest.TestCase):
     Both calibration routes did a bare ``await file.read()``, materialising the
     entire body as one bytes object with no ceiling and then writing it to a
     second temp file — an unauthenticated OOM + disk-fill lever on the 512 MB
-    Render instance. The ``require_tier("studio")`` gate does not stop it:
-    require_tier passes anonymous callers through whenever
-    MOTOQUANT_BILLING_ENFORCE is falsy, which render.yaml ships as the default.
+    Render instance. Both routes accept anonymous callers, so nothing
+    upstream of the cap stops such a body.
     """
 
     @classmethod
@@ -340,15 +339,6 @@ class TestCostBearingRoutesAreFused(unittest.TestCase):
         from motoquant import ratelimit
 
         ratelimit.reset()
-
-    def test_pricing_refresh_is_rate_limited(self):
-        codes = [
-            self.client.post("/api/pricing/refresh/8?force=true").status_code
-            for _ in range(9)
-        ]
-        self.assertIn(429, codes, f"pricing refresh never rate-limited: {codes}")
-        # The fuse must precede the handler, i.e. the 429s come at the tail.
-        self.assertEqual(codes[-1], 429, f"limit not enforced on later calls: {codes}")
 
     def test_venue_resolve_is_rate_limited(self):
         codes = [

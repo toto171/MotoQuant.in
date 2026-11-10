@@ -1,6 +1,6 @@
-import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
-import { AuthProvider } from '../components/AuthProvider';
+import { THEME_INIT_SCRIPT } from '../lib/theme';
 import StructuredData, {
   organizationSchema,
   websiteSchema,
@@ -9,31 +9,39 @@ import StructuredData, {
   SITE_URL,
 } from './StructuredData';
 
-const inter = Inter({
+// Fonts are self-hosted (web/app/fonts, SIL Open Font License) so the build
+// never depends on a network fetch to Google Fonts — that fetch failed CI
+// twice. Each file is the variable-weight Latin subset.
+const inter = localFont({
+  src: './fonts/inter-latin-wght-normal.woff2',
   variable: '--font-inter',
-  subsets: ['latin'],
   display: 'swap',
-  weight: ['400', '500', '600', '700'],
+  weight: '100 900',
 });
 
-// IGNITION v5 display face — the identity kit's own type (Space Grotesk 700
-// is the wordmark face; web, app and logo speak one voice).
-const spaceGrotesk = Space_Grotesk({
+// Display face — Space Grotesk 700 is the wordmark face; web and logo speak
+// one voice.
+const spaceGrotesk = localFont({
+  src: './fonts/space-grotesk-latin-wght-normal.woff2',
   variable: '--font-display',
-  subsets: ['latin'],
   display: 'swap',
-  weight: ['500', '600', '700'],
+  weight: '300 700',
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const jetbrainsMono = localFont({
+  src: './fonts/jetbrains-mono-latin-wght-normal.woff2',
   variable: '--font-jetbrains-mono',
-  subsets: ['latin'],
   display: 'swap',
-  weight: ['400', '500', '700'],
+  weight: '100 800',
 });
 
 export const viewport = {
-  themeColor: '#0A0A0B',
+  // Follows the OS preference; the in-page toggle only changes the page chrome.
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#fafaf9' },
+    { media: '(prefers-color-scheme: dark)', color: '#09090b' },
+  ],
+  colorScheme: 'dark light',
   width: 'device-width',
   initialScale: 1,
   // Allow zoom — Lighthouse flags "user-scalable=no" as an accessibility failure
@@ -45,7 +53,7 @@ export const viewport = {
 // SEO strategy
 // ──────────────────────────────────────────────────────────────────────────
 // Targets grouped by intent:
-//   - Brand: "motoquant", "moto quant pro"
+//   - Brand: "motoquant", "moto quant"
 //   - Product category: "motorcycle drag simulator", "quarter mile calculator"
 //   - Bike-specific long tail: "hayabusa quarter mile time", "zx-10r 1/4 mile"
 //   - Geographic: "drag racing india", "aamby valley drag strip", "kari speedway"
@@ -57,17 +65,17 @@ export const viewport = {
 // internal linking. This file handles the first three.
 
 const DESCRIPTION =
-  'Free physics-based motorcycle quarter-mile drag racing simulator — not a power-to-weight formula. Predict ET, trap speed, 60-ft split for 541 bikes including Hayabusa, ZX-14R, R15 V4, KTM Duke 390, Pulsar NS200. Compare builds, quantify parts ROI in INR, overlay Dragy runs against the sim. Built for the Indian drag racing community — Aamby Valley, MMRT, BIC, Kari.';
+  'Free physics-based motorcycle quarter-mile drag racing simulator — not a power-to-weight formula. Predict ET, trap speed, 60-ft split for 534 bikes including Hayabusa, ZX-14R, R15 V4, KTM Duke 390, Pulsar NS200. Compare builds, quantify parts ROI in INR, overlay Dragy runs against the sim. Built for the Indian drag racing community — Aamby Valley, MMRT, BIC, Kari.';
 
 export const metadata = {
   title: {
     default:
-      'MotoQuant Pro — Motorcycle Quarter-Mile Drag Racing Simulator | ET Predictor & Build Optimizer',
-    template: '%s · MotoQuant Pro',
+      'MotoQuant — Motorcycle Quarter-Mile Drag Racing Simulator | ET Predictor & Build Optimizer',
+    template: '%s · MotoQuant',
   },
   description: DESCRIPTION,
   metadataBase: new URL(SITE_URL),
-  applicationName: 'MotoQuant Pro',
+  applicationName: 'MotoQuant',
   manifest: '/site.webmanifest',
   alternates: {
     canonical: '/',
@@ -79,17 +87,17 @@ export const metadata = {
   },
   openGraph: {
     title:
-      'MotoQuant Pro — Motorcycle Quarter-Mile Drag Racing Simulator',
+      'MotoQuant — Motorcycle Quarter-Mile Drag Racing Simulator',
     description: DESCRIPTION,
     url: SITE_URL,
-    siteName: 'MotoQuant Pro',
+    siteName: 'MotoQuant',
     images: [
       {
         url: `${SITE_URL}/og-image.png`,
         secureUrl: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'MotoQuant Pro — quarter-mile drag racing simulator covering 541 motorcycles, 593 parts, 254 tires, 20 venues',
+        alt: 'MotoQuant — quarter-mile drag racing simulator covering 534 motorcycles, 546 parts, 254 tires, 20 venues',
         type: 'image/png',
       },
     ],
@@ -100,12 +108,12 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title:
-      'MotoQuant Pro — Motorcycle Quarter-Mile Drag Racing Simulator',
+      'MotoQuant — Motorcycle Quarter-Mile Drag Racing Simulator',
     description: DESCRIPTION,
     images: [
       {
         url: `${SITE_URL}/og-image.png`,
-        alt: 'MotoQuant Pro — quarter-mile drag racing simulator covering 541 motorcycles, 593 parts, 254 tires, 20 venues',
+        alt: 'MotoQuant — quarter-mile drag racing simulator covering 534 motorcycles, 546 parts, 254 tires, 20 venues',
       },
     ],
     site: '@motoquant',
@@ -114,7 +122,6 @@ export const metadata = {
   keywords: [
     // Brand
     'motoquant',
-    'motoquant pro',
     'motoquant simulator',
     // Primary category
     'motorcycle drag racing simulator',
@@ -171,7 +178,6 @@ export const metadata = {
     // Physics / academic
     'motorcycle physics simulation',
     'first principles drag racing physics',
-    'pacejka tire motorcycle',
     'motorcycle dyno simulator',
     'aerodynamic drag motorcycle',
     'tire slip ratio simulation',
@@ -189,7 +195,7 @@ export const metadata = {
   ],
   authors: [{ name: 'Ritwik Singh', url: SITE_URL }],
   creator: 'Ritwik Singh',
-  publisher: 'MotoQuant Pro',
+  publisher: 'MotoQuant',
   category: 'Automotive Simulation',
   classification: 'Motorcycle Racing Simulation Software',
   robots: {
@@ -246,9 +252,12 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={[inter.variable, spaceGrotesk.variable, jetbrainsMono.variable].join(' ')}
     >
       <head>
+        {/* No-flash theme: apply the saved/OS theme before first paint. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         {/* Preconnect to the API origin — shaves ~100-300ms off first sim call */}
         <link rel="preconnect" href={SITE_URL} crossOrigin="anonymous" />
         <link rel="dns-prefetch" href={SITE_URL} />
@@ -262,7 +271,7 @@ export default function RootLayout({ children }) {
             harmless anchor behavior. */}
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-xl focus:bg-accent focus:px-4 focus:py-2 focus:font-display focus:text-sm focus:font-bold focus:text-black"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-xl focus:bg-accent focus:px-4 focus:py-2 focus:font-display focus:text-sm focus:font-bold focus:text-on-accent"
         >
           Skip to content
         </a>
@@ -273,7 +282,7 @@ export default function RootLayout({ children }) {
         <StructuredData data={websiteSchema()} />
         <StructuredData data={softwareApplicationSchema()} />
         <StructuredData data={faqSchema()} />
-        <AuthProvider>{children}</AuthProvider>
+        {children}
       </body>
     </html>
   );

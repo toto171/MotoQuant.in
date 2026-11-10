@@ -1,11 +1,12 @@
 """
-MotoQuant Pro â Database Connection Manager
-==========================================
+MotoQuant — Database Connection Manager
+=======================================
 Handles SQLite connection lifecycle, schema initialization, migrations,
 and provides a single entry-point (MotoQuantDB) for all repository access.
 """
 
 import sqlite3
+import threading
 from pathlib import Path
 
 from .schema import (
@@ -15,6 +16,81 @@ from .schema import (
     SEED_VENUES,
     TABLES_DDL,
 )
+
+# -- Catalog generation counter ------------------------------------------------
+# Process-wide integer that changes whenever a catalog table is written at
+# runtime. API-side caches (serialized catalog responses, parsed fitment rules,
+# stock-baseline sims) key on it, so a write invalidates all of them at once.
+# It is NOT derived from the DB file's mtime: WAL writes do not move that until
+# a checkpoint. Writes through THIS process's MotoQuantDB connections bump it
+# via the authorizer below; writes made through any other connection (another
+# process, or a plain sqlite3.connect) are caught by folding ``PRAGMA
+# data_version`` into the token returned by :func:`catalog_token`.
+CATALOG_TABLES = frozenset(
+    {
+        "bike_models",
+        "bike_configs",
+        "manufacturers",
+        "parts",
+        "parts_categories",
+        "part_prices",
+        "tire_models",
+        "tire_manufacturers",
+        "bike_tire_fitments",
+        "venues",
+        "venue_seasonal",
+    }
+)
+_catalog_generation = 0
+_catalog_generation_lock = threading.Lock()
+
+
+def catalog_generation() -> int:
+    """Current catalog generation (monotonically increasing within a process)."""
+    return _catalog_generation
+
+
+def catalog_token(conn: "sqlite3.Connection | None") -> tuple:
+    """Opaque freshness token for catalog-derived caches.
+
+    ``(generation, data_version)``: the generation moves on every write made
+    through a MotoQuantDB connection or an explicit bump; ``PRAGMA
+    data_version`` moves whenever a DIFFERENT connection (another process, a
+    script, a plain ``sqlite3.connect``) commits to the same database file.
+    Compare for equality only.
+    """
+    dv = None
+    if conn is not None:
+        try:
+            dv = conn.execute("PRAGMA data_version").fetchone()[0]
+        except sqlite3.Error:
+            dv = None
+    return (_catalog_generation, dv)
+
+
+def bump_catalog_generation() -> int:
+    """Mark every catalog-derived cache stale. Returns the new generation."""
+    global _catalog_generation
+    with _catalog_generation_lock:
+        _catalog_generation += 1
+        return _catalog_generation
+
+
+_WRITE_ACTIONS = frozenset(
+    {sqlite3.SQLITE_INSERT, sqlite3.SQLITE_UPDATE, sqlite3.SQLITE_DELETE}
+)
+
+
+def _catalog_write_authorizer(action, table, _arg2, _dbname, _source):
+    """sqlite3 authorizer: bump the generation on any write to a catalog table.
+
+    Runs at statement-prepare time, which is why the connection is opened with
+    ``cached_statements=0``: a cached prepared statement would skip this hook
+    on every repeat of the same SQL. Never denies anything.
+    """
+    if action in _WRITE_ACTIONS and table in CATALOG_TABLES:
+        bump_catalog_generation()
+    return sqlite3.SQLITE_OK
 
 
 class MotoQuantDB:
@@ -43,19 +119,21 @@ class MotoQuantDB:
         self._parts = None
         self._sim_runs = None
         self._bike_suggestions = None
-        self._spec_corrections = None
 
-    # ââââââââââââââââââââââââââââââââââââââââââââ
+    # ────────────────────────────────────────────
     # Connection lifecycle
-    # ââââââââââââââââââââââââââââââââââââââââââââ
+    # ────────────────────────────────────────────
 
     def connect(self) -> sqlite3.Connection:
         """Open (or return existing) SQLite connection with optimal pragmas."""
         if self._conn is not None:
             return self._conn
 
-        self._conn = sqlite3.connect(str(self._db_path), check_same_thread=False)
+        self._conn = sqlite3.connect(
+            str(self._db_path), check_same_thread=False, cached_statements=0
+        )
         self._conn.row_factory = sqlite3.Row
+        self._conn.set_authorizer(_catalog_write_authorizer)
 
         # WAL mode is optimal but fails on some network/FUSE-mounted filesystems.
         # Silently fall back to DELETE journal mode if WAL is unavailable.
@@ -88,7 +166,6 @@ class MotoQuantDB:
         self._venues = None
         self._weather = None
         self._parts = None
-        self._spec_corrections = None
         self._sim_runs = None
         self._bike_suggestions = None
 
@@ -105,9 +182,9 @@ class MotoQuantDB:
             self.connect()
         return self._conn
 
-    # ââââââââââââââââââââââââââââââââââââââââââââ
+    # ────────────────────────────────────────────
     # Schema initialization & migration
-    # ââââââââââââââââââââââââââââââââââââââââââââ
+    # ────────────────────────────────────────────
 
     def initialize(self):
         """Create all tables, seed reference data, and set schema version."""
@@ -143,7 +220,7 @@ class MotoQuantDB:
         """Run incremental migrations."""
         conn = self.conn
 
-        # v1 â v2: Add fitment_rules column to parts table
+        # v1 → v2: Add fitment_rules column to parts table
         if from_version < 2:
             try:
                 conn.execute("ALTER TABLE parts ADD COLUMN fitment_rules TEXT")
@@ -152,11 +229,11 @@ class MotoQuantDB:
                 if "duplicate column name" not in str(e).lower():
                     raise
 
-        # v2 â v3: bike_suggestions table (added for /api/bikes/suggest endpoint)
-        # The CREATE TABLE statement is idempotent in TABLES_DDL, so no-op here â
+        # v2 → v3: bike_suggestions table
+        # The CREATE TABLE statement is idempotent in TABLES_DDL, so no-op here —
         # but we bump the version so older DB files get their schema_meta updated.
 
-        # v3 â v4: part_prices table (live Indian-market retailer pricing layer)
+        # v3 → v4: part_prices table (live Indian-market retailer pricing layer)
         if from_version < 4:
             conn.executescript(
                 """
@@ -188,16 +265,24 @@ class MotoQuantDB:
     def _seed_parts_categories(self):
         """Insert parts categories if not present. Also prunes the retired
         'tire' pseudo-category from older DBs (tires are managed in tire_models,
-        not parts â the category was only ever empty)."""
+        not parts — the category was only ever empty)."""
         conn = self.conn
+        # Insert only the rows that are missing. ``INSERT OR IGNORE`` into an
+        # AUTOINCREMENT table advances ``sqlite_sequence`` even when the row is
+        # ignored, so re-running it on every open rewrote the database file:
+        # any read-only CLI command left the tracked motoquant.db modified.
+        # The same guard is on the venue and seasonal seeds below.
+        present = {r[0] for r in conn.execute("SELECT name FROM parts_categories")}
         for name, display, affects in SEED_PARTS_CATEGORIES:
+            if name in present:
+                continue
             conn.execute(
                 """INSERT OR IGNORE INTO parts_categories (name, display_name, affects_params)
                    VALUES (?, ?, ?)""",
                 (name, display, affects),
             )
         # Retire stale "tire" category if it exists AND is empty (parts in it
-        # would block the delete via FK â that scenario is impossible by design
+        # would block the delete via FK — that scenario is impossible by design
         # but we still guard against it rather than silently dropping data).
         tire_row = conn.execute(
             "SELECT id FROM parts_categories WHERE name = 'tire'"
@@ -215,7 +300,10 @@ class MotoQuantDB:
     def _seed_venues(self):
         """Insert Indian drag venues if not present."""
         conn = self.conn
+        present = {r[0] for r in conn.execute("SELECT name FROM venues")}
         for venue in SEED_VENUES:
+            if venue.get("name") in present:
+                continue
             cols = ", ".join(venue.keys())
             placeholders = ", ".join(["?"] * len(venue))
             conn.execute(
@@ -226,6 +314,10 @@ class MotoQuantDB:
     def _seed_seasonal_data(self):
         """Insert seasonal weather normals for seeded venues."""
         conn = self.conn
+        present = {
+            (r[0], r[1])
+            for r in conn.execute("SELECT venue_id, month FROM venue_seasonal")
+        }
         for venue_name, months in SEED_SEASONAL_DATA.items():
             row = conn.execute(
                 "SELECT id FROM venues WHERE name = ?", (venue_name,)
@@ -234,6 +326,8 @@ class MotoQuantDB:
                 continue
             venue_id = row["id"]
             for month, vals in months.items():
+                if (venue_id, month) in present:
+                    continue
                 (
                     avg_t,
                     avg_h,
@@ -269,9 +363,9 @@ class MotoQuantDB:
                     ),
                 )
 
-    # ââââââââââââââââââââââââââââââââââââââââââââ
+    # ────────────────────────────────────────────
     # Repository accessors
-    # ââââââââââââââââââââââââââââââââââââââââââââ
+    # ────────────────────────────────────────────
 
     @property
     def bikes(self):
@@ -336,15 +430,6 @@ class MotoQuantDB:
             self._bike_suggestions = BikeSuggestionsRepository(self.conn)
         return self._bike_suggestions
 
-    @property
-    def spec_corrections(self):
-        """Spec-corrections (user-submitted field-level fixes) repository."""
-        if self._spec_corrections is None:
-            from .spec_corrections_repo import SpecCorrectionsRepository
-
-            self._spec_corrections = SpecCorrectionsRepository(self.conn)
-        return self._spec_corrections
-
     # ────────────────────────────────────────────
     # Utility
     # ────────────────────────────────────────────
@@ -397,7 +482,7 @@ def connect(db_path=None):
 
 def row_conn(db_path=None) -> sqlite3.Connection:
     """``connect()`` with ``sqlite3.Row`` as the row factory — the exact shape
-    auth / payments / subscriptions each need. Centralised so the row-factory
+    the optional-accounts layer (auth) needs. Centralised so the row-factory
     (and any future per-request connection tuning) lives in one place instead
     of being copy-pasted into every module's ``_get_conn``.
     """

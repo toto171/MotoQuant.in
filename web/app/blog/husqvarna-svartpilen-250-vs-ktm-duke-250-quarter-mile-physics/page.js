@@ -58,7 +58,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running both bikes in MotoQuant under matched Aamby Valley November conditions (density altitude around 1,100 m, 22°C ambient, dry concrete with OEM tire choices, 78 kg rider) produces the head-to-head below. These are stock-tune outputs from the production sweep — no power boost, no mass cut, no parts catalogue mods applied.',
+    text: 'Running both bikes in MotoQuant under matched Aamby Valley November conditions (density altitude around 1,100 m, 22°C ambient, dry asphalt with OEM tire choices, 78 kg rider) produces the head-to-head below. These are stock-tune outputs from the production sweep — no power boost, no mass cut, no parts catalogue mods applied.',
   },
   {
     type: 'table',
@@ -186,7 +186,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Two final caveats. First, every number in this post is a stock-tune simulation under specific conditions; change the rider weight or the surface or the launch technique and the absolute ETs shift, but the relative ordering of which bike is quicker stays stable. Second, the entry-200-300 cc cluster carries a +0.5 to +1.4 s slow bias against real-world instrumented data; expect a competent rider on a warmed bike with good launches to run quicker than the sim figures, with the gap between the two bikes holding roughly constant. Both biases will tighten as more Indian small-cc Dragy and VBOX uploads flow into the calibrator.',
+    text: 'Two final caveats. First, every number in this post is a stock-tune simulation under specific conditions; change the rider weight or the surface or the launch technique and the absolute ETs shift, but the relative ordering of which bike is quicker stays stable. Second, the entry-200-300 cc cluster carries a +0.5 to +1.4 s slow bias against real-world instrumented data; expect a competent rider on a warmed bike with good launches to run quicker than the sim figures, with the gap between the two bikes holding roughly constant. Both biases will tighten as more Indian small-cc Dragy and VBOX timeslips join the benchmark set.',
   },
 ];
 
@@ -234,7 +234,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -257,7 +257,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -286,7 +286,7 @@ export default function PostPage() {
             {['Husqvarna', 'Svartpilen 250', 'KTM', 'Duke 250', 'LC4c platform', 'comparison'].map((t) => (
               <span
                 key={t}
-                className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
               >
                 {t}
               </span>
@@ -295,7 +295,7 @@ export default function PostPage() {
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             Husqvarna Svartpilen 250 vs KTM Duke 250: Quarter-Mile Physics
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             25 May 2026 · 11 min read · MotoQuant Blog
           </div>
         </div>
@@ -341,13 +341,6 @@ export default function PostPage() {
               </Link>{' '}
               — every spec, every gear ratio, every Cd value used by the simulator.
             </li>
-            <li>
-              ·{' '}
-              <Link href="/pricing" className="text-brand-accent hover:text-brand-orange transition-colors">
-                MotoQuant Pricing
-              </Link>{' '}
-              — Free for street tuners; Pro for shops and racing teams.
-            </li>
           </ul>
         </div>
 
@@ -361,9 +354,9 @@ export default function PostPage() {
           </div>
           <Link
             href="/simulator?bike=husqvarna-svartpilen-250"
-            className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
+            className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
           >
-            Run sim →
+            Open the simulator →
           </Link>
         </div>
       </article>

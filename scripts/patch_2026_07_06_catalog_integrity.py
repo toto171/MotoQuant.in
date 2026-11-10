@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MotoQuant Pro — Catalog-integrity patch (2026-07-06 audit).
+MotoQuant — Catalog-integrity patch (2026-07-06 audit).
 
 Fixes the catalog-integrity defects surfaced by the July-6 discovery pass
 (leak matrix over every part x bike pair). Every fix below is ALSO folded
@@ -121,7 +121,6 @@ RULE_FIXES: list[dict] = [
     {"brand": "HealTech", "name": "QuickShifter Controller Module", "set": _S4},
     {"brand": "Dynojet", "name": "Power Commander Auto-Tune Map", "set": _S4},
     {"brand": "AEM", "name": "Infinity Fuel Management", "set": _S4},
-    {"brand": "Dynojet", "name": "Power Commander QS", "set": _S4},
     {"brand": "Dynojet", "name": "Power Commander V Small-Displacement", "set": _S4},
     {"brand": "Bazzaz", "name": "BKN Fuel Map Controller", "set": _S4},
     # premium_universal piggybacks (displacement/category-band only rules)

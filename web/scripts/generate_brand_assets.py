@@ -21,7 +21,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 # ----------------------------------------------------------------------------
-# Brand tokens (IGNITION v5 — MotoQuant_Identity_Kit + web/tailwind.config.js)
+# Brand tokens (IGNITION v5 — web/tailwind.config.js)
 # ----------------------------------------------------------------------------
 ORANGE = "#FF5E1F"  # Signal (identity kit)
 ORANGE_LIGHT = "#FF8F57"
@@ -80,7 +80,7 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # ----------------------------------------------------------------------------
-# Logo mark: the identity kit "redline Q" (MotoQuant_Identity_Kit, July 2026).
+# Logo mark: the "redline Q" (July 2026; see web/components/GaugeMark.js).
 # Heavyweight dial ring, 30-degree sector gap at 315, tapered needle that
 # accelerates outward through the gap, hub dot at large sizes (the kit app
 # icon drops the hub below 64px). Geometry lifted from the kit SVGs verbatim
@@ -241,10 +241,10 @@ def render_og_image(path: Path) -> None:
     # NOTE: scripts/audit_headline_stats.py --regen-og owns the live
     # og-image.png; these values are the fallback and must track it.
     stats = [
-        ("541", "bikes"),
-        ("593", "parts"),
+        ("534", "bikes"),
+        ("546", "parts"),
         ("20", "venues"),
-        ("4393", "tests"),
+        ("6200+", "tests"),
     ]
     stat_x = 110
     stat_y = 420
@@ -410,7 +410,7 @@ def render_og_image(path: Path) -> None:
 # Web manifest
 # ----------------------------------------------------------------------------
 WEBMANIFEST = """{
-  "name": "MotoQuant Pro",
+  "name": "MotoQuant",
   "short_name": "MotoQuant",
   "description": "First-principles physics simulation for quarter-mile drag racing.",
   "icons": [

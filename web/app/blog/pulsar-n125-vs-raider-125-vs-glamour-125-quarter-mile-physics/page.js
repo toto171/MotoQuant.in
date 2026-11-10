@@ -54,7 +54,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "MotoQuant treats every bike in its catalog the same way regardless of category. The 15-sub-model physics engine that simulates a Hayabusa at 10.47 seconds also simulates a Glamour 125, with the same chain-drive losses, the same tyre-slip Pacejka model, the same aerodynamic drag at trap. The numbers below come from the same code path that produces the K5 / R1 / Hayabusa reference baselines that the engine is locked against.",
+    text: "MotoQuant treats every bike in its catalog the same way regardless of category. The 15-sub-model physics engine that simulates the reference Hayabusa at 10.11 seconds also simulates a Glamour 125, with the same chain-drive losses, the same tyre grip model, the same aerodynamic drag at trap. The numbers below come from the same code path that produces the K5 / R1 / Hayabusa reference baselines that the engine is locked against.",
   },
   {
     type: "h2",
@@ -62,7 +62,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Conditions are matched across all four: Aamby Valley November, roughly 1,100 m density altitude, 22 C ambient, dry concrete, OEM tyre rubber, 70 kg rider in upright commuter stance. No mods, no tuck, no warm-up. Just the bike Bajaj or Hero or TVS would ship to the dealer.",
+    text: "Conditions are matched across all four: Aamby Valley November, roughly 1,100 m density altitude, 22 C ambient, dry asphalt, OEM tyre rubber, 70 kg rider in upright commuter stance. No mods, no tuck, no warm-up. Just the bike Bajaj or Hero or TVS would ship to the dealer.",
   },
   {
     type: "table",
@@ -81,7 +81,7 @@ const CONTENT = [
   },
   {
     type: "callout",
-    text: "Why the simulator under-predicts small-cc Indian ETs: the cluster bias is calibrated against the most reliable instrumented benchmarks available, which are mostly litre-bike magazine tests. The May 2026 two-stroke clutch rewrite and the April 2026 over-clutching tier-table closed half the gap on the entry_150_200 cluster. The remaining bias closes the moment Dragy uploads from real Indian small-cc bikes start flowing through the Phase 3 calibrator.",
+    text: "Why the simulator under-predicts small-cc Indian ETs: the cluster bias is calibrated against the most reliable instrumented benchmarks available, which are mostly litre-bike magazine tests. The May 2026 two-stroke clutch rewrite and the April 2026 over-clutching tier-table closed half the gap on the entry_150_200 cluster. The remaining bias closes as instrumented timeslips from real Indian small-cc bikes join the benchmark set.",
   },
   {
     type: "h2",
@@ -227,7 +227,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Two final caveats. First, every number in this post is a stock-tune simulation under specific Aamby Valley November conditions inside the documented entry_150_200 cluster bias band of +0.5 to +1.4 seconds. A single instrumented Dragy timeslip from any of these bikes at a real Indian strip would tighten the simulator prediction by a meaningful margin — and we will pull that data in through the Phase 3 calibrator the moment we have it. Second, the Indian aftermarket pricing in the table shifts every quarter; the parts-ROI engine pulls live retailer pricing where it can and falls back to formula-based landing-cost math (USD × 84 × 1.30 import duty × 1.18 GST + ₹1,500 freight) where it cannot.",
+    text: "Two final caveats. First, every number in this post is a stock-tune simulation under specific Aamby Valley November conditions inside the documented entry_150_200 cluster bias band of +0.5 to +1.4 seconds. A single instrumented Dragy timeslip from any of these bikes at a real Indian strip would tighten the simulator prediction by a meaningful margin — and the “Submit a timeslip” form is how to send one. Second, the Indian aftermarket pricing in the table shifts every quarter; the parts catalog uses retailer prices where it has them and falls back to formula-based landing-cost math (USD × 84 × 1.30 import duty × 1.18 GST + ₹1,500 freight) where it cannot.",
   },
   {
     type: "p",
@@ -279,7 +279,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -302,7 +302,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -338,7 +338,7 @@ export default function PostPage() {
             ].map((t) => (
               <span
                 key={t}
-                className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
               >
                 {t}
               </span>
@@ -347,7 +347,7 @@ export default function PostPage() {
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             Pulsar N125 vs Raider 125 vs Glamour 125: Which 125cc Commuter Is the Fastest?
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             31 May 2026 · 13 min read · MotoQuant Blog
           </div>
         </div>
@@ -428,16 +428,6 @@ export default function PostPage() {
               </Link>{" "}
               — all four 125cc commuters plus 535+ other bikes with full spec sheets, gear cassettes, and OEM tyre fitments.
             </li>
-            <li>
-              ·{" "}
-              <Link
-                href="/pricing"
-                className="text-brand-accent hover:text-brand-orange transition-colors"
-              >
-                MotoQuant Pricing
-              </Link>{" "}
-              — free tier covers stock-tune sims on every bike; Pro adds full parts-ROI and Dragy timeslip calibration.
-            </li>
           </ul>
         </div>
 
@@ -451,9 +441,9 @@ export default function PostPage() {
           </div>
           <Link
             href="/simulator?bike=bajaj-pulsar-n125"
-            className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
+            className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
           >
-            Run sim →
+            Open the simulator →
           </Link>
         </div>
       </article>

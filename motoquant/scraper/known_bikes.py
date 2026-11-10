@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Curated Bike Dataset
-=====================================
+MotoQuant — Curated Bike Dataset
+================================
 Manually curated, cross-referenced specifications for ~30 high-performance
 motorcycles relevant to Indian drag racing (2005-2024 era).
 
@@ -577,9 +577,17 @@ KAWASAKI_H2_2015 = spec_from_dict(
         "stroke_mm": 55.0,
         "compression_ratio": 8.5,
         "cylinders": 4,
-        "peak_power_hp": 228.0,
-        "peak_power_rpm": 11000,  # ram-air, street-legal
-        "peak_torque_nm": 141.7,
+        # 2026-10 epoch: was 228 hp / 141.7 Nm — the 2019+ update's figures
+        # (231 PS ram-air, 141.7 Nm @ 11,000) on a row whose year_from (2015)
+        # and only ET benchmark (Cycle World 2015, 9.62 s @ 152.01 mph) are
+        # the first-generation bike. 2015 Kawasaki rating: 147.2 kW (200 PS)
+        # @ 11,000 rpm, 154.5 kW (210 PS = 207 hp) @ 11,000 rpm with ram air,
+        # 133.5 Nm @ 10,500 rpm (iamabiker.com 2014 Ninja H2 spec sheet;
+        # Wikipedia "Kawasaki Ninja H2" claimed figures). Cycle World's own
+        # rear-wheel dyno of that 2015 bike: 189.8 hp / 123.7 Nm (91.2 lb-ft).
+        "peak_power_hp": 207.0,
+        "peak_power_rpm": 11000,  # ram-air, street-legal (2015 claim)
+        "peak_torque_nm": 133.5,
         "peak_torque_rpm": 10500,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -1218,7 +1226,7 @@ HONDA_CBR1000RR_R_2020 = spec_from_dict(
         "model_name": "CBR1000RR-R Fireblade SP",
         "model_code": "SC82",
         "year_from": 2020,
-        "year_to": 2024,
+        "year_to": 2023,  # EPOCH 2026-11-10: SC82 2020-2023; the 2024+ update is its own row
         "category": "sport",
         "displacement_cc": 999,
         "bore_mm": 81.0,
@@ -1849,110 +1857,22 @@ SUZUKI_GSX_S1000_2021 = spec_from_dict(
 # Royal Enfield
 # ────────────────────────────────────────────────────────
 
-RE_CONTINENTAL_GT_650 = spec_from_dict(
-    {
-        "manufacturer": "Royal Enfield",
-        "model_name": "Continental GT 650",
-        "model_code": "GT650",
-        "year_from": 2020,
-        "year_to": 2024,
-        "category": "naked",
-        "displacement_cc": 648,
-        "bore_mm": 78.0,
-        "stroke_mm": 67.8,
-        "compression_ratio": 9.5,
-        "cylinders": 2,
-        "peak_power_hp": 47.0,
-        "peak_power_rpm": 7150,
-        "peak_torque_nm": 52.0,
-        "peak_torque_rpm": 5250,
-        "fuel_system": "fi",
-        "cooling": "air/oil",
-        "valve_config": "sohc",
-        "gears": 6,
-        "gear_ratios": [3.071, 2.056, 1.583, 1.292, 1.125, 1.000],
-        "front_sprocket": 16,
-        "rear_sprocket": 43,
-        "chain_pitch": "520",
-        "dry_mass_kg": 182.0,
-        "wheelbase_mm": 1400.0,
-        "front_tire_size": "110/70-17",
-        "rear_tire_size": "130/70-18",
-        "cd": 0.68,
-        "frontal_area_m2": 0.46,
-    },
-    source_name="spec_sheet",
-)
+# EPOCH 2026-11-10 (duplicate adjudication): the second Continental GT 650 entry (2020-2024, F16/R43)
+# that lived here described the SAME motorcycle as ROYAL_ENFIELD_CONTINENTAL_GT_650_2018
+# below and was removed. The surviving row is the later, source-cited one (geometry
+# adjudicated 2026-08-08); it takes this row's dry-convention mass (182 kg). See
+# reports/session_2026_11_10_epoch.md.
 
-RE_INTERCEPTOR_650 = spec_from_dict(
-    {
-        "manufacturer": "Royal Enfield",
-        "model_name": "Interceptor 650",
-        "model_code": "INT650",
-        "year_from": 2020,
-        "year_to": 2024,
-        "category": "naked",
-        "displacement_cc": 648,
-        "bore_mm": 78.0,
-        "stroke_mm": 67.8,
-        "compression_ratio": 9.5,
-        "cylinders": 2,
-        "peak_power_hp": 47.0,
-        "peak_power_rpm": 7150,
-        "peak_torque_nm": 52.0,
-        "peak_torque_rpm": 5250,
-        "fuel_system": "fi",
-        "cooling": "air/oil",
-        "valve_config": "sohc",
-        "gears": 6,
-        "gear_ratios": [3.071, 2.056, 1.583, 1.292, 1.125, 1.000],
-        "front_sprocket": 16,
-        "rear_sprocket": 46,
-        "chain_pitch": "520",
-        "dry_mass_kg": 181.0,
-        "wheelbase_mm": 1400.0,
-        "front_tire_size": "100/90-18",
-        "rear_tire_size": "130/70-18",
-        "cd": 0.76,
-        "frontal_area_m2": 0.5,
-    },
-    source_name="spec_sheet",
-)
 
-RE_SUPER_METEOR_650 = spec_from_dict(
-    {
-        "manufacturer": "Royal Enfield",
-        "model_name": "Super Meteor 650",
-        "model_code": "SM650",
-        "year_from": 2023,
-        "year_to": 2024,
-        "category": "cruiser",
-        "displacement_cc": 648,
-        "bore_mm": 78.0,
-        "stroke_mm": 67.8,
-        "compression_ratio": 9.5,
-        "cylinders": 2,
-        "peak_power_hp": 47.0,
-        "peak_power_rpm": 7250,
-        "peak_torque_nm": 52.0,
-        "peak_torque_rpm": 5650,
-        "fuel_system": "fi",
-        "cooling": "air/oil",
-        "valve_config": "sohc",
-        "gears": 6,
-        "gear_ratios": [3.071, 2.056, 1.583, 1.292, 1.125, 1.000],
-        "front_sprocket": 16,
-        "rear_sprocket": 46,
-        "chain_pitch": "520",
-        "dry_mass_kg": 221.0,
-        "wheelbase_mm": 1500.0,
-        "front_tire_size": "100/90-19",
-        "rear_tire_size": "140/70-17",
-        "cd": 0.8,
-        "frontal_area_m2": 0.56,
-    },
-    source_name="spec_sheet",
-)
+# EPOCH 2026-11-10 (duplicate adjudication): the second Interceptor 650 entry (2020-2024, F16/R46) was
+# removed for the same reason; ROYAL_ENFIELD_INTERCEPTOR_650_2018 is the single row and
+# takes this row's dry-convention mass (181 kg).
+
+
+# EPOCH 2026-11-10 (duplicate adjudication): the first Super Meteor 650 entry (2023-2024, 140/70-17
+# rear) was removed; ROYAL_ENFIELD_SUPER_METEOR_650_2023 in known_bikes_extended.py (the
+# later, source-cited entry, 2023-2026) is the single row.
+
 
 # ────────────────────────────────────────────────────────
 # Indian small-displacement (popular at Indian drag events)
@@ -2828,16 +2748,27 @@ HARLEY_VROD_MUSCLE = spec_from_dict(
         "model_code": "VRSCF",
         "year_from": 2009,
         "year_to": 2017,
-        "category": "muscle",
+        # 2026-10 epoch — harmonised with its VRSC platform sibling (the
+        # VRSCA V-Rod entry). The two had opposite ~1 s residuals on one
+        # engine family. Category "muscle" -> "cruiser": "muscle" fell to the
+        # importer's sport-compound default tyre mu 1.40, while the VRSCA got
+        # the cruiser 1.20 — yet the VRSCF ships on the Michelin Scorcher 11
+        # 240/40R18 cruiser compound (OE per H-D parts page 43189-11 /
+        # easyparts Scorcher 11 fitment list). Engine: Revolution 1250 is
+        # 105 x 72 mm (1000ps.com 2009 VRSCF), not 100 x 79.4.
+        "category": "cruiser",
         "displacement_cc": 1247,
-        "bore_mm": 100.0,
-        "stroke_mm": 79.4,
+        "bore_mm": 105.0,
+        "stroke_mm": 72.0,
         "compression_ratio": 11.3,
         "cylinders": 2,
         "peak_power_hp": 122.0,
         "peak_power_rpm": 8250,
-        "peak_torque_nm": 128.0,
-        "peak_torque_rpm": 6500,
+        # Was 128 Nm @ 6500. H-D 2009 VRSCF: 85 ft-lb (115 Nm) @ 7,000 rpm,
+        # 122 hp @ 8,250 rpm (totalmotorcycle.com 2009 VRSCF spec page;
+        # 1000ps.com lists 115 Nm).
+        "peak_torque_nm": 115.0,
+        "peak_torque_rpm": 7000,
         "fuel_system": "fi",
         "cooling": "liquid",
         "valve_config": "dohc",
@@ -2846,7 +2777,9 @@ HARLEY_VROD_MUSCLE = spec_from_dict(
         "front_sprocket": 32,
         "rear_sprocket": 68,
         "chain_pitch": "belt",
-        "dry_mass_kg": 254.0,
+        # Was 254 kg — lighter than the 270 kg VRSCA, though the Muscle is
+        # the heavier bike. 1000ps.com 2009 VRSCF: 292 kg dry.
+        "dry_mass_kg": 292.0,
         "wheelbase_mm": 1625.0,
         "front_tire_size": "120/70ZR19",
         "rear_tire_size": "240/40ZR18",
@@ -3017,10 +2950,14 @@ KTM_DUKE_200_2017 = spec_from_dict(
         "stroke_mm": 61.0,
         "compression_ratio": 11.5,
         "cylinders": 1,
-        "peak_power_hp": 24.8,
-        "peak_power_rpm": 9000,
-        "peak_torque_nm": 18.5,
-        "peak_torque_rpm": 6500,
+        # 2026-10 epoch: was 24.8 hp @ 9000 / 18.5 Nm @ 6500 — physically
+        # inconsistent (the torque at the power peak would exceed peak torque).
+        # KTM rating 25 PS (24.7 hp) @ 10,000 rpm / 19.3 Nm @ 8,000 rpm
+        # (rushlane.com BS6 KTM Duke & RC launch spec table, 2020).
+        "peak_power_hp": 24.7,
+        "peak_power_rpm": 10000,
+        "peak_torque_nm": 19.3,
+        "peak_torque_rpm": 8000,
         "fuel_system": "fi",
         "cooling": "liquid",
         "valve_config": "dohc",
@@ -3122,10 +3059,15 @@ KTM_DUKE_250_2017 = spec_from_dict(
         "stroke_mm": 56.0,
         "compression_ratio": 11.6,
         "cylinders": 1,
-        "peak_power_hp": 30.0,
-        "peak_power_rpm": 8000,
+        # 2026-10 epoch: was 30.0 hp @ 8000 / 24 Nm @ 6500 (inconsistent:
+        # needs 26.7 Nm at the power peak). KTM rating 30 PS (29.6 hp) @
+        # 9,000 rpm / 24 Nm @ 7,500 rpm (rushlane.com BS6 KTM Duke & RC
+        # launch spec table, 2020; the 2017 launch figure was 31.3 PS @ 9,000
+        # / 24 Nm @ 7,250).
+        "peak_power_hp": 29.6,
+        "peak_power_rpm": 9000,
         "peak_torque_nm": 24.0,
-        "peak_torque_rpm": 6500,
+        "peak_torque_rpm": 7500,
         "fuel_system": "fi",
         "cooling": "liquid",
         "valve_config": "dohc",
@@ -3157,10 +3099,13 @@ KTM_RC_200_2022 = spec_from_dict(
         "stroke_mm": 61.0,
         "compression_ratio": 11.5,
         "cylinders": 1,
-        "peak_power_hp": 24.8,
-        "peak_power_rpm": 9000,
-        "peak_torque_nm": 18.5,
-        "peak_torque_rpm": 6500,
+        # 2026-10 epoch: was 24.8 hp @ 9000 / 18.5 Nm @ 6500 (inconsistent).
+        # KTM rating 25 PS (24.7 hp) @ 10,000 rpm / 19.2 Nm @ 8,000 rpm
+        # (rushlane.com BS6 KTM Duke & RC launch spec table, 2020).
+        "peak_power_hp": 24.7,
+        "peak_power_rpm": 10000,
+        "peak_torque_nm": 19.2,
+        "peak_torque_rpm": 8000,
         "fuel_system": "fi",
         "cooling": "liquid",
         "valve_config": "dohc",
@@ -3503,7 +3448,8 @@ TVS_APACHE_RTR_160_4V_2018 = spec_from_dict(
 # @ 7250 / 52 Nm @ 5250 figures here sit inside the published spread
 # (47 PS @ 7250 with 52.3 Nm @ 5150 per RE Europe; 47 bhp @ 7100 with
 # 52 Nm @ 5200 per Wikipedia), and the F17/R45 final drive still disagrees
-# with the 2020-2024 entry's F16/R43 and with gear_ratios.py's F14/R43.
+# with gear_ratios.py's F14/R43 (and with the F16/R43 of the 2020-2024
+# duplicate entry removed on 2026-11-10). Neither is sourced.
 ROYAL_ENFIELD_CONTINENTAL_GT_650_2018 = spec_from_dict(
     {
         "manufacturer": "Royal Enfield",
@@ -3522,15 +3468,19 @@ ROYAL_ENFIELD_CONTINENTAL_GT_650_2018 = spec_from_dict(
         "peak_torque_nm": 52.0,
         "peak_torque_rpm": 5250,
         "fuel_system": "fi",
-        "cooling": "liquid",
+        "cooling": "air/oil",  # air/oil-cooled twin (was mislabelled liquid)
         "valve_config": "sohc",
         "gears": 6,
         "gear_ratios": [3.692, 2.105, 1.526, 1.179, 0.966, 0.814],
         "front_sprocket": 17,
         "rear_sprocket": 45,
         "chain_pitch": "520",
-        "dry_mass_kg": 202.0,
-        "wheelbase_mm": 1412.0,
+        # EPOCH 2026-11-10: was 202.0 - a published KERB figure (sources give
+        # 198-214 kg kerb) stored as dry mass, so the importer added fluids on
+        # top of it. 182.0 is the dry-convention figure the removed duplicate
+        # carried.
+        "dry_mass_kg": 182.0,
+        "wheelbase_mm": 1398.0,  # Autocar India / 1000PS (was 1412)
         "front_tire_size": "100/90R19",
         "rear_tire_size": "130/70R17",
         "cd": 0.85,
@@ -3562,15 +3512,19 @@ ROYAL_ENFIELD_INTERCEPTOR_650_2018 = spec_from_dict(
         "peak_torque_nm": 52.0,
         "peak_torque_rpm": 5250,
         "fuel_system": "fi",
-        "cooling": "liquid",
+        "cooling": "air/oil",  # air/oil-cooled twin (was mislabelled liquid)
         "valve_config": "sohc",
         "gears": 6,
         "gear_ratios": [3.692, 2.105, 1.526, 1.179, 0.966, 0.814],
         "front_sprocket": 17,
         "rear_sprocket": 45,
         "chain_pitch": "520",
-        "dry_mass_kg": 202.0,
-        "wheelbase_mm": 1412.0,
+        # EPOCH 2026-11-10: was 202.0 - a published KERB figure (sources give
+        # 202-218 kg kerb) stored as dry mass, so the importer added fluids on
+        # top of it. 181.0 is the dry-convention figure the removed duplicate
+        # carried.
+        "dry_mass_kg": 181.0,
+        "wheelbase_mm": 1398.0,  # Autocar India (was 1412)
         "front_tire_size": "100/90R19",
         "rear_tire_size": "130/70R17",
         "cd": 0.86,
@@ -3717,14 +3671,20 @@ YAMAHA_FZ_X_2021 = spec_from_dict(
         "year_to": 2024,
         "category": "naked",
         "displacement_cc": 149,
-        "bore_mm": 52.0,
-        "stroke_mm": 70.0,
-        "compression_ratio": 11.0,
+        # 2026-10 epoch: bore/stroke/CR were 52 x 70 / 11.0 — the FZ 149cc
+        # air-cooled 2V is 57.3 x 57.9 mm, CR 9.6:1 (bikeleague.in FZ-X spec;
+        # 91wheels FZ-X spec page).
+        "bore_mm": 57.3,
+        "stroke_mm": 57.9,
+        "compression_ratio": 9.6,
         "cylinders": 1,
+        # 2026-10 epoch: rpm points were 6000 / 4500 with 12.7 Nm
+        # (inconsistent). Yamaha India rating 12.4 PS (12.2 hp) @ 7,250 rpm /
+        # 13.3 Nm @ 5,500 rpm (team-bhp, 91wheels, bikeleague FZ-X specs).
         "peak_power_hp": 12.2,
-        "peak_power_rpm": 6000,
-        "peak_torque_nm": 12.7,
-        "peak_torque_rpm": 4500,
+        "peak_power_rpm": 7250,
+        "peak_torque_nm": 13.3,
+        "peak_torque_rpm": 5500,
         "fuel_system": "fi",
         "cooling": "liquid",
         "valve_config": "dohc",
@@ -3732,7 +3692,9 @@ YAMAHA_FZ_X_2021 = spec_from_dict(
         "gear_ratios": [3.500, 1.846, 1.227, 0.923, 0.734],
         "front_sprocket": 16,
         "rear_sprocket": 48,
-        "chain_pitch": "520",
+        # 2026-10 epoch: was "520". The FZ 149cc family (FZ V2/V3/FZ-X/V4)
+        # runs a 428 chain (Diamond K224 kit "J428H-XR-128L", lrlmotors.com).
+        "chain_pitch": "428",
         "dry_mass_kg": 142.0,
         "wheelbase_mm": 1360.0,
         "front_tire_size": "100/90R17",
@@ -3837,7 +3799,7 @@ HONDA_HORNET_2_0_2020 = spec_from_dict(
         "model_name": "Hornet 2.0",
         "model_code": "2020",
         "year_from": 2020,
-        "year_to": 2024,
+        "year_to": 2026,  # EPOCH 2026-11-10: one row; the OBD-2B refresh kept the engine
         "category": "naked",
         "displacement_cc": 184.4,  # was 184
         "bore_mm": 61.0,  # was 64.0
@@ -3856,7 +3818,9 @@ HONDA_HORNET_2_0_2020 = spec_from_dict(
         "front_sprocket": 16,
         "rear_sprocket": 46,
         "chain_pitch": "520",
-        "dry_mass_kg": 142.0,
+        # EPOCH 2026-11-10: 142 kg is the published KERB weight (Honda India);
+        # recorded as wet so the importer does not add fluids on top of it.
+        "wet_mass_kg": 142.0,
         "wheelbase_mm": 1355.0,  # published wheelbase (was 1320)
         "front_tire_size": "100/70R17",
         "rear_tire_size": "130/70R17",
@@ -3883,10 +3847,14 @@ KAWASAKI_NINJA_300_2013 = spec_from_dict(
         "stroke_mm": 70.0,
         "compression_ratio": 11.0,
         "cylinders": 2,
-        "peak_power_hp": 39.0,
+        # 2026-10 epoch: torque was 23.8 Nm @ 9000 (inconsistent — 39 hp @
+        # 11,000 needs 25 Nm there). Kawasaki rating 39 PS (38.5 hp) @ 11,000
+        # rpm / 27.0 Nm @ 10,000 rpm (1000ps.com 2013 Ninja 300 spec;
+        # iamabiker spec sheet 38.45 hp @ 11,000 / 27 Nm @ 10,000).
+        "peak_power_hp": 38.5,
         "peak_power_rpm": 11000,
-        "peak_torque_nm": 23.8,
-        "peak_torque_rpm": 9000,
+        "peak_torque_nm": 27.0,
+        "peak_torque_rpm": 10000,
         "fuel_system": "fi",
         "cooling": "liquid",
         "valve_config": "dohc",
@@ -3918,33 +3886,39 @@ KAWASAKI_NINJA_400_2018 = spec_from_dict(
         "stroke_mm": 80.0,
         "compression_ratio": 10.8,
         "cylinders": 2,
-        "peak_power_hp": 44.8,  # 44.8 hp at wheel (Cycle World dyno, US spec)
+        # 2026-10 epoch round 2: catalog power is the RATED (crank) figure —
+        # the importer applies drivetrain losses itself — so the old 44.8 hp
+        # rear-wheel dyno figure double-counted them. Kawasaki Canada /
+        # North-American spec: 36 kW {49 PS} @ 10,000, 38 N.m @ 8,000
+        # (https://www.totalmotorcycle.com/motorcycles/2018/2018-kawasaki-ninja-400abs-krt-review;
+        # the EU A2 version is 33.4 kW {45 PS}). MotoStatz (US) tested the
+        # North-American bike.
+        "peak_power_hp": 48.3,
         "peak_power_rpm": 10000,
-        "peak_torque_nm": 38.5,  # 38.5 Nm at 8000 rpm (service manual / dyno)
+        "peak_torque_nm": 38.0,
         "peak_torque_rpm": 8000,
         "fuel_system": "fi",
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        # Kawasaki Ninja 400 2018 service manual — DIFFERENT from Ninja 300
-        # Previous entry erroneously used Ninja 300 gear data
-        "gear_ratios": [
-            2.846,
-            2.071,
-            1.700,
-            1.441,
-            1.241,
-            1.107,
-        ],  # internal ratios (SM p. 3-33)
-        "primary_ratio": 2.073,  # crank → main shaft: 85/41 ≈ 2.073 (EX400 SM p. 3-33)
-        # NOTE: was 3.082 (Ninja 300 value — copy-paste error). Fix already in
-        # gear_ratios.py since Apr-22 but spec field was blocking the lookup
-        # (non-null spec.primary_ratio short-circuits lu_primary in importer.py:638).
-        "front_sprocket": 15,  # OEM: 15T (was 17 — Ninja 300 data)
-        "rear_sprocket": 46,  # OEM: 46T (was 43 — Ninja 300 data)
+        # 2026-10 epoch round 2: the previous "service manual p. 3-33"
+        # cassette [2.846, 2.071, 1.700, 1.441, 1.241, 1.107], primary 2.073
+        # (85/41) and 15/46 sprockets contradict Kawasaki's published Ninja
+        # 400 data (Canadian + European spec, same gearing): primary 2.219
+        # (71/32); 1st 2.929 (41/14) 2nd 2.056 (37/18) 3rd 1.619 (34/21) 4th
+        # 1.333 (32/24) 5th 1.154 (30/26) 6th 1.037 (28/27); final 2.929
+        # (41/14); wheelbase 1,370 mm; curb 166 kg (Canada) / 172-174 kg (EU,
+        # ABS) — https://www.totalmotorcycle.com/motorcycles/2018/2018-kawasaki-ninja-400abs-krt-review
+        "gear_ratios": [2.929, 2.056, 1.619, 1.333, 1.154, 1.037],
+        "primary_ratio": 2.219,
+        "front_sprocket": 14,
+        "rear_sprocket": 41,
         "chain_pitch": "520",
-        "dry_mass_kg": 168.0,
-        "wheelbase_mm": 1345.0,
+        # Was 168 kg "dry" (above the 166 kg curb). Dry ~= curb 166 - full
+        # 14 L tank x 0.74 kg/L (10.4) = 155.6 kg; oil + coolant ignored
+        # (not published; the importer adds its own fluid payload).
+        "dry_mass_kg": 155.6,
+        "wheelbase_mm": 1370.0,
         "front_tire_size": "110/70R17",
         "rear_tire_size": "150/60R17",  # corrected from 140/70R17
         "cd": 0.69,
@@ -4284,7 +4258,14 @@ YAMAHA_VMAX_2009 = spec_from_dict(
         "gear_ratios": [2.294, 1.555, 1.217, 1.000, 0.806],
         "front_sprocket": 18,
         "rear_sprocket": 46,
-        "chain_pitch": "530",
+        # 2026-10 epoch: was "530" — the VMAX 1700 is SHAFT drive (Yamaha
+        # 2009 VMAX launch spec "Transmission 5-speed... Final Drive Shaft",
+        # thekneeslider.com official specifications; 1000ps.com "prop
+        # shaft"). The 18/46 sprocket pair below is kept as the effective
+        # final ratio (2.556) — UNVERIFIED: dealer listings (bikesales.com.au)
+        # quote a 3.082 secondary + 1.509 primary and a 2.375/1.810/1.400/
+        # 1.115/0.935 box that does not match this entry's cassette either.
+        "chain_pitch": "shaft",
         "dry_mass_kg": 310.0,
         "wheelbase_mm": 1700.0,
         "front_tire_size": "120/70R18",
@@ -5647,7 +5628,11 @@ YAMAHA_R15_V1_2008 = spec_from_dict(
         "gear_ratios": [2.833, 1.875, 1.429, 1.160, 0.963, 0.840],
         "front_sprocket": 14,
         "rear_sprocket": 42,
-        "chain_pitch": "520",
+        # 2026-10 epoch: was "520". The R15 runs a 428 chain (Uno Minda CH
+        # 7010 kit for the R15 V2: "R428H 132L, 15T/47T"; V1 = same platform).
+        # The importer now honours this field instead of the displacement
+        # heuristic, so the wrong code would have reached parts fitment.
+        "chain_pitch": "428",
         "dry_mass_kg": 131.0,
         "wheelbase_mm": 1345.0,
         "front_tire_size": "90/80-17",
@@ -5682,7 +5667,11 @@ YAMAHA_R15_V2_2011 = spec_from_dict(
         "gear_ratios": [2.833, 1.875, 1.429, 1.160, 0.963, 0.840],
         "front_sprocket": 14,
         "rear_sprocket": 48,
-        "chain_pitch": "520",
+        # 2026-10 epoch: was "520". The R15 runs a 428 chain (Uno Minda CH
+        # 7010 kit for the R15 V2: "R428H 132L, 15T/47T"; V1 = same platform).
+        # The importer now honours this field instead of the displacement
+        # heuristic, so the wrong code would have reached parts fitment.
+        "chain_pitch": "428",
         "dry_mass_kg": 136.0,
         "wheelbase_mm": 1345.0,
         "front_tire_size": "90/80-17",
@@ -6597,7 +6586,11 @@ JAWA_42_2018 = spec_from_dict(
         "stroke_mm": 65.0,
         "compression_ratio": 10.5,
         "cylinders": 1,
-        "peak_power_hp": 27.33,
+        # 2026-10 epoch: was 27.33 "hp" — that is the PS rating. Classic
+        # Legends' 27.33 PS = 26.96 hp ("just a hair under 27 hp", RideApart
+        # 2021 Jawa Forty-Two report; 27.02 Nm torque unchanged). The PS
+        # value as hp made the pair inconsistent (1.06x).
+        "peak_power_hp": 26.96,
         "peak_power_rpm": 6800,
         "peak_torque_nm": 27.02,
         "peak_torque_rpm": 5000,
@@ -7252,40 +7245,10 @@ APRILIA_RS457_2024 = spec_from_dict(
     source_name="spec_sheet",
 )
 
-APRILIA_TUONO_457_2024 = spec_from_dict(
-    {
-        "manufacturer": "Aprilia",
-        "model_name": "Tuono 457",
-        "model_code": "T457",
-        "year_from": 2024,
-        "year_to": 2026,
-        "category": "naked",
-        "displacement_cc": 457.0,
-        "bore_mm": 69.0,
-        "stroke_mm": 61.1,
-        "compression_ratio": 13.1,
-        "cylinders": 2,
-        "peak_power_hp": 47.0,
-        "peak_power_rpm": 9400,
-        "peak_torque_nm": 43.5,
-        "peak_torque_rpm": 6700,
-        "fuel_system": "fi",
-        "cooling": "liquid",
-        "valve_config": "dohc",
-        "gears": 6,
-        "gear_ratios": [2.750, 1.938, 1.478, 1.182, 0.960, 0.821],
-        "front_sprocket": 14,
-        "rear_sprocket": 42,
-        "chain_pitch": "520",
-        "dry_mass_kg": 159.0,
-        "wheelbase_mm": 1365.0,
-        "front_tire_size": "110/70-17",
-        "rear_tire_size": "150/60-17",
-        "cd": 0.74,
-        "frontal_area_m2": 0.52,
-    },
-    source_name="spec_sheet",
-)
+# EPOCH 2026-11-10 (duplicate adjudication): the 2024-2026 Tuono 457 entry (47.0 hp) was removed; the
+# bike launched for 2025 and APRILIA_TUONO_457_2025 in known_bikes_extended.py (47.6 hp @
+# 9400, Rider / Motorcycle.com) is the single row.
+
 
 # ── Triumph (Indian market Scrambler 400X) ────────────────────────────
 TRIUMPH_SCRAMBLER_400X_2023 = spec_from_dict(
@@ -7560,11 +7523,20 @@ HONDA_CB500F_2019 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
+        # 2026-10 epoch round 2: gearing UNVERIFIED (open) — this cassette
+        # and the importer's Tier-2 primary (1.85) give an overall 1st of
+        # ~13.9:1, while the CBR500R Tier-1 entry (same 471 cc twin and
+        # gearbox family) gives ~18.2:1; no primary source located.
         "gear_ratios": [2.750, 1.857, 1.444, 1.200, 1.035, 0.925],
         "front_sprocket": 15,
         "rear_sprocket": 41,
         "chain_pitch": "520",
-        "dry_mass_kg": 189.0,
+        # Was 189 kg = Honda's KERB mass entered as dry (Padgett's 21YM spec:
+        # kerb 189 kg, fuel 17.1 L inc. reserve —
+        # https://www.padgettsmotorcycles.com/honda/21ym-honda-cb500f/), then
+        # the importer added its own 12.2 kg fluid payload on top. Dry ~=
+        # 189 - 17.1 L x 0.74 kg/L (12.7) = 176.3 kg (oil + coolant ignored).
+        "dry_mass_kg": 176.3,
         "wheelbase_mm": 1410.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "160/60ZR17",
@@ -9177,7 +9149,10 @@ HARLEY_VROD_2002 = spec_from_dict(
         "rear_sprocket": 0,
         "chain_pitch": "belt",
         "final_drive": "belt",
-        "dry_mass_kg": 272.0,
+        # 2026-10 epoch: 272 -> 270.4 kg (595.7 lb dry, totalmotorcycle.com
+        # 2003 VRSCA spec sheet; 115 hp @ 8,250 / 74 lb-ft = 100 Nm @ 7,000
+        # rpm in the same sheet — matches the values below).
+        "dry_mass_kg": 270.4,
         "wheelbase_mm": 1715.0,
         "front_tire_size": "120/70R19",
         "rear_tire_size": "180/55R18",
@@ -9208,9 +9183,17 @@ HARLEY_PAN_AMERICA_2021 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        "gear_ratios": [2.647, 1.862, 1.400, 1.130, 0.956, 0.827],
+        # 2026-10 epoch: gearing re-derived from the Harley-Davidson 2022
+        # RA1250 official spec sheet (h-dmediakit.com): primary "Gear, 49/89",
+        # final drive "Chain, 19/48", overall ratios 13.11 / 9.687 / 7.509 /
+        # 6.057 / 5.08 / 4.436. Internal ratio = overall / (89/49 × 48/19).
+        # Was [2.647, 1.862, 1.400, 1.130, 0.956, 0.827] with 19/43 and no
+        # primary (the lookup supplied one). The final drive is CHAIN (not
+        # belt like the rest of the H-D line).
+        "gear_ratios": [2.857, 2.111, 1.636, 1.32, 1.107, 0.967],
+        "primary_ratio": 1.8163,
         "front_sprocket": 19,
-        "rear_sprocket": 43,
+        "rear_sprocket": 48,
         "chain_pitch": "525",
         "dry_mass_kg": 258.0,
         "wheelbase_mm": 1580.0,
@@ -9273,19 +9256,30 @@ KTM_690_DUKE_2012 = spec_from_dict(
         "stroke_mm": 84.5,
         "compression_ratio": 13.1,
         "cylinders": 1,
-        "peak_power_hp": 75.0,
-        "peak_power_rpm": 8000,
-        "peak_torque_nm": 72.0,
-        "peak_torque_rpm": 6500,
+        # 2026-10 epoch round 2: KTM data for the 690 cc (102 x 84.5) Duke R
+        # (motorcyclespecs 2012 + 2013 690 Duke R —
+        # https://www.motorcyclespecs.co.za/model/ktm/ktm_690%20r%20duke%2012.htm,
+        # https://www.motorcyclespecs.co.za/model/ktm/ktm_690_duke%20r%2013.htm):
+        # 52.2 kW (70 hp) @ 7,500, 69.8 Nm @ 6,550 (was 75 hp @ 8,000 / 72 Nm
+        # — the 2016+ 693 cc engine's figures); primary 36:79; gears 14:35,
+        # 16:28, 21:28, 21:23, 23:22, 23:20; final 16:40; "weight without
+        # fuel approx. 149.5 kg". The old cassette [2.833, 1.937, 1.500,
+        # 1.227, 1.043, 0.912] had no source and no primary was set (the
+        # importer used the Tier-2 1.85).
+        "peak_power_hp": 70.0,
+        "peak_power_rpm": 7500,
+        "peak_torque_nm": 69.8,
+        "peak_torque_rpm": 6550,
         "fuel_system": "fi",
         "cooling": "liquid",
         "valve_config": "sohc",
         "gears": 6,
-        "gear_ratios": [2.833, 1.937, 1.500, 1.227, 1.043, 0.912],
+        "gear_ratios": [2.500, 1.750, 1.333, 1.095, 0.957, 0.870],
+        "primary_ratio": 2.194,
         "front_sprocket": 16,
         "rear_sprocket": 40,
         "chain_pitch": "520",
-        "dry_mass_kg": 150.0,
+        "dry_mass_kg": 149.5,
         "wheelbase_mm": 1466.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "160/60ZR17",
@@ -9460,7 +9454,12 @@ HUSQVARNA_VITPILEN_701_2018 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "sohc",
         "gears": 6,
+        # 2026-10 epoch round 2: cassette UNVERIFIED (open). Primary 36:79 =
+        # 2.194 (2018 Vitpilen 701 spec, Bikesales AU listings —
+        # https://www.bikesales.com.au/bikes/details/2018-husqvarna-vitpilen-701/SSE-AD-19489692);
+        # none was set, so the importer used the Tier-2 1.85.
         "gear_ratios": [2.833, 1.937, 1.500, 1.227, 1.043, 0.912],
+        "primary_ratio": 2.194,
         "front_sprocket": 16,
         "rear_sprocket": 40,
         "chain_pitch": "520",
@@ -9752,7 +9751,15 @@ HONDA_CBR250RR_2017 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 38,
         "chain_pitch": "520",
-        "dry_mass_kg": 165.0,
+        # 2026-10 epoch round 2: was 165 kg = Honda's CURB mass for the
+        # standard 2017 type (168 kg ABS; Honda global newsroom 2017-08-11 —
+        # https://global.honda/en/newsroom/worldnews/2017/2170811CBR250RR.html)
+        # entered as dry. Tank 14.5 L (AHM / Indomoto launch spec). Dry ~=
+        # 165 - 14.5 L x 0.74 kg/L (10.7) = 154.3 kg (oil + coolant ignored).
+        # OPEN (not verified): the 42 hp rating looks like the 2020+ 41 PS
+        # update while the bound benchmark is a 2017 bike; the primary comes
+        # from a Tier-1 entry (1.9) that cites no source.
+        "dry_mass_kg": 154.3,
         "wheelbase_mm": 1389.0,
         "front_tire_size": "110/70-17",
         "rear_tire_size": "140/70-17",
@@ -9952,9 +9959,14 @@ YAMAHA_R25_2014 = spec_from_dict(
         "stroke_mm": 44.1,
         "compression_ratio": 11.6,
         "cylinders": 2,
+        # 2026-10 epoch round 2: Yamaha Indonesia launch spec (detikOto
+        # 2014-05-20 — https://oto.detik.com/motor/d-2586754/intip-spesifikasi-motor-sport-yamaha-r25):
+        # 26.5 kW (36 PS) @ 12,000; 22.6 N.m @ 10,000 (was 22.1); berat isi
+        # (curb) 166 kg; tank 14.3 L. Gearing UNVERIFIED (open): no primary
+        # is published, so the importer uses the Tier-2 1.9.
         "peak_power_hp": 35.5,
         "peak_power_rpm": 12000,
-        "peak_torque_nm": 22.1,
+        "peak_torque_nm": 22.6,
         "peak_torque_rpm": 10000,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -9964,7 +9976,10 @@ YAMAHA_R25_2014 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 43,
         "chain_pitch": "520",
-        "dry_mass_kg": 166.0,
+        # Was 166 kg = the CURB mass entered as dry (the importer then adds
+        # its own fluid payload). Dry ~= 166 - 14.3 L x 0.74 kg/L (10.6) =
+        # 155.4 kg (oil + coolant ignored).
+        "dry_mass_kg": 155.4,
         "wheelbase_mm": 1380.0,
         "front_tire_size": "110/70-17",
         "rear_tire_size": "140/70-17",
@@ -9996,11 +10011,29 @@ KAWASAKI_ZX25R_2020 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        "gear_ratios": [2.600, 1.950, 1.611, 1.400, 1.238, 1.107],
+        # 2026-10 epoch round 2 (data audit): the old cassette [2.600, 1.950,
+        # 1.611, 1.400, 1.238, 1.107] matched no Kawasaki document and the
+        # spec carried no primary, so the importer fell back to the Tier-2
+        # 600 cc-sport primary 1.9 (real 2.900) — overall 1st was 16.9:1 vs
+        # the real 29.1:1 (first gear ran to ~118 km/h). Kawasaki Thailand
+        # official spec (https://www.kawasaki.co.th/en/motorcycle/ninjazx25r):
+        # 1st 2.929 (41/14) 2nd 2.056 (37/18) 3rd 1.619 (34/21) 4th 1.333
+        # (32/24) 5th 1.154 (30/26) 6th 1.037 (28/27), primary 2.900 (87/30);
+        # Motor-Fan (JP) spec repeats 41/14, 37/18, 28/27. Final 48/14 =
+        # 3.429 for the Indonesian/global bike (motorcyclespecs.co.za 2022
+        # ZX-25R; the Thai/JDM sheet's 50/14 is a market variant).
+        "gear_ratios": [2.929, 2.056, 1.619, 1.333, 1.154, 1.037],
+        "primary_ratio": 2.900,
         "front_sprocket": 14,
         "rear_sprocket": 48,
         "chain_pitch": "520",
-        "dry_mass_kg": 183.0,
+        # Kawasaki publishes curb mass only: 182 kg for the Indonesian ABS/SE
+        # unit (Autocar India / Rushlane launch specs; motorcyclespecs 180 kg
+        # base / 182 kg SE). The old 183 kg "dry" entry exceeded the curb
+        # mass and the importer then added its own 10.2 kg fluid payload on
+        # top. Dry ~= curb 182 - full 15 L tank x 0.74 kg/L (11.1) = 170.9 kg
+        # (oil + coolant ignored, as for the other round-2 curb conversions).
+        "dry_mass_kg": 170.9,
         "wheelbase_mm": 1380.0,
         "front_tire_size": "110/70-17",
         "rear_tire_size": "150/60-17",
@@ -10074,6 +10107,9 @@ YAMAHA_RD350_1974 = spec_from_dict(
         "cylinders": 2,
         "peak_power_hp": 39.0,
         "peak_power_rpm": 7500,
+        # Torque left as-is (unsourced, open): motorcyclespecs' 24.1 lb-ft /
+        # 32.6 Nm @ 7,000 cannot be adopted — it is inconsistent with the
+        # same page's 39 hp @ 7,500 (needs >= 37 Nm at 7,500 rpm).
         "peak_torque_nm": 36.0,
         "peak_torque_rpm": 6500,
         "fuel_system": "carb",
@@ -10086,10 +10122,23 @@ YAMAHA_RD350_1974 = spec_from_dict(
         "powervalve": False,
         "gears": 6,
         "gear_ratios": [2.461, 1.555, 1.190, 0.961, 0.821, 0.740],
+        # 2026-10 epoch round 2: no primary was set, so the importer used the
+        # Tier-2 600 cc-sport primary 1.9 -> overall 1st 10.8:1. The period
+        # road-test data (motorcyclespecs RD350 '73, same URL) gives OVERALL
+        # ratios 1st 19.86, 2nd 12.74, 3rd 9.45, 4th 7.46, 5th 6.37:1. With
+        # this cassette and 37/16 final, primary = 19.86 / (2.461 x 37/16) =
+        # 3.490 reproduces the published 1st exactly and 2nd-5th within ~4 %
+        # (12.55 / 9.60 / 7.76 / 6.63), so the cassette is consistent and only
+        # the primary was wrong. Derived, not a published primary figure.
+        "primary_ratio": 3.490,
         "front_sprocket": 16,
         "rear_sprocket": 37,
         "chain_pitch": "520",
-        "dry_mass_kg": 155.0,
+        # Was 155 kg = the published WET mass (155 kg / 342 lb wet —
+        # Wikipedia RD350 (McDiarmid 1998) and motorcyclespecs) entered as
+        # dry. Dry ~= 155 - 15.5 L tank x 0.74 kg/L (11.5) = 143.5 kg (oils
+        # ignored); Rajdoot RD350 dry 143 kg corroborates.
+        "dry_mass_kg": 143.5,
         "wheelbase_mm": 1320.0,
         "front_tire_size": "90/90-18",
         "rear_tire_size": "110/80-18",
@@ -10165,9 +10214,22 @@ YAMAHA_RD500LC_1984 = spec_from_dict(
         "reed_valve": True,
         "powervalve": True,  # YPVS on all four cylinders
         "gears": 6,
-        "gear_ratios": [2.571, 1.777, 1.333, 1.111, 0.961, 0.851],
-        "front_sprocket": 16,
-        "rear_sprocket": 40,
+        # 2026-10 epoch round 2: the old cassette [2.571, 1.777, 1.333, 1.111,
+        # 0.961, 0.851] + 16/40 + Tier-2 primary 1.9 gave overall 6th 4.0:1 —
+        # peak power (9,500) at ~290 km/h vs the published 238 km/h top
+        # speed. Gearbox per motorcyclespecs / moto-data RD500LC-RZV500-RZ500
+        # spec (https://www.motorcyclespecs.co.za/model/yamaha/yamaha_rd500lc.htm):
+        # 1st 2.250 2nd 1.685 3rd 1.363 4th 1.166 5th 1.043 6th 0.960.
+        # Primary 69/31 (2.226) and 15/38 sprockets per the motorbikespecs.net
+        # RD500 entry (chassis 47X; cited from its search-index text — the
+        # page itself returned 503). Physical cross-check: overall 6th =
+        # 2.226 x 0.960 x 38/15 = 5.41:1 puts the published 238 km/h at
+        # ~10,300 rpm, just past the 9,500 power peak, as a road bike is
+        # geared.
+        "gear_ratios": [2.250, 1.685, 1.363, 1.166, 1.043, 0.960],
+        "primary_ratio": 2.226,
+        "front_sprocket": 15,
+        "rear_sprocket": 38,
         "chain_pitch": "530",
         "dry_mass_kg": 180.0,
         "wheelbase_mm": 1375.0,
@@ -10566,6 +10628,16 @@ KAWASAKI_H2_MACH_IV_1973 = spec_from_dict(
         "powervalve": False,
         "gears": 5,
         "gear_ratios": [2.352, 1.631, 1.210, 0.961, 0.791],
+        # 2026-10 epoch round 2: no primary was set (Tier-2 1.9 -> overall
+        # 1st 11.6:1, 5th 3.9:1). Period road-test OVERALL ratios
+        # (motorcyclespecs H2 750 Mach IV —
+        # https://www.motorcyclespecs.co.za/model/kawasaki/kawasaki_h2.htm):
+        # 1st 12.75 2nd 8.64 3rd 6.53 4th 5.42 5th 4.76:1. primary = 12.75 /
+        # (2.352 x 39/15) = 2.085 reproduces 1st-3rd within 2.5 % (12.75 /
+        # 8.84 / 6.56); 4th / 5th stay 4 % / 10 % taller than published (5.21
+        # / 4.29) — the cassette's top two ratios are unverified (open).
+        # Derived, not a published primary figure.
+        "primary_ratio": 2.085,
         "front_sprocket": 15,
         "rear_sprocket": 39,
         "chain_pitch": "530",
@@ -10890,8 +10962,11 @@ HONDA_CBR1000RR_R_FIREBLADE_SP_2024 = spec_from_dict(
         "front_sprocket": 17,
         "rear_sprocket": 43,
         "chain_pitch": "530",
-        "dry_mass_kg": 201.0,
-        "wheelbase_mm": 1405.0,
+        # EPOCH 2026-11-10: 201 kg is Honda's published KERB figure; it was stored
+        # as dry mass (double-counting fluids). Recorded as wet; the importer
+        # derives dry = wet - 25.
+        "wet_mass_kg": 201.0,
+        "wheelbase_mm": 1455.0,  # Honda UK 2024 SP specification (was 1405)
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "190/50ZR17",
         "cd": 0.58,
@@ -10981,9 +11056,14 @@ YAMAHA_YZF_R9_2025 = spec_from_dict(
         "compression_ratio": 13.2,
         "cylinders": 3,
         "peak_power_hp": 117.4,
-        "peak_power_rpm": 12500,
+        # 2026-10 epoch: rpm points were 12,500 / 11,500 — 93 Nm @ 11,500
+        # is 150 hp, 1.28x the rated power. Yamaha rating 87.5 kW (119 PS,
+        # 117.4 hp) @ 10,000 rpm / 93 Nm @ 7,000 rpm (Wikipedia Yamaha YZF-R9
+        # spec box; Rider Magazine 2025 R9 review "117 hp @ 10,000 / 69 lb-ft
+        # @ 7,000") — the MT-09 CP3 figures.
+        "peak_power_rpm": 10000,
         "peak_torque_nm": 93.0,
-        "peak_torque_rpm": 11500,
+        "peak_torque_rpm": 7000,
         "fuel_system": "fi",
         "cooling": "liquid",
         "valve_config": "dohc",
@@ -11303,9 +11383,14 @@ INDIAN_PURSUIT_DARK_HORSE_2024 = spec_from_dict(
         "valve_config": "dohc",
         "gears": 6,
         "gear_ratios": [3.333, 2.000, 1.400, 1.053, 0.857, 0.727],
-        "front_sprocket": 17,
-        "rear_sprocket": 46,
-        "chain_pitch": "530",
+        # 2026-10 epoch: was a 17/46 "530" CHAIN — the Pursuit (Challenger
+        # platform) is BELT final drive, 2.379:1 (indianmotorcycle.in 2024
+        # Pursuit Dark Horse spec "final drive 2.379:1"; motorcycle.com 2024
+        # spec 2.38; totalmotorcycle "belt, 152 teeth"). 0/0 = the shaft/belt
+        # sentinel; the importer resolves 2.379 from _SHAFT_BELT_FINAL_DRIVE.
+        "front_sprocket": 0,
+        "rear_sprocket": 0,
+        "chain_pitch": "belt",
         "dry_mass_kg": 290.0,
         "wheelbase_mm": 1660.0,
         "front_tire_size": "130/90B16",
@@ -11419,39 +11504,10 @@ BAJAJ_PULSAR_P150_2023 = spec_from_dict(
     source_name="spec_sheet",
 )
 
-TVS_RAIDER_125_2022 = spec_from_dict(
-    {
-        "manufacturer": "TVS",
-        "model_name": "Raider 125",
-        "year_from": 2022,
-        "year_to": 2024,
-        "category": "naked",
-        "displacement_cc": 125,
-        "bore_mm": 52.5,
-        "stroke_mm": 57.0,
-        "compression_ratio": 9.5,
-        "cylinders": 1,
-        "peak_power_hp": 11.2,
-        "peak_power_rpm": 8500,
-        "peak_torque_nm": 10.8,
-        "peak_torque_rpm": 6500,
-        "fuel_system": "fi",
-        "cooling": "air",
-        "valve_config": "sohc",
-        "gears": 5,
-        "gear_ratios": [3.260, 2.142, 1.578, 1.300, 1.053],
-        "front_sprocket": 16,
-        "rear_sprocket": 48,
-        "chain_pitch": "428",
-        "dry_mass_kg": 130.0,
-        "wheelbase_mm": 1300.0,
-        "front_tire_size": "110/70R17",
-        "rear_tire_size": "130/70R17",
-        "cd": 0.77,
-        "frontal_area_m2": 0.34,
-    },
-    source_name="spec_sheet",
-)
+# EPOCH 2026-11-10 (duplicate adjudication): the 2022-2024 Raider 125 entry (52.5 x 57 mm, 1300 mm
+# wheelbase, 110/70 + 130/70 radials - none of which match TVS's specification) was removed;
+# TVS_RAIDER_125_2021 in known_bikes_extended.py is the single row.
+
 
 TVS_APACHE_RTR_310_2024 = spec_from_dict(
     {
@@ -11657,45 +11713,11 @@ HONDA_SP_160_2024 = spec_from_dict(
     source_name="spec_sheet",
 )
 
-# ── Honda Hornet 2.0 (2024-2025 OBD-2B refresh) ─────────────────────────
-# GEOMETRY CORRECTED 2026-08-08 — same defect and same sources as the
-# 2020-2024 entry above. This entry declared a 194 cc, 63.0 x 77.8 mm
-# engine; 63.0 x 77.8 mm sweeps 242 cc, and Honda has never sold a 194 cc
-# Hornet. The 2024 OBD-2B refresh kept the 184.4 cc air-cooled single
-# (61.0 x 63.1 mm) unchanged.
-HONDA_HORNET_2_0_2024 = spec_from_dict(
-    {
-        "manufacturer": "Honda",
-        "model_name": "Hornet 2.0",
-        "year_from": 2024,
-        "year_to": 2025,
-        "category": "naked",
-        "displacement_cc": 184.4,  # was 194 — no such Honda
-        "bore_mm": 61.0,  # was 63.0
-        "stroke_mm": 63.1,  # was 77.8 (63.0 x 77.8 sweeps 242 cc)
-        "compression_ratio": 9.8,
-        "cylinders": 1,
-        "peak_power_hp": 17.0,  # 17.03 bhp @ 8500 (was 17.3)
-        "peak_power_rpm": 8500,
-        "peak_torque_nm": 15.9,  # was 16.3 @ 6500
-        "peak_torque_rpm": 6000,
-        "fuel_system": "fi",
-        "cooling": "air",
-        "valve_config": "sohc",
-        "gears": 5,
-        "gear_ratios": [3.357, 2.210, 1.636, 1.286, 1.048],
-        "front_sprocket": 17,
-        "rear_sprocket": 44,
-        "chain_pitch": "428",
-        "dry_mass_kg": 142.0,
-        "wheelbase_mm": 1355.0,  # published wheelbase (was 1330)
-        "front_tire_size": "110/70R17",
-        "rear_tire_size": "140/70R17",
-        "cd": 0.76,
-        "frontal_area_m2": 0.36,
-    },
-    source_name="spec_sheet",
-)
+# EPOCH 2026-11-10 (duplicate adjudication): the 2024-2025 Hornet 2.0 entry that lived here was the
+# same 184.4 cc bike as HONDA_HORNET_2_0_2020 (now 2020-2026) and was removed. Its
+# cassette / F17-R44 / 428 chain / tyres disagreed with the surviving row and neither set is
+# sourced; the surviving row is the one backed by the Tier-1 gear table.
+
 
 YAMAHA_FZS_25_2023 = spec_from_dict(
     {
@@ -11731,57 +11753,9 @@ YAMAHA_FZS_25_2023 = spec_from_dict(
     source_name="spec_sheet",
 )
 
-# ── Suzuki V-Strom SX 250 (2022-2024) ───────────────────────────────────
-# GEOMETRY CORRECTED 2026-08-08. This entry carried a 67.0 x 70.5 mm
-# long-stroke single that does not exist in Suzuki's Indian line-up. The
-# V-Strom SX is built on the Gixxer 250 / SG250 oil-cooled SOHC single:
-# 76.0 x 54.9 mm, 249 cc, 26.15 bhp @ 9300 rpm, 22.2 Nm @ 7300 rpm. The
-# 1355 mm "wheelbase" was in fact the bike's OVERALL HEIGHT (2180 x 880 x
-# 1355 mm); the real wheelbase is 1440 mm. Engine, drivetrain, tyres and
-# dimensions are now aligned with the separately-keyed 2022-2026 entry in
-# known_bikes_extended.py, which carries the full citation set — the two
-# rows describe the same motorcycle and previously disagreed on every
-# engine dimension, so DB regen produced different physics for each.
-# Sources: Suzuki Motorcycle India V-Strom SX specification and 91Wheels /
-#          BikeWale / BikeDekho spec sheets (249 cc oil-cooled single,
-#          26.15 bhp @ 9300, 22.2 Nm @ 7300, 167 kg kerb, 1440 mm
-#          wheelbase, 205 mm ground clearance, 100/90-19 front and
-#          140/70-17 rear tyres);
-#          Gixxer 250 specification (76.0 x 54.9 mm shared engine).
-SUZUKI_V_STROM_SX_250_2022 = spec_from_dict(
-    {
-        "manufacturer": "Suzuki",
-        "model_name": "V-Strom SX 250",
-        "year_from": 2022,
-        "year_to": 2024,
-        "category": "adventure",
-        "displacement_cc": 249,
-        "bore_mm": 76.0,  # was 67.0 — not a Suzuki 250 dimension
-        "stroke_mm": 54.9,  # was 70.5
-        "compression_ratio": 10.7,  # was 9.3
-        "cylinders": 1,
-        "peak_power_hp": 26.1,  # 26.15 bhp @ 9300 (was 24.7 @ 8000)
-        "peak_power_rpm": 9300,
-        "peak_torque_nm": 22.2,  # was 22.9 @ 6250
-        "peak_torque_rpm": 7300,
-        "fuel_system": "fi",
-        "cooling": "air",  # oil-cooled (SOCS), was mislabelled liquid
-        "valve_config": "sohc",
-        "gears": 6,
-        # Gixxer 250 cassette + Suzuki India F14/R44 final drive.
-        "gear_ratios": [2.800, 1.895, 1.500, 1.261, 1.087, 0.960],
-        "front_sprocket": 14,
-        "rear_sprocket": 44,
-        "chain_pitch": "520",
-        "dry_mass_kg": 167.0,  # published kerb weight (was 168)
-        "wheelbase_mm": 1440.0,  # was 1355 — that is the overall HEIGHT
-        "front_tire_size": "100/90-19",
-        "rear_tire_size": "140/70-17",
-        "cd": 0.80,
-        "frontal_area_m2": 0.46,
-    },
-    source_name="spec_sheet",
-)
+# EPOCH 2026-11-10 (duplicate adjudication): the 2022-2024 V-Strom SX 250 entry (167 kg KERB stored as
+# dry mass) was removed; the 2022-2026 entry in known_bikes_extended.py is the single row.
+
 
 KTM_390_ADVENTURE_SW_2024 = spec_from_dict(
     {
@@ -12067,14 +12041,22 @@ TRIUMPH_DAYTONA_955I_2002 = spec_from_dict(
         "year_to": 2005,
         "category": "sport",
         "displacement_cc": 955,
-        "bore_mm": 80.0,
-        "stroke_mm": 63.5,
-        "compression_ratio": 11.3,
+        # 2026-10 epoch: was 80.0 x 63.5 / CR 11.3. Triumph 955i triple:
+        # 79 x 65 mm, CR 12.0:1 (motorcyclespecs.co.za Daytona 955i 2002).
+        "bore_mm": 79.0,
+        "stroke_mm": 65.0,
+        "compression_ratio": 12.0,
         "cylinders": 3,
         "peak_power_hp": 147.0,
-        "peak_power_rpm": 9000,
-        "peak_torque_nm": 107.0,
-        "peak_torque_rpm": 7500,
+        # 2026-10 epoch: was 147 hp @ 9000 / 107 Nm @ 7500 (inconsistent:
+        # needs 116 Nm at the power peak). 2002 redesign: 147 crankshaft hp @
+        # 10,700 rpm (Cycle World 5/2001 "Triumph launches '02 road rocket";
+        # motorcycle.com and totalmotorcycle quote the 149 hp claim at the
+        # same rpm) and 100 Nm @ 8,200 rpm (motodealers.co.uk +
+        # totalmotorcycle 2002 Daytona 955i specs).
+        "peak_power_rpm": 10700,
+        "peak_torque_nm": 100.0,
+        "peak_torque_rpm": 8200,
         "fuel_system": "fi",
         "cooling": "liquid",
         "valve_config": "dohc",
@@ -12134,25 +12116,39 @@ BIMOTA_TESI_1D_1991 = spec_from_dict(
         "year_from": 1991,
         "year_to": 1995,
         "category": "sport",
-        "displacement_cc": 998,
-        "bore_mm": 93.0,
-        "stroke_mm": 73.0,
-        "compression_ratio": 9.0,
+        # 2026-10 epoch: the previous engine block (998 cc, 93 x 73, 155 hp
+        # @ 8500, 95 Nm @ 7000, 220 kg) matched no Tesi variant and was
+        # physically impossible (95 Nm @ 7000 = 93 hp vs 155 rated, 1.37x).
+        # The Tesi 1D carries the Ducati 851 8-valve L-twin: 851 cc, 92 x 64
+        # mm, CR 10.4:1, 102 hp @ 9,500 rpm (Wikipedia "Bimota Tesi"),
+        # 103 hp @ 9,500 / 83 Nm @ 8,500 rpm, 188 kg dry, 1410 mm wheelbase
+        # (bikerwiki.ru "Tesi ID 851" spec sheet). The later 904 cc 1D 906SR
+        # (113 hp claim, autoevolution) is not modelled separately.
+        "displacement_cc": 851,
+        "bore_mm": 92.0,
+        "stroke_mm": 64.0,
+        "compression_ratio": 10.4,
         "cylinders": 2,
-        "peak_power_hp": 155.0,
-        "peak_power_rpm": 8500,
-        "peak_torque_nm": 95.0,
-        "peak_torque_rpm": 7000,
+        "peak_power_hp": 102.0,
+        "peak_power_rpm": 9500,
+        "peak_torque_nm": 83.0,
+        "peak_torque_rpm": 8500,
         "fuel_system": "fi",
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
         "gear_ratios": [2.611, 1.902, 1.442, 1.152, 0.949, 0.790],
+        # Final drive is a CHAIN (Ducati 851 platform; the hub-centre front
+        # end does not change the rear). The 0/0 sprocket sentinel is kept
+        # so the importer's ESTIMATED 851-platform 15/39 = 2.6 ratio
+        # (_SHAFT_BELT_FINAL_DRIVE "tesi") still applies; the old
+        # chain_pitch "shaft" was wrong and now would mis-type the drive.
         "front_sprocket": 0,
         "rear_sprocket": 0,
-        "chain_pitch": "shaft",
-        "dry_mass_kg": 220.0,
-        "wheelbase_mm": 1380.0,
+        "chain_pitch": None,
+        "final_drive": "chain",
+        "dry_mass_kg": 188.0,
+        "wheelbase_mm": 1410.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/50ZR17",
         "cd": 0.68,
@@ -12279,9 +12275,6 @@ ALL_KNOWN_BIKES = [
     # ── MV Agusta ───────────────────────────────
     MV_AGUSTA_BRUTALE_1000_RR,
     # ── Royal Enfield ───────────────────────────
-    RE_INTERCEPTOR_650,
-    RE_CONTINENTAL_GT_650,
-    RE_SUPER_METEOR_650,
     # ── Harley-Davidson ─────────────────────────
     HARLEY_SPORTSTER_S,
     HARLEY_VROD_MUSCLE,
@@ -12408,7 +12401,6 @@ ALL_KNOWN_BIKES = [
     HARLEY_X440_2023,
     # Aprilia (India)
     APRILIA_RS457_2024,
-    APRILIA_TUONO_457_2024,
     # Triumph (India)
     TRIUMPH_SCRAMBLER_400X_2023,
     # KTM (India)
@@ -12555,16 +12547,13 @@ ALL_KNOWN_BIKES = [
     # Indian-market gap-fill
     BAJAJ_PULSAR_N160_2023,
     BAJAJ_PULSAR_P150_2023,
-    TVS_RAIDER_125_2022,
     TVS_APACHE_RTR_310_2024,
     HERO_KARIZMA_XMR_250_2024,
     ROYAL_ENFIELD_CLASSIC_350_HALCYON_2024,
     ROYAL_ENFIELD_BEAR_650_2024,
     ROYAL_ENFIELD_GOAN_CLASSIC_350_2024,
     HONDA_SP_160_2024,
-    HONDA_HORNET_2_0_2024,
     YAMAHA_FZS_25_2023,
-    SUZUKI_V_STROM_SX_250_2022,
     KTM_390_ADVENTURE_SW_2024,
     BMW_G310RR_2024,
     # Vintage/classic icons

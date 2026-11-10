@@ -275,7 +275,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The K5 GSX-R 1000, R1 4C8, and Hayabusa Gen 1 reference baselines sat at 10.0334s, 10.2859s, and 10.4712s before the change and at exactly those same four-decimal numbers after (the era's pins — since re-based by the July 2026 epoch). K5 and R1 are in the litre-sport-195+ profile (≥600cc sport ≥195hp). Hayabusa Gen 1 is in the other profile (touring category). None of those clusters were touched. Cross-cluster regression was checked across all nine clusters in the bias map; the largest drift was +8 milliseconds on litre-sport-600-1000, and that 8 millisecond drift was entirely caused by six new benchmark matches added independently in the same session (CBR900RR, Fireblade, 929RR, GSX-R 750 1985, GSX-R 750 2008, FZ1 Fazer 2006). On the same-bike subset, the litre-sport-600-1000 cluster numbers are bit-identical before and after.", // [historical baselines]
+    text: "The K5 GSX-R 1000, R1 4C8, and Hayabusa Gen 1 reference baselines sat at 10.0334s, 10.2859s, and 10.4712s before the change and at exactly those same four-decimal numbers after (the era's pins, since re-based by the July and November 2026 accuracy epochs; today's are 10.0436, 10.1092 and 10.1100 s). K5 and R1 are in the litre-sport-195+ profile (≥600cc sport ≥195hp). Hayabusa Gen 1 is in the other profile (touring category). None of those clusters were touched. Cross-cluster regression was checked across all nine clusters in the bias map; the largest drift was +8 milliseconds on litre-sport-600-1000, and that 8 millisecond drift was entirely caused by six new benchmark matches added independently in the same session (CBR900RR, Fireblade, 929RR, GSX-R 750 1985, GSX-R 750 2008, FZ1 Fazer 2006). On the same-bike subset, the litre-sport-600-1000 cluster numbers are bit-identical before and after.", // [historical baselines]
   },
   {
     type: "p",
@@ -388,7 +388,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -411,7 +411,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -446,7 +446,7 @@ export default function PostPage() {
             ].map((t) => (
               <span
                 key={t}
-                className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
               >
                 {t}
               </span>
@@ -455,7 +455,7 @@ export default function PostPage() {
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             Why 600cc Supersports Were Running 200ms Slow in Our Sim
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             30 May 2026 · 13 min read · MotoQuant Blog
           </div>
         </div>
@@ -523,16 +523,6 @@ export default function PostPage() {
               — every 600cc supersport in the cluster, with the updated launch
               model applied.
             </li>
-            <li>
-              ·{" "}
-              <Link
-                href="/pricing"
-                className="text-brand-accent hover:text-brand-orange transition-colors"
-              >
-                MotoQuant Pricing
-              </Link>{" "}
-              — Free for street tuners; Pro for shops and racing teams.
-            </li>
           </ul>
         </div>
 
@@ -550,9 +540,9 @@ export default function PostPage() {
           </div>
           <Link
             href="/simulator?bike=yamaha-yzf-r6-13s-2008"
-            className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
+            className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
           >
-            Run sim →
+            Open the simulator →
           </Link>
         </div>
       </article>

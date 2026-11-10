@@ -3,7 +3,6 @@ import { Suspense } from 'react';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 import StructuredData, { articleSchema } from '../../StructuredData';
-import EndOfArticleCta from './EndOfArticleCta';
 
 const SLUG = 'best-mods-for-ktm-rc-390-budget-vs-cost-per-tenth';
 const TITLE = 'Best Mods for KTM RC 390 in India: A Cost-Per-Tenth Ladder';
@@ -240,7 +239,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'For everything that did make the ladder, the MotoQuant simulator at motoquant.in lets you build the exact ladder with your specific bike year, rider weight, home strip, and parts catalogue selection. The Pro tier surfaces the cost-per-tenth ranking on every part-toggle, lets you sweep ambient conditions, and folds in a Dragy timeslip from your own runs to tighten the prediction beyond the current ±0.4-second cluster bias band.',
+    text: 'For everything that did make the ladder, the MotoQuant simulator at motoquant.in lets you build the exact ladder with your specific bike year, rider weight, home strip, and parts catalogue selection. The simulator surfaces the cost-per-tenth ranking on every part-toggle, lets you sweep ambient conditions, and folds in a Dragy timeslip from your own runs to tighten the prediction beyond the current ±0.4-second cluster bias band.',
   },
   {
     type: 'callout',
@@ -256,7 +255,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The MotoQuant simulator at motoquant.in/simulator runs the same physics that produced every ET in this post against any of the 593 parts in the catalog, on any of the 20 seeded venues, with sweeps over rider weight, ambient temperature, density altitude, and tire compound. The Pro tier surfaces parts-ROI rankings (cost-per-tenth, ET delta, trap delta, compatibility warning) directly on the build page, and the Dragy upload calibrates the simulator against your own timeslips. Start with the stock RC 390 and Tier 1 — that is the answer for 80 percent of owners and it costs under ₹10,000 to verify.',
+    text: 'The MotoQuant simulator at motoquant.in/simulator runs the same physics that produced every ET in this post against any of the 546 parts in the catalog, on any of the 20 seeded venues, with sweeps over rider weight, ambient temperature, density altitude, and tire compound. The simulator surfaces parts-ROI rankings (cost-per-tenth, ET delta, trap delta, compatibility warning) directly on the build page, and the Dragy upload lines your own timeslip up against the simulation. Start with the stock RC 390 and Tier 1 — that is the answer for 80 percent of owners and it costs under ₹10,000 to verify.',
   },
 ];
 
@@ -304,7 +303,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -327,7 +326,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -355,7 +354,7 @@ export default function PostPage() {
             {['KTM', 'RC 390', 'Duke 390', 'cost-per-tenth', 'India mods'].map((t) => (
               <span
                 key={t}
-                className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
               >
                 {t}
               </span>
@@ -364,7 +363,7 @@ export default function PostPage() {
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             Best Mods for KTM RC 390 in India: A Cost-Per-Tenth Ladder
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             22 May 2026 · 13 min read · MotoQuant Blog
           </div>
         </div>
@@ -375,22 +374,15 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Build your own RC 390 ladder</div>
             <div className="text-white/60 text-sm">
-              Sweep rider weight, density altitude, sprocket choice, ECU re-flash, exhaust, tire compound, and any of the 593 parts in the catalog. Cost-per-tenth ranks appear on every part toggle in the Pro tier.
+              Sweep rider weight, density altitude, sprocket choice, ECU re-flash, exhaust, tire compound, and any of the 546 parts in the catalog. Cost-per-tenth ranks appear on every part toggle in the simulator.
             </div>
           </div>
-          {/* GROWTH_EXP_019 — CTA button copy A/B test; see ./EndOfArticleCta.js */}
-          <Suspense
-            fallback={
-              <Link
-                href="/simulator?bike=ktm-rc-390&venue=aamby-valley"
-                className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
-              >
-                Run sim →
-              </Link>
-            }
+          <Link
+            href="/simulator?bike=ktm-rc-390&venue=aamby-valley"
+            className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
           >
-            <EndOfArticleCta />
-          </Suspense>
+            Open the simulator →
+          </Link>
         </div>
 
         <div className="max-w-2xl mx-auto mt-16">
@@ -452,13 +444,6 @@ export default function PostPage() {
                 Browse the full bike catalog
               </Link>{' '}
               — RC 390, Duke 390, NS400Z, Apache RR 310, Dominar 400, and 390+ other bikes with full spec sheets and OEM tire fitments.
-            </li>
-            <li>
-              ·{' '}
-              <Link href="/pricing" className="text-brand-accent hover:text-brand-orange transition-colors">
-                Pricing
-              </Link>{' '}
-              — free tier covers stock-tune sims; Pro unlocks the cost-per-tenth ROI engine and Dragy timeslip calibration against your own runs.
             </li>
           </ul>
         </div>

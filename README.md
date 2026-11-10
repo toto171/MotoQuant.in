@@ -1,115 +1,160 @@
-# MotoQuant Pro
+# MotoQuant
 
-> *The physics of faster.*
+> *The physics of faster.* A free, open-source motorcycle drag-racing simulator.
 
-[![CI](https://github.com/da25mem5s02-debug/MotoQuant_v1/actions/workflows/ci.yml/badge.svg)](https://github.com/da25mem5s02-debug/MotoQuant_v1/actions/workflows/ci.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![CI](https://github.com/toto171/MotoQuant.in/actions/workflows/ci.yml/badge.svg)](https://github.com/toto171/MotoQuant.in/actions/workflows/ci.yml)
 [![Web](https://img.shields.io/badge/web-motoquant.in-orange)](https://www.motoquant.in)
 
-First-principles Python physics engine for motorcycle quarter-mile drag racing
-prediction, optimisation, and parts ROI analysis. Aimed at the Indian drag
-racing community (Aamby Valley, MMRT, BIC, Kari, Hyderabad) with
-541 bikes, 254 tires, 593 parts, and 20 venues modelled, validated
-against 250 published benchmarks (weighted mean |Δ| 0.272 s, bias −0.005 s
-across 277 matched runs) by a ~4,400-test pytest suite.
+MotoQuant predicts a motorcycle's quarter-mile time, finish-line speed and top
+speed from first principles, then answers the questions riders and tuners
+ask: what does this sprocket, exhaust or tyre do to my launch, and which
+upgrade buys a tenth of a second for the least money?
 
-Reference baselines: **GSX-R 1000 K5 → 9.9331 s**, **YZF-R1 4C8 → 10.1436 s**,
-**Hayabusa Gen1 → 10.3633 s** (pinned bit-identical; see
-[docs/INVARIANTS.md](docs/INVARIANTS.md) I1).
+Use it in the browser at **[motoquant.in](https://www.motoquant.in)**, from
+Python or the command line, or run your own copy. It was built for the Indian
+drag-racing scene (Aamby Valley, MMRT, BIC, Kari, Hyderabad) and works for any
+bike at any strip. Everything here is free under the
+[Apache License 2.0](LICENSE).
 
-## Quickstart
+## What it does
+
+- It simulates the run. Engine torque, clutch slip, tyre grip and heat,
+  weight transfer, wheelies, aerodynamics and the density of the air are
+  integrated every millisecond (RK4, 15 sub-models, Python and NumPy). An
+  optional [Rust core](docs/RUST_CORE.md) gives bit-identical results about
+  40 times faster, natively or in the browser through WebAssembly.
+- It knows the bikes: 534 bikes, 546 parts, 254 tyres and 20 venues ship
+  in a seeded SQLite file (`motoquant.db`). A compatibility engine shows a
+  part only for the bikes it fits.
+- It gives advice: cost per tenth for every part, a budget-constrained
+  upgrade planner, a race-day setup for the day's air (gearing, launch RPM,
+  tyre pressure), sensitivity analysis, and a chat assistant that runs the
+  simulations for you.
+- It checks itself against your data: import a Dragy run, a dyno sheet or
+  an ECU log and compare it with the simulation.
+- It plugs into other tools: a CLI, a FastAPI backend, the Next.js site and
+  an [MCP server](docs/MCP.md) that lets AI assistants call the simulator.
+
+## How accurate it is
+
+The simulator is checked against 250 published quarter-mile tests (magazine
+road tests, instrumented GPS runs and timeslips), matched to 263 catalog
+bikes. Weighted by how trustworthy each source is, the simulated time is off
+by **0.25 s** on average, with a bias of **+0.02 s**; 130 matches land within
+0.20 s. The figures come from `reports/acc_final_2026_11_10.json`, and every
+benchmark with its source is on
+[motoquant.in/validation](https://www.motoquant.in/validation).
+
+Accuracy is uneven, and the project says so. Sport bikes do best (litre bikes
+average 0.15–0.17 s). Small bikes are the weakest class, because few instrumented
+tests exist for them and their catalog gearing is still inferred. Published
+gearing for 53 of them was measured and made the fit worse until the
+small-bike settings are re-tuned, so it is recorded but not applied
+([`reports/gearing_experiment_2026_11_10.md`](reports/gearing_experiment_2026_11_10.md)).
+Top speed is less accurate than quarter-mile time.
+
+Three reference bikes are pinned bit-identical and gated in CI:
+GSX-R 1000 K5 **10.0436 s**, YZF-R1 4C8 **10.1092 s** and Hayabusa Gen1
+**10.1100 s** at sea level ([docs/INVARIANTS.md](docs/INVARIANTS.md)).
+
+## Quick start
+
+You need Python 3.10 or newer, and Node 18 or newer for the website.
 
 ```bash
-make install          # deps + editable package
-make health           # state of the world (baselines, lint, catalog, secrets)
-make check            # fast pre-PR gate: lint + format + baselines + fast tests
-make                  # list every target
-
-# Run the product
-make api              # FastAPI backend on :8000
-make web-dev          # Next.js frontend against the local API
-
-# Or use the CLI directly (the repo ships a seeded motoquant.db)
-python -m motoquant.run sim --bike-id 1 --venue-id 1
-python -m motoquant.run chat "how fast is a hayabusa at Aamby Valley?"
+git clone https://github.com/toto171/MotoQuant.in.git
+cd MotoQuant.in
+make install      # the package with its runtime and developer dependencies
+make check        # lint, format, the reference-time gate and fast tests (about 3 minutes)
 ```
 
-> **Contributing (human or AI):** read **[AGENTS.md](AGENTS.md)** first — the
-> one-page working contract (the prime directive, the loop, the non-negotiable
-> rules). New collaborators then read [docs/ONBOARDING.md](docs/ONBOARDING.md)
-> (day-one brief) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (module map +
-> data-flow — *where does X live?*). What must never break lives in
-> [docs/INVARIANTS.md](docs/INVARIANTS.md); the bugs that keep coming back are in
-> [docs/KNOWN_TRAPS.md](docs/KNOWN_TRAPS.md).
+`make` on its own lists every target. The repository ships the full catalog,
+so there is no database to set up.
 
-**Use MotoQuant from your AI:** the repo ships a stdio **MCP server**
-(`python -m motoquant.mcp_server`) exposing sims, catalog search and
-sprocket/part what-ifs as tools — wire-up in [docs/MCP.md](docs/MCP.md) —
-plus a Claude skill under `skills/motoquant/`.
+One simulation from Python:
 
-## Repo layout
+```python
+import motoquant
 
-```
-motoquant/          Python package -- physics engine, DB layer, calibration,
-                    analysis, scraper, CLI.
-  ├── physics.py        RK4 integrator (637 lines)
-  ├── submodels/        15 independent sub-models (engine, tire, aero, ...)
-  ├── database/         SQLite schema + seed + repos
-  ├── calibration/      Dragy + dyno + ECU import, overlay, calibrator
-  ├── analysis/         ROI, Sobol, Bayesian opt, surrogate, recommendations
-  ├── scraper/          bikez.com crawler + known-bike catalog
-  └── api.py            FastAPI web server
-
-tests/              pytest suite (run: `pytest tests/`)
-desktop/            Tauri 2 + React 19 MVP (Phase 5 — DISCONTINUED July 2026; hosted web app is the product)
-web/                Next.js 14 marketing + simulator (motoquant.in)
-scripts/            Validation harnesses + one-off automation
-artifacts/          ML model outputs (surrogate .pkl, training data)
-reports/            Validation JSON reports (one per sweep)
-docs/               All non-deploy documentation
-  ├── adr/          Architecture decision records
-  ├── changelog/    Release notes, fix summaries
-  └── papers/       Reference papers, project plans, validation reports
+engine = motoquant.MotoQuantEngine(motoquant.gsxr1000_k5())
+print(f"{engine.run().time_quarter:.4f} s")  # 10.0436
 ```
 
-Deployment configs (`render.yaml`, `Dockerfile`, `vercel.json`,
-`requirements-api.txt`) live at the repo root. The API runs on Render
-(`motoquant-api.onrender.com`, Docker via `render.yaml`); the frontend is on
-Vercel (`motoquant.in`) with a `/api/*` rewrite to Render. See
-`docs/RENDER_MIGRATION.md` for the cutover + rollback runbook.
+The command line works on any catalog bike at any venue:
 
-`CLAUDE.md` is the persistent project-context file read at the start of every
-Claude session -- consult it for the full state-of-the-world, known issues,
-and phase roadmap. It is a long, single-paragraph changelog; skim the *top*
-entry for the latest state and don't try to read it end-to-end.
+```bash
+python -m motoquant.run bikes --search hayabusa              # find a bike id
+python -m motoquant.run sim --bike-id 1 --venue-id 1         # GSX-R 1000 K5 at Aamby Valley
+python -m motoquant.run parts --bike-id 3 --impact 56        # what one part does
+python -m motoquant.run analysis recommend --bike-id 1 --budget 150000
+```
 
-### Root files you can ignore while developing
+The CLI rewrites the database file it opens even when no data changes, so
+point it at a copy (`cp motoquant.db /tmp/mq.db`, then `--db /tmp/mq.db`) or
+undo the change with `git checkout -- motoquant.db`.
 
-Several root files are **autonomous-operations plumbing**, not part of the
-product or the dev workflow. A newcomer can safely ignore them:
+Run the website locally:
 
-| File(s) | What it is |
-|---|---|
-| `DISPATCH_INBOX.md` / `DISPATCH_OUTBOX.md` / `DISPATCH_*.md` | Async message queue between the operator and unattended Claude sessions (`docs/DISPATCH_PROTOCOL.md`). Read/written by `scripts/session_*flight.sh` — **do not move or rename** them. |
-| `NEXT_SESSION.md`, `STATUS.md` | Session-handoff scratch notes. |
-| `AUTONOMOUS_PAUSED` | A flag file that pauses the scheduled autonomous runs (`scripts/START.sh`). Its presence is intentional. |
+```bash
+make api          # API on http://localhost:8000 (every route documented at /docs)
+make web-install  # once
+make web-dev      # site on http://localhost:3000, using the local API
+```
 
-Everything you actually need to build, test, and run the product is covered by
-`README.md`, `docs/ONBOARDING.md`, `docs/ARCHITECTURE.md`, and `CONTRIBUTING.md`.
+To host your own copy, follow [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md).
+No setting is required; keys for chat, live weather and error tracking are
+optional.
 
-## Project state (Jun 2026)
+## How you can help
 
-- **Phase 1 -- Core Physics:** complete. 15 sub-models, adaptive RK4.
-- **Phase 2 -- Database & Ingestion:** complete. 541 bikes, 254 tires,
-  593 parts, 20 venues, 1860 OEM bike-tire fitments.
-- **Phase 3 -- Validation & Calibration:** in progress. Dragy + dyno + ECU
-  import done; FastAPI + Next.js frontend live at motoquant.in.
-- **Phase 4 -- AI / Optimisation:** in progress. ROI, Sobol, Bayesian opt,
-  XGBoost + DNN surrogates, smart recommendations -- all shipping.
-- **Phase 5 -- Desktop App:** discontinued (July 2026). The hosted web app
-  at motoquant.in is the product; the `desktop/` scaffold remains in-tree
-  for reference only and ships nothing.
-- **Phase 6 -- Commercial Launch:** in progress. Accounts, Razorpay + Stripe
-  payments, freemium beta live.
+The most useful contribution is data, and none of it needs code:
 
-Contribute: see [CONTRIBUTING.md](CONTRIBUTING.md). Getting-started walkthrough:
-[docs/ONBOARDING.md](docs/ONBOARDING.md).
+- [Submit a timeslip](https://github.com/toto171/MotoQuant.in/issues/new?template=submit-timeslip.yml).
+  A Dragy run or a timing-light slip for a stock bike is the single best way
+  to improve accuracy, above all for bikes under 400 cc.
+- [Suggest a bike](https://github.com/toto171/MotoQuant.in/issues/new?template=suggest-bike.yml)
+  that is missing, with a link to its specifications.
+- [Send a dyno sheet or ECU log](https://github.com/toto171/MotoQuant.in/issues/new?template=calibration_data.yml).
+
+Code is welcome too. Read [AGENTS.md](AGENTS.md) (the working rules, one
+page) and [CONTRIBUTING.md](CONTRIBUTING.md), then look for issues labelled
+`good first issue`. Please follow the [Code of Conduct](CODE_OF_CONDUCT.md)
+and report security problems privately as described in
+[SECURITY.md](SECURITY.md).
+
+## Where things are
+
+```
+motoquant/              the Python package
+  physics.py              RK4 integrator (fixed 1 ms or adaptive step)
+  submodels/              the 15 physics sub-models
+  category_profiles.py    per-class physics settings
+  database/               schema, seed data, repositories
+  scraper/                the curated bike catalog and the spec importer
+  calibration/            Dragy, dyno and ECU import and comparison
+  analysis/               cost per tenth, upgrade planner, race-day setup, sensitivity
+  llm/                    the chat assistant
+  api.py                  FastAPI backend
+  run.py                  command line (python -m motoquant.run)
+web/                    the Next.js site (motoquant.in)
+rust/                   the optional Rust physics core
+tests/                  the test suite
+scripts/                sweeps, the reference-time gate, database patches, audits
+docs/                   architecture, invariants, decisions, self-hosting
+reports/                accuracy sweeps and investigation write-ups
+```
+
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) answers "where does X live?",
+[docs/adr/](docs/adr/) records settled decisions and
+[docs/README.md](docs/README.md) indexes the rest.
+
+## License and names
+
+MotoQuant is licensed under the **Apache License, Version 2.0**; see
+[LICENSE](LICENSE) and [NOTICE](NOTICE). The licence covers the code and
+data, not the MotoQuant name or logo. Motorcycle, tyre and parts names are
+trademarks of their owners and are used only to identify the products being
+modelled. Benchmark figures are cited facts from their published sources.
+
+Copyright 2026 Hritwik Mudhai and the MotoQuant contributors.

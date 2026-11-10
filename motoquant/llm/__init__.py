@@ -1,6 +1,6 @@
 """
-MotoQuant Pro -- LLM Interface Layer (Phase A)
-==============================================
+MotoQuant -- LLM Interface Layer (Phase A)
+==========================================
 Wraps the Anthropic API for two jobs:
   1. parse_query: natural-language string -> structured SimulateRequest fields
   2. summarize_result: sim result -> 2-4 sentence English summary

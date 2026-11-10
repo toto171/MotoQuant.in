@@ -6,7 +6,7 @@ import StructuredData, { articleSchema } from '../../StructuredData';
 const SLUG = 'how-to-tune-for-mmrt-chennai';
 const TITLE = 'How to Tune for MMRT Chennai: Sea-Level, Humid, Hot Track';
 const DESCRIPTION =
-  'MMRT Chennai sits at 78 m altitude with 80% humidity and 30°C track temperatures most of the year. That is denser air, hotter rubber, and worse traction than Aamby Valley. MotoQuant simulates the same Hayabusa 0.18s quicker at MMRT in trap speed but 0.05s slower in 60-foot. Here is the venue-specific tuning math.';
+  'MMRT Chennai sits at 78 m with 80% humidity in November: denser air than Aamby Valley but hotter, wetter intake air. MotoQuant simulates a stock Hayabusa 0.07 s quicker at MMRT in November, and small bikes 0.17–0.28 s quicker. Here is the venue-specific tuning math.';
 
 export const metadata = {
   title: 'How to Tune for MMRT Chennai — MotoQuant',
@@ -39,7 +39,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'Aamby Valley sits at 660 m above sea level. Madras Motor Race Track sits at 78 m. That is the single most useful sentence anyone has written about tuning a motorcycle for MMRT — every other difference between the two venues is a downstream consequence. MotoQuant simulates a stock Hayabusa Gen1 at 10.471 seconds at Aamby Valley in November (cool, dry, thin air). The same bike at MMRT in the same month runs roughly 10.42 seconds with a higher trap speed but a slightly worse 60-foot. The air helps; the track surface hurts; the humidity pushes back on engine power; the rubber gets hotter; and the prevailing wind direction flips the safe lane. Here is what changes when you trailer a bike from Pune to Sriperumbudur, and how to set the bike up for it.',
+    text: 'Aamby Valley sits at 679 m above sea level. Madras Motor Race Track sits at 78 m. Most of the difference between the two venues follows from that. MotoQuant simulates a stock Hayabusa Gen1 at 10.218 seconds at Aamby Valley in November and 10.145 seconds at MMRT in the same month, with a trap speed 2.8 km/h higher at MMRT and the same 60-foot. The air helps; the humidity pushes back on engine power; the rubber runs hotter; and the prevailing wind sits at an angle to the strip. Here is what changes when you trailer a bike from Pune to Sriperumbudur, and how to set it up. (Updated 10 November 2026: every simulated time here was re-run on the current engine.)',
   },
   {
     type: 'h2',
@@ -61,12 +61,12 @@ const CONTENT = [
     type: 'table',
     rows: [
       ['Metric', 'MMRT (Nov)', 'Aamby Valley (Nov)', 'Effect on ET'],
-      ['Altitude', '78 m', '660 m', 'MMRT denser baseline'],
+      ['Altitude', '78 m', '679 m', 'MMRT denser baseline'],
       ['Ambient temperature', '26°C', '22°C', 'MMRT hotter intake'],
       ['Track temperature', '30°C', '26°C', 'MMRT softer rubber'],
       ['Relative humidity', '80%', '40%', 'MMRT lower effective O₂'],
       ['Barometric pressure', '1012 hPa', '1014 hPa', 'roughly even'],
-      ['Density altitude', '~400 m', '~945 m', 'MMRT ~545 m denser'],
+      ['Density altitude', '~600 m', '~1,120 m', 'MMRT ~520 m lower'],
       ['Wind speed', '2.0 m/s', '1.2 m/s', 'MMRT slightly windier'],
       ['Prevailing wind', '045° NE', '045° NE', 'shared'],
       ['Rain probability', '~25% (NE monsoon)', '<5%', 'MMRT weather risk'],
@@ -74,11 +74,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Density altitude is the headline number for engine performance. MMRT in November sits roughly 545 m lower in DA than Aamby Valley — denser air, more oxygen molecules per intake stroke, more horsepower from the engine. The simulator routes this through the standard SAE J1349-style power-correction factor: every 1000 m of DA reduction is worth roughly 3.5 percent more peak power on a naturally aspirated engine, and the Hayabusa at MMRT makes roughly 2 percent more peak power than the same bike at Aamby Valley. On a 197 hp engine that is about 4 extra crank horsepower at the top of the rev range, which is where a Hayabusa already spends most of the quarter-mile.',
+    text: 'Density altitude is the headline number for engine performance. MMRT in November sits about 520 m lower in DA than Aamby Valley: more oxygen per intake stroke, more power. The simulator applies the SAE J1349 power correction against its sea-level reference day, and the factor is 0.938 at MMRT against 0.895 at Aamby Valley in November, so a Hayabusa makes about 4.8 percent more power at MMRT. That number already includes the humidity.',
   },
   {
     type: 'p',
-    text: 'Humidity pushes back. 80 percent humidity at 26°C displaces enough water vapour into the intake charge to drop the effective oxygen fraction by roughly 1 percent — a small but measurable subtraction from the DA gain. The net engine effect at MMRT versus Aamby Valley in November is about +1 percent peak power, worth roughly 0.02 to 0.04 seconds of ET on a litre-class superbike. Smaller, lower-revving bikes see less of it because they spend less time near peak power; on a Pulsar NS200 the same delta is barely measurable.',
+    text: 'Humidity pushes back. The correction works on dry-air pressure, and 80 percent humidity at 26°C puts enough water vapour in the intake to cost MMRT about a percent of power. That is why MMRT, the lowest strip in the catalog, still has less dense air than BIC in November. Even so, the net engine effect against Aamby Valley is close to five percent in MMRT\'s favour.',
   },
   {
     type: 'h2',
@@ -86,15 +86,15 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Engine power is one of two levers and not even the larger one. The other is traction off the line, and MMRT loses ground here. The track temperature in November runs 30°C against Aamby Valley\'s 26°C; in April and May, MMRT pushes 42 to 48°C track temperatures while Aamby Valley sits in the high 30s. Tire compound friction coefficients fall as the rubber overheats — a Metzeler M9RR or Pirelli Diablo Supercorsa SP at 50°C track temperature gives back roughly 4 to 6 percent of its peak μ value compared to its sweet spot around 35°C. The simulator models this through the per-tire thermal coefficient and the Pacejka μ_peak fall-off; on a Hayabusa with the OEM Bridgestone Battlax S22 rear, the 60-foot time at MMRT in November is roughly 0.05 seconds slower than at Aamby Valley because the rear simply will not hook up as well at a hotter track surface, even with the slightly heavier loading from denser air pushing the bike down at speed.',
+    text: 'The other lever is traction off the line. The track temperature in November runs 30°C against Aamby Valley\'s 26°C; in April and May, MMRT\'s normals reach 42 to 48°C. Tyre friction falls once the rubber runs past its operating window, and the simulator models that through each tyre\'s thermal window and peak friction coefficient. In November the difference does not show: the simulated 60-foot for a stock Hayabusa is 1.821 s at both venues.',
   },
   {
     type: 'p',
-    text: 'The MMRT surface itself is also not a purpose-built drag prep concrete strip. It is a polished bitumen road-racing surface, which means the friction coefficient never reaches the peak that a freshly-VHT-prepped strip can deliver. Aamby Valley\'s November airstrip surface is concrete with a slightly more aggressive texture and zero road-racing rubber polishing. The practical effect: MMRT tops out at roughly μ_peak ≈ 1.05 on a hot DOT sport tire, while Aamby Valley November can hit μ_peak ≈ 1.10 to 1.15 on the same compound. Five percent of μ_peak is worth about a tenth of 60-foot time on a 200+ hp bike, and that ripples forward to roughly 0.08 seconds of total ET — almost exactly cancelling the engine-power gain from the denser air.',
+    text: 'The MMRT surface is road-racing asphalt, not a purpose-built drag strip with prep compound, so its friction never reaches what a VHT-prepped strip delivers. The catalog stores both MMRT and Aamby Valley as unprepped asphalt with the same surface multiplier, so in the simulator the difference between them comes from the air, not the surface.',
   },
   {
     type: 'callout',
-    text: 'Sanity check: the simulator predicts a stock Hayabusa Gen1 at MMRT in November runs 10.42 seconds, versus 10.471 seconds at Aamby Valley November. The 0.05 second gap is net of +0.04 second engine power gain and −0.09 second traction loss. Trap speed at MMRT is roughly 0.7 km/h higher (denser air, more terminal acceleration), but the launch is fractionally worse. Both numbers sit inside the litre-sport-1300+ cluster bias band of ±0.21 seconds. Run it for your own bike on the simulator.',
+    text: 'Sanity check: the simulator runs a stock Hayabusa Gen1 at 10.145 seconds at MMRT in November against 10.218 seconds at Aamby Valley, with a trap 2.8 km/h higher at MMRT and the same 60-foot. In the 10 November 2026 accuracy sweep, the litre sport 195 hp-and-up class shows a weighted mean absolute error of 0.171 s against published tests, so treat the venue gap as more reliable than either absolute time. Run it for your own bike in the simulator.',
   },
   {
     type: 'h2',
@@ -102,7 +102,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Four practical tuning changes are worth making when you trailer from a high-altitude, cool venue to MMRT. None of them are gear-ratio changes — the cassette you ran at Aamby Valley is the same cassette you should run at MMRT, because gearing tunes to a target trap speed and the trap speeds at the two venues are within 1 km/h on the same bike.',
+    text: 'Four practical tuning changes are worth making when you trailer from a high-altitude, cool venue to MMRT. None of them are gear-ratio changes: the cassette you ran at Aamby Valley is the one to run at MMRT, because gearing tunes to a target trap speed and the trap speeds at the two venues are within about 3 km/h on the same bike.',
   },
   {
     type: 'table',
@@ -134,25 +134,25 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'MMRT\'s climate is meaningfully different in different months, and the simulator\'s twelve-month weather table makes this concrete. Quarter-mile ET on a Hayabusa Gen1 swings by roughly 0.4 seconds across the calendar at MMRT, almost entirely because of how track temperature and humidity move:',
+    text: 'MMRT\'s climate changes through the year, and the simulator\'s twelve-month weather table shows what that costs. Quarter-mile ET on a stock Hayabusa Gen1 moves by about 0.05 seconds across the calendar at MMRT, mostly with air temperature:',
   },
   {
     type: 'table',
     rows: [
       ['Month', 'Ambient', 'Track temp', 'RH', 'Hayabusa sim ET'],
-      ['January', '25°C', '30°C', '65%', '~10.43 s'],
-      ['February', '26°C', '32°C', '60%', '~10.44 s'],
-      ['March', '28°C', '36°C', '60%', '~10.51 s'],
-      ['April', '31°C', '42°C', '65%', '~10.65 s'],
-      ['May', '34°C', '48°C', '55%', '~10.72 s'],
-      ['October', '28°C', '34°C', '75%', '~10.48 s'],
-      ['November', '26°C', '30°C', '80%', '~10.42 s'],
-      ['December', '25°C', '28°C', '75%', '~10.39 s'],
+      ['January', '25°C', '30°C', '65%', '10.130 s'],
+      ['February', '26°C', '32°C', '60%', '10.132 s'],
+      ['March', '28°C', '36°C', '60%', '10.143 s'],
+      ['April', '31°C', '42°C', '65%', '10.165 s'],
+      ['May', '34°C', '48°C', '55%', '10.176 s'],
+      ['October', '28°C', '34°C', '75%', '10.155 s'],
+      ['November', '26°C', '30°C', '80%', '10.145 s'],
+      ['December', '25°C', '28°C', '75%', '10.135 s'],
     ],
   },
   {
     type: 'p',
-    text: 'December at MMRT is the fastest month on the calendar — coolest track surface, moderate humidity, dense post-monsoon air. Most FMSCI-sanctioned MMRT drag events cluster from November to February for exactly this reason. April and May are unraceable for serious ET — the track surface bakes past the rubber\'s thermal limit, and ETs blow out by three to four tenths versus December. October sees the northeast monsoon arrival and the rain probability column climbs above 25 percent; weather risk dominates everything else. The narrow rideable window is November through February, with a strong preference for December and January.',
+    text: 'January and December are the quickest months at MMRT in the simulator, and May the slowest, 0.05 s behind January on a stock Hayabusa. The engine model sees only the air; a real rear tyre on a 48°C May track may lose more than that. October brings the northeast monsoon, and the rain risk matters more than the air. The practical window is November through February.',
   },
   {
     type: 'h2',
@@ -160,7 +160,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'MMRT\'s prevailing wind in the dry season runs from 045 degrees (northeast) at around 2 m/s, which is light but consistent. The front straight at MMRT runs roughly north-south, which puts the prevailing wind at roughly 45 degrees off the bike\'s axis — a slight headwind component (about 1.4 m/s) plus a slight crosswind component (about 1.4 m/s). The headwind costs roughly 0.02 seconds of ET versus a perfectly still day, which the simulator already bakes in. The crosswind matters more for bike stability than for ET. On a fully-faired litre-class bike at a 240+ km/h trap, a 1.4 m/s crosswind produces a sideways force at the fairing of roughly 35 N, easily handled by a normal rider but uncomfortable on a heavily-modded bike with reduced front-end weighting. Aamby Valley also runs a 045° prevailing wind direction, so the qualitative behaviour is the same; the magnitudes are similar.',
+    text: 'MMRT\'s November wind normal is about 2 m/s from 045 degrees (northeast), light but consistent. The strip runs roughly north-south, so that wind sits about 45 degrees off the bike\'s axis: roughly 1.4 m/s along the strip and 1.4 m/s across it. The venue runs above assume calm air; set the wind in the simulator to see its effect. The crosswind matters more for bike stability than for ET. On a fully-faired litre-class bike at a 240+ km/h trap, a 1.4 m/s crosswind produces a sideways force at the fairing of roughly 35 N, easily handled by a normal rider but uncomfortable on a heavily-modded bike with reduced front-end weighting. Aamby Valley also runs a 045° prevailing wind direction, so the qualitative behaviour is the same; the magnitudes are similar.',
   },
   {
     type: 'h2',
@@ -176,11 +176,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The honest summary for MMRT: it is a venue with denser air than Aamby Valley but a hotter, less prepped surface. Those two effects nearly cancel for a stock litre-class bike, with a small net advantage of roughly 0.05 seconds at MMRT in November to December. For 200 to 400cc bikes the engine-power gain is smaller and the traction loss is roughly the same, so MMRT can run net 0.02 to 0.05 seconds slower than Aamby Valley on a Pulsar NS200, an RC 390, or a Continental GT 650. The simulator handles all of this automatically from the venue weather table once you pick the venue. The four tuning changes above (lower launch RPM, lower tire pressures, softer clutch ramp, stay on the same cassette) close most of the gap; the rest is rider technique on a track that punishes a stiff release.',
+    text: 'The summary for MMRT: denser air than Aamby Valley, and a hotter track. On the current engine the air wins for every bike we ran in November: a stock Hayabusa is 0.07 s quicker at MMRT, and a Continental GT 650, RC 390, Duke 390, Pulsar NS400Z and Pulsar NS200 are 0.17 s to 0.28 s quicker. The simulator applies all of this from the venue weather table once you pick the venue. The four tuning changes above (lower launch RPM, lower tyre pressures, softer clutch ramp, the same cassette) are about the track temperature, which the simulator models less fully than the air.',
   },
   {
     type: 'p',
-    text: 'The MotoQuant simulator at motoquant.in lets you swap MMRT for Aamby Valley with a single dropdown and re-run the same bike across both venues side by side. Every venue setting in the database — twelve months of weather, surface friction coefficients, prevailing wind, timing system — feeds the physics engine the same way. The 541-bike catalog, the 254-tire fitment library, and the 593-part ROI engine all respond to the venue selection. If you are planning a December MMRT entry on a stock Hayabusa, a modded Duke 390, or a Pulsar NS400Z, you can build the run sheet here before you load the trailer.',
+    text: 'The MotoQuant simulator at motoquant.in lets you swap MMRT for Aamby Valley with a single dropdown and re-run the same bike across both venues side by side. Every venue setting in the database (twelve months of weather, surface type, prevailing wind) feeds the physics engine the same way. The 534-bike catalog, the 254-tire fitment library, and the 546-part ROI engine all respond to the venue selection. If you are planning a December MMRT entry on a stock Hayabusa, a modded Duke 390, or a Pulsar NS400Z, you can build the run sheet here before you load the trailer.',
   },
 ];
 
@@ -228,7 +228,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -251,7 +251,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -279,7 +279,7 @@ export default function PostPage() {
             {['MMRT', 'Chennai', 'venue', 'tuning', 'Tamil Nadu'].map((t) => (
               <span
                 key={t}
-                className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
               >
                 {t}
               </span>
@@ -288,7 +288,7 @@ export default function PostPage() {
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             How to Tune for MMRT Chennai: Sea-Level, Humid, Hot Track
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             18 May 2026 · 11 min read · MotoQuant Blog
           </div>
         </div>
@@ -299,14 +299,14 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Simulate your bike at MMRT vs Aamby Valley</div>
             <div className="text-white/60 text-sm">
-              Switch venues with one dropdown. Sweep month, track temperature, rider weight, tire compound, and any of the 593 parts in the catalog. See your ET delta before the entry fee.
+              Switch venues with one dropdown. Sweep month, track temperature, rider weight, tire compound, and any of the 546 parts in the catalog. See your ET delta before the entry fee.
             </div>
           </div>
           <Link
             href="/simulator?venue=mmrt"
-            className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
+            className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
           >
-            Run sim →
+            Open the simulator →
           </Link>
         </div>
 
@@ -368,14 +368,7 @@ export default function PostPage() {
               <Link href="/bikes" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Browse the full bike catalog
               </Link>{' '}
-              — 541 bikes with full spec sheets, OEM tire fitments, and venue-aware quarter-mile predictions for every Indian drag strip in the database.
-            </li>
-            <li>
-              ·{' '}
-              <Link href="/pricing" className="text-brand-accent hover:text-brand-orange transition-colors">
-                Pricing
-              </Link>{' '}
-              — free tier covers stock-tune sims at every venue; Pro unlocks the full parts-ROI engine and Dragy timeslip calibration against your own MMRT runs.
+              — 534 bikes with full spec sheets, OEM tire fitments, and venue-aware quarter-mile predictions for every Indian drag strip in the database.
             </li>
           </ul>
         </div>

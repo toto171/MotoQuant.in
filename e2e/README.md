@@ -1,18 +1,19 @@
 # MotoQuant E2E — Playwright smoke harness
 
-A tiny, durable Playwright smoke suite for the **landing → quick-sim happy
-path**. It exists so that "the homepage loads and the Live Simulator returns
-an ET" is version-controlled and runnable, instead of living only in a
-throwaway session scratchpad.
+A tiny, durable Playwright smoke suite for the **landing → calculator happy
+path**. It exists so that "the homepage loads and the calculator returns an
+exact quarter-mile time" is version-controlled and runnable, instead of living
+only in a throwaway session scratchpad.
 
 - `playwright.config.js` — one Chromium project, `testDir: ./specs`,
   `baseURL` from `E2E_BASE_URL` (default `http://localhost:3000`), reduced
   motion on, generous timeouts for API cold starts.
 - `specs/smoke.spec.js` — two checks:
   1. landing page loads (title + hero visible, no uncaught JS errors);
-  2. quick-sim happy path (keep the default bike, click **Quarter-Mile ET**,
-     assert the result panel with **Trap Speed** / **Split Timeline** and a
-     `<n>.<3dp>s` ET renders).
+  2. calculator happy path (keep the default bike, press **Calculate my
+     time**, assert the exact result renders: the **First 60 ft (launch)** and
+     **Finish-line speed** rows, a time, a speed, and the **Conditions:** line
+     that says what air the result is for).
 
 ## Running it locally
 
@@ -20,9 +21,11 @@ The tests drive a **real** running stack (Next.js frontend + FastAPI
 backend). Nothing is mocked. From the repo root:
 
 ```bash
-# 1. Boot the API on :8000 against a scratch DB (seed it first if empty).
-python3 -m uvicorn motoquant.api:app --host 127.0.0.1 --port 8000
-#    (deps are in requirements-api.txt; `pip install -e .` if importing motoquant fails.)
+# 1. Boot the API on :8000 against a COPY of the shipped catalog (the API
+#    writes to the file it opens; never point it at the tracked motoquant.db).
+cp motoquant.db /tmp/e2e.db
+MOTOQUANT_DB=/tmp/e2e.db python3 -m uvicorn motoquant.api:app --host 127.0.0.1 --port 8000
+#    (`pip install -e .` installs the package and its runtime dependencies.)
 
 # 2. In a second shell, build + start the web app on :3000, pointed at the API.
 cd web

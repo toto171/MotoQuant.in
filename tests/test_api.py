@@ -145,7 +145,7 @@ class TestHealthEndpoints(unittest.TestCase):
         r = client.get("/")
         self.assertEqual(r.status_code, 200)
         body = r.json()
-        self.assertEqual(body["service"], "MotoQuant Pro API")
+        self.assertEqual(body["service"], "MotoQuant API")
         self.assertEqual(body["status"], "ok")
 
     def test_health(self):
@@ -461,97 +461,6 @@ class TestDynoUpload(unittest.TestCase):
 
 
 # ===========================================================================
-# POST /api/bikes/suggest
-# ===========================================================================
-
-
-class TestBikeSuggestEndpoint(unittest.TestCase):
-    def test_minimal_valid_submission(self):
-        """Accept a submission with only required fields (make + model)."""
-        r = client.post(
-            "/api/bikes/suggest",
-            json={
-                "make": "TestMakeXYZ",
-                "model": "Phantom 500R Test",
-            },
-        )
-        self.assertEqual(r.status_code, 201, r.text)
-        body = r.json()
-        self.assertIn("id", body)
-        self.assertIsInstance(body["id"], int)
-        self.assertEqual(body["flagged_out_of_bounds"], False)
-        self.assertEqual(body["issues"], [])
-
-    def test_full_submission_not_flagged(self):
-        """Plausible full submission should NOT be flagged."""
-        r = client.post(
-            "/api/bikes/suggest",
-            json={
-                "make": "TestBrand",
-                "model": "Test Sport 750",
-                "year": 2024,
-                "displacement_cc": 749.0,
-                "peak_power_hp": 95.0,
-                "dry_mass_kg": 190.0,
-                "category": "sport",
-                "notes": "Rare spec variant",
-            },
-        )
-        self.assertEqual(r.status_code, 201, r.text)
-        body = r.json()
-        self.assertFalse(body["flagged_out_of_bounds"])
-
-    def test_out_of_bounds_displacement_flagged(self):
-        """Plausible-range violations are stored but flagged."""
-        r = client.post(
-            "/api/bikes/suggest",
-            json={
-                "make": "TestBrand",
-                "model": "Flag Test Model",
-                "displacement_cc": 4500.0,  # Above 3500 ceiling in BOUNDS
-            },
-        )
-        # Pydantic range allows up to 5000, repo plausibility caps at 3500
-        self.assertEqual(r.status_code, 201, r.text)
-        body = r.json()
-        self.assertTrue(body["flagged_out_of_bounds"])
-        self.assertTrue(any("displacement_cc" in s for s in body["issues"]))
-
-    def test_empty_make_rejected(self):
-        """Empty make field returns 422."""
-        r = client.post(
-            "/api/bikes/suggest",
-            json={
-                "make": "",
-                "model": "Should not store",
-            },
-        )
-        self.assertEqual(r.status_code, 422)
-
-    def test_missing_model_rejected(self):
-        """Missing model field returns 422."""
-        r = client.post(
-            "/api/bikes/suggest",
-            json={
-                "make": "TestMake",
-            },
-        )
-        self.assertEqual(r.status_code, 422)
-
-    def test_extreme_value_rejected_by_pydantic(self):
-        """Values outside even the lenient Pydantic range return 422."""
-        r = client.post(
-            "/api/bikes/suggest",
-            json={
-                "make": "TestMake",
-                "model": "Extreme",
-                "year": 1800,  # below 1900 Pydantic lower bound
-            },
-        )
-        self.assertEqual(r.status_code, 422)
-
-
-# ===========================================================================
 # POST /api/venues/resolve
 # ===========================================================================
 
@@ -658,6 +567,15 @@ class TestPartsEndpoint(unittest.TestCase):
         """bike_id pointing at a nonexistent row should 404, not 500."""
         r = client.get("/api/parts", params={"bike_id": 99999})
         self.assertEqual(r.status_code, 404)
+
+    def test_bike_detail_exposes_stroke_type_and_gear_ratios(self):
+        """The bike page's JSON-LD reads stroke_type and gear_ratios from this
+        payload; they live inside the param blobs and must be merged to the
+        top level (2-strokes were published as 4-stroke without it)."""
+        bike = client.get("/api/bikes/1").json()
+        self.assertEqual(bike.get("stroke_type"), 4)
+        self.assertIsInstance(bike.get("gear_ratios"), list)
+        self.assertGreaterEqual(len(bike["gear_ratios"]), 5)
 
     def test_bike_id_filters_out_2stroke_parts(self):
         """
@@ -1049,62 +967,19 @@ class TestApiHygiene20260706(unittest.TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertLessEqual(len(r.json()["bikes"]), 1)
 
-    # ── L2: save-run plausibility bounds ──
-
-    def test_save_run_negative_et_422(self):
-        r = client.post(
-            "/api/simulate/save",
-            json={"bike_id": 1, "et_quarter_s": -3.0, "trap_speed_kmh": 220.0},
-        )
-        self.assertEqual(r.status_code, 422)
-
-    def test_save_run_absurd_trap_422(self):
-        r = client.post(
-            "/api/simulate/save",
-            json={"bike_id": 1, "et_quarter_s": 10.5, "trap_speed_kmh": 1200.0},
-        )
-        self.assertEqual(r.status_code, 422)
-
-    def test_save_run_zero_et_422(self):
-        r = client.post(
-            "/api/simulate/save",
-            json={"bike_id": 1, "et_quarter_s": 0.0, "trap_speed_kmh": 220.0},
-        )
-        self.assertEqual(r.status_code, 422)
-
-    def test_save_run_legit_values_still_accepted(self):
-        r = client.post(
-            "/api/simulate/save",
-            json={"bike_id": 1, "et_quarter_s": 10.033, "trap_speed_kmh": 239.8},
-        )
-        self.assertEqual(r.status_code, 201)
-
 
 class TestApiHygiene20260707(unittest.TestCase):
     """API-hygiene regression pins (2026-07-07 all-nighter review session).
 
     Continuation of the 2026-07-06 pass, which bounded /api/bikes|parts|tires
-    but missed two list routes and the free-tier sim request bodies:
+    but missed two list routes and the public sim request bodies:
 
-    L3: /api/leaderboard and /api/me/runs `limit` had le=100 but no ge, so
-        limit=-1 became an unbounded SQLite `LIMIT -1` (whole-table dump).
     L4: SimulateRequest / QuickSimRequest / TopSpeedRequest /
         DistanceRunRequest / CompareRequest accepted unbounded
         power_boost_pct / mass_delta_kg / rider_mass_kg, so impossible values
         (mass_delta=-300, power_boost=-100) ran and returned ET=0.0 nonsense
         as a 200 success. The paid routes already bounded these fields.
     """
-
-    # ── L3: list-route limit lower bound ──
-
-    def test_leaderboard_negative_limit_422(self):
-        self.assertEqual(client.get("/api/leaderboard?limit=-1").status_code, 422)
-
-    def test_leaderboard_zero_limit_422(self):
-        self.assertEqual(client.get("/api/leaderboard?limit=0").status_code, 422)
-
-    def test_leaderboard_valid_limit_ok(self):
-        self.assertEqual(client.get("/api/leaderboard?limit=10").status_code, 200)
 
     # ── L4: free-sim request-body physical bounds ──
 

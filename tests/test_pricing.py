@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Indian-Market Parts Pricing Tests
-=================================================
+MotoQuant — Indian-Market Parts Pricing Tests
+=============================================
 Covers :mod:`motoquant.database.pricing_refresh`:
 
 * Retailer URL template coverage + format correctness
@@ -234,18 +234,21 @@ class TestRefreshRetailerURLs:
         assert row["retailer_url"].startswith("https://www.superbikestore.com/")
         assert "CR-T" in row["retailer_url"] or "CR%2DT" in row["retailer_url"]
 
-    def test_stamps_updated_for_all_with_retailer(self, seeded_db):
+    def test_url_refresh_does_not_stamp_price_check(self, seeded_db):
+        # Building a search URL is not a price check. The old code stamped
+        # last_price_check=today on every part with a retailer, so
+        # stale_parts()/coverage_report() reported prices as freshly checked
+        # that nobody had looked at (October 2026 audit).
+        before = dict(
+            seeded_db.conn.execute("SELECT brand, last_price_check FROM parts")
+        )
         refresh_retailer_urls(seeded_db.conn, only_missing=True)
-        stamps = seeded_db.conn.execute(
-            "SELECT brand, last_price_check FROM parts"
-        ).fetchall()
-        stamps_by_brand = {r["brand"]: r["last_price_check"] for r in stamps}
-        # The three parts with retailers should all have a fresh stamp
-        assert stamps_by_brand["Akrapovic"] is not None
-        assert stamps_by_brand["SBS"] is not None
-        assert stamps_by_brand["SC-Project"] is not None
-        # The orphan (no retailer) is untouched — stamp remains NULL
-        assert stamps_by_brand["NoRetailer"] is None
+        refresh_retailer_urls(seeded_db.conn, only_missing=False)
+        after = dict(
+            seeded_db.conn.execute("SELECT brand, last_price_check FROM parts")
+        )
+        assert after == before  # SC-Project keeps its 2020 check date
+        assert len(stale_parts(seeded_db.conn, days_threshold=30)) == len(after)
 
     def test_dry_run_does_not_commit(self, seeded_db):
         summary = refresh_retailer_urls(seeded_db.conn, dry_run=True)
@@ -261,8 +264,9 @@ class TestRefreshRetailerURLs:
         # Second pass: nothing left to fill
         assert first.urls_filled == 2
         assert second.urls_filled == 0
-        # But stamps still get refreshed (harmless bookkeeping)
-        assert second.check_stamps_updated == 3
+        # And no check-date is ever stamped by URL building.
+        assert first.check_stamps_updated == 0
+        assert second.check_stamps_updated == 0
 
     def test_fills_use_correct_retailer_template(self, seeded_db):
         refresh_retailer_urls(seeded_db.conn, only_missing=True)

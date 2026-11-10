@@ -1,0 +1,685 @@
+diff --git a/motoquant/scraper/gear_ratios.py b/motoquant/scraper/gear_ratios.py
+index 28b023a..b4d3358 100755
+--- a/motoquant/scraper/gear_ratios.py
++++ b/motoquant/scraper/gear_ratios.py
+@@ -7,7 +7,7 @@ service-manual data:
+ 
+ Tier 1 — Model-family lookup  (GEAR_RATIO_DB)
+   Keyed by (manufacturer_lower, model_pattern, year_range).
+-  Patterns are matched with simple substring matching on the model name.
++  Patterns are matched on whole model-name tokens (see _tier1_pattern_matches).
+   Source: compiled from service manuals, owners forums, and dyno databases.
+   Confidence: 0.75
+ 
+@@ -183,6 +183,7 @@ _DB: list[dict] = [
+         "mfr": "yamaha",
+         "model": "r15 v4",
+         "year": (2021, 2026),
++        "primary_verified": True,
+         # ACCURACY 2026-06-11: previous entry ([2.8, 1.88, 1.36, 1.09, 0.96,
+         # 0.86], F15/R43, primary 2.100) cited a non-existent "NS200 shared
+         # 155cc platform" (the NS200 is a Bajaj 199cc). Real R155 box
+@@ -197,6 +198,7 @@ _DB: list[dict] = [
+         "mfr": "yamaha",
+         "model": "yzf-r15 v1",
+         "year": (2008, 2010),
++        "primary_verified": True,
+         # ACCURACY 2026-07-02: V1/V2 previously substring-leaked onto the
+         # "yzf-r1" entry (primary 1.609 -- the litre bike's). Same 73/24
+         # primary as the whole R15 family (Yamaha India service manual);
+@@ -282,6 +284,13 @@ _DB: list[dict] = [
+         "mfr": "yamaha",
+         "model": "fz-x",
+         "year": (2021, 2026),
++        # EPOCH 2026-11-10: this entry's primary reduction has no source in the repo and
++        # the bike it serves fails the gearing-plausibility gate (top-gear speed at
++        # peak-power rpm > 1.25 x terminal speed). The primary below is IGNORED by
++        # importer.resolve_primary_ratio, which uses the sibling / displacement-class
++        # inference instead. Source a real value and drop the flags to make it live again.
++        "primary_unverified": True,
++        "primary_implausible": True,
+         "ratios": [3.500, 1.846, 1.227, 0.923, 0.734],
+         "front": 16,
+         "rear": 48,
+@@ -470,6 +479,13 @@ _DB: list[dict] = [
+         "mfr": "honda",
+         "model": "cb 300r",
+         "year": (2019, 2026),
++        # EPOCH 2026-11-10: this entry's primary reduction has no source in the repo and
++        # the bike it serves fails the gearing-plausibility gate (top-gear speed at
++        # peak-power rpm > 1.25 x terminal speed). The primary below is IGNORED by
++        # importer.resolve_primary_ratio, which uses the sibling / displacement-class
++        # inference instead. Source a real value and drop the flags to make it live again.
++        "primary_unverified": True,
++        "primary_implausible": True,
+         "ratios": [
+             3.420,
+             2.250,
+@@ -486,6 +502,13 @@ _DB: list[dict] = [
+         "mfr": "honda",
+         "model": "hornet 2.0",
+         "year": (2020, 2026),
++        # EPOCH 2026-11-10: this entry's primary reduction has no source in the repo and
++        # the bike it serves fails the gearing-plausibility gate (top-gear speed at
++        # peak-power rpm > 1.25 x terminal speed). The primary below is IGNORED by
++        # importer.resolve_primary_ratio, which uses the sibling / displacement-class
++        # inference instead. Source a real value and drop the flags to make it live again.
++        "primary_unverified": True,
++        "primary_implausible": True,
+         "ratios": [3.313, 1.842, 1.157, 0.862, 0.688],
+         "front": 16,
+         "rear": 46,
+@@ -604,6 +627,7 @@ _DB: list[dict] = [
+         "mfr": "kawasaki",
+         "model": "ninja 300",
+         "year": (2013, 2026),
++        "primary_verified": True,
+         "ratios": [
+             2.714,
+             1.789,
+@@ -620,6 +644,7 @@ _DB: list[dict] = [
+         "mfr": "kawasaki",
+         "model": "ninja 400",
+         "year": (2018, 2026),
++        "primary_verified": True,
+         # Kawasaki Ninja 400 2018 service manual (p. 3-33)
+         # Fixed: was erroneously copy-pasted from Ninja 300 entry
+         # April 22, 2026: primary was still 3.082 (Ninja 300 value). Real
+@@ -633,6 +658,7 @@ _DB: list[dict] = [
+         "mfr": "kawasaki",
+         "model": "ninja 650",
+         "year": (2017, 2026),
++        "primary_verified": True,
+         # Kawasaki ER650H / Ninja 650 2017+ service manual. 6-speed cassette,
+         # all six gears below 1:1 (classic overdriven box). Previous entries
+         # under "z650" and "er-6" were copy-pasted from Z900 (6th=1.095, NOT
+@@ -962,6 +988,10 @@ _DB: list[dict] = [
+         "mfr": "bajaj",
+         "model": "pulsar ns 200",
+         "year": (2017, 2026),
++        # EPOCH 2026-11-10: this entry's primary reduction has no source in the repo and
++        # the bike it serves fails the gearing-plausibility gate (top gear far taller than
++        # the engine can pull). Marked unverified.
++        "primary_unverified": True,
+         "ratios": [
+             2.800,
+             1.880,
+@@ -978,6 +1008,10 @@ _DB: list[dict] = [
+         "mfr": "bajaj",
+         "model": "pulsar rs 200",
+         "year": (2015, 2026),
++        # EPOCH 2026-11-10: this entry's primary reduction has no source in the repo and
++        # the bike it serves fails the gearing-plausibility gate (top gear far taller than
++        # the engine can pull). Marked unverified.
++        "primary_unverified": True,
+         "ratios": [
+             2.800,
+             1.880,
+@@ -994,6 +1028,13 @@ _DB: list[dict] = [
+         "mfr": "bajaj",
+         "model": "pulsar 220f",
+         "year": (2007, 2026),
++        # EPOCH 2026-11-10: this entry's primary reduction has no source in the repo and
++        # the bike it serves fails the gearing-plausibility gate (top-gear speed at
++        # peak-power rpm > 1.25 x terminal speed). The primary below is IGNORED by
++        # importer.resolve_primary_ratio, which uses the sibling / displacement-class
++        # inference instead. Source a real value and drop the flags to make it live again.
++        "primary_unverified": True,
++        "primary_implausible": True,
+         "ratios": [3.500, 1.846, 1.227, 0.923, 0.734],
+         "front": 16,
+         "rear": 50,
+@@ -1022,6 +1063,13 @@ _DB: list[dict] = [
+         "mfr": "tvs",
+         "model": "apache rr 310",
+         "year": (2018, 2026),
++        # EPOCH 2026-11-10: this entry's primary reduction has no source in the repo and
++        # the bike it serves fails the gearing-plausibility gate (top-gear speed at
++        # peak-power rpm > 1.25 x terminal speed). The primary below is IGNORED by
++        # importer.resolve_primary_ratio, which uses the sibling / displacement-class
++        # inference instead. Source a real value and drop the flags to make it live again.
++        "primary_unverified": True,
++        "primary_implausible": True,
+         "ratios": [3.384, 2.333, 1.769, 1.400, 1.160, 0.961],
+         "front": 16,
+         "rear": 47,
+@@ -1029,7 +1077,7 @@ _DB: list[dict] = [
+     },
+     {
+         "mfr": "tvs",
+-        "model": "apache rtr 200",
++        "model": "apache rtr 200 4v",
+         "year": (2016, 2026),
+         "ratios": [3.214, 1.947, 1.333, 1.000, 0.800],
+         "front": 16,
+@@ -1040,6 +1088,10 @@ _DB: list[dict] = [
+         "mfr": "tvs",
+         "model": "apache rtr 160",
+         "year": (2018, 2026),
++        # EPOCH 2026-11-10: this entry's primary reduction has no source in the repo and
++        # the bike it serves fails the gearing-plausibility gate (top gear far taller than
++        # the engine can pull). Marked unverified.
++        "primary_unverified": True,
+         "ratios": [3.182, 1.909, 1.313, 0.987, 0.789],
+         "front": 16,
+         "rear": 48,
+@@ -1050,6 +1102,13 @@ _DB: list[dict] = [
+         "mfr": "royal_enfield",
+         "model": "himalayan 450",
+         "year": (2024, 2026),
++        # EPOCH 2026-11-10: this entry's primary reduction has no source in the repo and
++        # the bike it serves fails the gearing-plausibility gate (top-gear speed at
++        # peak-power rpm > 1.25 x terminal speed). The primary below is IGNORED by
++        # importer.resolve_primary_ratio, which uses the sibling / displacement-class
++        # inference instead. Source a real value and drop the flags to make it live again.
++        "primary_unverified": True,
++        "primary_implausible": True,
+         "ratios": [3.692, 2.105, 1.526, 1.179, 0.966, 0.814],
+         "front": 17,
+         "rear": 47,
+@@ -1115,6 +1174,13 @@ _DB: list[dict] = [
+         "mfr": "triumph",
+         "model": "speed 400",
+         "year": (2023, 2026),
++        # EPOCH 2026-11-10: this entry's primary reduction has no source in the repo and
++        # the bike it serves fails the gearing-plausibility gate (top-gear speed at
++        # peak-power rpm > 1.25 x terminal speed). The primary below is IGNORED by
++        # importer.resolve_primary_ratio, which uses the sibling / displacement-class
++        # inference instead. Source a real value and drop the flags to make it live again.
++        "primary_unverified": True,
++        "primary_implausible": True,
+         "ratios": [2.900, 2.067, 1.562, 1.240, 1.043],
+         "front": 14,
+         "rear": 41,
+@@ -1144,6 +1210,13 @@ _DB: list[dict] = [
+         "mfr": "hero",
+         "model": "xtreme 160r",
+         "year": (2020, 2026),
++        # EPOCH 2026-11-10: this entry's primary reduction has no source in the repo and
++        # the bike it serves fails the gearing-plausibility gate (top-gear speed at
++        # peak-power rpm > 1.25 x terminal speed). The primary below is IGNORED by
++        # importer.resolve_primary_ratio, which uses the sibling / displacement-class
++        # inference instead. Source a real value and drop the flags to make it live again.
++        "primary_unverified": True,
++        "primary_implausible": True,
+         "ratios": [3.500, 1.846, 1.227, 0.923, 0.734],
+         "front": 16,
+         "rear": 50,
+@@ -1560,13 +1633,158 @@ _DEFAULTS: dict[str, dict] = {
+ # ══════════════════════════════════════════════════════════════════
+ 
+ 
+-def _pattern_match(pattern: str, text: str) -> bool:
+-    """Substring match with a trailing-digit boundary guard."""
+-    if not pattern:
++_TOKEN_SPLIT = re.compile(r"[\s\-_./()+]+")
++
++# Model-name tokens that may sit beside a Tier-1 pattern without changing which
++# gearbox the entry describes (family names, trim levels, market / emissions
++# tags, generation codes). Purely numeric tokens (years, displacement badges)
++# are always accepted. ANY OTHER extra token blocks the Tier-1 match, so a new
++# variant falls back to the sibling / class inference instead of silently
++# inheriting a neighbour's gearbox ("Apache RTR 160 4V" and "... 2V" are two
++# engines and used to share one entry; "4v" / "2v" are deliberately absent).
++_NEUTRAL_MODEL_TOKENS = frozenset(
++    {
++        # family / marketing names
++        "ninja", "fireblade", "yzf", "brutale", "fazer", "pulsar", "gsx",
++        # trim levels and editions
++        "sp", "sp2", "s", "r", "rr", "rs", "se", "st", "gt", "gp", "rc", "sx",
++        "pro", "factory", "sport", "rally", "storm", "muscle", "mono",
++        "extrema", "assen", "anniversary", "25th", "edition", "special",
++        "limited", "standard", "std", "base", "abs", "dct", "e", "clutch",
++        "y", "amt", "premium", "plus", "performance",
++        # market / emissions / generation codes
++        "bs4", "bs6", "gen", "v1", "k5", "5sl", "13s", "rc51", "vrsca", "fw1a",
++        "indonesia", "india", "vietnam", "asia", "eu", "us",
++    }
++)
++
++# Variants whose badge is GLUED onto the pattern's last token ("YZF-R1M",
++# "Z900RS") and that share the base model's gearbox. Token-boundary matching
++# rejects every glued suffix by default - that is what stops "cbr 250r" from
++# claiming the twin-cylinder CBR250RR and "zx-10r" from claiming the ZX-10RR -
++# so each legitimate one is listed here explicitly: (mfr, pattern) -> suffixes.
++_GLUED_VARIANT_ALLOWLIST: dict[tuple[str, str], frozenset[str]] = {
++    ("yamaha", "yzf-r1"): frozenset({"m"}),
++    ("kawasaki", "ninja h2"): frozenset({"r"}),
++    # ZX-10RR: homologation edition of the same engine and gearbox family.
++    ("kawasaki", "zx-10r"): frozenset({"r"}),
++    ("kawasaki", "zx-4r"): frozenset({"r"}),
++    ("kawasaki", "z1000"): frozenset({"sx"}),
++    ("kawasaki", "z900"): frozenset({"rs"}),
++    ("kawasaki", "z650"): frozenset({"rs"}),
++    ("benelli", "tnt 600"): frozenset({"i"}),
++    ("ducati", "streetfighter v4"): frozenset({"s"}),
++    ("suzuki", "gsx-s 1000"): frozenset({"gt", "gx"}),
++    ("suzuki", "sv 650"): frozenset({"x"}),
++}
++
++
++def _model_tokens(text: str) -> list[str]:
++    return [t for t in _TOKEN_SPLIT.split((text or "").lower()) if t]
++
++
++def _tier1_pattern_matches(mfr_slug: str, pattern: str, model_name: str) -> bool:
++    """Full-token Tier-1 match.
++
++    The pattern must line up with whole tokens of the model name (spacing and
++    hyphenation are ignored, so "cb 650r" matches "CB650R" and "cbr 1000rr"
++    matches "CBR-1000RR"), a glued suffix is accepted only when listed in
++    ``_GLUED_VARIANT_ALLOWLIST``, and every model token outside the pattern
++    must be numeric or in ``_NEUTRAL_MODEL_TOKENS``.
++    """
++    p_norm = "".join(_model_tokens(pattern))
++    m_toks = _model_tokens(model_name)
++    if not p_norm or not m_toks:
+         return False
+-    if pattern[-1].isdigit():
+-        return re.search(re.escape(pattern) + r"(?!\d)", text) is not None
+-    return pattern in text
++    m_norm = "".join(m_toks)
++    bounds = [0]
++    for t in m_toks:
++        bounds.append(bounds[-1] + len(t))
++    glued_ok = _GLUED_VARIANT_ALLOWLIST.get((mfr_slug, pattern.lower()), frozenset())
++    start = m_norm.find(p_norm)
++    while start != -1:
++        end = start + len(p_norm)
++        if start in bounds:
++            first = bounds.index(start)
++            if end in bounds:
++                last = bounds.index(end)
++            else:
++                # the pattern stops inside a token: accept only a listed suffix
++                last = next(i for i, b in enumerate(bounds) if b > end)
++                if m_norm[end : bounds[last]] not in glued_ok:
++                    last = -1
++            if last != -1:
++                extra = m_toks[:first] + m_toks[last:]
++                if all(t.isdigit() or t in _NEUTRAL_MODEL_TOKENS for t in extra):
++                    return True
++        start = m_norm.find(p_norm, start + 1)
++    return False
++
++
++def find_tier1_entry(manufacturer: str, model_name: str, year: int | None = None):
++    """Return the Tier-1 ``_DB`` entry for a bike, or ``None``.
++
++    Longest pattern wins among the entries whose manufacturer, model pattern
++    (see ``_tier1_pattern_matches``) and year range all match.
++    """
++    mfr_slug = (manufacturer or "").lower().strip().replace(" ", "_")
++    best = None
++    best_len = -1
++    for entry in _DB:
++        if entry["mfr"] != mfr_slug:
++            continue
++        if not _tier1_pattern_matches(mfr_slug, entry["model"], model_name or ""):
++            continue
++        if year is not None:
++            y_from, y_to = entry["year"]
++            if not (y_from <= year <= y_to):
++                continue
++        if len(entry["model"]) > best_len:
++            best, best_len = entry, len(entry["model"])
++    return best
++
++
++# ══════════════════════════════════════════════════════════════════
++# INFERRED PRIMARY REDUCTION (displacement class)
++# ══════════════════════════════════════════════════════════════════
++# The Tier-2 ``_DEFAULTS`` primaries are litre inline-four values (1.6-1.92).
++# Used on a 150 cc single they leave the overall gearing 40-60 % too tall. For
++# small engines with no sourced primary the importer interpolates, by
++# displacement, between the primaries this file carries WITH a service-manual
++# citation (entries flagged ``primary_verified``):
++#
++#     155 cc  3.042   Yamaha R15 / R125 / MT-15 / XSR155 family (73/24)
++#     296 cc  3.087   Kawasaki Ninja 300
++#     399 cc  2.073   Kawasaki Ninja 400 (85/41)
++#     649 cc  2.095   Kawasaki ER650 / Ninja 650
++#
++# Flat below the first and above the last anchor. The result is an INFERENCE,
++# not a specification: importer.gearing_provenance() labels it
++# ``class-inferred`` and the DB provenance rows carry source_type
++# ``estimation``. tests/test_gearing_inference.py pins every anchor to the
++# Tier-1 entry it was read from.
++CLASS_PRIMARY_ANCHORS: tuple[tuple[float, float, str], ...] = (
++    (155.0, 3.042, "yamaha|r15 v4"),
++    (296.0, 3.087, "kawasaki|ninja 300"),
++    (399.0, 2.073, "kawasaki|ninja 400"),
++    (649.0, 2.095, "kawasaki|ninja 650"),
++)
++CLASS_PRIMARY_MAX_CC = 700.0
++CLASS_PRIMARY_MAX_CYLINDERS = 2
++
++
++def class_primary_ratio(displacement_cc: float | None) -> float | None:
++    """Displacement-interpolated primary reduction, or None outside 0-700 cc."""
++    cc = float(displacement_cc or 0.0)
++    if not 0.0 < cc < CLASS_PRIMARY_MAX_CC:
++        return None
++    pts = CLASS_PRIMARY_ANCHORS
++    if cc <= pts[0][0]:
++        return pts[0][1]
++    for (c0, p0, _), (c1, p1, _) in zip(pts, pts[1:]):
++        if cc <= c1:
++            return round(p0 + (p1 - p0) * (cc - c0) / (c1 - c0), 3)
++    return pts[-1][1]
+ 
+ 
+ def lookup_gear_ratios(
+@@ -1594,55 +1812,9 @@ def lookup_gear_ratios(
+     displacement_cc: Engine displacement in cc (used for Tier 2)
+     gears          : Number of gears (used for Tier 2 fallback selection)
+     """
+-    # Normalise manufacturer to slug form used in _DB
+-    mfr_slug = manufacturer.lower().strip().replace(" ", "_")
+-
+-    # ── Tier 1: named model match ─────────────────────────────────────────────
+-    # Whitespace/hyphen-agnostic match so "CB650R" matches the "cb 650r"
+-    # pattern key and "CBR-1000RR" matches "cbr 1000rr".  Service-manual
+-    # and owner-forum sources use inconsistent spacing/hyphenation; the
+-    # lookup must not be brittle to that.
+-    def _norm(s: str) -> str:
+-        return (
+-            s.lower()
+-            .replace("-", "")
+-            .replace("_", "")
+-            .replace(".", "")
+-            .replace(" ", "")
+-        )
+-
+-    model_lower = model_name.lower()
+-    model_norm = _norm(model_name)
+-
+-    # Collect all matching entries, prefer longest pattern match
+-    candidates = []
+-    for entry in _DB:
+-        if entry["mfr"] != mfr_slug:
+-            continue
+-        pattern = entry["model"].lower()
+-        pattern_norm = _norm(entry["model"])
+-        # Accept either a direct substring match (legacy behaviour) or a
+-        # whitespace-normalised match (handles "CB650R" vs "cb 650r").
+-        # Digit-boundary guard (2026-07-02): a pattern ending in a digit
+-        # must not be immediately followed by another digit, or "yzf-r1"
+-        # leaks its litre-bike primary onto "yzf-r15 v1/v2" and "yzf-r125"
+-        # (the exact bug class that gave the R15 V3 the R1 primary before
+-        # the June-12 respec -- V1/V2/R125 were still leaking).
+-        if not (
+-            _pattern_match(pattern, model_lower)
+-            or _pattern_match(pattern_norm, model_norm)
+-        ):
+-            continue
+-        # Check year range
+-        if year is not None:
+-            y_from, y_to = entry["year"]
+-            if not (y_from <= year <= y_to):
+-                continue
+-        candidates.append((len(pattern), entry))
+-
+-    if candidates:
+-        candidates.sort(key=lambda x: x[0], reverse=True)
+-        best = candidates[0][1]
++    # ── Tier 1: named model match (full-token; see _tier1_pattern_matches) ───
++    best = find_tier1_entry(manufacturer, model_name, year)
++    if best is not None:
+         return (
+             [r for r in best["ratios"] if r is not None],
+             best.get("front", 16),
+diff --git a/motoquant/scraper/importer.py b/motoquant/scraper/importer.py
+index d786b40..2f08ff5 100755
+--- a/motoquant/scraper/importer.py
++++ b/motoquant/scraper/importer.py
+@@ -25,7 +25,12 @@ from ..models import (
+     EngineParams,
+     TireParams,
+ )
+-from .gear_ratios import lookup_gear_ratios
++from .gear_ratios import (
++    CLASS_PRIMARY_MAX_CYLINDERS,
++    class_primary_ratio,
++    find_tier1_entry,
++    lookup_gear_ratios,
++)
+ from .spec import BikeSpec, ValidationResult
+ from .validator import score_spec, validate_spec
+ 
+@@ -791,6 +796,145 @@ def _build_chassis_from_spec(spec: BikeSpec) -> ChassisParams:
+     )
+ 
+ 
++# ────────────────────────────────────────────────────────
++# Primary-reduction resolution (epoch 2026-11-10)
++# ────────────────────────────────────────────────────────
++# Where a bike's primary reduction comes from, best evidence first:
++#
++#   spec               the spec carries primary_ratio
++#   tier1              a named gear_ratios entry (flagged primary_verified when
++#                      it has a service-manual citation; "tier1-unverified" when
++#                      flagged primary_unverified)
++#   sibling            INFERRED: another catalog bike with the same engine
++#                      (manufacturer, bore x stroke, cylinders, stroke cycle)
++#                      has a spec / Tier-1 primary - the same engine has the
++#                      same primary gear pair. Applied in the same domain as
++#                      the class rule (geared 4-stroke, <= 2 cyl, < 700 cc).
++#   class-inferred     INFERRED: geared 4-stroke, <= 2 cylinders, < 700 cc and
++#                      nothing better - displacement-interpolated between the
++#                      repo's service-manual primaries
++#                      (gear_ratios.class_primary_ratio)
++#   tier2-generic      the category default (a litre inline-four value); what
++#                      every bike without a spec / Tier-1 primary used to get
++#
++# "sibling" and "class-inferred" are estimates, never specifications. They are
++# labelled as such here, in the gearing plausibility report, and in the
++# data_provenance table (source_type "estimation").
++
++PRIMARY_SOURCE_INFERRED = ("sibling", "class-inferred")
++
++_SIBLING_INDEX: dict | None = None
++
++
++def _engine_key(spec: BikeSpec):
++    if not (spec.manufacturer and spec.bore_mm and spec.stroke_mm and spec.cylinders):
++        return None
++    return (
++        spec.manufacturer.lower().strip(),
++        round(float(spec.bore_mm), 1),
++        round(float(spec.stroke_mm), 1),
++        int(spec.cylinders),
++        int(getattr(spec, "stroke_type", 4) or 4),
++    )
++
++
++def _direct_primary(spec: BikeSpec):
++    """(value, source, detail) from the spec itself or its Tier-1 entry, else None."""
++    if spec.primary_ratio:
++        return float(spec.primary_ratio), "spec", "spec primary_ratio"
++    entry = find_tier1_entry(spec.manufacturer, spec.model_name, spec.year_from)
++    if entry is None or "primary" not in entry or entry.get("primary_implausible"):
++        return None
++    source = "tier1-unverified" if entry.get("primary_unverified") else "tier1"
++    detail = "%s|%s|%s" % (entry["mfr"], entry["model"], entry["year"])
++    if entry.get("primary_verified"):
++        detail += " (service-manual)"
++    return float(entry["primary"]), source, detail
++
++
++def _sibling_index() -> dict:
++    """engine key -> [(primary, verified, 'Mfr Model (year)')] over the catalog."""
++    global _SIBLING_INDEX
++    if _SIBLING_INDEX is None:
++        from .known_bikes import ALL_KNOWN_BIKES  # lazy: known_bikes is a big module
++
++        index: dict = {}
++        for other in ALL_KNOWN_BIKES:
++            key = _engine_key(other)
++            direct = _direct_primary(other)
++            if key is None or direct is None:
++                continue
++            value, source, detail = direct
++            verified = source == "spec" or detail.endswith("(service-manual)")
++            name = "%s %s (%s)" % (other.manufacturer, other.model_name, other.year_from)
++            index.setdefault(key, []).append((value, verified, name))
++        _SIBLING_INDEX = index
++    return _SIBLING_INDEX
++
++
++def _sibling_primary(spec: BikeSpec):
++    key = _engine_key(spec)
++    donors = _sibling_index().get(key) if key is not None else None
++    if not donors:
++        return None
++    pool = [d for d in donors if d[1]] or donors
++    counts: dict[float, int] = {}
++    for value, _verified, _name in pool:
++        counts[value] = counts.get(value, 0) + 1
++    # most common donor value; a tie goes to the first-declared donor
++    best_value = max(counts, key=lambda v: (counts[v], -[d[0] for d in pool].index(v)))
++    donor = next(d for d in pool if d[0] == best_value)
++    return best_value, "sibling", "same engine as %s" % donor[2]
++
++
++def resolve_primary_ratio(spec: BikeSpec) -> tuple[float, str, str]:
++    """Return (primary_ratio, source, detail) for a spec. See the table above."""
++    direct = _direct_primary(spec)
++    if direct is not None:
++        return direct
++    cylinders = spec.cylinders or 4
++    stroke_type = getattr(spec, "stroke_type", 4) or 4
++    # Geared small four-strokes only: the anchors are all 4-stroke road bikes
++    # (no sourced 2-stroke primary exists in the repo), and a CVT scooter has
++    # no primary gear pair to infer.
++    small_four_stroke = (
++        stroke_type == 4
++        and cylinders <= CLASS_PRIMARY_MAX_CYLINDERS
++        and (spec.category or "").lower() != "scooter"
++        and class_primary_ratio(spec.displacement_cc) is not None
++    )
++    if small_four_stroke:
++        sibling = _sibling_primary(spec)
++        if sibling is not None:
++            return sibling
++        cc = float(spec.displacement_cc)
++        return (
++            float(class_primary_ratio(cc)),
++            "class-inferred",
++            "displacement-interpolated (%.0f cc) from service-manual primaries" % cc,
++        )
++    _r, _f, _rr, lu_primary, _conf = lookup_gear_ratios(
++        manufacturer=spec.manufacturer,
++        model_name=spec.model_name,
++        year=spec.year_from,
++        category=spec.category,
++        displacement_cc=spec.displacement_cc,
++        gears=spec.gears,
++    )
++    return float(lu_primary), "tier2-generic", "category default"
++
++
++def gearing_provenance(spec: BikeSpec) -> dict:
++    """Where this spec's primary reduction comes from (for reports / provenance)."""
++    value, source, detail = resolve_primary_ratio(spec)
++    return {
++        "primary_ratio": value,
++        "primary_source": source,
++        "primary_detail": detail,
++        "primary_inferred": source in PRIMARY_SOURCE_INFERRED,
++    }
++
++
+ def _build_drivetrain_from_spec(
+     spec: BikeSpec, engine: EngineParams
+ ) -> DrivetrainParams:
+@@ -827,8 +971,11 @@ def _build_drivetrain_from_spec(
+     )
+     if not ratios:
+         ratios = lu_ratios
+-    primary = primary or lu_primary
+-    primary = primary or base.primary_ratio
++    # Primary reduction: spec > Tier-1 > same-engine sibling > displacement
++    # class (small 4-strokes only) > Tier-2 category default. The last three
++    # are inferences and are labelled as such by gearing_provenance().
++    primary, _primary_source, _primary_detail = resolve_primary_ratio(spec)
++    primary = primary or lu_primary or base.primary_ratio
+ 
+     # July 3, 2026 sentinel fix: front/rear_sprocket == 0 is the DOCUMENTED
+     # shaft/belt sentinel — NOT a missing value — so it must be merged with
+diff --git a/scripts/check_gearing_plausibility.py b/scripts/check_gearing_plausibility.py
+index 4587a51..8218b98 100644
+--- a/scripts/check_gearing_plausibility.py
++++ b/scripts/check_gearing_plausibility.py
+@@ -20,10 +20,14 @@ table, every bike); the analytic part is recomputed on the fly.
+ 
+ The baseline also records which bikes are CURRENTLY flagged, with a cause bucket:
+ 
+-  generic-primary    no spec primary and no Tier-1 entry: the Tier-2 default
+-                     primary (a litre inline-4 value) is used
++  generic-primary    no spec primary, no Tier-1 entry and no inference applies: the
++                     Tier-2 default primary (a litre inline-4 value) is used
++  class-inferred     the primary is the displacement-class inference (small geared
++                     4-strokes; see gear_ratios.class_primary_ratio) - the bike's own
++                     cassette / sprockets are then the likelier culprit
++  sibling-inferred   the primary is copied from a same-engine catalog sibling
+   tier1-unverified   a Tier-1 entry supplies the primary (its own value is unsourced
+-                     for several Indian models) or a substring match hit a sibling
++                     for several models)
+   explicit-spec      the spec carries its own primary_ratio
+   tall-by-design     generic primary on an adventure/cruiser/touring bike of 600 cc+,
+                      where a tall top gear is plausible
+@@ -63,42 +67,20 @@ def bike_keys(specs) -> list[str]:
+     return keys
+ 
+ 
+-def _tier1_entry(spec):
+-    from motoquant.scraper import gear_ratios as G
+-
+-    mfr = spec.manufacturer.lower().strip().replace(" ", "_")
+-
+-    def norm(s):
+-        return (
+-            s.lower()
+-            .replace("-", "")
+-            .replace("_", "")
+-            .replace(".", "")
+-            .replace(" ", "")
+-        )
+-
+-    ml, mn = spec.model_name.lower(), norm(spec.model_name)
+-    hits = []
+-    for e in G._DB:
+-        if e["mfr"] != mfr:
+-            continue
+-        p = e["model"].lower()
+-        if not (G._pattern_match(p, ml) or G._pattern_match(norm(e["model"]), mn)):
+-            continue
+-        if spec.year_from is not None:
+-            a, b = e["year"]
+-            if not a <= spec.year_from <= b:
+-                continue
+-        hits.append((len(p), e))
+-    hits.sort(key=lambda x: -x[0])
+-    return hits[0][1] if hits else None
+-
+-
+ def cause_bucket(spec) -> str:
+-    if spec.primary_ratio:
++    """Why a flagged bike's gearing is suspect, from the importer's own
++    provenance (motoquant.scraper.importer.gearing_provenance)."""
++    from motoquant.scraper.importer import gearing_provenance
++
++    source = gearing_provenance(spec)["primary_source"]
++    if source == "spec":
+         return "explicit-spec"
+-    if _tier1_entry(spec) is not None:
++    if source in ("tier1", "tier1-unverified"):
+         return "tier1-unverified"
++    if source == "sibling":
++        return "sibling-inferred"
++    if source == "class-inferred":
++        return "class-inferred"
+     cc = spec.displacement_cc or 0
+     if (spec.category or "").lower() in _TALL_BY_DESIGN_CATEGORIES and cc >= 600:
+         return "tall-by-design"

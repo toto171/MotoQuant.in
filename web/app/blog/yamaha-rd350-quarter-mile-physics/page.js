@@ -51,7 +51,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Under Aamby Valley November conditions — 21°C ambient, 28% RH, 1050 m elevation, concrete strip with a grip multiplier of 0.88 — MotoQuant runs the simulation through 15 physics sub-models including the new 2-stroke clutch-engagement model that shipped in the May 31 2026 calibration pass. The result, with a 78 kg rider:',
+    text: 'Under Aamby Valley November conditions (22°C ambient, 40% RH, 679 m elevation, asphalt strip), MotoQuant runs the simulation through 15 physics sub-models including the new 2-stroke clutch-engagement model that shipped in the May 31 2026 calibration pass. The result, with a 78 kg rider:',
   },
   {
     type: 'table',
@@ -248,7 +248,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -271,7 +271,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -299,7 +299,7 @@ export default function PostPage() {
             {['Yamaha', 'RD350', 'Two-stroke', 'Rajdoot RD350', 'India', 'physics'].map((t) => (
               <span
                 key={t}
-                className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
               >
                 {t}
               </span>
@@ -308,7 +308,7 @@ export default function PostPage() {
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             Yamaha RD350 Quarter-Mile Physics: Why a 1973 2-Stroke Still Runs 14.7s
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             31 May 2026 · 12 min read · MotoQuant Blog
           </div>
         </div>
@@ -324,9 +324,9 @@ export default function PostPage() {
           </div>
           <Link
             href="/simulator?bike=yamaha-rd350-1973&venue=aamby-valley"
-            className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
+            className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
           >
-            Run sim →
+            Open the simulator →
           </Link>
         </div>
 
@@ -389,13 +389,6 @@ export default function PostPage() {
                 Browse the full bike catalog
               </Link>{' '}
               — every 2-stroke in MotoQuant alongside the modern 200-400cc class for direct comparison.
-            </li>
-            <li>
-              ·{' '}
-              <Link href="/pricing" className="text-brand-accent hover:text-brand-orange transition-colors">
-                MotoQuant Pricing
-              </Link>{' '}
-              — free simulator for restorers and street tuners; Pro for shops and racing teams.
             </li>
           </ul>
         </div>

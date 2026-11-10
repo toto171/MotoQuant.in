@@ -56,7 +56,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running both bikes through MotoQuant at matched Aamby Valley November conditions — density altitude around 1,100 m, 22°C ambient, dry concrete with the OEM Metzeler Sportec M5 rear tire at μ_peak ≈ 1.10, 70 kg rider in stock tuck — produces these numbers:',
+    text: 'Running both bikes through MotoQuant at matched Aamby Valley November conditions — density altitude around 1,100 m, 22°C ambient, dry asphalt with the OEM Metzeler Sportec M5 rear tire at μ_peak ≈ 1.10, 70 kg rider in stock tuck — produces these numbers:',
   },
   {
     type: 'table',
@@ -72,7 +72,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Both ETs sit inside MotoQuant\'s mid-twin-300-500 cluster bias band of about ±0.4 seconds. The relative gap — two tenths and four km/h — is stable across rider weight, ambient temperature, and density altitude sweeps. The Duke 390 is consistently slower by margins that match what a Cd × A delta predicts: roughly equal off the line where aerodynamics barely matters, then the gap opens as speed climbs. By the 1/8-mile mark the RC 390 is already seven hundredths ahead; by the trap it has pulled clear by two full tenths. Neither bike has a Dragy timeslip in our calibrator yet, so the absolute numbers carry the cluster band of uncertainty, but the relative ordering is structural.',
+    text: 'Both ETs sit inside MotoQuant\'s mid-twin-300-500 cluster bias band of about ±0.4 seconds. The relative gap — two tenths and four km/h — is stable across rider weight, ambient temperature, and density altitude sweeps. The Duke 390 is consistently slower by margins that match what a Cd × A delta predicts: roughly equal off the line where aerodynamics barely matters, then the gap opens as speed climbs. By the 1/8-mile mark the RC 390 is already seven hundredths ahead; by the trap it has pulled clear by two full tenths. Neither bike has a Dragy timeslip in our benchmark set yet, so the absolute numbers carry the cluster band of uncertainty, but the relative ordering is structural.',
   },
   {
     type: 'callout',
@@ -155,7 +155,7 @@ const CONTENT = [
   },
   {
     type: 'callout',
-    text: 'Three caveats. First, every simulator number in this post sits inside the mid-twin-300-500 cluster bias band of ±0.4 seconds; a real Dragy timeslip would tighten the prediction. Second, the Powertronic Stage 1 figure quoted here is the conservative end of the range — published dynos for that flash run from 1.2 to 2.5 hp depending on the test bike, the tune revision, and the riding altitude. Third, Indian aftermarket pricing shifts every quarter; pricing-refresh runs monthly and these numbers reflect May 2026 retail.',
+    text: 'Three caveats. First, every simulator number in this post sits inside the mid-twin-300-500 cluster bias band of ±0.4 seconds; a real Dragy timeslip would tighten the prediction. Second, the Powertronic Stage 1 figure quoted here is the conservative end of the range — published dynos for that flash run from 1.2 to 2.5 hp depending on the test bike, the tune revision, and the riding altitude. Third, Indian aftermarket pricing shifts every quarter; these numbers reflect May 2026 retail.',
   },
   {
     type: 'h2',
@@ -179,7 +179,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The MotoQuant simulator at motoquant.in lets you sweep rider weight, density altitude, ambient temperature, tire compound, and any combination of the 593 parts in the catalog against either bike, side by side. You can answer the practical questions — "for my 75 kg rider weight and my home strip at 600 m DA, will the Duke or RC be faster after a sprocket drop and a re-flash?" — without trusting a YouTube comparison or a press release. And the moment a real Dragy timeslip from either bike lands in the calibrator, the simulator folds it in and tightens the prediction. The current ±0.4 second cluster bias band is the honest uncertainty number until that data exists.',
+    text: 'The MotoQuant simulator at motoquant.in lets you sweep rider weight, density altitude, ambient temperature, tire compound, and any combination of the 546 parts in the catalog against either bike, side by side. You can answer the practical questions — "for my 75 kg rider weight and my home strip at 600 m DA, will the Duke or RC be faster after a sprocket drop and a re-flash?" — without trusting a YouTube comparison or a press release. A real Dragy timeslip from either bike, submitted through the "Submit a timeslip" form, would tighten the prediction. The current ±0.4 second cluster bias band is the honest uncertainty number until that data exists.',
   },
 ];
 
@@ -227,7 +227,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -250,7 +250,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -278,7 +278,7 @@ export default function PostPage() {
             {['KTM', 'Duke 390', 'RC 390', 'Indian 400cc', 'comparison'].map((t) => (
               <span
                 key={t}
-                className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
               >
                 {t}
               </span>
@@ -287,7 +287,7 @@ export default function PostPage() {
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             KTM Duke 390 vs RC 390: Quarter-Mile Physics at Aamby Valley
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             18 May 2026 · 12 min read · MotoQuant Blog
           </div>
         </div>
@@ -298,14 +298,14 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Simulate the Duke 390 vs RC 390 side by side</div>
             <div className="text-white/60 text-sm">
-              Sweep rider weight, density altitude, sprocket choice, ECU re-flash, and any of the 593 parts in the catalog. See ET delta before you spend a rupee.
+              Sweep rider weight, density altitude, sprocket choice, ECU re-flash, and any of the 546 parts in the catalog. See ET delta before you spend a rupee.
             </div>
           </div>
           <Link
             href="/simulator"
-            className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
+            className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
           >
-            Run sim →
+            Open the simulator →
           </Link>
         </div>
 
@@ -368,13 +368,6 @@ export default function PostPage() {
                 Browse the full bike catalog
               </Link>{' '}
               — Duke 390, RC 390, NS400Z, Dominar 400, Apache RR 310, and 390+ other bikes with full spec sheets and OEM tire fitments.
-            </li>
-            <li>
-              ·{' '}
-              <Link href="/pricing" className="text-brand-accent hover:text-brand-orange transition-colors">
-                Pricing
-              </Link>{' '}
-              — free tier covers stock-tune sims on either bike; Pro unlocks the full parts-ROI engine and Dragy timeslip calibration against your own runs.
             </li>
           </ul>
         </div>

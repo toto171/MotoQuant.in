@@ -4,9 +4,9 @@
 import StructuredData, { SITE_URL } from '../StructuredData';
 
 const TITLE =
-  'Motorcycle Spec Database India — 541 Bikes with Dyno, Aero & Quarter-Mile Data';
+  'Motorcycle Spec Database India — 534 Bikes with Dyno, Aero & Quarter-Mile Data';
 const DESCRIPTION =
-  'Indian motorcycle specifications database — 541 bikes with full physics data for quarter-mile drag simulation. Hayabusa, ZX-14R, R15 V4, KTM Duke 390, KTM 890 Duke, Suzuki GSX-S750, Honda CB500X, Pulsar NS200, Apache RTR, Interceptor 650 and more. Individual Cd, frontal area, peak power, redline, wet mass, wheelbase, chain pitch, OEM tire fitments, and predicted ET at Aamby Valley + 19 other venues.';
+  'Indian motorcycle specifications database — 534 bikes with full physics data for quarter-mile drag simulation. Hayabusa, ZX-14R, R15 V4, KTM Duke 390, KTM 890 Duke, Suzuki GSX-S750, Honda CB500X, Pulsar NS200, Apache RTR, Interceptor 650 and more. Individual Cd, frontal area, peak power, redline, wet mass, wheelbase, chain pitch, OEM tire fitments, and predicted ET at Aamby Valley + 19 other venues.';
 
 export const metadata = {
   title: TITLE,
@@ -49,7 +49,6 @@ export const metadata = {
     'indian motorcycle database',
     'indian bike specifications',
     'valley run bikes',
-    'pacejka tire model motorcycle',
     'harley nightster rh975 quarter mile',
     'harley davidson nightster drag time',
     'nightster rh975 vs sportster s drag',
@@ -66,7 +65,6 @@ export const metadata = {
     'triumph street triple 765 rs quarter mile india',
     'street triple 765 rs vs 765 r',
     'hayabusa 2026 launch control 2.6 seconds',
-    'pacejka motorcycle tire model calculator',
   ],
   openGraph: {
     title: TITLE,
@@ -78,7 +76,7 @@ export const metadata = {
         url: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'MotoQuant Pro bike catalog — 541 motorcycles with full spec data',
+        alt: 'MotoQuant bike catalog — 534 motorcycles with full spec data',
       },
     ],
   },
@@ -108,7 +106,7 @@ function collectionSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: 'Motorcycle Catalog — MotoQuant Pro',
+    name: 'Motorcycle Catalog — MotoQuant',
     description: DESCRIPTION,
     url: `${SITE_URL}/bikes`,
     isPartOf: { '@id': `${SITE_URL}/#website` },
@@ -116,7 +114,7 @@ function collectionSchema() {
       '@type': 'Thing',
       name: 'Motorcycle specifications and drag-racing physics data',
     },
-    numberOfItems: 541,
+    numberOfItems: 534,
     inLanguage: 'en',
   };
 }

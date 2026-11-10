@@ -4,8 +4,8 @@
 
 import StructuredData, { SITE_URL } from '../StructuredData';
 
-const TITLE = "About MotoQuant — Built in Pune for the Indian Drag Strip";
-const DESCRIPTION = "MotoQuant Pro is a first-principles drag-racing simulator built in Pune for the Indian motorcycle community — Aamby Valley regulars, MMRT track-day riders, and Narhe tuning shops. Founder story, roadmap, design philosophy, and how the project differs from generic power-to-weight quarter-mile calculators.";
+const TITLE = "About MotoQuant — free, open-source quarter-mile simulator built in Pune";
+const DESCRIPTION = "MotoQuant is a free, open-source (Apache-2.0) quarter-mile simulator for motorcycles, built in Pune for Indian riders, drag strips and tuning shops. Why we built it, how it works and who is behind it.";
 
 export const metadata = {
   title: TITLE,

@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Drag Rubber + Cruiser Tire Pack (July 2026)
-============================================================
+MotoQuant — Drag Rubber + Cruiser Tire Pack (July 2026)
+=======================================================
 Two tire families following the seed_recommended_fitments auto-create
 pattern (_ensure_tire_exists + honest Pacejka templates), plus
 DB-QUERY-DRIVEN fitment seeding — fitments are derived from each bike's
@@ -51,6 +51,8 @@ import formula (usd * 84 * 1.30 * 1.18 + 1500), +/-15%.
 """
 
 import logging
+
+from ..tire_repo import tire_position_fits_slot
 
 logger = logging.getLogger(__name__)
 
@@ -852,6 +854,21 @@ def seed_drag_tires_cruiser(db) -> dict:
             stats["skipped"] += 1
             continue
         try:
+            tire_pos = db._conn.execute(
+                "SELECT position FROM tire_models WHERE id = ?", (tire_id,)
+            ).fetchone()
+            if tire_pos is not None and not tire_position_fits_slot(
+                tire_pos[0], plan["position"]
+            ):
+                logger.warning(
+                    "skipping %s fitment: %s tire in %s slot (bike=%s)",
+                    plan["tire_key"],
+                    tire_pos[0],
+                    plan["position"],
+                    plan["bike_id"],
+                )
+                stats["skipped"] += 1
+                continue
             exists = db._conn.execute(
                 "SELECT id FROM bike_tire_fitments "
                 "WHERE bike_model_id = ? AND tire_model_id = ? AND position = ?",

@@ -38,18 +38,41 @@ name: Vercel Deploy
 # Rotate VERCEL_TOKEN quarterly. The token has full account access; anyone
 # who can land a PR can effectively deploy to prod (gated by the review
 # policy in CONTRIBUTING.md §6).
+#
+# SECURITY (open-source repo — read before editing):
+#   * workflow_run runs in THIS repo's trusted context with secrets, but CI
+#     and web-verify also run for pull requests FROM FORKS. The `branches:
+#     [main]` filter matches head_branch only, so a fork's branch named
+#     `main` passes it. deploy-production therefore also requires that the
+#     upstream run was a `push` to THIS repository; only then is head_sha a
+#     commit already on our main and safe to build with the token.
+#   * Never check out an untrusted ref in a job that holds VERCEL_TOKEN.
+#     Fork PRs get no secrets on `pull_request`, and deploy-preview is
+#     additionally limited to same-repo branches (their authors already have
+#     write access).
+#   * The token reaches only the vercel steps (step-level env), never
+#     checkout or the shell of unrelated steps; the CLI version is pinned so
+#     a compromised `latest` cannot run with it. Bump VERCEL_CLI_VERSION
+#     deliberately (dependabot does not track global npm installs).
+
+# Least privilege: the jobs only read the repo. deploy-preview additionally
+# comments the preview URL on its PR.
+permissions:
+  contents: read
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-  # Exposed at job env so the deploy steps can gate on its presence. Until the
-  # VERCEL_* secrets are configured (Settings → Secrets and variables →
-  # Actions), the deploy steps skip instead of failing the check — Vercel's
+  VERCEL_CLI_VERSION: "63.1.2"
+  # Presence flag only (never the token itself) so steps can skip, instead of
+  # failing the check, until the VERCEL_* secrets are configured — Vercel's
   # own Git integration still produces the preview. They auto-activate the
   # moment the token is added.
-  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  HAS_VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN != '' }}
 
 on:
+  # zizmor: ignore[dangerous-triggers] -- guarded: deploy-production runs only
+  # for a successful upstream PUSH to this repo's main (see SECURITY above).
   workflow_run:
     # CI is python-only and path-filtered since 2026-07-17, so web-only pushes
     # to main never trigger it; web-verify (which builds web/ on web/** paths)
@@ -65,11 +88,14 @@ on:
 
 jobs:
   deploy-production:
-    # Only when CI passed AND the trigger was a push to main.
+    # Only when CI passed on a PUSH to main of THIS repository (see SECURITY
+    # above — a fork PR from a branch named `main` must not reach here).
     if: >
       github.event_name == 'workflow_run' &&
       github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_branch == 'main'
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 10
     concurrency:
@@ -80,31 +106,46 @@ jobs:
         working-directory: web
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
         with:
+          # Trusted: the guard above proves this sha was pushed to our main.
           ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
 
       - name: Install Vercel CLI
-        if: ${{ env.VERCEL_TOKEN != '' }}
-        run: npm install --global vercel@latest
+        if: ${{ env.HAS_VERCEL_TOKEN == 'true' }}
+        run: npm install --global "vercel@${VERCEL_CLI_VERSION}"
 
       - name: Pull Vercel environment (production)
-        if: ${{ env.VERCEL_TOKEN != '' }}
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        if: ${{ env.HAS_VERCEL_TOKEN == 'true' }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
 
       - name: Build project artifacts
-        if: ${{ env.VERCEL_TOKEN != '' }}
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        if: ${{ env.HAS_VERCEL_TOKEN == 'true' }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --prod --token="$VERCEL_TOKEN"
 
       - name: Deploy to Vercel (production)
-        if: ${{ env.VERCEL_TOKEN != '' }}
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        if: ${{ env.HAS_VERCEL_TOKEN == 'true' }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
 
   deploy-preview:
-    # Preview deploys on every PR so reviewers get a clickable URL.
-    if: github.event_name == 'pull_request'
+    # Preview deploys on same-repo PRs so reviewers get a clickable URL. Fork
+    # PRs are skipped outright: they get no secrets, and building their code
+    # with the token must never be possible.
+    if: >
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
     concurrency:
       group: vercel-preview-${{ github.event.pull_request.number }}
       cancel-in-progress: true
@@ -113,34 +154,46 @@ jobs:
         working-directory: web
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+        with:
+          persist-credentials: false
 
       - name: Install Vercel CLI
-        if: ${{ env.VERCEL_TOKEN != '' }}
-        run: npm install --global vercel@latest
+        if: ${{ env.HAS_VERCEL_TOKEN == 'true' }}
+        run: npm install --global "vercel@${VERCEL_CLI_VERSION}"
 
       - name: Pull Vercel environment (preview)
-        if: ${{ env.VERCEL_TOKEN != '' }}
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        if: ${{ env.HAS_VERCEL_TOKEN == 'true' }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
 
       - name: Build project artifacts
-        if: ${{ env.VERCEL_TOKEN != '' }}
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        if: ${{ env.HAS_VERCEL_TOKEN == 'true' }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --token="$VERCEL_TOKEN"
 
       - name: Deploy preview
         id: deploy
-        if: ${{ env.VERCEL_TOKEN != '' }}
+        if: ${{ env.HAS_VERCEL_TOKEN == 'true' }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          url=$(vercel deploy --prebuilt --token="$VERCEL_TOKEN")
           echo "preview_url=$url" >> "$GITHUB_OUTPUT"
           echo "Preview deployed: $url"
 
       - name: Comment preview URL on PR
         if: steps.deploy.outputs.preview_url != ''
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b  # v7.1.0
+        env:
+          # Passed through the environment, not spliced into the script, so
+          # the value can never be parsed as JavaScript.
+          PREVIEW_URL: ${{ steps.deploy.outputs.preview_url }}
         with:
           script: |
-            const url = "${{ steps.deploy.outputs.preview_url }}";
+            const url = process.env.PREVIEW_URL;
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,

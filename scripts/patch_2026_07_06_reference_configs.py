@@ -15,8 +15,12 @@ whose launch knobs match litre_sport_195p, so their ETs were unaffected
 (their documented DB-vs-defaults delta is the by-design Aamby-vs-sea-
 level environment, see bridge.config_to_db_row docstring).
 
-Fix: stamp category_tag='litre_sport_195p' — the tag the defaults.py
+Fix: stamp category_tag='litre_sport_195p' (July 2026) — the tag the defaults.py
 configs carry explicitly — on the is_current=1 rows of bikes 1/2/3.
+
+Oct 2026 epoch: the tag is now 'reference_litre_195p' — the frozen profile
+the defaults.py references carry since the 2026-10 epoch, so catalog
+retunes of litre_sport_195p can no longer move these rows (or the pins).
 
 Idempotent: re-running is a no-op once the tags are set.
 
@@ -31,7 +35,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-REFERENCE_TAG = "litre_sport_195p"
+REFERENCE_TAG = "reference_litre_195p"
 REFERENCE_BIKE_IDS = (1, 2, 3)
 
 

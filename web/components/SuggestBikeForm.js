@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
 import { motion } from 'framer-motion';
-import { X, Check, AlertCircle, Info } from 'lucide-react';
-import { API_URL } from '../lib/api';
-import useAsyncTask from '../lib/useAsyncTask';
-import ActionButton from './ActionButton';
+import { X, ExternalLink, Mail } from 'lucide-react';
 
+const REPO_URL = 'https://github.com/toto171/MotoQuant.in';
+const CONTACT = 'motoquant@gmail.com';
+
+// Field ids match .github/ISSUE_TEMPLATE/suggest-bike.yml, so GitHub fills
+// the issue form from the query string.
 const EMPTY_FORM = {
   make: '',
   model: '',
@@ -15,21 +17,55 @@ const EMPTY_FORM = {
   peak_power_hp: '',
   dry_mass_kg: '',
   category: '',
-  notes: '',
-  submitter_email: '',
   source_url: '',
+  notes: '',
 };
 
+const LABELS = {
+  make: 'Make',
+  model: 'Model',
+  year: 'Year',
+  displacement_cc: 'Engine size (cc)',
+  peak_power_hp: 'Peak power (hp)',
+  dry_mass_kg: 'Dry weight (kg)',
+  category: 'Type of bike',
+  source_url: 'Where the figures come from',
+  notes: 'Notes',
+};
+
+function filled(form) {
+  return Object.entries(form)
+    .map(([k, v]) => [k, String(v ?? '').trim()])
+    .filter(([, v]) => v);
+}
+
+/** A prefilled "Suggest a bike" issue on GitHub. */
+export function suggestionIssueUrl(form) {
+  const p = new URLSearchParams({ template: 'suggest-bike.yml' });
+  p.set('title', `Add ${form.make.trim()} ${form.model.trim()}`.trim());
+  for (const [k, v] of filled(form)) p.set(k, v);
+  return `${REPO_URL}/issues/new?${p.toString()}`;
+}
+
+/** The same suggestion as an email, for riders without a GitHub account. */
+export function suggestionMailto(form) {
+  const body = filled(form)
+    .map(([k, v]) => `${LABELS[k]}: ${v}`)
+    .join('\n');
+  const subject = `Add ${form.make.trim()} ${form.model.trim()} to MotoQuant`;
+  return `mailto:${CONTACT}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
 /**
- * Modal form for submitting a "please add this bike" request.
- * POSTs to /api/bikes/suggest; handles plausibility-flag responses gracefully.
- * Submission runs through useAsyncTask + ActionButton (staged progress —
- * the button is the bar) per the progress doctrine.
+ * "Suggest a bike". Suggestions are public GitHub issues, so anyone can see
+ * what has been asked for and add sources; nothing is stored on our server.
+ * The form only fills in the issue (or an email, for riders without GitHub).
  */
 export default function SuggestBikeForm({ onClose }) {
   const [form, setForm] = useState(EMPTY_FORM);
+  const [ready, setReady] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Close on ESC
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === 'Escape') onClose?.();
@@ -39,71 +75,18 @@ export default function SuggestBikeForm({ onClose }) {
   }, [onClose]);
 
   function update(k, v) {
-    setForm(f => ({ ...f, [k]: v }));
+    setForm((f) => ({ ...f, [k]: v }));
+    setReady(false);
   }
-
-  const submitTask = useAsyncTask(async (signal) => {
-    if (!form.make.trim() || !form.model.trim()) {
-      throw new Error('Make and model are required.');
-    }
-
-    const body = {
-      make: form.make.trim(),
-      model: form.model.trim(),
-    };
-    // Only include optional fields if user filled them in
-    const num = (k) => {
-      const v = form[k];
-      if (v === '' || v === null || v === undefined) return undefined;
-      const n = Number(v);
-      return Number.isFinite(n) ? n : undefined;
-    };
-    const str = (k) => {
-      const v = form[k];
-      return v && v.trim() ? v.trim() : undefined;
-    };
-
-    const year = num('year');
-    if (year !== undefined) body.year = year;
-    const disp = num('displacement_cc');
-    if (disp !== undefined) body.displacement_cc = disp;
-    const pwr = num('peak_power_hp');
-    if (pwr !== undefined) body.peak_power_hp = pwr;
-    const mass = num('dry_mass_kg');
-    if (mass !== undefined) body.dry_mass_kg = mass;
-    const cat = str('category');
-    if (cat) body.category = cat;
-    const notes = str('notes');
-    if (notes) body.notes = notes;
-    const email = str('submitter_email');
-    if (email) body.submitter_email = email;
-    const url = str('source_url');
-    if (url) body.source_url = url;
-
-    const res = await fetch(`${API_URL}/api/bikes/suggest`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-      signal,
-    });
-    if (!res.ok) {
-      let msg = `API error ${res.status}`;
-      try {
-        const j = await res.json();
-        if (j?.detail) msg = typeof j.detail === 'string' ? j.detail : JSON.stringify(j.detail);
-      } catch {
-        try { msg = await res.text(); } catch {}
-      }
-      throw new Error(msg);
-    }
-    return res.json(); // {id, flagged_out_of_bounds, issues}
-  });
-
-  const result = submitTask.result;
 
   function handleSubmit(e) {
     e?.preventDefault?.();
-    if (!submitTask.active) submitTask.run();
+    if (!form.make.trim() || !form.model.trim()) {
+      setError('Make and model are needed.');
+      return;
+    }
+    setError(null);
+    setReady(true);
   }
 
   return (
@@ -112,6 +95,9 @@ export default function SuggestBikeForm({ onClose }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="suggest-bike-title"
       className="fixed inset-0 bg-asphalt-0/85 backdrop-blur-sm z-[100] flex items-start justify-center p-4 overflow-y-auto"
     >
       <motion.div
@@ -124,11 +110,12 @@ export default function SuggestBikeForm({ onClose }) {
       >
         <div className="flex items-start justify-between mb-5">
           <div>
-            <h2 className="font-display font-bold tracking-tight text-2xl text-white">
+            <h2 id="suggest-bike-title" className="font-display font-bold tracking-tight text-2xl text-white">
               Suggest a bike
             </h2>
             <p className="text-sm text-white/65 mt-2">
-              Don&apos;t see your bike? Tell us what to add next. Required fields marked *.
+              Missing your bike? Fill in what you know; only make and model are needed. A
+              link to the manufacturer&apos;s specification sheet or a road test helps most.
             </p>
           </div>
           <button
@@ -140,52 +127,34 @@ export default function SuggestBikeForm({ onClose }) {
           </button>
         </div>
 
-        {result ? (
+        {ready ? (
           <div className="py-2">
-            <div className="card border-signal-go/30 bg-signal-go/[0.06] p-4 flex items-start gap-3">
-              <Check className="text-signal-go shrink-0 mt-0.5" size={20} />
-              <div>
-                <p className="font-semibold text-signal-go">
-                  Submission <span className="font-mono tabular-nums">#{result.id}</span> received.
-                </p>
-                <p className="text-sm text-white/65 mt-1">
-                  Thanks — we&apos;ll review and add it to the catalog soon.
-                </p>
-                {result.flagged_out_of_bounds && result.issues?.length > 0 && (
-                  <div className="card border-signal-stage/30 bg-signal-stage/[0.08] mt-3 p-3 text-xs font-mono text-signal-stage">
-                    <p className="flex items-center gap-1 mb-1 font-semibold">
-                      <Info size={14} /> Flagged for manual review
-                    </p>
-                    <ul className="list-disc list-inside space-y-0.5 text-signal-stage/80">
-                      {result.issues.map((msg, i) => <li key={i}>{msg}</li>)}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="flex gap-3 justify-end mt-6">
-              <button
-                type="button"
-                onClick={() => { submitTask.reset(); setForm(EMPTY_FORM); }}
-                className="btn-ghost"
-              >
-                Submit another
+            <p className="text-white/80">
+              Suggestions are public issues on GitHub, where anyone can add sources and follow
+              progress. Submit it there with a free GitHub account, or send it by email instead.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-end gap-3">
+              <button type="button" onClick={() => setReady(false)} className="btn-ghost">
+                Edit
               </button>
-              <button
-                type="button"
-                onClick={onClose}
+              <a href={suggestionMailto(form)} className="btn-ghost">
+                <Mail size={15} aria-hidden="true" /> Send by email
+              </a>
+              <a
+                href={suggestionIssueUrl(form)}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="btn-primary"
               >
-                Done
-              </button>
+                Open on GitHub <ExternalLink size={15} aria-hidden="true" />
+              </a>
             </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <Field
-                label="Make *"
+                label="Make (required)"
                 value={form.make}
                 onChange={v => update('make', v)}
                 placeholder="e.g. Suzuki"
@@ -193,7 +162,7 @@ export default function SuggestBikeForm({ onClose }) {
                 maxLength={60}
               />
               <Field
-                label="Model *"
+                label="Model (required)"
                 value={form.model}
                 onChange={v => update('model', v)}
                 placeholder="e.g. GSX-R 1000 K9"
@@ -209,7 +178,7 @@ export default function SuggestBikeForm({ onClose }) {
                 min={1960} max={2099}
               />
               <Field
-                label="Displacement (cc)"
+                label="Engine size (cc)"
                 value={form.displacement_cc}
                 onChange={v => update('displacement_cc', v)}
                 placeholder="e.g. 999"
@@ -218,7 +187,7 @@ export default function SuggestBikeForm({ onClose }) {
                 min={0}
               />
               <Field
-                label="Peak Power (hp)"
+                label="Peak power (hp)"
                 value={form.peak_power_hp}
                 onChange={v => update('peak_power_hp', v)}
                 placeholder="e.g. 185"
@@ -227,7 +196,7 @@ export default function SuggestBikeForm({ onClose }) {
                 min={0}
               />
               <Field
-                label="Dry Mass (kg)"
+                label="Dry weight (kg)"
                 value={form.dry_mass_kg}
                 onChange={v => update('dry_mass_kg', v)}
                 placeholder="e.g. 172"
@@ -238,10 +207,10 @@ export default function SuggestBikeForm({ onClose }) {
             </div>
 
             <Field
-              label="Category"
+              label="Type of bike"
               value={form.category}
               onChange={v => update('category', v)}
-              placeholder="sport, naked, cruiser, adventure…"
+              placeholder="Sport, naked, cruiser, adventure…"
               maxLength={40}
             />
 
@@ -255,34 +224,18 @@ export default function SuggestBikeForm({ onClose }) {
               maxLength={1000}
             />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Field
-                label="Your email (optional)"
-                value={form.submitter_email}
-                onChange={v => update('submitter_email', v)}
-                placeholder="So we can follow up"
-                type="email"
-                maxLength={200}
-              />
-              <Field
-                label="Source URL (optional)"
-                value={form.source_url}
-                onChange={v => update('source_url', v)}
-                placeholder="Link to specs"
-                type="url"
-                maxLength={500}
-              />
-            </div>
+            <Field
+              label="Where the figures come from (optional)"
+              value={form.source_url}
+              onChange={v => update('source_url', v)}
+              placeholder="Link to a spec sheet or road test"
+              type="url"
+              maxLength={500}
+            />
 
-            {submitTask.error && (
-              <div className="card border-signal-foul/40 bg-signal-foul/[0.08] p-3 text-signal-foul text-sm flex items-center gap-2">
-                <AlertCircle size={16} className="shrink-0" /> {submitTask.error}
-              </div>
+            {error && (
+              <p role="alert" className="text-sm text-signal-foul">{error}</p>
             )}
-
-            {/* Hidden sentinel keeps Enter-in-field implicit submission working
-                even though the visible submit control is an ActionButton. */}
-            <button type="submit" className="hidden" tabIndex={-1} aria-hidden="true" />
 
             <div className="flex gap-3 justify-end pt-2">
               <button
@@ -292,12 +245,9 @@ export default function SuggestBikeForm({ onClose }) {
               >
                 Cancel
               </button>
-              <ActionButton
-                task={submitTask}
-                onRun={handleSubmit}
-                label="Submit suggestion"
-                runningLabel="Submitting"
-              />
+              <button type="submit" className="btn-primary">
+                Next
+              </button>
             </div>
           </form>
         )}
@@ -308,18 +258,20 @@ export default function SuggestBikeForm({ onClose }) {
 
 function Field({ label, value, onChange, as = 'input', rows = 3, ...rest }) {
   const Common = as === 'textarea' ? 'textarea' : 'input';
+  const id = useId();
   return (
-    <label className="block">
-      <span className="label-mono block mb-1.5">
+    <div>
+      <label htmlFor={id} className="field-label">
         {label}
-      </span>
+      </label>
       <Common
+        id={id}
         value={value}
         onChange={e => onChange(e.target.value)}
         {...(as === 'textarea' ? { rows } : {})}
-        className={`input-base font-mono ${as === 'textarea' ? 'h-auto py-2.5' : ''}`}
+        className={`input-base ${as === 'textarea' ? 'h-auto py-2.5' : ''}`}
         {...rest}
       />
-    </label>
+    </div>
   );
 }

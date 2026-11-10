@@ -1,4 +1,4 @@
-# MotoQuant Pro -- dev-side scraping toolkit dependencies
+# MotoQuant -- dev-side scraping toolkit dependencies
 # Install with: pip install -r requirements-scrape.txt
 #
 # HARD RULE: none of this ever goes into requirements-api.txt. The prod

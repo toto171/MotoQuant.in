@@ -91,12 +91,6 @@ export default async function sitemap() {
       priority: 0.3,
     },
     {
-      url: `${SITE_URL}/refunds`,
-      lastModified: now,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    },
-    {
       url: `${SITE_URL}/contact`,
       lastModified: now,
       changeFrequency: "yearly",
@@ -115,16 +109,16 @@ export default async function sitemap() {
       priority: 0.7,
     },
     {
-      url: `${SITE_URL}/pricing`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
-    {
       url: `${SITE_URL}/blog`,
       lastModified: now,
       changeFrequency: "weekly",
       priority: 0.8,
+    },
+    {
+      url: `${SITE_URL}/blog/motoquant-2-0-is-open-source`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
     },
     {
       url: `${SITE_URL}/blog/best-mods-for-ktm-rc-390-budget-vs-cost-per-tenth`,
@@ -410,6 +404,12 @@ export default async function sitemap() {
     },
     {
       url: `${SITE_URL}/docs/getting-started`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${SITE_URL}/docs/glossary`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.8,

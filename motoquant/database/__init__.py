@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Database Layer
-============================
+MotoQuant — Database Layer
+==========================
 SQLite-backed storage for motorcycles, tires, venues, weather, and parts.
 
 Phase 2 of MotoQuant: persistent, queryable, provenance-tracked data.
@@ -19,8 +19,6 @@ Usage:
     results = db.bikes.search(displacement_min=900, category="sport")
     config = db.bikes.to_config(bike_id)  # → BikeConfig ready for simulation
 """
-
-__version__ = "0.1.0"
 
 from .connection import MotoQuantDB
 from .schema import SCHEMA_VERSION

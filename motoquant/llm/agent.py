@@ -30,7 +30,7 @@ from __future__ import annotations
 
 import json
 import logging
-import os
+import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -39,6 +39,7 @@ from typing import Any
 import numpy as np
 
 from ..constants import MS_TO_KMH, MS_TO_MPH
+from ..physics import effective_et
 from .client import (
     AgentStep,
     LLMClient,
@@ -56,74 +57,50 @@ TOOL_RESULT_MAX_CHARS = 6_000
 HISTORY_MAX_MESSAGES = 16
 HISTORY_MAX_CHARS = 16_000
 AGENT_MAX_TOKENS = 2_048
+# Same ceiling the API enforces on OptimizeBuildRequest.budget_inr; an
+# unclamped chat budget sizes roi's knapsack DP (budget // 100 buckets).
+AGENT_MAX_BUDGET_INR = 5_000_000.0
 
-# ─── Quota cost of a heavy op, in full-sim units ──────────────────────────
+
+def _as_int(value: Any, default: int | None = None) -> int | None:
+    """Coerce a loosely typed tool argument to int without raising.
+
+    Function-calling models send integers as 5, 5.0, "5", "5.0", " 5 " or
+    even "5 bikes" / "top 3" / "all"; a bare int() on the strings raises
+    ValueError and aborts the whole tool call (the search_bikes crash in
+    Sentry, MOTOQUANTAPI-2). Read a whole number where one is present,
+    otherwise return ``default``.
+    """
+    if value is None or isinstance(value, bool):
+        return default
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value) if value == value and abs(value) != float("inf") else default
+    s = str(value).strip()
+    if not s:
+        return default
+    for parse in (int, lambda x: int(float(x))):
+        try:
+            return parse(s)
+        except (ValueError, OverflowError):
+            pass
+    m = re.search(r"-?\d+", s)
+    return int(m.group()) if m else default
+
+
+# ─── Sim-count accounting for heavy ops ───────────────────────────────────
 # A heavy op is not one RK4 run: ecu_autotune.autotune's own progress total is
 # 1 baseline + (2*gear_span+3 = 9) gearing + (launch_steps+1 = 7) launch + 1
 # combined = 18 sims at the default spans, and build_optimizer's verification
-# loop full-sims the selected build after surrogate-scoring candidates. Charge
-# both a flat 18 units so a chat turn that runs one is not billed like a
-# single sim; the outlaw pipeline composes an optimizer pass AND an autotune
-# pass, so it is charged double. Nominal by design — the exact count is
-# data-dependent (surrogate hit rate, tooth dedup) — but honest to the order
-# of magnitude, which is the point of the meter.
+# loop full-sims the selected build after surrogate-scoring candidates. Each
+# one therefore adds a flat 18 to the turn's reported ``sims_run``; the outlaw
+# pipeline composes an optimizer pass AND an autotune pass, so it counts
+# double. Nominal by design — the exact count is data-dependent (surrogate
+# hit rate, tooth dedup) — but honest to the order of magnitude. This is
+# reporting, not a charge: the per-turn CPU fuse is HEAVY_OP_BUDGET above.
 HEAVY_OP_SIM_COST = 18
 OUTLAW_SIM_COST = 2 * HEAVY_OP_SIM_COST
-
-# ─── Pro-tier gating ──────────────────────────────────────────────────────
-# The three surfaces docs/COMMERCIAL_LAUNCH.md calls "the conversion lever"
-# each sit behind require_tier("pro") on their own routes — but the chat agent
-# can invoke all three, and /api/chat has no tier gate at all. The moment the
-# operator flips MOTOQUANT_BILLING_ENFORCE, POST /api/optimize/build would 401
-# while ASKING THE CHATBOT for the same thing still worked (2026-07-25 audit
-# §3.5). Settled decision: the executor inherits the caller's tier.
-#
-# Inert during the open beta, exactly like require_tier: with billing off,
-# every caller — anonymous included — keeps full access.
-PRO_TOOLS = ("optimize_build", "autotune_setup")
-_PRO_TIERS = frozenset({"pro", "studio"})
-
-
-def _billing_enforced() -> bool:
-    """Read the live flag (tests patch motoquant.auth.BILLING_ENFORCE)."""
-    try:
-        from .. import auth as _auth
-
-        return bool(_auth.BILLING_ENFORCE)
-    except Exception:  # noqa: BLE001 — no auth layer installed ⇒ open beta
-        return False
-
-
-def pro_tools_locked(tier: str | None) -> bool:
-    """True when this caller must not reach the pro-gated agent tools."""
-    if not _billing_enforced():
-        return False
-    return (tier or "free").strip().lower() not in _PRO_TIERS
-
-
-def _upgrade_required(tool_label: str, tier: str | None) -> dict[str, Any]:
-    """Tool-result payload for a locked pro tool.
-
-    Returned as ordinary tool DATA (not an exception) so the model reads it,
-    stops trying, and relays the upgrade path in its own voice — the same way
-    it handles every other error-as-data result in this executor.
-    """
-    base = os.environ.get("MOTOQUANT_BASE_URL", "https://motoquant.in").rstrip("/")
-    current = (tier or "free").strip().lower() or "free"
-    return {
-        "error": "upgrade_required",
-        "required_tier": "pro",
-        "current_tier": current,
-        "upgrade_url": f"{base}/pricing",
-        "message": (
-            f"{tool_label} is a MotoQuant Pro feature and this user is on the "
-            f"'{current}' plan. Do NOT try to reproduce it with other tools. "
-            "Tell them plainly that it needs Pro, point at "
-            f"{base}/pricing, and offer what IS free: full simulations, "
-            "top-speed runs, A/B compares, catalog and parts search."
-        ),
-    }
-
 
 # ─── Build-tier glossary (single source of truth for chat) ────────────────
 # Industry-standard motorcycle drag-build stages. stage_3 is honestly
@@ -221,28 +198,12 @@ class AgentContext:
     db: Any
     result: AgentChatResult
     progress_cb: Callable[[float, str | None], None] | None = None
-    meter_cb: Callable[[int], bool] | None = None  # False → quota exhausted
     surrogate_getter: Callable[[], tuple[Any, str]] | None = None
-    # Caller's subscription tier, resolved at route time. None == anonymous.
-    # Only consulted when billing is enforced (see pro_tools_locked).
-    tier: str | None = None
+    # Per-caller heavy-op fuse supplied by the HTTP layer (a per-IP rate
+    # limit); False → refuse. None (CLI, tests, library use) never blocks.
+    heavy_gate: Callable[[], bool] | None = None
     full_sims_left: int = FULL_SIM_BUDGET
     heavy_ops_left: int = HEAVY_OP_BUDGET
-
-    def _meter(self, n: int) -> bool:
-        """Charge n full-sim units to the caller's daily quota.
-
-        The callback owns the record-always / block-only-when-enforced
-        policy (api._make_chat_meter); a missing callback — CLI, tests,
-        library use — always allows.
-        """
-        if self.meter_cb is None or n <= 0:
-            return True
-        try:
-            return bool(self.meter_cb(n))
-        except Exception:  # noqa: BLE001 — metering must never break chat
-            logger.warning("chat meter callback failed", exc_info=True)
-            return True
 
     def spend_sims(self, n: int) -> str | None:
         """Reserve n full sims. Returns an error string when over budget."""
@@ -252,33 +213,24 @@ class AgentContext:
                 f"({FULL_SIM_BUDGET} full sims/turn) — answer with the "
                 f"results you already have"
             )
-        if not self._meter(n):
-            return (
-                "the user's free daily simulation quota is exhausted — "
-                "explain this politely and suggest upgrading or returning "
-                "tomorrow"
-            )
         self.full_sims_left -= n
         self.result.sims_run += n
         return None
 
     def spend_heavy(self, sim_cost: int = HEAVY_OP_SIM_COST) -> str | None:
-        """Reserve one heavy op AND meter its sim cost.
-
-        Heavy ops run tens of RK4 sims apiece and used to charge the quota
-        nothing at all (2026-07-25 audit §3.5) — the per-turn heavy_ops_left
-        budget capped one message, not one day.
-        """
+        """Reserve one heavy op (per-turn CPU fuse) and add its nominal sim
+        count to ``sims_run``."""
         if self.heavy_ops_left < 1:
             return (
                 f"per-message optimizer budget exhausted ({HEAVY_OP_BUDGET} "
                 f"heavy operations/turn) — answer with what you have"
             )
-        if not self._meter(sim_cost):
+        # Consulted only once the per-turn budget allows the op, and before
+        # any work or sim accounting: a refused op costs nothing.
+        if self.heavy_gate is not None and not self.heavy_gate():
             return (
-                "the user's free daily simulation quota is exhausted — "
-                "explain this politely and suggest upgrading or returning "
-                "tomorrow"
+                "too many optimizer/autotune runs from this address in the "
+                "last minute — tell the user to retry shortly"
             )
         self.heavy_ops_left -= 1
         self.result.sims_run += sim_cost
@@ -349,29 +301,143 @@ def _bike_display_name(db, bike_id: int) -> str:
     return f"bike #{bike_id}"
 
 
+# Why a requested part was not applied — the same three codes the simulation
+# routes return in ``parts_skipped_detail[].reason`` (api.SKIP_*).
+SKIP_UNKNOWN = "unknown_part"
+SKIP_DOES_NOT_FIT = "does_not_fit"
+SKIP_NOT_APPLIED = "not_applied"
+
+
+class _BuildNotes(list):
+    """The applied-modification notes of one build (a plain list of strings),
+    plus what happened to the parts that were asked for."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.parts_applied: list[int] = []
+        self.parts_skipped: list[int] = []
+        self.parts_skipped_detail: list[dict[str, Any]] = []
+
+
+def _fit_parts(
+    db, bike_id: int, ids: list[int]
+) -> tuple[list[int], list[dict[str, Any]]]:
+    """Split requested part ids into (ids that fit ``bike_id``, skipped detail).
+
+    The rule is the simulation routes' (``api._apply_parts_to_config``): the
+    bike's catalog row, enriched by ``enrich_bike_row_for_fitment``, and each
+    part row go through ``parts.compatibility.is_compatible`` — the engine
+    ``GET /api/parts?bike_id=`` lists by — so the chat can never fit a part
+    the simulator refuses. An id the catalog does not have is skipped too.
+    When the bike has no catalog row there is nothing to judge against and
+    every known part is kept. Each skipped entry is ``{id, reason, detail}``
+    with the routes' reason codes and wording
+    (tests/test_agent.py pins both against the route helper).
+    """
+    from ..database.parts_repo import enrich_bike_row_for_fitment
+    from ..parts.compatibility import is_compatible
+
+    conn = db.conn
+    fit_row = None
+    try:
+        raw = conn.execute(
+            "SELECT * FROM bike_models WHERE id = ?", (bike_id,)
+        ).fetchone()
+        if raw is not None:
+            fit_row = dict(raw)
+            enrich_bike_row_for_fitment(conn, fit_row)
+    except Exception as exc:  # noqa: BLE001 — a lookup fault must not kill the turn
+        logger.warning("fitment lookup failed for bike_id=%s: %s", bike_id, exc)
+        fit_row = None
+
+    fitting: list[int] = []
+    skipped: list[dict[str, Any]] = []
+    for pid in ids:
+        row = conn.execute("SELECT * FROM parts WHERE id = ?", (pid,)).fetchone()
+        if not row:
+            skipped.append(
+                {
+                    "id": pid,
+                    "reason": SKIP_UNKNOWN,
+                    "detail": "No part with this id is in the catalog.",
+                }
+            )
+            continue
+        part = dict(row)
+        if fit_row is not None:
+            fits, fit_reason = is_compatible(part, fit_row)
+            if not fits:
+                label = " ".join(
+                    x for x in (part.get("brand"), part.get("model_name")) if x
+                )
+                skipped.append(
+                    {
+                        "id": pid,
+                        "reason": SKIP_DOES_NOT_FIT,
+                        "detail": f"{label or 'This part'} does not fit this bike"
+                        + (f" ({fit_reason})." if fit_reason else "."),
+                    }
+                )
+                continue
+        fitting.append(pid)
+    return fitting, skipped
+
+
+def _report_parts(out: dict[str, Any], notes: Any) -> dict[str, Any]:
+    """Put a build's skipped parts on a tool result (no-op when none were).
+
+    ``parts_skipped`` / ``parts_skipped_detail`` have the simulation routes'
+    shape; ``parts_warning`` tells the model what the numbers do and do not
+    include, so the answer says the part does not fit instead of quoting the
+    time as if it were fitted.
+    """
+    skipped = list(getattr(notes, "parts_skipped", None) or [])
+    if not skipped:
+        return out
+    detail = list(getattr(notes, "parts_skipped_detail", None) or [])
+    applied = list(getattr(notes, "parts_applied", None) or [])
+    out["parts_applied"] = applied
+    out["parts_skipped"] = skipped
+    out["parts_skipped_detail"] = detail
+    reasons = " ".join(str(d.get("detail") or "") for d in detail).strip()
+    out["parts_warning"] = (
+        f"Part id(s) {skipped} were NOT fitted. {reasons} "
+        + (
+            "These numbers include only the parts in parts_applied."
+            if applied
+            else "No requested part was fitted: these numbers are the bike WITHOUT them."
+        )
+        + " Tell the user which parts do not fit and why; do not present "
+        "this result as the bike with those parts."
+    ).replace("  ", " ")
+    return out
+
+
 def _build_config_for(ctx: AgentContext, args: dict[str, Any]):
     """Build a BikeConfig for args {bike_id, venue_id?, env?, mods?}.
 
-    Returns (config, applied_notes list) or raises ValueError with a
-    user-meaningful message.
+    Returns (config, applied_notes) or raises ValueError with a
+    user-meaningful message. ``applied_notes`` is a list of strings that also
+    carries ``parts_applied`` / ``parts_skipped`` / ``parts_skipped_detail``:
+    a requested part that does not fit the bike is NOT applied (see
+    ``_fit_parts``); pass the notes to ``_report_parts`` to say so.
     """
     db = ctx.db
-    bike_id = args.get("bike_id")
+    bike_id = _as_int(args.get("bike_id"))
     if not bike_id:
         raise ValueError("bike_id is required (use search_bikes first)")
-    bike_id = int(bike_id)
 
     config_row = db.bikes.get_current_config(bike_id)
     if config_row is None:
         raise ValueError(
             f"no physics config for bike_id {bike_id} — is the id correct?"
         )
-    env = _venue_env(db, args.get("venue_id"))
+    env = _venue_env(db, _as_int(args.get("venue_id")))
     config = db.bikes.to_config(config_row["id"], environment=env)
     if config is None:
         raise ValueError(f"config load failed for bike_id {bike_id}")
 
-    notes: list[str] = []
+    notes = _BuildNotes()
     _apply_env_args(config, args)
     _apply_power_boost(config, args.get("power_boost_pct"))
     if args.get("power_boost_pct"):
@@ -387,16 +453,49 @@ def _build_config_for(ctx: AgentContext, args: dict[str, Any]):
     if part_ids:
         from ..database.parts_repo import PartsRepository
 
+        # De-duplicate, keeping order: the same exhaust can't be fitted twice,
+        # and a repeated id used to stack its ET gain and its price.
+        ids = list(
+            dict.fromkeys(
+                pid for pid in (_as_int(p) for p in part_ids) if pid is not None
+            )
+        )
         repo = PartsRepository(db.conn)
-        config = repo.apply_multiple([int(p) for p in part_ids], config)
-        cost = repo.estimate_build_cost([int(p) for p in part_ids])
-        notes.append(f"{len(part_ids)} parts applied (₹{cost.get('total', 0):,.0f})")
+        # Only parts that fit this bike are applied (the simulation routes'
+        # rule); the rest are reported, never silently simulated.
+        fitting, skipped = _fit_parts(db, bike_id, ids)
+        applied: list[int] = []
+        for pid in fitting:
+            try:
+                config = repo.apply_to_config(pid, config)
+                applied.append(pid)
+            except Exception as exc:  # noqa: BLE001 — report it, keep the rest
+                logger.warning("part %s could not be applied: %s", pid, exc)
+                skipped.append(
+                    {
+                        "id": pid,
+                        "reason": SKIP_NOT_APPLIED,
+                        "detail": "The part could not be applied.",
+                    }
+                )
+        skipped.sort(key=lambda d: ids.index(d["id"]))  # request order
+        notes.parts_applied = applied
+        notes.parts_skipped = [d["id"] for d in skipped]
+        notes.parts_skipped_detail = skipped
+        if applied:
+            cost = repo.estimate_build_cost(applied)
+            notes.append(f"{len(applied)} parts applied (₹{cost.get('total', 0):,.0f})")
+        if skipped:
+            notes.append(
+                f"{len(skipped)} requested part(s) NOT fitted: "
+                + " ".join(d["detail"] for d in skipped)
+            )
 
-    rear_tire_id = args.get("rear_tire_id")
+    rear_tire_id = _as_int(args.get("rear_tire_id"))
     if rear_tire_id:
         row = db.conn.execute(
             "SELECT mu_peak, pacejka_D FROM tire_models WHERE id=?",
-            (int(rear_tire_id),),
+            (rear_tire_id,),
         ).fetchone()
         if row:
             r = dict(row)
@@ -411,7 +510,10 @@ def _build_config_for(ctx: AgentContext, args: dict[str, Any]):
 def _sim_to_dict(sim, bike_name: str, notes: list[str]) -> dict[str, Any]:
     out: dict[str, Any] = {
         "bike_name": bike_name,
-        "et_quarter_s": round(float(sim.time_quarter), 4),
+        "finished_quarter": bool(getattr(sim, "finished_quarter", True)),
+        # A DNF maps to DNF_ET_SENTINEL_S so it never reads as the fastest
+        # (0.0 s) to compare_bikes' winner or any downstream ranking.
+        "et_quarter_s": round(effective_et(sim), 4),
         "trap_speed_kmh": round(float(sim.speed_quarter) * MS_TO_KMH, 1),
         "trap_speed_mph": round(float(sim.speed_quarter) * MS_TO_MPH, 1),
         "et_60ft_s": round(float(sim.time_60ft), 4),
@@ -426,7 +528,8 @@ def _sim_to_dict(sim, bike_name: str, notes: list[str]) -> dict[str, Any]:
         if val:
             out[key] = round(float(val), 4)
     if notes:
-        out["modifications"] = notes
+        out["modifications"] = list(notes)
+    _report_parts(out, notes)
     return out
 
 
@@ -452,7 +555,11 @@ _MOD_PROPS = {
     "part_ids": {
         "type": "array",
         "items": {"type": "integer"},
-        "description": "Catalog part ids (from search_parts) to bolt on before the run",
+        "description": (
+            "Catalog part ids (from search_parts) to bolt on before the run. A "
+            "part that does not fit the bike is NOT applied: it comes back in "
+            "parts_skipped / parts_skipped_detail with the reason"
+        ),
     },
     "rear_tire_id": {
         "type": "integer",
@@ -610,7 +717,13 @@ AGENT_TOOLS: list[dict[str, Any]] = [
         "autotune_setup",
         "Conditions-aware drag setup for a bike: gearing sweep, launch-RPM "
         "sweep, tyre pressures, fuel/timing guidance (full-sim, ~20 sims). "
-        "Use for 'how should I set up X at venue Y' questions.",
+        "Use for 'how should I set up X at venue Y' questions. Only gearing "
+        "and launch RPM are simulated: launch_rpm.recommended_rpm = null "
+        "(adjustable false) means no launch RPM is recommended — say so and "
+        "give launch_rpm.reason, never invent one; requires_two_step true "
+        "means the RPM needs launch control to hold. tyre_pressure and "
+        "fuel_timing are general guidance with no simulated gain. "
+        "combined.knobs lists the changes behind the headline time.",
         {"bike_id": {"type": "integer"}, **_ENV_PROPS},
         ["bike_id"],
     ),
@@ -671,7 +784,7 @@ def _exec_search_bikes(ctx: AgentContext, args: dict) -> dict:
     query = (args.get("query") or "").strip()
     if not query:
         return {"error": "empty query"}
-    limit = max(1, min(int(args.get("limit") or 5), 10))
+    limit = max(1, min(_as_int(args.get("limit"), 5) or 5, 10))
     match_id, suggestions = resolve_bike(query, ctx.db)
     out: dict[str, Any] = {"query": query}
     if match_id is not None:
@@ -702,7 +815,7 @@ def _exec_search_bikes(ctx: AgentContext, args: dict) -> dict:
 
 
 def _exec_get_bike_details(ctx: AgentContext, args: dict) -> dict:
-    bike_id = int(args.get("bike_id") or 0)
+    bike_id = _as_int(args.get("bike_id"), 0)
     row = ctx.db.conn.execute(
         """SELECT bm.*, m.name AS manufacturer_name
            FROM bike_models bm JOIN manufacturers m ON bm.manufacturer_id=m.id
@@ -749,16 +862,16 @@ def _exec_run_simulation(ctx: AgentContext, args: dict) -> dict:
     err = ctx.spend_sims(1)
     if err:
         return {"error": err}
-    from ..physics import MotoQuantEngine
+    from ..engine_select import make_engine
 
     try:
         config, notes = _build_config_for(ctx, args)
     except ValueError as e:
         return {"error": str(e)}
-    bike_name = _bike_display_name(ctx.db, int(args["bike_id"]))
+    bike_name = _bike_display_name(ctx.db, _as_int(args.get("bike_id"), 0))
     ctx.tick(0.0, f"Simulating {bike_name}")
     try:
-        sim = MotoQuantEngine(config).run()
+        sim = make_engine(config).run()
     except Exception as e:  # noqa: BLE001
         return {"error": f"simulation failed: {type(e).__name__}: {e}"}
     out = _sim_to_dict(sim, bike_name, notes)
@@ -770,16 +883,16 @@ def _exec_run_top_speed(ctx: AgentContext, args: dict) -> dict:
     err = ctx.spend_sims(1)
     if err:
         return {"error": err}
-    from ..physics import MotoQuantEngine
+    from ..engine_select import make_engine
 
     try:
         config, notes = _build_config_for(ctx, args)
     except ValueError as e:
         return {"error": str(e)}
-    bike_name = _bike_display_name(ctx.db, int(args["bike_id"]))
+    bike_name = _bike_display_name(ctx.db, _as_int(args.get("bike_id"), 0))
     ctx.tick(0.0, f"Top-speed run: {bike_name}")
     try:
-        ts = MotoQuantEngine(config).run_top_speed()
+        ts = make_engine(config).run_top_speed()
     except Exception as e:  # noqa: BLE001
         return {"error": f"top-speed sim failed: {type(e).__name__}: {e}"}
     out = {
@@ -793,7 +906,8 @@ def _exec_run_top_speed(ctx: AgentContext, args: dict) -> dict:
         "reached_plateau": bool(ts.reached_plateau),
     }
     if notes:
-        out["modifications"] = notes
+        out["modifications"] = list(notes)
+    _report_parts(out, notes)
     ctx.add_block("top_speed", out)
     return out
 
@@ -802,7 +916,7 @@ def _exec_compare_bikes(ctx: AgentContext, args: dict) -> dict:
     err = ctx.spend_sims(2)
     if err:
         return {"error": err}
-    from ..physics import MotoQuantEngine
+    from ..engine_select import make_engine
 
     results = {}
     for key, id_key in (("a", "bike_a_id"), ("b", "bike_b_id")):
@@ -811,20 +925,22 @@ def _exec_compare_bikes(ctx: AgentContext, args: dict) -> dict:
             config, notes = _build_config_for(ctx, sub_args)
         except ValueError as e:
             return {"error": f"bike {key}: {e}"}
-        name = _bike_display_name(ctx.db, int(args[id_key]))
+        name = _bike_display_name(ctx.db, _as_int(args.get(id_key), 0))
         ctx.tick(0.0, f"Simulating {name}")
         try:
-            sim = MotoQuantEngine(config).run()
+            sim = make_engine(config).run()
         except Exception as e:  # noqa: BLE001
             return {"error": f"bike {key} sim failed: {type(e).__name__}: {e}"}
         results[key] = _sim_to_dict(sim, name, notes)
-    delta_et = results["a"]["et_quarter_s"] - results["b"]["et_quarter_s"]
+    # B relative to A (bike A is the reference): NEGATIVE = B is quicker —
+    # the same sign as /api/simulate/compare and /api/surrogate/compare.
+    delta_et = results["b"]["et_quarter_s"] - results["a"]["et_quarter_s"]
     out = {
         "bike_a": results["a"],
         "bike_b": results["b"],
         "delta_et_s": round(delta_et, 4),
         "winner": results["a"]["bike_name"]
-        if delta_et < 0
+        if delta_et > 0
         else results["b"]["bike_name"],
     }
     ctx.add_block("compare_result", out)
@@ -832,20 +948,21 @@ def _exec_compare_bikes(ctx: AgentContext, args: dict) -> dict:
 
 
 def _exec_search_parts(ctx: AgentContext, args: dict) -> dict:
+    from ..analysis.roi import CANDIDATE_LIMIT
     from ..database.parts_repo import PartsRepository
 
-    bike_id = int(args.get("bike_id") or 0)
-    limit = max(1, min(int(args.get("limit") or 12), 30))
+    bike_id = _as_int(args.get("bike_id"), 0)
+    limit = max(1, min(_as_int(args.get("limit"), 12) or 12, 30))
     repo = PartsRepository(ctx.db.conn)
     try:
         rows = repo.search(
             bike_model_id=bike_id,
             category=args.get("category") or None,
-            limit=200,
+            limit=CANDIDATE_LIMIT,
         )
     except TypeError:
         # older search signature — degrade to unfiltered then filter here
-        rows = repo.search(bike_model_id=bike_id, limit=200)
+        rows = repo.search(bike_model_id=bike_id, limit=CANDIDATE_LIMIT)
     max_price = args.get("max_price_inr")
     out_rows = []
     for r in rows:
@@ -869,7 +986,7 @@ def _exec_search_parts(ctx: AgentContext, args: dict) -> dict:
 
 
 def _exec_list_tires(ctx: AgentContext, args: dict) -> dict:
-    bike_id = int(args.get("bike_id") or 0)
+    bike_id = _as_int(args.get("bike_id"), 0)
     try:
         fitments = ctx.db.tires.get_bike_fitments(
             bike_id, fitment_type=args.get("fitment_type") or None
@@ -896,9 +1013,9 @@ def _exec_list_tires(ctx: AgentContext, args: dict) -> dict:
 
 def _exec_rank_bikes(ctx: AgentContext, args: dict) -> dict:
     """Shortlist by power-to-weight (cheap SQL), then rank by REAL sims."""
-    from ..physics import MotoQuantEngine
+    from ..engine_select import make_engine
 
-    top_n = max(1, min(int(args.get("top_n") or 5), 5))
+    top_n = max(1, min(_as_int(args.get("top_n"), 5) or 5, 5))
     sql = """
         SELECT bm.id, bm.model_name, m.name AS manufacturer,
                bm.peak_power_hp, bm.dry_mass_kg, bm.displacement_cc,
@@ -938,14 +1055,16 @@ def _exec_rank_bikes(ctx: AgentContext, args: dict) -> dict:
                 ctx, {"bike_id": row["id"], **{k: args.get(k) for k in _ENV_PROPS}}
             )
             ctx.tick(0.0, f"Simulating {row['manufacturer']} {row['model_name']}")
-            sim = MotoQuantEngine(config).run()
+            sim = make_engine(config).run()
             ranked.append(
                 {
                     "bike_id": row["id"],
                     "bike_name": f"{row['manufacturer']} {row['model_name']}",
                     "displacement_cc": row["displacement_cc"],
                     "power_hp": row["peak_power_hp"],
-                    "et_quarter_s": round(float(sim.time_quarter), 3),
+                    "finished_quarter": bool(getattr(sim, "finished_quarter", True)),
+                    # effective_et: a DNF sorts to the bottom, not the top.
+                    "et_quarter_s": round(effective_et(sim), 3),
                     "trap_speed_kmh": round(float(sim.speed_quarter) * MS_TO_KMH, 1),
                 }
             )
@@ -991,11 +1110,7 @@ def _exec_list_venues(ctx: AgentContext, args: dict) -> dict:
 
 
 def _exec_optimize_build(ctx: AgentContext, args: dict) -> dict:
-    # Tier gate BEFORE any budget/quota spend — a locked caller must not be
-    # charged for work that will not run.
-    if pro_tools_locked(ctx.tier):
-        return _upgrade_required("The build optimizer", ctx.tier)
-    bike_id = int(args.get("bike_id") or 0)
+    bike_id = _as_int(args.get("bike_id"), 0)
     tier = resolve_build_tier(args.get("build_tier"))
     tier_info = BUILD_TIERS[tier]
     err = ctx.spend_heavy(OUTLAW_SIM_COST if tier == "stage_4" else HEAVY_OP_SIM_COST)
@@ -1004,6 +1119,11 @@ def _exec_optimize_build(ctx: AgentContext, args: dict) -> dict:
     budget = args.get("budget_inr")
     if budget is None:
         budget = tier_info["default_budget_inr"]
+    if budget is not None:
+        try:
+            budget = min(float(budget), AGENT_MAX_BUDGET_INR)
+        except (TypeError, ValueError):
+            budget = tier_info["default_budget_inr"]
     goal = args.get("goal") or "min_et"
 
     try:
@@ -1076,24 +1196,23 @@ def _exec_optimize_build(ctx: AgentContext, args: dict) -> dict:
 
 
 def _exec_autotune_setup(ctx: AgentContext, args: dict) -> dict:
-    if pro_tools_locked(ctx.tier):
-        return _upgrade_required("ECU / setup autotune", ctx.tier)
     err = ctx.spend_heavy()
     if err:
         return {"error": err}
     try:
-        config, _ = _build_config_for(ctx, args)
+        config, notes = _build_config_for(ctx, args)
     except ValueError as e:
         return {"error": str(e)}
     from ..analysis.ecu_autotune import autotune
 
-    bike_name = _bike_display_name(ctx.db, int(args["bike_id"]))
+    bike_name = _bike_display_name(ctx.db, _as_int(args.get("bike_id"), 0))
     ctx.tick(0.0, f"Autotuning setup: {bike_name}")
     try:
         result = autotune(config, progress_cb=lambda f, s=None: ctx.tick(f, s))
     except Exception as e:  # noqa: BLE001
         return {"error": f"autotune failed: {type(e).__name__}: {e}"}
     payload = result.to_dict()
+    _report_parts(payload, notes)
     ctx.add_block("autotune_result", payload)
     return payload
 
@@ -1111,12 +1230,16 @@ def _exec_simulate_estimated(ctx: AgentContext, args: dict) -> dict:
     ctx.tick(
         0.0, f"Estimating {spec.get('manufacturer', '')} {spec.get('model_name', '')}"
     )
+    # log_suggestion=False: the public chat writes nothing to the catalog
+    # database. Visitor text would otherwise become uncapped rows; a missing
+    # bike is suggested through the GitHub form instead.
     payload = simulate_estimated_bike(
         spec,
         db=ctx.db,
         venue_id=args.get("venue_id"),
         env_overrides=env_overrides,
         rider_mass_kg=args.get("rider_mass_kg"),
+        log_suggestion=False,
     )
     if not payload.get("error"):
         ctx.add_block("estimated_sim", payload)
@@ -1128,7 +1251,7 @@ def _exec_web_search(ctx: AgentContext, args: dict) -> dict:
 
     ctx.tick(0.0, "Searching the web")
     payload = web_search(
-        args.get("query") or "", max_results=int(args.get("max_results") or 5)
+        args.get("query") or "", max_results=_as_int(args.get("max_results"), 5) or 5
     )
     if payload.get("results"):
         ctx.add_block(
@@ -1212,21 +1335,11 @@ def _system_prompt(ctx: AgentContext) -> str:
             f"  - {info['label']}: {info['description']} (default budget: {budget_txt})"
         )
     tiers = "\n".join(tier_lines)
-    # Tell the model up front when the pro tools will refuse, so it spends
-    # its iterations on something useful instead of discovering the lock.
-    access = ""
-    if pro_tools_locked(ctx.tier):
-        access = (
-            f"\nACCESS: this user is on the '{(ctx.tier or 'free')}' plan. "
-            "optimize_build and autotune_setup are MotoQuant Pro features and "
-            "WILL refuse — do not call them. If asked for a build or a setup, "
-            "say it needs Pro, point at the pricing page, and offer the free "
-            "tools instead (simulations, top speed, compares, parts search).\n"
-        )
-    return f"""{access}You are the MotoQuant race engineer — the AI assistant of MotoQuant Pro, \
-a first-principles motorcycle drag-racing physics simulator (15 validated \
-sub-models, RK4 solver, weighted-benchmark accuracy |Δ|≈0.25s across 216 \
-instrumented benchmarks). Today is {datetime.now():%d %b %Y}.
+    return f"""You are the MotoQuant race engineer — the AI assistant of MotoQuant, \
+a free, open-source, first-principles motorcycle drag-racing physics \
+simulator (15 sub-models, RK4 solver, validated against a weighted corpus of \
+published drag-strip benchmarks — motoquant.in/validation). Every tool you \
+have is free for every user. Today is {datetime.now():%d %b %Y}.
 
 Catalog right now: {stats.get("bikes")} bikes, {stats.get("parts")} parts, \
 {stats.get("tires")} tires, {stats.get("venues")} venues.
@@ -1263,6 +1376,10 @@ context from the conversation — reuse known bike_ids instead of re-searching.
 - "Best possible / fastest configuration" for a bike = stage_4 outlaw \
 optimize_build. Summarize the result: baseline → final ET, the parts list \
 with prices, the gearing/launch setup, and total cost.
+- If a result carries parts_skipped, those parts were NOT fitted (see \
+parts_skipped_detail for why): say they do not fit this bike and never quote \
+the returned time as the bike with them — offer search_parts with the \
+bike_id to find ones that fit.
 - Be a race engineer in tone: precise, numbers-first, no hype. Use km/h \
 (mention mph for US bikes). Prices in ₹ (INR).
 - Budgets: you have {FULL_SIM_BUDGET} full sims and {HEAVY_OP_BUDGET} heavy \
@@ -1300,17 +1417,16 @@ def run_agent_chat(
     client: LLMClient | None = None,
     history: list[dict[str, Any]] | None = None,
     progress_cb: Callable[[float, str | None], None] | None = None,
-    meter_cb: Callable[[int], bool] | None = None,
     surrogate_getter: Callable[[], tuple[Any, str]] | None = None,
-    tier: str | None = None,
     max_iterations: int = MAX_ITERATIONS,
+    heavy_gate: Callable[[], bool] | None = None,
 ) -> AgentChatResult:
     """Run one agent chat turn. Never raises — errors land on the result.
 
-    ``tier`` is the caller's subscription tier (resolved by the route from
-    the bearer token, None for anonymous). It gates the pro-only tools —
-    but only once MOTOQUANT_BILLING_ENFORCE is on; during the open beta the
-    gate is inert and everyone keeps full access.
+    Cost is bounded per turn by MAX_ITERATIONS / FULL_SIM_BUDGET /
+    HEAVY_OP_BUDGET (enforced by the executor) and per client by the API's
+    rate limits. ``heavy_gate`` is the API's per-caller fuse for optimizer /
+    autotune / outlaw runs: called once per heavy op, False refuses it.
     """
     result = AgentChatResult(raw_query=query)
     if client is None:
@@ -1330,9 +1446,8 @@ def run_agent_chat(
         db=db,
         result=result,
         progress_cb=progress_cb,
-        meter_cb=meter_cb,
         surrogate_getter=surrogate_getter,
-        tier=tier,
+        heavy_gate=heavy_gate,
     )
 
     system = _system_prompt(ctx)

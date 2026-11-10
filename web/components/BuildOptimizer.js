@@ -1,95 +1,135 @@
 'use client';
 
 /**
- * BuildOptimizer — budget-constrained parts build optimiser (IGNITION v5).
+ * BuildOptimizer — "Best parts for your budget" (CLARITY v6).
  *
- * Lets a user pick a bike, set a ₹ budget, choose an optimisation goal
- * (min ET vs max trap) and a build profile (all / street-legal / drag-prep
- * / full-race), then calls the job-backed POST /api/jobs/optimize (with
- * sync fallback) and renders:
- *   - base → optimised ET & trap with deltas
- *   - total cost / budget-used % / cost-per-tenth
- *   - the selected parts list (name, category, price, ΔET)
- *   - the scoring-method chip (full_sim vs surrogate(dnn))
- *   - detected part synergies + compatibility warnings
- *   - the suggested next upgrade beyond the budget
+ * Pick a bike, set a budget, say what kind of build you want, press
+ * "Find the best parts". Calls the job-backed POST /api/jobs/optimize (sync
+ * fallback in lib/api.js) and explains the answer in plain words: one
+ * sentence, before/after tiles, the parts sorted best value first, plain
+ * warnings, and what to buy next.
  *
- * FUNCTION IS FROZEN (v5 is a re-skin): job wrapper via useAsyncTask +
- * ActionButton (real % in the button, Stop always live), the ?bike_id
- * deep-link preselect reads window.location post-mount (NOT
- * useSearchParams) so the page keeps static-prerendering without a
- * Suspense boundary. v4 layout: input card stack left, one timeslip-style
- * results card right (lg:grid-cols-[0.9fr_1.1fr]).
+ * Request shape is unchanged: { bike_id, budget_inr (null = no limit), goal,
+ * profile, rider_weight_kg, venue_id? }. Profiles are the real API values:
+ * all | street_legal | drag_prep | full_race.
+ *
+ * ?bike_id= deep link preselects the bike (guarded window read, NOT
+ * useSearchParams, so the page keeps prerendering).
  */
 
-import { useEffect, useState } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import {
-  Wrench, AlertCircle, ChevronDown, TrendingDown, TrendingUp, Cpu,
-} from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Wrench, Gauge, SlidersHorizontal, Share2, Beaker, Check } from 'lucide-react';
 import { API_URL, optimizeBuildJob, partLabel } from '../lib/api';
 import useAsyncTask from '../lib/useAsyncTask';
 import ActionButton from './ActionButton';
 import SimProgress from './SimProgress';
 import BikePicker from './BikePicker';
-import ScoreboardDigits from './ScoreboardDigits';
+import LocationPicker from './LocationPicker';
+import ConditionsLine, { DEFAULT_ALTITUDE_M, DEFAULT_TEMP_C } from './ConditionsLine';
+import Term from './Term';
+import NextSteps from './NextSteps';
+import {
+  Step,
+  MoreOptions,
+  ManualConditions,
+  EMPTY_MANUAL,
+  manualStates,
+  conditionsBody,
+  RangeField,
+  Segmented,
+  ErrorCard,
+  fmtINR,
+  fmtSecs,
+  describeTimeChange,
+  TONE_TEXT,
+} from './tools/ToolBits';
 
-// ─── helpers ────────────────────────────────────────────────────────────────
-const fmtINR = (n) =>
-  n == null ? '—' : `₹${Math.round(n).toLocaleString('en-IN')}`;
-const fmtNum = (n, d = 1) => (n == null ? '—' : Number(n).toFixed(d));
-const fmtDelta = (n, d = 3) =>
-  n == null ? '—' : `${n > 0 ? '+' : ''}${Number(n).toFixed(d)}`;
-// Sign-aware tone for ET deltas. Convention unified July 6, 2026:
-// delta_et_s = optimized − base everywhere ⇒ NEGATIVE = faster (time
-// dropped) = good = signal-go. Trap deltas read the opposite way
-// (positive = faster = green).
-const deltaTone = (n) =>
-  n == null || Number(n) === 0
-    ? 'font-mono tabular-nums text-white/50'
-    : Number(n) < 0
-      ? 'delta-down'
-      : 'delta-up';
-const deltaChip = (n) =>
-  n == null || Number(n) === 0 ? 'chip' : Number(n) < 0 ? 'chip chip-go' : 'chip chip-foul';
-const trapTone = (n) =>
-  n == null || Number(n) === 0
-    ? 'text-white/50'
-    : Number(n) > 0
-      ? 'text-signal-go'
-      : 'text-signal-foul';
+// ─── options ────────────────────────────────────────────────────────────────
+// Labels map onto the REAL API profile values — do not invent new ones.
+const PROFILES = [
+  { id: 'street_legal', label: 'Street legal', hint: 'Parts you can run on the road.' },
+  { id: 'drag_prep', label: 'Drag-strip prep', hint: 'Bolt-ons and strip rubber.' },
+  { id: 'full_race', label: 'Full race', hint: 'Everything, including nitrous and boost.' },
+  { id: 'all', label: 'Anything goes', hint: 'No restrictions at all.' },
+];
+const PROFILE_LABEL = Object.fromEntries(PROFILES.map((p) => [p.id, p.label]));
 
 const GOALS = [
-  { id: 'min_et', label: 'Min ET', icon: TrendingDown },
-  { id: 'max_trap', label: 'Max Trap', icon: TrendingUp },
-];
-
-const PROFILES = [
-  { id: 'all', label: 'All parts' },
-  { id: 'street_legal', label: 'Street legal' },
-  { id: 'drag_prep', label: 'Drag prep' },
-  { id: 'full_race', label: 'Full race / Outlaw' },
+  { id: 'min_et', label: 'Quickest time' },
+  { id: 'max_trap', label: 'Highest finish speed' },
 ];
 
 const BUDGET_PRESETS = [
-  { label: '₹50K', value: 50000 },
-  { label: '₹1.5L', value: 150000 },
-  { label: '₹5L', value: 500000 },
+  { label: '₹25,000', value: 25000 },
+  { label: '₹50,000', value: 50000 },
+  { label: '₹1,00,000', value: 100000 },
+  { label: '₹2,00,000', value: 200000 },
 ];
-// Outlaw / open class — POST budget_inr: null (the API resolves null/0 to
-// its ₹5M internal ceiling = effectively no limit). Sentinel is null in
-// component state; the slider shows full-right while unlimited.
-const OUTLAW_BUDGET = null;
+// "No limit" — POST budget_inr: null (the API resolves null/0 to its ₹5M
+// internal ceiling = effectively no limit). null in component state; the
+// slider shows full-right while unlimited.
+const NO_LIMIT = null;
+const SLIDER_MAX = 2000000;
 
-// One-tap starts for first-time users (shared BikePicker `popular` prop).
-const POPULAR_BIKES = [
-  { label: 'Hayabusa', search: 'hayabusa' },
-  { label: 'R15 V4', search: 'r15 v4' },
-  { label: 'Duke 390', search: 'duke 390' },
-  { label: 'Classic 350', search: 'classic 350' },
-  { label: 'ZX-10R', search: 'zx-10r' },
-  { label: 'GSX-R1000', search: 'gsx-r1000' },
-];
+const SEVERITY_WORDS = { info: 'Note', warning: 'Heads up', critical: 'Important' };
+
+// What the server uses when no place is chosen (stated before a run; after a
+// run the server's echoed conditions block is shown instead).
+const DEFAULT_CONDITIONS = `the default conditions (${DEFAULT_ALTITUDE_M} m altitude, ${DEFAULT_TEMP_C} °C)`;
+
+const plainCategory = (s) => String(s || '').replace(/_/g, ' ');
+
+// ─── pieces ─────────────────────────────────────────────────────────────────
+function Tile({ title, time, trap, accent = false, change = null, trapChange = null }) {
+  return (
+    <div className={`rounded-xl border p-4 ${accent ? 'border-accent/50 bg-accent/[0.06]' : 'border-white/10 bg-white/[0.03]'}`}>
+      <p className="text-sm font-medium text-white/70">{title}</p>
+      <p className={`mt-1 font-display text-4xl font-bold tabular-nums md:text-5xl ${accent ? 'text-accent' : 'text-white'}`}>
+        {time}
+        <span className="ml-1 text-base font-medium text-white/60">s</span>
+      </p>
+      {change && (
+        <p className={`mt-1 text-sm font-semibold ${TONE_TEXT[change.tone]}`}>{change.text}</p>
+      )}
+      {trap != null && (
+        <p className="mt-2 text-sm text-white/70">
+          <Term k="trap">Finish-line speed</Term>{' '}
+          <span className="font-mono tabular-nums text-white">{trap} km/h</span>
+          {trapChange && (
+            <span className={`block font-semibold ${TONE_TEXT[trapChange.tone]}`}>{trapChange.text}</span>
+          )}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function trapChangeOf(delta) {
+  if (delta == null || !Number.isFinite(Number(delta))) return null;
+  const v = Number(delta);
+  if (Math.abs(v) < 0.05) return null;
+  return v > 0
+    ? { text: `${v.toFixed(1)} km/h faster`, tone: 'go' }
+    : { text: `${Math.abs(v).toFixed(1)} km/h slower`, tone: 'foul' };
+}
+
+function scoringNote(result) {
+  const m = String(result.scoring_method || '');
+  const oob = result.scoring_stats?.out_of_envelope || 0;
+  if (!m || m === 'full_sim') {
+    return (
+      <>
+        Every part was tested with the <Term k="full_sim">full simulation</Term>.
+      </>
+    );
+  }
+  return (
+    <>
+      Most parts were scored with the <Term k="instant_estimate">instant model</Term> (fast and close, not exact)
+      {m.includes('fallback') || oob > 0 ? ' and the rest with the full simulation' : ''}.
+    </>
+  );
+}
 
 // ─── main ─────────────────────────────────────────────────────────────────────
 export default function BuildOptimizer() {
@@ -98,13 +138,23 @@ export default function BuildOptimizer() {
   const [goal, setGoal] = useState('min_et');
   const [profile, setProfile] = useState('all');
   const [riderKg, setRiderKg] = useState(75);
-  const reduce = useReducedMotion();
+  const [location, setLocation] = useState(null);
+  const [stopped, setStopped] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [forceMore, setForceMore] = useState(false);
+  // What the last run was actually started with (the inputs may change after).
+  const [ran, setRan] = useState(null);
+  const resultRef = useRef(null);
+  const moreRef = useRef(null);
+
+  const [manual, setManual] = useState(EMPTY_MANUAL);
+  const fieldStates = manualStates(manual);
 
   // Job-backed run — useAsyncTask owns AbortController + progress + error;
   // optimizeBuildJob polls /api/jobs with real candidate-scoring % and
   // cancels the job server-side when the signal aborts (Stop).
   const task = useAsyncTask(async (signal, onProgress) => {
-    if (!bike) throw new Error('Pick a bike first.');
+    if (!bike) throw new Error('Choose a bike first.');
     return optimizeBuildJob(
       {
         bike_id: bike.id,
@@ -112,91 +162,195 @@ export default function BuildOptimizer() {
         goal,
         profile,
         rider_weight_kg: riderKg,
+        // A seeded track, any other place by name, and/or hand-set values —
+        // the same fields (and meaning) as Race-day setup.
+        ...conditionsBody(location, fieldStates),
       },
       onProgress,
       signal,
     );
   });
 
-  // Preselect a bike from ?bike_id (deep link from /bikes/[id] "Optimize build").
-  // Guarded window read (not useSearchParams) so the un-Suspense'd client page
-  // keeps prerendering; no-op when the param is absent or invalid.
+  // Preselect a bike from ?bike_id (deep link from /bikes/[id]).
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') return undefined;
     const raw = new URLSearchParams(window.location.search).get('bike_id');
     const id = raw != null ? Number(raw) : NaN;
-    if (!Number.isInteger(id) || id <= 0) return;
+    if (!Number.isInteger(id) || id <= 0) return undefined;
     let cancelled = false;
     fetch(`${API_URL}/api/bikes/${id}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((b) => {
         if (!cancelled && b && b.id != null) {
-          setBike({ id: b.id, manufacturer: b.manufacturer, model: b.model });
+          setBike({
+            id: b.id,
+            manufacturer: b.manufacturer,
+            model: b.model,
+            displacement_cc: b.displacement_cc,
+            peak_power_hp: b.peak_power_hp,
+          });
         }
       })
-      .catch(() => {}); // bad id / offline → silently leave the picker empty
+      .catch(() => {}); // bad id / offline → leave the picker empty
     return () => {
       cancelled = true;
     };
   }, []);
 
   const run = () => {
+    setStopped(false);
+    setCopied(false);
+    setRan({
+      bike,
+      budget,
+      goal,
+      profile,
+      riderKg,
+      venue: location && location.matched_venue_id != null ? location : null,
+      label: location
+        ? location.venue_name || location.location_name || location._label || null
+        : null,
+    });
     task.reset(); // clear the previous result + error before a fresh run
     task.run();
   };
 
+  const stoppableTask = useMemo(
+    () => ({
+      ...task,
+      stop: () => {
+        setStopped(true);
+        task.stop();
+      },
+    }),
+    [task],
+  );
+
   const result = task.result;
-  const parts = result?.parts || [];
+  const parts = useMemo(() => {
+    const list = [...(result?.parts || [])];
+    // Best value first: lowest rupees per tenth, unknowns last, then biggest gain.
+    list.sort((a, b) => {
+      const ca = a.cost_per_tenth_inr;
+      const cb = b.cost_per_tenth_inr;
+      const fa = ca != null && Number.isFinite(ca);
+      const fb = cb != null && Number.isFinite(cb);
+      if (fa && fb && ca !== cb) return ca - cb;
+      if (fa !== fb) return fa ? -1 : 1;
+      return (a.delta_et_s ?? 0) - (b.delta_et_s ?? 0);
+    });
+    return list;
+  }, [result]);
   const synergies = result?.synergies || [];
   const warnings = result?.warnings || [];
-  const noParts = result && parts.length === 0;
+  const noParts = !!result && parts.length === 0;
+
+  // On phones the result lands below the button — bring it into view.
+  useEffect(() => {
+    if (!result || !resultRef.current) return;
+    if (window.matchMedia && window.matchMedia('(min-width: 1024px)').matches) return;
+    const calm = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    resultRef.current.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' });
+  }, [result]);
+
+  const openMoreOptions = () => {
+    setForceMore(true);
+    requestAnimationFrame(() =>
+      moreRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }),
+    );
+  };
+
+  // ── derived result text ──
+  const rBudgetText = ran?.budget == null ? 'no limit' : fmtINR(ran.budget);
+  let sentence = null;
+  if (result && parts.length > 0 && result.base_et_s != null && result.optimized_et_s != null) {
+    const change = describeTimeChange(result.delta_et_s);
+    const spend = fmtINR(result.total_cost_inr);
+    const n = parts.length;
+    const partsWord = `${n} ${n === 1 ? 'part' : 'parts'}`;
+    if (result.goal === 'max_trap') {
+      const tc = trapChangeOf(result.delta_trap_kmh);
+      sentence = (
+        <>
+          Spend <strong className="font-semibold text-white">{spend}</strong> on {partsWord}:{' '}
+          finish-line speed {Number(result.base_trap_kmh).toFixed(0)} →{' '}
+          {Number(result.optimized_trap_kmh).toFixed(0)} km/h
+          {tc ? `, ${tc.text}` : ''}. Quarter-mile time {fmtSecs(result.base_et_s)} s →{' '}
+          {fmtSecs(result.optimized_et_s)} s{change && change.tone !== 'flat' ? `, ${change.text}` : ''}.
+        </>
+      );
+    } else {
+      sentence = (
+        <>
+          Spend <strong className="font-semibold text-white">{spend}</strong> on {partsWord}:{' '}
+          {fmtSecs(result.base_et_s)} s → {fmtSecs(result.optimized_et_s)} s
+          {change ? (change.tone === 'flat' ? ', no change' : `, ${change.text}`) : ''}.
+        </>
+      );
+    }
+  }
+
+  const simHref = (() => {
+    if (!result || !ran?.bike || parts.length === 0) return null;
+    const q = new URLSearchParams();
+    q.set('bike', String(ran.bike.id));
+    q.set('parts', parts.map((p) => p.part_id).join(','));
+    if (ran.venue?.matched_venue_id != null) q.set('venue', String(ran.venue.matched_venue_id));
+    if (ran.riderKg !== 75) q.set('rider', String(ran.riderKg));
+    return `/simulator?${q.toString()}`;
+  })();
+
+  const copyLink = async () => {
+    if (!simHref) return;
+    const url = `${window.location.origin}${simHref}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      window.prompt('Copy this link', url);
+    }
+  };
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-      {/* ── Inputs (left column) ─────────────────────────────────────── */}
-      <div className="relative space-y-4">
-        <AnimatePresence>
-          {task.active && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute -top-1 left-1 right-1 z-20"
-            >
-              <SimProgress active edge progress={task.progress} />
-            </motion.div>
-          )}
-        </AnimatePresence>
+    <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
+      {/* ── Inputs ─────────────────────────────────────────────────────── */}
+      <div className="space-y-4">
+        <Step n={1} title="Choose your bike">
+          <BikePicker value={bike} onSelect={setBike} popular />
+        </Step>
 
-        <div className="card p-5 md:p-6">
-          <BikePicker value={bike} onSelect={setBike} popular={POPULAR_BIKES} />
-        </div>
-
-        {/* Budget */}
-        <div className="card p-5 md:p-6">
-          <span className="label-mono block mb-2">Budget</span>
-          <p className="font-mono text-2xl font-bold text-white tabular-nums mb-3">
+        <Step n={2} title="Set your budget">
+          <p className="font-display text-3xl font-bold tabular-nums text-white" aria-live="polite">
             {budget == null ? 'No limit' : fmtINR(budget)}
           </p>
-          <input
-            type="range"
-            min={5000}
-            max={2000000}
-            step={5000}
-            value={budget ?? 2000000}
-            onChange={(e) => setBudget(Number(e.target.value))}
-            aria-label="Budget in rupees"
-            className="w-full h-1.5 bg-asphalt-4 rounded-full appearance-none cursor-pointer accent-accent"
-          />
-          <div className="flex flex-wrap gap-2 mt-3">
+          <div className="mt-2">
+            <label htmlFor="mq-opt-budget" className="sr-only">
+              Budget in rupees
+            </label>
+            <input
+              id="mq-opt-budget"
+              type="range"
+              min={5000}
+              max={SLIDER_MAX}
+              step={5000}
+              value={budget ?? SLIDER_MAX}
+              onChange={(e) => setBudget(Number(e.target.value))}
+              aria-valuetext={budget == null ? 'No limit' : fmtINR(budget)}
+              className="h-11 w-full cursor-pointer accent-accent"
+            />
+          </div>
+          <div className="mt-1 flex flex-wrap gap-2" role="group" aria-label="Budget presets">
             {BUDGET_PRESETS.map((b) => (
               <button
                 key={b.value}
                 type="button"
                 onClick={() => setBudget(b.value)}
                 aria-pressed={budget === b.value}
-                className={`chip h-9 px-3 transition-colors cursor-pointer ${
-                  budget === b.value ? 'chip-volt' : 'hover:border-white/30 hover:text-white'
+                className={`inline-flex min-h-[44px] items-center rounded-full border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/70 ${
+                  budget === b.value
+                    ? 'border-accent bg-accent/10 text-accent'
+                    : 'border-white/15 text-white/80 hover:border-accent/60 hover:text-white'
                 }`}
               >
                 {b.label}
@@ -204,377 +358,414 @@ export default function BuildOptimizer() {
             ))}
             <button
               type="button"
-              onClick={() => setBudget(OUTLAW_BUDGET)}
+              onClick={() => setBudget(NO_LIMIT)}
               aria-pressed={budget == null}
-              className={`chip h-9 px-3 transition-colors cursor-pointer ${
-                budget == null ? 'chip-volt' : 'hover:border-white/30 hover:text-white'
+              className={`inline-flex min-h-[44px] items-center rounded-full border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/70 ${
+                budget == null
+                  ? 'border-accent bg-accent/10 text-accent'
+                  : 'border-white/15 text-white/80 hover:border-accent/60 hover:text-white'
               }`}
             >
-              Outlaw — no limit
+              No limit
             </button>
           </div>
-        </div>
+          {budget == null && (
+            <p className="field-hint">
+              <Term k="outlaw">Outlaw-style build</Term>: we pick the quickest combination whatever it costs.
+            </p>
+          )}
+        </Step>
 
-        {/* Goal + profile + rider */}
-        <div className="card p-5 md:p-6 space-y-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <span className="label-mono block mb-1.5">Goal</span>
-              <div className="flex gap-1 rounded-lg border border-white/10 bg-asphalt-3/60 p-1">
-                {GOALS.map(({ id, label, icon: Icon }) => (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => setGoal(id)}
-                    aria-pressed={goal === id}
-                    className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md text-xs font-semibold transition-colors ${
-                      goal === id ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white/80'
+        <Step n={3} title="What kind of build?">
+          <fieldset>
+            <legend className="sr-only">Build type</legend>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {PROFILES.map((p) => {
+                const on = profile === p.id;
+                return (
+                  <label
+                    key={p.id}
+                    className={`relative flex min-h-[64px] cursor-pointer flex-col justify-center rounded-xl border px-4 py-3 transition-colors focus-within:ring-2 focus-within:ring-accent/70 ${
+                      on
+                        ? 'border-accent bg-accent/[0.08]'
+                        : 'border-white/15 hover:border-white/30'
                     }`}
                   >
-                    <Icon size={12} aria-hidden="true" /> {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="mq-opt-profile" className="label-mono block mb-1.5">Profile</label>
-              <div className="relative">
-                <select
-                  id="mq-opt-profile"
-                  value={profile}
-                  onChange={(e) => setProfile(e.target.value)}
-                  className="input-base appearance-none pr-8 cursor-pointer"
-                >
-                  {PROFILES.map((p) => (
-                    <option key={p.id} value={p.id} className="bg-asphalt-2">
+                    <input
+                      type="radio"
+                      name="mq-opt-profile"
+                      value={p.id}
+                      checked={on}
+                      onChange={() => setProfile(p.id)}
+                      className="peer sr-only"
+                    />
+                    <span className="flex items-center justify-between gap-2 font-display text-base font-semibold text-white">
                       {p.label}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none" aria-hidden="true" />
+                      {on && <Check size={16} className="text-accent" aria-hidden="true" />}
+                    </span>
+                    <span className="mt-0.5 text-sm text-white/65">{p.hint}</span>
+                  </label>
+                );
+              })}
+            </div>
+            <p className="field-hint">
+              <Term k="build_profile">What do these mean?</Term>
+            </p>
+          </fieldset>
+        </Step>
+
+        <div ref={moreRef} id="mq-opt-where" className="card card-pad scroll-mt-24">
+          <MoreOptions storageKey="mq-opt-more" label="More options" forceOpen={forceMore}>
+            <Segmented
+              idPrefix="mq-opt-goal"
+              label="What matters most?"
+              options={GOALS}
+              value={goal}
+              onChange={setGoal}
+            />
+            <div>
+              <span className="field-label">Where are you racing? (optional)</span>
+              <LocationPicker
+                value={location}
+                onResolved={setLocation}
+                onCleared={() => setLocation(null)}
+                compact
+              />
+              <p className="field-hint">
+                Adjusts for altitude and weather. Without a choice we use {DEFAULT_CONDITIONS}.
+              </p>
+              <div className="mt-3">
+                <ManualConditions idPrefix="mq-opt-manual" storageKey="mq-opt-manual" manual={manual} setManual={setManual} />
               </div>
             </div>
-          </div>
-
-          {/* Rider weight */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="label-mono block">Rider weight</span>
-              <span className="text-sm font-mono text-white/80 tabular-nums">{riderKg} kg</span>
-            </div>
-            <input
-              type="range"
+            <RangeField
+              id="mq-opt-rider"
+              label="Rider weight with gear"
+              valueText={`${riderKg} kg`}
               min={50}
               max={130}
               value={riderKg}
-              onChange={(e) => setRiderKg(Number(e.target.value))}
-              aria-label="Rider weight in kilograms"
-              className="w-full h-1.5 bg-asphalt-4 rounded-full appearance-none cursor-pointer accent-accent"
+              onChange={setRiderKg}
             />
-          </div>
+          </MoreOptions>
         </div>
 
-        {task.active && (
-          <SimProgress
-            active
-            progress={task.progress}
-            stage={task.stage}
-            label="Optimising build"
+        <div>
+          <ActionButton
+            task={stoppableTask}
+            onRun={run}
+            label={
+              <>
+                <Wrench size={18} aria-hidden="true" /> Find the best parts
+              </>
+            }
+            runningLabel="Testing parts"
+            disabled={!bike}
+            className="w-full"
           />
-        )}
-
-        <ActionButton
-          task={task}
-          onRun={run}
-          label={
-            <>
-              <Wrench size={16} aria-hidden="true" /> Optimise build
-            </>
-          }
-          runningLabel="Optimising"
-          disabled={!bike}
-          className="w-full"
-        />
-        {!bike && (
-          <p className="text-[11px] text-white/40 font-mono text-center">
-            Pick a bike to arm the optimiser.
-          </p>
-        )}
+          {!bike && !task.active && (
+            <p className="field-hint text-center">Choose a bike above to get started.</p>
+          )}
+          {task.active && (
+            <div className="mt-3" aria-live="polite">
+              <SimProgress
+                active
+                progress={task.progress}
+                stage={task.stage}
+                label="Testing every compatible part"
+              />
+              <p className="field-hint text-center">
+                This can take up to a minute or two. You can stop at any time.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* ── Results (right column) ───────────────────────────────────── */}
-      <div className="space-y-4">
-        {/* Error */}
-        <AnimatePresence>
-          {task.error && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="card border-signal-foul/30 bg-signal-foul/10 p-3 text-signal-foul text-sm flex items-center gap-2"
-            >
-              <AlertCircle size={16} aria-hidden="true" /> {task.error}
-            </motion.div>
-          )}
-        </AnimatePresence>
+      {/* ── Results ────────────────────────────────────────────────────── */}
+      <div ref={resultRef} className="scroll-mt-24 space-y-4" aria-live="polite">
+        {task.error && <ErrorCard message={task.error} onRetry={bike ? run : undefined} />}
 
-        {/* Empty (no parts found) */}
+        {!result && !task.error && !task.active && (
+          <div className="card card-pad">
+            <h2 className="font-display text-lg font-semibold text-white">
+              {stopped ? 'Stopped' : 'Your result will appear here'}
+            </h2>
+            <p className="mt-1 text-sm text-white/70">
+              {stopped
+                ? 'The search was stopped. Change anything you like and press Find the best parts again.'
+                : "We'll show the parts to buy, what each one costs and how much quicker they make your bike."}
+            </p>
+          </div>
+        )}
+
         {noParts && !task.active && (
-          <div className="card p-6 text-center">
-            <p className="text-white/80 text-sm font-semibold mb-1">No improving parts within budget</p>
-            <p className="text-white/40 text-xs">
-              Nothing in the {result.profile} catalog improves {result.bike_name} for{' '}
-              {fmtINR(result.budget_inr)}. Try raising the budget or widening the profile.
+          <div className="card card-pad">
+            <h2 className="font-display text-lg font-semibold text-white">
+              No parts would help within {rBudgetText}
+            </h2>
+            <p className="mt-1 text-sm text-white/70">
+              Nothing in the {PROFILE_LABEL[result.profile] || 'selected'} group makes the{' '}
+              {result.bike_name} quicker at {fmtINR(result.budget_inr) || 'this budget'}. Try a bigger budget or
+              a wider build type such as &quot;Anything goes&quot;.
             </p>
           </div>
         )}
 
-        {/* Idle / running placeholder */}
-        {!result && !task.error && (
-          <div className="card p-8 md:p-10 text-center">
-            <Wrench size={22} className="mx-auto text-white/30 mb-3" aria-hidden="true" />
-            <p className="label-mono mb-2">
-              {task.active ? 'Optimiser running' : 'Optimiser standing by'}
-            </p>
-            <p className="text-sm text-white/45 max-w-sm mx-auto">
-              {task.active
-                ? 'Scoring candidate builds against the physics engine — the best combination lands here.'
-                : 'Pick a bike, set a budget, and the knapsack solver returns the fastest legal combination of parts.'}
-            </p>
-            {task.active && (
-              <div className="max-w-xs mx-auto mt-5">
-                <SimProgress active progress={task.progress} stage={task.stage} label="Optimising build" />
+        {result && parts.length > 0 && (
+          <>
+            {/* The answer, in a sentence */}
+            <section className="card card-pad" aria-label="Result">
+              <p className="eyebrow mb-2">{result.bike_name}</p>
+              <p className="font-display text-xl font-semibold leading-snug text-white md:text-2xl">
+                {sentence}
+              </p>
+              <p className="mt-3 text-sm text-white/65">
+                Build type: {PROFILE_LABEL[result.profile] || result.profile} · Goal:{' '}
+                {result.goal === 'max_trap' ? 'highest finish speed' : 'quickest time'} · Rider:{' '}
+                {ran?.riderKg ?? riderKg} kg
+              </p>
+              <ConditionsLine
+                className="mt-1 text-sm text-white/65"
+                env={result.environment}
+                placeLabel={ran?.label}
+                onChange={openMoreOptions}
+              />
+
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                <Tile
+                  title="Stock"
+                  time={fmtSecs(result.base_et_s, 3)}
+                  trap={result.base_trap_kmh != null ? Number(result.base_trap_kmh).toFixed(0) : null}
+                />
+                <Tile
+                  accent
+                  title="With these parts"
+                  time={fmtSecs(result.optimized_et_s, 3)}
+                  change={describeTimeChange(result.delta_et_s, 3)}
+                  trap={result.optimized_trap_kmh != null ? Number(result.optimized_trap_kmh).toFixed(0) : null}
+                  trapChange={trapChangeOf(result.delta_trap_kmh)}
+                />
               </div>
-            )}
-          </div>
-        )}
+            </section>
 
-        {/* Results */}
-        <AnimatePresence>
-          {result && parts.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: reduce ? 0 : 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: reduce ? 0 : 12 }}
-              transition={{ duration: 0.35 }}
-              className="space-y-4"
-            >
-              {/* Header row: bike + scoring chip */}
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <h3 className="font-display font-semibold text-lg md:text-xl tracking-tight text-white">
-                  {result.bike_name}
-                  <span className="label-mono ml-2">
-                    {result.goal === 'max_trap' ? 'max trap' : 'min ET'} · {result.profile}
-                  </span>
-                </h3>
-                {result.scoring_method && (
-                  <span className="chip">
-                    <Cpu size={10} aria-hidden="true" /> {result.scoring_method}
-                    {result.scoring_stats?.out_of_envelope > 0 && (
-                      <span className="text-signal-stage" title="some candidates fell outside the surrogate envelope">
-                        · {result.scoring_stats.out_of_envelope} oob
-                      </span>
-                    )}
-                  </span>
-                )}
-              </div>
-
-              {/* The slip — base → optimised + parts + cost */}
-              <div className="card p-5 md:p-6">
-                <div className="flex items-start justify-between gap-3 flex-wrap">
-                  <div className="min-w-0">
-                    <p className="label-mono">Base → optimised</p>
-                    {result.base_et_s != null && result.optimized_et_s != null ? (
-                      /* Headline ET pair on the seven-seg timing board — the
-                         optimised time is the moving part, so it carries the
-                         orange; the base time stays white. */
-                      <div className="flex flex-wrap items-end gap-2 mt-2">
-                        <ScoreboardDigits
-                          value={Number(result.base_et_s).toFixed(3)}
-                          h={28}
-                          color="#FFFFFF"
-                          label={`Base ET ${Number(result.base_et_s).toFixed(3)} seconds`}
-                        />
-                        <span className="font-mono text-lg text-white/40 leading-none pb-1" aria-hidden="true">
-                          →
-                        </span>
-                        <ScoreboardDigits
-                          value={Number(result.optimized_et_s).toFixed(3)}
-                          h={28}
-                          label={`Optimised ET ${Number(result.optimized_et_s).toFixed(3)} seconds`}
-                        />
-                        <span className="font-mono text-sm text-white/40 pb-0.5">s</span>
-                      </div>
-                    ) : (
-                      <p className="font-mono text-3xl md:text-4xl font-bold text-white tabular-nums mt-1.5">
-                        {fmtNum(result.base_et_s, 3)} → {fmtNum(result.optimized_et_s, 3)}
-                        <span className="text-base text-white/40 ml-1">s</span>
-                      </p>
-                    )}
-                    <p className="text-xs font-mono text-white/40 tabular-nums mt-1.5">
-                      trap {fmtNum(result.base_trap_kmh, 1)} → {fmtNum(result.optimized_trap_kmh, 1)} km/h ·{' '}
-                      <span className={trapTone(result.delta_trap_kmh)}>
-                        {fmtDelta(result.delta_trap_kmh, 1)}
-                      </span>
-                    </p>
-                  </div>
-                  <span className={`${deltaChip(result.delta_et_s)} h-7 px-2.5 text-xs shrink-0`}>
-                    {fmtDelta(result.delta_et_s, 3)}s
-                  </span>
-                </div>
-
-                <div className="centerline my-4" aria-hidden="true" />
-
-                {/* Selected parts — timeslip rows */}
-                <div className="flex items-center justify-between flex-wrap gap-2 mb-1">
-                  <p className="label-mono">Selected parts ({parts.length})</p>
-                  <p className="text-[10px] font-mono text-white/30">
-                    {result.parts_evaluated} evaluated
-                    {result.parts_skipped_incompatible ? ` · ${result.parts_skipped_incompatible} incompatible` : ''}
-                    {result.parts_skipped_no_gain ? ` · ${result.parts_skipped_no_gain} no-gain` : ''}
-                  </p>
-                </div>
-                <div>
-                  {parts.map((p) => (
-                    <div key={p.part_id} className="timeslip-row gap-3">
-                      <span className="min-w-0">
-                        <span className="block truncate text-white/85">
-                          {partLabel(p.brand, p.name)}
-                          {p.is_compatible === false && (
-                            <span className="ml-2 text-[10px] uppercase text-signal-stage">incompatible</span>
+            {/* Parts list */}
+            <section className="card card-pad" aria-labelledby="mq-opt-parts-h">
+              <h2 id="mq-opt-parts-h" className="font-display text-lg font-semibold text-white">
+                Parts to buy ({parts.length})
+              </h2>
+              <p className="mt-1 text-sm text-white/65">
+                Best value first. Value is measured as rupees per tenth of a second (
+                <Term k="cost_per_tenth">cost per tenth</Term>) — lower is better.
+              </p>
+              <ul className="mt-3 divide-y divide-white/[0.08]">
+                {parts.map((p) => {
+                  const change =
+                    result.goal === 'max_trap' && p.delta_trap_ms != null
+                      ? (() => {
+                          const kmh = Number(p.delta_trap_ms) * 3.6;
+                          if (Math.abs(kmh) < 0.05) return describeTimeChange(p.delta_et_s);
+                          return kmh > 0
+                            ? { text: `${kmh.toFixed(1)} km/h faster`, tone: 'go' }
+                            : { text: `${Math.abs(kmh).toFixed(1)} km/h slower`, tone: 'foul' };
+                        })()
+                      : describeTimeChange(p.delta_et_s);
+                  return (
+                    <li key={p.part_id} className="flex items-start justify-between gap-4 py-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-white">{partLabel(p.brand, p.name)}</p>
+                        <p className="mt-0.5 text-xs capitalize text-white/60">
+                          {plainCategory(p.category_display || p.category)}
+                          {p.cost_per_tenth_inr != null && Number.isFinite(p.cost_per_tenth_inr) && (
+                            <span className="normal-case">
+                              {' '}
+                              · {fmtINR(p.cost_per_tenth_inr)} per 0.1 s
+                            </span>
                           )}
-                        </span>
-                        <span className="block text-[10px] uppercase tracking-wide text-white/35 mt-0.5">
-                          {p.category_display || p.category}
-                          {p.cost_per_tenth_inr != null && (
-                            <span className="ml-2 text-white/25 normal-case">{fmtINR(p.cost_per_tenth_inr)}/tenth</span>
-                          )}
-                        </span>
-                      </span>
-                      <span className="shrink-0 text-right">
-                        <span className={deltaTone(p.delta_et_s)}>{fmtDelta(p.delta_et_s, 3)}s</span>
-                        <span className="text-white/60"> · {fmtINR(p.price_inr)}</span>
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="centerline my-4" aria-hidden="true" />
-
-                {/* Cost summary */}
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <p className="label-mono">Total cost</p>
-                    <p className="font-mono text-base md:text-lg font-bold text-white tabular-nums mt-1">
-                      {fmtINR(result.total_cost_inr)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="label-mono">Budget used</p>
-                    <p className="font-mono text-base md:text-lg font-bold text-white tabular-nums mt-1">
-                      {fmtNum(result.budget_used_pct, 0)}%
-                    </p>
-                  </div>
-                  <div>
-                    <p className="label-mono">Cost / tenth</p>
-                    <p className="font-mono text-base md:text-lg font-bold text-white tabular-nums mt-1">
-                      {result.cost_per_tenth_inr == null ? '—' : fmtINR(result.cost_per_tenth_inr)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Synergies */}
-              {synergies.length > 0 && (
-                <div className="card p-4 md:p-5">
-                  <p className="label-mono mb-2.5">Synergies</p>
-                  <div className="space-y-1.5">
-                    {synergies.map((s, i) => (
-                      <div key={i} className="flex items-start justify-between gap-3 text-sm">
-                        <span className="text-white/80">{s.description}</span>
-                        {s.multiplier != null && (
-                          <span className="font-mono text-white/85 shrink-0 tabular-nums">
-                            ×{Number(s.multiplier).toFixed(2)}
-                          </span>
+                        </p>
+                        {p.is_compatible === false && (
+                          <p className="mt-1 text-xs font-medium text-signal-stage">
+                            May not fit this bike — check before buying.
+                          </p>
                         )}
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Warnings */}
-              {warnings.length > 0 && (
-                <div className="card p-4 md:p-5">
-                  <p className="label-mono mb-2.5">Warnings</p>
-                  <div className="space-y-2">
-                    {warnings.map((w, i) => (
-                      <p key={i} className="text-sm text-white/80 flex items-start gap-2">
-                        <span className="chip chip-stage shrink-0">{w.severity}</span>
-                        <span>{w.message}</span>
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Next upgrade */}
-              {result.next_upgrade?.part && (
-                <div className="card p-4 md:p-5">
-                  <p className="label-mono mb-2.5">Next upgrade (beyond budget)</p>
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-sm text-white font-medium truncate">
-                        {result.next_upgrade.part.brand ? `${result.next_upgrade.part.brand} ` : ''}
-                        {result.next_upgrade.part.name}
-                      </p>
-                      {result.next_upgrade.reason && (
-                        <p className="text-[11px] text-white/40 mt-0.5">{result.next_upgrade.reason}</p>
-                      )}
-                    </div>
-                    <div className="text-right shrink-0 font-mono text-sm tabular-nums">
-                      <p className="text-white">{fmtINR(result.next_upgrade.marginal_cost_inr)}</p>
-                      {/* marginal_et_gain_s is a positive-good GAIN on the
-                          wire; render as the resulting ET change (−) so every
-                          ET number on the page reads the same direction. */}
-                      <p className={`text-[11px] ${deltaTone(-result.next_upgrade.marginal_et_gain_s)}`}>
-                        {fmtDelta(-result.next_upgrade.marginal_et_gain_s, 3)}s
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Category priority */}
-              {Array.isArray(result.category_priority) && result.category_priority.length > 0 && (
-                <div className="card p-4 md:p-5">
-                  <p className="label-mono mb-3">Where the gains are</p>
-                  <div>
-                    {result.category_priority.slice(0, 6).map((c, i) => (
-                      <div key={i} className="timeslip-row gap-3">
-                        <span className="text-white/80 capitalize truncate">
-                          {String(c.category || '').replace(/_/g, ' ')}
-                        </span>
-                        <span className="text-white/50 shrink-0 tabular-nums text-xs">
-                          best{' '}
-                          <span className={deltaTone(c.best_et_gain_s != null ? -c.best_et_gain_s : null)}>
-                            {fmtDelta(c.best_et_gain_s != null ? -c.best_et_gain_s : null, 3)}s
-                          </span>
-                          {c.avg_cost_per_tenth != null && ` · ${fmtINR(c.avg_cost_per_tenth)}/tenth`}
-                        </span>
+                      <div className="shrink-0 text-right">
+                        <p className="font-mono text-sm font-medium tabular-nums text-white">
+                          {fmtINR(p.price_inr)}
+                        </p>
+                        {change && (
+                          <p className={`mt-0.5 text-xs font-semibold ${TONE_TEXT[change.tone]}`}>
+                            {change.text}
+                          </p>
+                        )}
                       </div>
-                    ))}
+                    </li>
+                  );
+                })}
+              </ul>
+
+              <div className="mt-2 border-t border-white/10 pt-1">
+                <div className="stat-row">
+                  <span>Total cost</span>
+                  <span>{fmtINR(result.total_cost_inr)}</span>
+                </div>
+                {ran?.budget != null && result.budget_used_pct != null && (
+                  <div className="stat-row">
+                    <span>Budget used</span>
+                    <span>{Number(result.budget_used_pct).toFixed(0)} %</span>
+                  </div>
+                )}
+                {result.cost_per_tenth_inr != null && Number.isFinite(result.cost_per_tenth_inr) && (
+                  <div className="stat-row">
+                    <span>
+                      <Term k="cost_per_tenth">Cost per tenth of a second</Term>, whole build
+                    </span>
+                    <span>{fmtINR(result.cost_per_tenth_inr)}</span>
+                  </div>
+                )}
+              </div>
+              <p className="mt-2 text-xs text-white/60">
+                We tested {result.parts_evaluated ?? parts.length} parts
+                {result.parts_skipped_incompatible
+                  ? `; ${result.parts_skipped_incompatible} don't fit this bike`
+                  : ''}
+                {result.parts_skipped_no_gain
+                  ? `; ${result.parts_skipped_no_gain} wouldn't make it quicker`
+                  : ''}
+                .
+              </p>
+            </section>
+
+            {synergies.length > 0 && (
+              <section className="card card-pad" aria-labelledby="mq-opt-syn-h">
+                <h2 id="mq-opt-syn-h" className="font-display text-lg font-semibold text-white">
+                  Parts that work well together
+                </h2>
+                <ul className="mt-2 space-y-2">
+                  {synergies.map((s, i) => (
+                    <li
+                      key={i}
+                      className="text-sm text-white/80"
+                      title={s.multiplier != null ? `Combined effect ×${Number(s.multiplier).toFixed(2)}` : undefined}
+                    >
+                      {s.description}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {warnings.length > 0 && (
+              <section className="card card-pad" aria-labelledby="mq-opt-warn-h">
+                <h2 id="mq-opt-warn-h" className="font-display text-lg font-semibold text-white">
+                  Things to check
+                </h2>
+                <ul className="mt-2 space-y-2.5">
+                  {warnings.map((w, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-sm text-white/80">
+                      <span
+                        className={`chip shrink-0 ${
+                          w.severity === 'critical' ? 'chip-foul' : 'chip-stage'
+                        }`}
+                      >
+                        {SEVERITY_WORDS[w.severity] || 'Note'}
+                      </span>
+                      <span>{w.message}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {result.next_upgrade?.part && (
+              <section className="card card-pad" aria-labelledby="mq-opt-next-h">
+                <h2 id="mq-opt-next-h" className="font-display text-lg font-semibold text-white">
+                  If you have more to spend
+                </h2>
+                <div className="mt-2 flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-white">
+                      {partLabel(result.next_upgrade.part.brand, result.next_upgrade.part.name)}
+                    </p>
+                    {result.next_upgrade.reason && (
+                      <p className="mt-0.5 text-sm text-white/65">{result.next_upgrade.reason}</p>
+                    )}
+                  </div>
+                  <div className="shrink-0 text-right">
+                    {result.next_upgrade.marginal_cost_inr != null && (
+                      <p className="font-mono text-sm font-medium tabular-nums text-white">
+                        +{fmtINR(result.next_upgrade.marginal_cost_inr)}
+                      </p>
+                    )}
+                    {result.next_upgrade.marginal_et_gain_s != null && (
+                      // marginal_et_gain_s is a positive-good GAIN on the wire.
+                      <p className="mt-0.5 text-xs font-semibold text-signal-go">
+                        {describeTimeChange(-result.next_upgrade.marginal_et_gain_s)?.text}
+                      </p>
+                    )}
                   </div>
                 </div>
-              )}
+              </section>
+            )}
 
-              <p className="text-[11px] text-white/30 text-center pt-1">
-                Estimates from first-principles RK4 physics · ROI knapsack across compatible parts.
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            {Array.isArray(result.category_priority) && result.category_priority.length > 0 && (
+              <details className="card card-pad group">
+                <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between font-display text-lg font-semibold text-white">
+                  Which kinds of parts help most
+                  <span className="text-sm font-medium text-accent group-open:hidden">Show</span>
+                  <span className="hidden text-sm font-medium text-accent group-open:inline">Hide</span>
+                </summary>
+                <ul className="mt-2 divide-y divide-white/[0.08]">
+                  {result.category_priority.slice(0, 6).map((c, i) => {
+                    const ch = c.best_et_gain_s != null ? describeTimeChange(-c.best_et_gain_s) : null;
+                    return (
+                      <li key={i} className="flex items-baseline justify-between gap-3 py-2.5 text-sm">
+                        <span className="capitalize text-white/85">{plainCategory(c.category)}</span>
+                        <span className="text-right text-white/65">
+                          {ch && <span className={`font-semibold ${TONE_TEXT[ch.tone]}`}>best: {ch.text}</span>}
+                          {c.avg_cost_per_tenth != null && Number.isFinite(c.avg_cost_per_tenth) && (
+                            <span> · about {fmtINR(c.avg_cost_per_tenth)} per 0.1 s</span>
+                          )}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </details>
+            )}
+
+            <p className="flex items-start gap-2 px-1 text-xs text-white/60">
+              <Gauge size={14} className="mt-0.5 shrink-0" aria-hidden="true" />
+              <span>
+                {scoringNote(result)} These are predictions from a physics model, not a guarantee — real
+                results depend on tuning, tyres and the day.
+              </span>
+            </p>
+
+            <NextSteps
+              items={[
+                simHref && {
+                  icon: Beaker,
+                  title: 'Try these parts in the simulator',
+                  hint: 'Opens the simulator with this exact set of parts.',
+                  href: simHref,
+                },
+                ran?.bike && {
+                  icon: SlidersHorizontal,
+                  title: 'Get a race-day setup for this bike',
+                  hint: 'Gearing and tyre pressure for the day you race.',
+                  href: `/autotune?bike_id=${ran.bike.id}`,
+                },
+                simHref && {
+                  icon: Share2,
+                  title: copied ? 'Link copied' : 'Copy a link to this build',
+                  hint: 'Send it to a friend or your tuner.',
+                  onClick: copyLink,
+                },
+              ].filter(Boolean)}
+            />
+          </>
+        )}
       </div>
     </div>
   );

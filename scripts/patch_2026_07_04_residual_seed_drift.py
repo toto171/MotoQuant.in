@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MotoQuant Pro — residual seed-drift cleanup (2026-07-04).
+MotoQuant — residual seed-drift cleanup (2026-07-04).
 
 Companion to the A3-15 "fold patch fixes into seed sources" pass. The seed
 SOURCES (motoquant/database/seed.py + seed_catalogs/*.py) now emit clean

@@ -47,15 +47,12 @@ jobs:
           pip install -r requirements-api.txt
           pip install -e .
 
-      - name: Seed a scratch database (/tmp/e2e.db)
-        # Fresh, empty DB → init → import → seed. This is the same sequence
-        # the CI "python" job runs against /tmp/ci.db, so it's known-good and
-        # side-steps the "re-seeding the tracked DB raises a FK error"
-        # idempotency artifact documented in the sidecar-smoke job.
-        run: |
-          python -m motoquant.run --db /tmp/e2e.db db init
-          python -m motoquant.run --db /tmp/e2e.db import --known-bikes
-          python -m motoquant.run --db /tmp/e2e.db db seed
+      - name: Copy the shipped catalog to a scratch database (/tmp/e2e.db)
+        # The site is built against the shipped catalog: the landing
+        # calculator's instant-estimate assets (web/public/surrogate/) are
+        # keyed by its bike ids. A copy keeps the tracked motoquant.db
+        # untouched (the API and the CLI write to the file they open).
+        run: cp motoquant.db /tmp/e2e.db
 
       # ── Frontend (Next.js) ───────────────────────────────────────────────
       - name: Set up Node 20

@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Surrogate Training Data Generator (Phase 4B v2)
-===============================================================
+MotoQuant — Surrogate Training Data Generator (Phase 4B v2)
+===========================================================
 Generates a quasi-random dataset of (BikeConfig parameters → ET, trap speed)
 pairs by Sobol-sampling the physical parameter space and running the full
 physics engine on each sample.
@@ -45,8 +45,8 @@ from pathlib import Path
 
 import numpy as np
 
+from .. import engine_select
 from ..models import BikeConfig
-from ..physics import MotoQuantEngine
 
 logger = logging.getLogger(__name__)
 
@@ -443,7 +443,8 @@ def _extract_nominal_features(config: BikeConfig) -> dict[str, float]:
     Used for inference: given a real BikeConfig, produce its feature vector.
     """
     gear_ratios = config.drivetrain.gear_ratios or [2.8, 2.0, 1.5, 1.2, 1.0, 0.85]
-    rider_mass = config.rider.mass_kg if hasattr(config, "rider") else 75.0
+    # The rider mass the physics reads (RiderParams.mass_kg is an unread copy).
+    rider_mass = config.chassis.rider_mass_kg
     total_mass = config.chassis.dry_mass_kg + rider_mass
 
     base = {
@@ -506,7 +507,7 @@ def _apply_features_to_config(
         )
 
     # Mass — subtract rider weight to get bike dry mass
-    rider_mass = cfg.rider.mass_kg if hasattr(cfg, "rider") else 75.0
+    rider_mass = cfg.chassis.rider_mass_kg
     cfg.chassis.dry_mass_kg = max(80.0, features["total_mass_kg"] - rider_mass)
 
     # Aero
@@ -638,7 +639,7 @@ def generate_training_data(
         try:
             cfg = _apply_features_to_config(base_config, feat)
             feat = {**feat, **_extras_from_config(cfg)}
-            engine = MotoQuantEngine(cfg)
+            engine = engine_select.make_engine(cfg)
             result = engine.run()
 
             if result.time_quarter is None or not np.isfinite(result.time_quarter):

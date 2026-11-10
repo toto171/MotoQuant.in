@@ -4,12 +4,15 @@ Sub-Model 14: Staging & Launch
 Encapsulates the procedural logic that happens *before* and *at* the start
 of a drag run:
 
-  • Rollout correction — clocks start after the front wheel clears the
-    stage beam, so the bike is already moving by the time timing begins.
-    The simulator positions the bike at x = –rollout_m at t = 0 so the
-    clock equivalent at x = 0 is already included.
+  • Rollout is NOT handled here: the single timing convention lives in
+    MotoQuantEngine.run(rollout_m=constants.ROLLOUT_M) — integrate from rest
+    at the start line, start the clock at x = rollout_m, finish at x = D.
+    (2026-10 epoch round 2 removed this model's start_position_m() /
+    rollout_m() and StagingParams.rollout_distance_mm: serialised but never
+    read by run(), they described a third, contradictory convention.)
 
-  • Reaction time & vehicle response lag — total elapsed time before the
+  • Reaction time & vehicle response lag (diagnostic only — run() times the
+    pass from the start beam, so reaction time is not part of the ET) — total elapsed time before the
     rear wheel delivers torque = reaction_time_ms + vehicle_response_ms.
     During this window the engine is at launch_rpm but no drive force is
     applied.
@@ -31,22 +34,18 @@ from ..models import BikeConfig
 
 class StagingModel:
     """
-    Provides staging corrections consumed by the physics loop.
+    Provides staging values consumed by the physics loop.
 
     Typical usage
     ─────────────
         staging = StagingModel(cfg)
 
-        # At loop initialisation:
-        x_start    = staging.start_position_m()   # negative (behind beam)
+        # At loop initialisation (the only value run() reads):
         omega_e_0  = staging.initial_omega_e()     # rad/s
-        dead_time  = staging.total_dead_time_s()   # seconds with zero drive force
 
-        # Each timestep:
-        if t < dead_time:
-            T_drive = 0.0   # staging dead-band — clutch not yet dropped
-        else:
-            T_drive = <normal clutch logic>
+        # Diagnostics (not applied by run(): the ET clock starts at the
+        # start beam, after the rider has already reacted):
+        dead_time  = staging.total_dead_time_s()   # reaction + response, s
     """
 
     def __init__(self, cfg: BikeConfig):
@@ -54,7 +53,6 @@ class StagingModel:
         s = cfg.staging
         e = cfg.engine
 
-        self._rollout_m = s.rollout_distance_mm / 1000.0
         self._reaction_s = s.reaction_time_ms / 1000.0
         self._vehicle_s = s.vehicle_response_ms / 1000.0
         self._two_step = s.two_step
@@ -69,15 +67,6 @@ class StagingModel:
     # ─────────────────────────────────────────
     # PUBLIC API
     # ─────────────────────────────────────────
-
-    def start_position_m(self) -> float:
-        """
-        Initial x position (m).  Negative because rollout means the bike is
-        already 'rollout_m' ahead of the staging beam at the moment the clock
-        starts at x = 0.  The simulation starts at x = -rollout_m and the
-        quarter-mile distance is measured from x = 0.
-        """
-        return -self._rollout_m
 
     def initial_omega_e(self) -> float:
         """
@@ -106,10 +95,6 @@ class StagingModel:
     def is_in_dead_band(self, t: float) -> bool:
         """True while the driver has not yet reacted and the clutch is still held."""
         return t < self.total_dead_time_s()
-
-    def rollout_m(self) -> float:
-        """Rollout distance in metres."""
-        return self._rollout_m
 
     def validate(self) -> list:
         """

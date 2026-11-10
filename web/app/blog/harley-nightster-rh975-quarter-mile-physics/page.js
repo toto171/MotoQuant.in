@@ -212,7 +212,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'If you own a Nightster and have a Dragy GPS timer, the MotoQuant calibrator at motoquant.in can fit the simulator\'s predictions to your actual timeslip data. This tightens the prediction band from the cluster\'s ±0.4 second band down to approximately ±0.15 seconds and generates an accurate mod-by-mod ROI table for your specific bike and launch style. The calibrator is especially useful for the Nightster because the belt-drive gearing constraint means the simulation\'s gear-ratio assumptions are exact — there is no sprocket variation to account for.',
+    text: 'If you own a Nightster and have a Dragy GPS timer, upload the run in the simulator to line it up against the simulation split by split; the file is compared and deleted, not kept. To help the model, submit the run through the "Submit a timeslip" form; a reviewed run joins the benchmark set. The Nightster is a good candidate because its belt drive fixes the gearing: there is no sprocket variation to account for.',
   },
   {
     type: 'p',
@@ -264,7 +264,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -287,7 +287,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -315,7 +315,7 @@ export default function PostPage() {
             {['Harley-Davidson', 'Nightster RH975', 'Revolution Max', 'cruiser', 'V-twin', 'physics'].map((t) => (
               <span
                 key={t}
-                className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
               >
                 {t}
               </span>
@@ -324,7 +324,7 @@ export default function PostPage() {
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             Harley Nightster RH975: Revolution Max Quarter-Mile Physics
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             25 May 2026 · 11 min read · MotoQuant Blog
           </div>
         </div>
@@ -338,9 +338,9 @@ export default function PostPage() {
           </div>
           <Link
             href="/simulator"
-            className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
+            className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
           >
-            Run sim →
+            Open the simulator →
           </Link>
         </div>
 
@@ -381,13 +381,6 @@ export default function PostPage() {
                 Browse the full bike catalog
               </Link>{' '}
               — Harley-Davidson Nightster RH975, Sportster S RH1250S, and 350+ other bikes with full spec sheets and OEM tire fitments.
-            </li>
-            <li>
-              ·{' '}
-              <Link href="/pricing" className="text-brand-accent hover:text-brand-orange transition-colors">
-                Pricing
-              </Link>{' '}
-              — free tier covers stock-tune sims on the Nightster; Pro adds the Dragy calibration, full mod-ROI engine, and multi-run statistical analysis for timeslip matching.
             </li>
           </ul>
         </div>

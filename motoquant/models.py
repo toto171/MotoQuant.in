@@ -1,8 +1,48 @@
 """
-MotoQuant Pro — Parameter Models
-==============================
+MotoQuant — Parameter Models
+============================
 All input parameters organized into dataclasses by category.
 Every parameter that affects prediction by >= 0.1% is represented.
+
+Fields accepted but not read by the quarter-mile simulation
+------------------------------------------------------------
+These fields are stored, validated and round-tripped, but changing them does
+not change ET or trap speed (checked 2026-11-10 by perturbing every numeric
+field on the K5 reference and three catalog bikes — V-Rod Muscle, YZF-R15 V4,
+RD350 — with the rollout-epoch physics).  Do not tune them, fit them or
+expose them as levers; wiring one into the physics is a deliberate accuracy
+epoch (and a Rust-core change).
+
+* ``tires.front_pressure_psi`` / ``tires.rear_pressure_psi`` -- no
+  pressure-dependent grip or rolling-resistance term exists (the only
+  pressure effect is the hot-tyre Gay-Lussac factor, which uses temperature).
+* ``tires.mu_slide``, ``tires.tread_depth_mm`` and ``tires.pacejka_B/C/D/E``
+  (``pacejka_force`` is not called by ``run()``).
+* ``staging.reaction_time_ms`` / ``staging.vehicle_response_ms`` -- the
+  staging dead time is not applied.
+* ``clutch.slipper_ratio`` (and ``braking.slipper_ratio``) -- no slipper
+  back-torque branch runs on the quarter-mile path.
+* ``rider.mass_kg`` -- the sim reads ``chassis.rider_mass_kg``;
+  ``rider.cog_height_seated_mm``, ``rider.gear_mass_kg`` and
+  ``rider.experience_level`` are unused.  ``rider.height_cm``,
+  ``rider.launch_forward_shift_mm`` and ``rider.tuck_transition_time_s`` are
+  live.
+* ``suspension.*`` except ``suspension.anti_squat_pct`` and
+  ``suspension.static_sag_mm``.
+* ``braking.*`` -- braking is not part of the quarter-mile run.
+* ``wheelie.*`` except ``wheelie.wheelie_bar`` and, with a bar fitted,
+  ``wheelie.bar_length_mm``.
+
+Conditionally live -- NOT dead, although a perturbation on one bike can make
+them look it: ``engine.peak_power_hp`` / ``peak_torque_nm`` /
+``peak_power_rpm`` shape the torque only for a config WITHOUT a
+``dyno_curve`` (with one, the curve is the torque; scale it too), every
+``forced_induction.*`` field needs a boosted ``boost_type``,
+``drivetrain.shaft_efficiency`` needs a shaft drive,
+``environment.track_prep`` / ``track_prep_passes`` apply only when the
+tyre's own ``track_prep_type`` is "none", ``tires.reversion_temp_c`` only
+above that temperature, and the wind direction / heading only at non-zero
+wind speed.
 """
 
 from dataclasses import dataclass, field
@@ -88,8 +128,14 @@ class ChassisParams:
     fuel_consumption_gs: float = 8.0  # g/s at WOT (decreasing mass)
     wheelbase_mm: float = 1405.0  # Stock wheelbase
     swingarm_extension_mm: float = 0.0  # Extension beyond stock
-    cog_height_mm: float = 550.0  # Combined bike+rider CoG height
-    front_weight_pct: float = 0.52  # Static front weight % (with rider)
+    # Bike CoG height: dry mass + fluids, NO rider (2026-10 epoch round 2 —
+    # the rider is composed on top in submodels/cog.py; the catalog's
+    # 530-620 mm values only make sense as bike-only heights).
+    cog_height_mm: float = 550.0
+    # Static front-wheel load share. The rider's seated CoG is taken at the
+    # bike's fore-aft CoG position (submodels/cog.py), so this holds with
+    # or without the rider and for any rider mass.
+    front_weight_pct: float = 0.52
     rake_deg: float = 24.0  # Steering head angle
     trail_mm: float = 100.0  # Trail
     seat_height_mm: float = 810.0  # Seat height
@@ -108,13 +154,15 @@ class ChassisParams:
 
     @property
     def L_f(self) -> float:
-        """Distance from front axle to CoG (m)."""
-        return self.wheelbase_m * (1 - self.front_weight_pct)
+        """Distance from front axle to CoG (m). A swingarm extension moves
+        only the rear axle, so this uses the stock wheelbase."""
+        return self.wheelbase_mm / 1000.0 * (1 - self.front_weight_pct)
 
     @property
     def L_r(self) -> float:
-        """Distance from rear axle to CoG (m)."""
-        return self.wheelbase_m * self.front_weight_pct
+        """Distance from rear axle to CoG (m): the stock share plus the full
+        swingarm extension."""
+        return self.wheelbase_m - self.L_f
 
 
 # ═══════════════════════════════════════════
@@ -265,10 +313,13 @@ class EngineParams:
         factor = math.exp(-1.5 * x * x)
         factor = max(baseline, factor)
 
-        # Rev-limiter cliff above redline (already handled in engine sub-model
-        # but we also clamp here for direct callers)
-        if rpm > self.redline_rpm * 1.02:
-            return 0.0
+        # 2026-10 epoch: the rev-limiter cliff that used to sit here (torque 0
+        # above 1.02 x redline) was REMOVED. The limiter is modelled once, in
+        # EngineModel.torque (soft cut, constants.REV_LIMITER_CUT_FACTOR) —
+        # dyno-curve configs never had a cliff in get_torque, and a second
+        # hard cut here re-created the slip-phase zero-torque freeze for
+        # curve-less 2T configs. Direct callers (optimal_shift_rpm, the N2O
+        # multiplier) only evaluate at or below redline / under the limiter.
         return self.peak_torque_nm * factor
 
 
@@ -327,7 +378,10 @@ class DrivetrainParams:
     primary_efficiency: float = 0.99  # Primary gear mesh
     trans_efficiency_per_mesh: float = 0.985  # Per gear pair
     chain_efficiency: float = 0.97  # Chain/belt efficiency
-    shaft_efficiency: float = 0.85  # If shaft drive
+    # Shaft final drive: two bevel meshes (~0.97-0.98 each) plus the U-joint /
+    # spline (~0.98) give ~0.93. The old 0.85 made every shaft bike ~0.3 s
+    # slower than its benchmark (Oct 2026 epoch, data-agent attribution).
+    shaft_efficiency: float = 0.93
     gear_oil_viscosity_cst: float = 12.0  # Gear oil @ 100C
     clutch_type: str = CLUTCH_LOCKUP  # Clutch type
     clutch_engage_rpm: float = 6000.0  # Engagement RPM
@@ -497,19 +551,33 @@ class TireParams:
         decay = np.exp(-self.time_burnout_to_launch_s / max(tau, 1.0))
         return ambient_temp_c + (self.burnout_end_temp_c - ambient_temp_c) * decay
 
-    def track_prep_multiplier(self, track_temp_c: float) -> float:
-        """Grip multiplier from track prep compound."""
-        if self.track_prep_type == TRACK_NONE:
+    def track_prep_multiplier(
+        self,
+        track_temp_c: float,
+        venue_prep_type: str = TRACK_NONE,
+        venue_prep_passes: int = 0,
+    ) -> float:
+        """Grip multiplier from track prep compound.
+
+        The tyre's own prep setting wins; when it is ``TRACK_NONE`` the
+        venue-level prep (``EnvironmentParams.track_prep`` /
+        ``track_prep_passes``) applies instead. With both at ``TRACK_NONE``
+        the result is exactly 1.0, as before the venue fallback existed.
+        """
+        prep_type, passes = self.track_prep_type, self.track_prep_passes
+        if prep_type == TRACK_NONE:
+            prep_type, passes = venue_prep_type, venue_prep_passes
+        if prep_type == TRACK_NONE:
             return 1.0
         # Base multiplier decreases with passes and degrades above 50C
-        if self.track_prep_type in (TRACK_VHT, TRACK_PJ1):
-            freshness = max(0.0, 1.0 - self.track_prep_passes / 200.0)
+        if prep_type in (TRACK_VHT, TRACK_PJ1):
+            freshness = max(0.0, 1.0 - passes / 200.0)
             temp_penalty = max(0.0, 1.0 - max(0.0, track_temp_c - 50.0) / 30.0)
             return (
                 1.0 + 0.12 * freshness * temp_penalty
             )  # 12% max grip boost from VHT/PJ1
-        if self.track_prep_type == TRACK_RUBBER:
-            return 1.0 + 0.10 * max(0.0, 1.0 - self.track_prep_passes / 500.0)
+        if prep_type == TRACK_RUBBER:
+            return 1.0 + 0.10 * max(0.0, 1.0 - passes / 500.0)
         return 1.0
 
 
@@ -629,9 +697,15 @@ class WheelieParams:
 class RiderParams:
     """Rider body dynamics."""
 
+    # Not read by the physics: the rider mass the loop uses is
+    # ChassisParams.rider_mass_kg.
     mass_kg: float = 75.0  # With gear
-    height_cm: float = 175.0  # Rider height
-    cog_height_seated_mm: float = 700.0  # Rider CoG when seated
+    # Stature — LIVE since the 2026-10 epoch round 2: scales the rider's CoG
+    # height above the seat (constants.RIDER_COG_ABOVE_SEAT_PER_STATURE).
+    height_cm: float = 175.0
+    # Not read by the physics (submodels/cog.py composes the rider CoG from
+    # seat height, sag and stature instead).
+    cog_height_seated_mm: float = 700.0
     launch_forward_shift_mm: float = 80.0  # Forward lean at launch
     tuck_transition_time_s: float = 2.0  # Time to go from launch to tuck
     gear_mass_kg: float = 5.0  # Helmet, suit, boots
@@ -690,17 +764,16 @@ class StagingParams:
     """Staging procedure and launch setup."""
 
     staging_type: str = STAGING_SHALLOW
-    rollout_distance_mm: float = 350.0  # Distance before clock starts
+    # (2026-10 epoch round 2: the never-read ``rollout_distance_mm`` field and
+    # its ``rollout_m`` property were REMOVED — there is exactly one rollout
+    # convention, run(rollout_m=constants.ROLLOUT_M). Old saved configs that
+    # still carry the key load fine: bridge/config_io drop unknown fields.)
     launch_rpm: float = 8000.0  # Two-step hold RPM
     prespool_boost_bar: float = 0.0  # Boost at staging
     reaction_time_ms: float = 300.0  # Human RT
     vehicle_response_ms: float = 50.0  # ECU + fuel + ignition lag
     tree_type: str = "pro"  # pro (0.400s) / sportsman (0.500s)
     two_step: bool = False  # Two-step rev limiter
-
-    @property
-    def rollout_m(self) -> float:
-        return self.rollout_distance_mm / 1000.0
 
 
 # ═══════════════════════════════════════════
@@ -725,6 +798,20 @@ class EnvironmentParams:
     track_prep_passes: int = 0  # Freshness
     track_heading_deg: float = 0.0  # Track direction for wind calc
     track_gradient_pct: float = 0.0  # % grade (positive = uphill)
+
+    def dry_air_pressure_pa(self) -> float:
+        """Dry-air partial pressure (Pa): station pressure minus water-vapour pressure.
+
+        Uses the same barometric and Magnus models as ``air_density``.
+        """
+        P_sea = self.barometric_pressure_hpa * 100.0
+        P_alt = P_sea * (1.0 - 0.0065 * self.altitude_m / 288.15) ** (
+            9.80665 * 0.0289644 / (8.31447 * 0.0065)
+        )
+        e_sat = 610.78 * np.exp(
+            17.27 * self.ambient_temp_c / (self.ambient_temp_c + 237.3)
+        )
+        return float(P_alt - e_sat * self.relative_humidity_pct / 100.0)
 
     def air_density(self) -> float:
         """Compute air density from altitude, temp, humidity using barometric formula."""

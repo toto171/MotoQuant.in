@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Venue Repository
-================================
+MotoQuant — Venue Repository
+============================
 CRUD for drag strips, airstrips, and road closure venues.
 Handles seasonal weather normals and environment construction.
 """

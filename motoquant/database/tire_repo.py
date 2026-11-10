@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Tire Repository
-===============================
+MotoQuant — Tire Repository
+===========================
 CRUD for the tire library — the most sim-critical component database.
 
 Pacejka coefficients, thermal models, and friction data are the #1 driver
@@ -12,11 +12,25 @@ import sqlite3
 from ..models import TireParams
 
 
+def tire_position_fits_slot(tire_position: str | None, slot: str) -> bool:
+    """True when a tire model of ``tire_position`` may sit in fitment ``slot``.
+
+    A front-position tire never fills a rear slot (or vice versa). A tire whose
+    position is unset or ``both`` is not contradicted by either slot.
+    """
+    return tire_position in (None, "", "both", slot)
+
+
 class TireRepository:
     """Repository for tire models and their simulation parameters."""
 
     def __init__(self, conn: sqlite3.Connection):
         self._conn = conn
+        # Rows with id <= this watermark are never overwritten by create().
+        # Set by seed_all() while it re-seeds a populated catalog, so curated
+        # patch data (availability flags, prices, size notation) survives a
+        # `db seed` on the shipped DB. None = no protection.
+        self.protect_ids_upto: int | None = None
 
     # ────────────────────────────────────────────
     # Tire Manufacturers
@@ -64,12 +78,16 @@ class TireRepository:
         size_designation: str,
         compound_type: str = "sport",
         position: str = "rear",
+        update_existing: bool = True,
         **kwargs,
     ) -> int:
         """
         Create a tire model entry.
 
         All Pacejka, friction, thermal, and physical params passed as kwargs.
+        An existing row for the same (manufacturer, model, physical size) is
+        updated in place unless ``update_existing`` is False or the row is
+        protected by ``protect_ids_upto`` — then it is returned untouched.
         """
         mfr_id = self.get_or_create_manufacturer(manufacturer_name)
 
@@ -132,6 +150,11 @@ class TireRepository:
                 break
         if existing:
             tire_id = existing["id"] if hasattr(existing, "keys") else existing[0]
+            protected = (
+                self.protect_ids_upto is not None and tire_id <= self.protect_ids_upto
+            )
+            if not update_existing or protected:
+                return tire_id
             set_cols = [c for c in cols if c not in ("manufacturer_id",)]
             set_vals = [v for c, v in zip(cols, vals) if c not in ("manufacturer_id",)]
             assignments = ", ".join(f"{c} = ?" for c in set_cols)
@@ -392,6 +415,19 @@ class TireRepository:
         row ids (same class of bug fixed in `create()` above). Root-cause
         history: scripts/patch_2026_08_08_fitment_integrity.py.
         """
+        tire_row = self._conn.execute(
+            "SELECT position FROM tire_models WHERE id = ?", (tire_model_id,)
+        ).fetchone()
+        if tire_row is not None:
+            tire_position = (
+                tire_row["position"] if hasattr(tire_row, "keys") else tire_row[0]
+            )
+            if not tire_position_fits_slot(tire_position, position):
+                raise ValueError(
+                    f"tire model {tire_model_id} is a {tire_position}-position tire "
+                    f"and cannot fill the {position} slot of bike {bike_model_id}"
+                )
+
         # Id-preserving upsert on the table's UNIQUE key.
         existing = self._conn.execute(
             """SELECT id FROM bike_tire_fitments

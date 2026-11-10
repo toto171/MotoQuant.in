@@ -52,7 +52,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running the Xtreme 200S 4V in MotoQuant under Aamby Valley November conditions (density altitude around 1100 m, 22°C ambient, dry concrete with the OEM bias-ply 130/70-17 rear at μ_peak 1.05) and a 78 kg rider on the 158 kg dry bike produces the following stock-tune output:',
+    text: 'Running the Xtreme 200S 4V in MotoQuant under Aamby Valley November conditions (density altitude around 1100 m, 22°C ambient, dry asphalt with the OEM bias-ply 130/70-17 rear at μ_peak 1.05) and a 78 kg rider on the 158 kg dry bike produces the following stock-tune output:',
   },
   {
     type: 'table',
@@ -71,7 +71,7 @@ const CONTENT = [
   },
   {
     type: 'callout',
-    text: 'Why the simulator runs slow on small-cc Indian bikes: the cluster bias is honest, not a bug. Most published 0-100 km/h times for this class are converted to ETs by multiplying by 1.6 — a magazine shortcut, not a real timing trap. Real instrumented Indian small-cc data is thin, so the model is conservatively calibrated to the slower end of plausible until Dragy uploads start flowing through the calibrator.',
+    text: 'Why the simulator runs slow on small-cc Indian bikes: the cluster bias is honest, not a bug. Most published 0-100 km/h times for this class are converted to ETs by multiplying by 1.6 — a magazine shortcut, not a real timing trap. Real instrumented Indian small-cc data is thin, so the model is conservatively calibrated to the slower end of plausible until instrumented timeslips arrive through the "Submit a timeslip" form.',
   },
   {
     type: 'h2',
@@ -107,7 +107,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "2. Clutch and launch. With only 17.35 Nm at 6,500 rpm, the Xtreme has the opposite problem of a litre bike: there is barely enough torque to wheelie, and the launch window is narrow. Drop the clutch below 5,000 rpm and the engine bogs; bring the launch above 7,500 rpm and the rear tire — bias-ply OEM rubber, μ_peak 1.05 — actually does start to spin on dry concrete because the clutch hooks too hard. The simulator's small-cc clutch over-clutching factor (added in the May 2026 calibration pass) lets the Xtreme launch closer to its peak-torque rpm without snatching, which closes about 0.3 seconds of the bigger pre-fix gap. A real rider on a real strip needs to find that window by feel, and most do not.",
+    text: "2. Clutch and launch. With only 17.35 Nm at 6,500 rpm, the Xtreme has the opposite problem of a litre bike: there is barely enough torque to wheelie, and the launch window is narrow. Drop the clutch below 5,000 rpm and the engine bogs; bring the launch above 7,500 rpm and the rear tire — bias-ply OEM rubber, μ_peak 1.05 — actually does start to spin on dry asphalt because the clutch hooks too hard. The simulator's small-cc clutch over-clutching factor (added in the May 2026 calibration pass) lets the Xtreme launch closer to its peak-torque rpm without snatching, which closes about 0.3 seconds of the bigger pre-fix gap. A real rider on a real strip needs to find that window by feel, and most do not.",
   },
   {
     type: 'p',
@@ -176,7 +176,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'For the Xtreme specifically that means the simulator 17.40 second ET and a magazine 16.0 second ET are probably describing the same physical bike — they are just produced by different methodologies. The honest answer for an owner is: take the Xtreme to a real timed strip, run a Dragy or a VBOX, and trust the timing trap over the magazine number. The simulator will close the gap as more Indian small-cc Dragy data flows into the calibrator, which is a Phase 3 priority.',
+    text: 'For the Xtreme specifically that means the simulator 17.40 second ET and a magazine 16.0 second ET are probably describing the same physical bike — they are just produced by different methodologies. The honest answer for an owner is: take the Xtreme to a real timed strip, run a Dragy or a VBOX, and trust the timing trap over the magazine number. The gap will close as more instrumented Indian small-cc timeslips join the benchmark set.',
   },
   {
     type: 'h2',
@@ -244,7 +244,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -267,7 +267,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -296,7 +296,7 @@ export default function PostPage() {
             {['Hero', 'Xtreme 200S 4V', 'Indian 200cc', 'commuter sport'].map((t) => (
               <span
                 key={t}
-                className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
               >
                 {t}
               </span>
@@ -305,7 +305,7 @@ export default function PostPage() {
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             Hero Xtreme 200S 4V Quarter-Mile Physics: 200cc Commuter Drag
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             8 May 2026 · 9 min read · MotoQuant Blog
           </div>
         </div>
@@ -351,13 +351,6 @@ export default function PostPage() {
               </Link>{' '}
               — every spec, every gear ratio, every Cd value used by the simulator.
             </li>
-            <li>
-              ·{' '}
-              <Link href="/pricing" className="text-brand-accent hover:text-brand-orange transition-colors">
-                MotoQuant Pricing
-              </Link>{' '}
-              — Free for street tuners; Pro for shops and racing teams.
-            </li>
           </ul>
         </div>
 
@@ -371,9 +364,9 @@ export default function PostPage() {
           </div>
           <Link
             href="/simulator?bike=hero-xtreme-200s-4v"
-            className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
+            className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
           >
-            Run sim →
+            Open the simulator →
           </Link>
         </div>
       </article>

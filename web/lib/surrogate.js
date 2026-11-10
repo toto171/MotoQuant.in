@@ -45,25 +45,41 @@ function decodeF32(b64) {
 
 let _assets = null; // resolved {model, bikes} or null after a failed load
 let _loading = null; // in-flight promise so concurrent callers share one fetch
+let _failedAt = 0; // timestamp of the last failed load; failures are cached briefly
+const FAIL_TTL_MS = 60_000;
+
+async function fetchPair(bust) {
+  const q = bust ? `?v=${Date.now()}` : '';
+  const init = bust ? { cache: 'no-store' } : undefined;
+  const [mRes, bRes] = await Promise.all([
+    fetch(`${ASSET_BASE}/model.json${q}`, init),
+    fetch(`${ASSET_BASE}/bikes.json${q}`, init),
+  ]);
+  if (!mRes.ok || !bRes.ok) return null;
+  const [model, bikes] = await Promise.all([mRes.json(), bRes.json()]);
+  return { model, bikes };
+}
 
 async function loadAssets() {
   if (_assets) return _assets;
   if (_loading) return _loading;
+  if (_failedAt && Date.now() - _failedAt < FAIL_TTL_MS) return null;
   _loading = (async () => {
     try {
-      const [mRes, bRes] = await Promise.all([
-        fetch(`${ASSET_BASE}/model.json`),
-        fetch(`${ASSET_BASE}/bikes.json`),
-      ]);
-      if (!mRes.ok || !bRes.ok) return null;
-      const [model, bikes] = await Promise.all([mRes.json(), bRes.json()]);
-      if (model.format !== 'motoquant-surrogate-web/1') return null;
-      // A mismatched pair (one file regenerated without the other) would
-      // silently misapply features — refuse instead.
-      if (model.npz_sha256 !== bikes.npz_sha256) {
-        console.warn('surrogate: model/bikes fingerprint mismatch — falling back to server');
-        return null;
+      let pair = await fetchPair(false);
+      if (!pair) return null;
+      // A mismatched pair (one file regenerated without the other, e.g. a
+      // deploy mid-cache) would silently misapply features. Refetch both once
+      // with a cache-busting query before giving up.
+      if (pair.model.npz_sha256 !== pair.bikes.npz_sha256) {
+        pair = await fetchPair(true);
+        if (!pair || pair.model.npz_sha256 !== pair.bikes.npz_sha256) {
+          console.warn('surrogate: model/bikes fingerprint mismatch — falling back to server');
+          return null;
+        }
       }
+      const { model, bikes } = pair;
+      if (model.format !== 'motoquant-surrogate-web/1') return null;
       const layers = model.layers.map((l) => ({
         shape: l.shape,
         W: decodeF32(l.W),
@@ -82,11 +98,13 @@ async function loadAssets() {
         bikes: bikes.bikes,
         venues: bikes.venues,
       };
+      _failedAt = 0;
       return _assets;
     } catch (e) {
       console.warn('surrogate: asset load failed — falling back to server', e);
       return null;
     } finally {
+      if (!_assets) _failedAt = Date.now();
       _loading = null;
     }
   })();
@@ -152,9 +170,11 @@ function forward(assets, x26) {
  * @param {number} [opts.powerBoostPct=0]
  * @param {number} [opts.massDeltaKg=0]
  * @param {number|null} [opts.venueId]  overrides altitude when set
+ * @param {string|null} [opts.venueSurface] the venue's surface_type; anything but
+ *        'asphalt' (or unknown) is refused — the model has no grip/surface input
  * @param {boolean} [opts.hasParts]     any part/tire override selected → refuse
  * @returns {Promise<{ok:true, etS:number, trapKmh:number, source:'surrogate'}
- *                  |{ok:false, reason:'unsupported-overrides'|'envelope'|'unavailable'}>}
+ *                  |{ok:false, reason:'unsupported-overrides'|'surface'|'envelope'|'unavailable'}>}
  */
 export async function predictQuick({
   bikeId,
@@ -162,9 +182,13 @@ export async function predictQuick({
   powerBoostPct = 0,
   massDeltaKg = 0,
   venueId = null,
+  venueSurface = null,
   hasParts = false,
 }) {
   if (hasParts) return { ok: false, reason: 'unsupported-overrides' };
+  // The model's only venue input is altitude. A venue whose surface is not
+  // asphalt (salt, dry lake, concrete) changes grip — answer exactly or not at all.
+  if (venueId != null && venueSurface !== 'asphalt') return { ok: false, reason: 'surface' };
   const assets = await loadAssets();
   if (!assets) return { ok: false, reason: 'unavailable' };
   const bike = assets.bikes[String(bikeId)];
@@ -176,7 +200,8 @@ export async function predictQuick({
   base.peak_power_hp = bike.f.peak_power_hp * scale;
   base.peak_torque_nm = bike.f.peak_torque_nm * scale;
   base.total_mass_kg = bike.dry_mass_kg + massDeltaKg + riderMassKg;
-  if (venueId != null && assets.venues[String(venueId)] != null) {
+  if (venueId != null) {
+    if (assets.venues[String(venueId)] == null) return { ok: false, reason: 'unavailable' };
     base.altitude_m = assets.venues[String(venueId)];
   }
 

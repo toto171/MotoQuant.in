@@ -1,8 +1,9 @@
 """
-MotoQuant Pro — FastAPI Web Server
-====================================
+MotoQuant — FastAPI Web Server
+==============================
 REST API wrapper around the MotoQuant physics engine and database.
-Serves the motoquant.in web simulator, public leaderboard, and bike library.
+Serves the motoquant.in simulator, tools and bike library. It has no accounts
+and stores nothing a visitor sends for other visitors to see.
 
 Endpoints
 ---------
@@ -13,29 +14,33 @@ GET  /api/bikes/{id}          Bike detail + default config
 GET  /api/venues              List venues with current DA
 POST /api/simulate            Full simulation (returns v(t), RPM(t), etc.)
 POST /api/simulate/quick      Quick ET-only simulation (faster for UI sliders)
-GET  /api/leaderboard         Top simulation results
 GET  /api/tires               List tire models
+GET  /docs                    Every route, with request and response schemas
 
 Run locally
 -----------
-    cd "Vehicle Dynamics"
     uvicorn motoquant.api:app --reload --port 8000
 
-Deploy (Railway / Render / DigitalOcean App Platform)
+Deploy
 ------
-    Set PORT env var; Render builds via render.yaml (Docker).
+    Set the PORT env var; render.yaml builds the Docker image.
 """
 
 import asyncio
 import copy
+import hashlib
 import json
 import logging
+import math
 import os
+import re
 import sqlite3
 import tempfile
 import threading
+from collections import OrderedDict
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import (
     Depends,
@@ -43,54 +48,39 @@ from fastapi import (
     File,
     Form,
     HTTPException,
+    Path,
     Query,
     Request,
-    Response,
     UploadFile,
 )
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from pydantic import BaseModel, Field
+from fastapi.responses import JSONResponse, Response
+from pydantic import BaseModel, ConfigDict, Field
 
 # TypedDict must come from typing_extensions on Python < 3.12 when used in
 # Pydantic/FastAPI annotations (pydantic raises PydanticUserError otherwise).
 # python:3.11-slim in prod hit exactly that and crash-looped — 2026-06-06.
 from typing_extensions import TypedDict
 
+from . import __version__, engine_select
+from .constants import ROLLOUT_M
+from .database.connection import (
+    bump_catalog_generation,
+    catalog_token,
+)
 from .defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 from .models import BikeConfig
-from .physics import MotoQuantEngine
-from .ratelimit import rate_limit
-
-# ─── Auth dependency (imported early so Depends() default-args resolve) ───────
-# Wrapped in try/except so the server still starts without python-jose installed
-# (tests stub this out; production must have all deps in requirements-api.txt).
-try:
-    from .auth import (
-        get_optional_user as get_optional_user,  # noqa: PLC0414
-        require_tier as require_tier,  # noqa: PLC0414
-    )
-except ImportError:  # pragma: no cover
-
-    def require_tier(_tier: str):  # type: ignore[misc]
-        """Stub — replace by installing python-jose[cryptography]."""
-
-        def _noop() -> dict:
-            return {}
-
-        return _noop  # callers wrap with Depends(require_tier(...))
-
-    def get_optional_user() -> dict | None:  # type: ignore[misc]
-        """Stub — no auth layer, so every caller is anonymous."""
-        return None
-
+from .ratelimit import heavy_gate_for, rate_limit
 
 # ─── App init ─────────────────────────────────────────────────────────────
 
 app = FastAPI(
-    title="MotoQuant Pro API",
+    title="MotoQuant API",
     description="First-principles motorcycle drag racing simulator -- motoquant.in",
-    version="0.3.0",
+    version=__version__,
     docs_url="/docs",
     redoc_url="/redoc",
 )
@@ -114,7 +104,48 @@ app.add_middleware(
 # catalog fetches, sim timeseries) uncompressed, which is pure egress waste
 # on the free-tier instance and slow on Indian mobile links. minimum_size
 # keeps tiny health/quick-sim responses uncompressed (gzip overhead > win).
-app.add_middleware(GZipMiddleware, minimum_size=1024)
+# compresslevel=5: level 9 costs ~2.3x the CPU of level 5 for ~4% smaller output
+# on the catalog JSON (0.5-CPU instance).
+app.add_middleware(GZipMiddleware, minimum_size=1024, compresslevel=5)
+
+# Database row ids are SQLite INTEGERs (signed 64-bit) but the catalog never
+# approaches 2**31; bounding request ids keeps absurd values (which sqlite3
+# rejects with OverflowError) a clean 422 instead of a 500.
+MAX_DB_ID = 2**31 - 1
+DbId = Annotated[int, Field(ge=1, le=MAX_DB_ID)]
+
+
+def _json_safe_float(x: float) -> float | str:
+    return x if math.isfinite(x) else str(x)
+
+
+@app.exception_handler(RequestValidationError)
+async def _validation_error_handler(request: Request, exc: RequestValidationError):
+    """422 body in FastAPI's default shape, but always JSON-serialisable.
+
+    The default handler echoes each offending ``input`` back; a JSON ``NaN`` /
+    ``Infinity`` there makes the (strict-JSON) encoder raise, turning a plain
+    validation failure into a 500. Non-finite floats are echoed as strings.
+    """
+    try:
+        detail = jsonable_encoder(
+            exc.errors(), custom_encoder={float: _json_safe_float}
+        )
+        content = {"detail": detail}
+        json.dumps(content, allow_nan=False)
+    except (TypeError, ValueError):
+        content = {
+            "detail": [
+                {
+                    "type": e.get("type"),
+                    "loc": list(e.get("loc", ())),
+                    "msg": e.get("msg"),
+                }
+                for e in exc.errors()
+            ]
+        }
+    return JSONResponse(status_code=422, content=content)
+
 
 # ─── DB helper ────────────────────────────────────────────────────────────
 
@@ -146,6 +177,9 @@ def _get_db():
         db_path = os.environ.get("MOTOQUANT_DB", "motoquant.db")
         db = MotoQuantDB(db_path)
         _db_conn = db.conn
+        # A new connection may be a different database file: nothing cached
+        # from the previous one may be served.
+        bump_catalog_generation()
         return _db_conn
     except Exception as e:
         logging.getLogger(__name__).error(
@@ -212,15 +246,52 @@ class AppliedPartDict(TypedDict, total=False):
     price_inr: float | None
 
 
+class SkippedPartDict(TypedDict):
+    """One entry of ``parts_skipped_detail``: a requested part id that was NOT
+    applied, and why. ``reason`` is ``"unknown_part"`` (no such catalog id),
+    ``"does_not_fit"`` (the part is not compatible with the chosen bike — the
+    same verdict ``GET /api/parts?bike_id=`` gives) or ``"not_applied"`` (the
+    part row could not be applied). ``detail`` is a plain-language sentence."""
+
+    id: int
+    reason: str
+    detail: str
+
+
+class EnvironmentEchoDict(TypedDict):
+    """The conditions a result was actually simulated under.
+
+    ``name`` is the venue (or resolved location) name, ``"Custom conditions"``
+    when only manual values were supplied, or ``"Default conditions"`` when the
+    server defaults were used (``is_default`` is then true). Numbers are read
+    off the config the engine ran, never restated from the request.
+    """
+
+    name: str
+    is_default: bool
+    source: str  # "default" | "manual" | "venue"
+    altitude_m: float
+    ambient_temp_c: float
+    track_temp_c: float
+    humidity_pct: float
+    pressure_hpa: float
+    headwind_kmh: float
+    track_surface: str
+
+
+class TyreLabelDict(TypedDict):
+    """A catalog tyre fitted by the request (``tyres`` in quick results)."""
+
+    position: str
+    id: int
+    name: str
+
+
 class QuickSimResultDict(TypedDict):
     """Shape of the dict returned by the ``/api/simulate/quick`` endpoint.
 
-    Mirrors the ``QuickSimResponse`` TypeScript interface in
-    ``desktop/src/types/api.ts``. Built inline in :func:`simulate_quick`.
-
-    Keep field names + types in lockstep with
-    ``desktop/src/types/api.ts::QuickSimResponse`` — any drift between the
-    two silently breaks the desktop BuildPage slider UI.
+    Built inline in :func:`simulate_quick`. The website's simulator and
+    timeslip pages read these keys by name, so treat them as a public contract.
 
     ``stock_et_s`` and ``et_delta_s`` are nullable because they are only
     populated when ``parts_applied`` is non-empty (otherwise "stock" equals
@@ -236,6 +307,10 @@ class QuickSimResultDict(TypedDict):
     total_mass_kg: float
     parts_applied: list[AppliedPartDict]
     build_cost_inr: float
+    parts_skipped: list[int]
+    parts_skipped_detail: list[SkippedPartDict]
+    tyres: list[TyreLabelDict]
+    environment: EnvironmentEchoDict
     stock_et_s: float | None
     et_delta_s: float | None
 
@@ -258,8 +333,9 @@ class TopSpeedTimeseriesDict(TypedDict):
     """Downsampled timeseries payload for ``/api/simulate/top-speed``.
 
     Only populated when the request sets ``include_timeseries=True``.
-    Stride is chosen in :func:`simulate_top_speed` so the payload is
-    ~100 Hz regardless of the underlying solver ``dt``.
+    Built by :func:`_topspeed_timeseries`: ~100 Hz source, decimated to at most
+    ``TOPSPEED_MAX_SERIES_POINTS`` samples (first, last and peak kept) and
+    rounded to plotting precision.
     """
 
     t: list[float]
@@ -294,6 +370,9 @@ class TopSpeedResultDict(TypedDict, total=False):
     peak_power_hp: float
     total_mass_kg: float
     parts_applied: list[AppliedPartDict]
+    parts_skipped: list[int]
+    parts_skipped_detail: list[SkippedPartDict]
+    environment: EnvironmentEchoDict
     build_cost_inr: float
     timeseries: TopSpeedTimeseriesDict
 
@@ -315,23 +394,49 @@ class DistanceResultDict(TypedDict):
     bike_name: str
     peak_power_hp: float
     total_mass_kg: float
+    parts_skipped: list[int]
+    parts_skipped_detail: list[SkippedPartDict]
+    environment: EnvironmentEchoDict
 
 
 # ─── Request / response models ────────────────────────────────────────────
 
 
-class SimulateRequest(BaseModel):
+class ConditionsRequest(BaseModel):
+    """Optional race conditions shared by every simulate, compare, optimiser,
+    autotune and outlaw route (and their ``/api/jobs/*`` variants).
+
+    Precedence: ``venue_id`` (seeded venue) sets altitude and surface first; a
+    resolved ``location`` / ``lat``+``lon`` then sets the environment; explicit
+    values (``altitude_m``, ``ambient_temp_c``, ``track_temp_c``,
+    ``humidity_pct``, ``pressure_hpa``) override both. The conditions actually
+    simulated are echoed in the response's ``environment`` block."""
+
+    location: str | None = Field(
+        None, max_length=200, description="City/venue, e.g. 'Pune, IN'"
+    )
+    venue_id: DbId | None = Field(None, description="Seeded venue id (sets altitude)")
+    lat: float | None = Field(None, ge=-90, le=90)
+    lon: float | None = Field(None, ge=-180, le=180)
+    altitude_m: float | None = Field(None, ge=-500, le=8000)
+    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
+    track_temp_c: float | None = Field(None, ge=-30, le=80)
+    humidity_pct: float | None = Field(None, ge=0, le=100)
+    pressure_hpa: float | None = Field(None, ge=800, le=1100)
+
+
+class SimulateRequest(ConditionsRequest):
     """POST /api/simulate -- full simulation request."""
 
     # Bike selection -- one of these must be provided
-    bike_id: int | None = Field(None, description="DB bike model ID")
+    bike_id: DbId | None = Field(None, description="DB bike model ID")
     bike_preset: str | None = Field(
         None, description="'gsxr1000_k5' | 'yzfr1_4c8' | 'hayabusa_gen1'"
     )
 
     # Optional overrides (applied on top of the selected bike's defaults).
-    # Bounds mirror the paid routes (OptimizeBuildRequest/AutotuneRequest) so
-    # the free sim surface can't be fed physically-impossible values that make
+    # Bounds mirror the optimizer routes (OptimizeBuildRequest/AutotuneRequest)
+    # so the sim surface can't be fed physically-impossible values that make
     # the engine return ET=0.0 nonsense as a 200 success.
     power_boost_pct: float = Field(
         0.0,
@@ -345,26 +450,16 @@ class SimulateRequest(BaseModel):
     rider_mass_kg: float = Field(
         75.0, ge=20.0, le=250.0, description="Rider weight [kg]"
     )
-    front_tire_id: int | None = Field(None, description="Override front tire DB ID")
-    rear_tire_id: int | None = Field(None, description="Override rear tire DB ID")
-    venue_id: int | None = Field(
-        None, description="Venue for DA and surface conditions"
+    # Same cap as QuickSimRequest.part_ids.
+    part_ids: list[DbId] = Field(
+        default_factory=list, max_length=30, description="Part IDs to apply"
     )
-
-    # Environment overrides (applied on top of venue defaults if set).
-    # Bounds match AutotuneRequest, which had them from the start. Without
-    # them (2026-07-25 audit) physically impossible input was absorbed as a
-    # 200 success with a silently meaningless answer: humidity_pct=1e9 or
-    # ambient_temp_c=500 returned et_quarter_s 0.0 / trap 0.0.
-    ambient_temp_c: float | None = Field(
-        None, ge=-30, le=60, description="Ambient temperature C"
-    )
-    track_temp_c: float | None = Field(
-        None, ge=-30, le=80, description="Track surface temperature C"
-    )
-    humidity_pct: float | None = Field(
-        None, ge=0, le=100, description="Relative humidity 0-100%"
-    )
+    front_tire_id: DbId | None = Field(None, description="Override front tire DB ID")
+    rear_tire_id: DbId | None = Field(None, description="Override rear tire DB ID")
+    # venue_id / location / lat / lon / altitude_m / ambient_temp_c /
+    # track_temp_c / humidity_pct / pressure_hpa come from ConditionsRequest.
+    # Their bounds reject physically impossible input (humidity_pct=1e9 or
+    # ambient_temp_c=500 once returned et_quarter_s 0.0 as a 200 success).
     headwind_kmh: float | None = Field(
         None, ge=-200, le=200, description="Headwind km/h (negative = tailwind)"
     )
@@ -374,8 +469,8 @@ class SimulateRequest(BaseModel):
         False, description="Use adaptive RK4 timestep (slower)"
     )
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "bike_id": 1,
                 "power_boost_pct": 5.0,
@@ -383,12 +478,13 @@ class SimulateRequest(BaseModel):
                 "rider_mass_kg": 70.0,
             }
         }
+    )
 
 
-class QuickSimRequest(BaseModel):
+class QuickSimRequest(ConditionsRequest):
     """POST /api/simulate/quick -- minimal input for slider-driven UI."""
 
-    bike_id: int | None = None
+    bike_id: DbId | None = None
     bike_preset: str | None = None
     power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
@@ -397,20 +493,74 @@ class QuickSimRequest(BaseModel):
     # unbounded (2026-08-11 hardening) — a single request carrying tens of
     # thousands of ids became a free CPU/DB amplifier. No real build exceeds
     # ~15 parts; 30 leaves 2x headroom.
-    part_ids: list[int] = Field(
+    part_ids: list[DbId] = Field(
         default_factory=list, max_length=30, description="Part IDs to apply"
     )
-    front_tire_id: int | None = None
-    rear_tire_id: int | None = None
-    venue_id: int | None = None
-    # Environment overrides
-    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
-    track_temp_c: float | None = Field(None, ge=-30, le=80)
-    humidity_pct: float | None = Field(None, ge=0, le=100)
+    front_tire_id: DbId | None = None
+    rear_tire_id: DbId | None = None
     headwind_kmh: float | None = Field(None, ge=-200, le=200)
 
 
 # ─── Config builder ────────────────────────────────────────────────────────
+
+_PRESETS = {
+    "gsxr1000_k5": gsxr1000_k5,
+    "yzfr1_4c8": yzfr1_4c8,
+    "hayabusa_gen1": hayabusa_gen1,
+}
+
+
+def _precheck_refs(
+    *,
+    bike_ids=(),
+    bike_presets=(),
+    venue_id: int | None = None,
+    tire_ids=(),
+) -> None:
+    """404 on catalog ids / presets that do not exist.
+
+    Job routes run their work on a worker thread, where an unknown id would
+    only surface as a failed job on the first poll; checking up front gives the
+    caller the same 404 the synchronous routes return.
+    """
+    for bike_id, preset in zip(bike_ids, bike_presets):
+        if bike_id is None and preset and preset not in _PRESETS:
+            raise HTTPException(404, f"Unknown bike_preset: {preset}")
+    db = _get_db()
+    if not db:
+        return
+
+    def _exists(table: str, row_id: int) -> bool:
+        return db.execute(f"SELECT 1 FROM {table} WHERE id=?", (row_id,)).fetchone()
+
+    for bike_id in bike_ids:
+        if bike_id is not None and not _exists("bike_models", bike_id):
+            raise HTTPException(404, f"Bike {bike_id} not found")
+    if venue_id is not None and not _exists("venues", venue_id):
+        raise HTTPException(404, f"Venue {venue_id} not found")
+    # tire_ids come in (front, rear) pairs, as every caller passes them.
+    for i, tire_id in enumerate(tire_ids):
+        if tire_id is None:
+            continue
+        row = db.execute(
+            "SELECT position FROM tire_models WHERE id=?", (tire_id,)
+        ).fetchone()
+        if row is None:
+            raise HTTPException(404, f"Tire {tire_id} not found")
+        _check_tire_position(tire_id, row[0], "front" if i % 2 == 0 else "rear")
+
+
+def _check_tire_position(tire_id: int, position: str | None, wanted: str) -> None:
+    """422 when a tyre made for one wheel is requested for the other.
+
+    Grip for drive traction comes from the rear tyre, so a front tyre sent as
+    ``rear_tire_id`` would silently change the result. ``both`` fits either.
+    """
+    pos = (position or "").lower()
+    if pos in ("front", "rear") and pos != wanted:
+        raise HTTPException(
+            422, f"Tire {tire_id} is a {pos} tyre and cannot be fitted at the {wanted}"
+        )
 
 
 def _build_config(
@@ -426,8 +576,18 @@ def _build_config(
     track_temp_c: float | None = None,
     humidity_pct: float | None = None,
     headwind_kmh: float | None = None,
+    altitude_m: float | None = None,
+    pressure_hpa: float | None = None,
+    location: str | None = None,
+    lat: float | None = None,
+    lon: float | None = None,
 ) -> BikeConfig:
-    """Assemble a BikeConfig from request parameters."""
+    """Assemble a BikeConfig from request parameters.
+
+    The condition arguments (``venue_id`` .. ``lon``) are the fields of
+    :class:`ConditionsRequest`, applied with the same precedence and the same
+    helper (:func:`_apply_conditions`) the optimiser routes use.
+    """
 
     # -- Base config ---------------------------------------------------------
     cfg: BikeConfig | None = None
@@ -491,12 +651,7 @@ def _build_config(
         raise HTTPException(404, f"Bike {bike_id} not found")
 
     if cfg is None and bike_preset:
-        presets = {
-            "gsxr1000_k5": gsxr1000_k5,
-            "yzfr1_4c8": yzfr1_4c8,
-            "hayabusa_gen1": hayabusa_gen1,
-        }
-        fn = presets.get(bike_preset)
+        fn = _PRESETS.get(bike_preset)
         if fn:
             cfg = fn()
         else:
@@ -526,6 +681,10 @@ def _build_config(
     cfg.chassis.rider_mass_kg = rider_mass_kg
 
     # -- Venue conditions ----------------------------------------------------
+    # An id that matches no catalog row is a client error (404), like an
+    # unknown bike_id — silently returning stock-condition numbers for a
+    # typo'd venue or tire looks like a valid answer.
+    unknown_ref: str | None = None
     if venue_id is not None:
         db = _get_db()
         if db:
@@ -533,8 +692,11 @@ def _build_config(
                 row = db.execute(
                     "SELECT * FROM venues WHERE id=?", (venue_id,)
                 ).fetchone()
-                if row:
+                if row is None:
+                    unknown_ref = f"Venue {venue_id} not found"
+                else:
                     d = dict(row)
+                    cfg.environment.venue_name = d["name"]
                     if d.get("altitude_m") is not None:
                         cfg.environment.altitude_m = float(d["altitude_m"])
                     # Route the venue's surface type into track_surface — the
@@ -548,10 +710,30 @@ def _build_config(
                 logging.getLogger(__name__).warning(
                     "Failed to load venue %s: %s", venue_id, e
                 )
+        if unknown_ref:
+            raise HTTPException(404, unknown_ref)
 
     # -- Environment overrides (on top of venue) -----------------------------
+    if venue_id is None:
+        manual = any(
+            v is not None
+            for v in (
+                ambient_temp_c,
+                track_temp_c,
+                humidity_pct,
+                headwind_kmh,
+                altitude_m,
+                pressure_hpa,
+            )
+        )
+        cfg.environment.venue_name = (
+            CUSTOM_CONDITIONS_NAME if manual else DEFAULT_CONDITIONS_NAME
+        )
     if ambient_temp_c is not None:
         cfg.environment.ambient_temp_c = ambient_temp_c
+        if track_temp_c is None:
+            # Same rule as a resolved place: the track runs ~7 °C over the air.
+            cfg.environment.track_temp_c = ambient_temp_c + 7.0
     if track_temp_c is not None:
         cfg.environment.track_temp_c = track_temp_c
     if humidity_pct is not None:
@@ -559,32 +741,87 @@ def _build_config(
     if headwind_kmh is not None:
         cfg.environment.wind_speed_ms = headwind_kmh / 3.6
         cfg.environment.wind_direction_deg = 0.0  # 0 = headwind
+    if any(v is not None for v in (location, lat, lon, altitude_m, pressure_hpa)):
+        _apply_conditions(
+            cfg,
+            ConditionsRequest.model_construct(
+                location=location,
+                venue_id=venue_id,
+                lat=lat,
+                lon=lon,
+                altitude_m=altitude_m,
+                ambient_temp_c=ambient_temp_c,
+                track_temp_c=track_temp_c,
+                humidity_pct=humidity_pct,
+                pressure_hpa=pressure_hpa,
+            ),
+        )
 
     # -- Tire overrides ------------------------------------------------------
     # TireParams carries ONE scalar mu_peak, and drive traction is rear-tire
-    # physics — so ONLY the rear tire may set grip. Previously the loop ran
-    # (front, rear) and both wrote the same field: a front-only selection
-    # silently replaced rear grip with the front tire's compound.
-    for tire_id in (rear_tire_id,):
-        if tire_id is not None:
-            db = _get_db()
-            if db:
-                try:
-                    trow = db.execute(
-                        "SELECT pacejka_D, mu_peak FROM tire_models WHERE id=?",
-                        (tire_id,),
-                    ).fetchone()
-                    if trow:
-                        td = dict(trow)
-                        mu = td.get("mu_peak") or td.get("pacejka_D")
-                        if mu and float(mu) > 0:
-                            cfg.tires.mu_peak = float(mu)
-                except Exception as e:
-                    logging.getLogger(__name__).warning(
-                        "Failed to load tire_id=%s: %s", tire_id, e
-                    )
+    # physics — so ONLY the rear tire may set grip. A front-only selection
+    # must not replace rear grip with the front tire's compound; it is still
+    # checked for existence.
+    db = _get_db() if (front_tire_id is not None or rear_tire_id is not None) else None
+    if db:
+        for tire_id in (front_tire_id, rear_tire_id):
+            if tire_id is None:
+                continue
+            try:
+                trow = db.execute(
+                    "SELECT pacejka_D, mu_peak, position FROM tire_models WHERE id=?",
+                    (tire_id,),
+                ).fetchone()
+            except Exception as e:
+                logging.getLogger(__name__).warning(
+                    "Failed to load tire_id=%s: %s", tire_id, e
+                )
+                continue
+            if trow is None:
+                raise HTTPException(404, f"Tire {tire_id} not found")
+            if tire_id == front_tire_id:
+                _check_tire_position(tire_id, dict(trow).get("position"), "front")
+            if tire_id == rear_tire_id:
+                _check_tire_position(tire_id, dict(trow).get("position"), "rear")
+                td = dict(trow)
+                mu = td.get("mu_peak") or td.get("pacejka_D")
+                if mu and float(mu) > 0:
+                    cfg.tires.mu_peak = float(mu)
 
     return cfg
+
+
+# Why a requested part id was not applied (``parts_skipped_detail[].reason``).
+SKIP_UNKNOWN = "unknown_part"
+SKIP_DOES_NOT_FIT = "does_not_fit"
+SKIP_NOT_APPLIED = "not_applied"
+
+
+def _fitment_bike_row(db, bike_id: int | None, bike_preset: str | None) -> dict | None:
+    """The catalog row (enriched for the compatibility engine) of the bike a
+    request names, or None when it has no catalog row to judge fitment by."""
+    try:
+        model_id = _parts_model_id(db, bike_id, bike_preset)
+        if model_id is None:
+            return None
+        raw = db.execute(
+            "SELECT * FROM bike_models WHERE id = ?", (model_id,)
+        ).fetchone()
+        if raw is None:
+            return None
+        from .database.parts_repo import enrich_bike_row_for_fitment
+
+        bike_row = dict(raw)
+        enrich_bike_row_for_fitment(db, bike_row)
+        return bike_row
+    except Exception as exc:  # noqa: BLE001 — a lookup fault must not 500 the sim
+        logging.getLogger(__name__).warning(
+            "fitment lookup failed for bike_id=%s preset=%s: %s",
+            bike_id,
+            bike_preset,
+            exc,
+        )
+        return None
 
 
 def _apply_parts_to_config(
@@ -592,6 +829,10 @@ def _apply_parts_to_config(
     part_ids: list[int] | None,
     *,
     include_price_in_summary: bool = True,
+    skipped: list[int] | None = None,
+    skipped_detail: list[SkippedPartDict] | None = None,
+    bike_id: int | None = None,
+    bike_preset: str | None = None,
 ) -> tuple[BikeConfig, list[AppliedPartDict], float]:
     """Apply a list of selected ``part_ids`` to *cfg* and report what was used.
 
@@ -607,6 +848,19 @@ def _apply_parts_to_config(
       prior "if db:" guarded paths.
     * If any single part row raises while being applied, the whole batch
       is logged and dropped (mirrors the prior outer ``try/except``).
+    * A part that does not fit the bike is NOT applied. ``bike_id`` /
+      ``bike_preset`` identify the bike exactly as the request did (a preset
+      maps to its catalog row, see :func:`_parts_model_id`); each part then
+      goes through the same ``is_compatible`` engine ``GET /api/parts?bike_id``
+      uses, so the sim routes and the parts list can never disagree about
+      what fits. When the bike has no catalog row there is nothing to judge
+      against and parts are applied as requested.
+    * When ``skipped`` is a list, it is filled with the (de-duplicated, ordered)
+      requested ids that were NOT applied — unknown to the catalog, not
+      compatible with the bike, or dropped by a failure — so routes can report
+      ``parts_skipped`` instead of silently returning numbers for a part that
+      was never (or should never be) fitted. ``skipped_detail`` receives one
+      ``{id, reason, detail}`` entry per skipped id, in the same order.
     * The ``parts_applied`` dict shape is ``{id, name, brand[, price_inr]}``
       — the optional ``price_inr`` key is omitted when
       ``include_price_in_summary=False`` (used by ``_run_build`` whose
@@ -624,13 +878,32 @@ def _apply_parts_to_config(
     if not part_ids:
         return cfg, parts_applied, build_cost
 
+    why: dict[int, tuple[str, str]] = {}  # part id -> (reason code, plain detail)
+
+    def _report_skipped() -> None:
+        applied_ids = {p["id"] for p in parts_applied}
+        missed = [p for p in dict.fromkeys(part_ids) if p not in applied_ids]
+        if skipped is not None:
+            skipped.extend(missed)
+        if skipped_detail is not None:
+            for pid in missed:
+                reason, detail = why.get(
+                    pid, (SKIP_NOT_APPLIED, "The part could not be applied.")
+                )
+                skipped_detail.append({"id": pid, "reason": reason, "detail": detail})
+
     db = _get_db()
     if not db:
+        _report_skipped()
         return cfg, parts_applied, build_cost
 
     try:
+        from .analysis.roi import _BOOST_CATEGORIES
         from .database.bridge import apply_part_to_config
+        from .parts.compatibility import is_compatible
         from .submodels.forced_induction import VALID_BOOST_TYPES
+
+        fit_row = _fitment_bike_row(db, bike_id, bike_preset)
 
         # De-duplicate while preserving order. A repeated id used to be applied
         # once per occurrence, stacking that part's param_deltas: part_ids
@@ -641,14 +914,51 @@ def _apply_parts_to_config(
         # part — the same rule the ROI knapsack already enforces via its
         # exclusive-category groups.
         seen: set[int] = set()
+        fitting: list[dict] = []
         for pid in part_ids:
             if pid in seen:
                 continue
             seen.add(pid)
-            row = db.execute("SELECT * FROM parts WHERE id=?", (pid,)).fetchone()
+            row = db.execute(
+                "SELECT p.*, pc.name AS category_name FROM parts p "
+                "LEFT JOIN parts_categories pc ON pc.id = p.category_id "
+                "WHERE p.id=?",
+                (pid,),
+            ).fetchone()
             if not row:
+                why[pid] = (SKIP_UNKNOWN, "No part with this id is in the catalog.")
                 continue
             part_dict = dict(row)
+            if fit_row is not None:
+                fits, fit_reason = is_compatible(part_dict, fit_row)
+                if not fits:
+                    label = " ".join(
+                        x
+                        for x in (part_dict.get("brand"), part_dict.get("model_name"))
+                        if x
+                    )
+                    why[pid] = (
+                        SKIP_DOES_NOT_FIT,
+                        f"{label or 'This part'} does not fit this bike"
+                        + (f" ({fit_reason})." if fit_reason else "."),
+                    )
+                    continue
+            fitting.append(part_dict)
+
+        # Apply in the optimizer's canonical order (roi._apply_order: NA parts
+        # before boost, then cheapest first, then id). Parts whose effects do
+        # not commute (a +10 hp delta and a x1.032 power multiplier) otherwise
+        # gave a different time for the same build depending on click order,
+        # and the simulator disagreed with the time the Upgrades page reported.
+        fitting.sort(
+            key=lambda d: (
+                1 if (d.get("category_name") or "").lower() in _BOOST_CATEGORIES else 0,
+                d.get("price_inr") or 0.0,
+                d["id"],
+            )
+        )
+        for part_dict in fitting:
+            part_dict.pop("category_name", None)
             cfg = apply_part_to_config(cfg, part_dict)
             # A part carrying a typo'd boost_type would otherwise surface as
             # a 500 when the engine's ForcedInductionModel guard fires — turn
@@ -682,7 +992,223 @@ def _apply_parts_to_config(
         # came from a late row); cfg likewise carries any deltas already
         # applied. This matches the inline try/except behaviour we replaced.
 
+    _report_skipped()
     return cfg, parts_applied, build_cost
+
+
+DEFAULT_CONDITIONS_NAME = "Default conditions"
+CUSTOM_CONDITIONS_NAME = "Custom conditions"
+
+
+def _environment_echo(cfg: BikeConfig) -> EnvironmentEchoDict:
+    e = cfg.environment
+    name = e.venue_name
+    is_default = name == DEFAULT_CONDITIONS_NAME
+    source = (
+        "default"
+        if is_default
+        else "manual"
+        if name == CUSTOM_CONDITIONS_NAME
+        else "venue"
+    )
+    headwind = (
+        float(e.wind_speed_ms) * 3.6 * math.cos(math.radians(e.wind_direction_deg))
+    )
+    return {
+        "name": name,
+        "is_default": is_default,
+        "source": source,
+        "altitude_m": float(e.altitude_m),
+        "ambient_temp_c": float(e.ambient_temp_c),
+        "track_temp_c": float(e.track_temp_c),
+        "humidity_pct": float(e.relative_humidity_pct),
+        "pressure_hpa": float(e.barometric_pressure_hpa),
+        "headwind_kmh": round(headwind, 2),
+        "track_surface": str(e.track_surface),
+    }
+
+
+def _conditions_kwargs(req) -> dict:
+    """The ConditionsRequest-only fields of *req*, as ``_build_config`` kwargs."""
+    return {
+        "altitude_m": req.altitude_m,
+        "pressure_hpa": req.pressure_hpa,
+        "location": req.location,
+        "lat": req.lat,
+        "lon": req.lon,
+    }
+
+
+# ─── Stock-baseline cache ─────────────────────────────────────────────────
+# A quick sim with parts needs the same bike WITHOUT parts for its delta. That
+# baseline depends only on the bike/slider/venue/tyre/environment inputs, so it
+# is memoised (bounded LRU, thread-safe). The key carries the catalog
+# generation, so a runtime catalog write retires every entry. Values are the
+# already-rounded stock ET, i.e. exactly what an uncached run would report.
+_STOCK_CACHE_MAX = 256
+_stock_cache: "OrderedDict[tuple, float]" = OrderedDict()
+_stock_cache_lock = threading.Lock()
+
+
+def _catalog_token() -> tuple:
+    """Freshness token of the shared catalog connection (see catalog_token)."""
+    return catalog_token(_db_conn)
+
+
+def _engine_tag() -> str:
+    """Which integrator ``engine_select`` would pick right now.
+
+    Part of the stock-baseline key so a cached baseline is only ever compared
+    with a run from the same engine (``MOTOQUANT_ENGINE`` is read per call and
+    tests switch it). The probes behind it are computed once per process.
+    """
+    try:
+        return "native" if engine_select.native_active() else "python"
+    except Exception:  # noqa: BLE001 — native forced but unusable: the sim will raise
+        return "unavailable"
+
+
+def _tyre_labels(front_id: int | None, rear_id: int | None) -> list[TyreLabelDict]:
+    """Names of the catalog tyres a request fitted, for result cards and slips."""
+    out: list[TyreLabelDict] = []
+    db = _get_db() if (front_id is not None or rear_id is not None) else None
+    if not db:
+        return out
+    for position, tid in (("front", front_id), ("rear", rear_id)):
+        if tid is None:
+            continue
+        row = db.execute(
+            "SELECT tm.id, tmf.name AS maker, tm.model_name, tm.size_designation "
+            "FROM tire_models tm LEFT JOIN tire_manufacturers tmf "
+            "ON tmf.id = tm.manufacturer_id WHERE tm.id = ?",
+            (tid,),
+        ).fetchone()
+        if row:
+            d = dict(row)
+            name = " ".join(
+                str(x)
+                for x in (d["maker"], d["model_name"], d["size_designation"])
+                if x
+            )
+            out.append({"position": position, "id": int(d["id"]), "name": name})
+    return out
+
+
+def _stock_key(req: "QuickSimRequest") -> tuple:
+    return (
+        _catalog_token(),
+        _engine_tag(),
+        req.bike_id,
+        req.bike_preset,
+        req.power_boost_pct,
+        req.mass_delta_kg,
+        req.rider_mass_kg,
+        req.venue_id,
+        req.front_tire_id,
+        req.rear_tire_id,
+        req.ambient_temp_c,
+        req.track_temp_c,
+        req.humidity_pct,
+        req.headwind_kmh,
+        req.altitude_m,
+        req.pressure_hpa,
+        req.location,
+        req.lat,
+        req.lon,
+    )
+
+
+def _stock_cache_get(key: tuple) -> float | None:
+    with _stock_cache_lock:
+        et = _stock_cache.get(key)
+        if et is not None:
+            _stock_cache.move_to_end(key)
+        return et
+
+
+def _stock_cache_put(key: tuple, et: float) -> None:
+    with _stock_cache_lock:
+        _stock_cache[key] = et
+        _stock_cache.move_to_end(key)
+        while len(_stock_cache) > _STOCK_CACHE_MAX:
+            _stock_cache.popitem(last=False)
+
+
+# ─── Catalog response cache ───────────────────────────────────────────────
+# The catalog GETs (bikes, bike detail, parts, categories, tires, venues) are
+# immutable between deploys apart from the rare runtime catalog write. The
+# serialized body is cached per (route, validated params) and tagged with the
+# catalog generation; a write bumps the generation, which retires every entry.
+# Responses carry a weak ETag and a short public Cache-Control so browsers and
+# the CDN revalidate instead of re-downloading.
+CATALOG_CACHE_CONTROL = "public, max-age=300, stale-while-revalidate=3600"
+_CATALOG_CACHE_MAX_ENTRIES = 256
+_CATALOG_CACHE_MAX_BYTES = 24 * 1024 * 1024
+_CATALOG_CACHE_MAX_ENTRY_BYTES = 4 * 1024 * 1024
+_catalog_cache: "OrderedDict[tuple, tuple[tuple, bytes, str]]" = OrderedDict()
+_catalog_cache_bytes = 0
+_catalog_cache_lock = threading.Lock()
+# hits / misses, exposed for tests and diagnostics
+catalog_cache_stats = {"hits": 0, "misses": 0}
+
+
+def _etag_matches(header: str | None, etag: str) -> bool:
+    if not header:
+        return False
+    want = etag.removeprefix("W/")
+    for tok in header.split(","):
+        tok = tok.strip()
+        if tok == "*" or tok.removeprefix("W/") == want:
+            return True
+    return False
+
+
+def _serve_catalog(request: Request | None, key: tuple, build):
+    """Serve ``build()`` (a JSON-able dict) through the catalog cache.
+
+    ``request`` is None when a route function is called directly (MCP local
+    backend, tests): the plain dict is returned, uncached. Errors raised by
+    ``build`` are never cached.
+    """
+    global _catalog_cache_bytes
+    if request is None:
+        return build()
+    gen = _catalog_token()
+    with _catalog_cache_lock:
+        ent = _catalog_cache.get(key)
+        if ent is not None and ent[0] == gen:
+            _catalog_cache.move_to_end(key)
+            catalog_cache_stats["hits"] += 1
+        else:
+            ent = None
+    if ent is None:
+        payload = build()
+        try:
+            raw = json.dumps(payload, separators=(",", ":"), allow_nan=False)
+        except (TypeError, ValueError):
+            raw = json.dumps(jsonable_encoder(payload), separators=(",", ":"))
+        body = raw.encode("utf-8")
+        etag = 'W/"' + hashlib.sha1(body).hexdigest()[:20] + '"'
+        ent = (gen, body, etag)
+        with _catalog_cache_lock:
+            catalog_cache_stats["misses"] += 1
+            old = _catalog_cache.pop(key, None)
+            if old is not None:
+                _catalog_cache_bytes -= len(old[1])
+            if len(body) <= _CATALOG_CACHE_MAX_ENTRY_BYTES:
+                _catalog_cache[key] = ent
+                _catalog_cache_bytes += len(body)
+                while _catalog_cache and (
+                    len(_catalog_cache) > _CATALOG_CACHE_MAX_ENTRIES
+                    or _catalog_cache_bytes > _CATALOG_CACHE_MAX_BYTES
+                ):
+                    _, evicted = _catalog_cache.popitem(last=False)
+                    _catalog_cache_bytes -= len(evicted[1])
+    _, body, etag = ent
+    headers = {"ETag": etag, "Cache-Control": CATALOG_CACHE_CONTROL}
+    if _etag_matches(request.headers.get("if-none-match"), etag):
+        return Response(status_code=304, headers=headers)
+    return Response(content=body, media_type="application/json", headers=headers)
 
 
 # ─── Endpoints ────────────────────────────────────────────────────────────
@@ -691,8 +1217,8 @@ def _apply_parts_to_config(
 @app.get("/")
 def root():
     return {
-        "service": "MotoQuant Pro API",
-        "version": "0.3.0",
+        "service": "MotoQuant API",
+        "version": __version__,
         "tagline": "The physics of faster",
         "docs": "/docs",
         "status": "ok",
@@ -716,6 +1242,10 @@ def health():
         "status": "ok",
         "database": "connected" if db_ok else "unavailable",
         "bike_count": bike_count,
+        # Which integrator serves simulations (Rust core or the Python
+        # reference) and why. Cheap: the extension import, host-math probe
+        # and source fingerprint are each computed once per process.
+        "engine": engine_select.engine_info(),
     }
 
 
@@ -741,103 +1271,6 @@ def sentry_test():
 
 
 # ─────────────────────────────────────────────────────────────────────────
-# Free-tier sim metering (commercial launch, July 2026)
-# ─────────────────────────────────────────────────────────────────────────
-# FULL simulations (sync + job-backed, top-speed, distance) are metered per
-# identity per UTC day via motoquant/usage.py. Quick sims stay unmetered --
-# the web UI fires them on every slider move, so a daily cap there would
-# break the live-preview UX; the full run with charts is the free-tier
-# quota unit. During the open beta (MOTOQUANT_BILLING_ENFORCE falsy) the
-# quota is advisory: counts are recorded, X-Sims-Remaining is exposed, but
-# nothing is blocked. Flipping the env var arms the 402.
-
-
-def _sim_identity_and_tier(request: Request) -> tuple[str, str]:
-    """Resolve the metering identity: user id when a valid bearer token is
-    present, else a hashed client IP (never stored raw -- privacy page)."""
-    authz = request.headers.get("authorization", "")
-    if authz.lower().startswith("bearer "):
-        try:
-            from . import auth as _auth
-            from .usage import user_identity
-
-            payload = _auth._decode_token(authz.split(" ", 1)[1])
-            if payload and payload.get("type") == "access":
-                conn = _auth._get_conn()
-                try:
-                    user = _auth._users.get_user_by_id(conn, int(payload["sub"]))
-                finally:
-                    conn.close()
-                if user:
-                    return user_identity(user["id"]), user.get("tier", "free")
-        except Exception:  # noqa: BLE001 -- metering must never break sims
-            pass
-    from .ratelimit import client_ip
-    from .usage import anon_identity
-
-    # Same trusted-proxy client-IP derivation as the rate limiter — the rightmost
-    # X-Forwarded-For hop, never the spoofable leftmost one (see client_ip).
-    return anon_identity(client_ip(request)), "free"
-
-
-def _meter_sims(request: Request, response: Response, n: int) -> None:
-    """Count ``n`` full sims for this caller and (when billing is enforced)
-    402 free-tier callers past the daily quota.
-
-    ``n`` is the number of RK4 runs the route actually performs, so the
-    quota unit stays "one full simulation" no matter how many the endpoint
-    bundles — /api/simulate/compare runs two and used to charge nothing,
-    which was a straight quota bypass (2026-07-25 audit §3.4)."""
-    try:
-        from .database.connection import connect as _db_connect
-        from .usage import record_and_check
-
-        identity, tier = _sim_identity_and_tier(request)
-        conn = _db_connect()
-        try:
-            st = record_and_check(conn, identity, tier=tier, n=n)
-        finally:
-            conn.close()
-    except Exception:  # noqa: BLE001 -- metering must never break sims
-        logging.getLogger(__name__).warning("sim metering failed", exc_info=True)
-        return
-    if st.limit is not None:
-        response.headers["X-Sims-Limit"] = str(st.limit)
-        response.headers["X-Sims-Remaining"] = str(st.remaining)
-    if not st.allowed:
-        try:
-            from . import auth as _auth
-        except Exception:  # noqa: BLE001
-            return
-        if _auth.BILLING_ENFORCE:
-            raise HTTPException(
-                402,
-                detail={
-                    "error": "quota_exceeded",
-                    "message": (
-                        f"Free tier includes {st.limit} full simulations per "
-                        "day. Upgrade to Pro for unlimited runs."
-                    ),
-                    "upgrade_url": f"{os.environ.get('MOTOQUANT_BASE_URL', 'https://motoquant.in')}/pricing",
-                },
-            )
-
-
-def _meter_full_sim(request: Request, response: Response) -> None:
-    """FastAPI dependency: meter one full sim (the common case)."""
-    _meter_sims(request, response, 1)
-
-
-def _meter_full_sims(n: int):
-    """FastAPI dependency factory for routes that run ``n`` full sims."""
-
-    def _dep(request: Request, response: Response) -> None:
-        _meter_sims(request, response, n)
-
-    return _dep
-
-
-# ─────────────────────────────────────────────────────────────────────────
 # Anonymous telemetry endpoint
 # ─────────────────────────────────────────────────────────────────────────
 # Used by web/lib/telemetry.js to capture client-side events:
@@ -845,14 +1278,16 @@ def _meter_full_sims(n: int):
 #   - js_error / js_unhandled_rejection
 #   - bike_select / mode_change
 # Privacy: no user id, no IP correlation, per-tab random session_id only.
-# Storage: stdout (Railway log stream); ship to PostHog/Logfire later
-# without changing the client.
+# Storage: the server log (stdout) ONLY by default. Forwarding to PostHog is
+# strictly OPT-IN for whoever runs a deployment: it stays off unless the
+# operator sets POSTHOG_API_KEY (see _forward_telemetry_posthog). A
+# self-hosted copy of this open-source project sends nothing anywhere.
 
 
 # Bounds (2026-07-25 audit §3.5): the beacon is unauthenticated and writes
-# the funnel numbers the roadmap uses for pricing decisions, so every axis it
-# can be pushed on gets a ceiling — body bytes, field count, field length,
-# requests per IP, and in-flight forwarding threads.
+# the usage numbers the roadmap reads, so every axis it can be pushed on gets
+# a ceiling — body bytes, field count, field length, requests per IP, and
+# in-flight forwarding threads.
 TELEMETRY_MAX_BODY_BYTES = 8 * 1024  # ~40x the largest real beacon
 TELEMETRY_MAX_PROPS = 16
 TELEMETRY_MAX_INFLIGHT = 8  # concurrent PostHog forwards, hard ceiling
@@ -882,10 +1317,10 @@ def _forward_telemetry_posthog(
     path: str,
     props: dict,
 ) -> str:
-    """Env-gated server-side forward to PostHog (project "Motoquant", EU).
+    """OPT-IN server-side forward to PostHog (EU host by default).
 
-    No-op unless POSTHOG_API_KEY is set, so behaviour without the key is
-    unchanged (stdout log only). Runs off the event loop -- the beacon route
+    No-op unless the deployment operator sets POSTHOG_API_KEY, so a default
+    or self-hosted install never sends telemetry anywhere (stdout log only). Runs off the event loop -- the beacon route
     is async and a blocking HTTP call would starve it. Server-side capture,
     no cookies: stays inside the privacy page's consent promise.
 
@@ -1003,216 +1438,247 @@ def list_bikes(
     category: str | None = Query(None),
     limit: int = Query(100, ge=1, le=5000),
     offset: int = Query(0, ge=0),
+    request: Request = None,
 ):
-    db = _get_db()
-    if not db:
-        raise HTTPException(503, "Database unavailable")
+    def _build():
+        db = _get_db()
+        if not db:
+            raise HTTPException(503, "Database unavailable")
 
-    try:
-        query = """SELECT bm.*, m.name AS manufacturer
-                   FROM bike_models bm
-                   JOIN manufacturers m ON bm.manufacturer_id = m.id
-                   WHERE 1=1"""
-        params: list[Any] = []
+        try:
+            query = """SELECT bm.*, m.name AS manufacturer
+                       FROM bike_models bm
+                       JOIN manufacturers m ON bm.manufacturer_id = m.id
+                       WHERE 1=1"""
+            params: list[Any] = []
 
-        if search:
-            query += " AND (m.name LIKE ? OR bm.model_name LIKE ?)"
-            params += [f"%{search}%", f"%{search}%"]
-        if manufacturer:
-            query += " AND LOWER(m.name) = LOWER(?)"
-            params.append(manufacturer)
-        if category:
-            query += " AND LOWER(bm.category) = LOWER(?)"
-            params.append(category)
+            if search:
+                query += " AND (m.name LIKE ? OR bm.model_name LIKE ?)"
+                params += [f"%{search}%", f"%{search}%"]
+            if manufacturer:
+                query += " AND LOWER(m.name) = LOWER(?)"
+                params.append(manufacturer)
+            if category:
+                query += " AND LOWER(bm.category) = LOWER(?)"
+                params.append(category)
 
-        query += " ORDER BY m.name, bm.model_name LIMIT ? OFFSET ?"
-        params += [limit, offset]
+            query += " ORDER BY m.name, bm.model_name LIMIT ? OFFSET ?"
+            params += [limit, offset]
 
-        rows = db.execute(query, params).fetchall()
+            rows = db.execute(query, params).fetchall()
 
-        count_query = """SELECT COUNT(*) FROM bike_models bm
-                         JOIN manufacturers m ON bm.manufacturer_id = m.id
-                         WHERE 1=1"""
-        count_params: list[Any] = []
-        if search:
-            count_query += " AND (m.name LIKE ? OR bm.model_name LIKE ?)"
-            count_params += [f"%{search}%", f"%{search}%"]
-        # Mirror ALL row-query filters — total previously ignored
-        # manufacturer/category, so filtered pagination reported the full
-        # catalog count (e.g. 38 cruisers with total: 501).
-        if manufacturer:
-            count_query += " AND LOWER(m.name) = LOWER(?)"
-            count_params.append(manufacturer)
-        if category:
-            count_query += " AND LOWER(bm.category) = LOWER(?)"
-            count_params.append(category)
+            count_query = """SELECT COUNT(*) FROM bike_models bm
+                             JOIN manufacturers m ON bm.manufacturer_id = m.id
+                             WHERE 1=1"""
+            count_params: list[Any] = []
+            if search:
+                count_query += " AND (m.name LIKE ? OR bm.model_name LIKE ?)"
+                count_params += [f"%{search}%", f"%{search}%"]
+            # Mirror ALL row-query filters — total previously ignored
+            # manufacturer/category, so filtered pagination reported the full
+            # catalog count (e.g. 38 cruisers with total: 501).
+            if manufacturer:
+                count_query += " AND LOWER(m.name) = LOWER(?)"
+                count_params.append(manufacturer)
+            if category:
+                count_query += " AND LOWER(bm.category) = LOWER(?)"
+                count_params.append(category)
 
-        total = db.execute(count_query, count_params).fetchone()[0]
+            total = db.execute(count_query, count_params).fetchone()[0]
 
-        return {
-            "total": total,
-            "offset": offset,
-            "limit": limit,
-            "bikes": [_bike_row_to_summary(dict(r)) for r in rows],
-        }
-    except Exception as exc:
-        raise HTTPException(500, f"Database error: {exc}")
+            return {
+                "total": total,
+                "offset": offset,
+                "limit": limit,
+                "bikes": [_bike_row_to_summary(dict(r)) for r in rows],
+            }
+        except Exception as exc:
+            raise HTTPException(500, f"Database error: {exc}")
+
+    return _serve_catalog(
+        request, ("bikes", search, manufacturer, category, limit, offset), _build
+    )
 
 
 @app.get("/api/bikes/{bike_id}")
-def get_bike(bike_id: int):
-    db = _get_db()
-    if not db:
-        raise HTTPException(503, "Database unavailable")
+def get_bike(bike_id: int = Path(..., ge=1, le=MAX_DB_ID), request: Request = None):
+    def _build():
+        db = _get_db()
+        if not db:
+            raise HTTPException(503, "Database unavailable")
 
-    try:
-        row = db.execute(
-            """SELECT bm.*, m.name AS manufacturer
-               FROM bike_models bm
-               JOIN manufacturers m ON bm.manufacturer_id = m.id
-               WHERE bm.id = ?""",
-            (bike_id,),
-        ).fetchone()
-    except Exception as exc:
-        raise HTTPException(500, f"Database error: {exc}")
+        try:
+            row = db.execute(
+                """SELECT bm.*, m.name AS manufacturer
+                   FROM bike_models bm
+                   JOIN manufacturers m ON bm.manufacturer_id = m.id
+                   WHERE bm.id = ?""",
+                (bike_id,),
+            ).fetchone()
+        except Exception as exc:
+            raise HTTPException(500, f"Database error: {exc}")
 
-    if not row:
-        raise HTTPException(404, f"Bike {bike_id} not found")
+        if not row:
+            raise HTTPException(404, f"Bike {bike_id} not found")
 
-    # Expose all bike_models columns (not just the summary subset)
-    full = dict(row)
-    d = _bike_row_to_summary(full)
-    # Merge in remaining headline columns that detail pages need
-    for extra in (
-        "model_code",
-        "year_to",
-        "subcategory",
-        "cylinder_count",
-        "cylinder_config",
-        "bore_mm",
-        "stroke_mm",
-        "compression_ratio",
-        "peak_power_rpm",
-        "peak_torque_nm",
-        "peak_torque_rpm",
-        "wet_mass_kg",
-        "wheelbase_mm",
-        "seat_height_mm",
-        "fuel_capacity_l",
-        "validation_et_s",
-        "validation_trap_kmh",
-        "validation_source",
-    ):
-        if extra in full:
-            d[extra] = full[extra]
+        # Expose all bike_models columns (not just the summary subset)
+        full = dict(row)
+        d = _bike_row_to_summary(full)
+        # Merge in remaining headline columns that detail pages need
+        for extra in (
+            "model_code",
+            "year_to",
+            "subcategory",
+            "cylinder_count",
+            "cylinder_config",
+            "bore_mm",
+            "stroke_mm",
+            "compression_ratio",
+            "peak_power_rpm",
+            "peak_torque_nm",
+            "peak_torque_rpm",
+            "wet_mass_kg",
+            "wheelbase_mm",
+            "seat_height_mm",
+            "fuel_capacity_l",
+            "validation_et_s",
+            "validation_trap_kmh",
+            "validation_source",
+        ):
+            if extra in full:
+                d[extra] = full[extra]
 
-    # Attach latest bike_config JSON sub-blocks (aero, drivetrain, engine extras, tire)
-    try:
-        cfg_row = db.execute(
-            """SELECT engine_params, aero_params, drivetrain_params, tire_params,
-                      chassis_params, config_name
-               FROM bike_configs
-               WHERE bike_model_id = ? AND is_current = 1
-               ORDER BY version DESC
-               LIMIT 1""",
-            (bike_id,),
-        ).fetchone()
-        if cfg_row:
-            import json as _json
+        # Attach latest bike_config JSON sub-blocks (aero, drivetrain, engine extras, tire)
+        try:
+            cfg_row = db.execute(
+                """SELECT engine_params, aero_params, drivetrain_params, tire_params,
+                          chassis_params, config_name
+                   FROM bike_configs
+                   WHERE bike_model_id = ? AND is_current = 1
+                   ORDER BY version DESC
+                   LIMIT 1""",
+                (bike_id,),
+            ).fetchone()
+            if cfg_row:
+                import json as _json
 
-            def _safe_parse(blob):
-                if not blob:
-                    return {}
-                try:
-                    return _json.loads(blob)
-                except Exception:
-                    return {}
+                def _safe_parse(blob):
+                    if not blob:
+                        return {}
+                    try:
+                        return _json.loads(blob)
+                    except Exception:
+                        return {}
 
-            engine = _safe_parse(cfg_row["engine_params"])
-            aero = _safe_parse(cfg_row["aero_params"])
-            drive = _safe_parse(cfg_row["drivetrain_params"])
-            tire = _safe_parse(cfg_row["tire_params"])
-            chassis = _safe_parse(cfg_row["chassis_params"])
+                engine = _safe_parse(cfg_row["engine_params"])
+                aero = _safe_parse(cfg_row["aero_params"])
+                drive = _safe_parse(cfg_row["drivetrain_params"])
+                tire = _safe_parse(cfg_row["tire_params"])
+                chassis = _safe_parse(cfg_row["chassis_params"])
 
-            # Expose common simulation-relevant fields at top level
-            if engine:
-                for k in ("redline_rpm", "cylinder_count", "cylinder_config"):
-                    v = engine.get(k)
-                    if v is not None and d.get(k) in (None, ""):
-                        d[k] = v
-            if aero:
-                for k in ("cd", "frontal_area_m2"):
-                    v = aero.get(k)
+                # Expose common simulation-relevant fields at top level
+                if engine:
+                    # stroke_type feeds the bike page's JSON-LD (2-strokes were
+                    # all published as "4-stroke" without it).
+                    for k in (
+                        "redline_rpm",
+                        "cylinder_count",
+                        "cylinder_config",
+                        "stroke_type",
+                    ):
+                        v = engine.get(k)
+                        if v is not None and d.get(k) in (None, ""):
+                            d[k] = v
+                if aero:
+                    for k in ("cd", "frontal_area_m2"):
+                        v = aero.get(k)
+                        if v is not None:
+                            d[k] = v
+                if drive:
+                    for k in (
+                        "front_sprocket",
+                        "rear_sprocket",
+                        "chain_pitch",
+                        "gear_ratios",
+                    ):
+                        v = drive.get(k)
+                        if v is not None:
+                            d[k] = v
+                if tire:
+                    # Expose mu_peak so the bike-detail UI can show grip class
+                    # alongside the raw tire model. Other tire fields stay
+                    # tucked inside tire_params for the detail-card expander.
+                    v = tire.get("mu_peak")
                     if v is not None:
-                        d[k] = v
-            if drive:
-                for k in ("front_sprocket", "rear_sprocket", "chain_pitch"):
-                    v = drive.get(k)
-                    if v is not None:
-                        d[k] = v
-            if tire:
-                # Expose mu_peak so the bike-detail UI can show grip class
-                # alongside the raw tire model. Other tire fields stay
-                # tucked inside tire_params for the detail-card expander.
-                v = tire.get("mu_peak")
-                if v is not None:
-                    d["tire_mu_peak"] = v
-            if chassis:
-                # CoG height is stored as mm in chassis_params (matches
-                # wheelbase_mm / seat_height_mm convention). Expose both units
-                # so the detail page can format consistently.
-                cog_mm = chassis.get("cog_height_mm")
-                if cog_mm is None and chassis.get("cog_height_m") is not None:
-                    cog_mm = chassis["cog_height_m"] * 1000.0
-                if cog_mm is not None:
-                    d["cog_height_mm"] = cog_mm
-                    d["cog_height_m"] = cog_mm / 1000.0
-                # Derived: wet mass = dry + fluids + fuel (bike_models.wet_mass_kg
-                # is rarely populated by the scraper; config has the components).
-                if d.get("wet_mass_kg") in (None, 0):
-                    dry = chassis.get("dry_mass_kg")
-                    fluid = chassis.get("fluid_mass_kg") or 0.0
-                    fuel = chassis.get("fuel_mass_kg") or 0.0
-                    if dry is not None:
-                        d["wet_mass_kg"] = round(dry + fluid + fuel, 1)
-                        d["wet_mass_derived"] = True
-            # Derived: wheelbase in meters for display
-            if d.get("wheelbase_mm") is not None:
-                d["wheelbase_m"] = d["wheelbase_mm"] / 1000.0
-    except Exception:
-        # Detail page degrades gracefully if JSON blobs are malformed.
-        pass
+                        d["tire_mu_peak"] = v
+                if chassis:
+                    # CoG height is stored as mm in chassis_params (matches
+                    # wheelbase_mm / seat_height_mm convention). Expose both units
+                    # so the detail page can format consistently.
+                    cog_mm = chassis.get("cog_height_mm")
+                    if cog_mm is None and chassis.get("cog_height_m") is not None:
+                        cog_mm = chassis["cog_height_m"] * 1000.0
+                    if cog_mm is not None:
+                        d["cog_height_mm"] = cog_mm
+                        d["cog_height_m"] = cog_mm / 1000.0
+                    # Derived: wet mass = dry + fluids + fuel (bike_models.wet_mass_kg
+                    # is rarely populated by the scraper; config has the components).
+                    if d.get("wet_mass_kg") in (None, 0):
+                        dry = chassis.get("dry_mass_kg")
+                        fluid = chassis.get("fluid_mass_kg") or 0.0
+                        fuel = chassis.get("fuel_mass_kg") or 0.0
+                        if dry is not None:
+                            d["wet_mass_kg"] = round(dry + fluid + fuel, 1)
+                            d["wet_mass_derived"] = True
+                # Derived: wheelbase in meters for display
+                if d.get("wheelbase_mm") is not None:
+                    d["wheelbase_m"] = d["wheelbase_mm"] / 1000.0
+        except Exception:
+            # Detail page degrades gracefully if JSON blobs are malformed.
+            pass
 
-    # Attach OEM tire fitments
-    try:
-        fitments = db.execute(
-            """SELECT tf.position, tf.fitment_type,
-                      tmfr.name AS manufacturer, tm.model_name AS model,
-                      tm.size_designation, tm.compound_type,
-                      tm.id AS tire_id
-               FROM bike_tire_fitments tf
-               JOIN tire_models tm ON tf.tire_model_id = tm.id
-               JOIN tire_manufacturers tmfr ON tm.manufacturer_id = tmfr.id
-               WHERE tf.bike_model_id = ?""",
-            (bike_id,),
-        ).fetchall()
-        d["tire_fitments"] = [dict(f) for f in fitments]
-    except Exception:
-        d["tire_fitments"] = []
+        # Attach OEM tire fitments
+        try:
+            fitments = db.execute(
+                """SELECT tf.position, tf.fitment_type,
+                          tmfr.name AS manufacturer, tm.model_name AS model,
+                          tm.size_designation, tm.compound_type,
+                          tm.id AS tire_id
+                   FROM bike_tire_fitments tf
+                   JOIN tire_models tm ON tf.tire_model_id = tm.id
+                   JOIN tire_manufacturers tmfr ON tm.manufacturer_id = tmfr.id
+                   WHERE tf.bike_model_id = ?""",
+                (bike_id,),
+            ).fetchall()
+            d["tire_fitments"] = [dict(f) for f in fitments]
+        except Exception:
+            d["tire_fitments"] = []
 
-    return d
+        return d
+
+    return _serve_catalog(request, ("bike", bike_id), _build)
 
 
 @app.get("/api/venues")
-def list_venues():
-    db = _get_db()
-    if not db:
-        raise HTTPException(503, "Database unavailable")
-    try:
-        rows = db.execute("SELECT * FROM venues ORDER BY country, name").fetchall()
-        return {"venues": [dict(r) for r in rows]}
-    except Exception as exc:
-        raise HTTPException(500, f"Database error: {exc}")
+def list_venues(request: Request = None):
+    def _build():
+        db = _get_db()
+        if not db:
+            raise HTTPException(503, "Database unavailable")
+        try:
+            rows = db.execute("SELECT * FROM venues ORDER BY country, name").fetchall()
+            venues = []
+            for r in rows:
+                v = dict(r)
+                # Same name and normalisation as the ``environment`` echo of
+                # the sim routes: the surface that venue is simulated on.
+                v["track_surface"] = (v.get("surface_type") or "asphalt").lower()
+                venues.append(v)
+            return {"venues": venues}
+        except Exception as exc:
+            raise HTTPException(500, f"Database error: {exc}")
+
+    return _serve_catalog(request, ("venues",), _build)
 
 
 @app.get("/api/tires")
@@ -1220,41 +1686,45 @@ def list_tires(
     compound: str | None = Query(None),
     manufacturer: str | None = Query(None),
     limit: int = Query(1000, ge=1, le=5000),
+    request: Request = None,
 ):
-    db = _get_db()
-    if not db:
-        raise HTTPException(503, "Database unavailable")
-    try:
-        count_query = """SELECT COUNT(*)
-                   FROM tire_models tm
-                   JOIN tire_manufacturers tmfr ON tm.manufacturer_id = tmfr.id
-                   WHERE 1=1"""
-        query = """SELECT tm.*, tmfr.name AS manufacturer
-                   FROM tire_models tm
-                   JOIN tire_manufacturers tmfr ON tm.manufacturer_id = tmfr.id
-                   WHERE 1=1"""
-        params: list[Any] = []
-        if compound:
-            count_query += " AND LOWER(tm.compound_type) = LOWER(?)"
-            query += " AND LOWER(tm.compound_type) = LOWER(?)"
-            params.append(compound)
-        if manufacturer:
-            count_query += " AND LOWER(tmfr.name) LIKE LOWER(?)"
-            query += " AND LOWER(tmfr.name) LIKE LOWER(?)"
-            params.append(f"%{manufacturer}%")
-        total = db.execute(count_query, params).fetchone()[0]
-        query += " ORDER BY tmfr.name, tm.model_name LIMIT ?"
-        params.append(limit)
-        rows = db.execute(query, params).fetchall()
-        # Reshape to frontend-friendly format
-        tires = []
-        for r in rows:
-            d = dict(r)
-            d["model"] = d.get("model_name", "")
-            tires.append(d)
-        return {"tires": tires, "total": total}
-    except Exception as exc:
-        raise HTTPException(500, f"Database error: {exc}")
+    def _build():
+        db = _get_db()
+        if not db:
+            raise HTTPException(503, "Database unavailable")
+        try:
+            count_query = """SELECT COUNT(*)
+                       FROM tire_models tm
+                       JOIN tire_manufacturers tmfr ON tm.manufacturer_id = tmfr.id
+                       WHERE 1=1"""
+            query = """SELECT tm.*, tmfr.name AS manufacturer
+                       FROM tire_models tm
+                       JOIN tire_manufacturers tmfr ON tm.manufacturer_id = tmfr.id
+                       WHERE 1=1"""
+            params: list[Any] = []
+            if compound:
+                count_query += " AND LOWER(tm.compound_type) = LOWER(?)"
+                query += " AND LOWER(tm.compound_type) = LOWER(?)"
+                params.append(compound)
+            if manufacturer:
+                count_query += " AND LOWER(tmfr.name) LIKE LOWER(?)"
+                query += " AND LOWER(tmfr.name) LIKE LOWER(?)"
+                params.append(f"%{manufacturer}%")
+            total = db.execute(count_query, params).fetchone()[0]
+            query += " ORDER BY tmfr.name, tm.model_name LIMIT ?"
+            params.append(limit)
+            rows = db.execute(query, params).fetchall()
+            # Reshape to frontend-friendly format
+            tires = []
+            for r in rows:
+                d = dict(r)
+                d["model"] = d.get("model_name", "")
+                tires.append(d)
+            return {"tires": tires, "total": total}
+        except Exception as exc:
+            raise HTTPException(500, f"Database error: {exc}")
+
+    return _serve_catalog(request, ("tires", compound, manufacturer, limit), _build)
 
 
 def _simulate_impl(req: SimulateRequest, progress=None):
@@ -1280,14 +1750,26 @@ def _simulate_impl(req: SimulateRequest, progress=None):
             track_temp_c=req.track_temp_c,
             humidity_pct=req.humidity_pct,
             headwind_kmh=req.headwind_kmh,
+            **_conditions_kwargs(req),
         )
     except HTTPException:
         raise
     except Exception as exc:
         raise HTTPException(400, f"Config error: {exc}")
 
+    parts_skipped: list[int] = []
+    parts_skipped_detail: list[SkippedPartDict] = []
+    cfg, parts_applied, build_cost_inr = _apply_parts_to_config(
+        cfg,
+        req.part_ids,
+        skipped=parts_skipped,
+        skipped_detail=parts_skipped_detail,
+        bike_id=req.bike_id,
+        bike_preset=req.bike_preset,
+    )
+
     try:
-        engine = MotoQuantEngine(cfg)
+        engine = engine_select.make_engine(cfg)
         sim = engine.run(
             use_adaptive_dt=req.use_adaptive_dt,
             progress_cb=(lambda f: progress(f, "Integrating physics"))
@@ -1325,6 +1807,11 @@ def _simulate_impl(req: SimulateRequest, progress=None):
             "1000ft_s": round(float(sim.time_1000ft), 4),
             "1320ft_s": round(float(sim.time_quarter), 4),
         },
+        "environment": _environment_echo(cfg),
+        "parts_applied": parts_applied,
+        "parts_skipped": parts_skipped,
+        "parts_skipped_detail": parts_skipped_detail,
+        "build_cost_inr": round(build_cost_inr, 0),
         "bike": {
             "manufacturer": _mfr,
             "model": cfg.name or "Unknown",
@@ -1353,9 +1840,8 @@ def _simulate_impl(req: SimulateRequest, progress=None):
             "rpm": _safe_array(sim.rpm, lambda v: round(float(v), 0)),
             "gear": _safe_array(sim.gear, lambda v: int(v)),
             "accel_g": _safe_array(sim.a, lambda v: round(float(v) / 9.81, 3)),
-            "traction_pct": _safe_array(
-                sim.traction_pct, lambda v: round(float(v) * 100, 1)
-            ),
+            # SimResult.traction_pct is already a 0-100 percentage.
+            "traction_pct": _safe_array(sim.traction_pct, lambda v: round(float(v), 1)),
             "tire_temp_c": _safe_array(sim.T_tire, lambda v: round(float(v), 1)),
             "power_kw": _safe_array(sim.power_kw, lambda v: round(float(v), 1)),
             "F_drive_N": _safe_array(sim.F_drive, lambda v: round(float(v), 0)),
@@ -1367,14 +1853,13 @@ def _simulate_impl(req: SimulateRequest, progress=None):
 @app.post(
     "/api/simulate",
     dependencies=[
-        # Cost fuse (2026-08-11 hardening): metering alone is advisory while
-        # MOTOQUANT_BILLING_ENFORCE is off, so an anonymous loop could run
-        # unlimited full RK4 sims. 30/60s is generous for human-paced UI use
-        # and fatal to loops. Bucket shared with /api/jobs/simulate — the
+        # Cost fuse (2026-08-11 hardening): every route here is anonymous and
+        # free, so without a limit one loop could run unlimited full RK4
+        # sims on the shared instance. 30/60s is generous for human-paced UI
+        # use and fatal to loops. Bucket shared with /api/jobs/simulate — the
         # client falls back between the two (deploy-skew contract), so a
         # split bucket would double the effective limit.
         Depends(rate_limit("simulate", 30, 60.0)),
-        Depends(_meter_full_sim),
     ],
 )
 def simulate(req: SimulateRequest):
@@ -1384,10 +1869,10 @@ def simulate(req: SimulateRequest):
 
 @app.post(
     "/api/simulate/quick",
-    # Rate-limited but deliberately UNMETERED (pinned design: quick stays
-    # free — the slider UI auto-runs it). The limit exists because each call
+    # Rate-limited on its OWN bucket (the slider UI auto-runs it, so it must
+    # never drain the full-sim budget). The limit exists because each call
     # is still a full RK4 pass (~50-100 ms CPU; TWO passes with part_ids),
-    # and the route previously had neither fuse (2026-08-11 hardening).
+    # and the route previously had no fuse at all (2026-08-11 hardening).
     # Live-mode drags answer client-side now, so 30/60s covers real use.
     dependencies=[Depends(rate_limit("quick_sim", 30, 60.0))],
 )
@@ -1396,6 +1881,13 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
     Quick ET-only simulation -- no time-series arrays.
     Returns in ~50 ms; ideal for slider-driven UI.
     """
+    # Read the catalog freshness token BEFORE loading the bike: a catalog write
+    # that lands between the two must not file the old baseline under the new
+    # token (the catalog cache reads its token first for the same reason).
+    stock_key = _stock_key(req)
+    # A named place resolves to live weather, which the key cannot capture,
+    # so its baseline is never served from (or written to) the cache.
+    live_place = bool(req.location) or (req.lat is not None and req.lon is not None)
     try:
         cfg = _build_config(
             bike_id=req.bike_id,
@@ -1410,48 +1902,54 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
             track_temp_c=req.track_temp_c,
             humidity_pct=req.humidity_pct,
             headwind_kmh=req.headwind_kmh,
+            **_conditions_kwargs(req),
         )
     except HTTPException:
         raise
     except Exception as exc:
         raise HTTPException(400, f"Config error: {exc}")
 
+    # The pre-parts config is the stock baseline. apply_part_to_config returns
+    # a new config, so ``base_cfg`` stays stock; the baseline therefore runs in
+    # exactly the conditions this request resolved (no second weather lookup).
+    base_cfg = cfg
+
     # Apply selected parts
-    cfg, parts_applied, build_cost_inr = _apply_parts_to_config(cfg, req.part_ids)
+    parts_skipped: list[int] = []
+    parts_skipped_detail: list[SkippedPartDict] = []
+    cfg, parts_applied, build_cost_inr = _apply_parts_to_config(
+        cfg,
+        req.part_ids,
+        skipped=parts_skipped,
+        skipped_detail=parts_skipped_detail,
+        bike_id=req.bike_id,
+        bike_preset=req.bike_preset,
+    )
 
     # Run stock sim for comparison if parts are applied
     # "Stock" means same slider overrides but NO parts -- shows parts-only delta
     stock_et = None
     if parts_applied:
-        try:
-            stock_cfg = _build_config(
-                bike_id=req.bike_id,
-                bike_preset=req.bike_preset,
-                power_boost_pct=req.power_boost_pct,
-                mass_delta_kg=req.mass_delta_kg,
-                rider_mass_kg=req.rider_mass_kg,
-                venue_id=req.venue_id,
-                front_tire_id=req.front_tire_id,
-                rear_tire_id=req.rear_tire_id,
-                ambient_temp_c=req.ambient_temp_c,
-                track_temp_c=req.track_temp_c,
-                humidity_pct=req.humidity_pct,
-                headwind_kmh=req.headwind_kmh,
-            )
-            stock_sim = MotoQuantEngine(stock_cfg).run()
-            stock_et = round(float(stock_sim.time_quarter), 4)
-        except Exception:
-            # Baseline comparison is optional; stock_et stays None and the
-            # response simply omits the stock delta.
-            pass
+        stock_et = None if live_place else _stock_cache_get(stock_key)
+        if stock_et is None:
+            try:
+                stock_sim = engine_select.make_engine(copy.deepcopy(base_cfg)).run()
+                stock_et = round(float(stock_sim.time_quarter), 4)
+                if not live_place:
+                    _stock_cache_put(stock_key, stock_et)
+            except Exception:
+                # Baseline comparison is optional; stock_et stays None and the
+                # response simply omits the stock delta.
+                pass
 
     try:
-        engine = MotoQuantEngine(cfg)
+        engine = engine_select.make_engine(cfg)
         sim = engine.run()
     except Exception as exc:
         raise HTTPException(500, f"Simulation error: {exc}")
 
     result: QuickSimResultDict = {
+        "tyres": _tyre_labels(req.front_tire_id, req.rear_tire_id),
         "et_quarter_s": round(float(sim.time_quarter), 4),
         "trap_speed_kmh": round(float(sim.speed_quarter) * 3.6, 2),
         "et_60ft_s": round(float(sim.time_60ft), 4),
@@ -1460,31 +1958,33 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
         "peak_power_hp": round(float(cfg.engine.peak_power_hp), 1),
         "total_mass_kg": round(float(cfg.chassis.total_mass_kg), 1),
         "parts_applied": parts_applied,
+        "parts_skipped": parts_skipped,
+        "parts_skipped_detail": parts_skipped_detail,
+        "environment": _environment_echo(cfg),
         "build_cost_inr": round(build_cost_inr, 0),
         "stock_et_s": stock_et,
         "et_delta_s": round(float(sim.time_quarter) - stock_et, 4)
         if stock_et
         else None,
     }
+    if not parts_applied and not live_place:
+        # No parts changed the config, so this run IS the stock baseline.
+        _stock_cache_put(stock_key, result["et_quarter_s"])
     return result
 
 
-class TopSpeedRequest(BaseModel):
+class TopSpeedRequest(ConditionsRequest):
     """POST /api/simulate/top-speed — runs until terminal velocity."""
 
-    bike_id: int | None = None
+    bike_id: DbId | None = None
     bike_preset: str | None = None
     power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
     rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
     # Same cap rationale as QuickSimRequest.part_ids (2026-08-11 hardening).
-    part_ids: list[int] = Field(default_factory=list, max_length=30)
-    front_tire_id: int | None = None
-    rear_tire_id: int | None = None
-    venue_id: int | None = None
-    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
-    track_temp_c: float | None = Field(None, ge=-30, le=80)
-    humidity_pct: float | None = Field(None, ge=0, le=100)
+    part_ids: list[DbId] = Field(default_factory=list, max_length=30)
+    front_tire_id: DbId | None = None
+    rear_tire_id: DbId | None = None
     headwind_kmh: float | None = Field(None, ge=-200, le=200)
     # LSR-specific: optional override for max time/distance.
     # Bounded: n_max preallocates 18 float64 arrays of max_time_s/dt slots
@@ -1498,6 +1998,52 @@ class TopSpeedRequest(BaseModel):
     # DistanceRunRequest keeps le=300 — a 20 km LSR run genuinely needs it.
     max_time_s: float = Field(120.0, ge=0.1, le=120.0)
     include_timeseries: bool = False
+
+
+# Upper bound on plotted points in the top-speed timeseries. The web chart draws
+# one curve; ~2,000 points is far beyond what a chart can resolve, whereas the
+# native 100 Hz stream of a 120 s run is ~12,000 points x 7 series.
+TOPSPEED_MAX_SERIES_POINTS = 2000
+
+
+def _topspeed_timeseries(sim) -> TopSpeedTimeseriesDict:
+    """Plot-ready top-speed series: 100 Hz source, decimated and rounded.
+
+    Keeps the first sample, the last sample and the peak-speed sample, spreads
+    the rest evenly, and rounds each channel to the precision a chart can show.
+    Scalar results are computed from the full-resolution run elsewhere and are
+    not derived from this series.
+    """
+    import numpy as np
+
+    stride = max(1, int(0.01 / max(sim.dt, 0.0001)))
+    t = np.asarray(sim.t[::stride])
+    n = len(t)
+    if n > TOPSPEED_MAX_SERIES_POINTS:
+        # One slot is reserved for the peak-speed sample, which rarely lands
+        # on the even grid: without it the series came out one point over the
+        # cap (2,001) whenever the peak was off-grid.
+        keep = set(
+            np.linspace(0, n - 1, TOPSPEED_MAX_SERIES_POINTS - 1).astype(int).tolist()
+        )
+        keep.add(int(np.argmax(np.asarray(sim.v[::stride]))))
+        idx = np.array(sorted(keep), dtype=int)
+    else:
+        idx = np.arange(n)
+
+    def pick(arr):
+        return np.asarray(arr[::stride])[idx]
+
+    v = pick(sim.v)
+    return {
+        "t": np.round(pick(sim.t), 3).tolist(),
+        "v_ms": np.round(v, 3).tolist(),
+        "v_kmh": np.round(v * 3.6, 2).tolist(),
+        "rpm": np.round(pick(sim.rpm), 0).tolist(),
+        "gear": pick(sim.gear).astype(int).tolist(),
+        "power_kw": np.round(pick(sim.power_kw), 2).tolist(),
+        "x_m": np.round(pick(sim.x), 2).tolist(),
+    }
 
 
 def _topspeed_impl(req: TopSpeedRequest, progress=None) -> TopSpeedResultDict:
@@ -1523,16 +2069,26 @@ def _topspeed_impl(req: TopSpeedRequest, progress=None) -> TopSpeedResultDict:
             track_temp_c=req.track_temp_c,
             humidity_pct=req.humidity_pct,
             headwind_kmh=req.headwind_kmh,
+            **_conditions_kwargs(req),
         )
     except HTTPException:
         raise
     except Exception as exc:
         raise HTTPException(400, f"Config error: {exc}")
 
-    cfg, parts_applied, build_cost_inr = _apply_parts_to_config(cfg, req.part_ids)
+    parts_skipped: list[int] = []
+    parts_skipped_detail: list[SkippedPartDict] = []
+    cfg, parts_applied, build_cost_inr = _apply_parts_to_config(
+        cfg,
+        req.part_ids,
+        skipped=parts_skipped,
+        skipped_detail=parts_skipped_detail,
+        bike_id=req.bike_id,
+        bike_preset=req.bike_preset,
+    )
 
     try:
-        engine = MotoQuantEngine(cfg)
+        engine = engine_select.make_engine(cfg)
         ts = engine.run_top_speed(
             max_time=req.max_time_s,
             progress_cb=(lambda f: progress(f, "Running to terminal velocity"))
@@ -1568,23 +2124,14 @@ def _topspeed_impl(req: TopSpeedRequest, progress=None) -> TopSpeedResultDict:
         "peak_power_hp": round(float(cfg.engine.peak_power_hp), 1),
         "total_mass_kg": round(float(cfg.chassis.total_mass_kg), 1),
         "parts_applied": parts_applied,
+        "parts_skipped": parts_skipped,
+        "parts_skipped_detail": parts_skipped_detail,
+        "environment": _environment_echo(cfg),
         "build_cost_inr": round(build_cost_inr, 0),
     }
 
     if req.include_timeseries:
-        # Downsample to 100 Hz (every 10 ms) for web payload sanity
-        sim = ts.full_sim
-        stride = max(1, int(0.01 / max(sim.dt, 0.0001)))
-        timeseries: TopSpeedTimeseriesDict = {
-            "t": sim.t[::stride].tolist(),
-            "v_ms": sim.v[::stride].tolist(),
-            "v_kmh": (sim.v[::stride] * 3.6).tolist(),
-            "rpm": sim.rpm[::stride].tolist(),
-            "gear": sim.gear[::stride].tolist(),
-            "power_kw": sim.power_kw[::stride].tolist(),
-            "x_m": sim.x[::stride].tolist(),
-        }
-        response["timeseries"] = timeseries
+        response["timeseries"] = _topspeed_timeseries(ts.full_sim)
 
     return response
 
@@ -1595,7 +2142,6 @@ def _topspeed_impl(req: TopSpeedRequest, progress=None) -> TopSpeedResultDict:
         # Same cost-fuse rationale as /api/simulate (2026-08-11 hardening);
         # bucket shared with /api/jobs/topspeed.
         Depends(rate_limit("topspeed", 30, 60.0)),
-        Depends(_meter_full_sim),
     ],
 )
 def simulate_top_speed(req: TopSpeedRequest) -> TopSpeedResultDict:
@@ -1603,25 +2149,23 @@ def simulate_top_speed(req: TopSpeedRequest) -> TopSpeedResultDict:
     return _topspeed_impl(req)
 
 
-class DistanceRunRequest(BaseModel):
+class DistanceRunRequest(ConditionsRequest):
     """POST /api/simulate/distance — arbitrary distance for LSR events."""
 
-    bike_id: int | None = None
+    bike_id: DbId | None = None
     bike_preset: str | None = None
+    # gt=ROLLOUT_M: the run is timed from the start beam, 1 ft from rest, so
+    # a target at/before it has no timed distance (run() raises ValueError).
     distance_m: float = Field(
-        ..., gt=0, le=20000, description="Target distance in meters"
+        ..., gt=ROLLOUT_M, le=20000, description="Target distance in meters"
     )
     power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
     rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
     # Same cap rationale as QuickSimRequest.part_ids (2026-08-11 hardening).
-    part_ids: list[int] = Field(default_factory=list, max_length=30)
-    front_tire_id: int | None = None
-    rear_tire_id: int | None = None
-    venue_id: int | None = None
-    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
-    track_temp_c: float | None = Field(None, ge=-30, le=80)
-    humidity_pct: float | None = Field(None, ge=0, le=100)
+    part_ids: list[DbId] = Field(default_factory=list, max_length=30)
+    front_tire_id: DbId | None = None
+    rear_tire_id: DbId | None = None
     headwind_kmh: float | None = Field(None, ge=-200, le=200)
     # Same floor rationale as TopSpeedRequest.max_time_s (>= dt). Ceiling
     # DELIBERATELY stays at 300 (not the 2026-08-11 le=120 top-speed cap):
@@ -1630,7 +2174,15 @@ class DistanceRunRequest(BaseModel):
     max_time_s: float = Field(120.0, ge=0.1, le=300.0)
 
 
-@app.post("/api/simulate/distance", dependencies=[Depends(_meter_full_sim)])
+@app.post(
+    "/api/simulate/distance",
+    # Cost fuse — the HEAVIEST sim route (up to 20 km / 300 s of sim time,
+    # ~2.5x the top-speed ceiling). Its only protection used to be the
+    # sim-quota meter, so it gets its own, tighter bucket now that every
+    # route is free (open-source pivot, 2026-10-23). No job variant exists,
+    # so there is no deploy-skew bucket to share.
+    dependencies=[Depends(rate_limit("distance", 10, 60.0))],
+)
 def simulate_distance(req: DistanceRunRequest) -> DistanceResultDict:
     """
     Run the simulation to an arbitrary target distance.
@@ -1652,6 +2204,7 @@ def simulate_distance(req: DistanceRunRequest) -> DistanceResultDict:
             track_temp_c=req.track_temp_c,
             humidity_pct=req.humidity_pct,
             headwind_kmh=req.headwind_kmh,
+            **_conditions_kwargs(req),
         )
     except HTTPException:
         raise
@@ -1660,10 +2213,19 @@ def simulate_distance(req: DistanceRunRequest) -> DistanceResultDict:
 
     # Apply parts (distance run doesn't surface parts_applied/cost in its
     # response, but the helper handles that consistently).
-    cfg, _, _ = _apply_parts_to_config(cfg, req.part_ids)
+    parts_skipped: list[int] = []
+    parts_skipped_detail: list[SkippedPartDict] = []
+    cfg, _, _ = _apply_parts_to_config(
+        cfg,
+        req.part_ids,
+        skipped=parts_skipped,
+        skipped_detail=parts_skipped_detail,
+        bike_id=req.bike_id,
+        bike_preset=req.bike_preset,
+    )
 
     try:
-        engine = MotoQuantEngine(cfg)
+        engine = engine_select.make_engine(cfg)
         sim = engine.run_distance(req.distance_m, max_time=req.max_time_s)
     except Exception as exc:
         raise HTTPException(500, f"Distance run error: {exc}")
@@ -1678,14 +2240,17 @@ def simulate_distance(req: DistanceRunRequest) -> DistanceResultDict:
             "(check mass / power / distance inputs).",
         )
 
-    # Terminal/trap values at the target distance
-    import numpy as np
-
-    target_idx = int(np.searchsorted(sim.x, req.distance_m))
-    if target_idx >= len(sim.t):
-        target_idx = len(sim.t) - 1
-    trap_time = float(sim.t[target_idx])
-    trap_v = float(sim.v[target_idx])
+    # Terminal/trap values at the target distance, timed from the start beam
+    # with the same rollout convention as every other split (2026-10 epoch,
+    # SimResult.split_at). A run that never got there (time cap) reports its
+    # last sample, as before.
+    hit = sim.split_at(req.distance_m)
+    if hit is not None:
+        trap_time = float(hit[0])
+        trap_v = float(hit[1])
+    else:
+        trap_time = float(sim.t[-1])
+        trap_v = float(sim.v[-1])
 
     result: DistanceResultDict = {
         "distance_m": req.distance_m,
@@ -1697,30 +2262,48 @@ def simulate_distance(req: DistanceRunRequest) -> DistanceResultDict:
         "bike_name": cfg.name,
         "peak_power_hp": round(float(cfg.engine.peak_power_hp), 1),
         "total_mass_kg": round(float(cfg.chassis.total_mass_kg), 1),
+        "parts_skipped": parts_skipped,
+        "parts_skipped_detail": parts_skipped_detail,
+        "environment": _environment_echo(cfg),
     }
     return result
 
 
 @app.get("/api/parts/categories")
-def list_parts_categories():
+def list_parts_categories(request: Request = None):
     """Return all parts categories."""
-    db = _get_db()
-    if not db:
-        raise HTTPException(503, "Database unavailable")
-    try:
-        rows = db.execute(
-            "SELECT * FROM parts_categories ORDER BY display_name"
-        ).fetchall()
-        return {"categories": [dict(r) for r in rows]}
-    except Exception as exc:
-        raise HTTPException(500, f"Database error: {exc}")
+
+    def _build():
+        db = _get_db()
+        if not db:
+            raise HTTPException(503, "Database unavailable")
+        try:
+            rows = db.execute(
+                "SELECT * FROM parts_categories ORDER BY display_name"
+            ).fetchall()
+            return {"categories": [dict(r) for r in rows]}
+        except Exception as exc:
+            raise HTTPException(500, f"Database error: {exc}")
+
+    return _serve_catalog(request, ("parts_categories",), _build)
 
 
 @app.get("/api/parts")
 def list_parts(
     category: str | None = Query(None, description="Filter by category name"),
-    category_id: int | None = Query(None, description="Filter by category ID"),
-    bike_id: int | None = Query(None, description="Show compatibility for this bike"),
+    category_id: int | None = Query(
+        None, ge=1, le=MAX_DB_ID, description="Filter by category ID"
+    ),
+    bike_id: int | None = Query(
+        None, ge=1, le=MAX_DB_ID, description="Show compatibility for this bike"
+    ),
+    bike_preset: str | None = Query(
+        None,
+        max_length=64,
+        description="Reference preset (gsxr1000_k5 | yzfr1_4c8 | hayabusa_gen1) to "
+        "judge compatibility by, when no bike_id is given: its catalog row is "
+        "used, exactly as the sim routes do for a preset request.",
+    ),
     compatible_only: bool = Query(
         True,
         description="When bike_id is set: if True (default) only return compatible "
@@ -1729,331 +2312,204 @@ def list_parts(
     ),
     search: str | None = Query(None),
     limit: int = Query(500, ge=1, le=5000),
+    fields: str | None = Query(
+        None,
+        pattern="^id$",
+        description="'id' returns only the matching part ids "
+        '({"part_ids": [...], "total", "bike_id", "compatible_only"}) instead of '
+        "full rows — use with bike_id + compatible_only to learn which catalog "
+        "parts fit a bike without re-downloading the catalog.",
+    ),
+    include_rules: bool = Query(
+        False,
+        description="Include each part's raw 'fitment_rules' and 'specifications' "
+        "JSON (omitted by default: they are ~25% of the list payload and the "
+        "compatibility verdict is already in 'compatible'/'fitment_reason').",
+    ),
+    request: Request = None,
 ):
     """Return parts catalog, optionally filtered by category and bike compatibility.
 
     ``total`` in the response is the number of MATCHING parts (after category /
     search / compatibility filtering, before ``limit`` slicing) so paginating
-    callers can detect truncation. Cap is 5000 (563-part catalog as of Jun 2026).
+    callers can detect truncation. Cap is 5000 (the catalog is a few hundred parts).
 
-    When ``bike_id`` is provided, each returned part is evaluated against the
+    When ``bike_id`` (or, without one, ``bike_preset``) is provided, each
+    returned part is evaluated against the
     bike's fitment rules (stroke_type, manufacturer, engine_config, displacement,
     chain_pitch). Set ``compatible_only=false`` to receive every part with an
     annotation instead of a hard filter (useful for the Streamlit/Next.js UI
     which greys-out incompatible options).
     """
-    db = _get_db()
-    if not db:
-        raise HTTPException(503, "Database unavailable")
-    try:
-        query = """SELECT p.*, pc.name as category_name, pc.display_name as category_display
-                   FROM parts p
-                   JOIN parts_categories pc ON p.category_id = pc.id
-                   WHERE 1=1"""
-        params: list[Any] = []
+    # Direct (non-HTTP) callers omit params, so FastAPI's Query defaults arrive
+    # as Query objects; only a real value counts.
+    ids_only = isinstance(fields, str) and fields == "id"
+    with_rules = include_rules is True
+    preset = bike_preset if isinstance(bike_preset, str) and bike_preset else None
+    requested_bike_id = bike_id
 
-        if category:
-            query += " AND LOWER(pc.name) = LOWER(?)"
-            params.append(category)
-        if category_id:
-            query += " AND p.category_id = ?"
-            params.append(category_id)
-        if search:
-            query += " AND (p.brand LIKE ? OR p.model_name LIKE ?)"
-            params += [f"%{search}%", f"%{search}%"]
-
-        query += " ORDER BY pc.display_name, p.brand, p.model_name"
-        if bike_id is None:
-            # Plain catalog listing: SQL LIMIT is safe, but COUNT first for total.
-            count_q = query.replace(
-                "SELECT p.*, pc.name as category_name, pc.display_name as category_display",
-                "SELECT COUNT(*)",
-                1,
-            ).split(" ORDER BY")[0]
-            sql_total = db.execute(count_q, params).fetchone()[0]
-            query += " LIMIT ?"
-            params.append(limit)
-        else:
-            # Compatibility filtering happens in Python below -- applying the SQL
-            # LIMIT first silently starved brands late in the sort order
-            # (June 11 QA / parts-audit handoff). Fetch all, filter, then slice.
-            sql_total = None
-
-        rows = db.execute(query, params).fetchall()
-
-        # ── Bike compatibility annotation / filter ─────────────────────────
-        bike_row: dict | None = None
-        if bike_id is not None:
-            from .database.parts_repo import enrich_bike_row_for_fitment
-            from .parts.compatibility import is_compatible  # noqa: F401
-
-            raw = db.execute(
-                "SELECT * FROM bike_models WHERE id = ?", (bike_id,)
-            ).fetchone()
-            if raw is None:
-                raise HTTPException(404, f"Bike {bike_id} not found")
-            bike_row = dict(raw)
-            enrich_bike_row_for_fitment(db, bike_row)
-
-        parts = []
-        for r in rows:
-            d = dict(r)
-            # Evaluate compatibility BEFORE parsing JSON fields in-place
-            # (is_compatible expects the raw fitment_rules JSON string).
-            if bike_row is not None:
-                from .parts.compatibility import is_compatible
-
-                compat, reason = is_compatible(d, bike_row)
-                if compatible_only and not compat:
-                    continue
-                d["compatible"] = bool(compat)
-                d["fitment_reason"] = reason
-
-            # Parse JSON fields for frontend
-            for field in (
-                "param_overrides",
-                "param_deltas",
-                "param_multipliers",
-                "specifications",
-                "compatible_bikes",
-                "fitment_rules",
-            ):
-                if d.get(field) and isinstance(d[field], str):
-                    try:
-                        d[field] = json.loads(d[field])
-                    except (json.JSONDecodeError, TypeError):
-                        pass
-            parts.append(d)
-
-        total = sql_total if sql_total is not None else len(parts)
-        if bike_id is not None and len(parts) > limit:
-            parts = parts[:limit]
-
-        return {
-            "parts": parts,
-            "total": total,
-            "bike_id": bike_id,
-            "compatible_only": bool(bike_id is not None and compatible_only),
-        }
-    except HTTPException:
-        raise
-    except Exception as exc:
-        raise HTTPException(500, f"Database error: {exc}")
-
-
-class SaveRunRequest(BaseModel):
-    """POST /api/simulate/save — persist a sim result to the sim_runs table
-    so it surfaces on /api/leaderboard and the desktop History tab."""
-
-    bike_id: int
-    venue_id: int | None = None
-    # Physically-plausible bounds (2026-07-06): negative/zero ETs and
-    # absurd trap speeds were accepted and surfaced on the leaderboard.
-    et_quarter_s: float = Field(gt=0, le=120)
-    trap_speed_kmh: float = Field(gt=0, le=500)
-    et_60ft_s: float | None = None
-    et_eighth_s: float | None = None
-    et_1000ft_s: float | None = None
-    # Bounded (2026-07-25 audit §3.4): unbounded free text on an anonymous
-    # writer whose rows render on the PUBLIC leaderboard. 500 chars is well
-    # past any real "K5, 32C, street tyres" note.
-    notes: str | None = Field(None, max_length=500)
-
-
-@app.post(
-    "/api/simulate/save",
-    status_code=201,
-    dependencies=[Depends(rate_limit("save_run", 10, 60.0))],
-)
-def save_simulation(
-    req: SaveRunRequest,
-    auth_user: dict = Depends(require_tier("pro")),  # noqa: B008
-):
-    """Persist a single sim result to sim_runs. Resolves the incoming
-    bike_models.id to a bike_configs.id using the seed's 1:1 mapping.
-
-    Rate-limited per IP (2026-07-25 audit): the route is effectively
-    anonymous during the beta (`require_tier` passes everyone through while
-    MOTOQUANT_BILLING_ENFORCE is falsy) and it trusts the client-supplied ET,
-    so an unfused loop simply owns /api/leaderboard. The field bounds above
-    stop absurd values; this stops volume.
-    """
-    from . import __version__
-
-    db = _get_db()
-    if not db:
-        raise HTTPException(503, "Database unavailable")
-
-    row = db.execute(
-        "SELECT id FROM bike_configs WHERE bike_model_id = ? "
-        "ORDER BY is_current DESC LIMIT 1",
-        (req.bike_id,),
-    ).fetchone()
-    if not row:
-        raise HTTPException(
-            404,
-            f"No bike_config found for bike_model_id={req.bike_id}. "
-            "Re-seed with `python -m motoquant.run import --known-bikes`.",
-        )
-    bike_config_id = row["id"]
-
-    split_times = {
-        "time_60ft": req.et_60ft_s,
-        "time_eighth": req.et_eighth_s,
-        "time_1000ft": req.et_1000ft_s,
-        "time_quarter": req.et_quarter_s,
-        "speed_quarter_kmh": req.trap_speed_kmh,
-    }
-
-    try:
-        cur = db.execute(
-            """INSERT INTO sim_runs
-               (bike_config_id, venue_id, et_quarter_s, trap_speed_kmh,
-                et_eighth_s, time_60ft_s, time_1000ft_s,
-                sim_version, split_times_json, notes)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (
-                bike_config_id,
-                req.venue_id,
-                req.et_quarter_s,
-                req.trap_speed_kmh,
-                req.et_eighth_s,
-                req.et_60ft_s,
-                req.et_1000ft_s,
-                __version__,
-                json.dumps(split_times),
-                req.notes,
-            ),
-        )
-        db.commit()
-    except sqlite3.Error as exc:
-        raise HTTPException(500, f"Failed to persist run: {exc}")
-
-    # Attribute the run to the signed-in user (no-op for anonymous saves).
-    if auth_user and auth_user.get("id"):
+    def _build():
+        db = _get_db()
+        if not db:
+            raise HTTPException(503, "Database unavailable")
+        # A preset stands for its catalog row (see _parts_model_id), so the
+        # list a preset request gets is the list the sim routes will accept.
+        bike_id = requested_bike_id
+        if bike_id is None and preset is not None:
+            if preset not in _PRESETS:
+                raise HTTPException(404, f"Unknown bike_preset: {preset}")
+            bike_id = _parts_model_id(db, None, preset)
         try:
-            db.execute(
-                "UPDATE sim_runs SET user_id = ? WHERE id = ?",
-                (auth_user["id"], cur.lastrowid),
-            )
-            db.commit()
-        except sqlite3.Error:
-            logging.getLogger(__name__).warning(
-                "sim_runs.user_id attribution failed (column missing?)",
-                exc_info=True,
-            )
+            query = """SELECT p.*, pc.name as category_name, pc.display_name as category_display
+                       FROM parts p
+                       JOIN parts_categories pc ON p.category_id = pc.id
+                       WHERE 1=1"""
+            params: list[Any] = []
 
-    return {
-        "run_id": cur.lastrowid,
-        "bike_id": req.bike_id,
-        "bike_config_id": bike_config_id,
-        "saved_to_account": bool(auth_user and auth_user.get("id")),
-    }
+            if category:
+                query += " AND LOWER(pc.name) = LOWER(?)"
+                params.append(category)
+            if category_id:
+                query += " AND p.category_id = ?"
+                params.append(category_id)
+            if search:
+                query += " AND (p.brand LIKE ? OR p.model_name LIKE ?)"
+                params += [f"%{search}%", f"%{search}%"]
 
+            query += " ORDER BY pc.display_name, p.brand, p.model_name"
+            if bike_id is None:
+                # Plain catalog listing: SQL LIMIT is safe, but COUNT first for total.
+                count_q = query.replace(
+                    "SELECT p.*, pc.name as category_name, pc.display_name as category_display",
+                    "SELECT COUNT(*)",
+                    1,
+                ).split(" ORDER BY")[0]
+                sql_total = db.execute(count_q, params).fetchone()[0]
+                query += " LIMIT ?"
+                params.append(limit)
+            else:
+                # Compatibility filtering happens in Python below -- applying the
+                # SQL LIMIT first silently starved brands late in the sort order
+                # (June 11 QA / parts-audit handoff). Fetch all, filter, then slice.
+                sql_total = None
 
-@app.get("/api/leaderboard")
-def leaderboard(
-    limit: int = Query(20, ge=1, le=100),
-    venue_id: int | None = Query(None, description="Filter to one venue"),
-):
-    """Return the top simulation runs saved to the local database,
-    optionally filtered to a single venue (per-venue leaderboards)."""
-    db = _get_db()
-    if not db:
-        raise HTTPException(503, "Database unavailable")
+            rows = db.execute(query, params).fetchall()
 
-    try:
-        # sim_runs table stores saved runs from the CLI `sim save-run` command
-        query = """SELECT sr.id, sr.et_quarter_s, sr.trap_speed_kmh,
-                      m.name AS manufacturer, bm.model_name AS model,
-                      bm.year_from AS year, v.name AS venue, sr.created_at
-               FROM sim_runs sr
-               LEFT JOIN bike_configs bc ON sr.bike_config_id = bc.id
-               LEFT JOIN bike_models bm ON bc.bike_model_id = bm.id
-               LEFT JOIN manufacturers m ON bm.manufacturer_id = m.id
-               LEFT JOIN venues v ON sr.venue_id = v.id
-               WHERE sr.et_quarter_s IS NOT NULL"""
-        params: list[Any] = []
-        if venue_id is not None:
-            query += " AND sr.venue_id = ?"
-            params.append(venue_id)
-        query += " ORDER BY sr.et_quarter_s ASC LIMIT ?"
-        params.append(limit)
-        rows = db.execute(query, params).fetchall()
-        return {
-            "leaderboard": [dict(r) for r in rows],
-            "total": len(rows),
-        }
-    except sqlite3.OperationalError as exc:
-        # sim_runs table may not exist yet on a fresh DB -- return empty,
-        # but say so in the logs instead of swallowing silently.
-        logging.getLogger(__name__).warning("leaderboard query failed: %s", exc)
-        return {"leaderboard": [], "total": 0}
+            # -- Bike compatibility annotation / filter -----------------------
+            bike_row: dict | None = None
+            if bike_id is not None:
+                from .database.parts_repo import enrich_bike_row_for_fitment
 
+                raw = db.execute(
+                    "SELECT * FROM bike_models WHERE id = ?", (bike_id,)
+                ).fetchone()
+                if raw is None:
+                    raise HTTPException(404, f"Bike {bike_id} not found")
+                bike_row = dict(raw)
+                enrich_bike_row_for_fitment(db, bike_row)
 
-@app.get("/api/runs/{run_id}")
-def get_public_run(run_id: int):
-    """Public, immutable view of one saved sim run — powers the shareable
-    /r/[id] timeslip pages (the WhatsApp/OG share loop). Only exposes the
-    run's results + bike/venue names, never the owning account."""
-    db = _get_db()
-    if not db:
-        raise HTTPException(503, "Database unavailable")
-    try:
-        row = db.execute(
-            """SELECT sr.id, sr.et_quarter_s, sr.trap_speed_kmh,
-                      sr.et_eighth_s, sr.time_60ft_s, sr.time_330ft_s,
-                      sr.time_1000ft_s, sr.created_at,
-                      m.name AS manufacturer, bm.model_name AS model,
-                      bm.year_from AS year, v.name AS venue
-               FROM sim_runs sr
-               LEFT JOIN bike_configs bc ON sr.bike_config_id = bc.id
-               LEFT JOIN bike_models bm ON bc.bike_model_id = bm.id
-               LEFT JOIN manufacturers m ON bm.manufacturer_id = m.id
-               LEFT JOIN venues v ON sr.venue_id = v.id
-               WHERE sr.id = ?""",
-            (run_id,),
-        ).fetchone()
-    except sqlite3.OperationalError as exc:
-        logging.getLogger(__name__).warning("run lookup failed: %s", exc)
-        row = None
-    if not row:
-        raise HTTPException(404, "Run not found")
-    return dict(row)
+            from .parts.compatibility import is_compatible
+
+            parts = []
+            for r in rows:
+                d = dict(r)
+                # Evaluate compatibility BEFORE parsing JSON fields in-place
+                # (is_compatible expects the raw fitment_rules JSON string).
+                if bike_row is not None:
+                    compat, reason = is_compatible(d, bike_row)
+                    if compatible_only and not compat:
+                        continue
+                    d["compatible"] = bool(compat)
+                    d["fitment_reason"] = reason
+
+                if ids_only:
+                    parts.append(d["id"])
+                    continue
+
+                if not with_rules:
+                    d.pop("fitment_rules", None)
+                    d.pop("specifications", None)
+
+                # Parse JSON fields for frontend
+                for field in (
+                    "param_overrides",
+                    "param_deltas",
+                    "param_multipliers",
+                    "specifications",
+                    "compatible_bikes",
+                    "fitment_rules",
+                ):
+                    if d.get(field) and isinstance(d[field], str):
+                        try:
+                            d[field] = json.loads(d[field])
+                        except (json.JSONDecodeError, TypeError):
+                            pass
+                parts.append(d)
+
+            total = sql_total if sql_total is not None else len(parts)
+            if bike_id is not None and len(parts) > limit:
+                parts = parts[:limit]
+
+            out = {
+                "parts": parts,
+                "total": total,
+                "bike_id": bike_id,
+                "compatible_only": bool(bike_id is not None and compatible_only),
+            }
+            if ids_only:
+                out["part_ids"] = out.pop("parts")
+            return out
+        except HTTPException:
+            raise
+        except Exception as exc:
+            raise HTTPException(500, f"Database error: {exc}")
+
+    return _serve_catalog(
+        request,
+        (
+            "parts",
+            category,
+            category_id,
+            bike_id,
+            preset,
+            bool(compatible_only),
+            search,
+            limit,
+            ids_only,
+            with_rules,
+        ),
+        _build,
+    )
 
 
 # --- A vs B Comparison ---------------------------------------------------
 
 
-class CompareRequest(BaseModel):
+class CompareRequest(ConditionsRequest):
     """POST /api/simulate/compare - two builds side-by-side."""
 
     # Build A (baseline)
-    a_bike_id: int | None = None
+    a_bike_id: DbId | None = None
     a_bike_preset: str | None = None
     a_power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     a_mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
     a_rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
     # Same cap rationale as QuickSimRequest.part_ids (2026-08-11 hardening).
-    a_part_ids: list[int] = Field(default_factory=list, max_length=30)
-    a_front_tire_id: int | None = None
-    a_rear_tire_id: int | None = None
+    a_part_ids: list[DbId] = Field(default_factory=list, max_length=30)
+    a_front_tire_id: DbId | None = None
+    a_rear_tire_id: DbId | None = None
 
     # Build B (modified)
-    b_bike_id: int | None = None
+    b_bike_id: DbId | None = None
     b_bike_preset: str | None = None
     b_power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     b_mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
     b_rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
-    b_part_ids: list[int] = Field(default_factory=list, max_length=30)
-    b_front_tire_id: int | None = None
-    b_rear_tire_id: int | None = None
+    b_part_ids: list[DbId] = Field(default_factory=list, max_length=30)
+    b_front_tire_id: DbId | None = None
+    b_rear_tire_id: DbId | None = None
 
     # Shared conditions
-    venue_id: int | None = None
-    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
-    track_temp_c: float | None = Field(None, ge=-30, le=80)
-    humidity_pct: float | None = Field(None, ge=0, le=100)
     headwind_kmh: float | None = Field(None, ge=-200, le=200)
 
 
@@ -2072,8 +2528,13 @@ def _run_build(
     humidity_pct,
     headwind_kmh,
     progress_cb=None,
+    conditions: dict | None = None,
 ):
-    """Build config, apply parts, run sim, return (sim, cfg, parts_applied, cost)."""
+    """Build config, apply parts, run sim; return (sim, cfg, parts_applied,
+    cost, parts_skipped, parts_skipped_detail).
+
+    ``conditions`` carries the ConditionsRequest-only fields (see
+    :func:`_conditions_kwargs`)."""
     cfg = _build_config(
         bike_id=bike_id,
         bike_preset=bike_preset,
@@ -2087,16 +2548,34 @@ def _run_build(
         track_temp_c=track_temp_c,
         humidity_pct=humidity_pct,
         headwind_kmh=headwind_kmh,
+        **(conditions or {}),
     )
+    parts_skipped: list[int] = []
+    parts_skipped_detail: list[SkippedPartDict] = []
     cfg, parts_applied, build_cost = _apply_parts_to_config(
-        cfg, part_ids, include_price_in_summary=False
+        cfg,
+        part_ids,
+        include_price_in_summary=False,
+        skipped=parts_skipped,
+        skipped_detail=parts_skipped_detail,
+        bike_id=bike_id,
+        bike_preset=bike_preset,
     )
 
-    sim = MotoQuantEngine(cfg).run(progress_cb=progress_cb)
-    return sim, cfg, parts_applied, build_cost
+    sim = engine_select.make_engine(cfg).run(progress_cb=progress_cb)
+    return sim, cfg, parts_applied, build_cost, parts_skipped, parts_skipped_detail
 
 
-def _build_summary(sim, cfg, parts_applied, build_cost, label, include_timeseries=True):
+def _build_summary(
+    sim,
+    cfg,
+    parts_applied,
+    build_cost,
+    label,
+    include_timeseries=True,
+    parts_skipped=(),
+    parts_skipped_detail=(),
+):
     """Create a response dict from a sim run."""
     step = max(1, len(sim.t) // 1000)
     idx = list(range(0, len(sim.t), step))
@@ -2116,6 +2595,8 @@ def _build_summary(sim, cfg, parts_applied, build_cost, label, include_timeserie
         "peak_power_hp": round(float(cfg.engine.peak_power_hp), 1),
         "total_mass_kg": round(float(cfg.chassis.total_mass_kg), 1),
         "parts_applied": parts_applied,
+        "parts_skipped": list(parts_skipped),
+        "parts_skipped_detail": list(parts_skipped_detail),
         "build_cost_inr": round(build_cost, 0),
     }
     if include_timeseries:
@@ -2125,10 +2606,28 @@ def _build_summary(sim, cfg, parts_applied, build_cost, label, include_timeserie
             "rpm": _sa(sim.rpm, lambda v: round(float(v), 0)),
             "gear": _sa(sim.gear, lambda v: int(v)),
             "accel_g": _sa(sim.a, lambda v: round(float(v) / 9.81, 3)),
-            "traction_pct": _sa(sim.traction_pct, lambda v: round(float(v) * 100, 1)),
+            "traction_pct": _sa(sim.traction_pct, lambda v: round(float(v), 1)),
             "power_kw": _sa(sim.power_kw, lambda v: round(float(v), 1)),
         }
     return result
+
+
+def _same_build(req: CompareRequest) -> bool:
+    """True when builds A and B are defined by identical inputs."""
+
+    def norm(pids):  # repeated ids are applied once, in first-seen order
+        return tuple(dict.fromkeys(pids))
+
+    return (
+        req.a_bike_id == req.b_bike_id
+        and req.a_bike_preset == req.b_bike_preset
+        and req.a_power_boost_pct == req.b_power_boost_pct
+        and req.a_mass_delta_kg == req.b_mass_delta_kg
+        and req.a_rider_mass_kg == req.b_rider_mass_kg
+        and norm(req.a_part_ids) == norm(req.b_part_ids)
+        and req.a_front_tire_id == req.b_front_tire_id
+        and req.a_rear_tire_id == req.b_rear_tire_id
+    )
 
 
 def _compare_impl(req: CompareRequest, progress=None):
@@ -2144,7 +2643,7 @@ def _compare_impl(req: CompareRequest, progress=None):
     try:
         if progress is not None:
             progress(0.01, "Simulating build A")
-        sim_a, cfg_a, parts_a, cost_a = _run_build(
+        sim_a, cfg_a, parts_a, cost_a, skipped_a, why_a = _run_build(
             req.a_bike_id,
             req.a_bike_preset,
             req.a_power_boost_pct,
@@ -2159,25 +2658,41 @@ def _compare_impl(req: CompareRequest, progress=None):
             req.humidity_pct,
             req.headwind_kmh,
             progress_cb=_span(0.01, 0.48, "Simulating build A"),
+            conditions=_conditions_kwargs(req),
         )
         if progress is not None:
             progress(0.5, "Simulating build B")
-        sim_b, cfg_b, parts_b, cost_b = _run_build(
-            req.b_bike_id,
-            req.b_bike_preset,
-            req.b_power_boost_pct,
-            req.b_mass_delta_kg,
-            req.b_rider_mass_kg,
-            req.b_part_ids,
-            req.b_front_tire_id,
-            req.b_rear_tire_id,
-            req.venue_id,
-            req.ambient_temp_c,
-            req.track_temp_c,
-            req.humidity_pct,
-            req.headwind_kmh,
-            progress_cb=_span(0.5, 0.98, "Simulating build B"),
-        )
+        if _same_build(req):
+            # Identical inputs give an identical (deterministic) run: reuse A's
+            # result for B instead of integrating the same trajectory twice.
+            sim_b, cfg_b, parts_b, cost_b, skipped_b, why_b = (
+                sim_a,
+                cfg_a,
+                parts_a,
+                cost_a,
+                skipped_a,
+                why_a,
+            )
+            if progress is not None:
+                progress(0.98, "Simulating build B")
+        else:
+            sim_b, cfg_b, parts_b, cost_b, skipped_b, why_b = _run_build(
+                req.b_bike_id,
+                req.b_bike_preset,
+                req.b_power_boost_pct,
+                req.b_mass_delta_kg,
+                req.b_rider_mass_kg,
+                req.b_part_ids,
+                req.b_front_tire_id,
+                req.b_rear_tire_id,
+                req.venue_id,
+                req.ambient_temp_c,
+                req.track_temp_c,
+                req.humidity_pct,
+                req.headwind_kmh,
+                progress_cb=_span(0.5, 0.98, "Simulating build B"),
+                conditions=_conditions_kwargs(req),
+            )
     except HTTPException:
         raise  # e.g. 404 for an unknown bike_id — don't relabel as 500
     except Exception as exc:
@@ -2185,8 +2700,24 @@ def _compare_impl(req: CompareRequest, progress=None):
 
     if progress is not None:
         progress(0.99, "Building comparison")
-    a = _build_summary(sim_a, cfg_a, parts_a, cost_a, "A")
-    b = _build_summary(sim_b, cfg_b, parts_b, cost_b, "B")
+    a = _build_summary(
+        sim_a,
+        cfg_a,
+        parts_a,
+        cost_a,
+        "A",
+        parts_skipped=skipped_a,
+        parts_skipped_detail=why_a,
+    )
+    b = _build_summary(
+        sim_b,
+        cfg_b,
+        parts_b,
+        cost_b,
+        "B",
+        parts_skipped=skipped_b,
+        parts_skipped_detail=why_b,
+    )
 
     delta_et = round(b["et_quarter_s"] - a["et_quarter_s"], 4)
     delta_trap = round(b["trap_speed_kmh"] - a["trap_speed_kmh"], 2)
@@ -2194,6 +2725,7 @@ def _compare_impl(req: CompareRequest, progress=None):
     return {
         "a": a,
         "b": b,
+        "environment": _environment_echo(cfg_a),
         "delta": {
             "et_s": delta_et,
             "trap_kmh": delta_trap,
@@ -2203,17 +2735,24 @@ def _compare_impl(req: CompareRequest, progress=None):
     }
 
 
+# Cost fuse for both compare routes. Each call runs TWO full RK4 passes, and
+# the sim-quota meter used to be their only protection — so they get a
+# tighter bucket than single-sim routes (15/60 s = 30 full sims/min, the
+# same CPU ceiling as /api/simulate). ONE shared bucket: the web client
+# falls back between /api/simulate/compare and /api/jobs/compare
+# (deploy-skew contract), so a split bucket would double the effective
+# limit. Pinned by tests/test_public_route_fuses.py.
+_rl_compare = rate_limit("compare", 15, 60.0)
+
+
 @app.post(
     "/api/simulate/compare",
-    dependencies=[Depends(_meter_full_sims(2))],
+    dependencies=[Depends(_rl_compare)],
 )
 def simulate_compare(req: CompareRequest):
     """Run two builds side-by-side and return full results for both.
 
-    Metered at TWO sim units (2026-07-25 audit §3.4): this runs two full RK4
-    passes and was charging nothing, so it was the cheapest way to bypass the
-    free-tier quota entirely. /api/simulate/quick stays unmetered by design —
-    the slider UI auto-runs it on every drag.
+    Rate-limited on the shared ``compare`` bucket (see ``_rl_compare``).
     """
     return _compare_impl(req)
 
@@ -2226,9 +2765,8 @@ def simulate_compare(req: CompareRequest):
 # Starlette spools a large part to a temp file, but `.read()` pulls all of it
 # back into memory and it is then written to a SECOND temp file — so a single
 # unauthenticated POST of a few hundred MB is an OOM kill plus a disk fill on
-# the 512 MB Render instance. (The `require_tier("studio")` gate does not stop
-# it: require_tier passes anonymous callers through whenever
-# MOTOQUANT_BILLING_ENFORCE is falsy, which render.yaml ships as the default.)
+# the 512 MB Render instance. Both routes are anonymous, so nothing upstream
+# of this cap stops such a body.
 #
 # 25 MB is ~100x the largest realistic Dragy/dyno export, which are text CSVs
 # of a few hundred KB.
@@ -2271,17 +2809,17 @@ async def _read_upload_capped(file: UploadFile) -> bytes:
 
 @app.post(
     "/api/calibrate/dragy",
-    # The studio tier gate is inert while MOTOQUANT_BILLING_ENFORCE is off,
-    # so during beta these uploads are effectively anonymous and each one
-    # parses up to 25 MB in memory (2026-08-11 hardening). 6/60s is plenty
-    # for a human uploading timeslips; a loop gets cut off fast.
+    # These uploads are anonymous and each one parses up to 25 MB in memory
+    # (2026-08-11 hardening). 6/60s is plenty for a human uploading
+    # timeslips; a loop gets cut off fast.
     dependencies=[Depends(rate_limit("calibrate_upload", 6, 60.0))],
 )
 async def upload_dragy(
     file: UploadFile = File(..., description="Dragy CSV or JSON export"),
-    bike_id: int | None = Form(None, description="Bike to overlay sim against"),
+    bike_id: int | None = Form(
+        None, ge=1, le=MAX_DB_ID, description="Bike to overlay sim against"
+    ),
     bike_preset: str | None = Form(None),
-    _auth: dict = Depends(require_tier("studio")),  # noqa: B008
 ):
     """
     Upload a Dragy GPS file, parse it, and optionally overlay against simulation.
@@ -2370,7 +2908,11 @@ async def upload_dragy(
             )
             # Full RK4 run takes seconds on prod hardware — keep it off
             # the event loop.
-            sim = await asyncio.to_thread(MotoQuantEngine(cfg).run)
+            # rollout_m=0.0: the Dragy parser times the real run from its
+            # first-motion frame, so the overlay sim uses the same convention.
+            sim = await asyncio.to_thread(
+                engine_select.make_engine(cfg).run, rollout_m=0.0
+            )
             from .calibration.overlay import compare_runs
 
             comparison = compare_runs(best, sim)
@@ -2413,7 +2955,6 @@ async def upload_dyno(
     temp_c: float | None = Form(None, description="Ambient temperature during run [C]"),
     pressure_kpa: float | None = Form(None, description="Barometric pressure [kPa]"),
     rh_pct: float = Form(0.0, description="Relative humidity [%]"),
-    _auth: dict = Depends(require_tier("studio")),  # noqa: B008
 ):
     """Upload a dyno CSV, parse it with SAE J1349 correction, return power/torque curve."""
     log = logging.getLogger(__name__)
@@ -2475,298 +3016,6 @@ async def upload_dyno(
     }
 
 
-# --- Bike Suggestions (user submissions) ---------------------------------
-
-
-class BikeSuggestionRequest(BaseModel):
-    """POST /api/bikes/suggest -- user-submitted bike addition request."""
-
-    make: str = Field(
-        ..., min_length=1, max_length=60, description="Manufacturer (e.g. 'Kawasaki')"
-    )
-    model: str = Field(
-        ..., min_length=1, max_length=80, description="Model name (e.g. 'ZX-6R 636')"
-    )
-    year: int | None = Field(None, ge=1960, le=2099, description="Model year")
-    displacement_cc: float | None = Field(
-        None, gt=0, le=5000, description="Engine displacement in cc"
-    )
-    peak_power_hp: float | None = Field(
-        None, gt=0, le=600, description="Peak power (hp)"
-    )
-    dry_mass_kg: float | None = Field(None, gt=0, le=800, description="Dry mass (kg)")
-    category: str | None = Field(
-        None,
-        max_length=40,
-        description="sport / naked / cruiser / adv / drag / touring",
-    )
-    notes: str | None = Field(
-        None, max_length=2000, description="Free-form rider context"
-    )
-    submitter_email: str | None = Field(
-        None, max_length=254, description="Optional -- reply address"
-    )
-    source_url: str | None = Field(
-        None, max_length=500, description="Optional spec-sheet URL"
-    )
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "make": "Kawasaki",
-                "model": "ZX-6R 636",
-                "year": 2024,
-                "displacement_cc": 636,
-                "peak_power_hp": 128,
-                "dry_mass_kg": 196,
-                "category": "sport",
-                "notes": "Would love to see this in the simulator",
-                "submitter_email": "rider@example.com",
-            }
-        }
-
-
-@app.post("/api/bikes/suggest", status_code=201)
-def suggest_bike(req: BikeSuggestionRequest):
-    """
-    Submit a bike to be added to the catalog.
-
-    Returns `201 Created` with the suggestion id on success. Plausibility
-    violations (displacement > 3500cc, etc.) are stored anyway but flagged for
-    manual review; the `flagged_out_of_bounds` field in the response tells the
-    client whether the submission was accepted as-is or flagged.
-    """
-    db = _get_db()
-    if not db:
-        raise HTTPException(503, "Database unavailable")
-
-    try:
-        # Reuse the shared DB connection directly -- the repo only needs a
-        # connection-like object, so we skip the MotoQuantDB facade here.
-        from .database.bike_suggestions_repo import BikeSuggestionsRepository
-
-        repo = BikeSuggestionsRepository(db)
-        result = repo.create(
-            make=req.make,
-            model=req.model,
-            year=req.year,
-            displacement_cc=req.displacement_cc,
-            peak_power_hp=req.peak_power_hp,
-            dry_mass_kg=req.dry_mass_kg,
-            category=req.category,
-            notes=req.notes,
-            submitter_email=req.submitter_email,
-            source_url=req.source_url,
-        )
-    except ValueError as exc:
-        # Empty make/model -- shouldn't happen thanks to Pydantic min_length, but belt-and-braces
-        raise HTTPException(422, str(exc))
-    except Exception as exc:
-        logging.getLogger(__name__).error(
-            "Failed to store bike suggestion: %s", exc, exc_info=True
-        )
-        raise HTTPException(500, f"Database error: {exc}")
-
-    return {
-        "id": result["id"],
-        "status": "pending",
-        "flagged_out_of_bounds": result["flagged_out_of_bounds"],
-        "issues": result["issues"],
-        "message": (
-            "Thanks! Your submission is queued for review."
-            if not result["flagged_out_of_bounds"]
-            else "Submission stored, but some fields are out of expected range and will be manually verified."
-        ),
-    }
-
-
-# --- Spec Corrections (user-submitted field-level fixes) -----------------
-
-
-class SpecCorrectionRequest(BaseModel):
-    """POST /api/specs/correct — propose a correction for one spec field."""
-
-    bike_id: int = Field(..., description="DB bike model ID to correct")
-    field_name: str = Field(
-        ...,
-        max_length=80,
-        description=(
-            "Field to correct — must be one of the allowed spec fields "
-            "(see GET /api/specs/correction-fields for the full list)"
-        ),
-    )
-    proposed_value: str = Field(
-        ..., max_length=500, description="Corrected value as a string"
-    )
-    source_url: str | None = Field(
-        None, max_length=500, description="URL of supporting evidence (optional)"
-    )
-    submitter_email: str | None = Field(
-        None, max_length=254, description="Optional reply address"
-    )
-    notes: str | None = Field(None, max_length=2000, description="Free-form context")
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "bike_id": 42,
-                "field_name": "peak_power_hp",
-                "proposed_value": "185.5",
-                "source_url": "https://example.com/r15-dyno-2024.pdf",
-                "submitter_email": "rider@example.com",
-                "notes": "Indian Autos Mag wheel-dyno, stock R15 V4, July 2024 issue",
-            }
-        }
-
-
-def _fetch_current_value(db, bike_id: int, field_name: str) -> str | None:
-    """
-    Snapshot the current value of ``field_name`` from the DB for the audit trail.
-    Returns None if the field can't be found cleanly (non-blocking — we always
-    store the correction regardless).
-    """
-    # Fields that live directly on bike_models as columns
-    _HEADLINE_COLS = {
-        "peak_power_hp",
-        "peak_torque_nm",
-        "peak_power_rpm",
-        "peak_torque_rpm",
-        "displacement_cc",
-        "bore_mm",
-        "stroke_mm",
-        "compression_ratio",
-        "dry_mass_kg",
-        "wet_mass_kg",
-        "cylinder_count",
-        "wheelbase_mm",
-        "seat_height_mm",
-        "fuel_capacity_l",
-    }
-    # Fields that live inside bike_configs JSON blobs
-    _BLOB_FIELD_MAP = {
-        "front_sprocket": "drivetrain_params",
-        "rear_sprocket": "drivetrain_params",
-        "gear_ratios": "drivetrain_params",
-        "redline_rpm": "engine_params",
-        "cd": "aero_params",
-        "frontal_area_m2": "aero_params",
-    }
-    try:
-        if field_name in _HEADLINE_COLS:
-            row = db.execute(
-                f"SELECT {field_name} FROM bike_models WHERE id = ?",  # noqa: S608
-                (bike_id,),
-            ).fetchone()
-            if row:
-                val = row[0]
-                return str(val) if val is not None else None
-        elif field_name in _BLOB_FIELD_MAP:
-            blob_col = _BLOB_FIELD_MAP[field_name]
-            cfg_row = db.execute(
-                f"SELECT {blob_col} FROM bike_configs "  # noqa: S608
-                "WHERE bike_model_id = ? AND is_current = 1 ORDER BY version DESC LIMIT 1",
-                (bike_id,),
-            ).fetchone()
-            if cfg_row and cfg_row[0]:
-                blob = json.loads(cfg_row[0])
-                val = blob.get(field_name)
-                return str(val) if val is not None else None
-    except Exception:
-        # Probe helper: malformed/missing config blob degrades to None.
-        pass
-    return None
-
-
-@app.get("/api/specs/correction-fields")
-def list_correction_fields():
-    """Return the set of field names that users can propose corrections for.
-
-    Shape: ``[{value, label}, ...]`` — standard dropdown-source format. The
-    list is sorted by ``value`` so the dropdown ordering is stable across
-    deploys.
-    """
-    from .database.spec_corrections_repo import FIELD_LABELS, VALID_CORRECTION_FIELDS
-
-    return [
-        {"value": field, "label": FIELD_LABELS.get(field, field)}
-        for field in sorted(VALID_CORRECTION_FIELDS)
-    ]
-
-
-@app.post("/api/specs/correct", status_code=201)
-def submit_spec_correction(req: SpecCorrectionRequest):
-    """
-    Submit a user correction for a single spec field on a bike model.
-
-    Stored as ``status='pending'`` — not applied to the catalog until a
-    maintainer reviews it.  The ``field_name`` must be in the whitelist
-    returned by ``GET /api/specs/correction-fields``.
-
-    Returns ``201 Created`` with ``{id, status, message}`` on success.
-    """
-    from .database.spec_corrections_repo import (
-        VALID_CORRECTION_FIELDS,
-        SpecCorrectionsRepository,
-    )
-
-    db = _get_db()
-    if not db:
-        raise HTTPException(503, "Database unavailable")
-
-    # Validate field_name against whitelist
-    if req.field_name not in VALID_CORRECTION_FIELDS:
-        raise HTTPException(
-            422,
-            f"field_name {req.field_name!r} is not correctable. "
-            f"Valid fields: {sorted(VALID_CORRECTION_FIELDS)}",
-        )
-
-    # Confirm bike exists
-    bike_row = db.execute(
-        """SELECT bm.id, bm.model_name, m.name AS manufacturer
-           FROM bike_models bm
-           JOIN manufacturers m ON bm.manufacturer_id = m.id
-           WHERE bm.id = ?""",
-        (req.bike_id,),
-    ).fetchone()
-    if not bike_row:
-        raise HTTPException(404, f"Bike {req.bike_id} not found")
-
-    # Snapshot current value for the audit trail
-    current_value = _fetch_current_value(db, req.bike_id, req.field_name)
-
-    try:
-        repo = SpecCorrectionsRepository(db)
-        result = repo.create(
-            bike_model_id=req.bike_id,
-            field_name=req.field_name,
-            proposed_value=req.proposed_value,
-            current_value=current_value,
-            source_url=req.source_url,
-            submitter_email=req.submitter_email,
-            notes=req.notes,
-        )
-    except ValueError as exc:
-        raise HTTPException(422, str(exc))
-    except Exception as exc:
-        logging.getLogger(__name__).error(
-            "Failed to store spec correction: %s", exc, exc_info=True
-        )
-        raise HTTPException(500, f"Database error: {exc}")
-
-    bike_label = f"{dict(bike_row)['manufacturer']} {dict(bike_row)['model_name']}"
-    return {
-        "id": result["id"],
-        "status": "pending",
-        "bike": bike_label,
-        "field": req.field_name,
-        "message": (
-            "Thanks! Your correction is queued for review. "
-            "If accepted, it will be applied to the catalog in the next release."
-        ),
-    }
-
-
 # --- Venue Resolve (auto race-environment setup) -------------------------
 
 
@@ -2791,8 +3040,7 @@ class VenueResolveRequest(BaseModel):
         description="Elevation above sea level [m]. Overrides OWM's estimate if provided.",
     )
 
-    class Config:
-        json_schema_extra = {"example": {"location": "Pune, IN"}}
+    model_config = ConfigDict(json_schema_extra={"example": {"location": "Pune, IN"}})
 
 
 def _match_seeded_venue(db, location: str) -> dict | None:
@@ -2829,7 +3077,70 @@ def _match_seeded_venue(db, location: str) -> dict | None:
         return None
 
 
+# Upstream HTTP errors (requests' HTTPError / ConnectionError messages) embed
+# the full request URL — including `appid=<key>` — so any error text that
+# came from an outbound call must pass through this before it is logged or
+# returned. 2026-10-24: /api/venues/resolve echoed the OWM key in its 502.
+_SECRET_QUERY_RE = re.compile(
+    r"(?i)\b(appid|api_?key|access_token|token|key)=([^&\s'\"<>]+)"
+)
+
+
+def _redact_secrets(text: object, *secrets: str | None) -> str:
+    """Remove every given secret value and any ``appid=``/``key=``-style query
+    parameter value from ``text``."""
+    out = str(text)
+    for secret in secrets:
+        if secret:
+            out = out.replace(secret, "[REDACTED]")
+    return _SECRET_QUERY_RE.sub(lambda m: f"{m.group(1)}=[REDACTED]", out)
+
+
+# Successful weather lookups are reused for ten minutes. Every simulation
+# route accepts a place now, and the site's Live mode re-posts on every slider
+# change; without this one visitor could spend the shared upstream allowance.
+_OWM_CACHE_TTL_S = 600.0
+_OWM_CACHE_MAX = 256
+_owm_cache: "OrderedDict[tuple, tuple[float, dict]]" = OrderedDict()
+_owm_cache_lock = threading.Lock()
+
+
 def _fetch_owm_for_location(
+    *,
+    location: str | None,
+    lat: float | None,
+    lon: float | None,
+    altitude_m: float | None,
+) -> dict | None:
+    """Cached front of :func:`_fetch_owm_uncached` (errors are never cached)."""
+    key = (
+        (location or "").strip().lower() or None,
+        None if lat is None else round(float(lat), 2),
+        None if lon is None else round(float(lon), 2),
+        altitude_m,
+    )
+    now = _time.monotonic()
+    with _owm_cache_lock:
+        hit = _owm_cache.get(key)
+        if hit is not None and now - hit[0] < _OWM_CACHE_TTL_S:
+            _owm_cache.move_to_end(key)
+            return dict(hit[1])
+    result = _fetch_owm_uncached(
+        location=location, lat=lat, lon=lon, altitude_m=altitude_m
+    )
+    if isinstance(result, dict) and "_error" not in result:
+        # Stamp the fetch here so a cached reading keeps the time it was
+        # actually fetched, rather than the time it was served.
+        result = {"fetched_at": datetime.now(timezone.utc).isoformat(), **result}
+        with _owm_cache_lock:
+            _owm_cache[key] = (now, dict(result))
+            _owm_cache.move_to_end(key)
+            while len(_owm_cache) > _OWM_CACHE_MAX:
+                _owm_cache.popitem(last=False)
+    return result
+
+
+def _fetch_owm_uncached(
     *,
     location: str | None,
     lat: float | None,
@@ -2875,13 +3186,17 @@ def _fetch_owm_for_location(
         data = resp.json()
     except Exception as exc:
         logging.getLogger(__name__).warning(
-            "OWM fetch failed for location=%r lat=%s lon=%s: %s",
-            location,
-            lat,
-            lon,
-            exc,
+            # The place is visitor input: log how it was given, not what it was.
+            "OWM fetch failed (by=%s): %s",
+            "coords" if lat is not None and lon is not None else "name",
+            _redact_secrets(f"{type(exc).__name__}: {exc}", api_key),
         )
-        return {"_error": f"owm_error: {exc}"}
+        # The client gets a coarse, key-free reason only (status code or
+        # exception class) — never the upstream message, which carries the
+        # request URL with the server's API key in it.
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+        reason = f"HTTP {status}" if status else type(exc).__name__
+        return {"_error": f"owm_error: {_redact_secrets(reason, api_key)}"}
 
     # Parse response -- OWM returns Celsius + hPa + m/s when units=metric
     main = data.get("main", {}) or {}
@@ -3018,6 +3333,7 @@ def resolve_venue(req: VenueResolveRequest):
                 "country": venue.get("country"),
                 "latitude": venue.get("latitude"),
                 "longitude": venue.get("longitude"),
+                "surface_type": venue.get("surface_type"),
                 "altitude_m": alt,
                 "temperature_c": round(temp_c, 2),
                 "humidity_pct": round(humidity, 1),
@@ -3073,7 +3389,7 @@ def resolve_venue(req: VenueResolveRequest):
         "density_altitude_ft": owm["density_altitude_ft"],
         "density_altitude_m": owm["density_altitude_m"],
         "power_correction_factor": owm["power_correction_factor"],
-        "fetched_at": datetime.now(timezone.utc).isoformat(),
+        "fetched_at": owm.get("fetched_at") or datetime.now(timezone.utc).isoformat(),
         "source": "openweathermap",
     }
 
@@ -3133,7 +3449,6 @@ def _load_surrogate():
     return None, "none"
 
 
-@app.on_event("startup")
 async def _startup_load_surrogate():
     global _SURROGATE, _SURROGATE_SOURCE
     with _SURROGATE_LOCK:
@@ -3144,7 +3459,7 @@ async def _startup_load_surrogate():
 
 
 class SurrogatePredictRequest(BaseModel):
-    bike_id: int | None = Field(None, description="DB bike_models.id (optional)")
+    bike_id: DbId | None = Field(None, description="DB bike_models.id (optional)")
     power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
     aero_cd_override: float | None = Field(None, ge=0.30, le=1.20)
@@ -3237,7 +3552,11 @@ def _config_from_surrogate_request(req):
 # ─── Routes ──────────────────────────────────────────────────────────────
 
 
-@app.post("/api/surrogate/predict", response_model=SurrogatePredictResponse)
+@app.post(
+    "/api/surrogate/predict",
+    response_model=SurrogatePredictResponse,
+    dependencies=[Depends(rate_limit("surrogate", 60, 60.0))],
+)
 def surrogate_predict(
     req: SurrogatePredictRequest,
 ):
@@ -3307,7 +3626,11 @@ def surrogate_predict(
     )
 
 
-@app.post("/api/surrogate/compare", response_model=SurrogateCompareResponse)
+@app.post(
+    "/api/surrogate/compare",
+    response_model=SurrogateCompareResponse,
+    dependencies=[Depends(rate_limit("surrogate", 60, 60.0))],
+)
 def surrogate_compare(
     req: SurrogateCompareRequest,
 ):
@@ -3378,20 +3701,8 @@ class BikePricingSummaryOut(BaseModel):
     total_cheapest_inr: float
 
 
-class PricingRefreshOut(BaseModel):
-    part_id: int
-    retailer: str | None = None
-    price_inr: float | None = None
-    in_stock: bool | None = None
-    fetched_at: str | None = None
-    status: str
-    # Set when a server-side floor short-circuited the outbound fetch, so the
-    # caller can tell "we looked and it is unchanged" from "we did not look".
-    note: str | None = None
-
-
 @app.get("/api/pricing/part/{part_id}", response_model=PartPricingOut)
-def pricing_for_part(part_id: int):
+def pricing_for_part(part_id: int = Path(..., ge=1, le=MAX_DB_ID)):
     """
     Return the 3 cheapest live prices for *part_id* from the part_prices table.
     Flags stale rows (>14 days).  Falls back gracefully when no live prices exist.
@@ -3429,7 +3740,9 @@ def pricing_for_part(part_id: int):
 
 
 @app.get("/api/pricing/bike/{bike_id}", response_model=BikePricingSummaryOut)
-def pricing_for_bike(bike_id: int, limit: int = Query(50, ge=1, le=500)):
+def pricing_for_bike(
+    bike_id: int = Path(..., ge=1, le=MAX_DB_ID), limit: int = Query(50, ge=1, le=500)
+):
     """
     Pricing summary for all parts in the catalog, showing the cheapest live
     retailer per part.  ``total_cheapest_inr`` sums the cheapest price per part
@@ -3500,136 +3813,6 @@ def pricing_for_bike(bike_id: int, limit: int = Query(50, ge=1, le=500)):
 # aim the 44 s worst-case outbound fetch at the same URL in a loop. The rate
 # limit bounds the caller; this bounds the third party we call.
 PRICING_FORCE_FLOOR_S = 3600.0
-
-
-def _last_price_fetch(db, part_id: int) -> tuple[str, float, dict] | None:
-    """Most recent part_prices row for ``part_id`` as (fetched_at, age_s, row).
-
-    Parses in Python rather than comparing in SQL: fetched_at is written as
-    ``datetime.isoformat()`` ('T' separator, sometimes a +00:00 offset) while
-    SQLite's ``datetime('now')`` yields a space separator, so a string
-    comparison between the two is not reliably ordered. Returns None when
-    there is no row, no parseable timestamp, or no table.
-    """
-    try:
-        rows = db.execute(
-            "SELECT retailer, price_inr, in_stock, fetched_at FROM part_prices "
-            "WHERE part_id = ? AND fetched_at IS NOT NULL",
-            (part_id,),
-        ).fetchall()
-    except sqlite3.Error:
-        return None
-    now = datetime.now(timezone.utc)
-    best: tuple[str, float, dict] | None = None
-    for row in rows:
-        raw = str(row["fetched_at"])
-        try:
-            ts = datetime.fromisoformat(raw.replace(" ", "T"))
-        except ValueError:
-            continue
-        if ts.tzinfo is None:  # stored naive == UTC by convention
-            ts = ts.replace(tzinfo=timezone.utc)
-        age = (now - ts).total_seconds()
-        if best is None or age < best[1]:
-            best = (raw, age, dict(row))
-    return best
-
-
-@app.post(
-    "/api/pricing/refresh/{part_id}",
-    response_model=PricingRefreshOut,
-    dependencies=[Depends(rate_limit("pricing_refresh", 5, 60.0))],
-)
-def refresh_part_price(part_id: int, force: bool = Query(False)):
-    """
-    Trigger a live price refresh for a single part.
-
-    Uses the part's ``retailer_url`` field to hit the live retailer page.
-    Set ``force=true`` to bypass the 14-day freshness check.
-
-    Rate-limited per IP (2026-07-25 audit). This is a *sync* route that makes a
-    blocking outbound HTTP request to a third-party retailer, so each in-flight
-    call occupies one anyio threadpool worker (default 40) for as long as the
-    fetch takes — measured worst case 44.4 s (3 attempts x 10 s timeout plus
-    2+4+8 s backoff). Unauthenticated and unthrottled, a loop over the 72 parts
-    that carry a retailer_url exhausted the pool and starved every other sync
-    route, including ``/api/health`` — which is Render's healthCheckPath and the
-    keep-alive target, so the instance would be marked unhealthy. ``force=true``
-    made it worse by bypassing the 14-day freshness check so repeats could never
-    become no-ops.
-
-    ``force=true`` now still honours a one-hour server-side floor
-    (``PRICING_FORCE_FLOOR_S``): within that window the last stored price is
-    returned as ``status="floor_cached"`` with an explanatory ``note`` and no
-    outbound request is made. That keeps force useful (re-check a part that
-    genuinely changed today) while making a repeat loop a cheap no-op instead
-    of an amplifier pointed at a third-party retailer.
-
-    NOTE: still open (no auth) by design during the beta; the admin-role gate
-    remains the eventual fix. The rate limit is the fuse until then.
-    """
-    db = _get_db()
-    if db is None:
-        raise HTTPException(503, "Database unavailable")
-
-    part_row = db.execute(
-        "SELECT id, brand, model_name, retailer, retailer_url FROM parts WHERE id = ?",
-        (part_id,),
-    ).fetchone()
-    if part_row is None:
-        raise HTTPException(404, f"Part {part_id} not found")
-
-    if not part_row["retailer_url"]:
-        return PricingRefreshOut(
-            part_id=part_id,
-            retailer=part_row["retailer"],
-            price_inr=None,
-            in_stock=None,
-            fetched_at=None,
-            status="no_url",
-        )
-
-    if force:
-        recent = _last_price_fetch(db, part_id)
-        if recent is not None and recent[1] < PRICING_FORCE_FLOOR_S:
-            fetched_at, age_s, row = recent
-            return PricingRefreshOut(
-                part_id=part_id,
-                retailer=row.get("retailer") or part_row["retailer"],
-                price_inr=row.get("price_inr"),
-                in_stock=None if row.get("in_stock") is None else bool(row["in_stock"]),
-                fetched_at=fetched_at,
-                status="floor_cached",
-                note=(
-                    f"force ignored: this part was priced {int(age_s // 60)} min "
-                    f"ago and the server enforces a "
-                    f"{int(PRICING_FORCE_FLOOR_S // 60)}-minute minimum between "
-                    "live retailer fetches. Returning the stored price."
-                ),
-            )
-
-    from motoquant.database.pricing_refresh import fetch_live_price
-
-    result = fetch_live_price(db, part_id, force=force)
-
-    if result is None:
-        return PricingRefreshOut(
-            part_id=part_id,
-            retailer=part_row["retailer"],
-            price_inr=None,
-            in_stock=None,
-            fetched_at=None,
-            status="fetch_failed",
-        )
-
-    return PricingRefreshOut(
-        part_id=part_id,
-        retailer=result.retailer,
-        price_inr=result.price_inr,
-        in_stock=result.in_stock,
-        fetched_at=result.fetched_at.isoformat(),
-        status="refreshed",
-    )
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -3741,9 +3924,6 @@ class ChatResponse(BaseModel):
       - if error == "llm_not_configured": show a banner telling the operator
         to set the provider key (GROQ_API_KEY by default — see LLM_PROVIDER).
       - if error == "rate_limited": show a polite retry-in-a-minute note.
-      - if error == "quota_exceeded": the caller's free daily sim quota is
-        spent (classic mode only — in agent mode the model relays it in
-        prose); show error_detail plus an upgrade CTA.
       - if error == "parse_failed" / "sim_failed" / "agent_failed": show
         error_detail.
       - if error == None: render summary text; agent mode additionally
@@ -3758,9 +3938,9 @@ class ChatResponse(BaseModel):
     mode: str = "classic"
     intent_type: str | None = None
     bike_name: str = ""
-    bike_id: int | None = None
+    bike_id: DbId | None = None
     venue_name: str | None = None
-    venue_id: int | None = None
+    venue_id: DbId | None = None
     parsed_notes: str = ""
     optimization_goal: str = "minimize_et"
     bike_suggestions: list[ChatBikeSuggestion] = Field(default_factory=list)
@@ -3781,41 +3961,6 @@ class ChatResponse(BaseModel):
     error_detail: str | None = None
 
 
-def _make_chat_meter(request: Request):
-    """Capture the caller's sim-quota identity at route time; return a
-    meter(n)->bool callback the agent's tool executor calls per full sim.
-
-    Returns True when the sim may run. Metering failures never block chat.
-    """
-    try:
-        identity, tier = _sim_identity_and_tier(request)
-    except Exception:  # noqa: BLE001
-        return None
-
-    def meter(n: int) -> bool:
-        try:
-            from .database.connection import connect as _db_connect
-            from .usage import record_and_check
-
-            conn = _db_connect()
-            try:
-                st = record_and_check(conn, identity, tier=tier, n=max(1, int(n)))
-            finally:
-                conn.close()
-            if st is not None and not st.allowed:
-                from . import auth as _auth
-
-                return not _auth.BILLING_ENFORCE
-            return True
-        except Exception:  # noqa: BLE001 — metering must never break chat
-            logging.getLogger(__name__).warning(
-                "chat sim metering failed", exc_info=True
-            )
-            return True
-
-    return meter
-
-
 def _get_surrogate_pair():
     """Lazy surrogate accessor shared with the optimizer routes."""
     global _SURROGATE, _SURROGATE_SOURCE
@@ -3826,22 +3971,7 @@ def _get_surrogate_pair():
     return _SURROGATE, _SURROGATE_SOURCE
 
 
-def _chat_tier(user: dict | None) -> str | None:
-    """Caller's subscription tier for the agent executor. None == anonymous.
-
-    The chat agent can reach the three pro-gated surfaces (build optimizer,
-    ECU autotune, outlaw pipeline), so it must inherit the caller's tier —
-    otherwise flipping MOTOQUANT_BILLING_ENFORCE would 401 the direct routes
-    while /api/chat happily ran the same work for free (2026-07-25 audit
-    §3.5). The gate itself lives in llm/agent.py and is inert while billing
-    is off.
-    """
-    if not user:
-        return None
-    return str(user.get("tier") or "free")
-
-
-def _chat_impl(req: ChatRequest, client, meter_cb, progress=None, tier=None) -> dict:
+def _chat_impl(req: ChatRequest, client, progress=None, heavy_gate=None) -> dict:
     """Run one chat turn (agent or classic). Returns a ChatResponse dict."""
     db = _get_db_facade()
     if db is None:
@@ -3855,10 +3985,6 @@ def _chat_impl(req: ChatRequest, client, meter_cb, progress=None, tier=None) -> 
             db,
             client=client,
             run_summary=req.run_summary,
-            # Classic mode runs 1-25 real RK4 sims per request and was
-            # entirely unmetered until now. No tier plumbing needed: this
-            # pipeline has no pro-gated tools.
-            meter_cb=meter_cb,
         )
         return {
             "raw_query": result.raw_query,
@@ -3885,15 +4011,18 @@ def _chat_impl(req: ChatRequest, client, meter_cb, progress=None, tier=None) -> 
     from .llm.agent import run_agent_chat
 
     history = [m.model_dump() for m in (req.messages or [])]
+    # ``heavy_gate`` charges each heavy agent tool (optimizer / autotune /
+    # outlaw) against the caller's per-IP ``optimize`` bucket, so asking the
+    # agent for them cannot out-run the direct routes. The agent's own
+    # per-turn HEAVY_OP_BUDGET and the chat buckets remain in force.
     result = run_agent_chat(
         req.query,
         db,
         client=client,
         history=history,
         progress_cb=progress,
-        meter_cb=meter_cb,
         surrogate_getter=_get_surrogate_pair,
-        tier=tier,
+        heavy_gate=heavy_gate,
     )
     return {
         "raw_query": result.raw_query,
@@ -3909,27 +4038,83 @@ def _chat_impl(req: ChatRequest, client, meter_cb, progress=None, tier=None) -> 
     }
 
 
+def _parse_nonneg_int_env(name: str, default: int) -> int:
+    """Read a non-negative int from the environment; fall back (with a
+    warning) on garbage rather than crashing the boot over a typo."""
+    raw = os.environ.get(name, "").strip()
+    if not raw:
+        return default
+    try:
+        value = int(raw)
+    except ValueError:
+        logging.getLogger(__name__).warning(
+            "%s=%r is not an integer — using the default %d", name, raw, default
+        )
+        return default
+    if value < 0:
+        logging.getLogger(__name__).warning(
+            "%s=%d is negative — using the default %d", name, value, default
+        )
+        return default
+    return value
+
+
+# LLM-bill fuse (open-source pivot, 2026-10-23). Every chat turn spends the
+# deployment operator's LLM-provider tokens, and an agent turn is 2-8 LLM
+# calls, so the per-minute `chat` bucket alone (20/60 s) still lets one IP run
+# ~28k turns a day. This caps each client IP at MOTOQUANT_CHAT_DAILY_LIMIT
+# turns per rolling 24 h window, shared by /api/chat and /api/jobs/chat.
+# 0 disables the cap (self-hosters running their own key or a local model).
+# Read at REQUEST time so tests and operators can change it without a reboot.
+CHAT_DAILY_LIMIT = _parse_nonneg_int_env("MOTOQUANT_CHAT_DAILY_LIMIT", 200)
+CHAT_DAILY_WINDOW_S = 86400.0
+
+
+def _chat_daily_cap(request: Request) -> None:
+    """FastAPI dependency: per-IP daily chat cap (no-op when the limit is 0)."""
+    from . import ratelimit as _ratelimit
+
+    limit = CHAT_DAILY_LIMIT
+    if limit <= 0:
+        return
+    _ratelimit.enforce(request, "chat_day", limit, CHAT_DAILY_WINDOW_S)
+
+
+def _enforce_classic_chat_limit(req: ChatRequest, request: Request) -> None:
+    """Extra per-IP fuse for mode="classic" chat.
+
+    Classic mode runs 1-25 real RK4 sims per request (choose_bike simulates
+    up to 25 candidates, rank up to 15) with no per-message budget like the
+    agent executor's, so on top of the shared 20/60s chat bucket it gets its
+    own much tighter one.
+    """
+    if req.mode == "classic":
+        rate_limit("chat_classic", 4, 60.0)(request)
+
+
 @app.post(
     "/api/chat",
     response_model=ChatResponse,
-    dependencies=[Depends(rate_limit("chat", 20, 60.0))],
+    dependencies=[
+        Depends(rate_limit("chat", 20, 60.0)),
+        Depends(_chat_daily_cap),
+    ],
 )
 def chat(
     req: ChatRequest,
     request: Request,
     client=Depends(get_llm_client),
-    user: dict | None = Depends(get_optional_user),  # noqa: B008
 ) -> ChatResponse:
     """End-to-end NL chat (agent mode by default; mode='classic' for the
     legacy pipeline).
 
     Always returns 200 with `error` populated on failure modes the user
-    can recover from (bike not found, LLM not configured, rate limited,
-    quota exhausted). Returns 503 only if the database itself is
-    unreachable. The caller's tier (anonymous when unauthenticated) is
-    passed to the agent so its pro-gated tools match the direct routes.
+    can recover from (bike not found, LLM not configured, LLM rate limited).
+    Returns 503 only if the database itself is unreachable; 429 when the
+    caller trips the per-minute, the classic-mode or the daily chat fuse.
     """
-    payload = _chat_impl(req, client, _make_chat_meter(request), tier=_chat_tier(user))
+    _enforce_classic_chat_limit(req, request)
+    payload = _chat_impl(req, client, heavy_gate=heavy_gate_for(request))
     suggestions = payload.pop("bike_suggestions", None) or []
     return ChatResponse(
         **payload,
@@ -3940,13 +4125,16 @@ def chat(
 @app.post(
     "/api/jobs/chat",
     status_code=202,
-    dependencies=[Depends(rate_limit("chat", 20, 60.0))],
+    dependencies=[
+        # Same buckets as /api/chat — the web client uses either route.
+        Depends(rate_limit("chat", 20, 60.0)),
+        Depends(_chat_daily_cap),
+    ],
 )
 def job_chat(
     req: ChatRequest,
     request: Request,
     client=Depends(get_llm_client),
-    user: dict | None = Depends(get_optional_user),  # noqa: B008
 ):
     """Start a chat turn as a background job with live progress + Stop.
 
@@ -3954,40 +4142,27 @@ def job_chat(
     0.5-CPU prod tier exceeds comfortable request time — same rationale as
     every other /api/jobs/* route. Poll GET /api/jobs/{id}; result is the
     ChatResponse-shaped dict.
-
-    Identity and tier are captured HERE, on the request thread, because the
-    job body runs later on a worker with no Request in scope.
     """
-    meter = _make_chat_meter(request)
-    tier = _chat_tier(user)
-    return _start_job(
-        "chat", lambda progress: _chat_impl(req, client, meter, progress, tier)
-    )
-
-
-# ------- END ws/backend-surrogate-pricing additions ----------------------
-# Lines below here are reserved for Stream 5 auth router mounts:
-#   from motoquant.auth import router as auth_router
-#   app.include_router(auth_router)
+    _enforce_classic_chat_limit(req, request)
+    gate = heavy_gate_for(request)
+    return _start_job("chat", lambda progress: _chat_impl(req, client, progress, gate))
 
 
 # ═══════════════════════════════════════════════════════════════════════════
 # BUILD OPTIMIZER + ECU AUTOTUNE  (/api/optimize/*, /api/autotune/*)  — Track B
-# Pro-tier gated: these are the paid tooling surface (distinct from the free
-# demo routes like /simulate/quick, /simulate/compare, and /chat). The
-# require_tier("pro") dependency is INERT until MOTOQUANT_BILLING_ENFORCE is
-# truthy — with billing off (the freemium-beta default) every request passes
-# anonymously exactly as before; with billing on, an unauthenticated call gets
-# 401 and a lower-tier user gets 402 (upgrade CTA). Still rate-limited.
+# Free and anonymous like every other route. These are the heaviest compute
+# paths (seconds to minutes of RK4 on the shared instance), so they carry the
+# tightest per-IP buckets: optimize 6/60 s (shared with /api/jobs/outlaw) and
+# autotune 6/60 s, each shared with its job-backed twin.
 # The optimizer scores candidates through the loaded surrogate when available and
 # in-envelope, else falls back to the full physics sim — so it always answers.
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-class OptimizeBuildRequest(BaseModel):
+class OptimizeBuildRequest(ConditionsRequest):
     """POST /api/optimize/build — best on-budget parts build for a goal."""
 
-    bike_id: int | None = Field(None, description="DB bike_models.id")
+    bike_id: DbId | None = Field(None, description="DB bike_models.id")
     bike_preset: str | None = Field(
         None, description="Fallback preset: gsxr1000_k5 | yzfr1_4c8 | hayabusa_gen1"
     )
@@ -4010,9 +4185,6 @@ class OptimizeBuildRequest(BaseModel):
     rider_weight_kg: float = Field(75.0, ge=40, le=150)
     power_boost_pct: float = Field(0.0, ge=-50, le=200)
     mass_delta_kg: float = Field(0.0, ge=-100, le=200)
-    venue_id: int | None = Field(
-        None, description="Optional venue for ambient conditions"
-    )
     max_candidates: int | None = Field(
         None,
         ge=1,
@@ -4021,6 +4193,29 @@ class OptimizeBuildRequest(BaseModel):
     )
 
     model_config = {"populate_by_name": True}
+
+
+# Reference presets → their catalog rows, so preset requests still get a
+# compatibility-filtered parts pool (parts_repo.search fails closed for an
+# unknown bike and returns nothing useful for bike_model_id=None).
+_PRESET_MODEL_NAMES = {
+    "gsxr1000_k5": "GSX-R 1000 K5/K6",
+    "yzfr1_4c8": "YZF-R1 4C8",
+    "hayabusa_gen1": "Hayabusa GSX1300R Gen1",
+}
+
+
+def _parts_model_id(conn, bike_id: int | None, bike_preset: str | None) -> int | None:
+    """bike_models.id to filter parts by: the request's bike, else its preset's row."""
+    if bike_id is not None:
+        return bike_id
+    name = _PRESET_MODEL_NAMES.get(bike_preset or "gsxr1000_k5")
+    if name is None:
+        return None
+    row = conn.execute(
+        "SELECT id FROM bike_models WHERE model_name = ? ORDER BY id LIMIT 1", (name,)
+    ).fetchone()
+    return int(row[0]) if row else None
 
 
 def _optimize_impl(req: OptimizeBuildRequest, progress=None):
@@ -4052,6 +4247,8 @@ def _optimize_impl(req: OptimizeBuildRequest, progress=None):
     except Exception as exc:
         raise HTTPException(400, f"Config construction failed: {exc}") from exc
 
+    env_source = _apply_conditions(config, req)
+
     # Lazy-load the surrogate (same pattern as /api/surrogate/predict).
     global _SURROGATE, _SURROGATE_SOURCE
     if _SURROGATE is None:
@@ -4078,7 +4275,7 @@ def _optimize_impl(req: OptimizeBuildRequest, progress=None):
             PartsRepository(conn),
             goal=req.goal,
             profile=req.profile,
-            bike_model_id=req.bike_id,
+            bike_model_id=_parts_model_id(conn, req.bike_id, req.bike_preset),
             surrogate=_SURROGATE,
             surrogate_source=_SURROGATE_SOURCE,
             max_candidates=req.max_candidates,
@@ -4097,37 +4294,26 @@ def _optimize_impl(req: OptimizeBuildRequest, progress=None):
     # the route. json_safe nulls them so the response always serializes.
     from .analysis.roi import json_safe
 
-    return json_safe(result.to_dict())
+    out = json_safe(result.to_dict())
+    out["environment"] = _environment_echo(config)
+    out["environment_source"] = env_source
+    return out
 
 
 @app.post(
     "/api/optimize/build",
     dependencies=[Depends(rate_limit("optimize", 6, 60.0))],
 )
-def optimize_build_route(
-    req: OptimizeBuildRequest,
-    _auth: dict = Depends(require_tier("pro")),  # noqa: B008
-):
+def optimize_build_route(req: OptimizeBuildRequest):
     """Synchronous build optimiser (see ``_optimize_impl``)."""
     return _optimize_impl(req)
 
 
-class AutotuneRequest(BaseModel):
+class AutotuneRequest(ConditionsRequest):
     """POST /api/autotune/ecu — conditions-aware drag setup advisor."""
 
-    bike_id: int | None = Field(None, description="DB bike_models.id")
+    bike_id: DbId | None = Field(None, description="DB bike_models.id")
     bike_preset: str | None = Field(None, description="Fallback preset name")
-    location: str | None = Field(
-        None, max_length=200, description="City/venue, e.g. 'Pune, IN'"
-    )
-    venue_id: int | None = Field(None, description="Seeded venue id (sets altitude)")
-    lat: float | None = Field(None, ge=-90, le=90)
-    lon: float | None = Field(None, ge=-180, le=180)
-    altitude_m: float | None = Field(None, ge=-500, le=8000)
-    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
-    track_temp_c: float | None = Field(None, ge=-30, le=80)
-    humidity_pct: float | None = Field(None, ge=0, le=100)
-    pressure_hpa: float | None = Field(None, ge=800, le=1100)
     rider_weight_kg: float = Field(75.0, ge=40, le=150)
     gear_span: int = Field(
         3, ge=1, le=6, description="± sprocket-tooth sweep half-width"
@@ -4151,6 +4337,64 @@ def _apply_resolved_env(config, vd: dict) -> None:
         config.environment.altitude_m = float(vd["altitude_m"])
     if vd.get("venue_name"):
         config.environment.venue_name = vd["venue_name"]
+    # A seeded venue named by `location` races on its own surface, the same
+    # as when it is chosen by venue_id.
+    if vd.get("surface_type"):
+        config.environment.track_surface = str(vd["surface_type"]).lower()
+
+
+def _apply_conditions(config: BikeConfig, req: ConditionsRequest) -> str:
+    """Apply the request's optional location / manual conditions to *config*.
+
+    Returns a short source tag (``config_default``, the resolver's source, or a
+    ``resolution_*`` failure marker). Afterwards ``config.environment`` is the
+    single source of truth for what is simulated — and for what the response
+    echoes (see :func:`_environment_echo`).
+    """
+    env_source = "config_default"
+    if req.location or (req.lat is not None and req.lon is not None):
+        try:
+            resolved = resolve_venue(
+                VenueResolveRequest(
+                    location=req.location,
+                    lat=req.lat,
+                    lon=req.lon,
+                    altitude_m=req.altitude_m,
+                )
+            )
+            _apply_resolved_env(config, resolved)
+            env_source = resolved.get("source", "resolved")
+            if config.environment.venue_name == DEFAULT_CONDITIONS_NAME:
+                config.environment.venue_name = req.location or "Resolved location"
+        except HTTPException as exc:
+            env_source = f"resolution_unavailable_{exc.status_code}"
+        except Exception as exc:
+            logging.getLogger(__name__).warning("env resolve failed: %s", exc)
+            env_source = "resolution_error"
+
+    # Explicit condition overrides take precedence over any resolution.
+    manual = False
+    if req.altitude_m is not None:
+        config.environment.altitude_m = req.altitude_m
+        manual = True
+    if req.ambient_temp_c is not None:
+        config.environment.ambient_temp_c = req.ambient_temp_c
+        if req.track_temp_c is None:
+            # Same rule as a resolved place: the track runs ~7 °C over the air.
+            config.environment.track_temp_c = req.ambient_temp_c + 7.0
+        manual = True
+    if req.track_temp_c is not None:
+        config.environment.track_temp_c = req.track_temp_c
+        manual = True
+    if req.humidity_pct is not None:
+        config.environment.relative_humidity_pct = req.humidity_pct
+        manual = True
+    if req.pressure_hpa is not None:
+        config.environment.barometric_pressure_hpa = req.pressure_hpa
+        manual = True
+    if manual and config.environment.venue_name == DEFAULT_CONDITIONS_NAME:
+        config.environment.venue_name = CUSTOM_CONDITIONS_NAME
+    return env_source
 
 
 def _autotune_impl(req: AutotuneRequest, progress=None):
@@ -4178,36 +4422,7 @@ def _autotune_impl(req: AutotuneRequest, progress=None):
     except Exception as exc:
         raise HTTPException(400, f"Config construction failed: {exc}") from exc
 
-    env_source = "config_default"
-    if req.location or (req.lat is not None and req.lon is not None):
-        try:
-            resolved = resolve_venue(
-                VenueResolveRequest(
-                    location=req.location,
-                    lat=req.lat,
-                    lon=req.lon,
-                    altitude_m=req.altitude_m,
-                )
-            )
-            _apply_resolved_env(config, resolved)
-            env_source = resolved.get("source", "resolved")
-        except HTTPException as exc:
-            env_source = f"resolution_unavailable_{exc.status_code}"
-        except Exception as exc:
-            logging.getLogger(__name__).warning("autotune env resolve failed: %s", exc)
-            env_source = "resolution_error"
-
-    # Explicit condition overrides take precedence over any resolution.
-    if req.altitude_m is not None:
-        config.environment.altitude_m = req.altitude_m
-    if req.ambient_temp_c is not None:
-        config.environment.ambient_temp_c = req.ambient_temp_c
-    if req.track_temp_c is not None:
-        config.environment.track_temp_c = req.track_temp_c
-    if req.humidity_pct is not None:
-        config.environment.relative_humidity_pct = req.humidity_pct
-    if req.pressure_hpa is not None:
-        config.environment.barometric_pressure_hpa = req.pressure_hpa
+    env_source = _apply_conditions(config, req)
 
     from .analysis.ecu_autotune import autotune
 
@@ -4226,6 +4441,18 @@ def _autotune_impl(req: AutotuneRequest, progress=None):
 
     out = result.to_dict()
     out["environment_source"] = env_source
+    # Keep the autotune block's keys; add the shared echo markers so every
+    # route labels default / custom / venue conditions the same way.
+    echo = _environment_echo(config)
+    out["environment"] = {
+        **out.get("environment", {}),
+        "location": echo["name"],
+        "name": echo["name"],
+        "is_default": echo["is_default"],
+        "source": echo["source"],
+        "track_surface": echo["track_surface"],
+        "headwind_kmh": echo["headwind_kmh"],
+    }
     return out
 
 
@@ -4233,10 +4460,7 @@ def _autotune_impl(req: AutotuneRequest, progress=None):
     "/api/autotune/ecu",
     dependencies=[Depends(rate_limit("autotune", 6, 60.0))],
 )
-def autotune_ecu_route(
-    req: AutotuneRequest,
-    _auth: dict = Depends(require_tier("pro")),  # noqa: B008
-):
+def autotune_ecu_route(req: AutotuneRequest):
     """Synchronous autotune (see ``_autotune_impl``)."""
     return _autotune_impl(req)
 
@@ -4270,11 +4494,16 @@ def _start_job(kind: str, runner) -> dict:
         # Cost fuse shared with the sync /api/simulate route it wraps
         # (2026-08-11 hardening) — see that route for the rationale.
         Depends(rate_limit("simulate", 30, 60.0)),
-        Depends(_meter_full_sim),
     ],
 )
 def job_simulate(req: SimulateRequest):
     """Start a full simulation as a background job (real progress)."""
+    _precheck_refs(
+        bike_ids=[req.bike_id],
+        bike_presets=[req.bike_preset],
+        venue_id=req.venue_id,
+        tire_ids=[req.front_tire_id, req.rear_tire_id],
+    )
     return _start_job("simulate", lambda progress: _simulate_impl(req, progress))
 
 
@@ -4284,11 +4513,16 @@ def job_simulate(req: SimulateRequest):
     dependencies=[
         # Cost fuse shared with the sync /api/simulate/top-speed route.
         Depends(rate_limit("topspeed", 30, 60.0)),
-        Depends(_meter_full_sim),
     ],
 )
 def job_topspeed(req: TopSpeedRequest):
     """Start a top-speed run as a background job (real progress)."""
+    _precheck_refs(
+        bike_ids=[req.bike_id],
+        bike_presets=[req.bike_preset],
+        venue_id=req.venue_id,
+        tire_ids=[req.front_tire_id, req.rear_tire_id],
+    )
     return _start_job("topspeed", lambda progress: _topspeed_impl(req, progress))
 
 
@@ -4297,11 +4531,11 @@ def job_topspeed(req: TopSpeedRequest):
     status_code=202,
     dependencies=[Depends(rate_limit("optimize", 6, 60.0))],
 )
-def job_optimize(
-    req: OptimizeBuildRequest,
-    _auth: dict = Depends(require_tier("pro")),  # noqa: B008
-):
+def job_optimize(req: OptimizeBuildRequest):
     """Start the build optimiser as a background job (real progress)."""
+    _precheck_refs(
+        bike_ids=[req.bike_id], bike_presets=[req.bike_preset], venue_id=req.venue_id
+    )
     return _start_job("optimize", lambda progress: _optimize_impl(req, progress))
 
 
@@ -4310,15 +4544,15 @@ def job_optimize(
     status_code=202,
     dependencies=[Depends(rate_limit("autotune", 6, 60.0))],
 )
-def job_autotune(
-    req: AutotuneRequest,
-    _auth: dict = Depends(require_tier("pro")),  # noqa: B008
-):
+def job_autotune(req: AutotuneRequest):
     """Start the ECU autotune as a background job (real progress)."""
+    _precheck_refs(
+        bike_ids=[req.bike_id], bike_presets=[req.bike_preset], venue_id=req.venue_id
+    )
     return _start_job("autotune", lambda progress: _autotune_impl(req, progress))
 
 
-class OutlawRequest(BaseModel):
+class OutlawRequest(ConditionsRequest):
     """POST /api/jobs/outlaw — composed outlaw/open-class max-effort build.
 
     Pipeline: best drag_prep rubber → full_race parts knapsack (budget
@@ -4326,7 +4560,7 @@ class OutlawRequest(BaseModel):
     bike → combined verification sim.
     """
 
-    bike_id: int | None = Field(None, description="DB bike_models.id")
+    bike_id: DbId | None = Field(None, description="DB bike_models.id")
     bike_preset: str | None = Field(
         None, description="Fallback preset: gsxr1000_k5 | yzfr1_4c8 | hayabusa_gen1"
     )
@@ -4335,7 +4569,6 @@ class OutlawRequest(BaseModel):
     )
     goal: str = Field("min_et")
     rider_weight_kg: float = Field(75.0, ge=40, le=150)
-    venue_id: int | None = Field(None)
     max_candidates: int | None = Field(None, ge=1, le=200)
 
 
@@ -4357,6 +4590,8 @@ def _outlaw_impl(req: OutlawRequest, progress=None) -> dict:
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(400, f"Config construction failed: {exc}") from exc
 
+    env_source = _apply_conditions(config, req)
+
     surrogate, surrogate_source = _get_surrogate_pair()
 
     from .analysis.outlaw import optimize_outlaw
@@ -4364,11 +4599,11 @@ def _outlaw_impl(req: OutlawRequest, progress=None) -> dict:
     from .database.tire_repo import TireRepository
 
     try:
-        return optimize_outlaw(
+        out = optimize_outlaw(
             config,
             PartsRepository(conn),
             TireRepository(conn),
-            bike_model_id=req.bike_id,
+            bike_model_id=_parts_model_id(conn, req.bike_id, req.bike_preset),
             budget_inr=req.budget_inr,
             goal=req.goal,
             surrogate=surrogate,
@@ -4376,6 +4611,9 @@ def _outlaw_impl(req: OutlawRequest, progress=None) -> dict:
             max_candidates=req.max_candidates,
             progress_cb=progress,
         )
+        out["environment"] = _environment_echo(config)
+        out["environment_source"] = env_source
+        return out
     except HTTPException:
         raise
     except Exception as exc:  # noqa: BLE001
@@ -4388,28 +4626,40 @@ def _outlaw_impl(req: OutlawRequest, progress=None) -> dict:
 @app.post(
     "/api/jobs/outlaw",
     status_code=202,
+    # Shares the `optimize` bucket: the outlaw pipeline IS an optimizer pass
+    # plus an autotune, so alternating the two can't double the CPU budget.
     dependencies=[Depends(rate_limit("optimize", 6, 60.0))],
 )
-def job_outlaw(
-    req: OutlawRequest,
-    _auth: dict = Depends(require_tier("pro")),  # noqa: B008
-):
+def job_outlaw(req: OutlawRequest):
     """Start the composed outlaw/open-class build as a background job."""
-    # Pro tier is unmetered, so the tier gate is the access control here.
+    _precheck_refs(
+        bike_ids=[req.bike_id], bike_presets=[req.bike_preset], venue_id=req.venue_id
+    )
     return _start_job("outlaw", lambda progress: _outlaw_impl(req, progress))
 
 
 @app.post(
     "/api/jobs/compare",
     status_code=202,
-    dependencies=[Depends(_meter_full_sims(2))],
+    dependencies=[Depends(_rl_compare)],
 )
 def job_compare(req: CompareRequest):
     """Start an A-vs-B comparison as a background job (real progress).
 
-    Metered at two sim units, matching the sync /api/simulate/compare route
-    it wraps — the two must stay behaviourally identical (deploy-skew
-    fallback contract), so they gained the meter together."""
+    Shares the ``compare`` rate-limit bucket with the sync
+    /api/simulate/compare route it wraps — the two must stay behaviourally
+    identical (deploy-skew fallback contract)."""
+    _precheck_refs(
+        bike_ids=[req.a_bike_id, req.b_bike_id],
+        bike_presets=[req.a_bike_preset, req.b_bike_preset],
+        venue_id=req.venue_id,
+        tire_ids=[
+            req.a_front_tire_id,
+            req.a_rear_tire_id,
+            req.b_front_tire_id,
+            req.b_rear_tire_id,
+        ],
+    )
     return _start_job("compare", lambda progress: _compare_impl(req, progress))
 
 
@@ -4429,7 +4679,17 @@ def job_status(job_id: str):
         "stage": job.stage,
     }
     if job.status == "done":
-        out["result"] = job.result
+        # The finished result is held as compressed JSON; splice its bytes into
+        # the envelope instead of decoding and re-encoding a multi-MB object on
+        # every poll.
+        raw = job.result_json()
+        if raw is not None:
+            head = json.dumps(out, separators=(",", ":")).encode("utf-8")
+            return Response(
+                content=head[:-1] + b',"result":' + raw + b"}",
+                media_type="application/json",
+            )
+        out["result"] = None
     elif job.status == "error":
         out["error"] = job.error
     return out
@@ -4466,7 +4726,6 @@ def job_cancel(job_id: str):
 # ─────────────────────────────────────────────
 
 
-@app.on_event("startup")
 async def _start_keepwarm_loop() -> None:
     try:
         from .keepwarm import start_keepwarm
@@ -4476,90 +4735,55 @@ async def _start_keepwarm_loop() -> None:
         logging.getLogger(__name__).warning("keep-warm init failed", exc_info=True)
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# AUTH / SUBSCRIPTIONS / PAYMENTS router mounts (Phase 6 — June 2026)
-# The S5 routers existed since April but were never mounted (the
-# "reserved for Stream 5" comment above) — /api/auth/* 404'd in prod while
-# three routes were already tier-gated. Mounting is wrapped so a missing
-# optional dep (python-jose, email-validator) can never block boot:
-# require_tier already degrades to a no-op stub in that case.
-# ═══════════════════════════════════════════════════════════════════════════
-
-try:
-    from .auth import get_current_user as _get_current_user, router as _auth_router
-    from .payments import router as _payments_router
-    from .subscriptions import router as _subscriptions_router
-
-    app.include_router(_auth_router, prefix="/api/auth")
-    app.include_router(_subscriptions_router, prefix="/api/subscriptions")
-    app.include_router(_payments_router, prefix="/api/payments")
-
-    @app.get("/api/me/runs")
-    def my_runs(
-        user: dict = Depends(_get_current_user),  # noqa: B008
-        limit: int = Query(25, ge=1, le=100),
-    ):
-        """Saved runs for the signed-in user (powers the account Garage)."""
-        db = _get_db()
-        if not db:
-            raise HTTPException(503, "Database unavailable")
-        try:
-            rows = db.execute(
-                """SELECT sr.id, sr.et_quarter_s, sr.trap_speed_kmh,
-                          sr.et_eighth_s, sr.time_60ft_s, sr.notes,
-                          sr.created_at,
-                          m.name AS manufacturer, bm.model_name AS model,
-                          bm.year_from AS year, v.name AS venue
-                   FROM sim_runs sr
-                   LEFT JOIN bike_configs bc ON sr.bike_config_id = bc.id
-                   LEFT JOIN bike_models bm ON bc.bike_model_id = bm.id
-                   LEFT JOIN manufacturers m ON bm.manufacturer_id = m.id
-                   LEFT JOIN venues v ON sr.venue_id = v.id
-                   WHERE sr.user_id = ?
-                   ORDER BY sr.id DESC
-                   LIMIT ?""",
-                (user["id"], limit),
-            ).fetchall()
-            return {"runs": [dict(r) for r in rows], "count": len(rows)}
-        except sqlite3.Error:
-            return {"runs": [], "count": 0}
-
-except ImportError as _exc:  # pragma: no cover — optional-deps fallback
-    logging.getLogger(__name__).warning(
-        "Auth/subscriptions/payments routers not mounted: %s", _exc
-    )
+async def _probe_physics_engine() -> None:
+    """Run the engine selector's one-time probes (extension import, host-math
+    check, source fingerprint) at boot instead of on the first /api/health or
+    simulation, and log which integrator this process serves with."""
+    try:
+        info = engine_select.engine_info()
+        logging.getLogger(__name__).info(
+            "physics engine: %s (mode=%s%s)",
+            info.get("engine"),
+            info.get("mode"),
+            f", fallback: {info['fallback_reason']}"
+            if info.get("fallback_reason")
+            else "",
+        )
+    except Exception:  # noqa: BLE001 — diagnostics only; sims still select per call
+        logging.getLogger(__name__).warning("engine probe failed", exc_info=True)
 
 
-@app.on_event("startup")
-async def _ensure_phase6_schema() -> None:
-    """Guarded ALTERs so pre-June-2026 DBs gain run-attribution + auth tables."""
+async def _ensure_runtime_schema() -> None:
+    """Guarded ALTER so an older catalog gains the ``category_tag`` column.
+
+    Deliberately creates ONLY what live code uses. There are no accounts and
+    no server-side saved runs; scripts/patch_2026_11_10_remove_accounts.py
+    drops their tables from shipped databases and nothing recreates them.
+    """
     try:
         db = _get_db()
         if not db:
             return
         try:
-            db.execute("ALTER TABLE sim_runs ADD COLUMN user_id INTEGER")
-            db.commit()
-        except sqlite3.OperationalError:
-            pass  # column already exists
-        try:
             db.execute("ALTER TABLE bike_configs ADD COLUMN category_tag TEXT")
             db.commit()
         except sqlite3.OperationalError:
             pass  # column already exists
-        from .database import (
-            subscriptions_repo as _subs_repo,
-            users_repo as _users_repo,
-        )
-        from .database.connection import connect as _db_connect
-
-        conn = _db_connect()
-        try:
-            _users_repo.ensure_tables(conn)
-            _subs_repo.ensure_tables(conn)
-        finally:
-            conn.close()
     except Exception:  # noqa: BLE001 — schema top-up is best-effort
         logging.getLogger(__name__).warning(
-            "phase6 schema ensure failed", exc_info=True
+            "runtime schema ensure failed", exc_info=True
         )
+
+
+@asynccontextmanager
+async def _lifespan(_app: FastAPI):
+    """Startup hooks, in registration order: surrogate load, keep-warm loop,
+    physics-engine probe, runtime-schema top-up."""
+    await _startup_load_surrogate()
+    await _start_keepwarm_loop()
+    await _probe_physics_engine()
+    await _ensure_runtime_schema()
+    yield
+
+
+app.router.lifespan_context = _lifespan

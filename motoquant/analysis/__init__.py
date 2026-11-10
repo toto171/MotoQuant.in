@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Analysis Package (Phase 4)
-==========================================
+MotoQuant — Analysis Package (Phase 4)
+======================================
 Higher-level analytical tools that sit on top of the physics engine:
 
   roi           — Parts Return-on-Investment engine: ranks every part in the

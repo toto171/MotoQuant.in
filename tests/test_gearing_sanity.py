@@ -206,3 +206,83 @@ def test_gearaudit_pinned_gear_counts(model_name, model_code, expected_count):
         f"{len(spec.gear_ratios) if spec.gear_ratios else None} "
         f"!= verified {expected_count}"
     )
+
+
+# ── Overall-gearing plausibility gate ────────────────────────────────────────
+# The cassette checks above never look at the primary reduction, so a bike can
+# pass every one of them and still be geared 40-60 % too tall (a litre-bike
+# primary on a 150 cc single). scripts/check_gearing_plausibility.py measures
+# top-gear speed at peak-power rpm against the simulated terminal speed and the
+# gear in which terminal speed is reached. tests/data/gearing_plausibility_baseline.json
+# records the bikes flagged TODAY: a new bike may not join them, and a baselined
+# bike that is fixed must be removed (regenerate with --write-baseline).
+
+
+def _plausibility_state():
+    import importlib.util
+    from pathlib import Path
+
+    path = (
+        Path(__file__).resolve().parent.parent
+        / "scripts"
+        / "check_gearing_plausibility.py"
+    )
+    spec = importlib.util.spec_from_file_location("check_gearing_plausibility", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    specs = list(ALL_KNOWN_BIKES)
+    keys = mod.bike_keys(specs)
+    base = mod.load_baseline()
+    # A bike absent from the cached terminal table (newly added) is simulated.
+    missing = {k for k in keys if k not in base["terminal"]}
+    terminal = dict(base["terminal"])
+    terminal.update(mod.compute_terminal_table(specs, keys, only=missing, workers=1))
+    return mod, base, mod.evaluate(specs, keys, terminal)
+
+
+@pytest.fixture(scope="module")
+def plausibility():
+    return _plausibility_state()
+
+
+def test_no_new_gearing_plausibility_flags(plausibility):
+    _mod, base, flagged = plausibility
+    new = sorted(set(flagged) - set(base["flagged"]))
+    assert not new, (
+        "bikes with implausible overall gearing that are not in the baseline "
+        f"(top-gear speed at peak rpm > 1.25x terminal, or terminal 2+ gears below "
+        f"top): {new}. Fix the bike's primary_ratio/cassette from a sourced "
+        "manual; do not add it to the baseline."
+    )
+
+
+def test_gearing_plausibility_baseline_shrinks(plausibility):
+    _mod, base, flagged = plausibility
+    fixed = sorted(set(base["flagged"]) - set(flagged))
+    assert not fixed, (
+        f"{fixed} are no longer flagged: regenerate the baseline with "
+        "`python scripts/check_gearing_plausibility.py --write-baseline` so it shrinks."
+    )
+
+
+def test_gearing_plausibility_baseline_covers_whole_catalog(plausibility):
+    mod, base, _flagged = plausibility
+    keys = mod.bike_keys(list(ALL_KNOWN_BIKES))
+    stale = sorted(set(base["terminal"]) - set(keys))
+    assert not stale, (
+        f"baseline terminal table lists bikes no longer in the catalog: {stale}"
+    )
+
+
+@pytest.mark.skipif(
+    __import__("os").environ.get("MOTOQUANT_SLOW_TESTS") != "1",
+    reason="re-simulates terminal speed for a sample of bikes",
+)
+def test_cached_terminal_speeds_match_fresh_simulation(plausibility):
+    mod, base, _flagged = plausibility
+    specs = list(ALL_KNOWN_BIKES)
+    keys = mod.bike_keys(specs)
+    for i in range(0, len(specs), 60):
+        fresh = mod.terminal_speed(specs[i])
+        cached = base["terminal"][keys[i]]
+        assert abs(fresh[0] - cached[0]) < 0.01 and fresh[1] == cached[1], keys[i]

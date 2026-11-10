@@ -6,7 +6,7 @@ import StructuredData, { articleSchema } from '../../StructuredData';
 const SLUG = 'kawasaki-ninja-h2-sx-quarter-mile-physics';
 const TITLE = 'Kawasaki Ninja H2 SX Quarter-Mile Physics: Supercharged Tourer';
 const DESCRIPTION =
-  'MotoQuant sims the 2018-2023 Ninja H2 SX at 10.22s and 250.8 km/h trap, aligned with the 10.6-10.7s NHRA timeslips fully stock owners post on H2SXriders.net. Why a 238 kg supercharged tourer runs a Hayabusa-class quarter in India, and where the H2 SX hides its weight at launch.';
+  'MotoQuant sims the 2018-2023 Ninja H2 SX at 10.20 s and a 232.8 km/h trap at Aamby Valley in November, level with a stock Hayabusa Gen 1. Why a 238 kg supercharged tourer runs a Hayabusa-class quarter in India, and where it loses to the ZX-14R.';
 
 export const metadata = {
   title: 'Kawasaki Ninja H2 SX Quarter-Mile Physics India — MotoQuant',
@@ -42,7 +42,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'MotoQuant simulates the 2018-2023 Kawasaki Ninja H2 SX at 10.222 seconds with a 250.8 km/h trap under Aamby Valley November conditions. That ET puts a 238 kg sport-touring bike with hard luggage mounts ahead of the simulator’s stock Hayabusa Gen 1 reference and within two tenths of a stock ZX-14R. The trap speed is higher than either of them. The whole story of the H2 SX on a quarter mile is what a centrifugal supercharger does to a tourer that everyone assumes is heavy and soft.',
+    text: 'MotoQuant simulates the 2018-2023 Kawasaki Ninja H2 SX at 10.203 seconds with a 232.8 km/h trap under Aamby Valley November conditions. That puts a 238 kg sport-touring bike with hard luggage mounts level with the simulator’s stock Hayabusa Gen 1 (10.218 s) and a third of a second behind a stock ZX-14R. The whole story of the H2 SX on a quarter mile is what a centrifugal supercharger does to a tourer that everyone assumes is heavy and soft. (Updated 10 November 2026: every simulated time here was re-run on the current engine.)',
   },
   {
     type: 'h2',
@@ -62,27 +62,27 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running the H2 SX in MotoQuant under Aamby Valley November conditions (roughly 1,100 m density altitude, 22 °C ambient, dry concrete, OEM Bridgestone Battlax Hypersport S22 front + rear at μ_peak around 1.30) and a 78 kg rider on the 238 kg dry bike produces:',
+    text: 'Running the H2 SX in MotoQuant under Aamby Valley November conditions (roughly 1,100 m density altitude, 22 °C ambient, dry asphalt, OEM Bridgestone Battlax Hypersport S22 front + rear at μ_peak around 1.30) and a 78 kg rider on the 238 kg dry bike produces:',
   },
   {
     type: 'table',
     rows: [
       ['Metric', 'Value', 'Source'],
-      ['Quarter-mile ET', '10.222 s', 'MotoQuant sim (Aamby Valley Nov)'],
-      ['Trap speed', '250.8 km/h', 'MotoQuant sim'],
-      ['60-foot time', '~1.78 s', 'MotoQuant sim'],
+      ['Quarter-mile ET', '10.203 s', 'MotoQuant sim (Aamby Valley Nov)'],
+      ['Trap speed', '232.8 km/h', 'MotoQuant sim'],
+      ['60-foot time', '1.851 s', 'MotoQuant sim'],
       ['MCN informal drag', '~10.22 s', 'MCN test, Jan 2018 (uninstrumented)'],
       ['Claimed top speed', '~270 km/h (electronically limited)', 'Kawasaki spec / MCN'],
-      ['Cluster bias band', '−0.04 s (essentially zero)', 'litre_sport_195p cluster'],
+      ['Class error (weighted MAE)', '0.171 s, bias −0.011 s', 'litre_sport_195p, 10 Nov 2026 sweep'],
     ],
   },
   {
     type: 'p',
-    text: 'The H2 SX sits in MotoQuant’s litre_sport_195p cluster — bikes over 600 cc making at least 195 hp. When this post was written (May 2026, before the July 2026 recalibration epoch) that cluster carried a documented mean absolute delta of 0.162 seconds across 24 matched benchmarks and a near-zero bias of −0.035 s. In plain terms: the simulator is calibrated to within roughly an eighth of a second on this class of bike, with no systematic fast or slow tendency. A real H2 SX in skilled hands, warmed tires, and a measured launch should run within a tenth of the 10.222 s number, with the trap speed coming in close to 251 km/h provided the rider holds the throttle pinned all the way through the lights instead of rolling out at the 268 km/h limiter.', // [historical baselines]
+    text: 'The H2 SX sits in MotoQuant’s litre_sport_195p cluster: bikes over 600 cc making at least 195 hp. In the 10 November 2026 accuracy sweep that cluster shows a weighted mean absolute error of 0.171 seconds across 29 published tests, with a bias of −0.011 s. In plain terms, the simulator is typically within about two tenths on this class of bike, with no systematic fast or slow tendency. None of those 29 tests is a supercharged sport-tourer, so the H2 SX number is interpolation rather than validation.',
   },
   {
     type: 'callout',
-    text: 'The H2 SX trap speed of 250.8 km/h is the second-highest in MotoQuant’s 541-bike catalog for any street-legal bike running pump fuel — beaten only by the H2 (no luggage, 24 kg lighter) and matched by the litre superbikes that go 320 km/h on their way to 11.0-second ETs. No naturally-aspirated road bike traps above 248 km/h on a stock quarter-mile pass.',
+    text: 'The H2 SX trap speed of 232.8 km/h is 4.7 km/h above the stock Hayabusa Gen 1, but 6.6 km/h below the Ninja H2 and 11 km/h below the ZX-14R in the same conditions.',
   },
   {
     type: 'h2',
@@ -90,30 +90,30 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The Indian gray-market drag scene has three obvious flagships in the litre-plus class: the Suzuki Hayabusa (Gen 1 reference pinned in the simulator at 10.3633 s), the Kawasaki ZX-14R, and now the Ninja H2 SX. They are not the same bike. The Hayabusa is naturally aspirated, 197 hp, 220 kg dry. The ZX-14R is naturally aspirated, 197 hp, 218 kg dry. The H2 SX is supercharged, 200 hp, 238 kg dry. The interesting question is what each of those decisions costs at the strip.',
+    text: 'The Indian gray-market drag scene has three obvious flagships in the litre-plus class: the Suzuki Hayabusa (Gen 1 reference pinned in the simulator at 10.1100 s), the Kawasaki ZX-14R, and now the Ninja H2 SX. They are not the same bike. The Hayabusa is naturally aspirated, 197 hp, 220 kg dry. The ZX-14R is naturally aspirated, 197 hp, 218 kg dry. The H2 SX is supercharged, 200 hp, 238 kg dry. The interesting question is what each of those decisions costs at the strip.',
   },
   {
     type: 'table',
     rows: [
       ['Bike', 'Sim ET', 'Trap', 'Dry mass', 'Peak hp', 'Forced induction'],
-      ['Kawasaki Ninja H2 SX (2018-2023)', '10.222 s', '250.8 km/h', '238 kg', '200', 'Supercharger (0.6 bar)'],
-      ['Kawasaki ZX-14R (2012-2020)', '~10.05 s', '~244 km/h', '218 kg', '197', 'NA'],
-      ['Suzuki Hayabusa Gen 1', '10.3633 s', '~239 km/h', '220 kg', '197', 'NA'],
-      ['Suzuki Hayabusa Gen 3 (2021+)', '~10.40 s', '~244 km/h', '212 kg', '188', 'NA'],
-      ['Kawasaki Ninja H2 (road)', '~9.95 s', '~256 km/h', '214 kg', '231', 'Supercharger (0.7 bar)'],
+      ['Kawasaki Ninja H2 SX (2018-2023)', '10.203 s', '232.8 km/h', '238 kg', '200', 'Supercharger (0.6 bar)'],
+      ['Kawasaki ZX-14R (2012-2023)', '9.872 s', '243.8 km/h', '218 kg', '197', 'NA'],
+      ['Suzuki Hayabusa Gen 1', '10.218 s', '228.1 km/h', '220 kg', '197', 'NA'],
+      ['Suzuki Hayabusa Gen 3 (2021+)', '10.323 s', '229.4 km/h', '212 kg', '188', 'NA'],
+      ['Kawasaki Ninja H2 (road)', '10.072 s', '239.4 km/h', '214 kg', '231', 'Supercharger (0.7 bar)'],
     ],
   },
   {
     type: 'p',
-    text: 'Three things fall out of that table. First, mass costs almost exactly what the simple physics predicts: the H2 SX is 20 kg heavier than the ZX-14R and runs roughly 0.17 s slower in the ET despite trapping 7 km/h higher. The mass shows up in the launch, not in the back half — the H2 SX 60-foot time is around 1.78 s versus the ZX-14R’s 1.71 s, and that 70 millisecond gap accumulates over the whole run into 170 ms at the lights. The supercharger pays back some of it through trap but not all of it.',
+    text: 'Three things fall out of that table. First, the ZX-14R is the quickest bike in it: 0.33 s ahead of the H2 SX and 11 km/h faster at the trap, with 20 kg less to carry. The two leave the line together (60-foot 1.851 s for the H2 SX, 1.856 s for the ZX-14R), so the gap builds after the launch, where the lighter, naturally aspirated 1441 cc bike keeps pulling.',
   },
   {
     type: 'p',
-    text: 'Second, the H2 SX is a faster bike than a stock Hayabusa Gen 1 by 0.14 seconds even with 18 kg of extra mass. The reason is the supercharger fattens the torque curve from 6,000 rpm onward, exactly where the Hayabusa’s naturally-aspirated 1340 cc engine starts running into its diminishing-returns region. The H2 SX produces around 175 Nm at the rear wheel between 9,500 and 11,000 rpm — meaningfully above the Hayabusa’s 155 Nm peak. On a quarter-mile pass that gear-by-gear shove from second through fifth is what wins the race against displacement.',
+    text: 'Second, the H2 SX is level with a stock Hayabusa Gen 1 (0.015 s ahead) despite 18 kg of extra mass. The supercharger fattens the torque curve from 6,000 rpm onward, exactly where the Hayabusa’s naturally aspirated engine starts running into diminishing returns, and that pays for the touring weight.',
   },
   {
     type: 'p',
-    text: 'Third, the H2 (no SX) is the only bike in the table that comfortably beats the H2 SX, and it does so by 0.27 s with 24 kg less mass and 31 more horsepower from a hotter supercharger map. The H2 SX is genuinely halfway between a litre sport-tourer and a track-spec supercharged superbike — and on the strip it leans toward the second category.',
+    text: 'Third, the H2 (no SX) beats the H2 SX by 0.13 s and 6.6 km/h, with 24 kg less mass and 31 more horsepower from a hotter supercharger map. The H2 SX sits between a litre sport-tourer and a track-spec supercharged superbike.',
   },
   {
     type: 'h2',
@@ -140,7 +140,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'About 20 of the 24 kg gap between the H2 and the H2 SX is touring kit that does not contribute to the quarter-mile run. A serious strip racer who pulls the luggage mounts, the centerstand, the windshield, the pillion seat, and the spare key plate from an H2 SX can credibly drop 12 to 15 kg of dead weight without touching the engine, the chassis, or the bodywork. MotoQuant’s parts-ROI engine on a stripped-spec H2 SX projects an ET of around 10.115 s and a trap of around 253 km/h — within a tenth of a stock Ninja H2 from a bike that started life as a sport-tourer.',
+    text: 'About 20 of the 24 kg gap between the H2 and the H2 SX is touring kit that does not contribute to the quarter-mile run. A serious strip racer who pulls the luggage mounts, the centerstand, the windshield, the pillion seat, and the spare key plate from an H2 SX can credibly drop 12 to 15 kg of dead weight without touching the engine, the chassis, or the bodywork. Taking 12 to 15 kg off the H2 SX in MotoQuant gives 10.128 s to 10.109 s and a trap of about 235 km/h, within 0.06 s of a stock Ninja H2 from a bike that started life as a sport-tourer.',
   },
   {
     type: 'h2',
@@ -188,11 +188,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'MotoQuant treats the H2 SX as a member of the litre_sport_195p cluster — the highest-tier bucket in the validation taxonomy. That cluster ran a 2026-05-25 sweep across 28 matched benchmarks at mean|Δ| = 0.171 s and bias = −0.015 s, near-zero. The 200 hp bracket of the cluster is the most heavily benchmarked: K5 GSX-R 1000 (10.0334 s, matched exactly), YZF-R1 4C8 (10.2859 s, exact), Hayabusa Gen 1 (10.4712 s, exact) — figures as of that dated sweep; the July 2026 epoch re-based the pins, 2021 ZX-10R (+0.011 s, matched within Sport Rider sample variance), Aprilia RSV4 1100 Factory (matched to instrumented), Panigale V4R (matched to MCN). The H2 SX is the first supercharged sport-touring bike to enter this cluster — every other member is naturally-aspirated and full-fairing. So while the cluster-average accuracy is best in class, the H2 SX prediction itself is interpolation, not validation. The next Dragy upload from an actual H2 SX owner will lock the number in either direction.', // [historical baselines]
+    text: 'MotoQuant treats the H2 SX as a member of the litre_sport_195p cluster — the highest-tier bucket in the validation taxonomy. That cluster ran a 2026-05-25 sweep across 28 matched benchmarks at mean|Δ| = 0.171 s and bias = −0.015 s, near-zero. The 200 hp bracket of the cluster is the most heavily benchmarked: K5 GSX-R 1000 (10.0334 s, matched exactly), YZF-R1 4C8 (10.2859 s, exact), Hayabusa Gen 1 (10.4712 s, exact) — figures as of that dated sweep; the July 2026 epoch re-based the pins, 2021 ZX-10R (+0.011 s, matched within Sport Rider sample variance), Aprilia RSV4 1100 Factory (matched to instrumented), Panigale V4R (matched to MCN). The H2 SX is the first supercharged sport-touring bike to enter this cluster — every other member is naturally-aspirated and full-fairing. So while the cluster-average accuracy is best in class, the H2 SX prediction itself is interpolation, not validation. A Dragy run from a stock H2 SX, submitted through the "Submit a timeslip" form, would test it.', // [historical baselines]
   },
   {
     type: 'p',
-    text: 'If you own one and run a Dragy timeslip with measured conditions, the simulator’s Phase 3 calibrator will accept the upload and recalibrate the H2 SX entry against your actual run. That is the long-term plan for closing the cluster bias on every flagship bike in the catalog — the bench number is the starting point, the timeslips are the ground truth.',
+    text: 'If you own one and run a Dragy timeslip with measured conditions, submit it through the "Submit a timeslip" form; a reviewed run joins the benchmark set. That is the long-term plan for closing the cluster bias on every flagship bike in the catalog — the bench number is the starting point, the timeslips are the ground truth.',
   },
   {
     type: 'h2',
@@ -208,7 +208,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'For everything the H2 SX is, the headline is simple: 10.222 seconds at 250.8 km/h trap with hard luggage mounts still bolted on. There is no other sport-tourer in the world that touches that. Compared to the Hayabusa Gen 1 it takes 0.14 seconds out of the bigger displacement and 12 km/h at the trap. Compared to the ZX-14R it gives up two tenths to the lighter chassis but ties on top-end pull. Compared to the Ninja H2 it gives up a quarter-second to the spec sheet and 5 km/h at the trap because of the touring kit. The supercharger is the equalizer — and in a market where every other 200 hp bike has been carrying the same naturally-aspirated playbook for fifteen years, that equalizer is what makes the H2 SX worth simulating.',
+    text: 'For everything the H2 SX is, the headline is simple: 10.203 seconds at a 232.8 km/h trap with hard luggage mounts still bolted on. Compared to the Hayabusa Gen 1 it is level on ET and 4.7 km/h faster at the trap. Compared to the ZX-14R it gives up a third of a second to the lighter chassis and bigger engine. Compared to the Ninja H2 it gives up 0.13 seconds and 6.6 km/h to the touring kit. The supercharger is the equalizer, and that is what makes the H2 SX worth simulating.',
   },
 ];
 
@@ -256,7 +256,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -279,7 +279,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -308,7 +308,7 @@ export default function PostPage() {
             {['Kawasaki', 'Ninja H2 SX', 'Supercharged', 'Sport-Tourer', 'India gray market', 'physics'].map((t) => (
               <span
                 key={t}
-                className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
               >
                 {t}
               </span>
@@ -317,7 +317,7 @@ export default function PostPage() {
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             Kawasaki Ninja H2 SX Quarter-Mile Physics: Supercharged Tourer
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             25 May 2026 · 11 min read · MotoQuant Blog
           </div>
         </div>
@@ -375,13 +375,6 @@ export default function PostPage() {
               </Link>{' '}
               — every spec, every gear ratio, every Cd value used by the simulator across 340+ bikes.
             </li>
-            <li>
-              ·{' '}
-              <Link href="/pricing" className="text-brand-accent hover:text-brand-orange transition-colors">
-                MotoQuant Pricing
-              </Link>{' '}
-              — Free for street tuners; Pro Studio for shops and racing teams.
-            </li>
           </ul>
         </div>
 
@@ -395,9 +388,9 @@ export default function PostPage() {
           </div>
           <Link
             href="/simulator?bike=kawasaki-ninja-h2-sx&venue=aamby-valley"
-            className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
+            className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
           >
-            Run sim →
+            Open the simulator →
           </Link>
         </div>
       </article>

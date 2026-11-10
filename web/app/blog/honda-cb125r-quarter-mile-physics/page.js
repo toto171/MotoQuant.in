@@ -60,7 +60,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Running the CB125R in MotoQuant under matched Aamby Valley November conditions (density altitude approximately 1,100 m, 22°C ambient, dry concrete surface, μ_peak 1.18 on the OEM 150/60R17 rear), with a 78 kg rider on the 122 kg dry bike, produces the following stock-tune output:",
+    text: "Running the CB125R in MotoQuant under matched Aamby Valley November conditions (density altitude approximately 1,100 m, 22°C ambient, dry asphalt surface, μ_peak 1.18 on the OEM 150/60R17 rear), with a 78 kg rider on the 122 kg dry bike, produces the following stock-tune output:",
   },
   {
     type: "table",
@@ -213,7 +213,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Two caveats. First, the absolute ETs in this post are simulator output under specific conditions — change the rider weight, the surface, the temperature, or the launch technique and the numbers shift. The CB125R will run quicker than 18.6 seconds at the strip; expect 16.5 to 17.5 s depending on rider technique. Second, the +1.8 s cluster bias is not a bug or a calibration error; it is a known artefact of the way the model treats clutch slip on sub-15 hp bikes. Future calibrator passes will narrow it as the Indian Dragy submission corpus grows, but for now the relative deltas are what matter and the absolute numbers are systematically conservative.",
+    text: "Two caveats. First, the absolute ETs in this post are simulator output under specific conditions — change the rider weight, the surface, the temperature, or the launch technique and the numbers shift. The CB125R will run quicker than 18.6 seconds at the strip; expect 16.5 to 17.5 s depending on rider technique. Second, the +1.8 s cluster bias is not a bug or a calibration error; it is a known artefact of the way the model treats clutch slip on sub-15 hp bikes. Future accuracy passes will narrow it as more Indian timeslips are submitted, but for now the relative deltas are what matter and the absolute numbers are systematically conservative.",
   },
   {
     type: "p",
@@ -270,7 +270,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -293,7 +293,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -323,7 +323,7 @@ export default function PostPage() {
               (t) => (
                 <span
                   key={t}
-                  className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                  className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
                 >
                   {t}
                 </span>
@@ -333,7 +333,7 @@ export default function PostPage() {
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             Honda CB125R Quarter-Mile Physics: 14.7hp Neo Sports Café
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             25 May 2026 · 11 min read · MotoQuant Blog
           </div>
         </div>
@@ -399,16 +399,6 @@ export default function PostPage() {
               — every spec, every gear ratio, every Cd value used by the
               simulator.
             </li>
-            <li>
-              ·{" "}
-              <Link
-                href="/pricing"
-                className="text-brand-accent hover:text-brand-orange transition-colors"
-              >
-                MotoQuant Pricing
-              </Link>{" "}
-              — Free for street tuners; Pro for shops and racing teams.
-            </li>
           </ul>
         </div>
 
@@ -426,9 +416,9 @@ export default function PostPage() {
           </div>
           <Link
             href="/simulator?bike=honda-cb125r"
-            className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
+            className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
           >
-            Run sim →
+            Open the simulator →
           </Link>
         </div>
       </article>

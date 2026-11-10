@@ -84,7 +84,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "Running the 890 Duke R through MotoQuant under matched Aamby Valley November conditions — density altitude approximately 1,100 m, 22°C ambient, dry concrete, 78 kg rider, OEM Michelin Power Cup 2 rear — produces these numbers, alongside the standard 890 Duke baseline from the GSX-S750 comparison piece:",
+    text: "Running the 890 Duke R through MotoQuant under matched Aamby Valley November conditions — density altitude approximately 1,100 m, 22°C ambient, dry asphalt, 78 kg rider, OEM Michelin Power Cup 2 rear — produces these numbers, alongside the standard 890 Duke baseline from the GSX-S750 comparison piece:",
   },
   {
     type: 'table',
@@ -112,7 +112,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "Three contributors, in order of magnitude. First, raw power-to-weight. The R has 16 hp more and only 3 kg more. That alone, holding everything else constant, is worth approximately 0.20 seconds in this displacement class. Second, the launch advantage from the stickier OEM tire. The Michelin Power Cup 2 carries a μ_peak in the 1.42 range on warm dry concrete, against 1.35 for the Bridgestone S21 on the standard bike. A 0.07 grip-coefficient advantage compounds through the 60-foot section because the bike can run a higher slip ratio without breaking traction; the simulator credits about 0.08 seconds to this. Third, the gearing-and-rpm interaction.",
+    text: "Three contributors, in order of magnitude. First, raw power-to-weight. The R has 16 hp more and only 3 kg more. That alone, holding everything else constant, is worth approximately 0.20 seconds in this displacement class. Second, the launch advantage from the stickier OEM tire. The Michelin Power Cup 2 carries a μ_peak in the 1.42 range on warm dry asphalt, against 1.35 for the Bridgestone S21 on the standard bike. A 0.07 grip-coefficient advantage compounds through the 60-foot section because the bike can run a higher slip ratio without breaking traction; the simulator credits about 0.08 seconds to this. Third, the gearing-and-rpm interaction.",
   },
   {
     type: 'p',
@@ -200,7 +200,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "If you own an 890 Duke R and have Dragy or VBox timeslips from your local strip, the MotoQuant calibrator can fit the simulator's aero and tire parameters to your specific bike. This typically tightens the simulation to within 0.05 seconds of measured for that bike-rider combination and removes the cluster bias entirely. Useful if you are deciding between two mods and the predicted delta is below 0.10 seconds — the bias would otherwise swallow your signal.",
+    text: "If you own an 890 Duke R and have Dragy or VBox timeslips from your local strip, upload one in the simulator to compare it with the simulation split by split, and submit it through the “Submit a timeslip” form; a reviewed run joins the benchmark set. Your own timeslip matters most when you are deciding between two mods whose predicted delta is below 0.10 seconds, because the class error would otherwise swallow the signal.",
   },
   {
     type: 'h2',
@@ -260,7 +260,7 @@ function Prose({ content }) {
                     {header.map((h, hi) => (
                       <th
                         key={hi}
-                        className="px-4 py-3 text-left text-[11px] uppercase tracking-wider text-brand-orange font-display font-semibold"
+                        className="px-4 py-3 text-left text-xs text-accent font-display font-semibold whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -283,7 +283,7 @@ function Prose({ content }) {
           );
         }
         return (
-          <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">
+          <p key={i} className="text-white/75 text-base leading-relaxed mb-5">
             {block.text}
           </p>
         );
@@ -312,7 +312,7 @@ export default function PostPage() {
             {['KTM', '890 Duke R', 'India grey market', 'mid-cc naked', 'physics'].map((t) => (
               <span
                 key={t}
-                className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
+                className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 text-xs font-medium text-accent"
               >
                 {t}
               </span>
@@ -321,7 +321,7 @@ export default function PostPage() {
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             KTM 890 Duke R Quarter-Mile in India: 11.07s on the Grey Market
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="text-sm text-white/60 mb-12">
             22 May 2026 · 12 min read · MotoQuant Blog
           </div>
         </div>
@@ -393,16 +393,6 @@ export default function PostPage() {
               — 890 Duke, 890 Duke R, MT-09, XSR900 GP, and 400+ other bikes with
               service-manual gear ratios.
             </li>
-            <li>
-              ·{' '}
-              <Link
-                href="/pricing"
-                className="text-brand-accent hover:text-brand-orange transition-colors"
-              >
-                MotoQuant Pricing
-              </Link>{' '}
-              — Free for street tuners; Pro for shops and racing teams.
-            </li>
           </ul>
         </div>
 
@@ -417,9 +407,9 @@ export default function PostPage() {
           </div>
           <Link
             href="/simulator?bike=ktm-890-duke-r&venue=aamby-valley"
-            className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
+            className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
           >
-            Run sim →
+            Open the simulator →
           </Link>
         </div>
       </article>

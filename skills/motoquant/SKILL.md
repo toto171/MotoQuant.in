@@ -1,17 +1,17 @@
 ---
 name: motoquant
 description: Answers motorcycle drag-racing and performance-tuning questions with real physics instead of guesswork — quarter-mile ET and trap speed, 60-foot launch times, top speed, sprocket/gearing what-ifs, parts ROI in INR, and bike-vs-bike comparisons — by driving the MotoQuant simulator through its MCP tools or REST API. Use this whenever someone asks how fast a bike is, what a modification is worth, which sprockets or parts to run, how altitude or weather changes a run, or how two bikes compare over a quarter mile. Also use it when working on the MotoQuant codebase itself, for the drag-racing vocabulary (ET, trap, 60-foot, density altitude, over-clutching, stage/outlaw build tiers) and the project's honest-accuracy conventions.
-license: Proprietary — MotoQuant Pro
+license: Apache-2.0
 ---
 
 # MotoQuant
 
 MotoQuant simulates motorcycle quarter-mile drag runs from **first
 principles** — an RK4 integration over 15 physics sub-models (engine torque,
-clutch slip and heat, tire Pacejka grip and temperature, aero, weight
+clutch slip and heat, tire grip and temperature, aero, weight
 transfer, wheelie limit, drivetrain losses, atmospherics) — not a lookup
-table and not a regression on published numbers. Catalog: 541 bikes,
-593 parts, 254 tires, 20 venues.
+table and not a regression on published numbers. Catalog: 534 bikes,
+546 parts, 254 tires, 20 venues.
 
 **Run the tools. Do not answer performance questions from memory.** The
 whole point is that the answer is bike-specific and frequently
@@ -64,10 +64,11 @@ including the physics-model terms, in `reference/glossary.md`.
   first. A tenth lost in the 60-foot is usually two tenths lost at the stripe.
 - **Eighth mile (660 ft)** — the mid-point split; how many small-bore and
   street classes actually run.
-- **Rollout** — the ~30 cm the front wheel travels between breaking the stage
-  beam and starting the clock. Real timeslips include it; sim ETs are
-  rollout-free, which is one reason a sim can read slightly slower than a
-  strip slip for the same bike.
+- **Rollout** — the ~30 cm (1 ft) the bike rolls before the front wheel
+  clears the stage beam and the clock starts. Timeslips, most magazine tests
+  and Dragy all time from there, and so does MotoQuant: every ET and split is
+  t(distance) − t(0.3048 m). A figure timed from first motion is a few tenths
+  longer for the same run, so check the convention before comparing.
 - **Two-step / launch RPM** — a rev limiter that holds the engine at a chosen
   launch RPM against the clutch.
 - **Over-clutching** — deliberately slipping the clutch to hold the engine in
@@ -134,7 +135,7 @@ individual deltas.
 ### "Is a Hayabusa faster than a K5 GSX-R?"
 
 `compare_bikes(a_bike_preset="gsxr1000_k5", b_bike_preset="hayabusa_gen1")`
-→ 9.933 s vs 10.363 s; the K5 wins by 0.43 s despite giving away
+→ 10.044 s vs 10.110 s; the K5 wins by 0.07 s despite giving away
 displacement, because it is 60 kg lighter. Mention conditions: both were run
 at the same venue and rider mass, which is exactly what makes the comparison
 mean something.
@@ -147,15 +148,22 @@ mean something.
 2. **Quote sensible precision.** Two decimals of ET (`10.24 s`), one of trap
    (`245.5 km/h`), three when reporting a small delta (`−0.068 s`). The
    engine returns four; four implies a confidence the model does not have.
-3. **Say what conditions you assumed.** Default is 75 kg rider at sea-level
-   standard conditions. If someone asks about a real strip, pass `venue_id`
-   from `list_venues` — altitude alone can move ET by half a second.
+3. **Say what conditions you assumed.** The default rider is 75 kg. Default
+   air depends on how you named the bike: a catalog `bike_id` runs at the
+   conditions stored with the catalog (Aamby Valley: 679 m, 22 °C), a
+   `bike_preset` at sea level. Over REST every result carries an
+   `environment` block with the values actually simulated (see
+   `reference/api.md`); the MCP tools return a compact result without it, so
+   state the default yourself. If someone asks about a real strip, pass
+   `venue_id` from `list_venues` — altitude alone can move ET by half a
+   second.
 4. **Pass `bike_id` to `search_parts`.** Without it you will happily suggest a
    530-pitch sprocket for a 428-chain commuter. The fitment engine checks
    chain pitch, engine layout, displacement and stroke type — use it.
-5. **State the accuracy honestly.** Weighted mean error is about **0.27 s
-   across 277 matched real-world benchmarks** (bias ≈ 0, so it is not
-   systematically optimistic). That is good enough to rank builds and answer
+5. **State the accuracy honestly.** Weighted mean error is about **0.25 s
+   across 263 matched real-world benchmarks** (bias ≈ +0.02 s, so it is not
+   systematically optimistic; some small classes — entry 200-300cc,
+   two-strokes, 300-500cc singles — still carry ±0.2-0.27 s of class bias). That is good enough to rank builds and answer
    what-ifs, and *not* good enough to promise a given bike will run a given
    ET. Say so when someone is about to bet money.
 6. **Never invent a spec.** If a bike is not in the catalog, say it is not in
@@ -164,9 +172,9 @@ mean something.
 
 ## Traps
 
-- **Top speed is the weak spot.** ET accuracy is good; top speed still carries
-  roughly +25 km/h of fleet bias, and only a few bikes carry their factory
-  299 km/h limiter. Caveat every top-speed answer.
+- **Top speed is the weak spot.** ET accuracy is good; top speed is off by
+  ~13 km/h on average (fleet bias ~+7 km/h, sim fast), and only a few bikes
+  carry their factory 299 km/h limiter. Caveat every top-speed answer.
 - **Rider skill is not modelled.** Every run is a competent launch. Real-world
   slips will be slower, sometimes by a lot on a bike that is hard to launch.
 - **The catalog has no engine internals.** No cams, pistons or big-bore kits,
@@ -177,8 +185,14 @@ mean something.
   exposes `validation_source`; read it before citing a benchmark as truth.
 - **Prices are Indian-market INR** including duty and GST on imports. They are
   point-in-time and drift.
-- **The hosted API sleeps.** Free tier, ~50 s cold start. A slow first tool
-  call is normal, not a failure — wait, do not retry in a loop.
+- **The hosted API sleeps.** It runs on Render's free hosting tier, so expect a
+  ~50 s cold start. A slow first tool call is normal, not a failure — wait,
+  do not retry in a loop. It is also rate-limited per IP (HTTP 429 with
+  `Retry-After`); for heavy or batch use, run the MCP server in local mode
+  or self-host.
+- **MotoQuant is free and open source (Apache-2.0).** There are no paid
+  tiers, quotas or licence keys. Never tell a user a feature needs an
+  upgrade.
 
 ## Reference files
 
