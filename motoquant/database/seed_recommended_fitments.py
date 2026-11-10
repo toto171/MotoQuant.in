@@ -7,6 +7,8 @@ sport-touring/track upgrades (recommended) and drag-prep configurations.
 
 import logging
 
+from .tire_repo import tire_position_fits_slot
+
 RECOMMENDED_FITMENTS = [
     # Litre superbikes - recommended upgrades (R1, GSX-R 1000, ZX-10R, S1000RR, CBR1000RR, Panigale, RSV4)
     {
@@ -2002,6 +2004,20 @@ def seed_recommended_fitments(db):
                 continue
             if tire_id > tire_id_before:
                 stats["tires_created"] += 1
+            tire_pos = db._conn.execute(
+                "SELECT position FROM tire_models WHERE id = ?", (tire_id,)
+            ).fetchone()
+            if tire_pos is not None and not tire_position_fits_slot(
+                tire_pos[0], fitment["position"]
+            ):
+                logging.getLogger(__name__).warning(
+                    "skipping fitment: %s tire in %s slot (bike=%s)",
+                    tire_pos[0],
+                    fitment["position"],
+                    bike_id,
+                )
+                stats["skipped"] += 1
+                continue
             if db._conn.execute(
                 "SELECT id FROM bike_tire_fitments WHERE bike_model_id = ? AND tire_model_id = ? AND position = ?",
                 (bike_id, tire_id, fitment["position"]),

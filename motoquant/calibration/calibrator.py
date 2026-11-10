@@ -36,7 +36,7 @@ Predefined presets are available:
     PRESET_AERO_TIRE  : fit cd + mu_peak  (default, recommended)
     PRESET_AERO_ONLY  : fit cd only       (when tire data is trusted)
     PRESET_TIRE_ONLY  : fit mu_peak only  (when aero is well characterised)
-    PRESET_FULL       : cd + mu_peak + engine.drivetrain_efficiency
+    PRESET_FULL       : cd + mu_peak + drivetrain.chain_efficiency
 """
 
 import copy
@@ -82,7 +82,10 @@ PRESET_TIRE_ONLY: list[dict] = [
 PRESET_FULL: list[dict] = [
     {"path": "aero.cd", "bounds": (0.45, 0.95), "initial": None},
     {"path": "tires.mu_peak", "bounds": (1.0, 1.8), "initial": None},
-    {"path": "drivetrain.efficiency", "bounds": (0.82, 0.97), "initial": None},
+    # chain_efficiency scales delivered power only for crank-referenced power
+    # curves (dyno_curve.is_at_wheel False, e.g. every catalog import); on an
+    # at-wheel curve (the hand-built reference bikes) it has no effect on ET.
+    {"path": "drivetrain.chain_efficiency", "bounds": (0.90, 0.99), "initial": None},
 ]
 
 
@@ -161,22 +164,37 @@ class CalibrationResult:
 # ─── Parameter injection helpers ──────────────────────────────────────────
 
 
-def _get_param(config: BikeConfig, path: str) -> float:
-    """Get a value from BikeConfig via dotted path, e.g. 'aero.cd'."""
-    parts = path.split(".")
-    obj = config
-    for part in parts:
-        obj = getattr(obj, part)
-    return float(obj)
+def _resolve_parent(config: BikeConfig, path: str):
+    """Walk a dotted path to the object holding its final attribute.
 
-
-def _set_param(config: BikeConfig, path: str, value: float) -> None:
-    """Set a value in BikeConfig via dotted path, e.g. 'aero.cd' = 0.65."""
+    Raises ValueError naming the bad path (rather than AttributeError from deep
+    inside the optimiser, or silently creating a new attribute).
+    """
     parts = path.split(".")
     obj = config
     for part in parts[:-1]:
+        if not hasattr(obj, part):
+            raise ValueError(
+                f"unknown calibration parameter path {path!r}: no {part!r}"
+            )
         obj = getattr(obj, part)
-    setattr(obj, parts[-1], float(value))
+    if not hasattr(obj, parts[-1]):
+        raise ValueError(
+            f"unknown calibration parameter path {path!r}: no {parts[-1]!r}"
+        )
+    return obj, parts[-1]
+
+
+def _get_param(config: BikeConfig, path: str) -> float:
+    """Get a value from BikeConfig via dotted path, e.g. 'aero.cd'."""
+    obj, attr = _resolve_parent(config, path)
+    return float(getattr(obj, attr))
+
+
+def _set_param(config: BikeConfig, path: str, value: float) -> None:
+    """Set an existing BikeConfig value via dotted path, e.g. 'aero.cd' = 0.65."""
+    obj, attr = _resolve_parent(config, path)
+    setattr(obj, attr, float(value))
 
 
 # ─── Objective function ───────────────────────────────────────────────────
@@ -201,8 +219,8 @@ class _Objective:
         self._weights = weights or {}
         self.n_evals = 0
 
-    def __call__(self, x: np.ndarray) -> float:
-        self.n_evals += 1
+    def simulate(self, x: np.ndarray):
+        """Run the sim for parameter vector x (None if it crashes or never finishes)."""
         cfg = copy.deepcopy(self._base_config)
         for i, spec in enumerate(self._specs):
             _set_param(cfg, spec["path"], float(x[i]))
@@ -211,13 +229,22 @@ class _Objective:
             engine = MotoQuantEngine(cfg)
             sim = engine.run()
         except Exception:
-            return 1e6  # penalise crashes
+            return None
 
         if sim.time_quarter <= 0 or sim.speed_quarter <= 0:
-            return 1e6
+            return None
+        return sim
 
+    def cost_for(self, sim) -> float:
+        """Cost of an already-run sim against this objective's real run."""
+        if sim is None:
+            return 1e6  # penalise crashes / unfinished runs
         cmp = compare_runs(self._real_run, sim)
         return compute_cost(cmp, self._weights)
+
+    def __call__(self, x: np.ndarray) -> float:
+        self.n_evals += 1
+        return self.cost_for(self.simulate(x))
 
 
 # ─── Public API ───────────────────────────────────────────────────────────
@@ -395,7 +422,10 @@ def calibrate_multi_run(
 
     def combined_obj(x: np.ndarray) -> float:
         n_evals[0] += 1
-        costs = [o(x) for o in objs]
+        # Every objective shares the same config and parameter vector, so
+        # simulate once and score that single result against every run.
+        sim = objs[0].simulate(x)
+        costs = [o.cost_for(sim) for o in objs]
         return float(np.mean(costs))
 
     initial_cost = combined_obj(np.array(x0))

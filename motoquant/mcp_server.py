@@ -910,7 +910,7 @@ TOOLS: list[dict[str, Any]] = [
     {
         "name": "search_parts",
         "description": (
-            "Search the 593-part catalog. Pass bike_id to return ONLY parts that "
+            "Search the 584-part catalog. Pass bike_id to return ONLY parts that "
             "actually fit that bike (chain pitch, engine layout, displacement, "
             "stroke type are all checked)."
         ),

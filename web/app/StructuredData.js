@@ -87,7 +87,7 @@ export function softwareApplicationSchema() {
     downloadUrl: `${SITE_URL}/simulator`,
     softwareVersion: '1.0',
     description:
-      'Physics-based quarter-mile drag racing simulator for motorcycles. 15-submodel engine (engine, drivetrain, clutch, chain, tires, aero, weight-transfer, rider dynamics, staging, environmental, braking, wheelie, parasitic, rolling resistance, forced induction) covering 541 bikes, 593 parts, 254 tires, 20 venues. Validated to K5 GSX-R1000 9.93s, YZF-R1 10.14s, Hayabusa 10.36s.',
+      'Physics-based quarter-mile drag racing simulator for motorcycles. 15-submodel engine (engine, drivetrain, clutch, chain, tires, aero, weight-transfer, rider dynamics, staging, environmental, braking, wheelie, parasitic, rolling resistance, forced induction) covering 541 bikes, 584 parts, 254 tires, 20 venues. Validated to K5 GSX-R1000 9.93s, YZF-R1 10.14s, Hayabusa 10.36s.',
     publisher: { '@id': `${SITE_URL}/#organization` },
     author: { '@id': `${SITE_URL}/#organization` },
     offers: {
@@ -100,7 +100,7 @@ export function softwareApplicationSchema() {
     featureList: [
       'Quarter-mile ET prediction to ±0.2s',
       '541 motorcycles with individual aero + dyno curves',
-      '593-part catalog with cost-per-tenth ROI analysis',
+      '584-part catalog with cost-per-tenth ROI analysis',
       '15 independent physics sub-models',
       'Dragy GPS + dyno import with sim overlay',
       'Calibrated surrogate model for instant iteration',
@@ -136,7 +136,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: 'How does it decide which parts are worth buying?',
-    a: 'Each part in the 593-part catalog is tested by running the simulation with and without it. The change in quarter-mile time is divided by the part\u2019s price to get the cost of each tenth of a second. The best-parts tool then picks the combination that gains the most within your budget, respecting compatibility rules and known pairings such as exhaust plus ECU flash.',
+    a: 'Each part in the 584-part catalog is tested by running the simulation with and without it. The change in quarter-mile time is divided by the part\u2019s price to get the cost of each tenth of a second. The best-parts tool then picks the combination that gains the most within your budget, respecting compatibility rules and known pairings such as exhaust plus ECU flash.',
   },
   {
     q: 'Can I upload my own Dragy or dyno data?',

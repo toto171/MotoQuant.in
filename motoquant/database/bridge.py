@@ -13,6 +13,7 @@ Guarantees:
 
 import dataclasses
 import json
+import math
 from typing import Any
 
 import numpy as np
@@ -190,7 +191,40 @@ class HeadlineSpecsDict(TypedDict):
     seat_height_mm: float | None
 
 
-def extract_headline_specs(config: BikeConfig) -> HeadlineSpecsDict:
+# Displayed bore/stroke are dropped (stored NULL) when they cannot reproduce the
+# stated displacement within this relative tolerance.
+BORE_STROKE_DISPLACEMENT_TOL = 0.03
+
+# Headline columns whose BikeConfig value can be a default borrowed from the
+# reference GSX-R1000 rather than a figure from the bike's own spec. When a
+# spec is supplied these come from the spec alone (NULL when it has no value).
+SPEC_ONLY_HEADLINE_FIELDS = (
+    "bore_mm",
+    "stroke_mm",
+    "compression_ratio",
+    "wheelbase_mm",
+    "seat_height_mm",
+)
+
+
+def bore_stroke_matches_displacement(
+    bore_mm: float | None,
+    stroke_mm: float | None,
+    cylinders: int | None,
+    displacement_cc: float | None,
+    tol: float = BORE_STROKE_DISPLACEMENT_TOL,
+) -> bool:
+    """True when bore x stroke x cylinders reproduces displacement within ``tol``.
+
+    Returns True (nothing to contradict) when any input is missing.
+    """
+    if not (bore_mm and stroke_mm and cylinders and displacement_cc):
+        return True
+    swept_cc = math.pi / 4.0 * (bore_mm / 10.0) ** 2 * (stroke_mm / 10.0) * cylinders
+    return abs(swept_cc - displacement_cc) / displacement_cc <= tol
+
+
+def extract_headline_specs(config: BikeConfig, spec=None) -> HeadlineSpecsDict:
     """
     Extract searchable headline specs from a BikeConfig
     for the bike_models table.
@@ -198,8 +232,14 @@ def extract_headline_specs(config: BikeConfig) -> HeadlineSpecsDict:
     Includes cylinder_count + cylinder_config so downstream consumers
     (e.g. parts compatibility engine) can filter on engine family without
     having to crack open the JSON engine_params blob.
+
+    ``spec`` (a BikeSpec, optional): when given, the columns in
+    SPEC_ONLY_HEADLINE_FIELDS are taken from the spec and stored NULL when the
+    spec carries no value -- the BikeConfig fills such gaps with reference-bike
+    defaults, which must not be displayed as this bike's figures. Bore and
+    stroke are also stored NULL when together they contradict the displacement.
     """
-    return {
+    out: HeadlineSpecsDict = {
         "displacement_cc": config.engine.displacement_cc,
         "bore_mm": config.engine.bore_mm,
         "stroke_mm": config.engine.stroke_mm,
@@ -214,6 +254,18 @@ def extract_headline_specs(config: BikeConfig) -> HeadlineSpecsDict:
         "wheelbase_mm": config.chassis.wheelbase_mm,
         "seat_height_mm": config.chassis.seat_height_mm,
     }
+    if spec is not None:
+        for key in SPEC_ONLY_HEADLINE_FIELDS:
+            out[key] = getattr(spec, key, None) or None
+        if not bore_stroke_matches_displacement(
+            out["bore_mm"],
+            out["stroke_mm"],
+            out["cylinder_count"] or getattr(spec, "cylinders", None),
+            out["displacement_cc"],
+        ):
+            out["bore_mm"] = None
+            out["stroke_mm"] = None
+    return out
 
 
 # ────────────────────────────────────────────

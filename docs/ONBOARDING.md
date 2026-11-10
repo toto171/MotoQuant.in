@@ -31,8 +31,8 @@ A first-principles physics engine for predicting and optimising motorcycle quart
 | Status | Free and open source (MIT); hosted at motoquant.in, no paid tiers or quota |
 | Tests | full pytest suite green (runs ~25–35 min; focused subsets in `CONTRIBUTING.md` §4) |
 | Bikes in catalog | 541 across 30+ manufacturers (India, SE Asia, US, EU, JP, CN) |
-| Tires | 254 (incl. drag radials/slicks + cruiser rubber), 1,783 fitments |
-| Parts | 593 across 19 categories (incl. lowering kits, air shifters, lockup clutches) |
+| Tires | 254 (incl. drag radials/slicks + cruiser rubber), 1,780 fitments |
+| Parts | 584 across 19 categories (incl. lowering kits, air shifters, lockup clutches) |
 | Venues | 20 (India + international drag strips) |
 | Benchmarks | 250 ET rows + 86 top-speed rows; weighted sweep 276 matched, |Δ| 0.263 s, bias +0.007 s |
 | Reference baselines | K5 9.9331 / R1 10.1436 / Hayabusa 10.3633 — pinned **bit-identical**, CI-gated |

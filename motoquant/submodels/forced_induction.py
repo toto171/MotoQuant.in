@@ -42,10 +42,13 @@ class ForcedInductionModel:
         if not fi.is_boosted:
             return 1.0
 
+        # Ambient absolute pressure from the venue's air density (same for every
+        # boost type), falling back to standard pressure on a degenerate density.
+        P_atm = self.rho * 287.058 * (self.cfg.environment.ambient_temp_c + 273.15)
+        if P_atm <= 0:
+            P_atm = 101325.0
+
         if fi.boost_type == BOOST_TURBO:
-            P_atm = self.rho * 287.058 * (self.cfg.environment.ambient_temp_c + 273.15)
-            if P_atm <= 0:
-                P_atm = 101325.0
             boost_ratio = 1.0 + P_boost / P_atm
             # Intercooler temperature correction
             if fi.intercooler_type != "none":
@@ -55,9 +58,7 @@ class ForcedInductionModel:
             return boost_ratio
 
         elif fi.boost_type in (BOOST_SC_ROOTS, BOOST_SC_CENTRIFUGAL):
-            P_atm = 101325.0
-            boost_ratio = 1.0 + P_boost / P_atm
-            return boost_ratio
+            return 1.0 + P_boost / P_atm
 
         elif fi.boost_type == BOOST_N2O:
             ramp = min(1.0, t / max(0.1, fi.n2o_ramp_duration_s))

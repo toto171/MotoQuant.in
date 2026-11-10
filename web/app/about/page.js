@@ -49,7 +49,7 @@ export default function AboutPage() {
             <p>
               Indian drag racing is growing fast, at Aamby Valley, MMRT, BIC, Kari and Hyderabad, but the tools were built for
               other bikes and other weather. A calculator tuned for Santa Pod at 5 °C says very little about Aamby Valley at
-              35 °C. So we built one for here: 541 bikes, 593 parts with prices in rupees, and 20 venues with real seasonal
+              35 °C. So we built one for here: 541 bikes, 584 parts with prices in rupees, and 20 venues with real seasonal
               weather.
             </p>
             <h2 className="pt-4 font-display text-xl font-semibold text-white md:text-2xl">How it works, in one paragraph</h2>

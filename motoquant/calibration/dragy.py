@@ -46,6 +46,7 @@ import numpy as np
 
 # ─── Physical constants ────────────────────────────────────────────────────
 from ..constants import QUARTER_MILE_M  # single source of truth (402.336 m)
+from ._launch import launch_slice
 
 EIGHTH_MILE_M: float = 201.168  # 1/8 mile in metres
 
@@ -341,8 +342,7 @@ def _detect_runs(
             continue
 
         # Slice from launch
-        t_run = t[launch_idx:] - t[launch_idx]  # re-zero time
-        v_run = v_ms[launch_idx:]
+        t_run, v_run = launch_slice(t, v_ms, launch_idx)  # re-zero at motion onset
         d_run = _integrate_distance(t_run, v_run)
 
         # Must reach 1/4 mile
@@ -590,11 +590,9 @@ def _build_run_list(
 
     results = []
     for run_num, (launch_idx, end_idx, et_quarter, trap_speed) in enumerate(detected):
-        t_slice = t_arr[launch_idx : end_idx + 1].copy()
-        v_slice = v_arr[launch_idx : end_idx + 1].copy()
-
-        # Re-zero time and re-integrate distance within this slice
-        t_slice -= t_slice[0]
+        # Re-zero time at (back-extrapolated) motion onset and re-integrate
+        # distance within this slice
+        t_slice, v_slice = launch_slice(t_arr, v_arr, launch_idx, end_idx)
         d_slice = _integrate_distance(t_slice, v_slice)
         a_slice = _compute_acceleration(t_slice, v_slice)
 

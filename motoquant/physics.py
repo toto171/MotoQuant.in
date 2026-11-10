@@ -201,7 +201,11 @@ class MotoQuantEngine:
         self.N_r_static = self.m_total * G * (1.0 - c.chassis.front_weight_pct)
         self.eta_dt = c.drivetrain.drivetrain_efficiency()
         self.T_tire_launch = c.tires.tire_temp_at_launch(c.environment.ambient_temp_c)
-        self.mu_prep = c.tires.track_prep_multiplier(c.environment.track_temp_c)
+        self.mu_prep = c.tires.track_prep_multiplier(
+            c.environment.track_temp_c,
+            c.environment.track_prep,
+            c.environment.track_prep_passes,
+        )
         self.anti_squat_frac = c.suspension.anti_squat_pct / 100.0
         self.T_tire_ref_K = self.T_tire_launch + 273.15
         self.F_gradient = self.m_total * G * c.environment.track_gradient_pct / 100.0
@@ -422,7 +426,17 @@ class MotoQuantEngine:
         Returns
         -------
         SimResult with all time-domain channels and split times.
+
+        Raises
+        ------
+        ValueError
+            If ``distance`` or ``max_time`` is not positive (the API enforces
+            the same bounds on its request models).
         """
+        if not distance > 0.0:
+            raise ValueError(f"distance must be positive, got {distance!r}")
+        if not max_time > 0.0:
+            raise ValueError(f"max_time must be positive, got {max_time!r}")
         dt = self.dt
         cfg = self.cfg
 

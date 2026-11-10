@@ -59,6 +59,43 @@ _SURFACE_RR: dict = {
 # ── Power correction denominator at standard conditions (ISO 1585) ────────────
 _RHO_SL_STD = 1.2250  # kg/m³  (sea level, 15 °C, 0 % RH)
 
+# ── Reference-anchored SAE J1349 power scaling ────────────────────────────────
+# Brake power scales with DRY-air pressure and ~sqrt(absolute inlet temperature)
+# (SAE J1349: CF = (99/Pd)·sqrt(Tm/298)); a density (P/T) scaling would count the
+# temperature effect twice.  The absolute level at the reference day (the catalog
+# calibration day: 0 m, 25 °C, 50 % RH, 1013.25 hPa) is the calibration constant
+# K_ref = rho_ref / 1.225, so that day reproduces the catalog power exactly and
+# only departures from it follow the SAE exponents.
+_REF_TEMP_C = 25.0
+_REF_RH_PCT = 50.0
+_REF_ALT_M = 0.0
+_REF_PRESSURE_HPA = 1013.25
+
+
+def _reference_environment():
+    from ..models import EnvironmentParams
+
+    return EnvironmentParams(
+        altitude_m=_REF_ALT_M,
+        ambient_temp_c=_REF_TEMP_C,
+        relative_humidity_pct=_REF_RH_PCT,
+        barometric_pressure_hpa=_REF_PRESSURE_HPA,
+    )
+
+
+def sae_power_correction(env) -> float:
+    """Engine power multiplier for ``env``: K_ref · (Pd/Pd_ref) · sqrt(T_ref/T).
+
+    Equals ``rho_ref / 1.225`` on the reference day.  Single source for the
+    simulation and for the weather/venue "power correction factor".
+    """
+    ref = _reference_environment()
+    k_ref = ref.air_density() / _RHO_SL_STD
+    t_ratio = (ref.ambient_temp_c + 273.15) / (env.ambient_temp_c + 273.15)
+    return (
+        k_ref * (env.dry_air_pressure_pa() / ref.dry_air_pressure_pa()) * t_ratio**0.5
+    )
+
 
 class EnvironmentalModel:
     """
@@ -85,13 +122,14 @@ class EnvironmentalModel:
         self.density_alt_ft: float = env.density_altitude_ft()
 
         # ── Engine power correction ──────────────────────────────────────────
-        # Naturally aspirated: power ∝ ρ / ρ_std
+        # Naturally aspirated: SAE J1349 scaling (dry-air pressure, sqrt(T)),
+        # anchored on the catalog reference day (see sae_power_correction).
         # Forced induction: boost compensates for density loss; apply a floor
         if not cfg.forced_induction.is_boosted:
-            self.power_correction: float = self.rho / _RHO_SL_STD
+            self.power_correction: float = sae_power_correction(env)
         else:
             # Boosted engines still lose a little at extreme DA
-            self.power_correction = max(0.97, self.rho / _RHO_SL_STD)
+            self.power_correction = max(0.97, sae_power_correction(env))
 
         # Informational: % power lost relative to sea level standard
         self.da_power_loss_pct: float = max(0.0, (1.0 - self.power_correction) * 100.0)

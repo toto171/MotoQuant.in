@@ -12,6 +12,15 @@ import sqlite3
 from ..models import TireParams
 
 
+def tire_position_fits_slot(tire_position: str | None, slot: str) -> bool:
+    """True when a tire model of ``tire_position`` may sit in fitment ``slot``.
+
+    A front-position tire never fills a rear slot (or vice versa). A tire whose
+    position is unset or ``both`` is not contradicted by either slot.
+    """
+    return tire_position in (None, "", "both", slot)
+
+
 class TireRepository:
     """Repository for tire models and their simulation parameters."""
 
@@ -392,6 +401,19 @@ class TireRepository:
         row ids (same class of bug fixed in `create()` above). Root-cause
         history: scripts/patch_2026_08_08_fitment_integrity.py.
         """
+        tire_row = self._conn.execute(
+            "SELECT position FROM tire_models WHERE id = ?", (tire_model_id,)
+        ).fetchone()
+        if tire_row is not None:
+            tire_position = (
+                tire_row["position"] if hasattr(tire_row, "keys") else tire_row[0]
+            )
+            if not tire_position_fits_slot(tire_position, position):
+                raise ValueError(
+                    f"tire model {tire_model_id} is a {tire_position}-position tire "
+                    f"and cannot fill the {position} slot of bike {bike_model_id}"
+                )
+
         # Id-preserving upsert on the table's UNIQUE key.
         existing = self._conn.execute(
             """SELECT id FROM bike_tire_fitments

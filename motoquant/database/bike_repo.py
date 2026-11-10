@@ -493,6 +493,7 @@ class BikeRepository:
         category: str = "sport",
         source: str = "spec_sheet",
         confidence: float = 0.7,
+        spec=None,
     ) -> tuple[int, int]:
         """
         High-level: store a BikeConfig, auto-creating manufacturer and model.
@@ -513,7 +514,7 @@ class BikeRepository:
             model_name = config.name[len(manufacturer_name) :].strip()
 
         # Extract headline specs
-        specs = extract_headline_specs(config)
+        specs = extract_headline_specs(config, spec=spec)
 
         model_id = self.create_model(
             manufacturer_id=mfr_id,

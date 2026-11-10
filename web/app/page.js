@@ -10,7 +10,7 @@
  * can I trust the numbers · open source · FAQ.
  *
  * Stat-audit shapes preserved (scripts/audit_headline_stats.py): STATS
- * (`num: N, label: 'BIKES'`), the "541 bikes" / "593 parts" / "254 tires" /
+ * (`num: N, label: 'BIKES'`), the "541 bikes" / "584 parts" / "254 tires" /
  * "20 venues" / "250 benchmarks" phrasing, ACCURACY_TILES, HONEST_CLUSTERS,
  * TOP10.
  */
@@ -58,7 +58,7 @@ const TOP10 = [
 // What the catalog holds (synced to motoquant.db by audit_headline_stats.py).
 const STATS = [
   { num: 541, label: 'BIKES' },
-  { num: 593, label: 'PARTS' },
+  { num: 584, label: 'PARTS' },
   { num: 254, label: 'TIRES' },
   { num: 20,  label: 'VENUES' },
 ];

@@ -11,7 +11,7 @@ quarter-mile drag racing: predict elapsed time and trap speed from a bike's
 specs, test modifications (power, gearing, tires, weight, parts) before you
 spend money, and rank parts by seconds gained per rupee. It started in the
 Indian drag-racing community (Aamby Valley, MMRT, BIC, Kari, Hyderabad) and
-models 541 bikes, 254 tires, 593 parts, and 20 venues. Predictions are
+models 541 bikes, 254 tires, 584 parts, and 20 venues. Predictions are
 validated against 250 published benchmarks (weighted mean |Δ| 0.263 s, bias
 +0.007 s across 276 matched runs) by a ~4,400-test pytest suite.
 

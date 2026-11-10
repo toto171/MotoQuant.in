@@ -3,6 +3,27 @@ MotoQuant — Parameter Models
 ==============================
 All input parameters organized into dataclasses by category.
 Every parameter that affects prediction by >= 0.1% is represented.
+
+Fields accepted but not read by the quarter-mile simulation
+------------------------------------------------------------
+These fields are stored, validated and round-tripped, but changing them does
+not change ET or trap speed (checked by perturbing each one on catalog bikes
+and the reference bikes).  Do not tune them, fit them or expose them as
+levers; wiring them into the physics would be a deliberate accuracy epoch.
+
+* ``tires.front_pressure_psi`` / ``tires.rear_pressure_psi`` -- no
+  pressure-dependent grip or rolling-resistance term exists.
+* ``tires.mu_slide`` and ``tires.tread_depth_mm``.
+* ``staging.reaction_time_ms`` -- the staging dead time is not applied.
+* ``clutch.slipper_ratio`` (and ``braking.slipper_ratio``) -- no slipper
+  back-torque branch runs on the quarter-mile path.
+* ``rider.mass_kg`` -- the sim reads ``chassis.rider_mass_kg``;
+  ``rider.height_cm``, ``rider.cog_height_seated_mm``, ``rider.gear_mass_kg``
+  and ``rider.experience_level`` are unused.  Only
+  ``rider.launch_forward_shift_mm`` and ``rider.tuck_transition_time_s`` are
+  live.
+* ``suspension.*`` except ``suspension.anti_squat_pct``.
+* ``braking.*`` -- braking is not part of the quarter-mile run.
 """
 
 from dataclasses import dataclass, field
@@ -497,19 +518,31 @@ class TireParams:
         decay = np.exp(-self.time_burnout_to_launch_s / max(tau, 1.0))
         return ambient_temp_c + (self.burnout_end_temp_c - ambient_temp_c) * decay
 
-    def track_prep_multiplier(self, track_temp_c: float) -> float:
-        """Grip multiplier from track prep compound."""
-        if self.track_prep_type == TRACK_NONE:
+    def track_prep_multiplier(
+        self,
+        track_temp_c: float,
+        venue_prep_type: str = TRACK_NONE,
+        venue_prep_passes: int = 0,
+    ) -> float:
+        """Grip multiplier from track prep compound.
+
+        The tyre's own prep setting wins; when it is ``TRACK_NONE`` the
+        venue-level prep (``EnvironmentParams.track_prep``) applies instead.
+        """
+        prep_type, passes = self.track_prep_type, self.track_prep_passes
+        if prep_type == TRACK_NONE:
+            prep_type, passes = venue_prep_type, venue_prep_passes
+        if prep_type == TRACK_NONE:
             return 1.0
         # Base multiplier decreases with passes and degrades above 50C
-        if self.track_prep_type in (TRACK_VHT, TRACK_PJ1):
-            freshness = max(0.0, 1.0 - self.track_prep_passes / 200.0)
+        if prep_type in (TRACK_VHT, TRACK_PJ1):
+            freshness = max(0.0, 1.0 - passes / 200.0)
             temp_penalty = max(0.0, 1.0 - max(0.0, track_temp_c - 50.0) / 30.0)
             return (
                 1.0 + 0.12 * freshness * temp_penalty
             )  # 12% max grip boost from VHT/PJ1
-        if self.track_prep_type == TRACK_RUBBER:
-            return 1.0 + 0.10 * max(0.0, 1.0 - self.track_prep_passes / 500.0)
+        if prep_type == TRACK_RUBBER:
+            return 1.0 + 0.10 * max(0.0, 1.0 - passes / 500.0)
         return 1.0
 
 
@@ -725,6 +758,20 @@ class EnvironmentParams:
     track_prep_passes: int = 0  # Freshness
     track_heading_deg: float = 0.0  # Track direction for wind calc
     track_gradient_pct: float = 0.0  # % grade (positive = uphill)
+
+    def dry_air_pressure_pa(self) -> float:
+        """Dry-air partial pressure (Pa): station pressure minus water-vapour pressure.
+
+        Uses the same barometric and Magnus models as ``air_density``.
+        """
+        P_sea = self.barometric_pressure_hpa * 100.0
+        P_alt = P_sea * (1.0 - 0.0065 * self.altitude_m / 288.15) ** (
+            9.80665 * 0.0289644 / (8.31447 * 0.0065)
+        )
+        e_sat = 610.78 * np.exp(
+            17.27 * self.ambient_temp_c / (self.ambient_temp_c + 237.3)
+        )
+        return float(P_alt - e_sat * self.relative_humidity_pct / 100.0)
 
     def air_density(self) -> float:
         """Compute air density from altitude, temp, humidity using barometric formula."""

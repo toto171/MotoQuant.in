@@ -48,6 +48,7 @@ from typing import Optional
 
 import numpy as np
 
+from ._launch import launch_origin_time
 from .dragy import LAUNCH_VEL_THRESHOLD_MS, MIN_STAGE_FRAMES, QUARTER_MILE_M
 
 # ─── Constants ────────────────────────────────────────────────────────────
@@ -77,6 +78,8 @@ class ECUParseError(Exception):
 # Each entry: (standard_name, conversion_fn_or_factor)
 # conversion can be: float (multiply), callable, or None (identity)
 
+_SPEED_NAME = r"^(speed|vss|vehicle.?speed|wheel.?speed|ground.?speed)"
+
 _CHANNEL_ALIASES: list[tuple[str, str, object | None]] = [
     # (regex pattern matching header col, standard_name, conversion)
     # Time
@@ -92,17 +95,17 @@ _CHANNEL_ALIASES: list[tuple[str, str, object | None]] = [
     (r"^tp[%_]?$", "tps_pct", None),
     (r"^throttle.?pos", "tps_pct", None),
     (r"^throttle.?(%|pct|percent)", "tps_pct", None),
-    # Vehicle speed — km/h → m/s
+    # Vehicle speed.  Explicit imperial / SI unit tokens are matched BEFORE the
+    # km/h patterns (whose unit group is optional, so they would otherwise claim
+    # "Speed (mph)" and "Vehicle Speed (m/s)" and convert with the km/h factor).
+    (_SPEED_NAME + r".*(?<![a-z])(mph|mi/?h)[\s)\]]*$", "vehicle_speed_ms", MPH_TO_MS),
+    (_SPEED_NAME + r".*(?<![a-z])(m/s|mps)[\s)\]]*$", "vehicle_speed_ms", None),
+    # km/h → m/s (also the unit assumed for a bare "Speed" header)
     (r"^speed[_ (km/h)]*$", "vehicle_speed_ms", KMH_TO_MS),
     (r"^vss.*(km.?h)?$", "vehicle_speed_ms", KMH_TO_MS),
     (r"^vehicle.?speed.*(km.?h)?$", "vehicle_speed_ms", KMH_TO_MS),
     (r"^wheel.?speed.*(km.?h)?$", "vehicle_speed_ms", KMH_TO_MS),
     (r"^ground.?speed.*(km.?h)?$", "vehicle_speed_ms", KMH_TO_MS),
-    # m/s already
-    (r"^vehicle.?speed.*(m/?s)?$", "vehicle_speed_ms", None),
-    # mph → m/s
-    (r"^speed.*(mph|mi.?h)$", "vehicle_speed_ms", MPH_TO_MS),
-    (r"^vss.*(mph|mi.?h)$", "vehicle_speed_ms", MPH_TO_MS),
     # Gear
     (r"^gear[_ ]?(position|pos)?$", "gear", None),
     (r"^current.?gear", "gear", None),
@@ -170,7 +173,7 @@ class ECURunWindow:
     parent ECULog are available here sliced to the run window.
     """
 
-    time_s: np.ndarray  # seconds, 0 = launch
+    time_s: np.ndarray  # seconds, 0 = first sample of the window
     rpm: np.ndarray | None
     tps_pct: np.ndarray | None
     vehicle_speed_ms: np.ndarray | None
@@ -192,6 +195,9 @@ class ECURunWindow:
     sample_rate_hz: float
     run_index: int = 0
     source_file: str = ""
+    # Seconds between the true motion onset (back-extrapolated, v = 0) and
+    # time_s[0].  ET, trap speed and splits are measured from the onset.
+    onset_lead_s: float = 0.0
 
     @property
     def trap_speed_kmh(self) -> float:
@@ -209,7 +215,8 @@ class ECURunWindow:
         """Return split times at standard drag strip distances."""
         if self.vehicle_speed_ms is None or len(self.vehicle_speed_ms) == 0:
             return {}
-        dist = _integrate_distance(self.time_s, self.vehicle_speed_ms)
+        t_int, v_int = _from_rest(self.time_s, self.vehicle_speed_ms, self.onset_lead_s)
+        dist = _integrate_distance(t_int, v_int)
         marks = {
             "60ft": 18.288,
             "330ft": 100.584,
@@ -219,7 +226,7 @@ class ECURunWindow:
         }
         out = {}
         for name, m in marks.items():
-            t = _interpolate_et(self.time_s, dist, m)
+            t = _interpolate_et(t_int, dist, m)
             if t is not None:
                 out[name] = round(t, 4)
         return out
@@ -687,7 +694,14 @@ def _extract_runs_from_speed(
 
                 # Extract window
                 window = slice(launch_idx, run_end)
-                run = _build_run_window(log, window, run_index, t[launch_idx])
+                # ET is timed from the back-extrapolated motion onset, not the
+                # first sample above the staging threshold.
+                onset_lead = float(t[launch_idx]) - launch_origin_time(
+                    t, speed, launch_idx
+                )
+                run = _build_run_window(
+                    log, window, run_index, t[launch_idx], onset_lead
+                )
                 if run is not None:
                     runs.append(run)
                     run_index += 1
@@ -785,6 +799,7 @@ def _build_run_window(
     window: slice,
     run_index: int,
     t_launch: float,
+    onset_lead_s: float = 0.0,
 ) -> Optional["ECURunWindow"]:
     """Slice all channels to the window and build an ECURunWindow."""
     t_win = log.time_s[window] - t_launch
@@ -796,9 +811,10 @@ def _build_run_window(
 
     # Compute ET and trap speed from speed channel
     if speed_win is not None and len(speed_win) > 3:
-        dist = _integrate_distance(t_win, speed_win)
-        et = _interpolate_et(t_win, dist, QUARTER_MILE_M)
-        trap = _interpolate_speed(t_win, speed_win, dist, QUARTER_MILE_M)
+        t_int, v_int = _from_rest(t_win, speed_win, onset_lead_s)
+        dist = _integrate_distance(t_int, v_int)
+        et = _interpolate_et(t_int, dist, QUARTER_MILE_M)
+        trap = _interpolate_speed(t_int, v_int, dist, QUARTER_MILE_M)
         et_q = et if et is not None else float("nan")
         trap_s = trap if trap is not None else float("nan")
         peak_speed = float(np.max(speed_win))
@@ -832,6 +848,7 @@ def _build_run_window(
         sample_rate_hz=log.sample_rate_hz,
         run_index=run_index,
         source_file=log.source_file,
+        onset_lead_s=onset_lead_s,
     )
 
 
@@ -843,6 +860,16 @@ def _slice_or_none(arr: np.ndarray | None, window: slice) -> np.ndarray | None:
 
 
 # ─── Maths helpers ────────────────────────────────────────────────────────
+
+
+def _from_rest(
+    t: np.ndarray, v: np.ndarray, lead_s: float
+) -> tuple[np.ndarray, np.ndarray]:
+    """(t, v) on a clock that starts at motion onset: a (0, 0) sample is prepended
+    and ``t`` shifted by ``lead_s`` (the onset-to-first-sample gap)."""
+    if lead_s > 0.0 and len(t):
+        return np.concatenate([[0.0], t + lead_s]), np.concatenate([[0.0], v])
+    return t, v
 
 
 def _integrate_distance(t: np.ndarray, v: np.ndarray) -> np.ndarray:

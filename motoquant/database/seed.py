@@ -7129,38 +7129,6 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
         },
     ]
 
-    # Additional Suspension (9 more)
-    for i, (brand, type_name) in enumerate(
-        [
-            ("K-Tech", "damper"),
-            ("Öhlins", "fork"),
-            ("Hyperpro", "spring"),
-            ("Showa", "fork"),
-            ("Sachs", "shock"),
-            ("WP", "fork"),
-            ("Fox", "shock"),
-            ("Fox", "fork"),
-            ("FGRT", "cartridge"),
-        ]
-    ):
-        parts.append(
-            {
-                "category": "suspension",
-                "brand": brand,
-                "model_name": f"{brand} {type_name.title()} V{i + 4}",
-                "part_number": f"SUSP-{brand[:3].upper()}-{i + 4}",
-                "specs": {"type": type_name},
-                "fitment_rules": {
-                    "tier": "family",
-                    "match": {"displacement_min_cc": 300 + i * 100},
-                    "description": f"{brand} {type_name} for 300cc+ bikes",
-                },
-                "price_inr": 35000 + i * 10000,
-                "availability": ["in_stock", "order"][i % 2],
-                "retailer": [f"{brand} India", f"{brand} (Japan)"][i % 2],
-            }
-        )
-
     # Additional Brakes (7 more)
     for i, (brand, model) in enumerate(
         [
