@@ -54,7 +54,7 @@ ET is now timed from the beam after a 1-ft rollout (`ET = t(D) − t(0.3048 m)`)
 
 Known residuals, accepted by the owner:
 - **Mass inversions on two bikes:** HP4 Race (−10 kg is 9.8 ms slower) and Panigale V4R (2.5 ms). This is wheelie-ballast physics: the lighter bike's higher system CoG lowers its wheelie ceiling. More litre bikes invert at sea level.
-- **Reference spread is compressed:** in the sim the K5 is slower than the R1 and Hayabusa. In reality it is the quickest of the three.
+- **Reference spread is compressed:** the three simulate within 0.07 s of each other (10.0436 / 10.1092 / 10.1100 s) against 0.43 s in the published tests (9.97 / 10.30 / 10.40 s). The order is right; the R1 and Hayabusa come out 0.19 s and 0.29 s quick. *(Corrected 2026-11-10: this line first said the K5 simulates slowest, which the pins contradict.)*
 - **Biased classes:** two-strokes, entry 200–300 cc and singles 300–500 cc are biased beyond ±0.25 s.
 - **Mass sensitivity:** litre bikes are nearly mass-insensitive at launch, about 1–4 ms/kg.
 - **Exhaust gaps:** five 125 cc bikes have no real exhaust part (`KNOWN_EXHAUST_GAPS`).

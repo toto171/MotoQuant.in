@@ -247,8 +247,10 @@ Details and figures: `reports/session_2026_11_05_handoff.md`.
 - Two accepted millisecond-level dry-mass inversions (BMW HP4 Race, Ducati
   Panigale V4R): wheelie-ballast physics. More litre bikes invert at sea
   level.
-- The reference spread is compressed: in the sim the K5 is slower than the R1
-  and the Hayabusa; in reality it is the quickest of the three.
+- The reference spread is compressed: the three simulate within 0.07 s of
+  each other (10.04 / 10.11 / 10.11 s) against 0.43 s in the published
+  tests (9.97 / 10.30 / 10.40 s). The order is right; the R1 and Hayabusa
+  come out 0.19 s and 0.29 s quick.
 - Class bias remains on entry 200–300 cc, singles 300–500 cc and two-strokes;
   small bikes are the weakest class.
 - Litre bikes are nearly mass-insensitive at launch.
