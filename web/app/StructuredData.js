@@ -139,6 +139,10 @@ export const FAQ_ITEMS = [
     a: 'Each part in the 546-part catalog is tested by running the simulation with and without it. The change in quarter-mile time is divided by the part\u2019s price to get the cost of each tenth of a second. The best-parts tool then picks the combination that gains the most within your budget, respecting compatibility rules and known pairings such as exhaust plus ECU flash.',
   },
   {
+    q: 'Who answers chat questions, and can I use my own key?',
+    a: 'The chat assistant is Claude, made by Anthropic, so your questions are sent to Anthropic. Pick the mechanic (Claude Sonnet 5.5) for quick answers or the doctor (Claude Opus 5.5) to dig deeper. Asking is free up to a daily limit. You can also add your own Anthropic API key under \u201cUse your own key\u201d: it stays in your browser, is sent with your questions to answer them, and is never stored on our server.',
+  },
+  {
     q: 'Can I upload my own Dragy or dyno data?',
     a: 'Yes. MotoQuant reads Dragy GPS logs (CSV or VBO) and DynoJet or MoTeC dyno sheets, corrects dyno numbers for the day\u2019s air, and lines your real run up against the simulation: finish time, finish-line speed and split-by-split differences for your own bike. The file is read, compared and deleted; nothing is kept.',
   },

@@ -4,12 +4,12 @@ import SiteFooter from '../../../components/SiteFooter';
 import StructuredData, { articleSchema } from '../../StructuredData';
 
 const SLUG = 'ktm-1390-super-duke-r-evo-quarter-mile-physics';
-const TITLE = 'KTM 1390 Super Duke R EVO Quarter-Mile Physics Breakdown';
+const TITLE = 'KTM 1390 Super Duke R EVO quarter-mile physics breakdown';
 const DESCRIPTION =
-  'KTM 1390 Super Duke R EVO quarter-mile time: MotoQuant simulates the 2024 EVO at 10.225s and 237.3 km/h trap at Aamby Valley. MCN clocked 9.95s stock. India pricing, cost-per-tenth breakdown, and what closes the 0.275s gap.';
+  'KTM 1390 Super Duke R EVO quarter-mile time: MotoQuant simulates the 2024 EVO at 10.225s with a 237.3 km/h trap at Aamby Valley. MCN clocked 9.95s on a stock bike. India pricing, the cost per tenth of each mod, and what closes the 0.275s gap.';
 
 export const metadata = {
-  title: 'KTM 1390 Super Duke R EVO Quarter-Mile Physics | MotoQuant',
+  title: 'KTM 1390 Super Duke R EVO quarter-mile physics | MotoQuant',
   description: DESCRIPTION,
   keywords: [
     'KTM 1390 Super Duke R quarter mile',
@@ -40,27 +40,27 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'MotoQuant simulates the 2024 KTM 1390 Super Duke R EVO at 10.225 seconds and a 237.3 km/h trap. Cycle World and MCN clocked stock test bikes at roughly 9.95s. The 0.275s gap is not noise; it is a litre-naked cluster bias the model carries by design, and once you understand where it comes from the picture of what this bike actually does on a drag strip gets very specific.',
+    text: 'MotoQuant simulates the 2024 KTM 1390 Super Duke R EVO at 10.225 seconds and a 237.3 km/h trap. Cycle World and MCN clocked stock test bikes at roughly 9.95s. The 0.275s gap is not noise. The model carries a bias for the whole litre-naked cluster by design, and where that bias comes from tells you a lot about what this bike does on a drag strip.',
   },
   {
     type: 'h2',
-    text: 'What the 1390 Actually Is',
+    text: 'What the 1390 is',
   },
   {
     type: 'p',
-    text: "The 1390 Super Duke R EVO is not a clean-sheet redesign. KTM's 2024 press kit puts it plainly: the 1390 inherits the 1290 EVO platform with new pistons and a new crankshaft. Bore moves from 108 to 110 mm, displacement from 1301 to 1350 cc, and peak figures climb from 180 hp / 140 Nm to 190 hp / 145 Nm. Everything else (the chrome-moly trellis frame, the 6-speed cassette gearbox, the 17F/41R 525 chain, the WP Apex suspension, the Brembo Stylema brakes) carries over verbatim from the 1290 EVO.",
+    text: "The 1390 Super Duke R EVO is not a clean-sheet redesign. KTM's 2024 press kit says so: the 1390 inherits the 1290 EVO platform with new pistons and a new crankshaft. Bore moves from 108 to 110 mm, displacement from 1301 to 1350 cc, and peak figures climb from 180 hp / 140 Nm to 190 hp / 145 Nm. Everything else (the chrome-moly trellis frame, the 6-speed cassette gearbox, the 17F/41R 525 chain, the WP Apex suspension, the Brembo Stylema brakes) carries over unchanged from the 1290 EVO.",
   },
   {
     type: 'p',
-    text: 'That carryover matters because it lets the simulator hold every variable except the engine constant. The 1290 Super Duke R EVO is in the MotoQuant catalog already with service-manual-accurate gearing and a published Cycle World ET in the 9.7s range. Drop a 110 mm piston into the same chassis and the math should produce a slightly heavier, slightly more torque-rich version of the same drag profile. It does, but the wider trap speed is the more interesting number.',
+    text: 'The carryover matters because it lets the simulator hold everything except the engine constant. The 1290 Super Duke R EVO is already in the MotoQuant catalog, with gearing taken from the service manual and a published Cycle World ET in the 9.7s range. Put a 110 mm piston into the same chassis and the math should give a slightly heavier, slightly torquier version of the same drag profile. It does, but the trap speed is the more interesting number.',
   },
   {
     type: 'h2',
-    text: 'Stock-Tune Simulation Numbers',
+    text: 'Stock-tune simulation numbers',
   },
   {
     type: 'p',
-    text: 'Running the 1390 in MotoQuant under Aamby Valley November conditions (density altitude ≈ 1100 m, 22°C ambient, dry asphalt, μ_peak 1.35 on the OEM Bridgestone S22 rear), with a 78 kg rider on a 200 kg dry bike, produces the following stock-tune numbers:',
+    text: 'We ran the 1390 in MotoQuant under Aamby Valley November conditions (density altitude ≈ 1100 m, 22°C ambient, dry asphalt, μ_peak 1.35 on the OEM Bridgestone S22 rear), with a 78 kg rider on a 200 kg dry bike. On the stock tune it gives these numbers:',
   },
   {
     type: 'table',
@@ -76,35 +76,35 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The +0.275s gap sits squarely inside the documented +0.15–0.30s slow bias for the litre-naked cluster, the same bias the simulator has on the 1290 Super Duke R, on the BMW M1000R, on the Streetfighter V4, and on the Tuono V4 1100 Factory. Naked litre bikes systematically run quicker on the strip than the simulator predicts because the rider tucks aggressively after the launch transient, and MotoQuant models a less aggressive tuck profile to keep the cluster honest across street-spec conditions.',
+    text: 'The +0.275s gap sits inside the documented +0.15–0.30s slow bias for the litre-naked cluster. The simulator shows the same bias on the 1290 Super Duke R, the BMW M1000R, the Streetfighter V4 and the Tuono V4 1100 Factory. Naked litre bikes run quicker on the strip than the simulator predicts because riders tuck hard once the launch is over. MotoQuant models a gentler tuck so the cluster stays honest in street-spec conditions.',
   },
   {
     type: 'p',
-    text: "There is a second contributor: launch-RPM optimization. Magazine testers run a fully-warmed bike with traction control set to its lowest intervention level, dump the clutch at exactly the rpm where the front tire just begins to skim, and ride the throttle through 60 feet on the edge of wheelie. MotoQuant uses a launch-RPM floor pinned to the bike's peak-torque rpm: conservative, repeatable, and matched to a smart but not heroic rider. On the 1390, the difference is roughly 0.10 to 0.15s of 60-foot time, which alone accounts for half of the sim-real gap.",
+    text: "Launch RPM is the second cause. Magazine testers run a fully warmed bike with traction control at its lowest setting, dump the clutch at exactly the rpm where the front tyre just begins to skim, and ride the throttle through 60 feet on the edge of a wheelie. MotoQuant pins its launch-RPM floor to the bike's peak-torque rpm. That is conservative and repeatable, and it suits a smart rider rather than a heroic one. On the 1390 the difference is roughly 0.10 to 0.15s of 60-foot time, which alone accounts for half of the sim-real gap.",
   },
   {
     type: 'callout',
-    text: 'Why the simulator deliberately runs slow: the goal is honest physics, not best-case headline numbers. Magazine drag tests are run by trained journalists with launch control, race fuel where allowed, and aggressive tucks. A street rider on a stock bike at Aamby Valley will see numbers closer to the simulation than the magazine. The model is calibrated to the 50th-percentile real-world rider, not the 95th.',
+    text: 'The simulator runs slow on purpose. Magazine drag tests are run by trained journalists with launch control, race fuel where allowed, and aggressive tucks. A street rider on a stock bike at Aamby Valley will see numbers closer to the simulation than to the magazine. The model is calibrated to the 50th-percentile real-world rider, not the 95th.',
   },
   {
     type: 'h2',
-    text: 'Why the 1390 Goes Faster Than the 1290 (and How Much)',
+    text: 'Why the 1390 is faster than the 1290, and by how much',
   },
   {
     type: 'p',
-    text: "Power is up 10 hp, torque is up 5 Nm, and dry weight goes up roughly 25 kg over the listed-spec 1290 (much of which is regulatory equipment, not engine mass). The simulator's per-bike sweep shows the 1390 EVO running ~0.05–0.08s faster than the 1290 EVO under matched conditions, almost all of it generated in the top half of the run, where the extra 10 hp matters more than the extra mass. The 60-foot times are within 0.01s because both bikes are gearing-and-traction-limited off the line, not power-limited.",
+    text: "Power is up 10 hp, torque is up 5 Nm, and dry weight is up roughly 25 kg over the listed-spec 1290 (much of it regulatory equipment, not engine mass). The simulator's per-bike sweep has the 1390 EVO running ~0.05–0.08s faster than the 1290 EVO under matched conditions. Almost all of that comes in the top half of the run, where the extra 10 hp matters more than the extra mass. The 60-foot times are within 0.01s because off the line both bikes are limited by gearing and traction, not by power.",
   },
   {
     type: 'p',
-    text: "The trap-speed delta is bigger than the ET delta. The 1390 picks up ~3 km/h in the trap (237 vs 234 km/h), a clean indicator that the additional power is doing useful work between 200 and 230 km/h, where the older 1290 was already running into its drag wall. If you owned a 1290 and were tempted by the upgrade for drag-strip use, the honest answer is: the 1390 is faster but not dramatically faster. The chassis is identical and the gearing carries over, so you're paying for 10 hp and a piston upgrade. A used 1290 with an Akrapovic full system and an ECU flash will run within 0.05s of a stock 1390.",
+    text: "The trap-speed delta is bigger than the ET delta. The 1390 gains ~3 km/h in the trap (237 vs 234 km/h), so the extra power is doing useful work between 200 and 230 km/h, where the older 1290 was already running into its drag wall. If you own a 1290 and are tempted to upgrade for the drag strip, the honest answer is that the 1390 is faster, but not by much. The chassis is identical and the gearing carries over, so you're paying for 10 hp and a piston upgrade. A used 1290 with an Akrapovic full system and an ECU flash will run within 0.05s of a stock 1390.",
   },
   {
     type: 'p',
-    text: "There is one quiet exception. The 1390's revised crankshaft and pistons sharpen throttle response between 4,000 and 7,000 rpm, exactly the region the bike spends most of its time in during a low-traction launch. The simulator does not currently model this transient improvement (its torque curve is interpolated from peak figures plus the documented dyno band), so the real-world 1390 may pull marginally harder out of the hole than the model predicts. This is what would push a careful rider closer to the magazine 9.95s than the simulated 10.225s: better mid-band response shaves another 0.05–0.10s off the simulated time without any other change.",
+    text: "There is one quiet exception. The 1390's revised crankshaft and pistons sharpen throttle response between 4,000 and 7,000 rpm, the range the bike spends most of its time in during a low-traction launch. The simulator does not currently model this transient gain, because its torque curve is interpolated from peak figures plus the documented dyno band. The real 1390 may therefore pull slightly harder out of the hole than the model predicts. That would bring a careful rider closer to the magazine's 9.95s than to the simulated 10.225s: better mid-band response takes another 0.05–0.10s off the simulated time with no other change.",
   },
   {
     type: 'h2',
-    text: 'What Actually Limits the 1390 in the Quarter',
+    text: 'What limits the 1390 in the quarter',
   },
   {
     type: 'p',
@@ -112,23 +112,23 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "1. Wheelie. With 145 Nm of torque at 8,000 rpm, a 200 kg dry bike, and a 1432 mm wheelbase, the 1390 has the highest wheelie risk of any production naked at any RPM below 70 km/h. The simulator's wheelie sub-model shows the front wheel lifting at full throttle through gear 1 and most of gear 2 unless throttle is feathered or the rider's CoG is moved aggressively forward. Real-world MCN test riders confirmed the same: the 1390 is a wheelie machine, and gear 1 is essentially a torque-limited interval rather than a power-limited one.",
+    text: "1. Wheelie. With 145 Nm of torque at 8,000 rpm, a 200 kg dry bike and a 1432 mm wheelbase, the 1390 has the highest wheelie risk of any production naked at any RPM below 70 km/h. The simulator's wheelie sub-model shows the front wheel lifting at full throttle through gear 1 and most of gear 2, unless the rider feathers the throttle or moves their CoG well forward. MCN's test riders found the same on real bikes: the 1390 is a wheelie machine, and gear 1 is limited by torque rather than by power.",
   },
   {
     type: 'p',
-    text: "2. Aerodynamics. The 1390's listed Cd is 0.73, frontal area 0.54 m². That puts it firmly in naked-bike territory, about 25% more aerodynamic drag than a faired Hayabusa at 250 km/h. This is why the trap speed plateaus around 237 km/h instead of 245+ where a similarly powerful sport bike would land. There's nothing to do about this short of fitting a touring screen or a dedicated drag fairing, and neither preserves the 1390 as the bike KTM intended.",
+    text: "2. Aerodynamics. The 1390's listed Cd is 0.73, with a frontal area of 0.54 m². That is naked-bike territory, about 25% more aerodynamic drag than a faired Hayabusa at 250 km/h, and it is why the trap speed levels off around 237 km/h instead of the 245+ where a sport bike with similar power would land. The only fixes are a touring screen or a dedicated drag fairing, and neither leaves the 1390 the bike KTM intended.",
   },
   {
     type: 'p',
-    text: '3. The 6th gear is a true overdrive. Final drive in 6th is 1.000 with 17F/41R sprockets, which means the simulator has the bike crossing the trap line in 5th gear under most conditions. Sixth is essentially an autobahn cruise gear, not a drag-strip gear. A drop to 16F/41R would shorten 5th enough to land the bike on the trap line in top gear with a small ET gain, at the cost of top-end roll-on punch. This is exactly the kind of swap MotoQuant\'s parts catalog scores: cost-per-tenth on a drag-strip-tuned sprocket pair is ~₹3,800 per tenth on this bike.',
+    text: '3. Sixth gear is a true overdrive. Final drive in 6th is 1.000 with 17F/41R sprockets, so the simulator has the bike crossing the trap line in 5th gear under most conditions. Sixth is an autobahn cruising gear, not a drag-strip gear. Dropping to 16F/41R would shorten 5th enough to put the bike on the trap line in top gear, with a small ET gain, at the cost of top-end roll-on punch. MotoQuant\'s parts catalog scores exactly this kind of swap: a drag-strip sprocket pair costs ~₹3,800 per tenth on this bike.',
   },
   {
     type: 'h2',
-    text: 'How the Simulation Compares to the 1290 Super Duke R EVO and the Streetfighter V4',
+    text: 'How the simulation compares with the 1290 Super Duke R EVO and the Streetfighter V4',
   },
   {
     type: 'p',
-    text: 'Three flagship litre nakeds, three different physics profiles. Numbers below are MotoQuant stock-tune sims under matched conditions:',
+    text: 'Each of these flagship litre nakeds has a different physics profile. The numbers are MotoQuant stock-tune sims under matched conditions:',
   },
   {
     type: 'table',
@@ -142,63 +142,63 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "The 1390 is the slowest of the four in raw simulation, but the gap to the Streetfighter V4 and the M1000R is smaller than the spec sheet suggests because both faster bikes pay for their power with much higher launch wheelie risk. In the 60-foot zone the 1390's longer wheelbase actually pays back: the Streetfighter V4 cannot put 208 hp to the ground in gear 1 without traction control intervention. On a perfectly prepped drag strip with launch control disabled, the four bikes run within 0.25s of each other.",
+    text: "The 1390 is the slowest of the four in raw simulation, but the gap to the Streetfighter V4 and the M1000R is smaller than the spec sheet suggests, because both faster bikes pay for their power with a much higher wheelie risk at launch. In the 60-foot zone the 1390's longer wheelbase pays back: the Streetfighter V4 cannot put 208 hp to the ground in gear 1 without traction control stepping in. On a perfectly prepped drag strip with launch control disabled, the four bikes run within 0.25s of each other.",
   },
   {
     type: 'p',
-    text: "Two-rider data on each platform tells the same story another way. The Streetfighter V4 traps about 6 km/h higher than the 1390 (243 vs 237 km/h) but only edges it by 0.18s in ET. That is the signature of a bike that is winning on the top half of the run, not the launch. The 1390's chassis happens to be one of the friendlier litre-naked launches, even though the engine outputs are no longer class-leading. For the typical Indian buyer who runs maybe ten quarter-mile passes a year, that launch friendliness translates into better real-world consistency than the spec sheet would predict.",
+    text: "Two-rider data on each platform shows the same thing another way. The Streetfighter V4 traps about 6 km/h higher than the 1390 (243 vs 237 km/h) but beats it by only 0.18s in ET. A bike that does that is winning on the top half of the run, not at the launch. The 1390's chassis gives one of the easier litre-naked launches, even though its engine outputs no longer lead the class. The typical Indian buyer runs maybe ten quarter-mile passes a year, and for that rider an easier launch means more consistent runs than the spec sheet would predict.",
   },
   {
     type: 'h2',
-    text: 'Gearing: Where the Tenths Actually Live',
+    text: 'Gearing is where the tenths are',
   },
   {
     type: 'p',
-    text: "Stock gearing on the 1390 EVO is 17F/41R with a 525 chain and the cassette ratios [2.500, 1.857, 1.538, 1.300, 1.148, 1.000], verbatim from the 1290 EVO. With a 200/55ZR17 rear (rolling radius ≈ 320 mm) and the 1.000 final-drive multiplier in 6th, the bike hits its 10,000 rpm power peak at roughly 295 km/h in 6th. That is well above the 237 km/h trap speed, which means the bike is never asking 6th gear to do real drag-strip work.",
+    text: "Stock gearing on the 1390 EVO is 17F/41R with a 525 chain and the cassette ratios [2.500, 1.857, 1.538, 1.300, 1.148, 1.000], unchanged from the 1290 EVO. With a 200/55ZR17 rear (rolling radius ≈ 320 mm) and the 1.000 final-drive multiplier in 6th, the bike hits its 10,000 rpm power peak at roughly 295 km/h in 6th. That is well above the 237 km/h trap speed, so 6th gear never does real drag-strip work.",
   },
   {
     type: 'p',
-    text: "The simulator log shows the bike crossing the trap line in 5th at roughly 9,500 rpm: slightly under peak power, slightly over peak torque. A 16/41 sprocket swap shifts that crossing into 6th at about 8,800 rpm, which sounds worse but actually isn't: 6th's overdrive ratio means the wheel torque at 8,800 rpm in 6th is essentially the same as 5th at 9,500 rpm, but the bike makes the shift earlier and spends less time in the gear-change deadband. Net ET impact: roughly 0.04 to 0.06 seconds depending on rider behavior.",
+    text: "The simulator log shows the bike crossing the trap line in 5th at roughly 9,500 rpm, slightly under peak power and slightly over peak torque. A 16/41 sprocket swap moves that crossing into 6th at about 8,800 rpm. That sounds worse, but it isn't. Because 6th is an overdrive, wheel torque at 8,800 rpm in 6th is essentially the same as in 5th at 9,500 rpm, and the bike makes the shift earlier and spends less time in the gear-change deadband. Net ET gain: roughly 0.04 to 0.06 seconds, depending on how the rider rides.",
   },
   {
     type: 'p',
-    text: "A more aggressive 16/42 swap shortens the ratios further and makes the 1390 a genuine 5th-gear quarter-mile bike. The trade-off is that 6th becomes useless on the highway: the bike will pull through 250 km/h in 5th, then refuse to do much of anything in 6th. Most owners who do this swap are committed to drag-strip use; nobody street-rides a 1390 with 16/42 gearing for long.",
+    text: "A more aggressive 16/42 swap shortens the ratios further and makes the 1390 a true 5th-gear quarter-mile bike. The cost is that 6th becomes useless on the highway: the bike pulls through 250 km/h in 5th, then does very little in 6th. Most owners who make this swap are committed to drag-strip use. Nobody street-rides a 1390 on 16/42 gearing for long.",
   },
   {
     type: 'h2',
-    text: 'The Indian Drag-Strip Reality',
+    text: 'The 1390 at Indian drag strips',
   },
   {
     type: 'p',
-    text: "The 1390 Super Duke R EVO arrives in India at roughly ₹22.5 lakh on-road (KTM India, 2026 pricing). Aamby Valley and the BIC drag strip see roughly two dozen private owners running litre nakeds at any given monthly meet, most of them on 1290 platforms, with a handful of older RSV4 Tuonos and the occasional MT-10. A 1390 on stock tune at Aamby Valley in October-November conditions will run a 10.1–10.2s in the hands of an experienced rider. The simulator's 10.225s sits at the slower end of that range, exactly where a careful first-time tester would land.",
+    text: "The 1390 Super Duke R EVO costs roughly ₹22.5 lakh on-road in India (KTM India, 2026 pricing). At a typical monthly meet, Aamby Valley and the BIC drag strip see roughly two dozen private owners running litre nakeds. Most ride 1290s, with a handful of older RSV4 Tuonos and the occasional MT-10. On the stock tune at Aamby Valley in October-November conditions, an experienced rider will run a 1390 at 10.1–10.2s. The simulator's 10.225s sits at the slower end of that range, where a careful first-time tester would land.",
   },
   {
     type: 'p',
-    text: "Indian-market mods that move the needle: an Akrapovic Racing slip-on (~₹1.85 lakh) is worth roughly 0.06s ET. A KTM PowerParts Akrapovic Evolution full system (~₹3.2 lakh) plus an ECU flash from KTune or Powertronic (~₹35,000) is worth roughly 0.18s. A 16/42 sprocket swap (~₹4,500 in parts) is worth roughly 0.04–0.06s. None of these are cheap-per-tenth on a stock bike that already runs 10-flat, which is why the 1390 typically sees light tuning rather than aggressive tuning in the Indian scene: the bike is fast enough as delivered that the cost-per-tenth is brutal.",
+    text: "The Indian-market mods that make a real difference: an Akrapovic Racing slip-on (~₹1.85 lakh) is worth roughly 0.06s ET. A KTM PowerParts Akrapovic Evolution full system (~₹3.2 lakh) plus an ECU flash from KTune or Powertronic (~₹35,000) is worth roughly 0.18s. A 16/42 sprocket swap (~₹4,500 in parts) is worth roughly 0.04–0.06s. None of these is cheap per tenth on a stock bike that already runs 10-flat. The bike is so fast as delivered that each extra tenth costs a lot, which is why Indian owners usually tune the 1390 lightly.",
   },
   {
     type: 'callout',
-    text: 'Fastest path on the 1390: gearing first (cheapest per tenth), then a flash, then exhaust. Skip the suspension upgrades unless you are actually competing; the 1390 chassis is good enough off the showroom floor that aftermarket Öhlins is a comfort upgrade, not an ET upgrade.',
+    text: 'Fastest path on the 1390: gearing first (cheapest per tenth), then a flash, then exhaust. Skip suspension upgrades unless you compete. The 1390 chassis is good enough off the showroom floor that aftermarket Öhlins is a comfort upgrade, not an ET upgrade.',
   },
   {
     type: 'h2',
-    text: 'Run Your Own Numbers',
+    text: 'Run your own numbers',
   },
   {
     type: 'p',
-    text: "If you own a 1390 (or are deciding between the 1390 and the 1290), the simulator at motoquant.in lets you sweep rider weight, ambient temperature, density altitude, and parts-catalog mods to see exactly where your tenths come from. The cluster-bias correction discussed above is built into the model: when the simulator says your bike runs 10.2, expect the strip to confirm closer to 9.95–10.05 with a competent rider. That gap is documented and intentional.",
+    text: "If you own a 1390, or are choosing between the 1390 and the 1290, the simulator at motoquant.in lets you sweep rider weight, ambient temperature, density altitude and parts-catalog mods to see where your tenths come from. The cluster-bias correction above is built into the model: when the simulator says your bike runs 10.2, expect the strip to show closer to 9.95–10.05 with a competent rider. That gap is documented and intentional.",
   },
   {
     type: 'p',
-    text: "More relevant for everyday tuning: the simulator shows you which mods are dead weight. Spending ₹1.85 lakh on an exhaust to gain 0.06s is a different value calculation than spending ₹4,500 on a sprocket pair to gain 0.05s. MotoQuant's parts ROI engine spells that out per part per bike, and on a 1390, the gearing answer is overwhelmingly the right answer for anyone whose primary goal is quarter-mile time rather than topping a friend's MotoVlog.",
+    text: "For everyday tuning, the simulator also shows which mods are dead weight. Spending ₹1.85 lakh on an exhaust to gain 0.06s is a different deal from spending ₹4,500 on a sprocket pair to gain 0.05s. MotoQuant's parts ROI engine works this out for each part on each bike. On a 1390, gearing is by far the best answer if your main goal is quarter-mile time rather than topping a friend's MotoVlog.",
   },
   {
     type: 'p',
-    text: "Two final caveats worth stating plainly. First, every number in this post is a stock-tune simulation under specific conditions. Change the rider weight, the ambient temperature, the surface, or the launch technique and the absolute ETs shift, but the relative ordering of which mods help most stays stable. Second, the simulator's litre-naked cluster bias is being actively closed in the background. The May 2026 calibration work in MotoQuant added Hypothesis property tests that pin the four load-bearing physics knobs to monotonic invariants, which makes future bias corrections safer to ship. Today's 10.225s might become a 10.10s in three months without any change to the bike's spec.",
+    text: "Two caveats. First, every number in this post is a stock-tune simulation under specific conditions. Change the rider weight, the ambient temperature, the surface or the launch technique and the absolute ETs shift, but the order of which mods help most stays the same. Second, work on closing the simulator's litre-naked cluster bias is ongoing. The May 2026 calibration work added Hypothesis property tests that pin the four load-bearing physics knobs to monotonic invariants, which makes future bias corrections safer to ship. Today's 10.225s might become a 10.10s in three months with no change to the bike's spec.",
   },
   {
     type: 'p',
-    text: "If you take one practical thing from this post, take this: on the KTM 1390 Super Duke R EVO, the launch is harder to get right than it looks, and the chassis is more forgiving than it has any business being given the engine output. Spend your first weekend at the strip learning the launch, not bolting on parts. The bike will reward it.",
+    text: "On the KTM 1390 Super Duke R EVO, the launch is harder to get right than it looks, and the chassis is more forgiving than an engine this strong would lead you to expect. Spend your first weekend at the strip learning the launch, not bolting on parts.",
   },
 ];
 
@@ -305,7 +305,7 @@ export default function PostPage() {
             ))}
           </div>
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
-            KTM 1390 Super Duke R EVO Quarter-Mile Physics Breakdown
+            KTM 1390 Super Duke R EVO quarter-mile physics breakdown
           </h1>
           <div className="text-sm text-white/60 mb-12">
             8 May 2026 · 9 min read · MotoQuant Blog
@@ -321,21 +321,21 @@ export default function PostPage() {
             <li>
               ·{' '}
               <Link href="/blog/the-physics-of-a-perfect-launch" className="text-brand-accent hover:text-brand-orange transition-colors">
-                The Physics of a Perfect Launch
+                The physics of a perfect launch
               </Link>:{' '}
               clutch, slip, and weight transfer in the first 0.4 seconds.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/how-the-motoquant-physics-engine-works" className="text-brand-accent hover:text-brand-orange transition-colors">
-                How the MotoQuant Physics Engine Works
+                How the MotoQuant physics engine works
               </Link>:{' '}
               the 15-sub-model architecture behind every ET prediction.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/how-to-tune-for-aamby-valley-in-november" className="text-brand-accent hover:text-brand-orange transition-colors">
-                How to Tune for Aamby Valley in November
+                How to tune for Aamby Valley in November
               </Link>:{' '}
               the venue conditions used for the simulation in this post.
             </li>
@@ -344,7 +344,7 @@ export default function PostPage() {
               <Link href="/bikes" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Browse the full bike catalog
               </Link>:{' '}
-              every spec, every gear ratio, every Cd value used by the simulator.
+              the specs, gear ratios and Cd values the simulator uses.
             </li>
           </ul>
         </div>

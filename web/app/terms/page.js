@@ -1,7 +1,8 @@
 /**
  * MotoQuant — Terms of Service
  * Last updated: 10 November 2026 — accounts removed; saved runs live in the
- * visitor's browser. (9 November 2026: rewritten for the open-source
+ * visitor's browser. §6 now says chat goes to Anthropic (Claude) and covers a
+ * visitor's own Anthropic key. (9 November 2026: rewritten for the open-source
  * Apache-2.0 release: no plans, payments, refunds or license keys.)
  */
 
@@ -97,8 +98,11 @@ export default function TermsPage() {
         <Section title="6. What you send us">
           <p>
             Simulation requests, chat questions and files you upload (Dragy GPS logs, dyno
-            sheets) are used only to produce your result. A timeslip link shows its setup to
-            anyone who has the link. The{" "}
+            sheets) are used only to produce your result. Chat questions are answered by
+            Anthropic&rsquo;s Claude, so they are sent to Anthropic. If you use your own
+            Anthropic API key, it is used only to answer your questions, you are responsible
+            for its use and cost, and Anthropic&rsquo;s terms for your account apply. A timeslip
+            link shows its setup to anyone who has the link. The{" "}
             <a href="/privacy" className="text-accent hover:text-accent-bright transition-colors">privacy page</a>{" "}
             lists what is kept and who else sees it.
           </p>

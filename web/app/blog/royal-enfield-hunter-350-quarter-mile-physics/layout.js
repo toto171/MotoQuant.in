@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from "../../StructuredData";
 
 const SLUG = "royal-enfield-hunter-350-quarter-mile-physics";
-const TITLE = "Royal Enfield Hunter 350 Quarter-Mile Physics: Fastest J-Platform at the Strip";
+const TITLE = "Royal Enfield Hunter 350 quarter-mile physics: Fastest J-platform at the strip";
 
 function breadcrumbs() {
   return {

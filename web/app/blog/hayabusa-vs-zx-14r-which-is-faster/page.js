@@ -52,7 +52,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "The table below is the spec sheet MotoQuant feeds into the simulation, taken from the catalog entries seeded in the project (SUZUKI_HAYABUSA_GEN2 and KAWASAKI_ZX14R_2012). The Hayabusa Gen1 reference bike behind the validated 10.1100 s ET is a slightly older model (1999-2007, 170 hp at the wheel), defined separately in defaults.py.",
+    text: "MotoQuant takes the spec sheet it simulates from the catalog entries seeded in the project (SUZUKI_HAYABUSA_GEN2 and KAWASAKI_ZX14R_2012). The Hayabusa Gen1 reference bike behind the validated 10.1100 s ET is a slightly older model (1999-2007, 170 hp at the wheel), defined separately in defaults.py.",
   },
   {
     type: 'table',

@@ -75,25 +75,44 @@ browser ──► web (Next.js, static + one route handler) ──/api/* rewrite
 
 ### 3a. Chat agent (`POST /api/chat`)
 
-The chat agent needs an LLM provider. Set `LLM_PROVIDER` (`groq` is the
-default; also `gemini`, `anthropic`, `deepseek`, `openrouter`) and that
-provider's key (`GROQ_API_KEY`, `GEMINI_API_KEY`, `ANTHROPIC_API_KEY`, …).
-Without a key, chat answers `llm_not_configured` and everything else still
-works. The CLI's `nl` subcommand needs no key at all.
+The chat runs on Anthropic's Claude, and Claude is the only provider. Set
+one variable on the server:
 
-The chat is a multi-step tool-calling agent (up to 8 tool rounds per turn),
-so tool-use reliability matters more than raw speed. Free providers are fine
-for a public demo; `anthropic` (Claude) gives the most reliable multi-step
-tool use but is billed per token — each chat turn makes 2-8 LLM calls, so pair
-it with a sensible daily cap. `ANTHROPIC_MODEL` (and `GEMINI_MODEL` /
-`GROQ_MODEL`) override the default model per provider.
+```bash
+ANTHROPIC_API_KEY=<your key from https://console.anthropic.com/settings/keys>
+```
 
-Whoever runs a deployment pays for its LLM key, so chat has two fuses:
+Put it in your host's environment settings (on Render: the service's
+**Environment** tab), never in a file in the repository. Without it, chat
+answers `assistant_unavailable` unless the visitor brings their own key, and
+everything else still works. The CLI's `nl` subcommand needs no key at all.
 
-- a per-minute per-IP rate limit, and
-- `MOTOQUANT_CHAT_DAILY_LIMIT`: chat turns per client IP per rolling 24 h
-  (default **200**). Set it to `0` to disable the cap, for example when you
-  use your own key or a local model.
+Visitors pick one of two assistants in the chat panel:
+
+- **1. The doctor**: Claude Opus 5.5. Slower, digs deeper.
+- **2. The mechanic** (the default): Claude Sonnet 5.5. Quick, practical
+  answers.
+
+The browser sends only `doctor` or `mechanic`; the server picks the model.
+
+**Visitor keys.** A visitor can add their own Anthropic API key under "Use
+your own key". It stays in their browser and is sent in the `X-Anthropic-Key`
+header on the request that starts a chat. The server uses it for that one
+request only (no fallback to your key) and never stores, logs or returns it.
+Questions asked with a visitor's key are billed to the visitor's Anthropic
+account.
+
+Whoever runs a deployment pays for its own key, so chat has two fuses:
+
+- a per-minute per-IP rate limit, for everyone (tools run simulations, so
+  this protects the CPU), and
+- `MOTOQUANT_CHAT_DAILY_LIMIT`: units per client IP per rolling 24 h
+  (default **200**), counted only when your key answers. A mechanic question
+  costs 1 unit and a doctor question 2. Requests with a visitor's key skip
+  this cap. Set it to `0` to turn the cap off.
+
+If your key runs out of credit or hits its spend limit, chat answers
+`free_assistant_resting` and the panel invites visitors to use their own key.
 
 Agent web lookup is optional: `SEARCH_PROVIDER=brave|serper` plus
 `SEARCH_API_KEY` upgrade the `web_search` tool from the keyless DuckDuckGo
@@ -196,7 +215,10 @@ that supports Next.js.
 ## 5. Health checklist
 
 - [ ] `/api/health` returns `status: ok` and the expected `bike_count`.
-- [ ] `MOTOQUANT_CHAT_DAILY_LIMIT` set to fit your LLM budget, if chat is
-      enabled.
+- [ ] `ANTHROPIC_API_KEY` set in the host's environment (not in a file), and
+      `GET /api/assistant` returns `free_available: true`, if you want free
+      chat.
+- [ ] `MOTOQUANT_CHAT_DAILY_LIMIT` set to fit your Anthropic budget, if chat
+      is enabled.
 - [ ] One trusted proxy hop in front of the API, so per-IP fuses key on the
       real client.

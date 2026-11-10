@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'hayabusa-quarter-mile-physics-what-limits-9-6-seconds';
-const TITLE = 'Hayabusa Quarter-Mile Physics: What Limits the 9.6';
+const TITLE = 'Hayabusa quarter-mile physics: what limits the 9.6';
 
 function breadcrumbs() {
   return {

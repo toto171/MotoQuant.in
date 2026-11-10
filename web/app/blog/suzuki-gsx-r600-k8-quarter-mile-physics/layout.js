@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from "../../StructuredData";
 
 const SLUG = "suzuki-gsx-r600-k8-quarter-mile-physics";
-const TITLE = "Suzuki GSX-R600 K8 Quarter-Mile Physics: 125hp 600cc Supersport";
+const TITLE = "Suzuki GSX-R600 K8 quarter-mile physics: 125hp 600cc supersport";
 
 function breadcrumbs() {
   return {

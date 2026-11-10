@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'yezdi-roadster-quarter-mile-physics';
-const TITLE = 'Yezdi Roadster Quarter-Mile Physics: 334cc Neo-Retro at the Strip';
+const TITLE = 'Yezdi Roadster quarter-mile physics: 334cc neo-retro at the strip';
 
 function breadcrumbs() {
   return {

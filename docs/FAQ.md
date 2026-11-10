@@ -165,6 +165,28 @@ The **cost ROI** shows you $/hp and $/ET-second. A turbo kit that costs ₹2,00,
 
 ---
 
+## The chat assistant
+
+### What can I ask the chat?
+Anything you would ask the simulator, in plain English: "How fast is a Duke 390 at Aamby Valley?", "Compare a ZX-10R and an S1000RR", or a build plan such as "Hayabusa, 1.5 lakh, quickest ET". It runs the real simulations and the build optimizer to answer, and every number comes from those runs.
+
+### Who answers?
+Claude, made by Anthropic, so your questions are sent to Anthropic. The **Assistant** dropdown has two choices:
+
+1. **The doctor**: Claude Opus 5.5. Slower, digs deeper.
+2. **The mechanic** (the default): Claude Sonnet 5.5. Quick, practical answers.
+
+Your choice is remembered in your browser.
+
+### Is there a limit?
+The free assistant allows a number of questions a day per connection (200 by default). A question to the mechanic counts as one and a question to the doctor as two. If you use your own key, that daily limit does not apply; a short per-minute limit still does, because every answer runs simulations on our server.
+
+### Can I use my own Anthropic key?
+Yes. Open **Use your own key** under the chat, paste an API key from the [Anthropic Console](https://console.anthropic.com/settings/keys) and press **Use key**. Your key stays in this browser: for this tab only, or until you remove it if you tick **Remember on this device**. It is sent with your questions to answer them and is never stored on our server. Questions asked with your key are billed to your Anthropic account. Press **Remove key** to delete it from the browser.
+
+### The chat says the free assistant is resting or switched off. What now?
+The site's own key has reached its spending limit, or the server has no key. Add your own Anthropic key to keep asking, or try again later. The calculator and the other tools still work without the chat.
+
 ## Venues & Weather
 
 ### What are "Seasonal Conditions"?

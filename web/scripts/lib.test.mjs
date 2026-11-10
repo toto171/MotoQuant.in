@@ -1,4 +1,5 @@
-// Unit tests for the browser-only helpers behind saved runs and timeslips.
+// Unit tests for the browser-only helpers behind saved runs, timeslips and the
+// chat assistant (lib/assistant.js).
 // Run (from web/): node --test scripts/*.test.mjs   (CI: .github/workflows/web-verify.yml)
 //
 // The modules use ES `export` syntax in .js files that Node would read as
@@ -149,4 +150,153 @@ test('every prefilled field exists in the issue form', () => {
     if (key === 'template' || key === 'title') continue;
     assert.ok(ids.has(key), `issue form has no field "${key}"`);
   }
+});
+
+// ── Assistant choice and the visitor's own key (lib/assistant.js) ───────────
+
+const assistant = await load('../lib/assistant.js');
+
+function memoryStore() {
+  const m = new Map();
+  return {
+    getItem: (k) => (m.has(k) ? m.get(k) : null),
+    setItem: (k, v) => m.set(k, String(v)),
+    removeItem: (k) => m.delete(k),
+    has: (k) => m.has(k),
+  };
+}
+
+function brokenStore() {
+  const boom = () => {
+    throw new Error('SecurityError');
+  };
+  return { getItem: boom, setItem: boom, removeItem: boom };
+}
+
+// Built at runtime so no key-shaped literal sits in the source.
+const fakeKey = (tail = 'x') => ['sk', 'ant', 'test'].join('-') + '-' + tail.repeat(24);
+
+test('the mechanic is the default, and only known assistants are kept', () => {
+  const local = memoryStore();
+  assert.equal(assistant.readAssistant(local), 'mechanic');
+  assert.equal(assistant.readAssistant(null), 'mechanic');
+  assert.equal(assistant.saveAssistant(local, 'doctor'), true);
+  assert.equal(assistant.readAssistant(local), 'doctor');
+  assert.equal(local.getItem('mq.assistant.v1'), 'doctor');
+  local.setItem('mq.assistant.v1', 'claude-opus-5-5');
+  assert.equal(assistant.readAssistant(local), 'mechanic');
+  assert.deepEqual(
+    assistant.ASSISTANTS.map((a) => a.label),
+    ['1. The doctor', '2. The mechanic'],
+  );
+});
+
+test('a key is checked the way the server checks it', () => {
+  assert.equal(assistant.looksLikeAnthropicKey(fakeKey()), true);
+  assert.equal(assistant.looksLikeAnthropicKey(`  ${fakeKey()}\n`), true);
+  assert.equal(assistant.looksLikeAnthropicKey('sk-ant-short'), false);
+  assert.equal(assistant.looksLikeAnthropicKey(fakeKey().replace('sk-ant', 'sk-xyz')), false);
+  assert.equal(assistant.looksLikeAnthropicKey(fakeKey().slice(0, 12) + ' ' + fakeKey().slice(12)), false);
+  assert.equal(assistant.looksLikeAnthropicKey('sk-ant-' + 'a'.repeat(300)), false);
+  assert.equal(assistant.looksLikeAnthropicKey(undefined), false);
+});
+
+test('a key is kept for the session unless "Remember on this device" is ticked', () => {
+  const stores = { local: memoryStore(), session: memoryStore() };
+  const key = fakeKey();
+  assert.equal(assistant.saveKey(stores, key, false), true);
+  assert.equal(stores.session.getItem('mq.anthropic-key.v1'), key);
+  assert.equal(stores.local.has('mq.anthropic-key.v1'), false);
+  assert.deepEqual(assistant.readKey(stores), { key, remember: false });
+
+  assert.equal(assistant.saveKey(stores, key, true), true);
+  assert.equal(stores.local.getItem('mq.anthropic-key.v1'), key);
+  assert.equal(stores.session.has('mq.anthropic-key.v1'), false);
+  assert.deepEqual(assistant.readKey(stores), { key, remember: true });
+
+  assert.equal(assistant.saveKey(stores, key, false), true);
+  assert.equal(stores.local.has('mq.anthropic-key.v1'), false);
+});
+
+test('remove key clears both places, and a bad key is never stored', () => {
+  const stores = { local: memoryStore(), session: memoryStore() };
+  assistant.saveKey(stores, fakeKey('a'), true);
+  stores.session.setItem('mq.anthropic-key.v1', fakeKey('b'));
+  assistant.removeKey(stores);
+  assert.deepEqual(assistant.readKey(stores), { key: '', remember: false });
+  assert.equal(assistant.saveKey(stores, 'not a key', false), false);
+  assert.equal(stores.session.has('mq.anthropic-key.v1'), false);
+  stores.local.setItem('mq.anthropic-key.v1', 'garbage');
+  assert.deepEqual(assistant.readKey(stores), { key: '', remember: false });
+});
+
+test('blocked storage never throws', () => {
+  const stores = { local: brokenStore(), session: brokenStore() };
+  assert.equal(assistant.readAssistant(stores.local), 'mechanic');
+  assert.equal(assistant.saveAssistant(stores.local, 'doctor'), false);
+  assert.deepEqual(assistant.readKey(stores), { key: '', remember: false });
+  assert.equal(assistant.saveKey(stores, fakeKey(), true), false);
+  assistant.removeKey(stores);
+  assert.deepEqual(assistant.readKey({}), { key: '', remember: false });
+});
+
+test('the key header is sent only for a usable key', () => {
+  const key = fakeKey();
+  assert.deepEqual(assistant.keyHeaders(key), { 'X-Anthropic-Key': key });
+  assert.deepEqual(assistant.keyHeaders(''), {});
+  assert.deepEqual(assistant.keyHeaders('sk-ant-bad key'), {});
+  assert.equal(assistant.maskKey(key), 'sk-ant-…xxxx');
+});
+
+test('the assistant info from the server is read defensively', () => {
+  assert.deepEqual(
+    assistant.parseAssistantInfo({ free_available: false, default: 'mechanic', daily_free_limit: 200 }),
+    { freeAvailable: false, defaultAssistant: 'mechanic', dailyFreeLimit: 200 },
+  );
+  assert.equal(
+    assistant.parseAssistantInfo({ free_available: true, daily_free_limit: 0 }).dailyFreeLimit,
+    null,
+  );
+  assert.equal(assistant.parseAssistantInfo({ detail: 'Not Found' }), null);
+  assert.equal(assistant.parseAssistantInfo(null), null);
+});
+
+test('every chat error code has plain words, and key problems offer a key', () => {
+  const codes = [
+    'assistant_unavailable',
+    'free_assistant_resting',
+    'key_rejected',
+    'invalid_key_format',
+    'rate_limited',
+    'refused',
+    'agent_failed',
+  ];
+  for (const code of codes) {
+    const copy = assistant.chatErrorCopy(code);
+    assert.ok(copy && copy.text, code);
+    assert.ok(!/—/.test(copy.text), `${code} has an em dash`);
+  }
+  for (const code of ['assistant_unavailable', 'free_assistant_resting', 'key_rejected', 'invalid_key_format']) {
+    assert.equal(assistant.chatErrorCopy(code).offerKey, true, code);
+  }
+  assert.match(assistant.chatErrorCopy('rate_limited', { ownKey: true }).text, /your key/);
+  assert.equal(assistant.chatErrorCopy('bike_not_found'), null);
+});
+
+test('a daily-limit 429 offers the visitor their own key', () => {
+  const daily = Object.assign(
+    new Error(JSON.stringify({ error: 'rate_limited', message: 'limit is 200 per day', retry_after_s: 40000 })),
+    { status: 429 },
+  );
+  assert.equal(assistant.describeChatFailure(daily).offerKey, true);
+  const minute = Object.assign(
+    new Error(JSON.stringify({ error: 'rate_limited', message: 'limit is 20 per 60s', retry_after_s: 12 })),
+    { status: 429 },
+  );
+  assert.deepEqual(assistant.describeChatFailure(minute), {
+    text: 'Too many questions at once. Please try again in a minute.',
+    offerKey: false,
+  });
+  assert.equal(assistant.describeChatFailure(new Error('Failed to fetch')).text, 'Failed to fetch');
+  assert.equal(assistant.describeChatFailure(undefined).text, 'Request failed. Please try again.');
 });

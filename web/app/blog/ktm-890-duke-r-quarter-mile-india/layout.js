@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'ktm-890-duke-r-quarter-mile-india';
-const TITLE = 'KTM 890 Duke R Quarter-Mile in India: 11.07s on the Grey Market';
+const TITLE = 'KTM 890 Duke R quarter-mile in India: 11.07s on the grey market';
 
 function breadcrumbs() {
   return {

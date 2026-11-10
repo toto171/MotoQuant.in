@@ -9,7 +9,7 @@ import StructuredData, { SITE_URL } from '../StructuredData';
 
 const TITLE = 'Best parts for your budget: motorcycle upgrade planner for India';
 const DESCRIPTION =
-  'Free motorcycle upgrade planner for Indian riders. Enter your bike and a budget in rupees and MotoQuant tests every compatible exhaust, ECU, sprocket and air filter, then shows the combination that makes your quarter-mile quickest (or your finish-line speed highest), with the cost per tenth of a second, parts that work well together and the best next upgrade.';
+  'Free motorcycle upgrade planner for Indian riders. Enter your bike and a budget in rupees. MotoQuant tests every compatible exhaust, ECU, sprocket and air filter and shows the combination that gives the quickest quarter-mile (or the highest finish-line speed), with the cost per tenth of a second, the parts that work well together and the best next upgrade.';
 
 export const metadata = {
   title: TITLE,

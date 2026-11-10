@@ -306,7 +306,7 @@ function Scatter({ bikes }) {
           })}
           {clipped > 0 && (
             <span className="text-xs text-white/65 font-mono">
-              · {clipped} slow outlier{clipped > 1 ? 's' : ''} clamped to the {hi}s edge
+              · {clipped} slow outlier{clipped > 1 ? 's' : ''} drawn at the {hi}s edge
             </span>
           )}
         </div>
@@ -488,7 +488,7 @@ function Histogram({ bikes, bias }) {
         )}
       </svg>
       <p className="mt-2 px-1 text-xs text-white/65 font-mono">
-        Δ = simulated − real. {bikes.length} benchmarks binned at 0.1s; the mass sits inside ±0.2s, centred on a near-zero bias.
+        Δ = simulated − real. {bikes.length} benchmarks binned at 0.1s; most sit inside ±0.2s, centred on a near-zero bias.
       </p>
     </div>
   );
@@ -654,7 +654,7 @@ export default function AccuracyExplorer({ data }) {
       <Section
         kicker="Real vs simulated"
         title={<>Every prediction against its <span className="text-accent">timeslip</span></>}
-        sub={`One dot per matched benchmark: the published real ET on the x-axis, MotoQuant's simulated ET on the y-axis, on the same scale. The dashed line is a perfect prediction; the shaded stripe is the ±0.2s tolerance band that instrumented magazine tests report as their own run-to-run spread. Dot weight = source confidence, so the low-confidence DERIVED estimates recede.`}
+        sub={`One dot per matched benchmark: the published real ET on the x-axis, MotoQuant's simulated ET on the y-axis, on the same scale. The dashed line is a perfect prediction; the shaded stripe is the ±0.2s tolerance band that instrumented magazine tests report as their own run-to-run spread. Larger, more solid dots come from more trusted sources, so the low-confidence DERIVED estimates fade into the background.`}
       >
         <Scatter bikes={bikes} />
       </Section>
@@ -670,7 +670,7 @@ export default function AccuracyExplorer({ data }) {
       <Section
         kicker="Residual shape"
         title={<>A tight, <span className="text-accent">near-symmetric</span> error distribution</>}
-        sub="The residual Δ = sim − real, binned at 0.1s. Green bins are runs we call faster than reality, red bins slower; the mass is stacked on the centre with only a whisker of bias."
+        sub="The residual Δ = sim − real, binned at 0.1s. Green bins are runs the simulator calls faster than reality, red bins slower. Most runs stack up in the centre, and the bias is very small."
       >
         <Histogram bikes={bikes} bias={overall.w_bias} />
       </Section>
@@ -678,7 +678,7 @@ export default function AccuracyExplorer({ data }) {
       <Section
         kicker="By segment"
         title={<>Litre classes are <span className="text-accent">tight</span>; small bikes are the weakest</>}
-        sub="Weighted mean absolute error per cluster, on the cylinder-aware 12-cluster taxonomy (twins, singles, and small-cc I4s are split out from same-displacement I4 buckets). The litre and 500–700cc mid-twin clusters (the ones with the most instrumented timeslips) sit under 0.20s, and sport twins sit just above it. The wide clusters are the small-cc and two-stroke bikes: their benchmarks are mostly DERIVED estimates, and small bikes are also where the model is weakest."
+        sub="Weighted mean absolute error for each of the 12 clusters, which group bikes by cylinder layout as well as size (twins, singles and small-cc I4s are kept apart from same-displacement I4s). The litre and 500–700cc mid-twin clusters (the ones with the most instrumented timeslips) sit under 0.20s, and sport twins sit just above it. The wide clusters are the small-cc and two-stroke bikes: their benchmarks are mostly DERIVED estimates, and small bikes are also where the model is weakest."
       >
         <ClusterBreakdown clusters={clusters} />
       </Section>
@@ -686,17 +686,17 @@ export default function AccuracyExplorer({ data }) {
       <Section
         kicker="Cleanest predictions"
         title={<>Ten runs, ten <span className="text-accent">real</span> timeslips</>}
-        sub="The ten smallest residuals among fully published (non-derived) benchmarks: Cycle World, Sport Rider, MCN, MotoStatz, FastestLaps. Race fuel, professional rider, ideal strip."
+        sub="The ten smallest residuals among fully published (non-derived) benchmarks: Cycle World, Sport Rider, MCN, MotoStatz, FastestLaps. Conditions: race fuel, professional rider, ideal strip."
       >
         <BestPredictions bikes={bikes} />
         {/* honest callout */}
         <div className="mt-6 card border-signal-stage/25 bg-signal-stage/[0.04] p-5 sm:p-6">
-          <div className="label-mono text-signal-stage mb-2">Honest caveat</div>
+          <div className="label-mono text-signal-stage mb-2">Caveat</div>
           <p className="text-white/75 text-base leading-relaxed">
             The <span className="text-white font-semibold">entry 150–200cc</span> and{' '}
             <span className="text-white font-semibold">two-stroke</span> clusters carry large |Δ| because most of their
             benchmarks are <span className="text-signal-stage font-mono">DERIVED</span>: 0-100 km/h times multiplied by 1.6,
-            with a declared ±0.7s uncertainty, so part of the spread is a benchmark-data limit. Small bikes are also the
+            with a declared ±0.7s uncertainty, so part of the spread comes from the benchmark data itself. Small bikes are also the
             weakest class of the simulator: many of them still carry a known gearing limitation, documented in{' '}
             <a
               href="https://github.com/toto171/MotoQuant.in/blob/main/reports/session_2026_11_10_epoch.md"
@@ -722,7 +722,7 @@ export default function AccuracyExplorer({ data }) {
         </Link>
         <Link href="/whitepaper" className="card card-hover block p-4 group">
           <div className="font-display font-semibold text-white mb-1 group-hover:text-accent transition-colors">Read the whitepaper →</div>
-          <div className="text-sm text-white/65">The physics, the validation method, the honest error budget.</div>
+          <div className="text-sm text-white/65">The physics, the validation method and the error budget.</div>
         </Link>
       </div>
     </div>

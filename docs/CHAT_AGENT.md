@@ -1,9 +1,46 @@
-# MotoQuant Chat Agent (July 2026)
+# MotoQuant Chat Agent
 
-The `/api/chat` surface is now a **multi-step tool-calling agent**
-(`motoquant/llm/agent.py`) instead of the fixed two-LLM-call pipeline. The
-classic pipeline remains available (`mode: "classic"`) and unchanged for the
-CLI and older clients.
+The `/api/chat` surface is a **multi-step tool-calling agent**
+(`motoquant/llm/agent.py`) that runs on Anthropic's Claude. The classic
+pipeline remains available (`mode: "classic"`) for the CLI and older clients.
+
+## Two assistants
+
+The chat panel has an **Assistant** dropdown. The browser sends only the id;
+the server maps it to a model, so a client can never pick an arbitrary model.
+
+| Dropdown | `assistant` | Model | Effort | Daily cost |
+|---|---|---|---|---|
+| 1. The doctor | `doctor` | Claude Opus 5.5 (`claude-opus-5-5`) | medium | 2 units |
+| 2. The mechanic | `mechanic` | Claude Sonnet 5.5 (`claude-sonnet-5-5`) | medium | 1 unit |
+
+The mechanic is the default. The choice is kept in the browser's local
+storage (`mq.assistant.v1`).
+
+## Who pays: the server key and visitor keys
+
+* **The server key** comes only from the `ANTHROPIC_API_KEY` environment
+  variable (on the public instance, the Render dashboard). It is never in a
+  file. Without it, and without a visitor key, chat answers
+  `assistant_unavailable`.
+* **A visitor's own key** is optional. In the chat panel, "Use your own key"
+  takes an Anthropic API key and keeps it in the browser: in session storage
+  by default, or in local storage (`mq.anthropic-key.v1`) when "Remember on
+  this device" is ticked. It is sent as the `X-Anthropic-Key` request header
+  on the request that starts a chat (`POST /api/jobs/chat`, or the
+  `POST /api/chat` fallback), never on job polls, never in the body or a
+  query string.
+* The server accepts only values that look like an Anthropic key (prefix
+  `sk-ant-`, 20 to 300 characters, no whitespace); anything else gets
+  `invalid_key_format`. A valid visitor key is used for that one request
+  through its own client: no fallback to the server key, and the key is never
+  stored, logged, put in a job result or error, or returned. Error text is
+  scrubbed of `sk-ant-` strings, and the Sentry scrubber drops the
+  `X-Anthropic-Key`, `Authorization` and `X-Api-Key` headers.
+* `GET /api/assistant` tells the browser whether the free assistant is on:
+  `{free_available, assistants: [{id, label, model}], default, daily_free_limit}`.
+  When `free_available` is false the panel opens the key form with a short
+  explanation.
 
 ## What it can do
 
@@ -63,27 +100,47 @@ CLI and older clients.
   planned batch). Heavy ops add a nominal **18** (`HEAVY_OP_SIM_COST`, from
   autotune's own sweep total: 1 baseline + 9 gearing + 7 launch + 1
   combined), and the composed outlaw pipeline adds **36**.
-* **Per-IP fuses** (whoever runs a deployment pays its LLM bill):
-  20 chat requests/min/IP (`mode: "classic"`, which can run up to 25 sims
-  per request outside the agent's budgets, has a tighter bucket of 4/min/IP),
-  plus a daily cap of `MOTOQUANT_CHAT_DAILY_LIMIT`
-  turns per IP per rolling 24 h (default **200**; `0` disables, e.g. for a
-  self-hoster's own key or a local model). Both buckets are shared by
-  `/api/chat` and `/api/jobs/chat`, and tripping either answers HTTP 429 with
-  `Retry-After`. Provider 429s surface as a typed `rate_limited` error (both
-  agent and classic modes).
+* **Per-IP fuses.** Everyone gets the per-minute limit: 20 chat requests per
+  minute per IP (`mode: "classic"`, which can run up to 25 sims per request
+  outside the agent's budgets, has a tighter bucket of 4 per minute). It
+  protects the CPU, because tools run simulations. The heavy-op gate above
+  also applies to everyone.
+* **Daily cap, server key only.** `MOTOQUANT_CHAT_DAILY_LIMIT` (default
+  **200** units per IP per rolling 24 h; `0` turns it off) applies only when
+  the server's key answers. A mechanic question costs 1 unit and a doctor
+  question 2. Requests with a visitor key skip the daily cap. Both buckets
+  are shared by `/api/chat` and `/api/jobs/chat`, and tripping either answers
+  HTTP 429 with `Retry-After`; the panel offers the visitor's own key when the
+  daily cap is hit.
 
 ## API
 
-* `POST /api/chat` — body `{query, messages?, mode?}`; returns `ChatResponse`
-  with `summary` (the reply), ordered `blocks` (`[{type, payload}]`:
-  `sim_result | top_speed | compare_result | build_result | outlaw_result |
-  autotune_result | estimated_sim | parts | tires | web_citations |
-  bike_details | venues`), `tool_trace`, `sims_run`. `sim_result` mirrors the
+* `POST /api/chat` — body `{query, messages?, mode?, assistant?}`
+  (`assistant` is `"mechanic"` or `"doctor"`, default `"mechanic"`), optional
+  header `X-Anthropic-Key`; returns `ChatResponse` with `summary` (the reply),
+  `assistant` (who answered), `own_key` (true when the visitor's key was
+  used), ordered `blocks` (`[{type, payload}]`:
+  `sim_result | top_speed | compare_result | build_result | rank_result |
+  outlaw_result | autotune_result | estimated_sim | parts | tires |
+  web_citations | bike_details | venues`), `tool_trace`, `sims_run`. `sim_result` mirrors the
   last sim block for older clients. Classic mode now also returns the
   previously-dropped `compare_result / rank_result / recommend_result /
   explain_result / choose_bike_result` payloads + `intent_type`.
-* `POST /api/jobs/chat` — same body, 202 + job_id; poll `GET /api/jobs/{id}`
+* Errors come back as HTTP 200 with `error` set:
+
+  | `error` | Meaning | What the panel says |
+  |---|---|---|
+  | `assistant_unavailable` | No server key and no visitor key | Add your own key |
+  | `free_assistant_resting` | The server key hit its credit or spend limit | Add your own key, or try later |
+  | `key_rejected` | Anthropic refused the visitor's key (401/403) | Check or change the key |
+  | `invalid_key_format` | The header does not look like an Anthropic key | Keys start with `sk-ant-` |
+  | `rate_limited` | Anthropic answered 429 | Try again in a minute |
+  | `refused` | The model declined to answer | Ask about a bike, part or run |
+  | `agent_failed` | Anything else; `error_detail` never contains a key | Try again |
+
+* `GET /api/assistant`: whether the free assistant is on, the two
+  assistants and the daily limit (see above).
+* `POST /api/jobs/chat` — same body and header, 202 + job_id; poll `GET /api/jobs/{id}`
   (live stage text: "Simulating…", "Optimizing stage_4…"), cancellable.
   Use this from UIs — agent turns can take minutes on the 0.5-CPU prod tier.
 * `POST /api/jobs/outlaw` — direct access to the composed pipeline
@@ -94,18 +151,24 @@ CLI and older clients.
 * `POST /api/optimize/build` — `budget_inr` is now optional; `null`/`0` =
   no limit (resolved server-side to ₹5M).
 
-## Provider support
+## Provider
 
-All five providers in `motoquant/llm/client.py` support the agent loop
-(`LLMClient.call_tools`, `tool_choice` auto): Groq (default,
-llama-3.3-70b-versatile), Gemini, Anthropic (native SDK), DeepSeek,
-OpenRouter — selected via `LLM_PROVIDER` + per-provider key/model env vars.
-Adding another OpenAI-compatible API = one entry in `_PROVIDERS`.
+Claude is the only provider. Set `ANTHROPIC_API_KEY` on the server; there is
+no provider switch and no other provider's key to set. An agent turn makes
+several Claude calls, so size `MOTOQUANT_CHAT_DAILY_LIMIT` to your monthly
+Anthropic budget, or set a spend limit in the Anthropic Console. When that
+limit is reached the panel shows `free_assistant_resting` and visitors can
+carry on with their own key.
 
-**Groq free-tier note:** an agent turn makes 2–8 LLM calls (vs 2 before). At
-30 RPM the 20/min/IP chat limit can exhaust the provider's rate limit under
-load. If that bites, set `LLM_PROVIDER=gemini`, add a paid key, or lower
-`MOTOQUANT_CHAT_DAILY_LIMIT`.
+## Build planner
+
+Give the chat a budget and a goal in plain words ("1.5 lakh", "₹80k", "under
+50 thousand"; "quickest ET", "max speed") and it calls `optimize_build`, then
+explains each pick in one line: what it does, the time saved and the rupees
+per tenth, then the total and what the next rupee should buy. The panel's
+build card shows the parts, the warnings ("Things to check") and the next
+upgrade ("If you have more to spend"). `rank_bikes` results show as a
+"Quickest bikes" table.
 
 ## Testing
 

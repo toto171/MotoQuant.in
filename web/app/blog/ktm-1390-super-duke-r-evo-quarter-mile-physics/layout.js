@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'ktm-1390-super-duke-r-evo-quarter-mile-physics';
-const TITLE = 'KTM 1390 Super Duke R EVO Quarter-Mile Physics Breakdown';
+const TITLE = 'KTM 1390 Super Duke R EVO quarter-mile physics breakdown';
 
 function breadcrumbs() {
   return {

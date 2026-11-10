@@ -5,7 +5,7 @@ import { Reveal } from '../../components/Reveal';
 import ScoreboardDigits from '../../components/ScoreboardDigits';
 
 export const metadata = {
-  title: 'Whitepaper | MotoQuant Physics Engine (15 Sub-Models + RK4)',
+  title: 'Whitepaper | MotoQuant physics engine (15 sub-models + RK4)',
   description:
     'MotoQuant whitepaper: a free, open-source motorcycle quarter-mile simulator built on 15 sub-models and RK4 integration at 1 ms, checked against 250 published tests weighted by source quality across a cylinder-aware 12-cluster taxonomy. Three reference bikes are held to four decimals by CI.',
   alternates: { canonical: 'https://motoquant.in/whitepaper' },
@@ -18,15 +18,15 @@ export const metadata = {
     'motorcycle drag racing physics paper',
   ],
   openGraph: {
-    title: 'MotoQuant | Physics Engine Whitepaper (15 Sub-Models + RK4)',
+    title: 'MotoQuant | Physics engine whitepaper (15 sub-models + RK4)',
     description:
-      '15 sub-models. RK4 at 1 ms. 12-cluster cylinder-aware taxonomy. Validation weighted by source quality. Reference bikes held to four decimals.',
+      '15 sub-models integrated with RK4 at 1 ms, a cylinder-aware 12-cluster taxonomy, and validation weighted by source quality. CI holds the reference bikes to four decimals.',
     url: 'https://motoquant.in/whitepaper',
     type: 'article',
   },
 };
 
-const ABSTRACT = `MotoQuant is a first-principles physics engine for predicting motorcycle quarter-mile drag-racing elapsed times. The model couples 15 independent sub-models through a fixed-step fourth-order Runge–Kutta integrator running at one-millisecond resolution: engine torque (Willans friction), rear-tyre grip with load sensitivity and thermal evolution, gear-shift and clutch slip dynamics, weight transfer and rider centre-of-gravity shift, aerodynamic drag with per-bike Cd × A, environmental conditions (density altitude, surface μ, ambient temp), and parasitic loss budget. In the 10 November 2026 sweep the model is checked against 250 published quarter-mile tests, weighted by source quality (263 matches to catalog bikes), across a cylinder-aware 12-cluster taxonomy. Overall weighted bias is +0.023 s and the weighted mean absolute error is 0.25 s. Litre sport bikes, where most benchmarks come from instrumented magazine tests, are off by 0.15 to 0.17 s on average (weighted); across the ten cleanest validated runs the mean absolute error is ±0.006 s. Three reference baselines (GSX-R 1000 K5, YZF-R1 4C8 and Suzuki Hayabusa Gen1) are held exactly to the fourth decimal place by CI, and move only in a deliberate, sweep-justified accuracy pass.`;
+const ABSTRACT = `MotoQuant predicts motorcycle quarter-mile drag-racing elapsed times from first principles. The model couples 15 independent sub-models through a fixed-step fourth-order Runge–Kutta integrator running at one-millisecond resolution: engine torque (Willans friction), rear-tyre grip with load sensitivity and thermal evolution, gear-shift and clutch slip dynamics, weight transfer and rider centre-of-gravity shift, aerodynamic drag with per-bike Cd × A, environmental conditions (density altitude, surface μ, ambient temp), and parasitic loss budget. In the 10 November 2026 sweep the model is checked against 250 published quarter-mile tests, weighted by source quality (263 matches to catalog bikes), across a cylinder-aware 12-cluster taxonomy. Overall weighted bias is +0.023 s and the weighted mean absolute error is 0.25 s. Litre sport bikes, where most benchmarks come from instrumented magazine tests, are off by 0.15 to 0.17 s on average (weighted); across the ten cleanest validated runs the mean absolute error is ±0.006 s. CI holds three reference baselines (GSX-R 1000 K5, YZF-R1 4C8 and Suzuki Hayabusa Gen1) exactly to the fourth decimal place; they move only in a deliberate accuracy pass backed by a full sweep.`;
 
 const SECTIONS = [
   {
@@ -34,8 +34,8 @@ const SECTIONS = [
     n: '1',
     title: 'Introduction',
     body: [
-      'Motorcycle drag racing in India has grown rapidly across Aamby Valley (Lonavala, Maharashtra), MMRT Chennai, the Buddh International Circuit, Kari Motor Speedway (Coimbatore), and the Hyderabad strips. The community has outgrown the available tooling: spreadsheet calculators that treat power-to-weight as the sole input, regression-based estimators trained on limited international data, and per-bike rules of thumb that fail to generalise across mass, aero, gearing, traction, and venue conditions.',
-      'MotoQuant is built to fill that gap. We aim for an open, audit-able simulator whose every coefficient traces back to a physical measurement, not a fitted curve. This whitepaper documents the architecture, validation methodology, and the honest residual error budget against which we benchmark every release.',
+      'Motorcycle drag racing in India has grown fast at Aamby Valley (Lonavala, Maharashtra), MMRT Chennai, the Buddh International Circuit, Kari Motor Speedway (Coimbatore), and the Hyderabad strips. The community has outgrown the available tooling: spreadsheet calculators that treat power-to-weight as the sole input, regression-based estimators trained on limited international data, and per-bike rules of thumb that fail to generalise across mass, aero, gearing, traction, and venue conditions.',
+      'MotoQuant is meant to fill that gap: an open simulator that anyone can audit, in which every coefficient traces back to a physical measurement rather than a fitted curve. This paper sets out the architecture, the validation method, and the remaining error we benchmark every release against.',
     ],
   },
   {
@@ -43,7 +43,7 @@ const SECTIONS = [
     n: '2',
     title: 'Architecture',
     body: [
-      'The simulator is structured as a fixed-step fourth-order Runge–Kutta integrator over the bike state vector ⟨x, v, ω_e, T_tire, T_clutch, gear⟩. Each timestep evaluates 15 coupled sub-models that share state through the bike configuration. The integration step is fixed at dt = 1 ms; an adaptive step-size variant is available for clutch-slip-dominated regions where the engine RPM derivative changes faster than the tyre temperature derivative.',
+      'The simulator is a fixed-step fourth-order Runge–Kutta integrator over the bike state vector ⟨x, v, ω_e, T_tire, T_clutch, gear⟩. Each timestep evaluates 15 coupled sub-models that share state through the bike configuration. The integration step is fixed at dt = 1 ms; an adaptive step-size variant is available for clutch-slip-dominated regions where the engine RPM derivative changes faster than the tyre temperature derivative.',
     ],
     list: {
       title: 'The 15 sub-models',
@@ -71,8 +71,8 @@ const SECTIONS = [
     n: '3',
     title: 'Category-flavoured physics',
     body: [
-      'A single set of physics constants would either over-tune for litre-class superbikes (which dominate published benchmarks) or under-tune for small-cc commuters where engine inertia, basket inertia, and chassis fluid mass are systematically smaller. Every catalog bike is auto-tagged into one of a cylinder-aware 12-cluster taxonomy (litre_sport_195p, litre_sport_600_1000, sport_twin_600_1300, mid_twin_500_700, mid_twin_300_500, single_300_500, small_i4_screamer, entry_200_300, entry_150_200, two_stroke, cruiser_1300p, other), with per-cluster knobs for over-clutching factor, engine-deceleration limit, parasitic loss multiplier, and launch RPM floor. The July 2026 revision split twins, singles, and small-cc I4 screamers out of the original displacement-only buckets after the sweep showed sport twins simming ~0.2 s fast and small-cc I4s ~1.1 s slow, then re-centred every cluster against the full weighted corpus.',
-      'The dispatch is back-compat-safe: bikes constructed before the taxonomy existed reproduce their pre-April-30 results bit-exactly through an "unknown" profile that preserves the legacy code path. Our three reference baselines (K5, R1, Hayabusa) have not drifted by more than 0.0000 s during the entire taxonomy roll-out.',
+      'A single set of physics constants would either over-tune for litre-class superbikes (which dominate published benchmarks) or under-tune for small-cc commuters where engine inertia, basket inertia, and chassis fluid mass are systematically smaller. Every catalog bike is auto-tagged into one of a cylinder-aware 12-cluster taxonomy (litre_sport_195p, litre_sport_600_1000, sport_twin_600_1300, mid_twin_500_700, mid_twin_300_500, single_300_500, small_i4_screamer, entry_200_300, entry_150_200, two_stroke, cruiser_1300p, other), with per-cluster knobs for over-clutching factor, engine-deceleration limit, parasitic loss multiplier, and launch RPM floor. The July 2026 revision split twins, singles, and small-cc I4 screamers out of the original displacement-only buckets, after the sweep showed sport twins simming ~0.2 s fast and small-cc I4s ~1.1 s slow. It then re-centred every cluster against the full weighted corpus.',
+      'The dispatch is backward compatible: bikes built before the taxonomy existed reproduce their pre-April-30 results bit-exactly through an "unknown" profile that keeps the legacy code path. Our three reference baselines (K5, R1, Hayabusa) drifted by 0.0000 s over the whole taxonomy roll-out.',
     ],
   },
   {
@@ -80,7 +80,7 @@ const SECTIONS = [
     n: '4',
     title: 'Validation methodology',
     body: [
-      'The 10 November 2026 sweep benchmarks against 250 published quarter-mile elapsed times (263 matched to a catalog bike) where the bike, year range, and venue conditions are unambiguous. Sources are classified by quality and weighted accordingly:',
+      'The 10 November 2026 sweep benchmarks against 250 published quarter-mile elapsed times (263 matched to a catalog bike) where the bike, year range, and venue conditions are unambiguous. Each source is graded by quality and weighted by grade:',
     ],
     list: {
       title: 'Source-quality weights',
@@ -94,7 +94,7 @@ const SECTIONS = [
       ],
     },
     extra: [
-      'Per-cluster bias and weighted MAE are reported with N (sample size) so the reader can judge which clusters are statistically meaningful. Derived benchmarks (mostly Indian small-cc entries) carry a declared ±0.7 s uncertainty and are down-weighted to 0.1 for that reason.',
+      'Per-cluster bias and weighted MAE are reported with N (sample size), so you can judge which clusters are statistically meaningful. Derived benchmarks (mostly Indian small-cc entries) carry a declared ±0.7 s uncertainty and are down-weighted to 0.1 for that reason.',
     ],
   },
   {
@@ -128,7 +128,7 @@ const SECTIONS = [
     n: '6',
     title: 'Reference baselines',
     body: [
-      'Three bikes are designated reference baselines and gated in the test suite to reproduce exactly to the fourth decimal place across every commit:',
+      'Three bikes are reference baselines. The test suite requires each one to reproduce exactly, to the fourth decimal place, on every commit:',
     ],
     table: {
       head: ['Bike', 'Year', 'Power', 'Reference ET', 'Δ (current)'],
@@ -139,7 +139,7 @@ const SECTIONS = [
       ],
     },
     body2: [
-      'These baselines were last re-pinned on 5 November 2026 by the 2026-10/11 accuracy epoch, which moved them from 9.9331 / 10.1436 / 10.3633 s with a full weighted sweep as evidence (since that epoch, ET is timed from the 1-ft rollout beam, as at a drag strip). Between deliberate passes like that one they do not move: a full-catalog regression golden backs them up, and a change of a ten-thousandth of a second in any of the three fails CI.',
+      'These baselines were last re-pinned on 5 November 2026 by the 2026-10/11 accuracy epoch, which moved them from 9.9331 / 10.1436 / 10.3633 s with a full weighted sweep as evidence (since that epoch, ET is timed from the 1-ft rollout beam, as at a drag strip). Between deliberate passes like that one they do not move. A golden-file regression test over the full catalog backs them up, and a change of a ten-thousandth of a second in any of the three fails CI.',
     ],
   },
   {
@@ -147,7 +147,7 @@ const SECTIONS = [
     n: '7',
     title: 'Reproducibility',
     body: [
-      'MotoQuant is open to external audit. The simulator code, all sub-model coefficients, the 534-bike catalog, the 546-part library, and every venue\'s seasonal weather profile are inspectable. Every parts ROI calculation is deterministic given the bike configuration and venue conditions. We publish:',
+      'MotoQuant is open to external audit. The simulator code, all sub-model coefficients, the 534-bike catalog, the 546-part library, and every venue\'s seasonal weather profile are inspectable. Every parts ROI calculation is deterministic for a given bike configuration and venue conditions. We publish:',
     ],
     list: {
       title: '',
@@ -160,7 +160,7 @@ const SECTIONS = [
       ],
     },
     extra: [
-      'External calibration is supported through the Phase 3 import pipeline. The hosted service accepts Dragy GPS logs (CSV / JSON / VBO) and dyno sheets (DynoJet, generic metric, MoTeC) with full SAE J1349 atmospheric correction, and overlays each real run against the simulation split by split. The offline engine toolchain additionally parses ECU logs (Woolich Racing, Power Commander PC-Link, MoTeC i2) and includes an auto-calibrator that fits Cd and μ-peak jointly via differential evolution followed by Nelder–Mead refinement.',
+      'External calibration is supported through the Phase 3 import pipeline. The hosted service accepts Dragy GPS logs (CSV / JSON / VBO) and dyno sheets (DynoJet, generic metric, MoTeC) with full SAE J1349 atmospheric correction, and overlays each real run against the simulation split by split. The offline engine toolchain also parses ECU logs (Woolich Racing, Power Commander PC-Link, MoTeC i2) and includes an auto-calibrator that fits Cd and μ-peak jointly via differential evolution followed by Nelder–Mead refinement.',
     ],
   },
   {
@@ -168,8 +168,8 @@ const SECTIONS = [
     n: '8',
     title: 'Known limitations',
     body: [
-      'We are honest about where the model is bounded. The two-stroke cluster still carries a +0.077 s weighted bias and a 0.642 s weighted |Δ| because piston-port 2T launch dynamics include an off-pipe / on-pipe transition whose integral-of-power-over-time is not perfectly captured by the current expansion-chamber Gaussian curve. The Indian entry small-cc cluster (entry-150-200) carries the largest weighted |Δ| of any cluster with ten or more benchmarks at 0.702 s, bias-centred at −0.011 s but widely scattered. Its derived benchmarks carry a declared ±0.7 s uncertainty, but six of its seven instrumented rows also miss by 0.4–0.9 s, in both directions, and many small bikes still carry a known gearing limitation (reports/session_2026_11_10_epoch.md). Closing the gap needs both per-bike Dragy / VBox-measured stock data and sourced gearing for the benchmarked small bikes.',
-      'The cruiser 1300+ cluster has only N=5 and the small-cc I4 screamer cluster only N=2, too small to draw statistically meaningful conclusions. The Apache RTR 200 4V is a documented outlier: the simulator gives 18.95 s against an instrumented 18.1 s, a 0.85 s miss on a high-confidence row; we have not adjusted the model on the strength of one data point.',
+      'The two-stroke cluster still carries a +0.077 s weighted bias and a 0.642 s weighted |Δ| because piston-port 2T launch dynamics include an off-pipe / on-pipe transition whose integral-of-power-over-time is not perfectly captured by the current expansion-chamber Gaussian curve. The Indian entry small-cc cluster (entry-150-200) has the largest weighted |Δ| of any cluster with ten or more benchmarks, 0.702 s. Its bias is centred, at −0.011 s, but the results scatter widely. Its derived benchmarks carry a declared ±0.7 s uncertainty, but six of its seven instrumented rows also miss by 0.4–0.9 s, in both directions, and many small bikes still carry a known gearing limitation (reports/session_2026_11_10_epoch.md). Closing the gap needs both per-bike Dragy / VBox-measured stock data and sourced gearing for the benchmarked small bikes.',
+      'The cruiser 1300+ cluster has only N=5 and the small-cc I4 screamer cluster only N=2, too few for statistically meaningful conclusions. The Apache RTR 200 4V is a documented outlier: the simulator gives 18.95 s against an instrumented 18.1 s, a 0.85 s miss on a high-confidence row; we have not adjusted the model on the strength of one data point.',
     ],
   },
   {
@@ -186,7 +186,7 @@ const SECTIONS = [
     n: '10',
     title: 'Citation',
     body: [
-      'If you reference this whitepaper or use MotoQuant outputs in your own analysis, please cite as:',
+      'If you reference this whitepaper or use MotoQuant results in your own analysis, cite it as:',
     ],
     citation: 'Singh, R. & Desai, A. (2026). MotoQuant: A first-principles drag-racing physics engine for motorcycles. Pune, India. https://motoquant.in/whitepaper',
   },
@@ -382,7 +382,7 @@ export default function WhitepaperPage() {
                 <div className="font-display font-semibold text-white group-hover:text-accent transition-colors">
                   How the physics works →
                 </div>
-                <div className="text-sm text-white/65 mt-1">Sub-model deep-dives.</div>
+                <div className="text-sm text-white/65 mt-1">Each sub-model in detail.</div>
               </Link>
               <Link href="/docs/validation" className="group card card-hover p-5">
                 <div className="font-display font-semibold text-white group-hover:text-accent transition-colors">
@@ -392,7 +392,7 @@ export default function WhitepaperPage() {
               </Link>
               <Link href="/simulator" className="group card card-hover border-accent/40 p-5">
                 <div className="font-display font-semibold text-accent">Open the simulator →</div>
-                <div className="text-sm text-white/65 mt-1">See the engine for yourself.</div>
+                <div className="text-sm text-white/65 mt-1">Try the engine yourself.</div>
               </Link>
             </div>
           </div>

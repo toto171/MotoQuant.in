@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'aprilia-tuono-457-vs-rs-457-quarter-mile-physics';
-const TITLE = 'Aprilia Tuono 457 vs RS 457: Same Engine, 0.41s Different ET';
+const TITLE = 'Aprilia Tuono 457 vs RS 457: Same engine, 0.41s different ET';
 
 function breadcrumbs() {
   return {

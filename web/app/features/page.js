@@ -82,7 +82,7 @@ const THINGS = [
   {
     icon: MessageSquare,
     q: 'Can I just ask?',
-    body: 'Yes. Type a question in plain English, such as “How fast is a Duke 390 at Aamby Valley?”, and the assistant runs the simulation for you.',
+    body: 'Yes. Type a question in plain English, such as “How fast is a Duke 390 at Aamby Valley?”, and the assistant runs the simulation for you. Give it a budget and a goal and it plans a build. It runs on Claude: pick the mechanic for quick answers or the doctor to dig deeper, and add your own Anthropic key if you want.',
     href: '/simulator',
     cta: 'Ask a question',
   },
