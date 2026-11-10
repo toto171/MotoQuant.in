@@ -50,6 +50,10 @@ for (let i = 0; i < fixture.cases.length; i++) {
     powerBoostPct: c.power_boost_pct,
     massDeltaKg: c.mass_delta_kg,
     venueId: c.venue_id ?? null,
+    // Parity is about the arithmetic, not the surface policy: the server-side
+    // fixture is the surrogate pipeline itself, so never let the surface
+    // refusal (exercised in the unit checks) mask a numeric comparison.
+    venueSurface: 'asphalt',
   });
   if (c.expect_refusal) {
     if (r.ok) {

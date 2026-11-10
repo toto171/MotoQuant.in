@@ -48,7 +48,8 @@ export function describeEnvironment(env, { placeLabel = null } = {}) {
   }
   // manual
   if (placeLabel) {
-    return `${placeLabel} weather — ${[temp, hum, wind].filter(Boolean).join(', ')}; altitude ${alt || 'unchanged'} (the default site)`;
+    // The echoed block is what the engine ran: name the place and its altitude.
+    return `${placeLabel} — ${[alt && `${alt} altitude`, temp, hum, wind].filter(Boolean).join(', ')}`;
   }
   return `your custom values — ${[alt && `${alt} altitude`, temp, hum, wind].filter(Boolean).join(', ')}`;
 }
@@ -64,11 +65,12 @@ export function describeEstimate({ venueName = null, altitudeM = null } = {}) {
 
 /**
  * Renders "Conditions: …" plus an optional "Change location" button.
- * Props: env | estimate, placeLabel, onChange, className, as ('p'|'span').
+ * Props: env | estimate | unreported, placeLabel, onChange, className, as ('p'|'span').
  */
 export default function ConditionsLine({
   env = null,
   estimate = null,
+  unreported = false,
   placeLabel = null,
   onChange = null,
   changeLabel = 'Change location',
@@ -76,6 +78,11 @@ export default function ConditionsLine({
   as: Tag = 'p',
 }) {
   const text = env ? describeEnvironment(env, { placeLabel }) : estimate ? describeEstimate(estimate) : '';
+  // An exact result whose response carried no conditions block: say so rather
+  // than assert defaults the run may not have used.
+  if (!text && unreported) {
+    return <Tag className={className} data-conditions="unreported">Conditions not reported.</Tag>;
+  }
   if (!text) return null;
   const isDefault = !!env?.is_default || (!env && !estimate?.venueName);
   return (

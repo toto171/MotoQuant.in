@@ -401,13 +401,15 @@ class TestMagicLinkEndpoint(unittest.TestCase):
     def test_magic_link_rate_limit_429(self):
         conn = _mem_conn()
         _bootstrap(conn)
-        with self._patch_conn(conn):
+        import motoquant.auth as auth_mod
+
+        with self._patch_conn(conn), patch.object(auth_mod, "DEV_ECHO_TOKEN", True):
             # First request should succeed
             r1 = self.client.post(
                 "/api/auth/magic-link",
                 json={"email": "ratelimit@test.in"},
             )
-            self.assertIn(r1.status_code, (200, 429))  # may be 200 first time
+            self.assertEqual(r1.status_code, 200)
 
             # Second immediate request should be rate-limited
             r2 = self.client.post(
@@ -456,13 +458,14 @@ class TestMagicLinkEndpoint(unittest.TestCase):
         self.assertEqual(r3.status_code, 200)
         self.assertIsNone(r3.json().get("dev_token"))
 
-        # Local dev (default EMAIL_BACKEND=stdout, not deployed): echo is on.
+        # Local dev with the explicit MOTOQUANT_DEV_ECHO_TOKEN opt-in: echo is on.
         conn2 = _mem_conn()
         _bootstrap(conn2)
         with (
             self._patch_conn(conn2),
             patch.object(auth_mod, "IN_DEPLOYED_ENV", False),
             patch.object(auth_mod, "EMAIL_BACKEND", "stdout"),
+            patch.object(auth_mod, "DEV_ECHO_TOKEN", True),
         ):
             r2 = self.client.post(
                 "/api/auth/magic-link", json={"email": "localdev@test.in"}
@@ -677,6 +680,7 @@ class TestMagicLinkDispatch(unittest.TestCase):
         with (
             patch.object(auth_mod, "EMAIL_BACKEND", "stdout"),
             patch.object(auth_mod, "IN_DEPLOYED_ENV", False),
+            patch.object(auth_mod, "DEV_ECHO_TOKEN", True),
             patch("sys.stdout", new_callable=io.StringIO) as out,
         ):
             auth_mod._send_magic_link_email("rider@example.com", "tok789")

@@ -122,7 +122,7 @@ class TestSimulatorPartsTransfer(unittest.TestCase):
         body = body[: body.index("export async function getCompatiblePartIds")]
         self.assertIn("if (_partsPromise) return _partsPromise;", body)
         # No bike id: one response serves every bike for the page lifetime.
-        self.assertIn("/api/parts?limit=5000`", body)
+        self.assertIn("/api/parts?limit=5000", body)
         self.assertNotIn("bike_id", body)
         # A failed load must not be cached forever.
         self.assertIn("_partsPromise = null;", body)

@@ -58,6 +58,10 @@ from .submodels import (
     WheelieModel,
 )
 
+# Library-level ceilings on a single run(); the API's request models are tighter.
+MAX_RUN_DISTANCE_M = 1.0e6
+MAX_RUN_TIME_S = 600.0
+
 # ═══════════════════════════════════════════
 # SIMULATION STATE
 # ═══════════════════════════════════════════
@@ -430,13 +434,21 @@ class MotoQuantEngine:
         Raises
         ------
         ValueError
-            If ``distance`` or ``max_time`` is not positive (the API enforces
-            the same bounds on its request models).
+            If ``distance`` or ``max_time`` is NaN, infinite, not positive or
+            beyond the library ceilings ``MAX_RUN_DISTANCE_M`` /
+            ``MAX_RUN_TIME_S`` (the arrays are sized from ``max_time``; the API
+            enforces tighter bounds on its request models).
         """
-        if not distance > 0.0:
-            raise ValueError(f"distance must be positive, got {distance!r}")
-        if not max_time > 0.0:
-            raise ValueError(f"max_time must be positive, got {max_time!r}")
+        if not (0.0 < distance <= MAX_RUN_DISTANCE_M):
+            raise ValueError(
+                f"distance must be finite and in (0, {MAX_RUN_DISTANCE_M:g}] m, "
+                f"got {distance!r}"
+            )
+        if not (0.0 < max_time <= MAX_RUN_TIME_S):
+            raise ValueError(
+                f"max_time must be finite and in (0, {MAX_RUN_TIME_S:g}] s, "
+                f"got {max_time!r}"
+            )
         dt = self.dt
         cfg = self.cfg
 

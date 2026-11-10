@@ -295,7 +295,6 @@ function ResolvedCard({ value, onClear, compact }) {
   const rows = [
     { label: 'Temperature', v: value?.temperature_c, suffix: ' °C', dec: 1 },
     { label: 'Humidity', v: value?.humidity_pct, suffix: ' %', dec: 0 },
-    { label: 'Pressure', v: value?.pressure_hpa, suffix: ' hPa', dec: 0 },
     { label: 'Altitude', v: value?.altitude_m, suffix: ' m', dec: 0 },
     { label: 'Air density', v: value?.air_density_kgm3, suffix: ' kg/m³', dec: 3 },
     { label: 'da', v: value?.density_altitude_m, suffix: ' m', dec: 0, highlight: true },
@@ -360,8 +359,20 @@ function ResolvedCard({ value, onClear, compact }) {
 export function environmentOverridesFromLocation(value) {
   if (!value) return {};
   const out = {};
-  if (value.temperature_c != null) out.ambient_temp_c = value.temperature_c;
-  if (value.humidity_pct != null) out.humidity_pct = value.humidity_pct;
-  if (value.matched_venue_id != null) out.venue_id = value.matched_venue_id;
+  // Same bounds as the API (-30..60 °C, 0..100 %): never send what it would reject.
+  if (value.temperature_c != null) out.ambient_temp_c = Math.max(-30, Math.min(60, value.temperature_c));
+  if (value.humidity_pct != null) out.humidity_pct = Math.max(0, Math.min(100, value.humidity_pct));
+  if (value.matched_venue_id != null) {
+    out.venue_id = value.matched_venue_id;
+  } else {
+    // Not a known venue: send the place itself so the server simulates the
+    // altitude it was resolved at (a known venue is sent by id instead).
+    const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+    const label = value.venue_name || value.location_name || value._label || value.resolved_name;
+    if (label) out.location = label;
+    if (num(value.latitude) != null) out.lat = value.latitude;
+    if (num(value.longitude) != null) out.lon = value.longitude;
+    if (num(value.altitude_m) != null) out.altitude_m = value.altitude_m;
+  }
   return out;
 }

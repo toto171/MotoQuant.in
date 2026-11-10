@@ -22,8 +22,10 @@ from .schema import (
 # runtime. API-side caches (serialized catalog responses, parsed fitment rules,
 # stock-baseline sims) key on it, so a write invalidates all of them at once.
 # It is NOT derived from the DB file's mtime: WAL writes do not move that until
-# a checkpoint. Writes made by OTHER processes (offline scripts) are not seen;
-# the API process picks those up on its next deploy/restart.
+# a checkpoint. Writes through THIS process's MotoQuantDB connections bump it
+# via the authorizer below; writes made through any other connection (another
+# process, or a plain sqlite3.connect) are caught by folding ``PRAGMA
+# data_version`` into the token returned by :func:`catalog_token`.
 CATALOG_TABLES = frozenset(
     {
         "bike_models",
@@ -48,6 +50,24 @@ def catalog_generation() -> int:
     return _catalog_generation
 
 
+def catalog_token(conn: "sqlite3.Connection | None") -> tuple:
+    """Opaque freshness token for catalog-derived caches.
+
+    ``(generation, data_version)``: the generation moves on every write made
+    through a MotoQuantDB connection or an explicit bump; ``PRAGMA
+    data_version`` moves whenever a DIFFERENT connection (another process, a
+    script, a plain ``sqlite3.connect``) commits to the same database file.
+    Compare for equality only.
+    """
+    dv = None
+    if conn is not None:
+        try:
+            dv = conn.execute("PRAGMA data_version").fetchone()[0]
+        except sqlite3.Error:
+            dv = None
+    return (_catalog_generation, dv)
+
+
 def bump_catalog_generation() -> int:
     """Mark every catalog-derived cache stale. Returns the new generation."""
     global _catalog_generation
@@ -64,8 +84,9 @@ _WRITE_ACTIONS = frozenset(
 def _catalog_write_authorizer(action, table, _arg2, _dbname, _source):
     """sqlite3 authorizer: bump the generation on any write to a catalog table.
 
-    Runs at statement-prepare time (cached statements are not re-checked) and
-    never denies anything.
+    Runs at statement-prepare time, which is why the connection is opened with
+    ``cached_statements=0``: a cached prepared statement would skip this hook
+    on every repeat of the same SQL. Never denies anything.
     """
     if action in _WRITE_ACTIONS and table in CATALOG_TABLES:
         bump_catalog_generation()
@@ -109,7 +130,9 @@ class MotoQuantDB:
         if self._conn is not None:
             return self._conn
 
-        self._conn = sqlite3.connect(str(self._db_path), check_same_thread=False)
+        self._conn = sqlite3.connect(
+            str(self._db_path), check_same_thread=False, cached_statements=0
+        )
         self._conn.row_factory = sqlite3.Row
         self._conn.set_authorizer(_catalog_write_authorizer)
 

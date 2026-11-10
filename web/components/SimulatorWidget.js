@@ -21,6 +21,7 @@ import dynamic from 'next/dynamic';
 import { AlertCircle, MapPin, ChevronDown, ArrowRight } from 'lucide-react';
 import { environmentOverridesFromLocation } from './LocationPicker';
 import { predictQuick, preloadSurrogate } from '../lib/surrogate';
+import { instantBlocker, LOCATION_HINT } from '../lib/instantEstimate';
 import { API_URL, runJob, getBikeCatalog } from '../lib/api';
 import ConditionsLine from './ConditionsLine';
 import SimProgress from './SimProgress';
@@ -272,9 +273,10 @@ export default function SimulatorWidget() {
   const sig = JSON.stringify([bike?.presetId ?? bike?.id ?? null, riderKg, powerBoost, massChange, env]);
 
   // ── Live in-browser estimate ───────────────────────────────────────────
-  // Only for catalog bikes, only after the id map resolved, and only when the
-  // location (if any) maps to a known venue (otherwise the surrogate would
-  // ignore the chosen altitude and quietly disagree with the exact run).
+  // Only for catalog bikes, only after the id map resolved, and only while NO
+  // place is chosen: the in-browser model has no input for a place's weather
+  // or surface, so a chosen place always goes to the exact server simulation
+  // (see lib/instantEstimate.js for the full list of what forces that).
   useEffect(() => {
     let cancelled = false;
     const canEstimate =
@@ -283,7 +285,7 @@ export default function SimulatorWidget() {
       bike &&
       !bike.presetId &&
       bike.id != null &&
-      (!location || env.venue_id != null);
+      !instantBlocker({ bikeId: bike.id, hasParts: false, hasTyres: false, weatherDefault: true, hasPlace: !!location });
     if (!canEstimate) {
       setEstimate(null);
       setEstimatePending(false);
@@ -295,7 +297,7 @@ export default function SimulatorWidget() {
       riderMassKg: riderKg,
       powerBoostPct: powerBoost,
       massDeltaKg: massChange,
-      venueId: env.venue_id ?? null,
+      venueId: null,
     }).then((r) => {
       if (cancelled) return;
       setEstimate(r.ok ? r : null);
@@ -378,6 +380,23 @@ export default function SimulatorWidget() {
 
   const exact = run && run.sig === sig ? run : null;
   const placeName = location ? locationName(location) : null;
+  const catalogBlocked = !bike?.presetId && catalog.state !== 'ready';
+
+  // With a place chosen there is no instant estimate (see above), so work the
+  // exact time out for it straight away — once per distinct setup, after the
+  // sliders have settled — instead of leaving the card empty.
+  const autoSigRef = useRef(null);
+  useEffect(() => {
+    if (!location || !bikeReady || catalogBlocked || loading || exact) return undefined;
+    if (autoSigRef.current === sig) return undefined;
+    const t = setTimeout(() => {
+      autoSigRef.current = sig;
+      runSim('quarter');
+    }, 600);
+    return () => clearTimeout(t);
+    // runSim is recreated each render; `sig` captures every input it reads.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sig, location, bikeReady, loading, exact]);
 
   // Conditions are worded from the server's echoed `environment` block (exact
   // results) or from what the in-browser estimate assumes — never restated
@@ -398,9 +417,7 @@ export default function SimulatorWidget() {
     return q ? `/simulator?${q}` : '/simulator';
   })();
 
-  const catalogBlocked = !bike?.presetId && catalog.state !== 'ready';
-
-  return (
+    return (
     <div
       ref={rootRef}
       onPointerDownCapture={() => setArmed(true)}
@@ -617,7 +634,7 @@ export default function SimulatorWidget() {
                 {locationOpen ? 'Close' : location ? 'Change' : 'Add'}
               </span>
             </button>
-            <p className="field-hint">Adjusts for altitude and weather.</p>
+            <p className="field-hint">{LOCATION_HINT}</p>
             {locationOpen && (
               <div className="mt-2">
                 <LocationPicker
@@ -675,6 +692,9 @@ export default function SimulatorWidget() {
             )}
             {exact?.kind === 'topspeed' && (
               <TopSpeedResult data={exact.data} riderKg={riderKg} placeName={placeName} placeLabel={placeName} onChange={changeLocation} />
+            )}
+            {!exact && loading && runningKind === 'quarter' && (
+              <p role="status" className="text-sm text-white/70">Calculating exact time…</p>
             )}
             {!exact && !loading && estimate && (
               <EstimateResult

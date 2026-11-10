@@ -385,6 +385,17 @@ def print_comparison(entries, results):
 # ═══════════════════════════════════════════
 
 
+def _positive_finite_float(text: str) -> float:
+    """argparse type: a finite float greater than zero."""
+    try:
+        v = float(text)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"not a number: {text!r}") from None
+    if not (v > 0.0 and v < float("inf")):
+        raise argparse.ArgumentTypeError(f"must be a finite number > 0, got {text}")
+    return v
+
+
 def run_bike(
     config: BikeConfig,
     dt: float = 0.001,
@@ -526,7 +537,7 @@ def cmd_bikes(args):
 
     # Handle fitments subcommand
     if getattr(args, "fitments", None):
-        bike = db.bikes.get(args.fitments)
+        bike = db.bikes.get_model(args.fitments)
         if not bike:
             print(f"\n  Error: no bike found with ID {args.fitments}")
             db.close()
@@ -540,9 +551,10 @@ def cmd_bikes(args):
             db.close()
             return
 
-        print(
-            f"\n  Tire Fitments for {bike['manufacturer_name']} {bike['model_name']} ({bike.get('model_code', '-')}):"
-        )
+        if not args.json_out:
+            print(
+                f"\n  Tire Fitments for {bike['manufacturer_name']} {bike['model_name']} ({bike.get('model_code') or '-'}):"
+            )
         if args.json_out:
             print(json.dumps(fitments, indent=2, default=str))
         else:
@@ -1688,7 +1700,9 @@ def legacy_main(args_list=None):
     parser.add_argument("--bike", "-b", type=str, default=None)
     parser.add_argument("--config", "-c", type=str, default=None)
     parser.add_argument("--venue", "-v", type=str, default=None)
-    parser.add_argument("--distance", "-d", type=float, default=QUARTER_MILE_M)
+    parser.add_argument(
+        "--distance", "-d", type=_positive_finite_float, default=QUARTER_MILE_M
+    )
     parser.add_argument("--dt", type=float, default=0.001)
     parser.add_argument("--json", "-j", action="store_true")
     parser.add_argument("--csv", type=str, default=None, metavar="FILE")
@@ -2125,20 +2139,31 @@ def cmd_analysis(args):
             return 0
 
         # Individual ROI ranking
+        # With --bike-id, parts that do not fit the bike are left out by
+        # default (as the API and the optimizer do); --include-incompatible
+        # lists them too, flagged.
+        only_compatible = bike_mid is not None and not getattr(
+            args, "include_incompatible", False
+        )
         results = compute_parts_roi(
             base_config=config,
             part_ids=part_ids,
             parts_repo=parts_repo,
             bike_model_id=bike_mid,
+            require_compatible=only_compatible,
         )
+        hidden = max(0, len(part_ids) - len(results)) if only_compatible else 0
 
         if getattr(args, "output_json", False):
             out = {
                 "bike": bike_name,
                 "base_et": round(results[0].base_et_s, 4) if results else None,
+                "compatible_only": only_compatible,
+                "parts_not_listed": hidden,
                 "parts": [
                     {
                         "part_id": r.part_id,
+                        "compatible": r.is_compatible,
                         "name": r.part_name,
                         "category": r.category_display,
                         "price_inr": r.price_inr,
@@ -2177,8 +2202,14 @@ def cmd_analysis(args):
                     else "no gain"
                 )
                 price = f"₹{r.price_inr:,.0f}" if r.price_inr else "free"
+                flag = "" if r.is_compatible else "  [does not fit this bike]"
                 print(
-                    f"  [{r.part_id:>3}] {r.part_name:<35} {et_s:>10}  {roi:>8}  {cpt:>14}  {price}"
+                    f"  [{r.part_id:>3}] {r.part_name:<35} {et_s:>10}  {roi:>8}  {cpt:>14}  {price}{flag}"
+                )
+            if hidden:
+                print(
+                    f"\n  {hidden} part(s) not listed (not compatible with this bike); "
+                    "use --include-incompatible to show them."
                 )
 
             if getattr(args, "by_category", False):
@@ -3076,9 +3107,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_sim.add_argument(
         "--distance",
         "-d",
-        type=float,
+        type=_positive_finite_float,
         default=QUARTER_MILE_M,
-        help="Simulation distance in meters",
+        help="Simulation distance in meters (> 0)",
     )
     p_sim.add_argument("--dt", type=float, default=0.001, help="Timestep (s)")
     # Output
@@ -3384,6 +3415,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=100_000,
         metavar="INR",
         help="Budget for --optimize in rupees (default: 100000)",
+    )
+    p_roi.add_argument(
+        "--include-incompatible",
+        action="store_true",
+        help="With --bike-id, also rank parts that do not fit the bike (flagged)",
     )
     p_roi.add_argument(
         "--by-category", action="store_true", help="Also print a category-level summary"
@@ -3823,7 +3859,10 @@ def main(args_list=None):
         parser.print_help()
         return 1
 
-    return handler(args)
+    rv = handler(args)
+    # Handlers may return a result object for in-process callers; the process
+    # exit status must be an int (sys.exit(obj) prints obj and exits 1).
+    return rv if isinstance(rv, int) else 0
 
 
 if __name__ == "__main__":

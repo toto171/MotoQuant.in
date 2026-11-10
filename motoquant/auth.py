@@ -121,6 +121,21 @@ IN_DEPLOYED_ENV = bool(
     os.environ.get("RENDER") or os.environ.get("RENDER_EXTERNAL_URL")
 )
 
+# Local-development convenience: with the stdout email backend, print the
+# magic link AND echo the token in the HTTP response so a developer can sign in
+# without a mail transport. This is an explicit opt-in (never derived from
+# the host) because the echo lets any caller sign in as any address; it is
+# ignored on a deployed Render host. Without it a missing transport is a 503.
+DEV_ECHO_TOKEN = (
+    os.environ.get("MOTOQUANT_DEV_ECHO_TOKEN", "").strip().lower()
+    in (
+        "1",
+        "true",
+        "yes",
+    )
+    and not IN_DEPLOYED_ENV
+)
+
 # Rate-limit: one magic link per email per 60 s
 MAGIC_LINK_COOLDOWN_S = 60
 
@@ -139,10 +154,10 @@ if _JWT_SECRET_IS_EPHEMERAL:
 # Same class of foot-gun as the JWT default: silent in dev, invisible in prod
 # until a user reports that the sign-in email never arrived. Warn at boot so
 # it shows up in the deploy log rather than only at the first request.
-if EMAIL_BACKEND == "stdout" and IN_DEPLOYED_ENV:
+if EMAIL_BACKEND == "stdout" and not DEV_ECHO_TOKEN:
     log.warning(
-        "No email backend configured on a deployed host (neither RESEND_API_KEY "
-        "nor SMTP_HOST is set) — magic-link sign-in will return 503. Password "
+        "No email backend configured (neither RESEND_API_KEY nor SMTP_HOST is "
+        "set, and MOTOQUANT_DEV_ECHO_TOKEN is off) — magic-link sign-in will return 503. Password "
         "sign-in is unaffected. Set RESEND_API_KEY + SMTP_FROM, or SMTP_HOST/PORT/USER/PASS/FROM."
     )
 
@@ -467,13 +482,11 @@ def _send_magic_link_email(email: str, token: str) -> None:
     html = _magic_link_html(link)
 
     if EMAIL_BACKEND == "stdout":
-        if IN_DEPLOYED_ENV:
-            # No transport configured on a deployed host. Previously this
-            # branch printed to stdout and let the caller answer "Sign-in
-            # link sent. Check your inbox." — a flat lie that left the user
-            # waiting on mail that was never going to arrive, with no signal
-            # anywhere except the server log. Fail loudly instead; password
-            # sign-in still works and the UI can say so.
+        if not DEV_ECHO_TOKEN:
+            # No transport configured and the local-dev echo is not opted
+            # into. Answering "Sign-in link sent" would be a lie (and printing
+            # the link would leak it into logs), so fail loudly on every
+            # host; password sign-in still works and the UI can say so.
             log.error(
                 "Magic link requested for %s but no email backend is configured "
                 "(set RESEND_API_KEY or SMTP_HOST). Refusing to report success.",
@@ -628,12 +641,10 @@ def request_magic_link(body: MagicLinkRequest) -> MagicLinkResponse:
     _send_magic_link_email(email, token)
 
     resp = MagicLinkResponse(message="Sign-in link sent. Check your inbox.")
-    # Echo the token ONLY in a genuine local dev/test run — never on a deployed
-    # host. Previously this also fired whenever SMTP_HOST was unset, so a prod
-    # box with email not-yet-configured (the beta state) returned the sign-in
-    # token straight to any caller: request a link for any address, read the
-    # token back, verify it → full account takeover with no inbox access.
-    if EMAIL_BACKEND == "stdout" and not IN_DEPLOYED_ENV:
+    # Echo the token ONLY on the explicit local-dev opt-in
+    # (MOTOQUANT_DEV_ECHO_TOKEN=1 with the stdout backend): the echo lets any
+    # caller sign in as any address, so no host detection may enable it.
+    if EMAIL_BACKEND == "stdout" and DEV_ECHO_TOKEN:
         resp.dev_token = token
     return resp
 

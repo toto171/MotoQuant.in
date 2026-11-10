@@ -72,11 +72,11 @@ export const OverlayChart = memo(function OverlayChart({ data, keyBase, label })
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
-            <XAxis dataKey="t" tick={TICK} tickFormatter={(v) => `${v}s`} />
+            <XAxis dataKey="t" type="number" domain={[0, 'dataMax']} tick={TICK} tickFormatter={(v) => `${Math.round(v * 10) / 10}s`} />
             <YAxis tick={TICK} />
-            <Tooltip contentStyle={TOOLTIP} labelFormatter={(v) => `${v} s`} />
-            <Line type="monotone" dataKey={`a_${keyBase}`} stroke={COLOR.a} strokeWidth={2} dot={false} name="Build A" />
-            <Line type="monotone" dataKey={`b_${keyBase}`} stroke={COLOR.b} strokeWidth={2} dot={false} name="Build B" />
+            <Tooltip contentStyle={TOOLTIP} labelFormatter={(v) => `${(+v).toFixed(2)} s`} />
+            <Line type="monotone" dataKey={`a_${keyBase}`} stroke={COLOR.a} strokeWidth={2} dot={false} connectNulls={false} name="Build A" />
+            <Line type="monotone" dataKey={`b_${keyBase}`} stroke={COLOR.b} strokeWidth={2} dot={false} connectNulls={false} name="Build B" />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -93,9 +93,9 @@ export const RealVsSimChart = memo(function RealVsSimChart({ data }) {
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
-            <XAxis dataKey="t" tick={TICK} tickFormatter={(v) => `${v}s`} />
+            <XAxis dataKey="t" type="number" domain={[0, 'dataMax']} tick={TICK} tickFormatter={(v) => `${Math.round(v * 10) / 10}s`} />
             <YAxis tick={TICK} />
-            <Tooltip contentStyle={TOOLTIP} labelFormatter={(v) => `${v} s`} />
+            <Tooltip contentStyle={TOOLTIP} labelFormatter={(v) => `${(+v).toFixed(2)} s`} />
             <Line type="monotone" dataKey="real" stroke={COLOR.b} strokeWidth={2.5} dot={false} name="Your run (Dragy)" />
             <Line type="monotone" dataKey="sim" stroke={COLOR.a} strokeWidth={2} strokeDasharray="5 3" dot={false} name="Simulator" />
           </LineChart>

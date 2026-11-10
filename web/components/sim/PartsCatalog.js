@@ -12,7 +12,7 @@ import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Check, ChevronRight, Search } from 'lucide-react';
 import { partLabel } from '../../lib/api';
 import { ErrorTile, PartChip } from './controls';
-import { exclusiveGroup, inr } from './format';
+import { partSlot, inr } from './format';
 
 const humanKey = (k) => k.split('.').pop().replace(/_/g, ' ');
 
@@ -115,8 +115,8 @@ const PartsCatalog = memo(function PartsCatalog({
   const takenGroups = useMemo(() => {
     const m = new Map();
     for (const p of selectedParts) {
-      const g = exclusiveGroup(categoryNameById[p.category_id]);
-      if (g) m.set(g, partLabel(p.brand, p.model_name));
+      const g = partSlot(p, categoryNameById[p.category_id]);
+      if (g) m.set(g, { id: p.id, label: partLabel(p.brand, p.model_name) });
     }
     return m;
   }, [selectedParts, categoryNameById]);
@@ -169,7 +169,6 @@ const PartsCatalog = memo(function PartsCatalog({
               const isOpen = needle ? true : openCat === cat.id;
               const fits = list.filter((p) => p.compatible !== false).length;
               const chosen = list.filter((p) => selectedIds.has(p.id)).length;
-              const group = exclusiveGroup(cat.name);
               return (
                 <li key={cat.id}>
                   <button
@@ -201,7 +200,7 @@ const PartsCatalog = memo(function PartsCatalog({
                             key={part.id}
                             part={part}
                             selected={selectedIds.has(part.id)}
-                            replaces={group && takenGroups.has(group) ? takenGroups.get(group) : null}
+                            replaces={(() => { const g = partSlot(part, cat.name); return g && takenGroups.has(g) && takenGroups.get(g).id !== part.id ? takenGroups.get(g).label : null; })()}
                             onToggle={onToggle}
                           />
                         ))

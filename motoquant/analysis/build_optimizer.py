@@ -494,6 +494,10 @@ SWAP_REPAIR_MAX_SIMS = 24
 _SWAP_ESTIMATE_WINDOW = 0.15
 
 
+# Single-part builds simmed by the final guard in _swap_repair.
+_SINGLE_PART_GUARD_SIMS = 2
+
+
 def _swap_repair(
     base_config,
     selected: list[PartROIResult],
@@ -513,7 +517,10 @@ def _swap_repair(
     For each unselected candidate that fits the budget and the exclusivity
     rules once a selected part is removed, the swapped build is simulated as a
     whole; a swap is kept only when the joint metric strictly improves. At
-    most ``max_sims`` extra sims are spent. Returns (selected, sims_used).
+    most ``max_sims`` extra sims are spent in total, the last few of them on
+    checking the top single-part builds so the result is never worse than the
+    best single part.
+    Returns (selected, sims_used).
     """
     if max_sims is None:
         max_sims = SWAP_REPAIR_MAX_SIMS
@@ -550,7 +557,9 @@ def _swap_repair(
     sims += 1  # combined sim of the starting build (memoized when repeated)
 
     tried: set[frozenset[int]] = {frozenset(r.part_id for r in current)}
-    while sims < max_sims:
+    # The final single-part guard below is part of the same sim budget.
+    swap_cap = max(sims, max_sims - _SINGLE_PART_GUARD_SIMS)
+    while sims < swap_cap:
         chosen_ids = {r.part_id for r in current}
         spend = sum(r.price_inr for r in current)
         moves: list[tuple[float, PartROIResult, PartROIResult]] = []
@@ -571,7 +580,7 @@ def _swap_repair(
 
         improved = False
         for _est, u, s_ in moves:
-            if sims >= max_sims:
+            if sims >= swap_cap:
                 break
             cand = [r for r in current if r.part_id != s_.part_id] + [u]
             key = frozenset(r.part_id for r in cand)
@@ -588,6 +597,27 @@ def _swap_repair(
                 break
         if not improved:
             break
+
+    # Never return a build that is worse than the best single part it ranked:
+    # a stacked build can be dragged down by interactions (stacked boost +
+    # nitrous, say) that one-for-one swaps cannot unwind. The top few
+    # affordable single parts are simmed as whole builds and win when they
+    # beat the refined build.
+    singles = sorted(
+        (
+            r
+            for r in individual
+            if r.is_compatible and gain(r) > 0 and r.price_inr <= budget_inr
+        ),
+        key=lambda r: -gain(r),
+    )[:_SINGLE_PART_GUARD_SIMS]
+    for r in singles:
+        if len(current) == 1 and current[0].part_id == r.part_id:
+            continue
+        m = build_metric([r])
+        sims += 1
+        if m is not None and m > cur_metric + 1e-9:
+            current, cur_metric = [r], m
     return current, sims
 
 

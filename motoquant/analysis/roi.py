@@ -113,7 +113,7 @@ class PartROIResult:
         roi_str = f"{self.roi_score:.3f}" if self.roi_score < 999 else "∞"
         cpt_str = (
             f"₹{self.cost_per_tenth_inr:,.0f}/tenth"
-            if self.delta_et_s > 0
+            if self.delta_et_s > 0 and math.isfinite(self.cost_per_tenth_inr)
             else "no gain"
         )
         price_s = f"₹{self.price_inr:,.0f}" if self.price_inr else "free"
@@ -864,17 +864,22 @@ def find_best_build(
     # Filter to parts that improve the objective, fit the budget, and are
     # actually compatible (is_compatible now reflects the production fitment
     # engine; incompatible parts are counted, never built).
+    # For the ET objective a part must also clear the same noise floor
+    # compute_parts_roi applies (a 1 ms "gain" is simulation noise: it would
+    # spend budget and print an infinite cost per tenth).
+    et_floor_s = min_delta_et_ms / 1000.0 if objective == "min_et" else 0.0
     candidates = [
         r
         for r in individual
         if (allow_negative_parts or gain_of(r) >= 0)
+        and (allow_negative_parts or gain_of(r) >= et_floor_s)
         and r.price_inr <= budget_inr
         and r.is_compatible
     ]
 
     n_evaluated = len(individual)
     n_incompat = sum(1 for r in individual if not r.is_compatible)
-    n_no_gain = sum(1 for r in individual if gain_of(r) <= 0)
+    n_no_gain = sum(1 for r in individual if gain_of(r) <= et_floor_s)
 
     if not candidates:
         base_et, base_trap = _et(base_config)

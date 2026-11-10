@@ -812,7 +812,7 @@ def get_category_upgrade_order(
             reason = f"Free upgrade — {part.delta_et_s:.3f}s gain for ₹0"
         elif part.roi_score > 1.0:
             reason = f"High ROI: {part.delta_et_s:.3f}s gain for ₹{part.price_inr:,.0f}"
-        elif part.delta_et_s > 0.1:
+        elif part.delta_et_s > 0.1 and math.isfinite(part.cost_per_tenth_inr):
             reason = f"Large gain: {part.delta_et_s:.3f}s (₹{part.cost_per_tenth_inr:,.0f}/tenth)"
         else:
             reason = f"Moderate gain: {part.delta_et_s:.3f}s for ₹{part.price_inr:,.0f}"

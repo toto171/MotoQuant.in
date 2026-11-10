@@ -18,8 +18,9 @@
  *  - value       : selected bike object | null ({id, manufacturer, model, …})
  *  - onSelect    : (bike) => void
  *  - label       : field label (default 'Bike')
- *  - popular     : optional [{label, search}] — chip click runs the search and
- *                  selects the first hit
+ *  - popular     : optional boolean — show the shared popular-bike chips
+ *                  (lib/popularBikes.js); a chip selects that family's newest
+ *                  generation and is not rendered if the catalogue lacks it
  *  - placeholder : optional search-box placeholder
  *  - hint        : optional helper line shown under the control
  */
@@ -27,7 +28,8 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown, Search } from 'lucide-react';
-import { API_URL } from '@/lib/api';
+import { API_URL, getBikeCatalog } from '@/lib/api';
+import { popularChips } from '@/lib/popularBikes';
 
 const DEFAULT_PLACEHOLDER = 'Search bikes — e.g. Duke 390';
 
@@ -151,23 +153,17 @@ export default function BikePicker({
     el?.scrollIntoView({ block: 'nearest' });
   }, [hi]);
 
-  const [chipError, setChipError] = useState(null); // { search } of the chip that failed
-
-  const pickPopular = async (search) => {
-    setChipError(null);
-    try {
-      const r = await fetch(
-        `${API_URL}/api/bikes?search=${encodeURIComponent(search)}&limit=1`
-      );
-      if (!r.ok) throw new Error(String(r.status));
-      const data = await r.json();
-      if (data.bikes?.[0]) pick(data.bikes[0]);
-      else throw new Error('not found');
-    } catch {
-      // Never fail silently: say so, and offer a retry.
-      setChipError({ search });
-    }
-  };
+  // Popular chips come from the full catalogue (already fetched once per page
+  // for the other pickers), so each chip selects a real, current record.
+  const [chips, setChips] = useState([]);
+  useEffect(() => {
+    if (!popular) return undefined;
+    let live = true;
+    getBikeCatalog()
+      .then((all) => { if (live) setChips(popularChips(all)); })
+      .catch(() => { if (live) setChips([]); });
+    return () => { live = false; };
+  }, [popular]);
 
   const display = value
     ? `${value.manufacturer || ''} ${value.model || ''}`.trim()
@@ -207,31 +203,19 @@ export default function BikePicker({
       </button>
       {hint && <p className="field-hint">{hint}</p>}
 
-      {popular && popular.length > 0 && !value && (
+      {popular && chips.length > 0 && !value && (
         <div className="mt-2.5 flex flex-wrap gap-2" role="group" aria-label="Popular bikes">
-          {popular.map((p) => (
+          {chips.map((c) => (
             <button
-              key={p.label}
+              key={c.label}
               type="button"
-              onClick={() => pickPopular(p.search)}
+              onClick={() => pick(c.bike)}
               className="inline-flex min-h-[44px] items-center rounded-full border border-white/15 px-4 text-sm font-medium text-white/80 transition-colors hover:border-accent/60 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/70"
             >
-              {p.label}
+              {c.label}
             </button>
           ))}
         </div>
-      )}
-      {chipError && (
-        <p role="alert" className="mt-2 text-sm text-signal-foul">
-          We couldn&apos;t reach the bike list.{' '}
-          <button
-            type="button"
-            onClick={() => pickPopular(chipError.search)}
-            className="font-medium underline underline-offset-2"
-          >
-            Try again
-          </button>
-        </p>
       )}
 
       <AnimatePresence>

@@ -53,16 +53,6 @@ const signed = (n, d = 1) => {
   return `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toFixed(d)}`;
 };
 
-// One-tap starts for first-time users (shared BikePicker `popular` prop).
-const POPULAR_BIKES = [
-  { label: 'Hayabusa', search: 'hayabusa' },
-  { label: 'R15 V4', search: 'r15 v4' },
-  { label: 'Duke 390', search: 'duke 390' },
-  { label: 'Classic 350', search: 'classic 350' },
-  { label: 'ZX-10R', search: 'zx-10r' },
-  { label: 'GSX-R1000', search: 'gsx-r1000' },
-];
-
 // What the server uses when no place is chosen (stated before a run, so there
 // is no server block to read yet; after a run the echoed block is used).
 const DEFAULT_CONDITIONS = `the default conditions (${DEFAULT_ALTITUDE_M} m altitude, ${DEFAULT_TEMP_C} °C)`;
@@ -268,7 +258,7 @@ export default function EcuAutotune() {
       {/* ── Inputs ─────────────────────────────────────────────────────── */}
       <div className="space-y-4">
         <Step n={1} title="Choose your bike">
-          <BikePicker value={bike} onSelect={setBike} popular={POPULAR_BIKES} />
+          <BikePicker value={bike} onSelect={setBike} popular />
         </Step>
 
         <Step n={2} id="mq-tune-where" title="Where are you racing?">

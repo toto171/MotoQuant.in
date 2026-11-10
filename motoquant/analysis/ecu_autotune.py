@@ -353,6 +353,40 @@ def _fuel_timing_recommendation(config: BikeConfig, env: dict, sigma: float) -> 
     }
 
 
+def _drop_gearing(gearing: dict, stock: dict) -> None:
+    """Withdraw the gearing change: the quickest verified setup does not use it."""
+    gearing.update(
+        recommended_front=gearing["stock_front"],
+        recommended_rear=gearing["stock_rear"],
+        recommended_final_drive=round(
+            gearing["stock_rear"] / max(1, gearing["stock_front"]), 3
+        ),
+        et_s=stock["et_s"],
+        trap_kmh=stock["trap_kmh"],
+        delta_et_s=0.0,
+        recommendation=(
+            f"keep stock {gearing['stock_front']}/{gearing['stock_rear']} gearing "
+            "(no gain beyond the launch-RPM change)"
+        ),
+    )
+
+
+def _drop_launch(launch: dict, stock: dict) -> None:
+    """Withdraw the launch-RPM change: the quickest verified setup does not use it."""
+    reason = (
+        "No gain beyond the gearing change, so no launch-RPM change is recommended."
+    )
+    launch.update(
+        adjustable=False,
+        recommended_rpm=None,
+        et_s=stock["et_s"],
+        trap_kmh=None,
+        delta_et_s=0.0,
+        reason=reason,
+        rationale=reason,
+    )
+
+
 # ─────────────────────────────────────────────────────────────────────────
 # Top-level
 # ─────────────────────────────────────────────────────────────────────────
@@ -426,23 +460,59 @@ def autotune(
     tyres = _tyre_pressure_recommendation(config, env_block)
     fuel = _fuel_timing_recommendation(config, env_block, sigma)
 
-    # Net effect of the simulated knobs applied together (gearing, and launch
-    # RPM only where the sim responds to it).
-    combined = {"et_s": stock["et_s"], "trap_kmh": stock["trap_kmh"], "delta_et_s": 0.0}
+    # Headline setup = whichever verified configuration is actually quickest:
+    # gearing alone, launch RPM alone, or both together. The two sweeps each
+    # ran at the OTHER knob's stock value, so their joint effect is not simply
+    # additive and can be slower than one knob by itself. A knob that does not
+    # earn its place is dropped from the recommendation.
+    combined = {
+        "et_s": stock["et_s"],
+        "trap_kmh": stock["trap_kmh"],
+        "delta_et_s": 0.0,
+        "knobs": [],
+    }
     if include_combined:
-        cfg = copy.deepcopy(config)
-        if gearing.get("adjustable") and gearing.get("recommended_rear"):
+        g_change = bool(
+            gearing.get("adjustable")
+            and gearing.get("recommended_rear")
+            and gearing["recommended_rear"] != gearing.get("stock_rear")
+        )
+        l_change = bool(
+            launch.get("adjustable")
+            and launch.get("recommended_rpm") is not None
+            and launch["recommended_rpm"] != launch.get("stock_rpm")
+        )
+        options: list[tuple[float, float, tuple[str, ...]]] = []
+        if g_change:
+            options.append((gearing["et_s"], gearing["trap_kmh"], ("gearing",)))
+        if l_change:
+            options.append((launch["et_s"], launch["trap_kmh"], ("launch_rpm",)))
+        if g_change and l_change:
+            cfg = copy.deepcopy(config)
             cfg.drivetrain.rear_sprocket = int(gearing["recommended_rear"])
-        if launch.get("adjustable") and launch.get("recommended_rpm") is not None:
             cfg.staging.launch_rpm = float(launch["recommended_rpm"])
-        c_et, c_trap = sim(cfg)
-        if _tick is not None:
-            _tick("Verifying combined setup")
-        combined = {
-            "et_s": round(c_et, 4),
-            "trap_kmh": round(c_trap * 3.6, 1),
-            "delta_et_s": round(c_et - stock_et, 4) + 0.0,  # negative = faster
-        }
+            c_et, c_trap = sim(cfg)
+            if _tick is not None:
+                _tick("Verifying combined setup")
+            options.append(
+                (round(c_et, 4), round(c_trap * 3.6, 1), ("gearing", "launch_rpm"))
+            )
+        # Only a setup that beats stock is worth recommending; on a tie the
+        # one with fewer changes wins (min() keeps the first, singles come first).
+        best = min(options, key=lambda o: o[0], default=None)
+        if best is not None and best[0] < stock["et_s"]:
+            c_et, c_trap_kmh, knobs = best
+            combined = {
+                "et_s": float(round(c_et, 4)),
+                "trap_kmh": float(c_trap_kmh),
+                "delta_et_s": float(round(c_et - stock_et, 4))
+                + 0.0,  # negative = faster
+                "knobs": list(knobs),
+            }
+        if "gearing" not in combined["knobs"] and g_change:
+            _drop_gearing(gearing, stock)
+        if "launch_rpm" not in combined["knobs"] and l_change:
+            _drop_launch(launch, stock)
 
     # Overall plain-language rationale tying it to the atmospherics.
     da = env_block["density_altitude_ft"]

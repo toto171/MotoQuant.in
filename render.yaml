@@ -60,6 +60,10 @@ services:
       #   JWT_SECRET (32+ random bytes) — without it a random per-process
       #     secret is used and sign-in sessions reset on every restart
       #   SMTP_HOST/PORT/USER/PASS/FROM or RESEND_API_KEY (magic-link email)
+      #   Without one of those, magic-link sign-in answers 503 (password
+      #   sign-in is unaffected). MOTOQUANT_DEV_ECHO_TOKEN=1 (local
+      #   development only, ignored on Render) echoes the link token in the
+      #   response; never set it on a shared host.
       # NOTE: secrets (GEMINI_API_KEY, GROQ_API_KEY, SENTRY_DSN, JWT_SECRET,
       # etc.) are set manually in the
       # Render dashboard under Environment -> Add Environment Variable so they

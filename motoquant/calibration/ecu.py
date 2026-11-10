@@ -42,6 +42,7 @@ Public API
 
 import csv
 import re
+import warnings
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
@@ -78,8 +79,6 @@ class ECUParseError(Exception):
 # Each entry: (standard_name, conversion_fn_or_factor)
 # conversion can be: float (multiply), callable, or None (identity)
 
-_SPEED_NAME = r"^(speed|vss|vehicle.?speed|wheel.?speed|ground.?speed)"
-
 _CHANNEL_ALIASES: list[tuple[str, str, object | None]] = [
     # (regex pattern matching header col, standard_name, conversion)
     # Time
@@ -95,17 +94,7 @@ _CHANNEL_ALIASES: list[tuple[str, str, object | None]] = [
     (r"^tp[%_]?$", "tps_pct", None),
     (r"^throttle.?pos", "tps_pct", None),
     (r"^throttle.?(%|pct|percent)", "tps_pct", None),
-    # Vehicle speed.  Explicit imperial / SI unit tokens are matched BEFORE the
-    # km/h patterns (whose unit group is optional, so they would otherwise claim
-    # "Speed (mph)" and "Vehicle Speed (m/s)" and convert with the km/h factor).
-    (_SPEED_NAME + r".*(?<![a-z])(mph|mi/?h)[\s)\]]*$", "vehicle_speed_ms", MPH_TO_MS),
-    (_SPEED_NAME + r".*(?<![a-z])(m/s|mps)[\s)\]]*$", "vehicle_speed_ms", None),
-    # km/h → m/s (also the unit assumed for a bare "Speed" header)
-    (r"^speed[_ (km/h)]*$", "vehicle_speed_ms", KMH_TO_MS),
-    (r"^vss.*(km.?h)?$", "vehicle_speed_ms", KMH_TO_MS),
-    (r"^vehicle.?speed.*(km.?h)?$", "vehicle_speed_ms", KMH_TO_MS),
-    (r"^wheel.?speed.*(km.?h)?$", "vehicle_speed_ms", KMH_TO_MS),
-    (r"^ground.?speed.*(km.?h)?$", "vehicle_speed_ms", KMH_TO_MS),
+    # Vehicle speed is mapped by _map_speed_column (unit-aware), not here.
     # Gear
     (r"^gear[_ ]?(position|pos)?$", "gear", None),
     (r"^current.?gear", "gear", None),
@@ -604,9 +593,55 @@ def _apply_unit_overrides(
 # ─── Column mapping ────────────────────────────────────────────────────────
 
 
+# Vehicle-speed header = a speed-ish name followed by an optional unit.
+_SPEED_COL_RE = re.compile(
+    r"^(?:gps[\s_.\-]*speed|veh(?:icle)?[\s_.\-]*(?:speed|spd)|wheel[\s_.\-]*speed"
+    r"|ground[\s_.\-]*speed|speed|vss)"
+)
+# Unit spellings (after brackets/spaces/underscores are removed) -> conversion
+# to m/s. A bare header with no unit is assumed to be km/h.
+_SPEED_UNITS: dict[str, object | None] = {
+    "": KMH_TO_MS,
+    "km/h": KMH_TO_MS,
+    "kmh": KMH_TO_MS,
+    "kph": KMH_TO_MS,
+    "kmph": KMH_TO_MS,
+    "mph": MPH_TO_MS,
+    "mi/h": MPH_TO_MS,
+    "mih": MPH_TO_MS,
+    "m/s": None,
+    "mps": None,
+}
+
+
+def _map_speed_column(col_lower: str) -> tuple[str | None, object | None] | None:
+    """Map a vehicle-speed header; None if *col_lower* is not a speed header.
+
+    A speed header whose unit is not one of km/h (kph), mph (mi/h) or m/s is
+    REFUSED (``(None, None)`` plus a warning) rather than converted with a
+    guessed factor: "Speed (knots)" read as km/h would silently skew every ET
+    and trap figure.
+    """
+    m = _SPEED_COL_RE.match(col_lower)
+    if m is None:
+        return None
+    unit = re.sub(r"[\s()\[\]_\-:]+", "", col_lower[m.end() :])
+    if unit in _SPEED_UNITS:
+        return "vehicle_speed_ms", _SPEED_UNITS[unit]
+    warnings.warn(
+        f"ECU header {col_lower!r}: unrecognised speed unit {unit!r} "
+        "(expected km/h, mph or m/s); column ignored",
+        stacklevel=2,
+    )
+    return None, None
+
+
 def _map_column(col_name: str) -> tuple[str | None, object | None]:
     """Map a raw column name to a standard channel name + conversion."""
     col_lower = col_name.lower().strip()
+    speed = _map_speed_column(col_lower)
+    if speed is not None:
+        return speed
     # Strip units in parentheses for matching: "Speed (km/h)" → "Speed"
     col_clean = re.sub(r"\s*\([^)]*\)", "", col_lower).strip()
 

@@ -468,7 +468,9 @@ let _partsPromise = null;
 export function getPartsCatalog() {
   if (_partsPromise) return _partsPromise;
   _partsPromise = (async () => {
-    const res = await fetch(`${API_URL}/api/parts?limit=5000`);
+    // include_rules adds each part's `specifications` (slot position/type for the
+    // picker's one-per-slot rule); the response is gzipped (~55 KB).
+    const res = await fetch(`${API_URL}/api/parts?limit=5000&include_rules=true`);
     if (!res.ok) {
       const err = new Error(`API error ${res.status}`);
       err.status = res.status;

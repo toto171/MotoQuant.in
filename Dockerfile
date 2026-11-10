@@ -23,6 +23,10 @@ RUN useradd -m app && chown -R app:app /app
 # Railway injects PORT at runtime
 ENV PORT=8000
 ENV MOTOQUANT_DB=/app/motoquant.db
+# Magic-link email needs RESEND_API_KEY or SMTP_HOST (+ SMTP_FROM) at run time;
+# without one, /api/auth/magic-link answers 503 and password sign-in still works.
+# MOTOQUANT_DEV_ECHO_TOKEN=1 (local development only; NOT set here) would echo
+# the sign-in token in the HTTP response -- never enable it on a shared host.
 
 USER app
 

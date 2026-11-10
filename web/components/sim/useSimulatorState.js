@@ -26,13 +26,15 @@ import {
 } from '../../lib/api';
 import useAsyncTask from '../../lib/useAsyncTask';
 import { predictQuick, preloadSurrogate } from '../../lib/surrogate';
+import { instantBlocker, venueSurface } from '../../lib/instantEstimate';
 import { useAuth } from '../AuthProvider';
 import { track, trackSimRun, installErrorHandlers } from '../../lib/telemetry';
 import {
-  DEFAULTS, MODE_KEY, bikeName, exclusiveGroup, makeKey, normalizeFull,
+  DEFAULTS, MODE_KEY, bikeName, partSlot, makeKey, normalizeFull,
   pickDefaultBikeForVariant, resolveBikeSlug, resolveVenueSlug,
 } from './format';
 
+const isNumber = (v) => typeof v === 'number' && Number.isFinite(v);
 const abortError = () => new DOMException('Aborted', 'AbortError');
 const throwIfAborted = (signal) => { if (signal?.aborted) throw abortError(); };
 
@@ -160,7 +162,7 @@ export default function useSimulatorState(searchParams) {
     humidity === DEFAULTS.humidity && headwind === DEFAULTS.headwind;
   const envCustom = location ? envTouched : !weatherDefault;
 
-  const vals = { bike, selectedParts, frontTire, rearTire, venue, riderKg, powerBoost,
+  const vals = { bike, selectedParts, frontTire, rearTire, venue, location, riderKg, powerBoost,
     massChange, ambientTemp, trackTemp, humidity, headwind };
   const keyFull = makeKey(vals, true);
   const keyNoParts = makeKey(vals, false);
@@ -196,6 +198,22 @@ export default function useSimulatorState(searchParams) {
       humidity_pct: humidity,
       headwind_kmh: headwind,
     };
+  }
+
+  // The chosen place, in the fields every sim route accepts. A known venue is
+  // sent by id (the server then uses its altitude and surface); any other
+  // resolved place (a hill town, a city) is sent by name with its coordinates
+  // and altitude, so the altitude it was resolved at is the altitude simulated.
+  function placeFields() {
+    if (venue?.id != null) return { venue_id: venue.id };
+    if (!location) return {};
+    const out = {};
+    const label = location.venue_name || location.location_name || location._label || location.resolved_name;
+    if (label) out.location = label;
+    if (isNumber(location.latitude)) out.lat = location.latitude;
+    if (isNumber(location.longitude)) out.lon = location.longitude;
+    if (isNumber(location.altitude_m)) out.altitude_m = location.altitude_m;
+    return out;
   }
 
   // A shared link can carry a venue or tyre id that no longer exists; the API
@@ -245,7 +263,7 @@ export default function useSimulatorState(searchParams) {
     else if (bike?.preset) body.bike_preset = bike.preset;
     if (frontTire?.id != null) body.front_tire_id = frontTire.id;
     if (rearTire?.id != null) body.rear_tire_id = rearTire.id;
-    if (venue?.id != null) body.venue_id = venue.id;
+    Object.assign(body, placeFields());
     return body;
   }
 
@@ -259,16 +277,23 @@ export default function useSimulatorState(searchParams) {
     const emit = trigger !== 'auto' || lastTrackedBikeRef.current !== bike.id;
     if (trigger === 'auto') lastTrackedBikeRef.current = bike.id;
 
-    if (
-      trigger === 'auto' && bike?.id != null && weatherDefault &&
-      selectedParts.length === 0 && frontTire?.id == null && rearTire?.id == null
-    ) {
+    // Anything the in-browser model has no input for goes to the server (see
+    // lib/instantEstimate.js for the full list and what enforces each item).
+    const blocker = instantBlocker({
+      bikeId: bike?.id ?? null,
+      hasParts: selectedParts.length > 0,
+      hasTyres: frontTire?.id != null || rearTire?.id != null,
+      weatherDefault,
+      hasPlace: !!location,
+    });
+    if (trigger === 'auto' && !blocker) {
       const est = await predictQuick({
         bikeId: bike.id,
         riderMassKg: riderKg,
         powerBoostPct: powerBoost,
         massDeltaKg: massChange,
         venueId: venue?.id ?? null,
+        venueSurface: venueSurface(venue),
       });
       throwIfAborted(signal);
       if (est.ok) {
@@ -402,7 +427,7 @@ export default function useSimulatorState(searchParams) {
       b_mass_delta_kg: compareMass,
       b_rider_mass_kg: riderKg,
       b_part_ids: [],
-      venue_id: venue?.id ?? undefined,
+      ...placeFields(),
       ...weatherFields(),
     };
     const runEvent = trackSimRun('simulator_page', 'compare', {
@@ -529,9 +554,9 @@ export default function useSimulatorState(searchParams) {
   const togglePart = useCallback((part) => {
     setSelectedParts((prev) => {
       if (prev.some((p) => p.id === part.id)) return prev.filter((p) => p.id !== part.id);
-      const grp = exclusiveGroup(catNameRef.current[part.category_id]);
+      const grp = partSlot(part, catNameRef.current[part.category_id]);
       const kept = grp
-        ? prev.filter((p) => exclusiveGroup(catNameRef.current[p.category_id]) !== grp)
+        ? prev.filter((p) => partSlot(p, catNameRef.current[p.category_id]) !== grp)
         : prev;
       return [...kept, part];
     });
@@ -570,7 +595,8 @@ export default function useSimulatorState(searchParams) {
     } else {
       setVenue(null);
     }
-    if (env?.temperature_c != null) setAmbientTemp(Math.round(env.temperature_c));
+    // Same bounds as the slider, the share-link parser and the API (-30..60 °C).
+    if (env?.temperature_c != null) setAmbientTemp(Math.max(-30, Math.min(60, Math.round(env.temperature_c))));
     if (env?.humidity_pct != null) setHumidity(Math.round(env.humidity_pct));
   }, [venues]);
 
@@ -885,7 +911,7 @@ export default function useSimulatorState(searchParams) {
     qsNum('boost', setPowerBoost, -20, 50);
     qsNum('mass', setMassChange, -30, 30);
     const envSet = [
-      qsNum('temp', setAmbientTemp, 0, 50),
+      qsNum('temp', setAmbientTemp, -30, 60),
       qsNum('track', setTrackTemp, 10, 65),
       qsNum('hum', setHumidity, 0, 100),
       qsNum('wind', setHeadwind, -30, 30),

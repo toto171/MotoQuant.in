@@ -71,16 +71,6 @@ const BUDGET_PRESETS = [
 const NO_LIMIT = null;
 const SLIDER_MAX = 2000000;
 
-// One-tap starts for first-time users (shared BikePicker `popular` prop).
-const POPULAR_BIKES = [
-  { label: 'Hayabusa', search: 'hayabusa' },
-  { label: 'R15 V4', search: 'r15 v4' },
-  { label: 'Duke 390', search: 'duke 390' },
-  { label: 'Classic 350', search: 'classic 350' },
-  { label: 'ZX-10R', search: 'zx-10r' },
-  { label: 'GSX-R1000', search: 'gsx-r1000' },
-];
-
 const SEVERITY_WORDS = { info: 'Note', warning: 'Heads up', critical: 'Important' };
 
 // What the server uses when no place is chosen (stated before a run; after a
@@ -327,7 +317,7 @@ export default function BuildOptimizer() {
       {/* ── Inputs ─────────────────────────────────────────────────────── */}
       <div className="space-y-4">
         <Step n={1} title="Choose your bike">
-          <BikePicker value={bike} onSelect={setBike} popular={POPULAR_BIKES} />
+          <BikePicker value={bike} onSelect={setBike} popular />
         </Step>
 
         <Step n={2} title="Set your budget">

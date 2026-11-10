@@ -87,7 +87,7 @@ export const EnvironmentPanel = memo(function EnvironmentPanel({
               renderSelected={venueSelected}
             />
           )}
-          <SimSlider label="Air temperature" value={ambientTemp} onChange={setAmbientTemp} min={0} max={50} unit=" °C" />
+          <SimSlider label="Air temperature" value={ambientTemp} onChange={setAmbientTemp} min={-30} max={60} unit=" °C" />
           <SimSlider label="Track temperature" value={trackTemp} onChange={setTrackTemp} min={10} max={65} unit=" °C" />
           <SimSlider label="Humidity" value={humidity} onChange={setHumidity} min={0} max={100} unit=" %" />
           <SimSlider

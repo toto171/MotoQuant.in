@@ -88,7 +88,8 @@ export default function ResultCard({ sim, advanced = false }) {
 
       {bike && !headline && !quickTask.error && (
         <div aria-busy="true" aria-label="Calculating your time" className="mt-4">
-          <div className="skeleton h-5 w-40" />
+          <p role="status" className="text-sm text-white/70">Calculating exact time…</p>
+          <div className="skeleton mt-2 h-5 w-40" />
           <div className="skeleton mt-3 h-16 w-56" />
           <div className="skeleton mt-4 h-4 w-full" />
           <div className="skeleton mt-2 h-4 w-3/4" />
@@ -126,7 +127,8 @@ export default function ResultCard({ sim, advanced = false }) {
           <ConditionsLine
             className="mt-2 text-sm text-white/65"
             env={headline.environment}
-            estimate={headline.environment ? null : headline.estimateAssumes || {}}
+            estimate={headline.environment || !headline.estimated ? null : headline.estimateAssumes || {}}
+            unreported={!headline.environment && !headline.estimated}
             placeLabel={!venueChosen ? meta?.placeLabel : null}
             onChange={changeLocation}
           />

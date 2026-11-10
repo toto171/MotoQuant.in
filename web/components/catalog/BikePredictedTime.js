@@ -100,7 +100,8 @@ export default function BikePredictedTime({ bike }) {
                 as="span"
                 className=""
                 env={est.env}
-                estimate={est.env ? null : {}}
+                estimate={est.env || !est.instant ? null : {}}
+                unreported={!est.env && !est.instant}
               />{' '}
               Pick your own location in the simulator.
             </p>

@@ -7,6 +7,7 @@ import BikeChooser from './BikeChooser';
 import ResultCard from './ResultCard';
 import { SimSlider } from './controls';
 import AskPanel from './AskPanel';
+import { LOCATION_HINT } from '../../lib/instantEstimate';
 
 /**
  * SimpleMode — two steps and an answer. Stacked on phones with the result
@@ -94,7 +95,7 @@ export default function SimpleMode({ sim }) {
             <div id="sim-location">
               <p className="field-label">Where are you racing? (optional)</p>
               <LocationPicker value={location} onResolved={applyLocation} onCleared={resetEnv} compact />
-              <p className="field-hint">Adjusts for altitude and weather. Leave blank to use the default conditions.</p>
+              <p className="field-hint">{LOCATION_HINT} Leave blank to use the default conditions.</p>
             </div>
           </div>
         </section>

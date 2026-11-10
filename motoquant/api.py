@@ -64,7 +64,10 @@ from pydantic import BaseModel, ConfigDict, Field
 # python:3.11-slim in prod hit exactly that and crash-looped — 2026-06-06.
 from typing_extensions import TypedDict
 
-from .database.connection import bump_catalog_generation, catalog_generation
+from .database.connection import (
+    bump_catalog_generation,
+    catalog_token,
+)
 from .defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 from .models import BikeConfig
 from .physics import MotoQuantEngine
@@ -389,7 +392,30 @@ class DistanceResultDict(TypedDict):
 # ─── Request / response models ────────────────────────────────────────────
 
 
-class SimulateRequest(BaseModel):
+class ConditionsRequest(BaseModel):
+    """Optional race conditions shared by every simulate, compare, optimiser,
+    autotune and outlaw route (and their ``/api/jobs/*`` variants).
+
+    Precedence: ``venue_id`` (seeded venue) sets altitude and surface first; a
+    resolved ``location`` / ``lat``+``lon`` then sets the environment; explicit
+    values (``altitude_m``, ``ambient_temp_c``, ``track_temp_c``,
+    ``humidity_pct``, ``pressure_hpa``) override both. The conditions actually
+    simulated are echoed in the response's ``environment`` block."""
+
+    location: str | None = Field(
+        None, max_length=200, description="City/venue, e.g. 'Pune, IN'"
+    )
+    venue_id: DbId | None = Field(None, description="Seeded venue id (sets altitude)")
+    lat: float | None = Field(None, ge=-90, le=90)
+    lon: float | None = Field(None, ge=-180, le=180)
+    altitude_m: float | None = Field(None, ge=-500, le=8000)
+    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
+    track_temp_c: float | None = Field(None, ge=-30, le=80)
+    humidity_pct: float | None = Field(None, ge=0, le=100)
+    pressure_hpa: float | None = Field(None, ge=800, le=1100)
+
+
+class SimulateRequest(ConditionsRequest):
     """POST /api/simulate -- full simulation request."""
 
     # Bike selection -- one of these must be provided
@@ -420,24 +446,10 @@ class SimulateRequest(BaseModel):
     )
     front_tire_id: DbId | None = Field(None, description="Override front tire DB ID")
     rear_tire_id: DbId | None = Field(None, description="Override rear tire DB ID")
-    venue_id: DbId | None = Field(
-        None, description="Venue for DA and surface conditions"
-    )
-
-    # Environment overrides (applied on top of venue defaults if set).
-    # Bounds match AutotuneRequest, which had them from the start. Without
-    # them (2026-07-25 audit) physically impossible input was absorbed as a
-    # 200 success with a silently meaningless answer: humidity_pct=1e9 or
-    # ambient_temp_c=500 returned et_quarter_s 0.0 / trap 0.0.
-    ambient_temp_c: float | None = Field(
-        None, ge=-30, le=60, description="Ambient temperature C"
-    )
-    track_temp_c: float | None = Field(
-        None, ge=-30, le=80, description="Track surface temperature C"
-    )
-    humidity_pct: float | None = Field(
-        None, ge=0, le=100, description="Relative humidity 0-100%"
-    )
+    # venue_id / location / lat / lon / altitude_m / ambient_temp_c /
+    # track_temp_c / humidity_pct / pressure_hpa come from ConditionsRequest.
+    # Their bounds reject physically impossible input (humidity_pct=1e9 or
+    # ambient_temp_c=500 once returned et_quarter_s 0.0 as a 200 success).
     headwind_kmh: float | None = Field(
         None, ge=-200, le=200, description="Headwind km/h (negative = tailwind)"
     )
@@ -459,7 +471,7 @@ class SimulateRequest(BaseModel):
     )
 
 
-class QuickSimRequest(BaseModel):
+class QuickSimRequest(ConditionsRequest):
     """POST /api/simulate/quick -- minimal input for slider-driven UI."""
 
     bike_id: DbId | None = None
@@ -476,11 +488,6 @@ class QuickSimRequest(BaseModel):
     )
     front_tire_id: DbId | None = None
     rear_tire_id: DbId | None = None
-    venue_id: DbId | None = None
-    # Environment overrides
-    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
-    track_temp_c: float | None = Field(None, ge=-30, le=80)
-    humidity_pct: float | None = Field(None, ge=0, le=100)
     headwind_kmh: float | None = Field(None, ge=-200, le=200)
 
 
@@ -539,8 +546,18 @@ def _build_config(
     track_temp_c: float | None = None,
     humidity_pct: float | None = None,
     headwind_kmh: float | None = None,
+    altitude_m: float | None = None,
+    pressure_hpa: float | None = None,
+    location: str | None = None,
+    lat: float | None = None,
+    lon: float | None = None,
 ) -> BikeConfig:
-    """Assemble a BikeConfig from request parameters."""
+    """Assemble a BikeConfig from request parameters.
+
+    The condition arguments (``venue_id`` .. ``lon``) are the fields of
+    :class:`ConditionsRequest`, applied with the same precedence and the same
+    helper (:func:`_apply_conditions`) the optimiser routes use.
+    """
 
     # -- Base config ---------------------------------------------------------
     cfg: BikeConfig | None = None
@@ -670,7 +687,14 @@ def _build_config(
     if venue_id is None:
         manual = any(
             v is not None
-            for v in (ambient_temp_c, track_temp_c, humidity_pct, headwind_kmh)
+            for v in (
+                ambient_temp_c,
+                track_temp_c,
+                humidity_pct,
+                headwind_kmh,
+                altitude_m,
+                pressure_hpa,
+            )
         )
         cfg.environment.venue_name = (
             CUSTOM_CONDITIONS_NAME if manual else DEFAULT_CONDITIONS_NAME
@@ -684,6 +708,21 @@ def _build_config(
     if headwind_kmh is not None:
         cfg.environment.wind_speed_ms = headwind_kmh / 3.6
         cfg.environment.wind_direction_deg = 0.0  # 0 = headwind
+    if any(v is not None for v in (location, lat, lon, altitude_m, pressure_hpa)):
+        _apply_conditions(
+            cfg,
+            ConditionsRequest.model_construct(
+                location=location,
+                venue_id=venue_id,
+                lat=lat,
+                lon=lon,
+                altitude_m=altitude_m,
+                ambient_temp_c=ambient_temp_c,
+                track_temp_c=track_temp_c,
+                humidity_pct=humidity_pct,
+                pressure_hpa=pressure_hpa,
+            ),
+        )
 
     # -- Tire overrides ------------------------------------------------------
     # TireParams carries ONE scalar mu_peak, and drive traction is rear-tire
@@ -858,6 +897,17 @@ def _environment_echo(cfg: BikeConfig) -> EnvironmentEchoDict:
     }
 
 
+def _conditions_kwargs(req) -> dict:
+    """The ConditionsRequest-only fields of *req*, as ``_build_config`` kwargs."""
+    return {
+        "altitude_m": req.altitude_m,
+        "pressure_hpa": req.pressure_hpa,
+        "location": req.location,
+        "lat": req.lat,
+        "lon": req.lon,
+    }
+
+
 # ─── Stock-baseline cache ─────────────────────────────────────────────────
 # A quick sim with parts needs the same bike WITHOUT parts for its delta. That
 # baseline depends only on the bike/slider/venue/tyre/environment inputs, so it
@@ -869,9 +919,14 @@ _stock_cache: "OrderedDict[tuple, float]" = OrderedDict()
 _stock_cache_lock = threading.Lock()
 
 
+def _catalog_token() -> tuple:
+    """Freshness token of the shared catalog connection (see catalog_token)."""
+    return catalog_token(_db_conn)
+
+
 def _stock_key(req: "QuickSimRequest") -> tuple:
     return (
-        catalog_generation(),
+        _catalog_token(),
         req.bike_id,
         req.bike_preset,
         req.power_boost_pct,
@@ -884,6 +939,11 @@ def _stock_key(req: "QuickSimRequest") -> tuple:
         req.track_temp_c,
         req.humidity_pct,
         req.headwind_kmh,
+        req.altitude_m,
+        req.pressure_hpa,
+        req.location,
+        req.lat,
+        req.lon,
     )
 
 
@@ -914,7 +974,7 @@ CATALOG_CACHE_CONTROL = "public, max-age=300, stale-while-revalidate=3600"
 _CATALOG_CACHE_MAX_ENTRIES = 256
 _CATALOG_CACHE_MAX_BYTES = 24 * 1024 * 1024
 _CATALOG_CACHE_MAX_ENTRY_BYTES = 4 * 1024 * 1024
-_catalog_cache: "OrderedDict[tuple, tuple[int, bytes, str]]" = OrderedDict()
+_catalog_cache: "OrderedDict[tuple, tuple[tuple, bytes, str]]" = OrderedDict()
 _catalog_cache_bytes = 0
 _catalog_cache_lock = threading.Lock()
 # hits / misses, exposed for tests and diagnostics
@@ -942,7 +1002,7 @@ def _serve_catalog(request: Request | None, key: tuple, build):
     global _catalog_cache_bytes
     if request is None:
         return build()
-    gen = catalog_generation()
+    gen = _catalog_token()
     with _catalog_cache_lock:
         ent = _catalog_cache.get(key)
         if ent is not None and ent[0] == gen:
@@ -1418,7 +1478,14 @@ def list_venues(request: Request = None):
             raise HTTPException(503, "Database unavailable")
         try:
             rows = db.execute("SELECT * FROM venues ORDER BY country, name").fetchall()
-            return {"venues": [dict(r) for r in rows]}
+            venues = []
+            for r in rows:
+                v = dict(r)
+                # Same name and normalisation as the ``environment`` echo of
+                # the sim routes: the surface that venue is simulated on.
+                v["track_surface"] = (v.get("surface_type") or "asphalt").lower()
+                venues.append(v)
+            return {"venues": venues}
         except Exception as exc:
             raise HTTPException(500, f"Database error: {exc}")
 
@@ -1494,6 +1561,7 @@ def _simulate_impl(req: SimulateRequest, progress=None):
             track_temp_c=req.track_temp_c,
             humidity_pct=req.humidity_pct,
             headwind_kmh=req.headwind_kmh,
+            **_conditions_kwargs(req),
         )
     except HTTPException:
         raise
@@ -1626,6 +1694,7 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
             track_temp_c=req.track_temp_c,
             humidity_pct=req.humidity_pct,
             headwind_kmh=req.headwind_kmh,
+            **_conditions_kwargs(req),
         )
     except HTTPException:
         raise
@@ -1659,6 +1728,7 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
                     track_temp_c=req.track_temp_c,
                     humidity_pct=req.humidity_pct,
                     headwind_kmh=req.headwind_kmh,
+                    **_conditions_kwargs(req),
                 )
                 stock_sim = MotoQuantEngine(stock_cfg).run()
                 stock_et = round(float(stock_sim.time_quarter), 4)
@@ -1697,7 +1767,7 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
     return result
 
 
-class TopSpeedRequest(BaseModel):
+class TopSpeedRequest(ConditionsRequest):
     """POST /api/simulate/top-speed — runs until terminal velocity."""
 
     bike_id: DbId | None = None
@@ -1709,10 +1779,6 @@ class TopSpeedRequest(BaseModel):
     part_ids: list[DbId] = Field(default_factory=list, max_length=30)
     front_tire_id: DbId | None = None
     rear_tire_id: DbId | None = None
-    venue_id: DbId | None = None
-    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
-    track_temp_c: float | None = Field(None, ge=-30, le=80)
-    humidity_pct: float | None = Field(None, ge=0, le=100)
     headwind_kmh: float | None = Field(None, ge=-200, le=200)
     # LSR-specific: optional override for max time/distance.
     # Bounded: n_max preallocates 18 float64 arrays of max_time_s/dt slots
@@ -1794,6 +1860,7 @@ def _topspeed_impl(req: TopSpeedRequest, progress=None) -> TopSpeedResultDict:
             track_temp_c=req.track_temp_c,
             humidity_pct=req.humidity_pct,
             headwind_kmh=req.headwind_kmh,
+            **_conditions_kwargs(req),
         )
     except HTTPException:
         raise
@@ -1866,7 +1933,7 @@ def simulate_top_speed(req: TopSpeedRequest) -> TopSpeedResultDict:
     return _topspeed_impl(req)
 
 
-class DistanceRunRequest(BaseModel):
+class DistanceRunRequest(ConditionsRequest):
     """POST /api/simulate/distance — arbitrary distance for LSR events."""
 
     bike_id: DbId | None = None
@@ -1881,10 +1948,6 @@ class DistanceRunRequest(BaseModel):
     part_ids: list[DbId] = Field(default_factory=list, max_length=30)
     front_tire_id: DbId | None = None
     rear_tire_id: DbId | None = None
-    venue_id: DbId | None = None
-    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
-    track_temp_c: float | None = Field(None, ge=-30, le=80)
-    humidity_pct: float | None = Field(None, ge=0, le=100)
     headwind_kmh: float | None = Field(None, ge=-200, le=200)
     # Same floor rationale as TopSpeedRequest.max_time_s (>= dt). Ceiling
     # DELIBERATELY stays at 300 (not the 2026-08-11 le=120 top-speed cap):
@@ -1920,6 +1983,7 @@ def simulate_distance(req: DistanceRunRequest) -> DistanceResultDict:
             track_temp_c=req.track_temp_c,
             humidity_pct=req.humidity_pct,
             headwind_kmh=req.headwind_kmh,
+            **_conditions_kwargs(req),
         )
     except HTTPException:
         raise
@@ -2352,7 +2416,7 @@ def get_public_run(run_id: int = Path(..., ge=1, le=MAX_DB_ID)):
 # --- A vs B Comparison ---------------------------------------------------
 
 
-class CompareRequest(BaseModel):
+class CompareRequest(ConditionsRequest):
     """POST /api/simulate/compare - two builds side-by-side."""
 
     # Build A (baseline)
@@ -2377,10 +2441,6 @@ class CompareRequest(BaseModel):
     b_rear_tire_id: DbId | None = None
 
     # Shared conditions
-    venue_id: DbId | None = None
-    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
-    track_temp_c: float | None = Field(None, ge=-30, le=80)
-    humidity_pct: float | None = Field(None, ge=0, le=100)
     headwind_kmh: float | None = Field(None, ge=-200, le=200)
 
 
@@ -2399,8 +2459,12 @@ def _run_build(
     humidity_pct,
     headwind_kmh,
     progress_cb=None,
+    conditions: dict | None = None,
 ):
-    """Build config, apply parts, run sim; return (sim, cfg, parts_applied, cost, parts_skipped)."""
+    """Build config, apply parts, run sim; return (sim, cfg, parts_applied, cost, parts_skipped).
+
+    ``conditions`` carries the ConditionsRequest-only fields (see
+    :func:`_conditions_kwargs`)."""
     cfg = _build_config(
         bike_id=bike_id,
         bike_preset=bike_preset,
@@ -2414,6 +2478,7 @@ def _run_build(
         track_temp_c=track_temp_c,
         humidity_pct=humidity_pct,
         headwind_kmh=headwind_kmh,
+        **(conditions or {}),
     )
     parts_skipped: list[int] = []
     cfg, parts_applied, build_cost = _apply_parts_to_config(
@@ -2514,6 +2579,7 @@ def _compare_impl(req: CompareRequest, progress=None):
             req.humidity_pct,
             req.headwind_kmh,
             progress_cb=_span(0.01, 0.48, "Simulating build A"),
+            conditions=_conditions_kwargs(req),
         )
         if progress is not None:
             progress(0.5, "Simulating build B")
@@ -2545,6 +2611,7 @@ def _compare_impl(req: CompareRequest, progress=None):
                 req.humidity_pct,
                 req.headwind_kmh,
                 progress_cb=_span(0.5, 0.98, "Simulating build B"),
+                conditions=_conditions_kwargs(req),
             )
     except HTTPException:
         raise  # e.g. 404 for an unknown bike_id — don't relabel as 500
@@ -2840,6 +2907,23 @@ async def upload_dyno(
 # --- Bike Suggestions (user submissions) ---------------------------------
 
 
+# Review queues fed by anonymous submissions. Per-IP rate limits bound the
+# rate; this bounds the total so a distributed flood cannot fill the disk or
+# bury the maintainer's review queue.
+MAX_PENDING_SUBMISSIONS = 5000
+
+
+def _enforce_queue_cap(db, table: str) -> None:
+    try:
+        n = db.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]  # noqa: S608
+    except Exception:  # noqa: BLE001 -- table is created lazily by its repo
+        return
+    if n >= MAX_PENDING_SUBMISSIONS:
+        raise HTTPException(
+            503, "The review queue is full right now. Please try again later."
+        )
+
+
 class BikeSuggestionRequest(BaseModel):
     """POST /api/bikes/suggest -- user-submitted bike addition request."""
 
@@ -2889,7 +2973,11 @@ class BikeSuggestionRequest(BaseModel):
     )
 
 
-@app.post("/api/bikes/suggest", status_code=201)
+@app.post(
+    "/api/bikes/suggest",
+    status_code=201,
+    dependencies=[Depends(rate_limit("suggest", 5, 60.0))],
+)
 def suggest_bike(req: BikeSuggestionRequest):
     """
     Submit a bike to be added to the catalog.
@@ -2902,6 +2990,7 @@ def suggest_bike(req: BikeSuggestionRequest):
     db = _get_db()
     if not db:
         raise HTTPException(503, "Database unavailable")
+    _enforce_queue_cap(db, "bike_suggestions")
 
     try:
         # Reuse the shared DB connection directly -- the repo only needs a
@@ -3057,7 +3146,11 @@ def list_correction_fields():
     ]
 
 
-@app.post("/api/specs/correct", status_code=201)
+@app.post(
+    "/api/specs/correct",
+    status_code=201,
+    dependencies=[Depends(rate_limit("spec_correct", 5, 60.0))],
+)
 def submit_spec_correction(req: SpecCorrectionRequest):
     """
     Submit a user correction for a single spec field on a bike model.
@@ -3076,6 +3169,8 @@ def submit_spec_correction(req: SpecCorrectionRequest):
     db = _get_db()
     if not db:
         raise HTTPException(503, "Database unavailable")
+
+    _enforce_queue_cap(db, "spec_corrections")
 
     # Validate field_name against whitelist
     if req.field_name not in VALID_CORRECTION_FIELDS:
@@ -3599,7 +3694,11 @@ def _config_from_surrogate_request(req):
 # ─── Routes ──────────────────────────────────────────────────────────────
 
 
-@app.post("/api/surrogate/predict", response_model=SurrogatePredictResponse)
+@app.post(
+    "/api/surrogate/predict",
+    response_model=SurrogatePredictResponse,
+    dependencies=[Depends(rate_limit("surrogate", 60, 60.0))],
+)
 def surrogate_predict(
     req: SurrogatePredictRequest,
 ):
@@ -3669,7 +3768,11 @@ def surrogate_predict(
     )
 
 
-@app.post("/api/surrogate/compare", response_model=SurrogateCompareResponse)
+@app.post(
+    "/api/surrogate/compare",
+    response_model=SurrogateCompareResponse,
+    dependencies=[Depends(rate_limit("surrogate", 60, 60.0))],
+)
 def surrogate_compare(
     req: SurrogateCompareRequest,
 ):
@@ -4289,25 +4392,6 @@ def job_chat(
 # The optimizer scores candidates through the loaded surrogate when available and
 # in-envelope, else falls back to the full physics sim — so it always answers.
 # ═══════════════════════════════════════════════════════════════════════════
-
-
-class ConditionsRequest(BaseModel):
-    """Optional race conditions shared by the optimiser, autotune and outlaw
-    routes. Precedence: a resolved ``location`` / ``lat``+``lon`` sets the
-    environment, then explicit values override it; ``venue_id`` (seeded venue)
-    sets altitude and surface first."""
-
-    location: str | None = Field(
-        None, max_length=200, description="City/venue, e.g. 'Pune, IN'"
-    )
-    venue_id: DbId | None = Field(None, description="Seeded venue id (sets altitude)")
-    lat: float | None = Field(None, ge=-90, le=90)
-    lon: float | None = Field(None, ge=-180, le=180)
-    altitude_m: float | None = Field(None, ge=-500, le=8000)
-    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
-    track_temp_c: float | None = Field(None, ge=-30, le=80)
-    humidity_pct: float | None = Field(None, ge=0, le=100)
-    pressure_hpa: float | None = Field(None, ge=800, le=1100)
 
 
 class OptimizeBuildRequest(ConditionsRequest):

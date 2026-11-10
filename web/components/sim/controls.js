@@ -27,8 +27,8 @@ export const SimSlider = memo(function SimSlider({
   return (
     <div>
       <div className="flex items-baseline justify-between gap-3">
-        <label htmlFor={id} className="field-label !mb-0">{label}</label>
-        <output htmlFor={id} className={`font-mono text-sm font-medium tabular-nums ${tone}`}>{shown}</output>
+        <label htmlFor={id} className="field-label !mb-0 min-w-0">{label}</label>
+        <output htmlFor={id} className={`shrink-0 whitespace-nowrap font-mono text-sm font-medium tabular-nums ${tone}`}>{shown}</output>
       </div>
       <input
         id={id}

@@ -170,9 +170,11 @@ function forward(assets, x26) {
  * @param {number} [opts.powerBoostPct=0]
  * @param {number} [opts.massDeltaKg=0]
  * @param {number|null} [opts.venueId]  overrides altitude when set
+ * @param {string|null} [opts.venueSurface] the venue's surface_type; anything but
+ *        'asphalt' (or unknown) is refused — the model has no grip/surface input
  * @param {boolean} [opts.hasParts]     any part/tire override selected → refuse
  * @returns {Promise<{ok:true, etS:number, trapKmh:number, source:'surrogate'}
- *                  |{ok:false, reason:'unsupported-overrides'|'envelope'|'unavailable'}>}
+ *                  |{ok:false, reason:'unsupported-overrides'|'surface'|'envelope'|'unavailable'}>}
  */
 export async function predictQuick({
   bikeId,
@@ -180,9 +182,13 @@ export async function predictQuick({
   powerBoostPct = 0,
   massDeltaKg = 0,
   venueId = null,
+  venueSurface = null,
   hasParts = false,
 }) {
   if (hasParts) return { ok: false, reason: 'unsupported-overrides' };
+  // The model's only venue input is altitude. A venue whose surface is not
+  // asphalt (salt, dry lake, concrete) changes grip — answer exactly or not at all.
+  if (venueId != null && venueSurface !== 'asphalt') return { ok: false, reason: 'surface' };
   const assets = await loadAssets();
   if (!assets) return { ok: false, reason: 'unavailable' };
   const bike = assets.bikes[String(bikeId)];
@@ -194,7 +200,8 @@ export async function predictQuick({
   base.peak_power_hp = bike.f.peak_power_hp * scale;
   base.peak_torque_nm = bike.f.peak_torque_nm * scale;
   base.total_mass_kg = bike.dry_mass_kg + massDeltaKg + riderMassKg;
-  if (venueId != null && assets.venues[String(venueId)] != null) {
+  if (venueId != null) {
+    if (assets.venues[String(venueId)] == null) return { ok: false, reason: 'unavailable' };
     base.altitude_m = assets.venues[String(venueId)];
   }
 

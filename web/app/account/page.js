@@ -147,7 +147,7 @@ export default function AccountPage() {
           {/* ── Garage — saved runs ────────────────────────────────────── */}
                     <section className="card p-6 sm:p-8">
             <div className="mb-5 flex items-center justify-between">
-              <h2 className={sectionTitle}>Saved runs</h2>
+              <h2 className={sectionTitle}>Your saved runs</h2>
               <Link href="/simulator" className="btn-ghost btn-sm">
                 Open the simulator
               </Link>

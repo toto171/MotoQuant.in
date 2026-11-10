@@ -79,8 +79,41 @@ def _sql_counter():
     return seen, lambda: conn.set_trace_callback(None)
 
 
+def _quiesce_background_jobs(timeout_s: float = 90.0) -> None:
+    """Cancel jobs left by earlier test modules and wait for their threads.
+
+    ``_sim_counter`` counts every engine run in the process, so a job still
+    simulating on a worker thread would be attributed to the request under
+    test and make the exact-count assertions order-dependent. A cancelled job
+    is marked finished at once but its thread keeps simulating until the next
+    progress tick, so wait on the threads themselves, not on job status.
+    """
+    import threading
+
+    from motoquant import jobs
+
+    with jobs._LOCK:
+        active = [
+            jid for jid, j in jobs._JOBS.items() if j.status in ("queued", "running")
+        ]
+    for jid in active:
+        jobs.cancel_job(jid)
+    deadline = time.monotonic() + timeout_s
+    while time.monotonic() < deadline:
+        workers = [
+            t
+            for t in threading.enumerate()
+            if t.name.startswith("job-") and t.is_alive()
+        ]
+        if not workers:
+            return
+        workers[0].join(timeout=0.25)
+    raise AssertionError(f"job threads still alive after {timeout_s}s: {workers}")
+
+
 def _sim_counter():
-    """Count full RK4 runs through the API's engine."""
+    """Count full RK4 runs through the API's engine (process-wide)."""
+    _quiesce_background_jobs()
     calls = {"n": 0}
     orig = api.MotoQuantEngine.run
 
@@ -416,7 +449,11 @@ class TestCatalogCache(unittest.TestCase):
                     undo()
                 self.assertEqual(second.content, first.content)
                 self.assertEqual(
-                    [s for s in seen if not s.startswith("SELECT 1")],
+                    [
+                        s
+                        for s in seen
+                        if not s.startswith(("SELECT 1", "PRAGMA data_version"))
+                    ],
                     [],
                     "cache hit must not touch the catalog tables",
                 )

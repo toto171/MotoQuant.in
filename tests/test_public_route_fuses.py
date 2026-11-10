@@ -480,6 +480,11 @@ class TestEveryExpensiveRouteIsRateLimited(unittest.TestCase):
         "/api/jobs/autotune",
         "/api/jobs/outlaw",
         "/api/jobs/compare",
+        # anonymous routes that write to the database / feed a review queue
+        "/api/bikes/suggest",
+        "/api/specs/correct",
+        "/api/surrogate/predict",
+        "/api/surrogate/compare",
     }
 
     def test_all_have_a_rate_limit_dependency(self):

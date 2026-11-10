@@ -2,7 +2,7 @@
 
 import { memo, useMemo } from 'react';
 import BikePicker from '../BikePicker';
-import { POPULAR_BIKE_PATTERNS } from './format';
+import { popularChips } from '../../lib/popularBikes';
 
 /**
  * BikeChooser — the shared bike picker + one-tap popular bikes + a one-line
@@ -11,11 +11,7 @@ import { POPULAR_BIKE_PATTERNS } from './format';
  */
 const BikeChooser = memo(function BikeChooser({ bike, bikes, onSelect, variant }) {
   const chips = useMemo(
-    () =>
-      POPULAR_BIKE_PATTERNS.map(({ label, re }) => ({
-        label,
-        match: bikes.find((b) => re.test(`${b.manufacturer} ${b.model}`)),
-      })).filter((c) => c.match),
+    () => popularChips(bikes).map(({ label, bike: match }) => ({ label, match })),
     [bikes],
   );
 

@@ -6,6 +6,7 @@ import Term from '../Term';
 import SimProgress from '../SimProgress';
 import { ErrorTile, PANEL } from './controls';
 import { DynoChart, RealVsSimChart } from './charts';
+import { mergeOnTime } from '../../lib/timeseries';
 
 export default function MyDataTab({ sim }) {
   const {
@@ -19,16 +20,11 @@ export default function MyDataTab({ sim }) {
     if (u?.type !== 'dragy' || !u.best_run?.timeseries || !u.overlay?.sim_timeseries) return [];
     const real = u.best_run.timeseries;
     const simTs = u.overlay.sim_timeseries;
-    const n = Math.max(real.t_s.length, simTs.t_s.length);
-    const out = [];
-    for (let i = 0; i < n; i++) {
-      out.push({
-        t: +(real.t_s[i] ?? simTs.t_s[i] ?? 0).toFixed(2),
-        real: real.v_kmh?.[i] ?? null,
-        sim: simTs.v_kmh?.[i] ?? null,
-      });
-    }
-    return out;
+    // The uploaded run and the simulation use different sample times.
+    return mergeOnTime([
+      { prefix: 'r', t: real.t_s, channels: { v: real.v_kmh } },
+      { prefix: 's', t: simTs.t_s, channels: { v: simTs.v_kmh } },
+    ]).map((row) => ({ t: row.t, real: row.r_v, sim: row.s_v }));
   }, [u]);
 
   const dynoCurve = useMemo(() => {

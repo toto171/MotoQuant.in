@@ -31,6 +31,7 @@ import ActionButton from "../../components/ActionButton";
 import { SkeletonCard } from "../../components/Skeleton";
 import useAsyncTask from "../../lib/useAsyncTask";
 import { track } from "../../lib/telemetry";
+import { safeNextPath } from "../../lib/safeRedirect";
 
 import { API_URL_DIRECT as API_BASE } from "../../lib/api";
 
@@ -55,19 +56,12 @@ function LoginPageInner() {
 
   const sendButtonLabel = "Email me a sign-in link";
 
-  // Same-origin ?next= redirect (defends against open-redirect abuse).
-  // Must be a clean absolute path: starts with a single "/", and no "//" or
-  // backslash — browsers normalise "\" to "/", so "/\evil.com" would otherwise
-  // become the protocol-relative "//evil.com" and redirect off-site.
-  const nextPath = (() => {
-    const n = params?.get("next") || "";
-    const safe =
-      n.startsWith("/") &&
-      !n.startsWith("//") &&
-      !n.includes("\\") &&
-      !n.includes("://");
-    return safe ? n : "/account";
-  })();
+  // Same-origin ?next= redirect, validated by parsing (see lib/safeRedirect.js).
+  const nextPath = safeNextPath(
+    params?.get("next") || "",
+    typeof window !== "undefined" ? window.location.origin : "https://www.motoquant.in",
+    "/account"
+  );
 
   useEffect(() => {
     if (isAuthenticated) router.replace(nextPath);
