@@ -13,5 +13,5 @@ Each file is the Latin subset, taken unmodified from the matching
 `@fontsource-variable/*` package, version 5.3.0. They are loaded in
 `web/app/layout.js` with `next/font/local`.
 
-The fonts keep their own licence; the MIT licence at the repository root
+The fonts keep their own licence; the Apache-2.0 licence at the repository root
 covers the MotoQuant code, not these files.

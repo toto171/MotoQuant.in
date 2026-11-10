@@ -149,7 +149,7 @@ export default function GettingStartedPage() {
 
       <Step n="8" title="For developers">
         <p>
-          MotoQuant is open source (MIT). The same engine is a Python package, a command line tool, an HTTP API
+          MotoQuant is open source (Apache-2.0). The same engine is a Python package, a command line tool, an HTTP API
           and an MCP server. Source and issues are on <A external href={REPO}>GitHub</A>.
         </p>
         <Code>{`git clone ${REPO}.git

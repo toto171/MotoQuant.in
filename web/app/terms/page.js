@@ -1,6 +1,6 @@
 /**
  * MotoQuant — Terms of Service
- * Last updated: November 9, 2026 — rewritten for the open-source (MIT)
+ * Last updated: November 9, 2026 — rewritten for the open-source (Apache-2.0)
  * release: no plans, payments, refunds or license keys.
  */
 
@@ -40,7 +40,7 @@ export default function TermsPage() {
         <Section title="1. Open source and free">
           <p>
             The MotoQuant software is released under the{" "}
-            <a href={`${REPO_URL}/blob/main/LICENSE`} target="_blank" rel="noopener noreferrer" className="text-accent hover:text-accent-bright transition-colors">MIT License</a>.
+            <a href={`${REPO_URL}/blob/main/LICENSE`} target="_blank" rel="noopener noreferrer" className="text-accent hover:text-accent-bright transition-colors">Apache License 2.0</a>.
             The source code is at{" "}
             <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className="text-accent hover:text-accent-bright transition-colors">github.com/toto171/MotoQuant.in</a>.
             Your rights to the code are whatever that license grants. Using this hosted
@@ -96,7 +96,7 @@ export default function TermsPage() {
           </ul>
           <p>
             If you need heavy or automated use, run your own copy &mdash; that is what the
-            MIT License is for. We may rate-limit or block usage that harms the service.
+            Apache License 2.0 is for. We may rate-limit or block usage that harms the service.
           </p>
         </Section>
 

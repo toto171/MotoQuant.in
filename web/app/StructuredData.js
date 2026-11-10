@@ -82,7 +82,7 @@ export function softwareApplicationSchema() {
     applicationSubCategory: 'Motorcycle Drag Racing Simulator',
     operatingSystem: 'Web',
     isAccessibleForFree: true,
-    license: 'https://opensource.org/licenses/MIT',
+    license: 'https://www.apache.org/licenses/LICENSE-2.0',
     url: SITE_URL,
     downloadUrl: `${SITE_URL}/simulator`,
     softwareVersion: '1.0',
@@ -128,7 +128,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: 'Is MotoQuant free?',
-    a: 'Yes. MotoQuant is free and open source under the MIT License. You do not need an account to run simulations; an optional free account just lets you save runs. motoquant.in is a free public copy of the open-source project, and you can also run it yourself from the GitHub repository.',
+    a: 'Yes. MotoQuant is free and open source under the Apache License 2.0. You do not need an account to run simulations; an optional free account just lets you save runs. motoquant.in is a free public copy of the open-source project, and you can also run it yourself from the GitHub repository.',
   },
   {
     q: 'Can I use it for Indian drag strips?',

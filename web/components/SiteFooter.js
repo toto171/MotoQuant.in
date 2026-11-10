@@ -47,7 +47,7 @@ const COLS = [
     links: [
       { href: '/terms',   label: 'Terms' },
       { href: '/privacy', label: 'Privacy' },
-      { href: `${REPO}/blob/main/LICENSE`, label: 'MIT License', external: true },
+      { href: `${REPO}/blob/main/LICENSE`, label: 'Apache License 2.0', external: true },
     ],
   },
 ];
@@ -97,7 +97,7 @@ export default function SiteFooter() {
         </div>
 
         <div className="mt-12 flex flex-col gap-2 border-t border-white/10 pt-6 text-sm text-white/60 md:flex-row md:items-center md:justify-between">
-          <p>Free and open source &middot; MIT License</p>
+          <p>Free and open source &middot; Apache License 2.0</p>
           <p>
             &copy; {new Date().getFullYear()} MotoQuant. Not affiliated with any motorcycle manufacturer.
           </p>

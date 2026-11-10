@@ -65,7 +65,7 @@ export default function AboutPage() {
           <section className="mb-14 rounded-2xl border border-accent/25 bg-accent/5 p-6 md:p-8">
             <h2 className="mb-2 font-display text-xl font-semibold text-white md:text-2xl">Open source and community-driven</h2>
             <p className="mb-4 max-w-2xl text-base leading-relaxed text-white/80">
-              MotoQuant is free and MIT licensed, and the public site has no limits. Add a bike that is missing, correct a
+              MotoQuant is free and Apache-2.0 licensed, and the public site has no limits. Add a bike that is missing, correct a
               spec, send us a timeslip or improve the physics. Every bit makes it more accurate for everyone.
             </p>
             <div className="flex flex-wrap gap-3">

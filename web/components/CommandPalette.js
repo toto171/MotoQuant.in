@@ -43,7 +43,7 @@ const ACTIONS = [
   { label: 'About MotoQuant', desc: 'Who builds this, and why it is open source', href: '/about', kw: 'story founders contact team', icon: ArrowRight, group: 'Learn' },
   { label: 'Features', desc: 'Everything the simulator can do', href: '/features', kw: 'what can it do capabilities overview', icon: ArrowRight, group: 'Learn' },
   { label: 'Whitepaper', desc: 'The method behind the numbers', href: '/whitepaper', kw: 'paper methodology research physics', icon: BookOpen, group: 'Learn' },
-  { label: 'Source code on GitHub', desc: 'MotoQuant is free and open source (MIT)', href: 'https://github.com/toto171/MotoQuant.in', kw: 'github open source mit license code repo contribute', icon: ArrowRight, group: 'Project' },
+  { label: 'Source code on GitHub', desc: 'MotoQuant is free and open source (Apache-2.0)', href: 'https://github.com/toto171/MotoQuant.in', kw: 'github open source apache license code repo contribute', icon: ArrowRight, group: 'Project' },
   { label: 'Your saved runs', desc: 'Runs you saved, and your password', href: '/account', kw: 'account profile garage saved runs sign in login', icon: ArrowRight, group: 'Project' },
 ];
 

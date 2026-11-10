@@ -345,7 +345,7 @@ export default function HomePage() {
             <SectionHead
               eyebrow="Open source"
               title="Free, open, and yours to improve"
-              lede="MotoQuant is released under the MIT License. The simulator, the bike catalog and the accuracy checks are all public, so anyone can read the maths, fix a number or run their own copy."
+              lede="MotoQuant is released under the Apache License 2.0. The simulator, the bike catalog and the accuracy checks are all public, so anyone can read the maths, fix a number or run their own copy."
             />
 
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

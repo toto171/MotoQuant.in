@@ -127,7 +127,7 @@ function webApplicationSchema() {
     operatingSystem: 'Any (web browser)',
     browserRequirements: 'Requires JavaScript and modern browser (Chrome 90+, Safari 14+, Firefox 88+)',
     isAccessibleForFree: true,
-    license: 'https://opensource.org/licenses/MIT',
+    license: 'https://www.apache.org/licenses/LICENSE-2.0',
     offers: {
       '@type': 'Offer',
       price: '0',

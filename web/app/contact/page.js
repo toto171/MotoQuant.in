@@ -1,7 +1,7 @@
 /**
  * MotoQuant — Contact
  *
- * MotoQuant is free and open source (MIT). Bugs and feature requests go to
+ * MotoQuant is free and open source (Apache-2.0). Bugs and feature requests go to
  * GitHub issues; everything else goes to the project email. There is no
  * ticket queue and no contact form.
  */
@@ -70,7 +70,7 @@ export default function ContactPage() {
           </Section>
 
           <div className="card mt-8 p-5 md:p-6 text-sm text-white/60">
-            <p>MotoQuant · Open source under the MIT License · Pune, India</p>
+            <p>MotoQuant · Open source under the Apache License 2.0 · Pune, India</p>
             <div className="mt-4 flex flex-wrap gap-4">
               <a href="/terms" className="text-accent hover:text-accent-bright transition-colors">
                 Terms

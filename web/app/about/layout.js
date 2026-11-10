@@ -5,7 +5,7 @@
 import StructuredData, { SITE_URL } from '../StructuredData';
 
 const TITLE = "About MotoQuant — free, open-source quarter-mile simulator built in Pune";
-const DESCRIPTION = "MotoQuant is a free, open-source (MIT) quarter-mile simulator for motorcycles, built in Pune for Indian riders, drag strips and tuning shops. Why we built it, how it works and who is behind it.";
+const DESCRIPTION = "MotoQuant is a free, open-source (Apache-2.0) quarter-mile simulator for motorcycles, built in Pune for Indian riders, drag strips and tuning shops. Why we built it, how it works and who is behind it.";
 
 export const metadata = {
   title: TITLE,
