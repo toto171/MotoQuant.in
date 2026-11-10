@@ -7,7 +7,8 @@ any host that runs Docker.
 
 There is no billing, account or email configuration of any kind, and the
 server writes nothing a visitor sends to its database (anonymous usage
-events go to the server log only). **Every environment variable on this page
+events go to the server log, and to PostHog only if you set
+`POSTHOG_API_KEY`; see below). **Every environment variable on this page
 is optional.** With none of them set, the API serves the simulator, catalog,
 optimizer and race-day setup; the leaderboard is a static page generated from
 the physics (`scripts/gen_stock_leaderboard.py`).

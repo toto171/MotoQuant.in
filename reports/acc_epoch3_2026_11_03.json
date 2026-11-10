@@ -3969,7 +3969,7 @@
   "r2_tuned": {
    "desc": "round 2 (1c487f0): round-2 physics + data + round-2 knobs (rejected)",
    "engine": "NativeEngine",
-   "root": "/home/user/MotoQuant_v1",
+   "root": "(local working directory, not kept)",
    "references": {
     "K5": 9.8309,
     "R1": 10.1592,
@@ -4256,7 +4256,7 @@
   "neutral": {
    "desc": "round-3 physics (wheelie_margin) + round-2 data, neutral knobs",
    "engine": "NativeEngine",
-   "root": "/home/user/MotoQuant_v1",
+   "root": "(local working directory, not kept)",
    "references": {
     "K5": 9.5425,
     "R1": 9.6234,
@@ -4543,7 +4543,7 @@
   "tuned": {
    "desc": "round-3 physics + round-2 data + round-3 knobs as SHIPPED (litre_sport_195p = alt_litre195_margin, owner decision 2026-11-05)",
    "engine": "NativeEngine",
-   "root": "/home/user/MotoQuant_v1",
+   "root": "(local working directory, not kept)",
    "references": {
     "K5": 10.0436,
     "R1": 10.1092,
@@ -4830,7 +4830,7 @@
   "tuned_gate_escape": {
    "desc": "tuner's gate-escape selection (not shipped)",
    "engine": "NativeEngine",
-   "root": "/home/user/MotoQuant_v1",
+   "root": "(local working directory, not kept)",
    "references": {
     "K5": 10.0436,
     "R1": 10.1092,

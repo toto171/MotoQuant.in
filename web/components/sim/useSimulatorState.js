@@ -27,7 +27,7 @@ import {
 import useAsyncTask from '../../lib/useAsyncTask';
 import { predictQuick, preloadSurrogate } from '../../lib/surrogate';
 import { instantBlocker, venueSurface } from '../../lib/instantEstimate';
-import { saveRun as storeRun, timeslipQuery } from '../../lib/runs';
+import { saveRun as storeRun, timeslipQuery, timeslipRequest } from '../../lib/runs';
 import { track, trackSimRun, installErrorHandlers } from '../../lib/telemetry';
 import {
   DEFAULTS, MODE_KEY, bikeName, partSlot, makeKey, normalizeFull,
@@ -521,7 +521,7 @@ export default function useSimulatorState(searchParams) {
     // (private browsing, storage full) still gets the link; the card says the
     // run was not kept.
     setSavedRun({ query, forKey: m.key, notStored: !stored });
-    track('save_run', { bike_id: m.bikeId, surface: 'simulator_page' });
+    track('save_run', { bike_id: m.bikeId, surface: 'simulator_page', stored: !!stored });
     return { query };
   });
 
@@ -931,13 +931,15 @@ export default function useSimulatorState(searchParams) {
     if (target && target.id !== bikeRef.current?.id) changeBike(target);
     if (hasBikeParam) setBikeNotice(slugMissed);
 
+    let venueApplied = false;
     if (sp.has('venue')) {
       const rawVenue = (sp.get('venue') ?? '').trim();
       const v = /^\d+$/.test(rawVenue)
         ? venues.find((x) => x.id === parseInt(rawVenue, 10))
         : resolveVenueSlug(rawVenue, venues); // blog links use names like "mmrt"
 
-      if (v) { setVenue(v); setLocation(null); }
+      if (v) { setVenue(v); setLocation(null); venueApplied = true; }
+      else addNotice('The venue in this link is not available, so the conditions saved in the link are used.');
     }
     qsNum('rider', setRiderKg, 50, 130);
     qsNum('boost', setPowerBoost, -20, 50);
@@ -952,18 +954,17 @@ export default function useSimulatorState(searchParams) {
     // A timeslip of a run at a place (not a catalog venue) carries that
     // place's altitude and pressure; keep them, or the simulator would re-run
     // at the default venue's altitude and show a different time.
-    if (!sp.has('venue') && sp.has('alt')) {
-      const alt = parseFloat(sp.get('alt') ?? '');
-      const pres = parseFloat(sp.get('pres') ?? '');
-      if (Number.isFinite(alt) && alt >= -500 && alt <= 8000) {
-        setVenue(null);
-        setLocation({
-          _saved: true,
-          _label: 'Conditions from the timeslip',
-          altitude_m: alt,
-          ...(Number.isFinite(pres) && pres >= 800 && pres <= 1100 ? { pressure_hpa: pres } : {}),
-        });
-      }
+    // Parsed exactly as the timeslip page parses them (lib/runs.js), so the
+    // simulator and the slip send the same request.
+    const saved = !venueApplied ? timeslipRequest(sp) : null;
+    if (saved && saved.altitude_m != null) {
+      setVenue(null);
+      setLocation({
+        _saved: true,
+        _label: 'Conditions from the timeslip',
+        altitude_m: saved.altitude_m,
+        ...(saved.pressure_hpa != null ? { pressure_hpa: saved.pressure_hpa } : {}),
+      });
     }
 
     const partIds = (sp.get('parts') || '').split(',').map((s) => parseInt(s, 10)).filter(Number.isFinite);
@@ -980,7 +981,7 @@ export default function useSimulatorState(searchParams) {
       settlePending();
     }
     if (linkWantsAdvanced(sp)) setModeState('advanced');
-  }, [bikes, venues, defaultBikeVariant, changeBike, applyPendingTires, settlePending]);
+  }, [bikes, venues, defaultBikeVariant, changeBike, applyPendingTires, settlePending, addNotice]);
 
   useEffect(() => {
     if (linkAppliedRef.current) return;
@@ -1020,7 +1021,7 @@ export default function useSimulatorState(searchParams) {
     }
     const t = setTimeout(() => runQuick('auto'), 400);
     return () => clearTimeout(t);
-  }, [bike, selectedParts, frontTire, rearTire, venue, riderKg, powerBoost, massChange,
+  }, [bike, selectedParts, frontTire, rearTire, venue, location, riderKg, powerBoost, massChange,
     ambientTemp, trackTemp, humidity, headwind, liveActive, livePausedUntil, linkReady,
     linkPending, runQuick]);
 

@@ -13,8 +13,9 @@ physics, and returns a clearly-labelled ESTIMATED result:
 
 The result carries the validator's confidence score and every assumption the
 pipeline made, so the agent can present the number honestly ("estimated, not
-catalog-validated"). Catalog misses are logged to the bike_suggestions table
-so demand for missing bikes is visible to the catalog team.
+catalog-validated"). Logging a catalog miss to the bike_suggestions table is
+opt-in (``log_suggestion``); the public chat agent turns it off, so a visitor's
+question writes nothing to the database.
 """
 
 from __future__ import annotations

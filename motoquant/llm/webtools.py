@@ -412,7 +412,8 @@ def web_search(query: str, *, max_results: int = 5) -> dict:
         attempts.append(("duckduckgo", e))
 
     detail = "; ".join(f"{name}: {exc}" for name, exc in attempts)
-    logger.warning("web_search failed (%s): %s", query[:80], detail)
+    # The query is visitor text: log its length only.
+    logger.warning("web_search failed (query_len=%d): %s", len(query), detail)
     return {"error": f"search unavailable ({detail})", "results": []}
 
 

@@ -53,6 +53,7 @@ function TimeslipView() {
         }
         const e = new Error(detail || String(r.status));
         e.status = r.status;
+        e.detail = detail;
         throw e;
       })
       .then((d) => {
@@ -103,8 +104,8 @@ function TimeslipView() {
     message = 'This link does not name a bike, so there is nothing to show.';
   } else if (error) {
     if (error.status === 404) {
-      message = error.message
-        ? `This run cannot be shown: ${error.message}. The catalog has changed since the link was made.`
+      message = /^(Bike|Venue|Tire) .* not found/i.test(error.detail || '')
+        ? `This run cannot be shown: ${error.detail}. The catalog has changed since the link was made.`
         : 'This run cannot be shown: something in the link is no longer in the catalog.';
     } else if (error.status === 422) {
       message = error.message || 'This link describes a setup the simulator cannot run.';

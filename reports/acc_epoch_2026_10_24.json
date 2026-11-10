@@ -3986,7 +3986,7 @@
  },
  "conservative_alternatives": {
   "conservative_grip_only": {
-   "root": "/home/user/MotoQuant_v1",
+   "root": "(local working directory, not kept)",
    "engine": "NativeEngine",
    "thetas_applied": {
     "litre_sport_600_1000": {
@@ -4181,7 +4181,7 @@
    }
   },
   "conservative_mt500_scale": {
-   "root": "/home/user/MotoQuant_v1",
+   "root": "(local working directory, not kept)",
    "engine": "NativeEngine",
    "thetas_applied": {
     "litre_sport_600_1000": {
@@ -4376,7 +4376,7 @@
    }
   },
   "conservative_l195_grip": {
-   "root": "/home/user/MotoQuant_v1",
+   "root": "(local working directory, not kept)",
    "engine": "NativeEngine",
    "thetas_applied": {
     "litre_sport_600_1000": {
@@ -4571,7 +4571,7 @@
    }
   },
   "conservative_lam003": {
-   "root": "/home/user/MotoQuant_v1",
+   "root": "(local working directory, not kept)",
    "engine": "NativeEngine",
    "thetas_applied": {
     "litre_sport_600_1000": {

@@ -38,7 +38,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Litre and 600 cc sport bikes do best, because most of their benchmarks come from instrumented magazine tests. The 600–1000 cc fours and triples are off by 0.15 s on average over 76 matches, and the ten closest matches in the whole set are, on average, 0.006 s from the published time.',
+    text: 'Litre and 600 cc sport bikes do best, because most of their benchmarks come from instrumented magazine tests. The 600–1000 cc fours and triples are off by 0.15 s on average over 76 matches, and the ten closest matches against measured tests are, on average, 0.006 s from the published time.',
   },
   { type: 'h2', text: 'Where it is wrong' },
   {

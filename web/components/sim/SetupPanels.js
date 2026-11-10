@@ -66,7 +66,11 @@ export const EnvironmentPanel = memo(function EnvironmentPanel({
       </button>
       {!open && (
         <p className="text-sm text-white/60">
-          {venue ? `${venue.name}${venue.altitude_m != null ? ` · ${Math.round(venue.altitude_m)} m` : ''}` : `Default conditions · ${DEFAULT_ALTITUDE_M} m`} · {ambientTemp} °C
+          {venue
+            ? `${venue.name}${venue.altitude_m != null ? ` · ${Math.round(venue.altitude_m)} m` : ''}`
+            : location
+              ? `${location.venue_name || location.location_name || location._label || location.resolved_name || 'Chosen place'}${Number.isFinite(location.altitude_m) ? ` · ${Math.round(location.altitude_m)} m` : ''}`
+              : `Default conditions · ${DEFAULT_ALTITUDE_M} m`} · {ambientTemp} °C
         </p>
       )}
       {open && (

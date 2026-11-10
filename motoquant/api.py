@@ -3186,10 +3186,9 @@ def _fetch_owm_uncached(
         data = resp.json()
     except Exception as exc:
         logging.getLogger(__name__).warning(
-            "OWM fetch failed for location=%r lat=%s lon=%s: %s",
-            location,
-            lat,
-            lon,
+            # The place is visitor input: log how it was given, not what it was.
+            "OWM fetch failed (by=%s): %s",
+            "coords" if lat is not None and lon is not None else "name",
             _redact_secrets(f"{type(exc).__name__}: {exc}", api_key),
         )
         # The client gets a coarse, key-free reason only (status code or

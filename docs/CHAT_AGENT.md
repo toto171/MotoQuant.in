@@ -37,7 +37,8 @@ CLI and older clients.
   unit auto-correction; hard reject on nonsense) → `spec_to_bike_config`
   (DB-free) → full sim + top speed. Results are always labelled **ESTIMATED**
   with a confidence score and the assumptions made (gearing tier, synthetic
-  torque curve, category aero). Misses are logged to `bike_suggestions`.
+  torque curve, category aero). Nothing is stored for a missing bike
+  (`log_suggestion=False`); riders suggest bikes through the GitHub form.
 
 ## Discipline & guardrails
 

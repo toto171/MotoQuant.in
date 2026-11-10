@@ -1,14 +1,14 @@
 """
 MotoQuant — Bike Suggestions Repository
 =======================================
-Stores bikes the chat assistant had to estimate because they are missing from
-the catalog (``motoquant/llm/estimator.py``), so a maintainer can review them
-and add the ones worth adding. Riders suggest bikes through the public issue
-tracker, not through this table.
+Stores estimated bikes that are missing from the catalog, for a maintainer to
+review. Only callers that opt in write here (``simulate_estimated_bike(...,
+log_suggestion=True)``, e.g. local CLI use); the public chat agent does not.
+Riders suggest bikes through the public issue tracker, not through this table.
 
 Workflow
 --------
-    chat estimate → repo.create(...)
+    opt-in estimate → repo.create(...)
         ↓
     (human review later)
         ↓

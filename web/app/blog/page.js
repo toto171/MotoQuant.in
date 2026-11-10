@@ -36,7 +36,7 @@ const POSTS = [
     tags: ["release", "open source", "accuracy"],
     title: "MotoQuant 2.0 Is Open Source, Including Where It Is Wrong",
     excerpt:
-      "MotoQuant 2.0 is free and open source under Apache-2.0, with no accounts and no paid plans. Across 263 matches with published tests it is off by 0.25 s on average; sport bikes do best, and small bikes, singles and two-strokes are still off by up to a quarter of a second. What changed, where it is wrong, and how a timeslip from you makes it better.",
+      "MotoQuant 2.0 is free and open source under Apache-2.0, with no accounts and no paid plans. Across 263 matches with published tests it is off by 0.25 s on average; sport bikes do best, while small bikes, singles and two-strokes still come out about a quarter of a second quick or slow on average, and single bikes can be off by more. What changed, where it is wrong, and how a timeslip from you makes it better.",
   },
   {
     slug: "pulsar-n125-vs-raider-125-vs-glamour-125-quarter-mile-physics",
