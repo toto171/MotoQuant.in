@@ -65,7 +65,7 @@ export const viewport = {
 // internal linking. This file handles the first three.
 
 const DESCRIPTION =
-  'Free physics-based motorcycle quarter-mile drag racing simulator, not a power-to-weight formula. Predict ET, trap speed, 60-ft split for 534 bikes including Hayabusa, ZX-14R, R15 V4, KTM Duke 390, Pulsar NS200. Compare builds, quantify parts ROI in INR, overlay Dragy runs against the sim. Built for the Indian drag racing community: Aamby Valley, MMRT, BIC, Kari.';
+  'Free motorcycle quarter-mile drag racing simulator that models the physics instead of using a power-to-weight formula. Predict ET, trap speed and 60-ft split for 534 bikes, including Hayabusa, ZX-14R, R15 V4, KTM Duke 390 and Pulsar NS200. Compare builds, work out parts ROI in INR and overlay Dragy runs on the sim. Built for Indian drag racers at Aamby Valley, MMRT, BIC and Kari.';
 
 export const metadata = {
   title: {

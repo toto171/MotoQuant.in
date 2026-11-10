@@ -33,10 +33,10 @@ export default function TermsPage() {
       <main id="main" className="pt-10 pb-20 px-4 sm:px-6">
         <div className="mx-auto max-w-3xl">
         <p className="text-white/75 text-base leading-relaxed">
-          MotoQuant (&ldquo;MotoQuant&rdquo;) is free, open-source software for
+          MotoQuant is free, open-source software for
           simulating motorcycle drag-racing quarter-mile times. The site at motoquant.in is a
           free, public instance of that project, run from Pune, India. By using it you agree
-          to these short terms.
+          to these terms.
         </p>
 
         <Section title="1. Open source and free">
@@ -52,10 +52,10 @@ export default function TermsPage() {
 
         <Section title="2. Simulations are estimates, not advice">
           <p>
-            Predicted elapsed times, trap speeds and parts-ROI figures are estimates produced
-            by physical models and publicly available specifications. They are for
+            Predicted elapsed times, trap speeds and parts-ROI figures are estimates from
+            physical models and publicly available specifications. They are for
             informational and analytical purposes only and are not safety, engineering or
-            tuning advice. Real-world performance depends on many factors the model does not
+            tuning advice. Real-world performance also depends on things the model does not
             capture.
           </p>
           <p>
@@ -85,13 +85,13 @@ export default function TermsPage() {
         <Section title="5. Acceptable use">
           <p>Please do not:</p>
           <ul className="text-white/65 list-disc pl-5 space-y-1">
-            <li>Abuse or scrape the hosted service in a way that degrades it for others, or try to circumvent its rate limits</li>
-            <li>Probe for or exploit security vulnerabilities (report them via GitHub instead)</li>
+            <li>Abuse or scrape the hosted service in a way that degrades it for others, or try to get around its rate limits</li>
+            <li>Probe for or exploit security vulnerabilities (report them on GitHub instead)</li>
             <li>Use the service for any unlawful purpose under Indian law or the law of your jurisdiction</li>
           </ul>
           <p>
-            If you need heavy or automated use, run your own copy &mdash; that is what the
-            Apache License 2.0 is for. We may rate-limit or block usage that harms the service.
+            If you need heavy or automated use, run your own copy under the
+            Apache License 2.0. We may rate-limit or block usage that harms the service.
           </p>
         </Section>
 

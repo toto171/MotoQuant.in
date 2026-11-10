@@ -29,7 +29,7 @@ export default function PrivacyPage() {
 
       <PageHero
         title="Privacy"
-        sub="No accounts, no cookies, and nothing kept that identifies you. Here is exactly what leaves your browser and where it goes."
+        sub="No accounts, no cookies, and nothing kept that identifies you. This page lists what leaves your browser and where it goes."
         className="pb-8 md:pb-10"
       >
         <p className="label-mono">Last updated &middot; 10 November 2026</p>
