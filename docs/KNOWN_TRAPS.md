@@ -110,8 +110,8 @@ in the July-17 run. Kept as a trap because the misreading is easy to reintroduce
 ### T14 — One shared SQLite connection across request + job threads
 `api.py` keeps a module-level `sqlite3` connection (`check_same_thread=False`)
 reused by FastAPI request threads *and* `jobs.py` daemon workers. Reads are fine
-on the single-worker Render deploy, but concurrent **writes** (the chat
-assistant's bike-estimate log, any future write route) can interleave. This is the
+on the single-worker Render deploy. No visitor request writes today, but any
+future write route (or a job that writes) can interleave with another thread. This is the
 #1 thing to fix before scaling to multiple workers — a per-thread/pooled
 connection. (Deferred; documented in the roadmap.)
 
