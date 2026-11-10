@@ -21,13 +21,18 @@ prompt + executor):
     executor, not by trusting the model.
   * Estimated-bike results are always labelled as estimates with confidence.
 
-The loop is provider-agnostic via LLMClient.call_tools (Anthropic native /
-OpenAI-compatible function calling) and fully testable offline through the
-``_call_override`` seam ("tools" kind).
+The loop runs on Claude through LLMClient.call_tools and is fully testable
+offline through the ``_call_override`` seam ("tools" kind). Each turn echoes
+the assistant content verbatim (thinking blocks included), handles every
+stop_reason (refusal, max_tokens, pause_turn, tool_use), returns all tool
+results in one user message as compact valid JSON, and ends an exhausted
+iteration budget with ``tool_choice={"type": "none"}`` instead of dropping
+the tools.
 """
 
 from __future__ import annotations
 
+import copy
 import json
 import logging
 import re
@@ -43,9 +48,10 @@ from ..physics import effective_et
 from .client import (
     AgentStep,
     LLMClient,
-    LLMNotConfiguredError,
-    LLMRateLimitError,
+    LLMError,
     ToolCall,
+    redact_secrets,
+    strict_json_schema,
 )
 
 logger = logging.getLogger(__name__)
@@ -56,7 +62,10 @@ HEAVY_OP_BUDGET = 2  # optimizer / autotune / outlaw runs per chat turn
 TOOL_RESULT_MAX_CHARS = 6_000
 HISTORY_MAX_MESSAGES = 16
 HISTORY_MAX_CHARS = 16_000
-AGENT_MAX_TOKENS = 2_048
+# Thinking counts toward max_tokens on both models; billing is per token
+# actually used, so a roomy ceiling costs nothing extra.
+AGENT_MAX_TOKENS = 16_000
+MAX_PAUSE_RESUMES = 3  # pause_turn: resend as-is at most this many times
 # Same ceiling the API enforces on OptimizeBuildRequest.budget_inr; an
 # unclamped chat budget sizes roi's knapsack DP (budget // 100 buckets).
 AGENT_MAX_BUDGET_INR = 5_000_000.0

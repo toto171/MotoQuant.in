@@ -1185,7 +1185,7 @@ export default function ChatPanel({ apiUrl }) {
         keyOpen={keyOpen}
         onToggleKey={() => setKeyOpen((o) => !o)}
         notice={notice}
-        dailyFreeLimit={serverInfo?.dailyFreeLimit ?? null}
+        dailyFreeLimit={serverInfo?.freeAvailable ? serverInfo.dailyFreeLimit : null}
         keyInputRef={keyInputRef}
       />
     </div>

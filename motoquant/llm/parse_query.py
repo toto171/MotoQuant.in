@@ -2,7 +2,9 @@
 NL query → structured ParsedSimRequest.
 
 Pipeline:
-  1. Build a forced-tool-use call so the LLM can only return JSON in our schema.
+  1. Ask for structured JSON output (output_config.format) so the LLM can
+     only return JSON in our schema. Forcing a tool call is rejected by the
+     Claude models we use, so no tool is involved.
   2. Optionally resolve bike/venue names against the live DB via the smart
      fuzzy resolver in motoquant.llm.resolver.
 
@@ -279,8 +281,8 @@ SYSTEM_PROMPT = """\
 You are a query parser for MotoQuant, a motorcycle drag-racing simulator.
 
 The user describes what they want. Extract structured parameters and submit \
-them via the submit_sim_query tool. Do not respond in plain text -- always \
-invoke the tool.
+them as one JSON object that follows the given schema. Fill every field: \
+use null (or the stated default) for anything the user did not mention.
 
 Intent classification (set the intent_type field):
 - "simulate"  : single specific bike, possibly with venue/conditions/mods. \
@@ -349,7 +351,7 @@ null. The simulator has venue defaults that will fill in.
 - Default optimization goal is minimize_et unless the user explicitly mentions \
 trap speed (maximize_trap) or budget constraints (best_budget).
 - Keep `notes` empty unless you made a non-obvious assumption worth flagging.
-- Never refuse the tool call. If the query is ambiguous, make your best guess \
+- Always return the JSON object. If the query is ambiguous, make your best guess \
 and document it in `notes`.
 """
 
