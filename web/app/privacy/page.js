@@ -65,9 +65,8 @@ export default function PrivacyPage() {
             </Row>
             <Row label="Chat questions">
               What you type into the assistant, and the conversation so far, so it can answer.
-              Not stored by us. When you ask about a bike missing from the catalog, its estimated
-              specifications (make, model, power, weight) are kept so a maintainer can consider
-              adding the bike. Your question is not kept.
+              Not stored by us, and neither is anything the assistant estimates for a bike that is
+              missing from the catalog.
             </Row>
             <Row label="Usage events">
               Short labels such as &ldquo;simulation run&rdquo; or &ldquo;page error&rdquo;, with

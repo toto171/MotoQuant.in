@@ -49,12 +49,9 @@ services:
         - rust/motoquant-core/**
     envVars:
       - key: MOTOQUANT_DB
-        # FREE HOSTING PLAN (current): baked image copy — wiped on every
-        # deploy, so optional accounts and saved runs reset with it.
-        # DURABLE: repoint to the persistent disk below and uncomment the
-        # `disk:` block (needs a paid Render plan). docker-entrypoint.sh seeds
-        # the disk from the image copy on first boot, then preserves it.
-        #   value: /data/motoquant.db   # <- uncomment WITH the disk block
+        # The catalog baked into the image. The server writes no visitor data
+        # (saved runs live in each visitor's browser), so nothing needs a
+        # persistent disk and a redeploy loses nothing.
         value: /app/motoquant.db
       - key: PYTHON_VERSION
         value: "3.11"

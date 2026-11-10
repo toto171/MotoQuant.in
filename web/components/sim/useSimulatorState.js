@@ -207,6 +207,15 @@ export default function useSimulatorState(searchParams) {
   function placeFields() {
     if (venue?.id != null) return { venue_id: venue.id };
     if (!location) return {};
+    // Conditions restored from a timeslip link: a place with no name to look
+    // up, so send its altitude and pressure, never a label (a label would be
+    // sent to the weather lookup).
+    if (location._saved) {
+      const saved = {};
+      if (isNumber(location.altitude_m)) saved.altitude_m = location.altitude_m;
+      if (isNumber(location.pressure_hpa)) saved.pressure_hpa = location.pressure_hpa;
+      return saved;
+    }
     const out = {};
     const label = location.venue_name || location.location_name || location._label || location.resolved_name;
     if (label) out.location = label;
@@ -508,10 +517,10 @@ export default function useSimulatorState(searchParams) {
       parts: (src.parts_applied || []).map((p) => [p.brand, p.name].filter(Boolean).join(' ')),
       tyresChanged: m.frontTireId != null || m.rearTireId != null,
     });
-    if (!stored) {
-      throw new Error('This browser would not store the run (private browsing or storage full). You can still share the link.');
-    }
-    setSavedRun({ query, forKey: m.key });
+    // The timeslip link needs no storage, so a browser that refuses the write
+    // (private browsing, storage full) still gets the link; the card says the
+    // run was not kept.
+    setSavedRun({ query, forKey: m.key, notStored: !stored });
     track('save_run', { bike_id: m.bikeId, surface: 'simulator_page' });
     return { query };
   });
@@ -940,6 +949,22 @@ export default function useSimulatorState(searchParams) {
       qsNum('wind', setHeadwind, -30, 30),
     ].some(Boolean);
     if (envSet) { setShowEnv(true); setEnvTouched(true); setLocation(null); }
+    // A timeslip of a run at a place (not a catalog venue) carries that
+    // place's altitude and pressure; keep them, or the simulator would re-run
+    // at the default venue's altitude and show a different time.
+    if (!sp.has('venue') && sp.has('alt')) {
+      const alt = parseFloat(sp.get('alt') ?? '');
+      const pres = parseFloat(sp.get('pres') ?? '');
+      if (Number.isFinite(alt) && alt >= -500 && alt <= 8000) {
+        setVenue(null);
+        setLocation({
+          _saved: true,
+          _label: 'Conditions from the timeslip',
+          altitude_m: alt,
+          ...(Number.isFinite(pres) && pres >= 800 && pres <= 1100 ? { pressure_hpa: pres } : {}),
+        });
+      }
+    }
 
     const partIds = (sp.get('parts') || '').split(',').map((s) => parseInt(s, 10)).filter(Number.isFinite);
     const ft = parseInt(sp.get('ft') ?? '', 10);

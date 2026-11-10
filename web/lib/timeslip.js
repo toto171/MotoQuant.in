@@ -4,8 +4,6 @@
  * the printed slip and the "Your runs" list, so all three say the same thing.
  */
 
-const DEFAULT_RIDER_KG = 75;
-
 function fmt(n, digits = 0) {
   return Number(n).toLocaleString('en-IN', {
     minimumFractionDigits: digits,
@@ -39,8 +37,9 @@ export function conditionsSummary(env) {
 }
 
 /**
- * Everything that differs from a stock bike with a 75 kg rider, as short
- * lines. ``request`` is the body that was simulated; ``result`` is the quick
+ * Everything that differs from the stock bike, as short lines. Rider weight
+ * is not a change to the bike: the slip states it in its headline instead,
+ * so a stock bike with a heavier rider is still "stock" everywhere. ``request`` is the body that was simulated; ``result`` is the quick
  * simulation response (its ``parts_applied`` and ``tyres`` name what was
  * actually fitted).
  */
@@ -48,10 +47,8 @@ export function changesFromStock(request, result) {
   const out = [];
   const boost = Number(request?.power_boost_pct || 0);
   const mass = Number(request?.mass_delta_kg || 0);
-  const rider = request?.rider_mass_kg;
   if (boost) out.push(`Engine power ${boost > 0 ? '+' : '−'}${fmt(Math.abs(boost))} %`);
   if (mass) out.push(`Bike weight ${mass > 0 ? '+' : '−'}${fmt(Math.abs(mass))} kg`);
-  if (rider != null && Number(rider) !== DEFAULT_RIDER_KG) out.push(`Rider ${fmt(rider)} kg`);
   for (const p of result?.parts_applied || []) {
     const name = [p.brand, p.name].filter(Boolean).join(' ');
     if (name) out.push(name);

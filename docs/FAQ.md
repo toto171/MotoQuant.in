@@ -6,7 +6,7 @@
 MotoQuant is a free, open-source, physics-based quarter-mile drag racing simulator for motorcycles. It uses first-principles aerodynamics, tyre grip and temperature, drivetrain dynamics, and engine modeling to predict your bike's quarter-mile ET (elapsed time) and trap speed. The simulator lets you test modifications—power increases, gear ratios, tire swaps, weight reduction—and see their impact on performance *before* spending money at the tuner or parts shop.
 
 ### Is it free? Is it open source?
-Yes to both. Everything (the simulator, parts ROI, build optimizer, autotune, Dragy/dyno calibration, chat) is free, with no paid tiers, no quotas and no license keys. The code is open source under the **Apache License 2.0**: <https://github.com/toto171/MotoQuant.in>. You can use the hosted site at motoquant.in or run your own copy ([SELF_HOSTING.md](SELF_HOSTING.md)). An account is optional and only keeps your saved runs in a personal garage.
+Yes to both. Everything (the simulator, parts ROI, build optimizer, autotune, Dragy/dyno calibration, chat) is free, with no paid tiers, no quotas and no license keys. The code is open source under the **Apache License 2.0**: <https://github.com/toto171/MotoQuant.in>. You can use the hosted site at motoquant.in or run your own copy ([SELF_HOSTING.md](SELF_HOSTING.md)). There is no account: runs you save stay in your browser, and a timeslip link shares one.
 
 ### Who should use it?
 - **Drag racers** — predict ET gains from mods, plan builds within budget constraints
@@ -15,7 +15,7 @@ Yes to both. Everything (the simulator, parts ROI, build optimizer, autotune, Dr
 - **Students** — learn motorcycle physics with a working model
 
 ### Is it accurate?
-MotoQuant is validated against **250 published benchmarks** (magazine road tests, instrumented GPS runs, timeslips), weighted by source quality. Across 266 matched runs the weighted mean error is about **0.25 s** and the mean bias **+0.02 s**. Reference bikes: GSX-R 1000 K5 10.04 s simulated vs 9.97 s real, YZF-R1 10.11 s vs 10.3 s, Hayabusa Gen1 10.11 s vs a 10.1–10.7 s real range. Small-cc bikes are the weakest class: few instrumented benchmarks exist for them, and many still carry a generic primary gear ratio in the catalog. For bikes not in the library, results are estimates; use them to guide decisions, not as law. The full breakdown is at motoquant.in/validation.
+MotoQuant is validated against **250 published benchmarks** (magazine road tests, instrumented GPS runs, timeslips), weighted by source quality. Across 263 matches to catalog bikes the weighted mean error is about **0.25 s** and the mean bias **+0.02 s**. Reference bikes, simulated at sea level: GSX-R 1000 K5 10.04 s vs 9.97 s (Cycle World), YZF-R1 10.11 s vs 10.30 s (Sport Rider), Hayabusa Gen1 10.11 s vs 10.40 s (Cycle World). Small-cc bikes are the weakest class: few instrumented benchmarks exist for them, and many still carry a generic primary gear ratio in the catalog. For bikes not in the library, results are estimates; use them to guide decisions, not as law. The full breakdown is at motoquant.in/validation.
 
 ### Where does the simulator run?
 - **Web simulator** on motoquant.in — enter your bike and mods, get ET in ~50 ms
@@ -38,7 +38,7 @@ The quarter-mile time and trap speed update as you change things, and the result
 ### What does Simple mode do?
 Simple mode answers one question: how quick is this bike, with this rider, at this place? Under the result it offers the next steps: add parts and mods, find the best parts for a budget ("Upgrades"), get a race-day setup, compare with another bike, see charts and splits, or save and share the run.
 
-A result marked **Instant estimate** comes from a fast model that runs in your browser; **Exact** means the full physics simulation ran. Only exact results can be saved to the leaderboard.
+A result marked **Instant estimate** comes from a fast model that runs in your browser; **Exact** means the full physics simulation ran. Only exact results can be saved and shared as a timeslip; the leaderboard ranks every catalog bike by its simulated stock time.
 
 ### What's Advanced mode?
 Advanced mode is the full workbench, with everything in one place:

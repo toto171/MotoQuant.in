@@ -1230,12 +1230,16 @@ def _exec_simulate_estimated(ctx: AgentContext, args: dict) -> dict:
     ctx.tick(
         0.0, f"Estimating {spec.get('manufacturer', '')} {spec.get('model_name', '')}"
     )
+    # log_suggestion=False: the public chat writes nothing to the catalog
+    # database. Visitor text would otherwise become uncapped rows; a missing
+    # bike is suggested through the GitHub form instead.
     payload = simulate_estimated_bike(
         spec,
         db=ctx.db,
         venue_id=args.get("venue_id"),
         env_overrides=env_overrides,
         rider_mass_kg=args.get("rider_mass_kg"),
+        log_suggestion=False,
     )
     if not payload.get("error"):
         ctx.add_block("estimated_sim", payload)

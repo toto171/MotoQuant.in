@@ -5,9 +5,8 @@ LLM-provider tokens per call (the deployment operator's bill), and
 /api/optimize/build + /api/autotune/ecu each pin the 0.5-CPU instance for
 seconds-to-minutes of RK4 work. Without a fuse, one scraper hitting any of
 these can exhaust the LLM quota or take the public instance down for
-everyone. This mirrors motoquant/auth.py's in-process login-failure
-limiter: stdlib-only, per-instance (fine for a single-replica deployment),
-resets on restart by design.
+everyone. The limiter is stdlib-only and per-instance (fine for a
+single-replica deployment), and resets on restart by design.
 
 Buckets may use DIFFERENT windows (60 s per-minute fuses alongside the
 86400 s daily chat cap). Each key therefore remembers its own window, and

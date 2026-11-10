@@ -248,7 +248,7 @@ git push -u origin feature/<short-name>
 Open PRs as **draft** until `make check` and `make test` are green, and fill in the
 PR template (it has the baseline-delta table for physics-adjacent changes).
 
-**PR requirements (strict — enforced by branch protection on `main`):**
+**PR requirements (a pull request merges only when all of these hold):**
 - Tests pass locally (`python -m pytest tests/ -q`).
 - Ruff clean (`ruff check . && ruff format --check .`).
 - CI workflow green on the PR (pytest + ruff + baseline gate; the Next.js build for `web/` changes).
@@ -256,7 +256,7 @@ PR template (it has the baseline-delta table for physics-adjacent changes).
   requests it automatically).
 - For physics changes: include the benchmark ET deltas in the PR description (template has a table for this).
 - For schema changes: include the migration path. Existing DBs must keep working; ship an idempotent `scripts/patch_*.py` for the shipped `motoquant.db`. Update `docs/ARCHITECTURE.md` if the data model's shape changed.
-- `main` is protected: no direct pushes, no force-push, no deletion.
+- Every change reaches `main` through a reviewed pull request: no direct pushes, no force-push, no deletion.
 - Once merged, a successful CI run on `main` triggers the Vercel production deploy (`.github/workflows/deploy.yml`). A red CI never reaches Vercel.
 
 **Commit message style** (look at `git log --oneline` for examples):

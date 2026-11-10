@@ -5,7 +5,7 @@ contact_links:
     about: For open-ended questions and design discussions, use GitHub Discussions instead of an issue.
   - name: Report a security vulnerability (privately)
     url: https://github.com/toto171/MotoQuant.in/security/advisories/new
-    about: Please do not open a public issue for security problems — see SECURITY.md.
+    about: Please do not open a public issue for security problems. Report privately here, or email motoquant@gmail.com (see SECURITY.md).
   - name: Read the onboarding doc
     url: https://github.com/toto171/MotoQuant.in/blob/main/docs/ONBOARDING.md
     about: New contributor? Start here (then AGENTS.md and CONTRIBUTING.md).

@@ -250,6 +250,14 @@ def git_ok():
         "web/.vercel/project.json",
         "coverage.xml",
         ".hypothesis/examples/x",
+        "tokens.md",
+        "tokens.md.bak",
+        "TOKENS_UPDATE_2026-05-04.md",
+        "git-creds.env",
+        "preflight.env",
+        "a.token",
+        "secrets.local",
+        ".motoquant-secrets/x",
     ],
 )
 def test_secret_files_are_ignored(git_ok, path):

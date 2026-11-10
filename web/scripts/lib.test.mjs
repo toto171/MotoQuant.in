@@ -112,11 +112,11 @@ test('every change from stock is listed on the slip', () => {
   assert.deepEqual(lines, [
     'Engine power +25 %',
     'Bike weight −4 kg',
-    'Rider 90 kg',
     'Dynojet Power Commander',
     'Rear tyre: Michelin Power Cup 2 190/55ZR17',
   ]);
-  assert.deepEqual(slip.changesFromStock({ rider_mass_kg: 75 }, {}), []);
+  // Rider weight is a condition, not a change to the bike.
+  assert.deepEqual(slip.changesFromStock({ rider_mass_kg: 90 }, {}), []);
 });
 
 const contribute = await load('../lib/contribute.js');

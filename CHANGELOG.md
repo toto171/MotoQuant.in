@@ -213,6 +213,9 @@ tuning record `reports/acc_epoch3_2026_11_03.json`).
 - Public routes that stored visitor input: bike suggestions, spec
   corrections and price refresh. Every POST route is now on a tested
   allow-list, and no route accepts PUT, PATCH or DELETE.
+- The chat assistant no longer logs an estimated bike that is missing from
+  the catalog; the server now writes nothing a visitor sends to its
+  database.
 
 ### Added — runs, timeslips and contributions without accounts
 - Saved runs live in the browser (`/runs`). A timeslip link carries the
@@ -229,6 +232,11 @@ tuning record `reports/acc_epoch3_2026_11_03.json`).
 - A launch post, "MotoQuant 2.0 is open source, including where it is
   wrong", and a contact page that links the data forms and the private
   security route.
+- Opening a timeslip in the simulator keeps the altitude and pressure of a
+  run at a place that is not a catalog venue, so the simulator shows the
+  slip's time. "Save and share" still gives the link when the browser will
+  not store the run, and rider weight is shown as a condition, not as a
+  change to the bike.
 
 ### Kept (not monetization)
 Part INR prices and cost-per-tenth, `budget_inr`, per-IP rate limiting, chat

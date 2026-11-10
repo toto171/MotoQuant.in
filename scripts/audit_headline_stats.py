@@ -207,7 +207,7 @@ _NUM = r"([+\u2212-]?\d?\.\d{2,4})"
 ACCURACY_PATTERNS = [
     # matched benchmark count
     (r"\b(\d{3}) matched\b", "acc_matched", "matched benchmark count"),
-    (r"\((\d{3}) Benchmarks\)", "acc_matched", "matched count (title)"),
+    (r"\((\d{3}) (?:Matched )?Benchmarks\)", "acc_matched", "matched count (title)"),
     (
         r"\bof (?:the )?(\d{3}) (?:matched|land|benchmarks fall)",
         "acc_matched",

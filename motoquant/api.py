@@ -3129,6 +3129,9 @@ def _fetch_owm_for_location(
         location=location, lat=lat, lon=lon, altitude_m=altitude_m
     )
     if isinstance(result, dict) and "_error" not in result:
+        # Stamp the fetch here so a cached reading keeps the time it was
+        # actually fetched, rather than the time it was served.
+        result = {"fetched_at": datetime.now(timezone.utc).isoformat(), **result}
         with _owm_cache_lock:
             _owm_cache[key] = (now, dict(result))
             _owm_cache.move_to_end(key)
@@ -3387,7 +3390,7 @@ def resolve_venue(req: VenueResolveRequest):
         "density_altitude_ft": owm["density_altitude_ft"],
         "density_altitude_m": owm["density_altitude_m"],
         "power_correction_factor": owm["power_correction_factor"],
-        "fetched_at": datetime.now(timezone.utc).isoformat(),
+        "fetched_at": owm.get("fetched_at") or datetime.now(timezone.utc).isoformat(),
         "source": "openweathermap",
     }
 

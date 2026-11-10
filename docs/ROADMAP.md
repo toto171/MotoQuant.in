@@ -12,7 +12,7 @@ were done long before they were removed from here.
 ## Where the project stands
 
 MotoQuant is free and open source under Apache-2.0. The engine is checked
-against 263 published runs, the site is live at motoquant.in, and the test
+against 250 published tests (263 matches to catalog bikes), the site is live at motoquant.in, and the test
 suite is large. Code is no longer the main limit. In order, the limits are:
 
 1. Data. Small bikes are the weakest class. Few instrumented timeslips exist
@@ -61,8 +61,8 @@ suite is large. Code is no longer the main limit. In order, the limits are:
   dispatch, staging dead time) waits for a deliberate accuracy pass with a
   full sweep as evidence (ADR-0002).
 - A wider speed-limiter annotation pass. The limiter model works; top speed
-  is still weaker than ET, at about +6.8 km/h on average (newest
-  `reports/acc_final_*.json`).
+  is still weaker than ET: off by about 12.7 km/h on average and about
+  6.8 km/h too fast overall (newest `reports/acc_final_*.json`).
 
 ## P1: community data
 

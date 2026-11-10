@@ -55,7 +55,6 @@ The code is not the bottleneck. The main limits are data (instrumented Dragy tim
 - Class bias remains on entry 200–300 cc, 300–500 cc singles and two-strokes; the three reference bikes' spread is compressed; two litre bikes carry millisecond-level dry-mass inversions. All documented in `reports/session_2026_11_05_handoff.md`.
 - Top speed is weaker than ET.
 - Catalog bikes simulate at their stored default venue conditions while the three reference presets run at sea level; every result states its conditions, but the two defaults differ.
-- Saved-run pages (`/r/[id]`) do not store the conditions of the run.
 - Exact full simulations in the browser: the Rust core is compiled to WebAssembly and parity-proven, but the simulator UI still runs full sims on the server.
 - Epoch-gated physics work (do NOT wire casually — moves the pinned baselines): Pacejka slip force, 4-branch clutch dispatch, staging dead time.
 - Full backlog: `docs/ROADMAP.md`.
@@ -73,7 +72,7 @@ Add well-sourced bikes/parts/tires following the July-2026 pattern: sibling spec
 The accuracy story depends on instrumented runs. Make submitting one easy: tighten the `calibration_data` issue template, document the source-labelling weights (instrumented 1.0 … DERIVED 0.1) in `docs/`, and add a reviewed-row path into the sweep corpus. No fabricated rows: every benchmark needs a citable source.
 
 ### C. Build-sheet export (web — 1–2 days)
-The shareable timeslip on `/r/[id]` already prints to PDF. Extend it to a one-page build sheet covering ET/trap/splits, the parts list with costs, and charts.
+The shareable timeslip on `/timeslip` already prints to PDF. Extend it to a one-page build sheet covering ET/trap/splits, the parts list with costs, and charts.
 
 ### D. Chat-agent polish (LLM layer — scoped pieces)
 The agent shipped July 3 (`motoquant/llm/agent.py`). Scoped follow-ups: resolver letter/digit tokenization ("ZX10R" → weak match), a `mode=agent` path for the CLI `chat` subcommand, streaming responses. Everything is offline-testable via the `_call_override` seam — see `tests/test_agent.py` for the pattern.

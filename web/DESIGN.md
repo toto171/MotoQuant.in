@@ -75,7 +75,7 @@ hence a real light theme).
 7. Mobile first-class: no horizontal overflow at 360px, tap targets ≥ 44px,
    form inputs ≥ 16px font-size (prevents iOS zoom).
 8. Existing routes keep their URLs (`/optimize`, `/autotune`, …). Rename
-   labels, never paths. Share links and `/r/[id]` timeslips keep working.
+   labels, never paths. Share links and `/timeslip` links keep working.
 9. Accessibility: every input has a visible label wired with
    `htmlFor`/`id` or `aria-label`; every clickable is a `<button>` or `<a>`;
    visible focus ring; colour is never the only signal; text contrast ≥ 4.5:1
@@ -193,7 +193,7 @@ all-caps chips, "standing by" empty-state theatre.
 - **`SiteNav`** — labels (paths unchanged): `Simulator` (/simulator) ·
   `Upgrades` (/optimize) · `Race-day setup` (/autotune) · `Bikes` ·
   `Leaderboard` · `Learn ▾` (Getting started, Glossary, How the physics
-  works, Accuracy, Blog, About) · GitHub icon link · ThemeToggle · Sign in ·
+  works, Accuracy, Blog, About) · GitHub icon link · ThemeToggle · Your runs ·
   primary `Open simulator`. Each Learn item has a one-line description.
   **`MobileToolBar`**: Simulate / Upgrades / Setup / Bikes / Board.
   **`CommandPalette`**: same labels + descriptions; searching "optimize",
@@ -283,17 +283,18 @@ one-line why in plain words.
 Everything visible without scroll-triggered reveals (rule 7).
 
 ### `/bikes`, `/bikes/[id]`
-Compact header ("Bikes", "541 motorcycles you can simulate. Pick one to see
+Compact header ("Bikes", "534 motorcycles you can simulate. Pick one to see
 its predicted time."), search + filters first, cards show name, cc, hp,
 predicted time when known, and one clear action "Simulate this bike". Remove
 the SEO keyword paragraph from the visible header (keep keywords in
 metadata). Detail page leads with predicted time + sentence + "Open in
 simulator".
 
-### `/leaderboard`, `/r/[id]`, `/account`, `/login`
+### `/leaderboard`, `/runs`, `/timeslip`
 Compact headers, plain labels, v6 components. Timeslip print styles keep
-working. Account = "Your saved runs" + "Password". Login copy: "Sign in to
-save your runs. You don't need an account to use the simulator."
+working. There are no accounts: `/runs` lists the runs saved in this browser,
+and `/timeslip` re-runs a shared link through the physics. The old `/login`,
+`/signup`, `/account` and `/r/[id]` paths redirect (`next.config.js`).
 
 ### `/docs/*`, `/features`, `/about`, `/validation`, `/whitepaper`, blog
 Content pages keep their content; they inherit the theme through tokens.

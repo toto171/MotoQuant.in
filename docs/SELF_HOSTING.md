@@ -6,9 +6,11 @@ copy: on a laptop, on Render + Vercel the way the public instance does, or on
 any host that runs Docker.
 
 There is no billing, account or email configuration of any kind, and the
-server stores nothing a visitor sends. **Every environment variable on this
-page is optional.** With none of them set, the API serves the simulator,
-catalog, optimizer, race-day setup and leaderboard.
+server writes nothing a visitor sends to its database (anonymous usage
+events go to the server log only). **Every environment variable on this page
+is optional.** With none of them set, the API serves the simulator, catalog,
+optimizer and race-day setup; the leaderboard is a static page generated from
+the physics (`scripts/gen_stock_leaderboard.py`).
 
 The full annotated variable list is in [`.env.example`](../.env.example) at
 the repo root. This page explains what each group is for and how to deploy.

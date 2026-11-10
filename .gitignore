@@ -57,6 +57,15 @@ scrape_cache/
 id_rsa*
 id_ed25519*
 *credentials*.json
+*creds*.env
+preflight.env
+tokens.md
+tokens.md.*
+TOKENS_UPDATE_*.md
+*.token
+*.tokens
+secrets.local
+.motoquant-secrets/
 
 # Editors, OS and tool state
 .vscode/

@@ -17,19 +17,16 @@ update to the latest `main`.
 
 **Please do not open a public issue for a security problem.**
 
-Report it privately with **GitHub Security Advisories**:
+Report it privately, by either route:
 
-1. Go to the repository's **Security** tab:
-   <https://github.com/toto171/MotoQuant.in/security>
-2. Choose **Report a vulnerability** (or open
-   <https://github.com/toto171/MotoQuant.in/security/advisories/new>).
-3. Describe the issue, how to reproduce it, and the impact you expect. A
-   minimal proof of concept helps. Please do not include real user data.
+- **GitHub private reporting.** Open the repository's **Security** tab
+  (<https://github.com/toto171/MotoQuant.in/security>) and choose **Report a
+  vulnerability**, or go straight to
+  <https://github.com/toto171/MotoQuant.in/security/advisories/new>.
+- **Email** <motoquant@gmail.com> with the subject "Security report".
 
-If private reporting is unavailable, email <motoquant@gmail.com> with the
-subject "Security report", or open a GitHub issue that says only *"security
-report: please contact me"*, with no details, and a maintainer will arrange a
-private channel.
+Describe the issue, how to reproduce it and the impact you expect. A minimal
+proof of concept helps. Please do not include real user data.
 
 What to expect:
 

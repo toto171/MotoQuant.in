@@ -67,6 +67,7 @@ function TimeslipView() {
   }, [body, attempt]);
 
   const changes = useMemo(() => (run ? changesFromStock(body, run) : []), [body, run]);
+  const riderKg = Number.isFinite(Number(body?.rider_mass_kg)) ? Number(body.rider_mass_kg) : 75;
   const conditions = run ? conditionsSummary(run.environment) : '';
   const splits = run
     ? [
@@ -102,7 +103,9 @@ function TimeslipView() {
     message = 'This link does not name a bike, so there is nothing to show.';
   } else if (error) {
     if (error.status === 404) {
-      message = `${error.message || 'Something in this link'} is no longer in the catalog, so this run cannot be shown.`;
+      message = error.message
+        ? `This run cannot be shown: ${error.message}. The catalog has changed since the link was made.`
+        : 'This run cannot be shown: something in the link is no longer in the catalog.';
     } else if (error.status === 422) {
       message = error.message || 'This link describes a setup the simulator cannot run.';
     } else if (error.status === 429) {
@@ -176,6 +179,7 @@ function TimeslipView() {
                   <ResultSentence
                     className="mt-4 text-left"
                     bikeName={run.bike_name}
+                    riderKg={riderKg}
                     et={Number(run.et_quarter_s)}
                     trapKmh={run.trap_speed_kmh ? Number(run.trap_speed_kmh) : null}
                     venueName={run.environment?.source === 'venue' ? run.environment.name : null}
@@ -261,7 +265,7 @@ function TimeslipView() {
           et={run.et_quarter_s}
           trapKmh={run.trap_speed_kmh}
           splits={splits}
-          conditions={conditions}
+          conditions={[`${Math.round(riderKg)} kg rider`, conditions].filter(Boolean).join(' · ')}
           changes={changes}
         />
       ) : null}

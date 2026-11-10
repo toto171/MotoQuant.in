@@ -266,10 +266,12 @@ export default function ValidationPage() {
             &ldquo;Submit a timeslip&rdquo; form on GitHub so it can join the benchmark set.
           </p>
           <p>
-            <strong className="text-white">Regression testing:</strong> Every commit runs
-            <code className="font-mono text-brand-accent mx-1">scripts/check_baselines.py</code> for the three reference bikes and
-            <code className="font-mono text-brand-accent mx-1">tests/test_regression_snapshot.py</code>, a stored result for every
-            catalog bike, so a change that moves any simulated time is caught.
+            <strong className="text-white">Regression testing:</strong> Every change to the physics code runs
+            <code className="font-mono text-brand-accent mx-1">scripts/check_baselines.py</code>, which holds the three reference bikes
+            to the fourth decimal, and
+            <code className="font-mono text-brand-accent mx-1">tests/test_regression_snapshot.py</code>, which re-simulates a
+            stratified sample of about 35 catalog bikes against stored results to within 2 ms. The same snapshot
+            covers every catalog bike when run with <code className="font-mono text-brand-accent">MOTOQUANT_SLOW_TESTS=1</code>.
           </p>
         </div>
       </section>

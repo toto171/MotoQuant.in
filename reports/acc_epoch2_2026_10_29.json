@@ -4755,7 +4755,7 @@
   "hyb_neutral": {
    "desc": "round-2 physics + round-1 catalog data, neutral knobs",
    "engine": "NativeEngine",
-   "root": "/tmp/claude-0/-home-user-MotoQuant-v1/cd99bc71-6bec-5127-8b8d-9cb285f0660f/scratchpad/epoch2/hyb_r2phys_r1data",
+   "root": "(local working directory, not kept)",
    "references": {
     "K5": 9.5425,
     "R1": 9.6234,
@@ -11791,7 +11791,7 @@
    "Data: the category-default primary ratios (298 bikes) bias the small-bike clusters slow."
   ],
   "runtime": "native ~14 ms per quarter sim; grid 2376 knob sets x cluster rows (~83k quarter sims) in 257 s on 4 cores; full measure incl. top speed + gate ~15 s; HEAD / round-1 trees run on the Python reference (~1 min each).",
-  "scratch": "/tmp/claude-0/-home-user-MotoQuant-v1/cd99bc71-6bec-5127-8b8d-9cb285f0660f/scratchpad/epoch2 (measure / tune / refs JSON, grid cache, hybrid tree)",
+  "scratch": "(local working directory, not kept)",
   "routing_membership_change": [
    {
     "manufacturer": "Suzuki",

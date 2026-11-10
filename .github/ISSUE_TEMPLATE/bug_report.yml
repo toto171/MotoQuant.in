@@ -54,7 +54,7 @@ body:
         - FastAPI backend
         - Web (Next.js)
         - Chat agent / MCP server
-        - Accounts / leaderboard
+        - Saved runs / timeslips / leaderboard
         - Calibration (Dragy / dyno / ECU)
         - Parts catalog / fitment
         - Scraper / importer
