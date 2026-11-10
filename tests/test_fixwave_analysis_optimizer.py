@@ -68,8 +68,10 @@ class _PoolRepo:
         self._ids = set(ids)
         self._conn = repo._conn
         self.discovered: list[int] = []
+        self.limits: list = []
 
     def search(self, **kw):
+        self.limits.append(kw.get("limit"))
         rows = self._repo.search(**kw)
         self.discovered = [r["id"] for r in rows]
         return [r for r in rows if r["id"] in self._ids]
@@ -296,11 +298,16 @@ class TestNextUpgrade:
 class TestCandidateDiscovery:
     def test_optimizer_discovers_every_compatible_part(self, conn, repo):
         compatible = repo.search(bike_model_id=3, limit=10**6)
-        assert len(compatible) > 200
+        assert len(compatible) > 150
         pool = _PoolRepo(repo, [354])
         optimize_build(_cfg(conn, 3), 10_000, pool, bike_model_id=3)
         assert len(pool.discovered) == len(compatible)
-        for pid in (141, 100, 383, 149, 104):  # the parts the 200-cap dropped
+        # This bike has fewer compatible parts (158) than the old cap of 200
+        # since 47 placeholder parts left the catalog (2026-11-10), so also
+        # pin the cap itself: discovery must ask for the whole catalog.
+        total = conn.execute("SELECT COUNT(*) FROM parts").fetchone()[0]
+        assert pool.limits and all(lim >= total for lim in pool.limits), pool.limits
+        for pid in (141, 100, 383, 104):  # parts the 200-cap dropped
             assert pid in pool.discovered
 
 

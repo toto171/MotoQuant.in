@@ -194,10 +194,24 @@ class TestDerivedCopiesInSync:
         assert stale == []
 
     def test_headline_columns_match_physics_blobs(self, db):
+        # Headline columns are the physics blob's values, except that five of
+        # them (bridge.SPEC_ONLY_HEADLINE_FIELDS) are NULL where the bike's
+        # spec has no figure of its own - the blob holds a reference-bike
+        # default there (2026-11-10). Same spec matching as the sync patch.
+        from scripts.reseed_configs_from_specs import match_spec_to_row
+
+        spec = importlib.util.spec_from_file_location("cfg_sync_idx", _SYNC_PATCH)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        specs_by_key = mod.spec_index()
         drift = []
         for row in _current_rows(db):
             model = db.bikes.get_model(row["bike_model_id"])
-            for col, val in extract_headline_specs(db_row_to_config(row)).items():
+            bike_spec = match_spec_to_row(
+                {**model, "manufacturer": model["manufacturer_name"]}, specs_by_key
+            )
+            expected = extract_headline_specs(db_row_to_config(row), spec=bike_spec)
+            for col, val in expected.items():
                 old = model[col]
                 if isinstance(val, (int, float)) and isinstance(old, (int, float)):
                     if abs(float(old) - float(val)) > 1e-9:
@@ -219,7 +233,7 @@ class TestDerivedCopiesInSync:
             # Re-create the shipped staleness on two rows.
             other.conn.execute(
                 "UPDATE bike_models SET wheelbase_mm = 1355, peak_power_rpm = 8000"
-                " WHERE id = 316"
+                " WHERE id = 2186"
             )
             other.conn.execute(
                 "UPDATE dyno_curves SET is_at_wheel = 1, torque_values = '[1.0]'"

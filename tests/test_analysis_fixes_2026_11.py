@@ -471,15 +471,18 @@ class TestSwapRepairUnit:
 # another buildable set of the same candidates:
 #   * Interceptor 650: the per-₹100 bucket rounding (always up, so a build can
 #     never exceed its budget) rejects exhaust + air filter + chain by ₹9.28
-#     and settles for a weaker fuel-system part; the swap pass works in exact
-#     rupees.
+#     and settles for the weaker air filter; the swap pass works in exact
+#     rupees. (Re-picked 2026-11-10: the catalog clean-up removed two of the
+#     original candidates, battery 209 and fuel-system part 286; battery 83
+#     and fuel-system part 95 take their places. With 286 the knapsack had
+#     settled for that fuel-system part instead of the exhaust.)
 #   * Duke 390: a front and a rear sprocket each help alone but not together,
 #     so the gearing re-choice drops one and the budget it frees is never
 #     spent; swapping the rear sprocket for the fork kit is the better build.
 # (bike, budget, candidate part ids). The expected set is the brute-force
 # optimum over the same candidates, computed in the test.
 _CASES = [
-    (INTERCEPTOR, 45_887, [32, 87, 89, 185, 209, 286]),
+    (INTERCEPTOR, 45_887, [32, 83, 87, 89, 95, 185]),
     (DUKE_390, 55_603, [2, 18, 214, 215, 232, 262]),
 ]
 

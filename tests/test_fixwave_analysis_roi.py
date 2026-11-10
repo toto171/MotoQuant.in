@@ -124,11 +124,26 @@ class TestCandidatePoolNotCut:
     def test_hayabusa_gen1_sees_every_compatible_part(self, repo):
         cfg = gsxr1000_k5()
         compatible = repo.search(bike_model_id=3, limit=10**6)
-        assert len(compatible) > 200  # the case the old cap broke
+        assert len(compatible) > 150
+        limits = []
+
+        class _Spy:
+            def search(self, **kw):
+                limits.append(kw.get("limit"))
+                return repo.search(**kw)
+
+            def __getattr__(self, name):
+                return getattr(repo, name)
+
         build = find_best_build(
-            cfg, 10_000, repo, bike_model_id=3, et_fn=lambda c: (10.0, 60.0)
+            cfg, 10_000, _Spy(), bike_model_id=3, et_fn=lambda c: (10.0, 60.0)
         )
         assert build.parts_evaluated == len(compatible)
+        # This bike has fewer compatible parts (158) than the old cap of 200
+        # since 47 placeholder parts left the catalog (2026-11-10), so also
+        # pin the cap itself: discovery must ask for the whole catalog.
+        total = repo._conn.execute("SELECT COUNT(*) FROM parts").fetchone()[0]
+        assert limits and all(lim >= total for lim in limits), limits
 
 
 # ─────────────────────────── physical slots ───────────────────────────
@@ -145,19 +160,19 @@ class TestPartSlots:
         assert part_slot(repo.get(348)) == "fuel_system:injector"
         assert part_slot(repo.get(92)) == "fuel_system:pump"
         assert part_slot(repo.get(144)) == "fuel_system:pump"
-        for pid in (94, 146, 285, 286, 287, 288, 351):
+        for pid in (94, 146, 351):
             assert part_slot(repo.get(pid)) == "fuel_system:controller", pid
 
     def test_bodywork_fairings_share_one_slot(self, repo):
-        for pid in (107, 108, 164, 165, 166, 167, 265):
+        for pid in (107, 108, 265):
             assert part_slot(repo.get(pid)) == "bodywork:fairing", pid
         assert part_slot(repo.get(423)) == "bodywork:winglets"
         assert part_slot(repo.get(264)) == "bodywork:windscreen"
 
     def test_unpositioned_brake_parts_are_front_axle(self, repo):
-        for pid in (101, 157, 158):  # calipers without a stated axle
+        for pid in (101,):  # calipers without a stated axle
             assert part_slot(repo.get(pid)) == "brakes:caliper:front", pid
-        for pid in (102, 159, 160, 162, 163, 261, 370):  # pad sets
+        for pid in (102, 261, 370):  # pad sets
             assert part_slot(repo.get(pid)) == "brakes:pad:front", pid
         for pid in (363, 364, 366):
             assert part_slot(repo.get(pid)) == "brakes:master_cylinder:front", pid

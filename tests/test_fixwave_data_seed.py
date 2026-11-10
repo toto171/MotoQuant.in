@@ -124,7 +124,7 @@ class TestFreshSeedUnchanged:
             summary = seed_all(db)
         finally:
             logging.disable(logging.NOTSET)
-        assert summary["parts"] >= 590
+        assert summary["parts"] >= 546  # 593 - 47 placeholder parts (2026-11-10)
         assert db.conn.execute("SELECT COUNT(*) FROM tire_models").fetchone()[0] > 150
         assert db.parts.protect_ids_upto is None  # protection is released
         assert db.tires.protect_ids_upto is None
