@@ -49,9 +49,12 @@ _PROVIDERS: dict[str, dict[str, str | None]] = {
         "model_env": "GEMINI_MODEL",
     },
     "anthropic": {
-        "model": "claude-sonnet-4-6",
+        # Override via ANTHROPIC_MODEL (e.g. a Haiku model to cut cost, or an
+        # Opus model for the hardest multi-step tool use).
+        "model": "claude-sonnet-5-5",
         "base_url": None,
         "api_key_env": "ANTHROPIC_API_KEY",
+        "model_env": "ANTHROPIC_MODEL",
     },
     "deepseek": {
         "model": "deepseek-chat",

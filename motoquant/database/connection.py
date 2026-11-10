@@ -1,12 +1,11 @@
 """
-MotoQuant â Database Connection Manager
-==========================================
+MotoQuant — Database Connection Manager
+=======================================
 Handles SQLite connection lifecycle, schema initialization, migrations,
 and provides a single entry-point (MotoQuantDB) for all repository access.
 """
 
 import sqlite3
-import threading
 from pathlib import Path
 
 from .schema import (
@@ -16,81 +15,6 @@ from .schema import (
     SEED_VENUES,
     TABLES_DDL,
 )
-
-# -- Catalog generation counter ------------------------------------------------
-# Process-wide integer that changes whenever a catalog table is written at
-# runtime. API-side caches (serialized catalog responses, parsed fitment rules,
-# stock-baseline sims) key on it, so a write invalidates all of them at once.
-# It is NOT derived from the DB file's mtime: WAL writes do not move that until
-# a checkpoint. Writes through THIS process's MotoQuantDB connections bump it
-# via the authorizer below; writes made through any other connection (another
-# process, or a plain sqlite3.connect) are caught by folding ``PRAGMA
-# data_version`` into the token returned by :func:`catalog_token`.
-CATALOG_TABLES = frozenset(
-    {
-        "bike_models",
-        "bike_configs",
-        "manufacturers",
-        "parts",
-        "parts_categories",
-        "part_prices",
-        "tire_models",
-        "tire_manufacturers",
-        "bike_tire_fitments",
-        "venues",
-        "venue_seasonal_data",
-    }
-)
-_catalog_generation = 0
-_catalog_generation_lock = threading.Lock()
-
-
-def catalog_generation() -> int:
-    """Current catalog generation (monotonically increasing within a process)."""
-    return _catalog_generation
-
-
-def catalog_token(conn: "sqlite3.Connection | None") -> tuple:
-    """Opaque freshness token for catalog-derived caches.
-
-    ``(generation, data_version)``: the generation moves on every write made
-    through a MotoQuantDB connection or an explicit bump; ``PRAGMA
-    data_version`` moves whenever a DIFFERENT connection (another process, a
-    script, a plain ``sqlite3.connect``) commits to the same database file.
-    Compare for equality only.
-    """
-    dv = None
-    if conn is not None:
-        try:
-            dv = conn.execute("PRAGMA data_version").fetchone()[0]
-        except sqlite3.Error:
-            dv = None
-    return (_catalog_generation, dv)
-
-
-def bump_catalog_generation() -> int:
-    """Mark every catalog-derived cache stale. Returns the new generation."""
-    global _catalog_generation
-    with _catalog_generation_lock:
-        _catalog_generation += 1
-        return _catalog_generation
-
-
-_WRITE_ACTIONS = frozenset(
-    {sqlite3.SQLITE_INSERT, sqlite3.SQLITE_UPDATE, sqlite3.SQLITE_DELETE}
-)
-
-
-def _catalog_write_authorizer(action, table, _arg2, _dbname, _source):
-    """sqlite3 authorizer: bump the generation on any write to a catalog table.
-
-    Runs at statement-prepare time, which is why the connection is opened with
-    ``cached_statements=0``: a cached prepared statement would skip this hook
-    on every repeat of the same SQL. Never denies anything.
-    """
-    if action in _WRITE_ACTIONS and table in CATALOG_TABLES:
-        bump_catalog_generation()
-    return sqlite3.SQLITE_OK
 
 
 class MotoQuantDB:
@@ -130,11 +54,8 @@ class MotoQuantDB:
         if self._conn is not None:
             return self._conn
 
-        self._conn = sqlite3.connect(
-            str(self._db_path), check_same_thread=False, cached_statements=0
-        )
+        self._conn = sqlite3.connect(str(self._db_path), check_same_thread=False)
         self._conn.row_factory = sqlite3.Row
-        self._conn.set_authorizer(_catalog_write_authorizer)
 
         # WAL mode is optimal but fails on some network/FUSE-mounted filesystems.
         # Silently fall back to DELETE journal mode if WAL is unavailable.
@@ -476,7 +397,7 @@ def connect(db_path=None):
 
 def row_conn(db_path=None) -> sqlite3.Connection:
     """``connect()`` with ``sqlite3.Row`` as the row factory — the exact shape
-    auth needs. Centralised so the row-factory
+    the optional-accounts layer (auth) needs. Centralised so the row-factory
     (and any future per-request connection tuning) lives in one place instead
     of being copy-pasted into every module's ``_get_conn``.
     """

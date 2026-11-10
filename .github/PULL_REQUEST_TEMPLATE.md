@@ -1,5 +1,6 @@
 <!--
-Thanks for contributing to MotoQuant (MIT-licensed; by submitting you agree your contribution is released under the same license).
+Thanks for contributing to MotoQuant.
+By opening this PR you agree your contribution is licensed under the project's Apache License 2.0 (see LICENSE and CONTRIBUTING.md).
 First time here? Read AGENTS.md (the working contract) and docs/INVARIANTS.md (what must never break).
 Fill every section. Delete sections that don't apply (e.g. "Physics benchmark deltas" for a docs-only PR), but don't delete the Kaizen checklist.
 Run `make check` (fast gate) and `make test` (full suite) before opening this PR.
@@ -19,7 +20,7 @@ Closes #
 - [ ] New feature
 - [ ] Physics / sub-model change
 - [ ] Database schema change
-- [ ] Bike / parts / tire / benchmark data (every value has a cited source in the PR body)
+- [ ] Bike / parts / tire data
 - [ ] Calibration data (Dragy / dyno / ECU log)
 - [ ] Web (Next.js) frontend
 - [ ] Docs / tooling / CI
@@ -49,7 +50,7 @@ python scripts/check_baselines.py
 | R1 |  |  |  |
 | Hayabusa |  |  |  |
 
-## Kaizen checklist (from CLAUDE.md)
+## Kaizen checklist (from CONTRIBUTING.md §7)
 
 - [ ] No silent failure modes (no swallowed exceptions, no helpers that accept invalid paths silently).
 - [ ] Data ↔ model paths match (seed / DB / config keys hit real dataclass fields — no `UserWarning` from `bridge.apply_part_to_config`).
@@ -63,8 +64,7 @@ python scripts/check_baselines.py
 
 - [ ] `python -m pytest tests/ -q` is green locally.
 - [ ] `ruff check .` and `ruff format --check .` are clean.
-- [ ] If this touches `web/`: `npm run build` is green in `web/`.
-- [ ] If substantive: added a `CHANGELOG.md` entry (and `docs/` if behaviour changed).
-- [ ] No fabricated data: every spec/benchmark/price I added has a citable source.
+- [ ] If this is a web PR: `make web-build` (= `npm run build` in `web/`, what Vercel runs) is green.
+- [ ] If user-visible counts changed: `make audit` is in sync. If behaviour changed: docs updated (and a `CHANGELOG.md` entry for anything notable).
 - [ ] No secrets, API keys, or `.env` files in the diff.
 - [ ] Commit messages are imperative-mood ("Add …", "Fix …"), subject ≤ 72 chars.

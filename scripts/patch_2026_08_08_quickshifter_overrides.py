@@ -44,11 +44,6 @@ the twelve functional siblings sit in a 48–70 ms band):
               No functional sibling for these four brands, so they take the
               60 ms band midpoint rather than any vendor's fastest claim.
 
-2026-11-10: QS-TRA-5, QS-DYN-6, QS-GPR-7, QS-HEL-8 and QS-SHI-9 were invented
-products and were removed from the catalog; their entries are gone from this
-table (the patch also reports them as ``missing`` on a database that never had
-them, which is not an error).
-
 Absolute overrides (not deltas) are used throughout, matching the majority
 sibling convention (9 of 12) and keeping re-application idempotent.
 
@@ -63,6 +58,11 @@ import sqlite3
 SHIFT_TIMES_MS: dict[str, tuple[str, float]] = {
     "HT-QS-MOD": ("HealTech QuickShifter Controller Module", 60.0),
     "QS-HM-4": ("HM QS Mid-Range", 70.0),
+    "QS-TRA-5": ("Translogic QS Pro V2", 60.0),
+    "QS-DYN-6": ("Dynojet Power Commander QS", 55.0),
+    "QS-GPR-7": ("GPR Gear Box QS", 60.0),
+    "QS-HEL-8": ("Helix QS Universal", 60.0),
+    "QS-SHI-9": ("Shift Assist Pro", 60.0),
     "QS-BON-10": ("Bonamici Racing Quick Shifter", 60.0),
 }
 

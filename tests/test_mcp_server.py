@@ -282,7 +282,7 @@ class TestToolCallsLocal(unittest.TestCase):
             "simulate_quarter_mile", {"bike_preset": "gsxr1000_k5"}
         )
         self.assertFalse(is_error, payload)
-        self.assertAlmostEqual(payload["et_s"], 9.9331, places=4)
+        self.assertAlmostEqual(payload["et_s"], 10.0436, places=4)
         self.assertGreater(payload["trap_kmh"], 200)
         self.assertLess(payload["et_60ft_s"], payload["et_eighth_s"])
         self.assertLess(payload["et_eighth_s"], payload["et_s"])
@@ -333,7 +333,7 @@ class TestToolCallsLocal(unittest.TestCase):
         # Setup A IS the K5's stock 17/42, so this path must reproduce the
         # pinned baseline exactly -- proof the sprocket override rides the real
         # config builder rather than a parallel re-implementation.
-        self.assertAlmostEqual(payload["a"]["et_s"], 9.9331, places=4)
+        self.assertAlmostEqual(payload["a"]["et_s"], 10.0436, places=4)
         # The swap must actually move the physics at BOTH the launch and the
         # stripe. Which way it moves is bike-specific (a grip-limited litre
         # bike loses to shorter gearing, a power-limited 150 gains), so the

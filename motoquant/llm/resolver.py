@@ -21,6 +21,7 @@ No external dependencies. Pure stdlib.
 from __future__ import annotations
 
 import re
+from functools import lru_cache
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -61,6 +62,27 @@ _KNOWN_MANUFACTURERS = {
     "buell",
     "husqvarna",
     "bimota",
+    "bsa",
+    "benda",
+    "ebr",
+    "kove",
+    "norton",
+    "zontes",
+    "hd",
+    "indian motorcycle",
+    "cf moto",
+}
+
+# Short or informal manufacturer names -> the catalog's name (normalised).
+# Scoring compares against the candidate's real manufacturer, so "RE Classic
+# 350" must know that "re" means Royal Enfield.
+_MANUFACTURER_ALIASES = {
+    "re": "royal enfield",
+    "harley": "harley davidson",
+    "hd": "harley davidson",
+    "indian motorcycle": "indian",
+    "qj": "qj motor",
+    "cf moto": "cfmoto",
 }
 
 # Strip "(2024-2026)", "(2024)", etc. from candidate names before scoring.
@@ -80,6 +102,7 @@ SUGGESTIONS_LIMIT = 5
 # ───────────────────────────────────────────────────────────────────
 
 
+@lru_cache(maxsize=8192)  # pure; a catalog-wide scan re-normalises ~550 names
 def _normalize(s: str) -> str:
     """Lowercase, drop punctuation that confounds matching, collapse spaces."""
     if not s:
@@ -110,22 +133,121 @@ def _strip_manufacturer_prefix(query: str) -> tuple[str, str | None]:
     q = _normalize(query)
     if not q:
         return q, None
-    # Try multi-word manufacturers first (so "royal enfield" matches before "re")
+    # Try multi-word manufacturers first (so "royal enfield" matches before "re").
+    # Keys are normalised like the query ("harley-davidson" -> "harley
+    # davidson"), else a hyphenated brand could never match its own prefix.
     for mfr in sorted(_KNOWN_MANUFACTURERS, key=len, reverse=True):
-        if q.startswith(mfr + " ") or q == mfr:
-            stripped = q[len(mfr) :].strip()
-            return stripped, mfr
+        key = _normalize(mfr)
+        if q.startswith(key + " ") or q == key:
+            stripped = q[len(key) :].strip()
+            return stripped, key
     return q, None
+
+
+def _canonical_manufacturer(name: str | None) -> str:
+    """Normalised catalog manufacturer name for a brand or its alias."""
+    n = _normalize(name or "")
+    return _MANUFACTURER_ALIASES.get(n, n)
+
+
+def _names_only_a_manufacturer(query: str, manufacturer: str | None) -> bool:
+    """True when ``query`` names a brand but no model.
+
+    "honda", "Harley Davidson", "RE" (Royal Enfield) and "yamaha r" (a lone
+    1-char token carries nothing) leave nothing that identifies a model once
+    the brand is removed. Every model of that brand then token-contains the
+    query, so the top score is just the oldest, shortest-named model (or,
+    for "re", any name with "re" inside it, e.g. "Fireblade"). The caller
+    must ask which bike was meant instead of simulating a guess.
+
+    ``manufacturer`` is the best candidate's own manufacturer; its words are
+    removed too, so a query made only of them ("Royal", "Davidson") is
+    caught even when it is not a known brand prefix. What is left counts as
+    a model once it has two or more characters with the separators removed,
+    so "Yamaha R 1" ("r1") and "R 1" still resolve to the YZF-R1.
+    """
+    stripped, _ = _strip_manufacturer_prefix(query)
+    brand = set(_canonical_manufacturer(manufacturer).split())
+    rest = "".join(t for t in stripped.split() if t not in brand)
+    return len(rest) < _MIN_TOKEN_LEN
+
+
+def _compact_windows(seq: list[str]) -> dict[str, int]:
+    """Every contiguous run of tokens joined with no separator, mapped to the
+    fewest tokens left outside that run.
+
+    "Ninja ZX-10R" -> tokens [ninja, zx, 10r] -> {"ninja": 2, "ninjazx": 1,
+    "ninjazx10r": 0, "zx": 2, "zx10r": 1, "10r": 2}. A query typed without
+    separators ("ZX10R", "S1000RR", "GSX-R1000 K5") then matches the catalog
+    spelling ("ZX-10R", "S 1000 RR", "GSX-R 1000 K5/K6") exactly on a token
+    boundary, so "R1" still does NOT match "R15".
+    """
+    out: dict[str, int] = {}
+    n = len(seq)
+    for i in range(n):
+        joined = ""
+        for j in range(i, n):
+            joined += seq[j]
+            extra = n - (j - i + 1)
+            if joined not in out or extra < out[joined]:
+                out[joined] = extra
+    return out
+
+
+def _compact_score(query: str, candidate: str) -> int:
+    """0-100: how well the separator-free query matches a token run of the
+    candidate (see _compact_windows). 0 when it does not match."""
+    q_seq = _normalize(query).split()
+    q_compact = "".join(q_seq)
+    if len(q_compact) < 2:
+        return 0
+    extra = _compact_windows(_normalize(candidate).split()).get(q_compact)
+    if extra is None:
+        return 0
+    return max(85, 100 - 3 * extra)
+
+
+def _compact_match(query: str, candidate: str) -> bool:
+    return _compact_score(query, candidate) > 0
 
 
 def _score_candidate(query: str, manufacturer: str, model_name: str) -> int:
     """0-100 similarity score between query and a candidate (manufacturer, model_name).
 
-    Higher = better. Combines:
-      - Manufacturer match bonus (if query mentions a manufacturer, match it)
-      - Token-set Jaccard against the cleaned model_name
-      - Substring containment bonus (if every query token appears in the candidate)
+    Higher = better. The best of:
+      - token-set containment / Jaccard of the full query against
+        "manufacturer model" (_token_score);
+      - the same with the manufacturer prefix stripped, scored against the
+        model name alone, when the query's brand (or its alias, "RE" ->
+        Royal Enfield) IS the candidate's manufacturer;
+      - a separator-free match ("ZX10R" vs "ZX-10R", "S1000RR" vs
+        "S 1000 RR") on a token boundary (_compact_score).
     """
+    if not _normalize(query):
+        return 0
+    cand_full = f"{manufacturer} {model_name}".strip()
+    best = max(
+        _token_score(query, manufacturer, model_name),
+        _compact_score(query, cand_full),
+        _compact_score(query, model_name),
+    )
+    stripped, q_mfr = _strip_manufacturer_prefix(query)
+    if (
+        q_mfr
+        and stripped
+        and manufacturer
+        and _canonical_manufacturer(q_mfr) == _canonical_manufacturer(manufacturer)
+    ):
+        best = max(
+            best,
+            _token_score(stripped, "", model_name),
+            _compact_score(stripped, model_name),
+        )
+    return best
+
+
+def _token_score(query: str, manufacturer: str, model_name: str) -> int:
+    """Token-set containment / Jaccard score (see _score_candidate)."""
     q_norm = _normalize(query)
     if not q_norm:
         return 0
@@ -144,7 +266,13 @@ def _score_candidate(query: str, manufacturer: str, model_name: str) -> int:
         # Tight containment is best; reward shorter candidates more (closer match).
         # If candidate has many extra tokens, slightly penalise.
         extra = len(cand_tokens - q_tokens)
-        return max(85, 100 - 3 * extra)
+        score = max(85, 100 - 3 * extra)
+        # _tokenize drops 1-char tokens, so "CBR1000RR-R" contains-matched the
+        # plain CBR1000RR as strongly as the RR-R. Charge each dropped query
+        # token the candidate does not have.
+        short = {t for t in q_norm.split() if len(t) < _MIN_TOKEN_LEN}
+        missing = short - set(cand_full.split())
+        return score - 10 * len(missing)
 
     # Otherwise Jaccard.
     intersect = q_tokens & cand_tokens
@@ -202,19 +330,24 @@ def resolve_bike(
         for r in rows:
             candidates[r["id"]] = r
 
-    # Strategy 3: manufacturer-filtered search (if we identified one).
+    # Strategy 3: manufacturer-filtered search (if we identified one). Search
+    # by the catalog name ("re" -> "royal%enfield"; a bare LIKE '%re%' hit
+    # every brand containing "re"), with '%' for the separators the
+    # normaliser removed ("harley%davidson" matches "Harley-Davidson").
     if mfr:
+        mfr_like = _canonical_manufacturer(mfr).replace(" ", "%")
         try:
-            rows = db.bikes.search(manufacturer=mfr, limit=200) or []
+            rows = db.bikes.search(manufacturer=mfr_like, limit=500) or []
         except Exception:
             rows = []
         # Only keep rows whose model_name contains at least one significant
-        # query token (otherwise this floods with the entire manufacturer's
-        # catalogue).
+        # query token, or matches it with the separators removed ("ZX10R" vs
+        # "Ninja ZX-10R"); otherwise this floods with the entire
+        # manufacturer's catalogue.
         sig_tokens = {t for t in _tokenize(stripped or raw) if len(t) >= 2}
         for r in rows:
-            cand_tokens = _tokenize(r.get("model_name", ""))
-            if sig_tokens & cand_tokens:
+            model = r.get("model_name", "") or ""
+            if sig_tokens & _tokenize(model) or _compact_match(stripped or raw, model):
                 candidates[r["id"]] = r
 
     # Strategy 4: token-by-token fallback if pool is still empty.
@@ -231,24 +364,48 @@ def resolve_bike(
             if len(candidates) >= 30:
                 break
 
-    if not candidates:
+    def _score_all(rows: list[dict[str, Any]]) -> list[tuple[int, dict[str, Any]]]:
+        out = [
+            (
+                _score_candidate(
+                    raw, r.get("manufacturer_name") or "", r.get("model_name") or ""
+                ),
+                r,
+            )
+            for r in rows
+        ]
+        out.sort(key=lambda x: (-x[0], x[1].get("year_from") or 0))
+        return out
+
+    scored = _score_all(list(candidates.values()))
+
+    # Strategy 5: the SQL LIKE strategies cannot see a separator-free spelling
+    # ("ZX10R", "GSX-R1000 K5") or a brand typed by its alias. When nothing in
+    # the pool clears the bar, score the whole catalog (~550 rows, a few ms).
+    if not scored or scored[0][0] < MATCH_THRESHOLD:
+        try:
+            everything = db.bikes.search(limit=100_000) or []
+        except Exception:
+            everything = []
+        if everything:
+            for r in everything:
+                candidates.setdefault(r["id"], r)
+            full = _score_all(list(candidates.values()))
+            if full and full[0][0] >= MATCH_THRESHOLD:
+                scored = full
+
+    if not scored:
         return None, []
-
-    # Score every candidate.
-    scored: list[tuple[int, dict[str, Any]]] = []
-    for r in candidates.values():
-        s = _score_candidate(
-            raw,
-            r.get("manufacturer_name") or "",
-            r.get("model_name") or "",
-        )
-        scored.append((s, r))
-
-    scored.sort(key=lambda x: (-x[0], x[1].get("year_from") or 0))
 
     suggestions = [r for _, r in scored[:SUGGESTIONS_LIMIT]]
     best_score, best_row = scored[0]
 
+    # A brand-only query clears the bar against EVERY model of that brand;
+    # keep the suggestions (the chips / the agent's candidate list) but do
+    # not pick one. Checked here, after every strategy, so no search path
+    # (including the whole-catalog scan above) can return a guess.
+    if _names_only_a_manufacturer(raw, best_row.get("manufacturer_name")):
+        return None, suggestions
     if best_score >= MATCH_THRESHOLD:
         return best_row["id"], suggestions
     return None, suggestions

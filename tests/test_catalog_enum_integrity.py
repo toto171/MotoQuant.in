@@ -78,26 +78,28 @@ class TestBoostTypeEnum(unittest.TestCase):
             + "\n  ".join(offenders),
         )
 
-    def test_no_new_boosted_parts_ship_without_a_boost_target(self):
-        """A boosted part with no target pressure gets the boosted-DA floor
-        with zero modelled boost.
+    def test_every_boosted_part_declares_its_boost(self):
+        """A boosted part with no boost amount delivers no boost.
 
-        These seven are a KNOWN, PRE-EXISTING gap recorded by the 2026-07-25
-        audit, not a regression. They are not inert — each carries a
-        substantial crank-power delta (+55 to +180 hp), so the part still
-        moves ET; what is missing is the boost *dynamics* (spool, the
-        density-altitude interaction). Closing it properly needs each kit's
-        real published boost pressure, and the honest-data contract forbids
-        inventing those numbers, so they are recorded rather than guessed.
+        A turbo/supercharger with ``target_boost_bar`` 0 (or a nitrous kit
+        whose ``n2o_hp_per_stage * n2o_stages`` is 0) builds zero
+        forced-induction power: all it gets is the boosted density-altitude
+        floor. The 2026-07-25 audit recorded seven such turbo kits
+        (336-339, 341, 581, 582) as a known gap; the October 2026 core audit
+        found three nitrous kits (100, 141, 142) with no ``n2o_stages`` too.
 
-        This test therefore guards against GROWTH: a new boosted SKU must
-        ship a target, and any of these seven that gains one should be
-        removed from the list.
+        Both are closed by ``scripts/patch_2026_10_24_parts_data.py`` (and the
+        seed sources): each turbo kit's ``target_boost_bar`` is its own
+        catalogued ``specifications.boost_psi`` (psi x 0.0689476, no invented
+        figures), each nitrous kit runs one stage of its rated shot, and the
+        kits' old ``engine.peak_power_hp`` deltas (which the bridge never
+        applied to a boosted part) are gone. There is no allowlist any more:
+        every boosted SKU must declare its boost.
         """
         from motoquant.submodels.forced_induction import VALID_BOOST_TYPES
 
-        known_gap = {336, 337, 338, 339, 341, 581, 582}
-        missing, closed = [], []
+        pressure_types = VALID_BOOST_TYPES - {"na", "n2o"}
+        offenders = []
         for pid, brand, name, overrides, _deltas in self.rows:
             if not overrides:
                 continue
@@ -106,26 +108,27 @@ class TestBoostTypeEnum(unittest.TestCase):
             except (TypeError, ValueError):
                 continue
             bt = parsed.get("forced_induction.boost_type")
-            # n2o meters via n2o_hp_per_stage, not a manifold pressure target.
-            if bt in (None, "na", "n2o") or bt not in VALID_BOOST_TYPES:
-                continue
-            has_target = bool(parsed.get("forced_induction.target_boost_bar"))
-            if not has_target and pid not in known_gap:
-                missing.append(f"part {pid} ({brand} {name}): {bt} with no target")
-            elif has_target and pid in known_gap:
-                closed.append(pid)
+            if bt in pressure_types:
+                bar = parsed.get("forced_induction.target_boost_bar") or 0.0
+                if not bar > 0:
+                    offenders.append(
+                        f"part {pid} ({brand} {name}): {bt} with target_boost_bar={bar}"
+                    )
+            elif bt == "n2o":
+                shot = parsed.get("forced_induction.n2o_hp_per_stage") or 0.0
+                stages = parsed.get("forced_induction.n2o_stages") or 0
+                if not shot * stages > 0:
+                    offenders.append(
+                        f"part {pid} ({brand} {name}): n2o with "
+                        f"n2o_hp_per_stage={shot} x n2o_stages={stages}"
+                    )
 
         self.assertEqual(
-            missing,
+            offenders,
             [],
-            "NEW boosted part(s) ship without a target pressure — add the "
-            "kit's real published boost, do not guess:\n  " + "\n  ".join(missing),
-        )
-        self.assertEqual(
-            closed,
-            [],
-            f"Part(s) {closed} now declare a boost target — remove them from "
-            "known_gap so the list stays honest.",
+            "Boosted part(s) declare no boost amount, so they deliver zero "
+            "forced-induction power — add the kit's real published boost / "
+            "shot, do not guess:\n  " + "\n  ".join(offenders),
         )
 
 

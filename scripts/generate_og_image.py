@@ -51,14 +51,14 @@ WHITE_45 = (150, 150, 156)
 
 TITLE = "MotoQuant"
 TAGLINE = "The physics of faster"
-DOMAIN = "motoquant.in"
+DOMAIN = "motoquant.in  ·  free & open source"
 
 # Canonical catalog stats. Keep in sync with scripts/audit_headline_stats.py.
 # (2026-08-08: the benchmark tile had sat at 221 — the July-6 count — through
 # two corpus epochs because nothing audited the rendered card's numbers.)
 STATS = [
-    ("534", "bikes"),
-    ("546", "parts"),
+    ("541", "bikes"),
+    ("593", "parts"),
     ("254", "tires"),
     ("20", "venues"),
     ("250", "benchmarks"),

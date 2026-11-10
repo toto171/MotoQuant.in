@@ -30,7 +30,6 @@ Detect new Anthropic / Claude releases, evaluate exploitability for MotoQuant, a
 
 - Sonnet 4.6 release → migrate routine code work from 3.7 to 4.6 (cost-down, quality-up)
 - Computer-use general availability → could automate Vercel dashboard checks
-- Tauri 2.x stable → could ship desktop binaries (already wired)
 - Prompt caching → cut Opus token spend on long-context agents by ~50%
 - Token-efficient tool use → reduces cost of every tool-heavy agent
 

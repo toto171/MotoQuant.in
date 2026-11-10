@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Hot-backup the production SQLite DB, gzip it, and rotate old snapshots.
 
-Once user accounts and saved runs live on a persistent disk, losing that
-file loses them.
+Once a deployment keeps its DB on a persistent disk (docs/SELF_HOSTING.md),
+that one file holds every optional account and every saved run on the
+leaderboard and in users' garages. Losing it loses all of them.
 
 Why the sqlite3 backup API and not `cp`
 ---------------------------------------

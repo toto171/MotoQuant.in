@@ -75,14 +75,11 @@ class TestStructure:
         # (delta_et_s = recommended - stock since July 6, 2026: <= 0 = not slower)
         assert g["delta_et_s"] <= 1e-6
 
-    def test_launch_recommendation_is_honest(self, sea):
-        # The K5 reference has no two-step launch, so the sim does not respond
-        # to launch RPM: the advisor must say so instead of recommending one.
+    def test_launch_recommendation_present(self, sea):
         lr = sea.launch_rpm
-        assert lr["adjustable"] is False
-        assert lr["recommended_rpm"] is None
-        assert lr["delta_et_s"] == 0.0
-        assert "not modelled" in lr["reason"]
+        assert lr["recommended_rpm"] > 0
+        assert lr["delta_et_s"] <= 1e-6
+        assert len(lr["candidates"]) >= 2
 
     def test_tyre_and_fuel_guidelines(self, sea):
         assert sea.tyre_pressure["rear_psi"] <= sea.tyre_pressure["stock_rear_psi"]

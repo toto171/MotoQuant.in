@@ -8,14 +8,13 @@ You are SUBAGENT 4: CIRCULAR DEPENDENCIES for the MotoQuant codebase. Read CLAUD
 - Imports that are deferred to function bodies to dodge cycles (these are fingerprints of unresolved cycles)
 - Layer violations: high-level modules importing implementation details of low-level ones (e.g., `motoquant.api` importing private helpers from `motoquant.scraper.bikez`)
 - Test fixtures that import production code which then imports test fixtures (rare but happens)
-- Desktop: TS module cycles in `desktop/src/`
 - Web: same for `web/app/` and `web/components/`
 
 ## Tools available
 
 - `python3 -c "import ast" + Glob + Read` — write a small AST-based import-graph builder
 - `grep -rn "^from motoquant" motoquant/ tests/ scripts/`
-- For desktop/TS: grep imports from `@/`
+- For web/JS: grep imports from `@/` and relative paths
 
 ## Where to focus first
 

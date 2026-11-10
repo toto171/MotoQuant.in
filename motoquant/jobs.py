@@ -13,12 +13,9 @@ routes remain available as a fallback for older clients / the desktop app.
 
 from __future__ import annotations
 
-import json
-import math
 import threading
 import time
 import uuid
-import zlib
 from collections.abc import Callable
 from typing import Any
 
@@ -31,13 +28,6 @@ MAX_RUNNING = 6  # concurrent-job guard (free-tier CPU)
 # registry. Deliberately far above any legitimate job (chat ≤ ~8×30s LLM
 # calls, optimizer a few minutes) — this only ever trips a true wedge.
 MAX_JOB_RUNTIME_S = 1800.0
-# Finished results are retained as zlib-compressed JSON, and the registry keeps
-# the compressed total under this budget by evicting the oldest finished jobs
-# first (a running job is never evicted). Without it 200 retained top-speed
-# results (~3 MB each as Python objects) approach the 512 MB instance limit.
-MAX_RESULT_BYTES_TOTAL = 48 * 1024 * 1024
-_RESULT_ZLIB_LEVEL = 3
-_TERMINAL = ("done", "error", "cancelled")
 
 
 class JobCapacityError(RuntimeError):
@@ -64,7 +54,7 @@ class Job:
         "status",
         "progress",
         "stage",
-        "_result_z",
+        "result",
         "error",
         "created_at",
         "updated_at",
@@ -77,70 +67,11 @@ class Job:
         self.status = "queued"  # queued | running | done | error
         self.progress = 0.0  # 0..1, monotonic non-decreasing
         self.stage = ""
-        self._result_z: bytes | None = None  # zlib(JSON) of the finished result
+        self.result: Any | None = None
         self.error: str | None = None
         self.created_at = time.time()
         self.updated_at = self.created_at
         self.cancel_requested = False
-
-    @property
-    def result(self) -> Any | None:
-        """The finished result, decoded from its compressed JSON form."""
-        raw = self.result_json()
-        return None if raw is None else json.loads(raw)
-
-    @result.setter
-    def result(self, value: Any | None) -> None:
-        self._result_z = (
-            None
-            if value is None
-            else zlib.compress(_dumps(value).encode("utf-8"), _RESULT_ZLIB_LEVEL)
-        )
-
-    @property
-    def result_bytes(self) -> int:
-        """Retained size of the result (compressed bytes)."""
-        return len(self._result_z) if self._result_z is not None else 0
-
-    def result_json(self) -> bytes | None:
-        """The result as raw JSON bytes (lets the route splice it into a
-        response without a decode/encode round trip)."""
-        z = self._result_z
-        return None if z is None else zlib.decompress(z)
-
-
-def _json_default(obj: Any) -> Any:
-    """Serialise numpy scalars/arrays the way FastAPI's encoder would."""
-    if hasattr(obj, "tolist"):
-        return obj.tolist()
-    if hasattr(obj, "item"):
-        return obj.item()
-    raise TypeError(f"{type(obj).__name__} is not JSON serialisable")
-
-
-def _finite(obj: Any) -> Any:
-    """Copy of *obj* with NaN/Infinity replaced by None (valid JSON)."""
-    if isinstance(obj, float):
-        return obj if math.isfinite(obj) else None
-    if isinstance(obj, dict):
-        return {k: _finite(v) for k, v in obj.items()}
-    if isinstance(obj, (list, tuple)):
-        return [_finite(v) for v in obj]
-    return obj
-
-
-def _dumps(value: Any) -> str:
-    """Strict-JSON encode a job result (never emits NaN/Infinity literals)."""
-    try:
-        return json.dumps(
-            value, default=_json_default, allow_nan=False, separators=(",", ":")
-        )
-    except ValueError:  # non-finite float somewhere in the payload
-        return json.dumps(
-            _finite(json.loads(json.dumps(value, default=_json_default))),
-            default=_json_default,
-            separators=(",", ":"),
-        )
 
 
 _JOBS: dict[str, Job] = {}
@@ -163,7 +94,7 @@ def _evict_locked(now: float) -> None:
     expired = [
         jid
         for jid, j in _JOBS.items()
-        if j.status in _TERMINAL and now - j.updated_at > JOB_TTL_S
+        if j.status in ("done", "error") and now - j.updated_at > JOB_TTL_S
     ]
     for jid in expired:
         del _JOBS[jid]
@@ -180,18 +111,6 @@ def _evict_locked(now: float) -> None:
             key=lambda kv: kv[1].created_at,
         )
         for jid, _ in overflow[: len(_JOBS) - MAX_JOBS]:
-            del _JOBS[jid]
-    # Byte budget: retained results are bounded by size, not just job count.
-    total = sum(j.result_bytes for j in _JOBS.values())
-    if total > MAX_RESULT_BYTES_TOTAL:
-        finished = sorted(
-            ((jid, j) for jid, j in _JOBS.items() if j.status in _TERMINAL),
-            key=lambda kv: kv[1].updated_at,
-        )
-        for jid, j in finished:
-            if total <= MAX_RESULT_BYTES_TOTAL:
-                break
-            total -= j.result_bytes
             del _JOBS[jid]
 
 
@@ -257,8 +176,6 @@ def create_job(kind: str, runner: Callable[[Callable], Any]) -> Job:
             job.status = "error"
         finally:
             job.updated_at = time.time()
-            with _LOCK:  # keep retained result bytes under budget
-                _evict_locked(job.updated_at)
 
     threading.Thread(target=_run, name=f"job-{kind}-{job.id}", daemon=True).start()
     return job

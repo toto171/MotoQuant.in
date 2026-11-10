@@ -160,6 +160,7 @@ STROKE_GATED_PARTS = [
     ("HealTech", "QuickShifter Controller Module"),
     ("Dynojet", "Power Commander Auto-Tune Map"),
     ("AEM", "Infinity Fuel Management"),
+    ("Dynojet", "Power Commander QS"),
     ("Dynojet", "Power Commander V Small-Displacement"),
     ("Bazzaz", "BKN Fuel Map Controller"),
     ("Dynojet", "Power Commander 6 (PC6)"),

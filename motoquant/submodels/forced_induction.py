@@ -42,23 +42,29 @@ class ForcedInductionModel:
         if not fi.is_boosted:
             return 1.0
 
-        # Ambient absolute pressure from the venue's air density (same for every
-        # boost type), falling back to standard pressure on a degenerate density.
-        P_atm = self.rho * 287.058 * (self.cfg.environment.ambient_temp_c + 273.15)
-        if P_atm <= 0:
-            P_atm = 101325.0
-
         if fi.boost_type == BOOST_TURBO:
+            P_atm = self.rho * 287.058 * (self.cfg.environment.ambient_temp_c + 273.15)
+            if P_atm <= 0:
+                P_atm = 101325.0
             boost_ratio = 1.0 + P_boost / P_atm
-            # Intercooler temperature correction
+            # Charge-temperature correction. 2026-10 epoch: the penalty used
+            # to be applied only WHEN an intercooler was fitted, so a turbo
+            # with NO intercooler made the most torque (audit 2026-10-23).
+            # Compressed charge is hot either way; an intercooler removes a
+            # fraction eta_ic of that heat, and "none" removes nothing
+            # (eta_ic = 0 → the full penalty).
             if fi.intercooler_type != "none":
                 eta_ic = fi.intercooler_effectiveness
-                temp_penalty = 1.0 - 0.02 * (1.0 - eta_ic) * (P_boost / 100000.0)
-                boost_ratio *= max(0.90, temp_penalty)
+            else:
+                eta_ic = 0.0
+            temp_penalty = 1.0 - 0.02 * (1.0 - eta_ic) * (P_boost / 100000.0)
+            boost_ratio *= max(0.90, temp_penalty)
             return boost_ratio
 
         elif fi.boost_type in (BOOST_SC_ROOTS, BOOST_SC_CENTRIFUGAL):
-            return 1.0 + P_boost / P_atm
+            P_atm = 101325.0
+            boost_ratio = 1.0 + P_boost / P_atm
+            return boost_ratio
 
         elif fi.boost_type == BOOST_N2O:
             ramp = min(1.0, t / max(0.1, fi.n2o_ramp_duration_s))

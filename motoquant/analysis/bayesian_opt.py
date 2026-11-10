@@ -1,6 +1,6 @@
 """
 MotoQuant — Bayesian Optimization Engine for Build Tuning
-==============================================================
+=========================================================
 Multi-variable budget-constrained motorcycle build optimization using BoTorch.
 
 Unlike the knapsack DP in ``roi.py`` which picks discrete parts, the Bayesian
@@ -34,6 +34,10 @@ Parameters tuned
   tire_mu_delta         : tire peak friction (μ_peak) adjustment (±0.25)
   gearing_ratio_delta   : final drive ratio adjustment (±10%, mult factor 0.9–1.1)
 
+  Tyre pressure is NOT a search dimension: the physics engine never reads
+  ``tires.rear_pressure_psi``, so a pressure knob was a dead dimension that only
+  added noise to the GP (``best_rear_pressure_delta`` is always 0.0).
+
 Budget constraint
 -----------------
 Parts implied by the parameter perturbations are mapped back to the parts
@@ -63,9 +67,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from ..models import BikeConfig
-from ..physics import MotoQuantEngine
-from .sobol import scale_dyno_to_peak_power
+from .. import engine_select
+from ..models import BikeConfig, DynoCurve
 
 # ─────────────────────────────────────────────────────────────────
 # Result dataclass
@@ -90,6 +93,7 @@ class OptimizationResult:
     best_cd_delta: float
     best_frontal_area_delta_m2: float
     best_tire_mu_delta: float
+    best_rear_pressure_delta: float
     best_gearing_ratio_delta: float
 
     # Optimization diagnostics
@@ -111,6 +115,7 @@ class OptimizationResult:
             f"  Drag coeff:     {self.best_cd_delta:+.3f}",
             f"  Frontal area:   {self.best_frontal_area_delta_m2:+.4f} m²",
             f"  Tire grip (μ):  {self.best_tire_mu_delta:+.3f}",
+            f"  Rear pressure:  {self.best_rear_pressure_delta:+.2f} psi",
             f"  Gearing ratio:  {self.best_gearing_ratio_delta:+.2%}",
             "",
             f"Optimization completed in {self.iterations_completed}/{self.n_iterations} iterations",
@@ -132,6 +137,7 @@ class OptimizationResult:
             "best_cd_delta": round(self.best_cd_delta, 4),
             "best_frontal_area_delta_m2": round(self.best_frontal_area_delta_m2, 4),
             "best_tire_mu_delta": round(self.best_tire_mu_delta, 3),
+            "best_rear_pressure_delta": round(self.best_rear_pressure_delta, 2),
             "best_gearing_ratio_delta": round(self.best_gearing_ratio_delta, 4),
             "n_iterations": self.n_iterations,
             "iterations_completed": self.iterations_completed,
@@ -162,15 +168,28 @@ class BayesianBuildOptimizer:
         "gearing_ratio_delta": (-0.10, 0.10),  # multiplicative factor
     }
 
-    # Approximate cost per unit change (INR)
-    # Used to estimate total build cost and apply budget penalty
+    # Approximate cost per unit of IMPROVEMENT (INR). Used to estimate the
+    # build cost and apply the budget penalty. Costs are one-sided where only
+    # one direction is a purchase: adding power / grip and SHEDDING mass cost
+    # money; detuning, adding ballast or fitting harder rubber are free. The
+    # old table multiplied a negative mass rate by |delta|, so every mass
+    # change made the build CHEAPER (a ₹32k +40 hp build became ₹9.5k with
+    # -15 kg and slipped under the budget penalty).
     COST_PER_UNIT = {
-        "power_delta_hp": 800.0,  # ₹800 per hp (ECU flash, intake, exhaust)
-        "mass_delta_kg": -1500.0,  # negative: weight reduction costs money
+        "power_delta_hp": 800.0,  # ₹800 per hp gained (ECU flash, intake, exhaust)
+        "mass_delta_kg": 1500.0,  # ₹1,500 per kg REMOVED
         "cd_delta": 0.0,  # aero mods estimated via part costs
         "frontal_area_delta_m2": 0.0,
-        "tire_mu_delta": 3000.0,  # tire compound/upgrade cost
-        "gearing_ratio_delta": 5000.0,  # sprocket/chain kit
+        "tire_mu_delta": 3000.0,  # per unit of grip gained
+        "gearing_ratio_delta": 5000.0,  # sprocket/chain kit (either direction)
+    }
+    # Which side of each knob is the purchase: +1 = increases cost money,
+    # -1 = decreases cost money, 0 = any change costs money.
+    _COST_SIDE = {
+        "power_delta_hp": +1,
+        "mass_delta_kg": -1,
+        "tire_mu_delta": +1,
+        "gearing_ratio_delta": 0,
     }
 
     def __init__(
@@ -201,7 +220,7 @@ class BayesianBuildOptimizer:
 
         # Get baseline ET
         try:
-            engine = MotoQuantEngine(self.base_config)
+            engine = engine_select.make_engine(self.base_config)
             result = engine.run()
             self.base_et_s = result.time_quarter
         except Exception as exc:
@@ -217,11 +236,18 @@ class BayesianBuildOptimizer:
         self.best_idx = -1
 
     def _estimate_cost(self, params: dict[str, float]) -> float:
-        """Estimate build cost from parameter deltas."""
+        """Estimate build cost from parameter deltas (purchases only)."""
         cost = 0.0
         for key, delta in params.items():
             unit_cost = self.COST_PER_UNIT.get(key, 0.0)
-            cost += abs(delta) * unit_cost
+            side = self._COST_SIDE.get(key, 0)
+            if side > 0:
+                bought = max(0.0, delta)
+            elif side < 0:
+                bought = max(0.0, -delta)
+            else:
+                bought = abs(delta)
+            cost += bought * unit_cost
         return max(0.0, cost)
 
     def _apply_params_to_config(
@@ -231,12 +257,25 @@ class BayesianBuildOptimizer:
         """Apply parameter deltas to a copy of the base config."""
         cfg = copy.deepcopy(self.base_config)
 
-        # Power: the physics reads the dyno curve, so the curve is scaled with
-        # peak_power_hp (same scaling the Sobol sampler uses).
-        nominal_hp = cfg.engine.peak_power_hp
+        # Power. Every catalog config (and the references) carries a dyno
+        # curve, which the physics integrates directly — bumping
+        # peak_power_hp alone was a dead knob (+50 hp gave the base ET).
+        # Scale the curve by the same power ratio, like sobol._apply_sample_row
+        # and bridge.apply_part_to_config do for NA power parts.
+        old_hp = cfg.engine.peak_power_hp
         cfg.engine.peak_power_hp += params.get("power_delta_hp", 0.0)
         cfg.engine.peak_power_hp = max(1.0, cfg.engine.peak_power_hp)
-        scale_dyno_to_peak_power(cfg, nominal_hp)
+        dc = cfg.engine.dyno_curve
+        if (
+            dc is not None
+            and old_hp > 1.0
+            and abs(cfg.engine.peak_power_hp - old_hp) > 1e-9
+        ):
+            cfg.engine.dyno_curve = DynoCurve(
+                rpm=dc.rpm.copy(),
+                torque_nm=dc.torque_nm * (cfg.engine.peak_power_hp / old_hp),
+                is_at_wheel=dc.is_at_wheel,
+            )
 
         # Mass (dry mass reduction)
         cfg.chassis.dry_mass_kg += params.get("mass_delta_kg", 0.0)
@@ -269,7 +308,7 @@ class BayesianBuildOptimizer:
     def _run_et(self, config: BikeConfig) -> float:
         """Run a simulation and return quarter-mile ET in seconds."""
         try:
-            engine = MotoQuantEngine(config)
+            engine = engine_select.make_engine(config)
             result = engine.run()
             return result.time_quarter
         except Exception as exc:
@@ -435,6 +474,8 @@ class BayesianBuildOptimizer:
             best_cd_delta=best_params["cd_delta"],
             best_frontal_area_delta_m2=best_params["frontal_area_delta_m2"],
             best_tire_mu_delta=best_params["tire_mu_delta"],
+            # Not a search dimension (pressure is not modelled) — always 0.
+            best_rear_pressure_delta=best_params.get("rear_pressure_delta", 0.0),
             best_gearing_ratio_delta=best_params["gearing_ratio_delta"],
             n_iterations=self.n_iterations,
             iterations_completed=len(self.X_samples),

@@ -1,6 +1,16 @@
+> **Internal maintainer workflow — mission superseded 2026-10-23.** This
+> describes the private, currently PAUSED (`AUTONOMOUS_PAUSED`) autonomous
+> Claude-session system. It is not needed to build, run or contribute to
+> MotoQuant. The commercial mission below ($1M valuation, B2C SaaS ARR, B2B
+> "Pro Studio" licensing) was scrapped: MotoQuant is free and open source
+> under Apache-2.0 ([ADR-0006](adr/0006-open-source-pivot.md)). The file stays
+> here (not in `docs/archive/`) only because `scripts/run_autonomous_session.sh`
+> and the agent prompts reference it. The open-source goals live in
+> [ROADMAP.md](ROADMAP.md).
+
 # MotoQuant Autonomous Operations Playbook
 
-> **Mission:** drive MotoQuant Pro to a defensible $1M valuation while the user is at an 8-hour daily internship for one year. The system runs itself, communicates async, self-improves, and only blocks on the user when judgement is genuinely required.
+> **Mission:** drive MotoQuant to a defensible $1M valuation while the user is at an 8-hour daily internship for one year. The system runs itself, communicates async, self-improves, and only blocks on the user when judgement is genuinely required.
 >
 > **Scope of this document:** the orchestration design that sits on top of the existing reliability stack (preflight/postflight, dispatch INBOX/OUTBOX, mutex, dual-PAT, 7-subagent code-cleanup). This is the layer that decides *what to do today* and *whether yesterday worked*.
 

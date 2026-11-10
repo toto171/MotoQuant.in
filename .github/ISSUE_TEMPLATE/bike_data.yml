@@ -1,5 +1,5 @@
-name: Bike / benchmark / part / tire data
-description: Add or correct a bike spec, a benchmark timeslip, a part, or a tire. A source is required.
+name: Bike / part / tire data contribution
+description: Add or correct bike specs, parts, or tire data in the catalog.
 title: "[data] "
 labels: ["data", "triage"]
 body:
@@ -22,7 +22,6 @@ body:
         - New part (exhaust, ECU, sprocket, nitrous, etc.)
         - Correction to existing part
         - New tire model
-        - New benchmark (quarter-mile ET / trap / top speed)
         - Gear-ratio correction
         - OEM tire fitment correction
     validations:
@@ -48,10 +47,10 @@ body:
   - type: textarea
     id: sources
     attributes:
-      label: Source (required)
+      label: Sources / citations
       description: |
         Non-negotiable. Service manual, magazine test, manufacturer spec sheet, retailer page, dyno chart. Link or cite.
-        Data without sources will be closed. For benchmarks (quarter-mile ET / trap / top speed), say whether the run is instrumented (Dragy/VBox/Racelogic) or a magazine/aggregator figure, and whether the bike was stock.
+        Data without sources will be closed.
     validations:
       required: true
 

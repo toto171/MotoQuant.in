@@ -184,10 +184,11 @@ class TestOptimizerBudgetApi(unittest.TestCase):
         self.assertEqual(req.goal, "min_et")
 
 
-class TestOutlawRouteIsOpen(unittest.TestCase):
-    """POST /api/jobs/outlaw composes the two heaviest surfaces (optimize +
-    autotune). It has no auth gate -- anonymous callers reach it -- and is
-    fused by the per-IP "optimize" rate limit (6/60s)."""
+class TestOutlawIsOpenAndFused(unittest.TestCase):
+    """POST /api/jobs/outlaw is free and anonymous (open-source pivot,
+    2026-10-23 — it used to sit behind a pro-tier gate). Its only protection
+    is the rate limit it SHARES with /api/jobs/optimize ("optimize" bucket,
+    6/60 s): the outlaw pipeline IS an optimizer pass plus an autotune."""
 
     BODY = {"bike_preset": "gsxr1000_k5", "max_candidates": 1}
 
@@ -206,29 +207,36 @@ class TestOutlawRouteIsOpen(unittest.TestCase):
 
         ratelimit.reset()
 
-    def test_anonymous_passes(self):
-        res = self.client.post("/api/jobs/outlaw", json=self.BODY)
-        self.assertNotIn(
-            res.status_code,
-            (401, 402, 403),
-            f"outlaw auth-blocked an anonymous caller: "
-            f"{res.status_code} {res.text[:200]}",
-        )
-        # Don't leave the accepted job burning a daemon thread for the rest
-        # of the suite -- cancellation is cooperative and immediate.
+    def _cancel(self, res):
+        # Don't leave an accepted job burning a daemon thread for the rest of
+        # the suite — cancellation is cooperative and immediate.
         if res.status_code == 202:
             job_id = res.json().get("job_id")
             if job_id:
                 self.client.post(f"/api/jobs/{job_id}/cancel")
 
-    def test_rate_limited_per_ip(self):
-        statuses = []
-        for _ in range(8):
-            res = self.client.post("/api/jobs/outlaw", json=self.BODY)
-            statuses.append(res.status_code)
-            if res.status_code == 202:
-                self.client.post(f"/api/jobs/{res.json()['job_id']}/cancel")
-        self.assertIn(429, statuses, statuses)
+    def test_anonymous_request_is_accepted(self):
+        res = self.client.post("/api/jobs/outlaw", json=self.BODY)
+        self._cancel(res)
+        self.assertEqual(
+            res.status_code,
+            202,
+            f"anonymous outlaw job was not accepted: {res.status_code} "
+            f"{res.text[:200]}",
+        )
+
+    def test_shares_the_optimize_bucket(self):
+        # Drain the shared bucket through the OPTIMIZE route with an unknown
+        # preset (404 before any RK4 work, but the limiter has counted it)...
+        unknown = {"bike_preset": "no_such_preset", "budget_inr": 60000}
+        for _ in range(6):
+            r = self.client.post("/api/optimize/build", json=unknown)
+            self.assertNotEqual(r.status_code, 429, r.text[:200])
+        # ...then the outlaw job route must already be fused off.
+        res = self.client.post("/api/jobs/outlaw", json=self.BODY)
+        self._cancel(res)
+        self.assertEqual(res.status_code, 429, res.text[:200])
+        self.assertEqual(res.json()["detail"]["error"], "rate_limited")
 
 
 class TestJsonSafe(unittest.TestCase):

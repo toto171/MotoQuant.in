@@ -27,12 +27,17 @@ help: ## Show this help
 # ── Setup ──────────────────────────────────────────────────────────────────
 .PHONY: install
 install: ## Install runtime + dev dependencies and the package (editable)
-	$(PY) -m pip install -e ".[dev]"
+	$(PY) -m pip install -r requirements-api.txt -r requirements-dev.txt
+	$(PY) -m pip install -e .
 
 .PHONY: db
-db: ## Fresh MINIMAL dev DB (3 reference bikes + starter data) in ./motoquant.dev.db; the shipped motoquant.db is the full catalog
-	$(PY) -m motoquant.run --db motoquant.dev.db db init
-	$(PY) -m motoquant.run --db motoquant.dev.db db seed
+DEV_DB ?= /tmp/motoquant-dev.db
+
+db: ## Build a fresh dev database at $(DEV_DB) (the tracked motoquant.db ships seeded)
+	rm -f $(DEV_DB)
+	$(PY) -m motoquant.run --db $(DEV_DB) db init
+	$(PY) -m motoquant.run --db $(DEV_DB) db seed
+	@echo "Dev DB at $(DEV_DB) -- use it with MOTOQUANT_DB=$(DEV_DB)
 
 .PHONY: lock
 lock: ## Regenerate requirements-api.lock (clean-venv resolve of requirements-api.txt)
@@ -120,3 +125,42 @@ web-build: ## Production build of the frontend (what Vercel runs)
 clean: ## Remove Python caches and build artefacts
 	find . -type d -name __pycache__ -prune -exec rm -rf {} + 2>/dev/null || true
 	rm -rf .pytest_cache .ruff_cache *.egg-info build dist coverage.xml
+
+# ── Rust physics core (optional accelerator; Python stays the reference) ───
+# docs/RUST_CORE.md. `native` builds the PyO3 extension (motoquant_core) and
+# installs it into the current interpreter; `native-test` is the cargo +
+# pytest gate and FAILS (never skips) when the extension is missing, built
+# for another schema, or built from different Rust sources than this checkout
+# (MOTOQUANT_REQUIRE_NATIVE=1); `native-parity` is the full Python-vs-Rust
+# bit-parity sweep (every catalog bike fixed + adaptive + top speed, plus the
+# stress variants — ~1,870 cases); `native-parity-quick` is the CI-sized
+# slice; `wasm` rebuilds the committed browser engine + fixtures and proves
+# parity under node.
+RUST_DIR := rust
+NODE ?= node
+
+.PHONY: native
+native: ## Build + install the Rust physics core (PyO3 abi3 wheel via maturin)
+	@$(PY) -m maturin --version >/dev/null 2>&1 || $(PY) -m pip install "maturin>=1.5,<2"
+	rm -rf $(RUST_DIR)/target/wheels
+	cd $(RUST_DIR) && $(PY) -m maturin build --release --locked -m motoquant-core/Cargo.toml -o target/wheels
+	$(PY) -m pip install --force-reinstall --no-deps $(RUST_DIR)/target/wheels/motoquant_core-*.whl
+	$(PY) -c "from motoquant import native; print(native.native_info())"
+
+.PHONY: native-test
+native-test: ## Rust unit + fixture tests (cargo) and the pytest native gate (fails if the build is missing/stale)
+	cd $(RUST_DIR) && cargo test -p motoquant-core --release --locked
+	MOTOQUANT_REQUIRE_NATIVE=1 $(PYTEST) tests/test_native_engine.py tests/test_engine_select.py -q
+
+.PHONY: native-parity
+native-parity: ## FULL Python-vs-Rust parity sweep (all 541 bikes × fixed/adaptive/top speed + stress) + bench
+	$(PY) scripts/check_native_parity.py
+
+.PHONY: native-parity-quick
+native-parity-quick: ## CI-sized parity slice (refs + 40-bike sample + 1/6 of the stress set)
+	$(PY) scripts/check_native_parity.py --quick --no-bench
+
+.PHONY: wasm
+wasm: ## Rebuild web/public/engine/*.wasm + fixtures, then prove parity under node
+	$(PY) scripts/gen_engine_web.py --build
+	$(NODE) web/scripts/engine-parity.mjs

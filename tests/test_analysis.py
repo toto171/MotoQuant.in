@@ -1,6 +1,6 @@
 """
 MotoQuant — Phase 4 Analysis Tests
-========================================
+==================================
 Tests for the Parts ROI engine and Sobol sensitivity analysis.
 
 Test philosophy
@@ -451,6 +451,7 @@ class TestDefaultParamBounds(unittest.TestCase):
             "frontal_area",
             "tire_mu",
             "rolling_radius",
+            "reaction_time",
             "redline_rpm",
             "primary_ratio",
             "final_drive_ratio",

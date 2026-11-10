@@ -2,6 +2,11 @@
 
 A curated, opinionated list. Each item has a one-line **"why for MotoQuant"** so you can filter fast.
 
+> **Dated (April 2026).** Desktop (Tauri/React) mentions are historical: the
+> desktop app was discontinued and its scaffold deleted (ADR-0005). The
+> "Phase 6" gates refer to the old commercial plan, which was replaced by
+> the open-source pivot (ADR-0006).
+
 > **Status legend (project-specific filtering — see CLAUDE.md "TOOLKIT REFERENCE" section for the canonical version):**
 > - **✓** = already in the codebase
 > - **★** = adopt this quarter
@@ -47,7 +52,7 @@ This is your differentiator and you should not roll your own optimizer.
 
 This is where most engineering time will go and where there's the least off-the-shelf help.
 
-- **✗ asammdf** — `danielhrisca/asammdf`. The Python library for MDF/MF4 (Vector measurement files). Pro-team CAN bus is too far out for the Indian drag scene; revisit only on a B2B Pro Studio request.
+- **✗ asammdf** — `danielhrisca/asammdf`. The Python library for MDF/MF4 (Vector measurement files). Pro-team CAN bus is too far out for the Indian drag scene; revisit only if a team contributes CAN logs.
 - **✗ cantools** — `cantools/cantools`. DBC file parsing, CAN message decoding. Same reasoning as asammdf — defer until pro-team data shows up.
 - **✗ python-can** — `hardbyte/python-can`. CAN bus interface library. Defer until pro-team data.
 - **gpxpy** — `tkrajina/gpxpy`. GPX parser, in case generic GPS exports need to be accepted alongside Dragy CSVs. Low priority.
@@ -94,7 +99,7 @@ You market "validated against published 1/4 mile times." That claim is only as s
 ## 9. Observability & product analytics
 
 - **★ Sentry** — error tracking. Free tier is fine for current scale. **Adopt this quarter** on Render + Vercel — catches the 500s and edge errors silently happening in production right now (the FastAPI ↔ Next.js rewrite chain is one fragile dependency).
-- **◇ PostHog** — `PostHog/posthog`. Product analytics with a free self-host and a generous cloud free tier. Useful for understanding which sliders riders actually move and where they drop off — drives roadmap. Wait for paid users before instrumenting.
+- **◇ PostHog** — `PostHog/posthog`. Product analytics with a free self-host and a generous cloud free tier. Useful for understanding which sliders riders actually move and where they drop off — drives roadmap. *Wired since July 2026 as opt-in server-side forwarding of the anonymous beacon: off unless the operator sets `POSTHOG_API_KEY`.*
 - **◇ Logfire** (mentioned above) — covers tracing.
 - **★ Vercel Speed Insights / Lighthouse CI** — Core Web Vitals tracking on `motoquant.in`. SEO and conversion both depend on this; Vercel's built-in is already free. Adopt this quarter, zero effort.
 
@@ -121,7 +126,7 @@ These are MotoQuant-specific tooling decisions that fell out of the project audi
 - **Playwright** — end-to-end browser tests against `motoquant.in`. Catches the class of regression where the FastAPI ↔ Next.js rewrite chain breaks silently (the April 28 chat panel deploy was a near miss).
 
 ### Adopt later (◇)
-- **Razorpay test mode + webhook simulator** — required gating for the Phase 6 subscription launch. Currently unblocked-but-untested per the S5 carry-forward list.
+- ~~**Razorpay test mode + webhook simulator**~~ — moot: payments were deleted in the 2026-10-23 open-source pivot (ADR-0006).
 - **k6 / Locust** — load-test the FastAPI surface before public launch. Render's free-tier instance degrades quickly under concurrent surrogate calls.
 - **Codecov (or coverage.py + GitHub Actions artifact)** — currently no test-coverage signal in CI; the 739+ test count is impressive but says nothing about which physics branches are actually exercised.
 - **Alembic** — needed for the SQLite → PostgreSQL migration if/when Phase 6 cloud sync goes live.

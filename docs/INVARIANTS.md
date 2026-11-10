@@ -8,9 +8,12 @@ invariant deliberately, change its enforcement and this doc in the same PR.
 
 ## I1 — Reference baselines are bit-identical
 
-**What.** `GSX-R 1000 K5 = 9.9331 s`, `YZF-R1 4C8 = 10.1436 s`,
-`Hayabusa Gen1 = 10.3633 s` (full precision in `scripts/check_baselines.py`).
-Refactors must produce Δ = 0.0000.
+**What.** `GSX-R 1000 K5 = 10.0436 s`, `YZF-R1 4C8 = 10.1092 s`,
+`Hayabusa Gen1 = 10.1100 s` (full precision in `scripts/check_baselines.py`).
+Refactors must produce Δ = 0.0000. Re-pinned 2026-11-05 by the deliberate
+2026-10/11 accuracy epoch (previous pins 9.9331 / 10.1436 / 10.3633;
+evidence `reports/acc_final_2026_11_05.json`). Since that epoch ET is timed
+from the 1-ft beam rollout: ET = t(402.336 m) − t(0.3048 m).
 
 **Why.** These three are the only hand-curated, human-validated configs. They
 are the fixed point the whole physics model is trusted against. If a "harmless"
@@ -83,28 +86,39 @@ check, and the release checklist.
 ## I7 — Security guarantees
 
 **What / Why / Enforcement.**
-- **Every expensive route is rate-limited per IP** (sims, compare, optimize,
-  autotune, outlaw, chat incl. the tighter classic-mode bucket, calibrate
-  uploads), and the chat agent's heavy tools share the optimize/autotune
-  bucket. — `tests/test_chat_fuses.py`, `tests/test_public_route_fuses.py`.
-- **Client IP for rate-limiting = rightmost `X-Forwarded-For` hop** (single
-  trusted proxy). The leftmost is client-spoofable. Implemented in
-  `client_ip()` (`motoquant/ratelimit.py`). **Partially enforced:**
-  `test_x_forwarded_for_distinguishes_clients` in `tests/test_ratelimit.py`
-  pins that the header is used for keying, but it sends a *single-hop* value,
-  so it cannot tell rightmost from leftmost; nothing currently pins the hop
-  selection, and `tests/test_api.py` (named here previously) has no
-  `X-Forwarded-For` test at all. A multi-hop case is the missing pin.
+- **Everything is free; per-IP fuses replace quotas.** There are no tiers, no
+  quota and no payment code (ADR-0006). Every compute-heavy public route
+  carries a `rate_limit(...)` dependency, and chat also has a per-IP daily cap
+  (`MOTOQUANT_CHAT_DAILY_LIMIT`, default 200; `0` disables), which is the
+  LLM-bill fuse. Rate-limit buckets expire on their **own** window, so a
+  short-window call can never evict a daily counter. —
+  `tests/test_public_route_fuses.py`, `tests/test_ratelimit.py::TestPerKeyWindows`,
+  `tests/test_open_source_pivot.py::TestChatDailyCap`, and
+  `tests/test_open_source_pivot.py::TestMonetizationIsGone` (no payment or
+  subscription routes, no quota headers, no paywall can creep back).
+- **Client IP for rate limiting = the N-th `X-Forwarded-For` hop from the
+  right, for N = trusted proxy hops** (`MOTOQUANT_TRUSTED_PROXY_HOPS`; unset =
+  1 on Render or behind a loopback/unix/private-network proxy, else 0 = key
+  on the socket peer). The leftmost hop is client-spoofable and is never
+  used. Implemented in `client_ip()` (`motoquant/ratelimit.py`). Enforced
+  by `tests/test_fixwave_sec_xff.py` (multi-hop selection, spoofing without
+  a trusted proxy, invalid values failing closed) and
+  `test_x_forwarded_for_distinguishes_clients` in `tests/test_ratelimit.py`.
 - **`web_fetch` re-checks the SSRF guard on every redirect hop** and bounds the
   whole chain to one timeout. Any server-side fetch of a user/LLM-controlled URL
   must too. — `tests/test_webtools_ssrf.py`.
-- **`motoquant.auth` never signs with a public secret.** If `JWT_SECRET` is
-  unset or equals the old public default, a random per-process secret is
-  generated and one warning is logged (sessions do not survive a restart until
-  `JWT_SECRET` is set). It never refuses to boot. The guard keys on the
-  secret's *value*. — `tests/test_auth.py::TestJwtRandomSecretFallback` (boots
-  a fresh interpreter per case; the guard is module-level code, so
-  reload/monkeypatch would test a re-implementation instead).
+- **A deployed host never signs sessions with the public dev JWT secret.**
+  On a deployed host (`RENDER`, `RENDER_EXTERNAL_URL` or
+  `MOTOQUANT_DEPLOYED=1`) with `JWT_SECRET` unset or equal to the public
+  default, `motoquant.auth` signs with an **ephemeral per-process random
+  secret** and logs a loud warning. Sessions reset on restart; tokens are
+  never forgeable; boot never fails, because accounts are optional and must
+  not take the simulator down. Local dev and tests keep the documented dev
+  default. The policy keys on the secret's *value*, not on whether the env
+  var is set. (This replaced the old guard, which was keyed on the deleted
+  billing switch.) — `tests/test_auth.py::TestJwtSecretPolicy`. Relatedly, a
+  deployed host never echoes magic-link tokens in HTTP responses —
+  `tests/test_auth.py` (`test_no_dev_token_leak_in_deployed_env`).
 - **SQL is always parameterized.** No f-string/format into queries with user
   data.
 - **No secrets in tracked files.** — `scripts/health_check.py` secret scan,

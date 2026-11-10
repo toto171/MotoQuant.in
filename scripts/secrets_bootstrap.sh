@@ -10,8 +10,8 @@
 #   2. BACKUP   — emergency-only, kept cold; used if PRIMARY fails validation
 #
 # Both should be:
-#   - Owner: da25mem5s02-debug
-#   - Repository scope: da25mem5s02-debug/MotoQuant_v1 (single repo)
+#   - Owner: toto171
+#   - Repository scope: toto171/MotoQuant.in (single repo)
 #   - Permissions: Contents R&W · Metadata R
 #   - Different expiry dates (so you never lose both at once)
 #
@@ -39,7 +39,7 @@ if [[ -z "${SECRETS_DIR}" ]]; then
 fi
 readonly SECRETS_DIR
 readonly SECRETS_FILE="${SECRETS_DIR}/git-creds.env"
-readonly REPO_URL="https://github.com/da25mem5s02-debug/MotoQuant_v1.git"
+readonly REPO_URL="https://github.com/toto171/MotoQuant.in.git"
 
 log()   { printf "\033[36m[secrets]\033[0m %s\n" "$*"; }
 warn()  { printf "\033[33m[secrets WARN]\033[0m %s\n" "$*" >&2; }

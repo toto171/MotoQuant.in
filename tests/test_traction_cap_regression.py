@@ -30,25 +30,34 @@ revert-sensitive test; these are it.
 How the pins were calibrated (measured, not guessed)
 ----------------------------------------------------
 The refinement count was varied in a scratch copy of the package (never in
-the repo tree) and the wet K5 re-simulated at each setting:
+the repo tree) and the wet K5 re-simulated at each setting. Re-measured
+2026-11-05 on the 2026-10/11 accuracy-epoch physics (1-ft rollout timing,
+combined-CoG wheelie limit, wheelie margin) — the July-13 numbers are kept
+below for history:
 
     passes | wet K5 ET | wet-minus-dry | mean |ΔN_rear| on clipped steps t<1 s
     -------+-----------+---------------+----------------------------------------
-       0   | 12.791355 |    2.956072   |  527.10 N   (no refinement at all)
-       1   | 14.364537 |    4.461349   |  125.32 N
-    >> 2 <<| 14.836859 |    4.903802   |   30.45 N   <- shipped
-       3   | 14.953818 |    5.007839   |    7.42 N
-       4   | 14.981497 |         —     |    1.80 N
+       0   | 11.719726 |    1.676125   |  214.71 N   (no refinement at all)
+       1   | 12.535033 |    2.491432   |   70.16 N
+    >> 2 <<| 12.836945 |    2.793344   |   23.53 N   <- shipped
+       3   | 12.937315 |    2.893714   |    8.29 N
+       4   | 12.969589 |    2.925988   |    3.28 N
+
+    (July 13, 2026 physics: 12.791355 / 14.364537 / 14.836859 / 14.953818 /
+    14.981497 s; penalties 2.956 / 4.461 / 4.904 / 5.008 s; residuals 527 /
+    125 / 30.5 / 7.4 / 1.8 N.)
 
 Every pin below is a two-sided band that admits **only** the shipped two-pass
-value. The nearest neighbour to the ET pin is 0.117 s away, so the ±0.01 s
-tolerance carries ~11x margin — tight enough that removing, halving or
+value. The nearest neighbour to the ET pin is 0.100 s away, so the ±0.01 s
+tolerance carries ~10x margin — tight enough that removing, halving or
 doubling the refinement fails, loose enough to survive platform float noise
 (the repo's own baselines reproduce to 1e-9, so this is generous).
 
-The dry path is deliberately re-checked here too: the fix is *not* dry-neutral
-(dry K5 would read 9.9053 at one pass, 9.9460 at three), so the pinned
-baselines are themselves part of this fix's evidence.
+The dry path is re-checked here too. Pre-epoch the fix was not dry-neutral
+(dry K5 read 9.9053 at one pass, 9.9460 at three). Since the 2026-10/11 epoch
+the dry K5 launch is wheelie-limited rather than traction-limited, and the
+dry ET is identical (10.043601 s) at every pass count 0-4 — the wet pins
+carry this fix's evidence alone.
 """
 
 from __future__ import annotations
@@ -62,17 +71,19 @@ from motoquant.defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 from motoquant.physics import G
 
 # ── Measured on the shipped two-pass engine ──────────────────────────────
-WET_K5_ET_S = 14.8368585008
-WET_K5_ET_TOL_S = 0.01  # nearest neighbouring pass-count is 0.117 s away
+WET_K5_ET_S = 12.836945059344155  # re-measured 2026-11-05 (was 14.8368585008)
+WET_K5_ET_TOL_S = 0.01  # nearest neighbouring pass-count is 0.100 s away
 
-DRY_K5_ET_S = 9.933056382451884  # == scripts/check_baselines.py
+DRY_K5_ET_S = 10.043600805570911  # == scripts/check_baselines.py
 
-# wet-minus-dry penalty band: 0/1/3-pass values are 2.956 / 4.461 / 5.008
-WET_PENALTY_MIN_S = 4.70
-WET_PENALTY_MAX_S = 4.95
+# wet-minus-dry penalty band: 0/1/3-pass values are 1.676 / 2.491 / 2.894 s
+# (2-pass 2.793; 2026-11-05 — July-13 band was 4.70-4.95)
+WET_PENALTY_MIN_S = 2.70
+WET_PENALTY_MAX_S = 2.85
 
 # mean |weight_transfer(a_recorded) - N_rear_recorded| over traction-limited
-# steps in the first second. 0/1/3/4-pass values are 527 / 125 / 7.4 / 1.8 N.
+# steps in the first second. 0/1/3/4-pass values are 215 / 70 / 8.3 / 3.3 N
+# (2-pass 23.5 N; 2026-11-05 — July 13: 527 / 125 / 7.4 / 1.8 N).
 RESIDUAL_MIN_N = 15.0
 RESIDUAL_MAX_N = 60.0
 
@@ -100,9 +111,9 @@ class TestTractionCapConverged(unittest.TestCase):
     def test_wet_k5_et_pinned_to_converged_cap(self):
         """The wet K5 ET admits only the two-pass cap.
 
-        Reverting the refinement loop to a single pass reads 14.3645 s (47x
-        the tolerance low); deleting it entirely reads 12.7914 s (204x low);
-        a third pass reads 14.9538 s (11x high)."""
+        Reverting the refinement loop to a single pass reads 12.5350 s (30x
+        the tolerance low); deleting it entirely reads 11.7197 s (112x low);
+        a third pass reads 12.9373 s (10x high). (Measured 2026-11-05.)"""
         self.assertAlmostEqual(
             self.wet.time_quarter,
             WET_K5_ET_S,
@@ -119,8 +130,9 @@ class TestTractionCapConverged(unittest.TestCase):
         """Same bike, same everything but ``track_surface``.
 
         The single-pass cap under-penalised low grip, so the wet-minus-dry
-        penalty was only 4.461 s (2.956 s with no refinement at all). Two
-        passes cost 4.904 s. This is the band the audit's '46 % of static
+        penalty is only 2.491 s at one pass (1.676 s with no refinement at
+        all); two passes cost 2.793 s (2026-11-05 physics; July 13: 4.461 /
+        2.956 / 4.904 s). This is the band the audit's '46 % of static
         rear load' finding shows up in, expressed as time."""
         penalty = self.wet.time_quarter - self.dry.time_quarter
         self.assertGreater(
@@ -145,7 +157,8 @@ class TestTractionCapConverged(unittest.TestCase):
         This is the fix stated as an invariant: feed the run's own recorded
         acceleration back through the production ``weight_transfer`` and the
         result must land on the recorded rear load. The single-pass code
-        leaves a ~125 N gap here and the no-refinement code a ~527 N gap,
+        leaves a ~70 N gap here and the no-refinement code a ~215 N gap
+        (2026-11-05; July 13: ~125 / ~527 N),
         because their ``N_rear`` belongs to an acceleration the bike never
         reached. Restricted to the first second so fuel burn (8 g/s ≈ 0.08 N)
         cannot contaminate the comparison."""
@@ -203,8 +216,8 @@ class TestTractionCapConverged(unittest.TestCase):
         change here may move them."""
         for factory, target in (
             (gsxr1000_k5, DRY_K5_ET_S),
-            (yzfr1_4c8, 10.143589715692835),
-            (hayabusa_gen1, 10.363345081274984),
+            (yzfr1_4c8, 10.10920982866053),
+            (hayabusa_gen1, 10.110001443831809),
         ):
             et = motoquant.MotoQuantEngine(factory()).run().time_quarter
             self.assertAlmostEqual(

@@ -1,6 +1,6 @@
 """
 MotoQuant — Spec Corrections Repository
-============================================
+=======================================
 Stores user-submitted corrections to individual spec fields on bike_model rows.
 
 Workflow

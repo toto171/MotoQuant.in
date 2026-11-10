@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 MotoQuant — Standalone Test Runner
-======================================
+==================================
 Uses unittest (stdlib) so no pip install needed.
 Also importable by pytest if available.
 

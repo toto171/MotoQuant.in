@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated": "2026-05-25T-EXP-019",
+  "updated": "2026-10-23-open-source-pivot",
   "experiments": [
     {
       "id": "EXP-001",
@@ -39,11 +39,13 @@
         "pricing_page_bounce_rate"
       ],
       "min_sample": 200,
-      "status": "live",
+      "status": "retired",
       "flag": "?variant=B",
       "default": "A",
       "implementation_notes": "Client-side useSearchParams() in web/app/pricing/page.js. Same canonical URL, same checkout endpoint, same h1, same meta — SEO-safe. data-exp/data-variant attributes on the Pro button for analytics attribution. Studio CTA unchanged (single-variable rule). EXP-001 is on landing-hero so no page conflict.",
-      "decision_criteria": "Ship variant B as new control if pro_checkout_init/visitor lifts ≥15% with p<0.05 over ≥200 samples per arm AND razorpay_checkout_completion does not drop >5% (we want trial intent, not abandoned-cart inflation). Roll back if Studio cannibalisation increases >10% (refund-anchor stealing higher-tier intent). No decision before 200 samples per arm."
+      "decision_criteria": "Ship variant B as new control if pro_checkout_init/visitor lifts ≥15% with p<0.05 over ≥200 samples per arm AND razorpay_checkout_completion does not drop >5% (we want trial intent, not abandoned-cart inflation). Roll back if Studio cannibalisation increases >10% (refund-anchor stealing higher-tier intent). No decision before 200 samples per arm.",
+      "retired": "2026-10-23",
+      "retired_reason": "Monetization scrapped; MotoQuant is free and open source (docs/adr/0006-open-source-pivot.md). /pricing was deleted and permanently redirects to /, so this experiment has no page and no Pro checkout to measure. No decision was ever reached (0 checkouts)."
     },
     {
       "id": "EXP-003",
@@ -106,11 +108,13 @@
         "studio_cta_cannibalisation_rate"
       ],
       "min_sample": 200,
-      "status": "live",
+      "status": "retired",
       "flag": "?exp5=B",
       "default": "A",
       "implementation_notes": "Client-side useSearchParams() in web/app/pricing/page.js, inside the existing PricingPageInner component which is already wrapped in <Suspense fallback={null}> per the static-prerender rule. Uses a dedicated query param ?exp5=B (not ?variant=B which is owned by EXP-002) so both experiments can be toggled independently without arm contamination — a visitor at ?variant=B&exp5=B gets Pro button variant B + tag line variant B; at ?variant=B alone they get Pro button variant B + tag line control; etc. data-exp='EXP-005' + data-variant={exp5Variant} on the <p> element for analytics attribution. Control is byte-identical at the default URL (/pricing with no query params). Same canonical URL, same h1, same meta — SEO-safe. EXP-002 covers the Pro button; EXP-005 covers the tag line; no copy overlap.",
-      "decision_criteria": "Ship variant B as new control if pro_checkout_init/visitor lifts ≥15% with p<0.05 over ≥200 samples per arm AND razorpay_checkout_completion does not drop >5% (specificity should convert intent, not just inflate clicks). Roll back if studio_cta_cannibalisation_rate increases >10% (specificity may push mid-tier visitors toward Studio, which is a good outcome — but only if Studio conversion also rises, otherwise the effect is cannibalisation not uplift). If both EXP-002 and EXP-005 are running concurrently, use separate ?variant and ?exp5 params for attribution; analyse arms independently before declaring interaction effects. No decision before 200 samples per arm."
+      "decision_criteria": "Ship variant B as new control if pro_checkout_init/visitor lifts ≥15% with p<0.05 over ≥200 samples per arm AND razorpay_checkout_completion does not drop >5% (specificity should convert intent, not just inflate clicks). Roll back if studio_cta_cannibalisation_rate increases >10% (specificity may push mid-tier visitors toward Studio, which is a good outcome — but only if Studio conversion also rises, otherwise the effect is cannibalisation not uplift). If both EXP-002 and EXP-005 are running concurrently, use separate ?variant and ?exp5 params for attribution; analyse arms independently before declaring interaction effects. No decision before 200 samples per arm.",
+      "retired": "2026-10-23",
+      "retired_reason": "Monetization scrapped; MotoQuant is free and open source (docs/adr/0006-open-source-pivot.md). /pricing was deleted and permanently redirects to /, so this experiment has no page and no Pro checkout to measure. No decision was ever reached (0 checkouts)."
     },
     {
       "id": "EXP-006",
@@ -169,7 +173,6 @@
       "primary_metric": "simulator_runs_per_features_page_visitor",
       "secondary_metrics": [
         "features_bottom_cta_click_through_rate",
-        "features_to_pricing_ctr",
         "features_page_bounce_rate",
         "simulator_page_first_run_completion_rate",
         "features_to_simulator_time_to_click_s"
@@ -179,7 +182,8 @@
       "flag": "?variant=B",
       "default": "A",
       "implementation_notes": "Client-side useSearchParams() inside BottomCtaInner in web/app/features/BottomCta.js, wrapped in <Suspense> per the Vercel App-Router static-prerender / CSR-bailout rule. The Suspense fallback renders the control (variant A) markup verbatim so SSR/SSG output is byte-identical to the pre-EXP-008 page — no layout shift, no hydration mismatch, no SEO drift. Variant flip touches only two text nodes (button label + subhead paragraph); h2 'Ready to run your first sim?', href='/simulator', and the 'See pricing' secondary CTA are unchanged across arms (single-variable rule: copy bundle, not multi-element redesign). data-exp='EXP-008' + data-variant attributes on the wrapper div AND the primary Link element so click-attribution survives even if wrapper analytics break. Same canonical URL, same h1, same meta tags — SEO-safe. EXP-001 on landing-hero, EXP-002+EXP-005 on /pricing, EXP-003 on /simulator, EXP-004 on /blog/the-physics-of-a-perfect-launch, EXP-006 on /blog index, EXP-007 on /login — no page conflict; /features previously had zero live experiments.",
-      "decision_criteria": "Ship variant B as new control if simulator-runs/features-visitor lifts ≥15% with p<0.05 over ≥200 samples per arm AND simulator_page_first_run_completion_rate does not drop >5% (we want intent-to-actually-run, not inflated clicks from visitors who land on /simulator and immediately bounce — if completion rate collapses, B is recruiting curiosity clicks not run-intent). Roll back if features_to_pricing_ctr drops >25% (CTA may be cannibalising the secondary pricing path entirely) or features_page_bounce_rate rises >10% (specificity reads spammy). No decision before 200 samples per arm. If B wins, evaluate replicating the time-bound + action-specific pattern on the landing-page hero (a follow-up to EXP-001, possibly as a 3-way test if EXP-001 has resolved by then) as a SEPARATE experiment — do not bundle. Note interaction with EXP-001: a visitor at landing-hero variant B then features-page variant B sees a consistent verb-result message; check funnel attribution by segmenting on landing-arrival variant before declaring features-page lift."
+      "decision_criteria": "Ship variant B as new control if simulator-runs/features-visitor lifts ≥15% with p<0.05 over ≥200 samples per arm AND simulator_page_first_run_completion_rate does not drop >5% (we want intent-to-actually-run, not inflated clicks from visitors who land on /simulator and immediately bounce — if completion rate collapses, B is recruiting curiosity clicks not run-intent). Roll back if features_to_pricing_ctr drops >25% (CTA may be cannibalising the secondary pricing path entirely) or features_page_bounce_rate rises >10% (specificity reads spammy). No decision before 200 samples per arm. If B wins, evaluate replicating the time-bound + action-specific pattern on the landing-page hero (a follow-up to EXP-001, possibly as a 3-way test if EXP-001 has resolved by then) as a SEPARATE experiment — do not bundle. Note interaction with EXP-001: a visitor at landing-hero variant B then features-page variant B sees a consistent verb-result message; check funnel attribution by segmenting on landing-arrival variant before declaring features-page lift.",
+      "note_2026_10_23": "Secondary 'See pricing' ghost button (both arms) replaced when /pricing was retired in the open-source pivot (ADR-0006); the features_to_pricing_ctr secondary metric was dropped. Primary metric and arms unchanged."
     },
     {
       "id": "EXP-009",

@@ -1,4 +1,4 @@
-# MotoQuant Pro — Master Task List
+# MotoQuant — Master Task List
 **Generated:** April 13, 2026  
 **Total Bikes:** 81 (was 56)  
 **Total Tires:** 29 (need 120–150)  

@@ -1,8 +1,14 @@
 """
 MotoQuant -- Users Repository
-=================================
-CRUD layer for users, sessions, and magic_links tables.
+=============================
+CRUD layer for the OPTIONAL-accounts tables: users, sessions, magic_links.
 All methods accept a sqlite3.Connection so callers control transactions.
+
+There are no tiers, plans or payment-customer ids. Databases created before
+the open-source pivot (2026-10-23) may still carry a ``users.tier`` column
+(``NOT NULL DEFAULT 'free'``) and the two old payment-customer columns until
+scripts/patch_2026_10_23_drop_monetization.py runs; every INSERT below omits
+them, so such databases keep working unchanged.
 """
 
 from __future__ import annotations
@@ -46,7 +52,7 @@ def get_user_by_id(conn: sqlite3.Connection, user_id: int) -> dict | None:
 
 
 def get_or_create_user(conn: sqlite3.Connection, email: str) -> dict:
-    """Return existing user or insert a new one.
+    """Return the existing user or insert a new one.
 
     Race-safe: two concurrent first-time sign-ins for the same email would both
     pass a plain SELECT-then-INSERT and the second would hit the UNIQUE(email)
@@ -265,7 +271,7 @@ def ensure_tables(conn: sqlite3.Connection) -> None:
     )
     conn.commit()
 
-    # ── password-auth columns — guarded ALTERs for old DBs ──
+    # ── v5 columns (password auth) — guarded ALTERs for old DBs ──
     for ddl in (
         "ALTER TABLE users ADD COLUMN password_hash TEXT",
         "ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0",
@@ -277,14 +283,14 @@ def ensure_tables(conn: sqlite3.Connection) -> None:
     conn.commit()
 
 
-# --- PASSWORD AUTH --------------------------------------------------------------
+# --- PASSWORD AUTH HELPERS (Phase 6, June 2026) -------------------------------
 
 
 def create_user_with_password(
     conn: sqlite3.Connection, email: str, password_hash: str
 ) -> dict:
-    """Insert a new user with a password hash. Caller must ensure
-    the email does not already exist (raises sqlite3.IntegrityError otherwise)."""
+    """Insert a new user with a password hash. Caller must ensure the email
+    does not already exist (raises sqlite3.IntegrityError otherwise)."""
     email = email.lower().strip()
     conn.execute(
         "INSERT INTO users (email, is_active, password_hash) VALUES (?, 1, ?)",

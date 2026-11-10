@@ -28,8 +28,8 @@
 set -euo pipefail
 
 # ─── Constants ───────────────────────────────────────────────────────────
-readonly REPO_URL="https://github.com/da25mem5s02-debug/MotoQuant_v1.git"
-readonly REPO_NAME="MotoQuant_v1"
+readonly REPO_URL="https://github.com/toto171/MotoQuant.in.git"
+readonly REPO_NAME="MotoQuant.in"
 readonly FUSE_MOUNT="/sessions/sharp-confident-cerf/mnt/Vehicle Dynamics"
 # SECRETS_DIR resolution order (first existing wins):
 #   1. $MOTOQUANT_SECRETS_DIR  — explicit override (recommended for sandboxes)

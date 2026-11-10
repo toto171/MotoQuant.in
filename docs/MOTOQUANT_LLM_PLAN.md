@@ -4,6 +4,12 @@
 **Audience:** the solo/contract ML engineer who will execute this, and the founder who approves each gate.
 **Status:** plan of record. **Read §0 and §1 before you touch a GPU.**
 
+> **Note (2026-10-23):** MotoQuant is now free and open source (Apache-2.0,
+> [ADR-0006](adr/0006-open-source-pivot.md)), and the desktop app was deleted
+> ([ADR-0005](adr/0005-desktop-discontinued.md)). The "hosted-only
+> IP-protection" argument against an offline build below no longer applies,
+> since the engine is public. The cost and quality arguments still stand.
+
 > **What this document is.** The founder wants a "MotoQuant AI LLM" built on top of an open-source model and kept current as the AI space moves. This is the exact, phased way to do that *without* wasting months — grounded in the code that already exists (`motoquant/llm/agent.py`, the 5-provider `LLMClient`, the 16-tool agent, the deterministic physics engine). It is written to be handed to one engineer and executed gate by gate.
 
 ---
@@ -36,7 +42,7 @@ The obvious plan — "rent a GPU and fine-tune a model" — is the trap. If you 
 | **Format / tool-call reliability on a *small* model** — reliably emit valid tool JSON, use your glossary, pick the right one of 16 tools. | **A moat.** Anyone can fine-tune Qwen on bike chat. The weights are not defensible; the engine + benchmark corpus + catalog are. |
 | **A latency/throughput floor you control** — no shared 30-RPM ceiling. | **Reasoning / planning.** Small fine-tunes are *worse* at novel multi-step tool orchestration than frontier models. Your 8-iteration outlaw pipeline can degrade. |
 | **Independence / IP** from a provider's price hikes, deprecations, ToS. | **Lower maintenance.** It *adds* ops: GPU hosting, retrain cadence, drift monitoring, eval gates — a second thing that breaks at 2am for a one-person team. |
-| **On-device / privacy** — a model that runs in the desktop app or inside a B2B customer boundary (both currently hypothetical). | **A fix for the 30-RPM pinch.** That is a *provider-tier* problem: `LLM_PROVIDER=gemini`, a paid Groq tier, or round-robin across the 5 providers already wired. Not a fine-tune problem. |
+| **On-device / privacy** — a model that runs fully offline on a self-hosted box (currently hypothetical). | **A fix for the 30-RPM pinch.** That is a *provider-tier* problem: `LLM_PROVIDER=gemini`, a paid Groq tier, or round-robin across the 5 providers already wired. Not a fine-tune problem. |
 
 **The one-sentence version:** for a tool-calling agent in front of a deterministic engine, the realistic upside is **cost + latency + small-model format-reliability — not capability, not correctness, not defensibility.**
 

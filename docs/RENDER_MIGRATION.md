@@ -1,5 +1,11 @@
 # Migrate MotoQuant API: Railway → Render (free tier)
 
+> **Historical runbook (May 2026).** The cutover is done; production runs on
+> Render. For how to deploy or self-host MotoQuant today, including every
+> environment variable, see [SELF_HOSTING.md](SELF_HOSTING.md). Some steps
+> below mention files and services that no longer exist (Railway, the
+> desktop app).
+
 **Goal:** drop hosting cost to $0/mo for the 3-4 month runway while MotoQuant
 gets users. Keep the Vercel frontend on `motoquant.in` untouched; only swap the
 backend that serves `/api/*`.
@@ -41,9 +47,9 @@ Render is dashboard-driven. There is nothing to install on your machine.
 
 1. Push this branch to GitHub on `main`. Render watches `main` for changes.
 2. Open https://dashboard.render.com → sign up with the **same GitHub
-   account** that owns `da25mem5s02-debug/MotoQuant_v1`.
+   account** that owns `toto171/MotoQuant.in`.
 3. **New +** → **Blueprint** → **Connect a repository** →
-   pick `da25mem5s02-debug/MotoQuant_v1`.
+   pick `toto171/MotoQuant.in`.
 4. Render reads `render.yaml`, shows a one-screen summary
    (`motoquant-api`, Docker, Free plan, Singapore region, healthcheck
    `/api/health`). Click **Apply**.
@@ -56,8 +62,8 @@ Render is dashboard-driven. There is nothing to install on your machine.
 ### Setting optional secrets
 
 If/when you want chat (`GEMINI_API_KEY`, `GROQ_API_KEY`), error tracking
-(`SENTRY_DSN`), or stable sessions (`JWT_SECRET` — if unset the server generates a random
-per-process secret and warns, so sessions reset on each restart), add them in the Render dashboard:
+(`SENTRY_DSN`), or optional accounts (`JWT_SECRET`, plus an email transport;
+see [SELF_HOSTING.md](SELF_HOSTING.md)), add them in the Render dashboard:
 
 `motoquant-api` → **Environment** → **Add Environment Variable**
 
@@ -197,14 +203,14 @@ the worker, `/api/bikes` and `/api/simulate/*` share that warm worker).
 In order of effort (low → high):
 
 1. **Render Starter ($7/mo)** — same dashboard, no sleep, persistent disk.
-   One-click upgrade from the free plan once hosting costs are covered.
+   One-click upgrade from the free plan once usage justifies it.
 2. **Fly.io pay-as-you-go (~$1.50-2/mo)** — slightly cheaper than Render
    Starter, no sleep, requires Docker (already have one) + `flyctl` install.
 3. **Oracle Cloud Always Free** — 4× ARM Ampere cores + 24 GB RAM forever
    free. Strictly better resources than any paid tier on this list. Costs
    1-2 hours of setup time (provision VM, install Docker, set up Caddy for
-   TLS, point DNS). Worth doing once the project has enough traffic that the $5/mo
-   feels worth retiring permanently rather than just deferring.
+   TLS, point DNS). Worth doing once real usage makes cold starts and the
+   ephemeral DB unacceptable.
 
 The migration path from Render to any of these is identical to this one:
 deploy to the new platform, flip `vercel.json`, suspend the old one. The

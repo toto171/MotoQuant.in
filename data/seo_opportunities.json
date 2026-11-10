@@ -527,7 +527,7 @@
       "target_url": "/features",
       "action": "tweak-existing",
       "priority": 33,
-      "rationale": "SERP is international tuners (Brock's, Woolich, 2 Wheel DynoWorks) with USD pricing. India buyer-funnel gap: no consolidated cost-per-tenth analysis comparing Powertronic (Indian), Bazzaz, Dynojet PCV, and Woolich flash options against ECU-cluster ROI on common Indian bikes (R15, NS200, Duke 390, Interceptor 650, Hayabusa). Pro-tier B2B funnel signal. Keywords array on /features expanded this pass to capture intent; queue a dedicated /blog/ecu-flash-india-cost-per-tenth post."
+      "rationale": "SERP is international tuners (Brock's, Woolich, 2 Wheel DynoWorks) with USD pricing. India buyer-funnel gap: no consolidated cost-per-tenth analysis comparing Powertronic (Indian), Bazzaz, Dynojet PCV, and Woolich flash options against ECU-cluster ROI on common Indian bikes (R15, NS200, Duke 390, Interceptor 650, Hayabusa). Strong tuner-audience signal. Keywords array on /features expanded this pass to capture intent; queue a dedicated /blog/ecu-flash-india-cost-per-tenth post."
     },
     {
       "keyword": "yezdi roadster quarter mile",
@@ -773,7 +773,7 @@
       "target_url": "/docs/physics",
       "action": "tweak-existing",
       "priority": 47,
-      "rationale": "Methodology query — surfaced as a Phase-3 priority in CLAUDE.md ('Physics / methodology queries: Pacejka tire model, motorcycle quarter-mile calculator'). Global SERP is dominated by academic PDFs (Pacejka 2012 textbook excerpts, IPG Automotive, Tyre Modelling Workshop papers) and one engineering blog post (mathworks.com/discovery/pacejka-magic-formula.html) — zero motorcycle-specific implementations on the first page, and zero free interactive demos. MotoQuant's catalog has 232 tires with full B/C/D/E + thermal coefficients (per CLAUDE.md, already integrated into the physics engine). The /docs/physics page already references the Pacejka model; surfacing 'Pacejka tire model motorcycle' in the meta keywords + features-page body adds an entry point for the underserved low-volume but very-high-intent methodology audience. Low India volume but high B2B Pro-Studio funnel value (Indian tuning-shop owners searching for credible vehicle-dynamics references). Linked from features page + docs/physics."
+      "rationale": "Methodology query — surfaced as a Phase-3 priority in CLAUDE.md ('Physics / methodology queries: Pacejka tire model, motorcycle quarter-mile calculator'). Global SERP is dominated by academic PDFs (Pacejka 2012 textbook excerpts, IPG Automotive, Tyre Modelling Workshop papers) and one engineering blog post (mathworks.com/discovery/pacejka-magic-formula.html) — zero motorcycle-specific implementations on the first page, and zero free interactive demos. MotoQuant's catalog has 232 tires with full B/C/D/E + thermal coefficients (per CLAUDE.md, already integrated into the physics engine). The /docs/physics page already references the Pacejka model; surfacing 'Pacejka tire model motorcycle' in the meta keywords + features-page body adds an entry point for the underserved low-volume but very-high-intent methodology audience. Low India volume but high value with Indian tuning-shop owners searching for credible vehicle-dynamics references (potential data contributors). Linked from features page + docs/physics."
     },
     {
       "keyword": "60 ft time motorcycle calculator",
@@ -1194,7 +1194,7 @@
       "severity": "opportunistic",
       "to": "marketing-content",
       "topic": "ECU flash India cost — Powertronic vs Bazzaz vs Dynojet PCV vs Woolich, by cost-per-tenth on common Indian bikes",
-      "rationale": "B2B Pro-tier buyer funnel content. SERP is international tuners with USD pricing. Run MotoQuant's parts ROI engine on the same 4-5 ECU options for R15 V4 / NS200 / Duke 390 / Interceptor 650 / Hayabusa. Output a ₹/tenth table. Unique to MotoQuant — no competitor has the catalog + sim to produce this."
+      "rationale": "Tuner/buyer-intent content (MotoQuant is free & open source, so this is reach, not a sales funnel). SERP is international tuners with USD pricing. Run MotoQuant's parts ROI engine on the same 4-5 ECU options for R15 V4 / NS200 / Duke 390 / Interceptor 650 / Hayabusa. Output a ₹/tenth table. Unique to MotoQuant — no competitor has the catalog + sim to produce this."
     },
     {
       "severity": "opportunistic",

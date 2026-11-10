@@ -188,10 +188,17 @@ HONDA_RC213V_S_2015 = spec_from_dict(
         "stroke_mm": 48.5,
         "compression_ratio": 13.0,
         "cylinders": 4,
-        "peak_power_hp": 159.0,  # street trim (159 hp); optional race kit takes it to 215 hp
-        "peak_power_rpm": 14000,
-        "peak_torque_nm": 118.0,
-        "peak_torque_rpm": 11500,
+        # 2026-10 epoch: was 159 hp @ 14,000 / 118 Nm @ 11,500 — the street
+        # power paired with the Sports-Kit torque (118 Nm @ 11,500 = 191 hp,
+        # 1.20x rated). European/Australian stock trim: 159 PS (156.8 hp) @
+        # 11,000 rpm / 102 Nm @ 10,500 rpm (autocarindia.com + motorbeam.com
+        # RC213V-S launch reports; evoindia "156.8hp @ 11,000, 102Nm @
+        # 10,500"). Sports Kit: >215 PS @ 13,000 / >118 Nm @ 10,500 (not
+        # modelled — track-only).
+        "peak_power_hp": 156.8,
+        "peak_power_rpm": 11000,
+        "peak_torque_nm": 102.0,
+        "peak_torque_rpm": 10500,
         "fuel_system": "fi",
         "cooling": "liquid",
         "valve_config": "dohc",
@@ -434,7 +441,7 @@ TVS_APACHE_RTR_180_2009 = spec_from_dict(
 
 # ── Honda NS400R (1985-1987 — vintage 2T V3) ────────────────────────
 # NS500-GP-derived 387cc 90° V3 2-stroke. ATAC power-valve, water-cooled,
-# 72 hp @ 9500 rpm, 51 Nm @ 8500 rpm. Reed-valve induction, 6-speed,
+# 72 PS (71 hp) @ 9500 rpm, 53 Nm @ 8500 rpm (2026-10 corrected; see below). Reed-valve induction, 6-speed,
 # 163 kg dry. Honda's "GP bike for the street" of the mid-80s.
 # Sources: Honda 1985 press kit (RC-built brochure), Cycle World 1985
 # road test, MCN classic-bike database.
@@ -451,9 +458,13 @@ HONDA_NS400R_1985 = spec_from_dict(
         "stroke_mm": 50.6,
         "compression_ratio": 6.7,
         "cylinders": 3,
-        "peak_power_hp": 72.0,
+        # 2026-10 epoch: was 72 "hp" / 51 Nm (1.06x inconsistent). Honda's
+        # rating is 72 PS = 71 hp @ 9,500 rpm (ultimatespecs NS 400 R 1985:
+        # "71 HP / 72 PS"); torque 53 Nm @ 8,500 rpm (totalmotorcycle.com 1985
+        # NS400R spec sheet; 5.2-5.4 kgf-m across sources).
+        "peak_power_hp": 71.0,
         "peak_power_rpm": 9500,
-        "peak_torque_nm": 51.0,
+        "peak_torque_nm": 53.0,
         "peak_torque_rpm": 8500,
         "fuel_system": "carb",
         "cooling": "liquid",
@@ -4493,7 +4504,7 @@ TVS_RAIDER_125_2021 = spec_from_dict(
         "dry_mass_kg": 115.0,  # 123 kg kerb - ~8 kg fuel (10 L tank)
         "wheelbase_mm": 1326.0,
         "front_tire_size": "80/100-17",
-        "rear_tire_size": "100/90-17",  # TVS specification (was 100/80-17)
+        "rear_tire_size": "100/80-17",  # bias-ply Indian notation
         "cd": 0.78,  # sporty-commuter posture, slight forward lean
         "frontal_area_m2": 0.42,
     },
@@ -4652,10 +4663,14 @@ KTM_890_DUKE_2020 = spec_from_dict(
         "stroke_mm": 73.0,
         "compression_ratio": 13.5,
         "cylinders": 2,
-        "peak_power_hp": 115.0,  # 115 hp @ 8,000 rpm — KTM/Rider Magazine (was showing the 790 Duke figure)
-        "peak_power_rpm": 8000,
-        "peak_torque_nm": 92.0,  # 92 Nm @ 6,500 rpm per KTM spec sheet
-        "peak_torque_rpm": 6500,
+        # 2026-10 epoch: rpm points were 8,000 / 6,500 (inconsistent: 115
+        # hp @ 8,000 needs 102 Nm). KTM rating 115 hp @ 9,000 rpm / 92 Nm @
+        # 8,000 rpm (1000ps.com 2021 890 Duke; motodealers.co.uk 2021 890
+        # Duke spec "92.0 Nm @ 8000 RPM"; Bennetts BikeSocial Jan-2021).
+        "peak_power_hp": 115.0,
+        "peak_power_rpm": 9000,
+        "peak_torque_nm": 92.0,
+        "peak_torque_rpm": 8000,
         "fuel_system": "fi",
         "cooling": "liquid",
         "valve_config": "dohc",
@@ -8122,8 +8137,15 @@ HUSQVARNA_701_SUPERMOTO_2016 = spec_from_dict(
         "valve_config": "sohc",  # pre-2017 LC4 — SOHC
         "gears": 6,
         # Husqvarna 2016 LC4 cassette per Husky service manual
-        # (matches KTM 2012-2017 Duke R, NOT the 2019+ LC4 cassette)
+        # 2026-10 epoch round 2: the "(matches KTM 2012-2017 Duke R)" claim
+        # was false — the 690 Duke R box is 14:35 / 16:28 / 21:28 / 21:23 /
+        # 23:22 / 23:20 (motorcyclespecs); this cassette is UNVERIFIED (open).
+        # Primary 36:79 = 2.194 — the 693 cc LC4's primary (Husqvarna
+        # Vitpilen 701 spec, Bikesales AU listing —
+        # https://www.bikesales.com.au/bikes/details/2018-husqvarna-vitpilen-701/SSE-AD-19489692);
+        # none was set, so the importer used the Tier-2 1.85.
         "gear_ratios": [2.833, 1.937, 1.500, 1.227, 1.043, 0.912],
+        "primary_ratio": 2.194,
         "front_sprocket": 16,  # F16/R42 520 — Husqvarna
         # chose taller front sprocket
         # than KTM SMC R (F15) for
@@ -8189,8 +8211,9 @@ SUZUKI_V_STROM_SX_250_2022 = spec_from_dict(
         # factually wrong — the Gixxer 250 / SG250 oil-cooled engine is a
         # 6-speed (confirmed ZigWheels/BikeWale; the catalogue Gixxer 250 entry
         # is 6-speed), so the V-Strom SX 250 (same engine) is 6-speed too.
-        # (The duplicate 2022-2024 entry in known_bikes.py was removed on
-        # 2026-11-10; this is the single V-Strom SX 250 row.)
+        # NOTE FOR ORCHESTRATOR: this is a DUPLICATE of SUZUKI_V_STROM_SX_250_2022
+        # in known_bikes.py (model_code=None, already 6-speed) — same bike, both
+        # land in ALL_KNOWN_BIKES. Dedup is out of gear-audit scope; flagging it.
         # Internal cassette ratios = catalogue Gixxer 250 (shared engine/box);
         # F14/R44 final drive kept (Suzuki India spec, taller R-sprocket for ADV).
         # Source: zigwheels.com/suzuki-bikes/gixxer-250/specifications (6-speed).
@@ -9494,11 +9517,9 @@ ROYAL_ENFIELD_SUPER_METEOR_650_2023 = spec_from_dict(
         # Cycle World Apr 2023 review confirmed
         "rear_sprocket": 40,
         "chain_pitch": "525",  # 525 pitch — RE 650 platform standard
-        # EPOCH 2026-11-10: was "dry_mass_kg": 230.0 (241 kg kerb minus ~11 kg).
-        # The importer adds fluids AND fuel to a dry figure, so 230 double-
-        # counted; the published 241 kg kerb weight is recorded as wet
-        # (importer: dry = wet - 25).
-        "wet_mass_kg": 241.0,
+        "dry_mass_kg": 230.0,  # 230 kg dry (241 kg kerb minus ~11 kg
+        # fluids — 15.7L fuel + oil + coolant)
+        # RE press spec sheet Jan 2023
         "wheelbase_mm": 1500.0,  # 1500 mm — RE spec (long cruiser
         # wheelbase, INT650 is 1398 mm)
         "front_tire_size": "100/90-19",  # 19-inch front cruiser tire
@@ -9720,11 +9741,15 @@ HONDA_CB400X_2023 = spec_from_dict(
         "stroke_mm": 56.6,
         "compression_ratio": 10.7,  # 10.7:1 — Honda spec sheet
         "cylinders": 2,
-        "peak_power_hp": 46.0,  # 46 PS (33.8 kW) @ 8000 rpm
-        # Honda Japan spec sheet 2023
-        "peak_power_rpm": 8000,
-        "peak_torque_nm": 38.0,  # 38 Nm @ 6500 rpm — Honda spec
-        "peak_torque_rpm": 6500,
+        # 2026-10 epoch: was 46 "hp" @ 8000 / 38 Nm @ 6500 (inconsistent:
+        # needs 40 Nm at the power peak). Japanese-market rating 46 PS
+        # (45.4 hp) @ 9,000 rpm / 38 Nm @ 7,500 rpm (rushlane.com 2020MY
+        # CB400X Japan report "45bhp @ 9,000rpm and 38Nm @ 7,500rpm"; the
+        # PC53E unit carries over to 2023).
+        "peak_power_hp": 45.4,
+        "peak_power_rpm": 9000,
+        "peak_torque_nm": 38.0,
+        "peak_torque_rpm": 7500,
         "fuel_system": "fi",  # PGM-FI (Honda programmed FI)
         "cooling": "liquid",
         "valve_config": "dohc",  # DOHC 4-valve per cylinder

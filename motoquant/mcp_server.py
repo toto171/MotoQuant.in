@@ -67,10 +67,11 @@ INSTRUCTIONS = (
     "MotoQuant simulates motorcycle quarter-mile drag runs from first "
     "principles (RK4 over 15 physics sub-models), not from lookup tables. "
     "Pick a bike with search_bikes (or a bike_preset), then simulate. "
-    "ET is elapsed time over 402.3 m; trap speed is the speed crossing that "
-    "line; the 60-foot split is the launch-quality number. All et_delta_s "
+    "ET is elapsed time over 402.3 m timed from the 1-ft beam rollout; trap "
+    "speed is the speed crossing that line; the 60-foot split is the "
+    "launch-quality number. All et_delta_s "
     "values are after-minus-before, so negative means faster. Published "
-    "accuracy: weighted mean |error| ~0.26 s across 273 matched real-world "
+    "accuracy: weighted mean |error| ~0.25 s across 266 matched real-world "
     "benchmarks — good for ranking builds and what-ifs, not for claiming a "
     "specific bike will run an exact ET."
 )
@@ -259,7 +260,7 @@ class LocalBackend:
         fields ``DrivetrainParams.final_ratio`` actually reads.
         """
         api = self._mod()
-        from .physics import MotoQuantEngine
+        from .engine_select import make_engine
 
         def _run() -> dict:
             cfg = api._build_config(
@@ -276,7 +277,7 @@ class LocalBackend:
             cfg = copy.deepcopy(cfg)
             cfg.drivetrain.front_sprocket = int(front)
             cfg.drivetrain.rear_sprocket = int(rear)
-            sim = MotoQuantEngine(cfg).run()
+            sim = make_engine(cfg).run()
             return {
                 "front_sprocket": int(front),
                 "rear_sprocket": int(rear),
@@ -518,7 +519,7 @@ def _t_simulate_top_speed(backend: Any, args: dict) -> dict:
         "reached_plateau": res.get("reached_plateau"),
         "note": (
             "Unrestricted unless the bike carries a factory speed limiter. "
-            "Top-speed accuracy is weaker than ET accuracy (fleet bias ~+25 km/h)."
+            "Top-speed accuracy is weaker than ET accuracy (mean |error| ~13 km/h, fleet bias ~+7 km/h)."
         ),
     }
 
@@ -803,7 +804,7 @@ TOOLS: list[dict[str, Any]] = [
     {
         "name": "search_bikes",
         "description": (
-            "Search the 534-bike catalog by free text, manufacturer or category. "
+            "Search the 541-bike catalog by free text, manufacturer or category. "
             "Returns catalog ids to feed the simulation tools. Always start here "
             "when the user names a bike."
         ),
@@ -910,7 +911,7 @@ TOOLS: list[dict[str, Any]] = [
     {
         "name": "search_parts",
         "description": (
-            "Search the 546-part catalog. Pass bike_id to return ONLY parts that "
+            "Search the 593-part catalog. Pass bike_id to return ONLY parts that "
             "actually fit that bike (chain pitch, engine layout, displacement, "
             "stroke type are all checked)."
         ),

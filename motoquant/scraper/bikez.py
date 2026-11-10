@@ -1,6 +1,6 @@
 """
 MotoQuant — Bikez.com Scraper
-=================================
+=============================
 Scrapes motorcycle specifications from bikez.com.
 
 Bikez.com structure (2024):

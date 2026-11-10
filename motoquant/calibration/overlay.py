@@ -1,6 +1,6 @@
 """
 MotoQuant — Sim vs Real Overlay
-=====================================
+===============================
 Compare a simulation run (SimResult) against a real GPS run (DragRunData).
 Produces residuals, RMSE, and a rich comparison report.
 

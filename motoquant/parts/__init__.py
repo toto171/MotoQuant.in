@@ -1,6 +1,6 @@
 """
 MotoQuant — Parts Compatibility Engine
-===========================================
+======================================
 Manages bike-specific fitment rules for performance parts.
 """
 

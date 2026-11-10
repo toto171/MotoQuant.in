@@ -37,7 +37,7 @@ This codebase has been built with heavy LLM assistance. Find:
 1. `motoquant/api.py` — old endpoints that may have been replaced
 2. `motoquant/llm/runner.py` — multiple refactors, may have stale dispatch branches
 3. `motoquant/scraper/*.py` — multi-session work, may have leftover scaffolding
-4. `desktop/src/pages/BuildPage.tsx` — recent surrogate wiring, may have dead code paths
+4. Leftovers from the 2026-10-23 open-source pivot — any surviving tier/quota/billing/licence-key references in `motoquant/`, `web/` or `tests/` (ADR-0006)
 5. Top-level scripts — many may be one-shots that ran and shouldn't be re-run
 
 ## Deliverable

@@ -1,5 +1,5 @@
 """
-MotoQuant — Sub-Model Registry
+MotoQuant Pro — Sub-Model Registry
 ==================================
 Individual physics sub-models, composed by the main MotoQuantEngine.
 """

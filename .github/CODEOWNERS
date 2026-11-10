@@ -6,7 +6,7 @@
 # from CONTRIBUTING.md.
 #
 # When a new co-developer joins, add their GitHub handle here on the areas they
-# own. Until then @toto171 owns everything.
+# own. Until then @toto171 (Hritwik) owns everything.
 
 # ---- Default owner (fallback) ----
 *                                   @toto171
@@ -40,9 +40,6 @@
 /motoquant/database/seed.py         @toto171
 /motoquant/database/seed_catalogs/  @toto171
 
-# ---- Desktop app (Tauri + React) ----
-/desktop/                           @toto171
-
 # ---- Web (Next.js marketing + simulator) ----
 /web/                               @toto171
 
@@ -56,5 +53,12 @@
 
 # ---- Project docs (any maintainer can approve) ----
 /CLAUDE.md                          @toto171
+/AGENTS.md                          @toto171
 /CONTRIBUTING.md                    @toto171
 /docs/ONBOARDING.md                 @toto171
+
+# ---- Licensing + community policy ----
+/LICENSE                            @toto171
+/NOTICE                             @toto171
+/SECURITY.md                        @toto171
+/CODE_OF_CONDUCT.md                 @toto171

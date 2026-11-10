@@ -4,58 +4,148 @@ Notable changes, newest first. This is the human-readable milestone history;
 the exhaustive session-by-session log lives in `CLAUDE.md` (top entry = latest)
 and `reports/`. Format loosely follows [Keep a Changelog](https://keepachangelog.com).
 
-## [2.0.0] — 2026-11-10 — Open source, plain-language site, audit fixes
+## 2026-11-05 — Accuracy epoch (2026-10/11)
 
-MotoQuant is now free and open source ([LICENSE](LICENSE), MIT), the "Pro"
-name is gone, and the site was rebuilt so a first-time visitor can use it.
-Full write-up: `reports/session_2026_11_10_v2.md`.
+A deliberate physics epoch under [ADR-0002](docs/adr/0002-pinned-reference-baselines.md):
+the pinned reference ETs move, with the full weighted sweep as evidence
+(`reports/acc_final_2026_11_05.json`; tuning record
+`reports/acc_epoch3_2026_11_03.json`). Builds on the 2026-10-23 open-source
+pivot and the Rust physics core (`rust/motoquant-core`,
+[ADR-0007](docs/adr/0007-rust-physics-core.md)) — the core is bit-identical
+to the Python reference (1,959/1,959 parity cases, worst |ΔET| 0,
+`reports/native_parity_2026-11-05.json`; wasm 59/59 fixture + 1,082/1,082
+every-bike runs) and now serves the sweep, tuner and surrogate regen.
+
+### Fixed — data
+- `scripts/patch_2026_11_05_reference_rows.py` refreshes the three reference
+  bikes' DB rows (ids 1-3) from `defaults.py`, so `db seed` no longer mints a
+  new config version for each of them. It is the last step of the re-seed chain.
+
+### Changed — physics (three rounds)
+- **Round 1** (2026-10-24) retuned the knobs on the first epoch physics and
+  was **rejected**: it left catalog bikes dry-mass-inverted (a lighter bike
+  ran a slower ET).
+- **Round 2** (2026-10-29) changed the launch physics: the wheelie limit uses
+  the **combined bike + rider centre of mass** (rider shift included), the
+  **aerodynamic drag pitch moment** enters the load transfer, the tyre runs a
+  **heat balance** (rolling-loss heating, partition, convection), and the
+  strip **rollout geometry** sets the timing: every split is now clocked from
+  the 1-ft stage beam, ET = t(402.336 m) − t(0.3048 m) (the convention of
+  timeslips, N.A. magazine tests and Dragy; first-motion-timed benchmark rows
+  are scored against a first-motion sim). The finish line is `distance`, and
+  `distance <= rollout_m` / a non-finite rollout now raise `ValueError` on
+  both engines. 599 cc I4 supersports route with the 600-1000 class.
+  Physics verified; its retune was not accepted on ET.
+- **Round 3** (2026-11-03) added one physical knob,
+  `CategoryProfile.wheelie_margin` — the share of the wheelie ceiling the
+  rider holds from rest to the 60-ft line (resolved-config schema 5; 1.0 =
+  bit-identical no-op) — and re-selected every cluster from neutral (grouped
+  5-fold CV, 1-SE rule, hard dry-mass gate). Class grip correctors are
+  retired: every cluster runs rated rubber. `litre_sport_195p` ships the CV
+  choice (margin 0.69) by **owner decision 2026-11-05** instead of the
+  tuner's gate escape (clutch dump 0.475 × redline), accepting two ms-level
+  dry-mass inversions.
+
+### Results (`reports/acc_final_2026_11_05.json`)
+- Epoch headline (250 benchmarks, 266 matched, per-row timing): weighted
+  mean |ΔET| **0.2493 s**, bias **+0.0225 s**; 72 within ±0.10 s, 133 within
+  ±0.20 s. Trap bias **+3.43 km/h** (|Δ| 6.08 km/h; was +13.8 km/h). Top
+  speed (83 matched) mean |Δ| **12.9 km/h**, bias +7.0 km/h (was 28.1 /
+  +24.3).
+- The exact 2026-08-08 published metric (HEAD labels, legacy rules) on the
+  new model: **0.2639 s** / bias +0.0292 s vs the published 0.2629 / +0.0073.
+- New pins: **K5 10.0436 s, R1 10.1092 s, Hayabusa 10.1100 s** (were 9.9331 /
+  10.1436 / 10.3633). K5 60 ft 1.896 s from the beam (2.184 s from first
+  motion).
+
+### Known residuals (documented, not fixed)
+- Accepted dry-mass inversions (−10 kg slower): BMW HP4 Race 9.8 ms, Ducati
+  Panigale V4R 2.5 ms (+10 kg also 1.0 ms quicker). At sea level 10
+  litre-class bikes invert dry mass, the HP4 Race by 22 ms (it inverts at
+  neutral knobs too: wheelie-ballast physics).
+- The reference spread is compressed: K5 +0.07 s slow, R1 −0.19 s and
+  Hayabusa −0.24/−0.29 s quick vs their published figures, and R1 vs
+  Hayabusa are 0.8 ms apart (≈ 0.1 s in reality).
+- Class bias beyond ±0.25 s on entry 200-300 (+0.27), singles 300-500
+  (−0.27) and two-strokes (+0.26); 150-200 entry spread stays wide.
+- Litre bikes are nearly mass-insensitive at launch: median 1.2 ms/kg
+  (`litre_sport_195p`) and 4.3 ms/kg (600-1000), vs ~25 ms/kg for 150-200 cc.
+
+### Regenerated
+- `motoquant.db` reseed chain (idempotent on a second pass; 541 models;
+  reference rows tagged `reference_litre_195p`), regression golden (fast +
+  541-bike slow tier), surrogate **v2.7** (9,142 rows; holdout ET MAE 69.8 ms,
+  RMSE 107.0 ms, R² 0.9989 — v2.6 was 110.5 / 174.9 / 0.9962) + web export,
+  wasm engine fixtures, `/validation` data, sitewide accuracy copy and the OG
+  card.
+
+### Moved
+- The repository is now <https://github.com/toto171/MotoQuant.in>.
+
+## 2026-10-23 — Open-source pivot
+
+**Monetization is scrapped. MotoQuant is free and open source under the
+Apache License 2.0** ([ADR-0006](docs/adr/0006-open-source-pivot.md)).
+Copyright 2026 Hritwik Mudhai and the MotoQuant contributors. Source:
+<https://github.com/toto171/MotoQuant.in>. No payment was ever
+taken; the billing switch was never enabled.
 
 ### Added
-- `LICENSE` (MIT), `SECURITY.md`, `CODE_OF_CONDUCT.md`; open-source
-  README/CONTRIBUTING, issue/PR templates; `docs/adr/0006-open-source-mit.md`.
-- Site design system v6 (`web/DESIGN.md`): light and dark themes, a glossary
-  with in-place term explanations, plain-language navigation, and a simulator
-  with a Simple mode (three questions) and an Advanced mode (everything else).
-- Every result now states the conditions it was computed for (API
-  `environment` block; shown on the site).
-- Conditions (venue, altitude, temperature, humidity, pressure) accepted by
-  the upgrade, race-day-setup and all simulation routes.
-- `pip install -e .` works; one version number (`motoquant.__version__`).
-- Self-hosted fonts (`web/app/fonts/`), so the site builds without network
-  access.
-- Gates: a gearing-plausibility check with a committed baseline, a docs-truth
-  test, and an accuracy block in `scripts/audit_headline_stats.py`.
+- `LICENSE` (Apache-2.0, unmodified), `NOTICE` (copyright; third-party
+  trademarks; cited benchmark figures; public-source catalog specs),
+  `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1), `SECURITY.md` (private
+  reporting via GitHub Security Advisories).
+- `docs/SELF_HOSTING.md`: run the API + web locally, on Render/Vercel or
+  any Docker host. Covers `JWT_SECRET`, `MOTOQUANT_DB` on a persistent disk,
+  the magic-link email transport, LLM keys for chat, backups, and optional
+  Sentry/PostHog. Migrated from the payments runbook's still-relevant steps.
+- `docs/adr/0006-open-source-pivot.md`; `docs/archive/` for retired
+  documents.
+- Abuse fuses where the sim quota had been the only protection: per-IP rate
+  limits on `/api/simulate/distance`, `/api/simulate/compare` and
+  `/api/jobs/compare`, plus a per-IP daily chat cap
+  (`MOTOQUANT_CHAT_DAILY_LIMIT`, default 200; `0` disables) as an LLM-bill
+  fuse.
+- `scripts/patch_2026_10_23_drop_monetization.py` (idempotent).
 
 ### Removed
-- Payments, subscriptions, paid tiers, license keys and sim-quota metering
-  (code, pages, database tables and docs). Everything on the site is free.
-- 47 invented placeholder parts that carried real brand names, and seven
-  bikes that were the same motorcycle entered twice. The catalog is now 534
-  bikes and 546 parts.
+- Payments (Razorpay/Stripe checkout and webhooks), subscriptions, license
+  keys, `require_tier` / `MOTOQUANT_BILLING_ENFORCE` tier gating, 402
+  `upgrade_required` / `upgrade_url`, the `X-Sims-Remaining` free-tier sim
+  quota (`usage.py`), and the chat agent's "pro tools" gate.
+- Dead billing schema from the shipped `motoquant.db`: tables
+  `subscriptions`, `license_keys`, `payment_events`, `sim_usage`, and columns
+  `users.tier` / `razorpay_customer_id` / `stripe_customer_id`. Older DBs
+  that still carry `users.tier` keep working.
+- Web: `/pricing` and `/refunds` (now permanent redirects), `TierBadge` /
+  `UpgradeCTA`, every Pro/Studio price and every "free during beta" claim.
+  `/contact` was rewritten as a community page.
+- The scrapped `desktop/` tree and the retired desktop `release.yml`
+  workflow.
 
 ### Changed
-- Accounts are optional and exist only to save runs. Per-IP rate limits remain
-  as abuse protection.
-- Hot- and cold-day power correction now follows the standard dyno correction
-  formula; the reference day is unchanged.
-- The upgrade tool never recommends a part it has not simulated; the race-day
-  tool says "not adjustable" instead of inventing a launch RPM.
-- The plain-English query parser no longer mistakes a model number or year
-  for a budget; when it cannot tell, it asks instead of guessing.
-- Catalog responses are cached and compressed; background job memory is
-  bounded.
+- Brand "MotoQuant Pro" → **"MotoQuant"** on user-facing surfaces, docs, API
+  titles and CLI help. Historical entries below are left as written.
+- JWT secret policy re-keyed off billing: a deployed host (`RENDER` /
+  `RENDER_EXTERNAL_URL` / `MOTOQUANT_DEPLOYED=1`) with no `JWT_SECRET` signs
+  with an ephemeral per-process random secret and warns loudly (sessions
+  reset on restart). It never uses the public default and never refuses to
+  boot.
+- `ratelimit.py` eviction now expires each key on its own window. A 60 s
+  bucket could previously evict the daily chat counters.
+- PostHog forwarding is documented as opt-in: off unless the operator sets
+  `POSTHOG_API_KEY`.
+- Archived to `docs/archive/`: the payments runbook, commercial-launch plan,
+  team-scaling plan, SEO growth plan, monetisation-plan PDF, unsent B2B
+  outreach drafts, desktop install/release docs, and old root hand-off notes
+  (`NEXT_SESSION.md`, `DISPATCH_2026-04-24.md`,
+  `DISPATCH_ws-physics-smallcc-2t.md`).
 
-### Fixed
-- Dragy and ECU-log imports mis-timed runs that did not start from a stop.
-- The defects confirmed by a full-codebase audit, and the 33 confirmed by an
-  independent review of this change; see the write-up for the list.
-
-### Measured accuracy (10 November 2026 sweep)
-273 matched tests, weighted mean error 0.262 s, bias +0.009 s
-(`reports/acc_final_2026_11_10.json`). The three pinned reference bikes are
-bit-identical to 1.x. A proposed gearing correction for small bikes was
-measured, made accuracy worse, and was **not** shipped
-(`reports/session_2026_11_10_epoch.md`).
+### Kept (not monetization)
+Optional accounts (magic link + password, sessions, `/api/me/runs` garage,
+run attribution), the leaderboard and rate-limited anonymous saves, per-IP
+rate limiting, part INR prices and ROI cost-per-tenth, `budget_inr`, chat
+per-turn budgets, build stages, and env-gated Sentry.
 
 ## [PR #116] — 2026-07-19 — Scrapling dev-side scraping toolkit
 

@@ -1,6 +1,6 @@
 """
 MotoQuant — Simulation Run Repository
-=========================================
+=====================================
 Archive simulation results with full traceability back to
 bike config, venue, weather conditions, and applied parts.
 """

@@ -2,7 +2,7 @@
 'use strict';
 
 /**
- * MotoQuant — Playwright smoke harness config
+ * MotoQuant Pro — Playwright smoke harness config
  * ================================================
  * Low-risk, version-controlled end-to-end smoke test for the landing →
  * quick-sim happy path. Intentionally minimal: one Chromium project, one

@@ -45,21 +45,23 @@ CLI and older clients.
   from a tool result. Estimated sims are always labelled.
 * Hard per-message budgets enforced by the **executor** (not the model):
   8 LLM iterations, 20 full sims, 2 heavy ops (optimizer/autotune/outlaw).
-* **Heavy tools are open but fused.** `optimize_build` and `autotune_setup`
-  (which includes the stage_4 / outlaw pipeline) need no account. Each call
-  consults a per-IP gate (`heavy_gate_for` in `motoquant/ratelimit.py`) that
-  shares the optimize/autotune rate bucket, so asking the chat agent for them
-  cannot out-run calling `POST /api/optimize/build`, `/api/autotune/ecu` or
-  `/api/jobs/outlaw` directly. A refused call comes back as a plain tool-result message the model
-  relays in its own words.
-* **Cost fuses.** The executor caps sims and heavy ops per message (above);
-  `/api/chat` and `/api/jobs/chat` are rate-limited per IP, and
-  `mode="classic"` (which can run up to 25 RK4 sims per request, unbudgeted)
-  has a much tighter bucket. Heavy ops are weighted at a nominal **18 units**
-  (`HEAVY_OP_SIM_COST`; 36 for the composed outlaw pipeline) against the
-  per-message sim budget.
-* Chat route limit: 20 requests/min/IP (classic mode: 4/min/IP). Provider 429s surface as a
-  typed `rate_limited` error (both agent and classic modes).
+* **Every tool is free.** `optimize_build` and `autotune_setup` (including
+  the stage_4 / outlaw pipeline) are available to every caller, signed in or
+  not, exactly like `POST /api/optimize/build`, `POST /api/autotune/ecu` and
+  `POST /api/jobs/outlaw`. There are no tiers, quotas or upgrade paths
+  (ADR-0006). The per-turn budgets above are the CPU fuse.
+* `sims_run` on the response is **reporting, not a charge.** Sim tools count
+  1 each (`compare_bikes` 2, `simulate_estimated_bike` 2, `rank_bikes` its
+  planned batch). Heavy ops add a nominal **18** (`HEAVY_OP_SIM_COST`, from
+  autotune's own sweep total: 1 baseline + 9 gearing + 7 launch + 1
+  combined), and the composed outlaw pipeline adds **36**.
+* **Per-IP fuses** (whoever runs a deployment pays its LLM bill):
+  20 chat requests/min/IP, plus a daily cap of `MOTOQUANT_CHAT_DAILY_LIMIT`
+  turns per IP per rolling 24 h (default **200**; `0` disables, e.g. for a
+  self-hoster's own key or a local model). Both buckets are shared by
+  `/api/chat` and `/api/jobs/chat`, and tripping either answers HTTP 429 with
+  `Retry-After`. Provider 429s surface as a typed `rate_limited` error (both
+  agent and classic modes).
 
 ## API
 
@@ -88,15 +90,19 @@ OpenRouter — selected via `LLM_PROVIDER` + per-provider key/model env vars.
 Adding another OpenAI-compatible API = one entry in `_PROVIDERS`.
 
 **Groq free-tier note:** an agent turn makes 2–8 LLM calls (vs 2 before). At
-30 RPM the 20/min/IP chat limit can exhaust the provider quota under load —
-if that bites, set `LLM_PROVIDER=gemini` or add a paid key.
+30 RPM the 20/min/IP chat limit can exhaust the provider's rate limit under
+load. If that bites, set `LLM_PROVIDER=gemini`, add a paid key, or lower
+`MOTOQUANT_CHAT_DAILY_LIMIT`.
 
 ## Testing
 
 Everything is testable offline through the `_call_override("tools", …)` seam:
-`tests/test_agent.py` (loop, budgets, metering, estimation, history, API
-routes, format conversion) and `tests/test_outlaw.py` (pipeline structure,
-physics sanity, unlimited-budget semantics).
+`tests/test_agent.py` (loop, budgets, estimation, history, API routes,
+format conversion) and `tests/test_outlaw.py` (pipeline structure, physics
+sanity, unlimited-budget semantics).
 
-`tests/test_chat_fuses.py` pins the heavy-op gate, the per-message budgets
-and the chat route rate limits through the real HTTP routes.
+`tests/test_open_source_pivot.py` pins, through the real HTTP routes, that no
+paywall exists (`TestMonetizationIsGone`) and that the daily chat cap trips,
+is per-IP, is shared by both chat routes and can be disabled
+(`TestChatDailyCap`). The old `tests/test_chat_gating.py` (tier gate +
+metering in both billing modes) was deleted with monetization.

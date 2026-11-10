@@ -1,6 +1,6 @@
 """
 MotoQuant — Weather Scheduled Refresh
-==========================================
+=====================================
 Polls OpenWeatherMap for all active venues and stores fresh weather records.
 
 Usage (standalone):

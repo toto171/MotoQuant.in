@@ -1,0 +1,137 @@
+name: Native core
+
+# The Rust physics core (rust/motoquant-core) is a second implementation of
+# MotoQuantEngine.run(): it must stay bit-identical to the Python reference
+# (docs/RUST_CORE.md, ADR-0007). This workflow is that gate. It runs on every
+# change that could break parity: the Rust sources, the Python loop and its
+# inputs, the resolve bridge, the engine selector, the browser engine and the
+# parity tooling itself.
+#
+# What it proves, in order:
+#   1. cargo test — Rust unit tests + native Rust vs the committed
+#      Python-reference fixtures (no Python involved).
+#   2. maturin builds the abi3 wheel (exactly rust/Cargo.lock) and it installs.
+#   3. pytest native gate with MOTOQUANT_REQUIRE_NATIVE=1 — a missing, stale
+#      or schema-mismatched build FAILS instead of skipping; includes the
+#      production-path API parity tests (python vs auto engine selection).
+#   4. scripts/check_native_parity.py --quick — refs + a 40-bike catalog
+#      sample (fixed + adaptive) + top speed + the stress slice.
+#   5. node web/scripts/engine-parity.mjs — the committed wasm, through the
+#      real web/lib/engine.js, against the committed fixtures (ET/trap/every
+#      split exact, plus sample/step counts and final dt).
+#   The always-on fixture/manifest freshness guards in tests/test_native_engine.py
+#   tie the chain together (fixtures == today's Python; the committed wasm's
+#   own schema export + source fingerprint == this checkout).
+
+# Least-privilege: read-only checkout + local builds; no tokens, no artifacts.
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "rust/**"
+      - "motoquant/physics.py"
+      - "motoquant/submodels/**"
+      - "motoquant/native.py"
+      - "motoquant/engine_select.py"
+      - "motoquant/category_profiles.py"
+      - "motoquant/defaults.py"
+      - "motoquant/models.py"
+      - "motoquant/constants.py"
+      - "tests/test_native_engine.py"
+      - "tests/test_engine_select.py"
+      - "scripts/check_native_parity.py"
+      - "scripts/gen_engine_web.py"
+      - "web/lib/engine.js"
+      - "web/scripts/engine-parity.mjs"
+      - "web/public/engine/**"
+      - "requirements-api.lock"
+      - ".github/workflows/native.yml"
+  pull_request:
+    branches: [main]
+    # (same list as push — kept literal, no YAML anchors)
+    paths:
+      - "rust/**"
+      - "motoquant/physics.py"
+      - "motoquant/submodels/**"
+      - "motoquant/native.py"
+      - "motoquant/engine_select.py"
+      - "motoquant/category_profiles.py"
+      - "motoquant/defaults.py"
+      - "motoquant/models.py"
+      - "motoquant/constants.py"
+      - "tests/test_native_engine.py"
+      - "tests/test_engine_select.py"
+      - "scripts/check_native_parity.py"
+      - "scripts/gen_engine_web.py"
+      - "web/lib/engine.js"
+      - "web/scripts/engine-parity.mjs"
+      - "web/public/engine/**"
+      - "requirements-api.lock"
+      - ".github/workflows/native.yml"
+
+concurrency:
+  group: native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  parity:
+    name: Rust core — cargo test, wheel, parity gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # Same toolchain the parity sweep was validated with (Dockerfile ARG too).
+      RUST_TOOLCHAIN: "1.97.0"
+      CARGO_TERM_COLOR: always
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11 (the production interpreter)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-api.lock
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Rust toolchain (rustup, minimal profile)
+        run: |
+          rustup toolchain install "$RUST_TOOLCHAIN" --profile minimal
+          rustup default "$RUST_TOOLCHAIN"
+          rustc --version && cargo --version
+
+      - name: cargo test (unit + native-vs-Python fixtures)
+        working-directory: rust
+        run: cargo test -p motoquant-core --release --locked
+
+      - name: Install Python deps (pinned lockfile, like the Docker image)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-api.lock
+          pip install -e . --no-deps
+          pip install pytest "maturin>=1.5,<2"
+
+      - name: Build + install the abi3 wheel (maturin)
+        working-directory: rust
+        run: |
+          python -m maturin build --release --locked -m motoquant-core/Cargo.toml -o target/wheels
+          pip install --force-reinstall --no-deps target/wheels/motoquant_core-*.whl
+          python -c "from motoquant import engine_select; import json; print(json.dumps(engine_select.engine_info(), indent=1))"
+
+      - name: pytest native gate (fails on a missing/stale build)
+        env:
+          MOTOQUANT_REQUIRE_NATIVE: "1"
+        run: pytest tests/test_native_engine.py tests/test_engine_select.py -q
+
+      - name: Python-vs-Rust parity sweep (quick slice)
+        run: python scripts/check_native_parity.py --quick --no-bench --workers 2
+
+      - name: Browser engine parity (committed wasm via web/lib/engine.js)
+        run: node web/scripts/engine-parity.mjs

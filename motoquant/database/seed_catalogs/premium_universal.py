@@ -1,6 +1,6 @@
 """
 MotoQuant — Premium Universal Parts Catalog
-===============================================
+===========================================
 Brakes, suspension, batteries, ECU piggybacks, wheelie bars, and rearsets
 with cross-manufacturer fitment rules. ~60 parts organized by category.
 

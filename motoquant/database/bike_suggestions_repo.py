@@ -1,6 +1,6 @@
 """
 MotoQuant — Bike Suggestions Repository
-===========================================
+=======================================
 Stores user-submitted bike addition requests from the web form at
 ``motoquant.in/bikes`` (and the matching ``POST /api/bikes/suggest`` endpoint).
 

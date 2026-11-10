@@ -306,7 +306,7 @@
       "affected_models": ["claude-opus-4-20250514", "claude-sonnet-4-20250514"],
       "days_until_retirement": 15,
       "motoquant_exposure": "NONE — re-verified via grep on 2026-05-31. Only references are this snapshot file + reports/claude_feature_scan_*.md. Zero code, zero agent-prompt pins, zero settings.json.",
-      "verification_command": "grep -r 'claude-opus-4-20250514\\|claude-sonnet-4-20250514\\|claude-opus-4-7\\|claude-opus-4-6' scripts/ docs/ motoquant/ web/ desktop/"
+      "verification_command": "grep -r 'claude-opus-4-20250514\\|claude-sonnet-4-20250514\\|claude-opus-4-7\\|claude-opus-4-6' scripts/ docs/ motoquant/ web/"
     },
     "no_new_deprecations_since_last_scan": true
   },

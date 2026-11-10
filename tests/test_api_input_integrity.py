@@ -17,8 +17,9 @@ HTTP 200 success rather than rejecting the input:
    ``humidity_pct: 1e9`` returned ``et_quarter_s: 0.0``.
 
 Both are driven through the real routes per docs/INVARIANTS.md I8. The module
-redirects MOTOQUANT_DB at import (and re-asserts at run time) so no route can
-write into the tracked catalog — see the comment in tests/test_jobs_api.py.
+redirects MOTOQUANT_DB at import (and re-asserts at run time) so no route-level
+writer can leave rows in the shipped catalog — see the comment in
+tests/test_jobs_api.py.
 """
 
 from __future__ import annotations
@@ -141,8 +142,8 @@ class TestCalibrationUploadCap(unittest.TestCase):
     Both calibration routes did a bare ``await file.read()``, materialising the
     entire body as one bytes object with no ceiling and then writing it to a
     second temp file — an unauthenticated OOM + disk-fill lever on the 512 MB
-    Render instance. The routes are open to anonymous callers, so the size cap
-    is the fuse.
+    Render instance. Both routes accept anonymous callers, so nothing
+    upstream of the cap stops such a body.
     """
 
     @classmethod
@@ -196,8 +197,8 @@ class TestDuplicatePartIdsAreNotStacked(unittest.TestCase):
 
     This class needs a real parts catalog, so it runs against a COPY of the
     tracked motoquant.db — never the tracked file itself (AGENTS.md rule 2).
-    ``/api/simulate/quick`` writes nothing, but the copy keeps that true
-    regardless of future route changes.
+    ``/api/simulate/quick`` is not metered, so no rows are written either way,
+    but the copy keeps that true regardless of future route changes.
     """
 
     @classmethod

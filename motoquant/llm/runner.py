@@ -27,7 +27,7 @@ import numpy as np
 from typing_extensions import TypedDict  # py<3.12-safe with pydantic
 
 from ..constants import MS_TO_KMH, MS_TO_MPH
-from ..physics import MotoQuantEngine
+from ..engine_select import make_engine
 from .client import LLMClient, LLMNotConfiguredError, LLMRateLimitError
 from .parse_query import ParsedSimRequest, parse_query
 from .summarize import summarize_result
@@ -99,11 +99,8 @@ class CompareDict(TypedDict):
 
     a: _CompareBikeEntry
     b: _CompareBikeEntry
-    # B relative to A (after - before, bike A is the reference): NEGATIVE =
-    # B is quicker. Same meaning as /api/simulate/compare and
-    # /api/surrogate/compare.
-    delta_et_s: float  # B.et_quarter_s - A.et_quarter_s, rounded to 4dp
-    delta_trap_kmh: float  # B.trap_speed_kmh - A.trap_speed_kmh, rounded to 1dp
+    delta_et_s: float  # A.et_quarter_s - B.et_quarter_s, rounded to 4dp
+    delta_trap_kmh: float  # A.trap_speed_kmh - B.trap_speed_kmh, rounded to 1dp
     faster: str  # "A" | "B" | "tie"
 
 
@@ -315,7 +312,12 @@ def run_chat_pipeline(
     run_summary: bool = True,
     suggestion_limit: int = 5,
 ) -> ChatResult:
-    """End-to-end: parse → resolve → dispatch on intent → summarize."""
+    """End-to-end: parse → resolve → dispatch on intent → summarize.
+
+    Sim cost per call is bounded by each path's batch cap (1 for
+    simulate/explain, 2 for compare, ≤15 for rank, ≤25 for choose_bike);
+    the API layer rate-limits callers.
+    """
     result = ChatResult(raw_query=query)
 
     # ── 1. Parse ────────────────────────────────────────────────────
@@ -483,12 +485,11 @@ def _run_compare(
         result.error_detail = f"Bike B sim failed: {sim_b}"
         return result
 
-    # B relative to A (negative = B quicker), the same sign as the API.
-    delta_et = sim_b["et_quarter_s"] - sim_a["et_quarter_s"]
-    delta_trap = sim_b["trap_speed_kmh"] - sim_a["trap_speed_kmh"]
-    if delta_et > 0:
+    delta_et = sim_a["et_quarter_s"] - sim_b["et_quarter_s"]
+    delta_trap = sim_a["trap_speed_kmh"] - sim_b["trap_speed_kmh"]
+    if delta_et < 0:
         faster = "A"
-    elif delta_et < 0:
+    elif delta_et > 0:
         faster = "B"
     else:
         faster = "tie"
@@ -537,7 +538,8 @@ def _run_rank(
     1. Parse query for displacement/category/'stock'/'modded' keywords.
     2. Fetch matching catalog rows.
     3. Take top-N by power-to-weight (rough first cut).
-    4. RUN REAL SIMS on those N bikes via MotoQuantEngine — venue-aware.
+    4. RUN REAL SIMS on those N bikes (engine_select.make_engine — the Rust
+       core when available, else MotoQuantEngine) — venue-aware.
     5. Sort by sim ET ascending; return top 10 with sim numbers.
 
     This is slower than a pure-DB query (~80-150ms per sim × 12-15 candidates
@@ -637,7 +639,7 @@ def _run_rank(
                 _apply_env_overrides(config, parsed)
                 _apply_archetype(config, parsed, db)
                 _apply_power_boost(config, parsed)
-                engine = MotoQuantEngine(config)
+                engine = make_engine(config)
                 sim = engine.run()
                 sim_rows.append(
                     {
@@ -996,8 +998,6 @@ def _run_explain(
     grounding for the explanation. Otherwise rely purely on the LLM.
     """
     sim_for_context: SimDict | None = None
-    # The sim here is OPTIONAL grounding: a failed sim degrades to an
-    # ungrounded explanation instead of failing the whole answer.
     if parsed.bike_id is not None:
         sim = _run_one_sim(parsed.bike_id, parsed, db)
         if isinstance(sim, dict):
@@ -1050,7 +1050,8 @@ def _run_smalltalk(
         except Exception:  # noqa: BLE001
             pass
     msg = (
-        "MotoQuant: I'm a motorcycle drag-racing simulator. Ask me things "
+        "MotoQuant: I'm a free, open-source motorcycle drag-racing simulator. "
+        "Ask me things "
         "like 'how fast is a Hayabusa', 'compare K5 vs R1', 'what's the fastest "
         f"300cc bike', or 'best mods for R15 V4 under 30k'. I can simulate any "
         f"of {bikes} bikes across {venues} venues with real physics."
@@ -1092,7 +1093,7 @@ def _run_one_sim(
     _apply_power_boost(config, parsed)
 
     try:
-        engine = MotoQuantEngine(config)
+        engine = make_engine(config)
         sim = engine.run()
     except Exception as e:  # noqa: BLE001
         return f"MotoQuantEngine.run: {type(e).__name__}: {e}"
@@ -1658,7 +1659,8 @@ def _run_choose_bike(parsed, db, client, result, *, run_summary):
         )
         return result
 
-    candidates = rows[:25]
+    candidates = rows[:25]  # the heaviest classic path: ≤25 full RK4 runs
+
     sim_rows = []
     for r in candidates:
         try:
@@ -1672,7 +1674,7 @@ def _run_choose_bike(parsed, db, client, result, *, run_summary):
             _apply_env_overrides(cfg, parsed)
             _apply_archetype(cfg, parsed, db)
             _apply_power_boost(cfg, parsed)
-            engine = MotoQuantEngine(cfg)
+            engine = make_engine(cfg)
             sim = engine.run()
             sim_rows.append(
                 {

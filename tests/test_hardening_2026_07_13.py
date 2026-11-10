@@ -26,9 +26,11 @@ from motoquant.defaults import gsxr1000_k5, hayabusa_gen1
 
 # ---------------------------------------------------------------------------
 # Isolated DB -- TestMaxTimeRequestFloor POSTs to /api/simulate/top-speed and
-# /api/simulate/distance. MOTOQUANT_DB falls back to the repo's tracked
-# motoquant.db when unset, so point it at a throwaway tmp DB: no route in this
-# module may ever be able to write into the SHIPPED catalog. Same pattern as
+# /api/simulate/distance through the real app. connect() falls back to the
+# repo's tracked motoquant.db when MOTOQUANT_DB is unset, so any route-level
+# writer (the retired sim-quota meter once wrote three ``sim_usage`` rows into
+# the SHIPPED catalog this way) would leak residue into it. Redirecting keeps
+# this module hermetic regardless of what the routes write. Same pattern as
 # test_jobs_api.py / test_api.py.
 # ---------------------------------------------------------------------------
 _tmp_db_file = tempfile.NamedTemporaryFile(
@@ -132,38 +134,6 @@ class TestMaxTimeRequestFloor(unittest.TestCase):
             {"bike_preset": "gsxr1000_k5", "max_time_s": 60.0},
         )
         self.assertEqual(r.status_code, 200)
-
-
-class TestFullSimIsOpenAndIsolated(unittest.TestCase):
-    """/api/simulate is open (no quota, no tier) and this module's DB
-    redirect is live."""
-
-    @classmethod
-    def setUpClass(cls):
-        try:
-            from fastapi.testclient import TestClient
-
-            from motoquant.api import app
-
-            cls.client = TestClient(app)
-        except Exception:  # noqa: BLE001
-            cls.client = None
-
-    def _simulate(self):
-        if self.client is None:
-            self.skipTest("fastapi not installed")
-        r = self.client.post("/api/simulate", json={"bike_preset": "gsxr1000_k5"})
-        self.assertEqual(r.status_code, 200, r.text)
-        return r
-
-    def test_anonymous_full_sim_has_no_quota_headers(self):
-        r = self._simulate()
-        self.assertNotIn("X-Sims-Limit", r.headers)
-        self.assertNotIn("X-Sims-Remaining", r.headers)
-
-    def test_db_redirect_is_live(self):
-        """Fails if setUpModule stops redirecting MOTOQUANT_DB."""
-        self.assertEqual(os.environ.get("MOTOQUANT_DB"), _TMP_DB_PATH)
 
 
 if __name__ == "__main__":

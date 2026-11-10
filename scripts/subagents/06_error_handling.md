@@ -32,7 +32,7 @@ You are SUBAGENT 6: ERROR HANDLING CLEANUP for the MotoQuant codebase. Read CLAU
 4. `motoquant/api.py` — exception handlers that return generic 500
 5. `motoquant/calibration/*.py` — overlay/calibrator may swallow during fit
 6. `motoquant/llm/runner.py` — recently rewritten, may have new silent paths
-7. `desktop/src/hooks/useApi.ts` — Mutation `onError` might be missing
+7. `web/lib/api.js` — fetch helpers whose errors might be swallowed
 
 ## Deliverable
 

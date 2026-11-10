@@ -38,8 +38,20 @@ class TestForcedInductionActsDuringSlip(unittest.TestCase):
         # prespooled turbo MUST beat the NA twin there. Pre-fix the two
         # 60-ft times were within a millisecond of each other because the
         # slip branch dropped the boost multiplier entirely.
-        na = MotoQuantEngine(hayabusa_gen1()).run()
-        boosted = MotoQuantEngine(_steady_turbo(hayabusa_gen1())).run()
+        #
+        # Since the 2026-10/11 epoch the stock reference launch is held at a
+        # margin of its (bike + rider) wheelie ceiling to the 60-ft line, so
+        # extra drive torque CANNOT shorten the stock 60 ft (NA 1.8211 vs
+        # turbo 1.8207 s — the physics, not a dead multiplier). A wheelie bar
+        # removes that ceiling and leaves the launch torque/traction-limited,
+        # which is the regime this mechanism test needs (measured 2026-11-05:
+        # NA 1.4926 vs turbo 1.4326 s).
+        def _bar(cfg):
+            cfg.wheelie.wheelie_bar = True
+            return cfg
+
+        na = MotoQuantEngine(_bar(hayabusa_gen1())).run()
+        boosted = MotoQuantEngine(_bar(_steady_turbo(hayabusa_gen1()))).run()
         self.assertLess(
             boosted.time_60ft,
             na.time_60ft - 0.05,

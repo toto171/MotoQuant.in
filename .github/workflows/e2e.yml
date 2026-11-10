@@ -51,7 +51,8 @@ jobs:
         # Fresh, empty DB → init → import → seed. This is the same sequence
         # the CI "python" job runs against /tmp/ci.db, so it's known-good and
         # side-steps the "re-seeding the tracked DB raises a FK error"
-        # idempotency artifact documented in the sidecar-smoke job.
+        # idempotency artifact (first documented in the since-deleted desktop
+        # sidecar-smoke job).
         run: |
           python -m motoquant.run --db /tmp/e2e.db db init
           python -m motoquant.run --db /tmp/e2e.db import --known-bikes

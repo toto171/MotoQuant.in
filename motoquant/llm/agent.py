@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -38,6 +39,7 @@ from typing import Any
 import numpy as np
 
 from ..constants import MS_TO_KMH, MS_TO_MPH
+from ..physics import effective_et
 from .client import (
     AgentStep,
     LLMClient,
@@ -55,17 +57,48 @@ TOOL_RESULT_MAX_CHARS = 6_000
 HISTORY_MAX_MESSAGES = 16
 HISTORY_MAX_CHARS = 16_000
 AGENT_MAX_TOKENS = 2_048
+# Same ceiling the API enforces on OptimizeBuildRequest.budget_inr; an
+# unclamped chat budget sizes roi's knapsack DP (budget // 100 buckets).
+AGENT_MAX_BUDGET_INR = 5_000_000.0
 
-# ─── Cost of a heavy op, in full-sim units ───────────────────────────────
+
+def _as_int(value: Any, default: int | None = None) -> int | None:
+    """Coerce a loosely typed tool argument to int without raising.
+
+    Function-calling models send integers as 5, 5.0, "5", "5.0", " 5 " or
+    even "5 bikes" / "top 3" / "all"; a bare int() on the strings raises
+    ValueError and aborts the whole tool call (the search_bikes crash in
+    Sentry, MOTOQUANTAPI-2). Read a whole number where one is present,
+    otherwise return ``default``.
+    """
+    if value is None or isinstance(value, bool):
+        return default
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value) if value == value and abs(value) != float("inf") else default
+    s = str(value).strip()
+    if not s:
+        return default
+    for parse in (int, lambda x: int(float(x))):
+        try:
+            return parse(s)
+        except (ValueError, OverflowError):
+            pass
+    m = re.search(r"-?\d+", s)
+    return int(m.group()) if m else default
+
+
+# ─── Sim-count accounting for heavy ops ───────────────────────────────────
 # A heavy op is not one RK4 run: ecu_autotune.autotune's own progress total is
 # 1 baseline + (2*gear_span+3 = 9) gearing + (launch_steps+1 = 7) launch + 1
 # combined = 18 sims at the default spans, and build_optimizer's verification
-# loop full-sims the selected build after surrogate-scoring candidates. Count
-# both as a flat 18 units so a chat turn that runs one is not treated like a
-# single sim; the outlaw pipeline composes an optimizer pass AND an autotune
-# pass, so it counts double. Nominal by design — the exact count is
-# data-dependent (surrogate hit rate, tooth dedup) — but honest to the order
-# of magnitude (it feeds AgentChatResult.sims_run).
+# loop full-sims the selected build after surrogate-scoring candidates. Each
+# one therefore adds a flat 18 to the turn's reported ``sims_run``; the outlaw
+# pipeline composes an optimizer pass AND an autotune pass, so it counts
+# double. Nominal by design — the exact count is data-dependent (surrogate
+# hit rate, tooth dedup) — but honest to the order of magnitude. This is
+# reporting, not a charge: the per-turn CPU fuse is HEAVY_OP_BUDGET above.
 HEAVY_OP_SIM_COST = 18
 OUTLAW_SIM_COST = 2 * HEAVY_OP_SIM_COST
 
@@ -166,9 +199,6 @@ class AgentContext:
     result: AgentChatResult
     progress_cb: Callable[[float, str | None], None] | None = None
     surrogate_getter: Callable[[], tuple[Any, str]] | None = None
-    # Per-caller heavy-op fuse supplied by the HTTP layer (a per-IP rate
-    # limit); False → refuse. None (CLI, tests, library use) never blocks.
-    heavy_gate: Callable[[], bool] | None = None
     full_sims_left: int = FULL_SIM_BUDGET
     heavy_ops_left: int = HEAVY_OP_BUDGET
 
@@ -185,20 +215,12 @@ class AgentContext:
         return None
 
     def spend_heavy(self, sim_cost: int = HEAVY_OP_SIM_COST) -> str | None:
-        """Reserve one heavy op and count its nominal sim cost.
-
-        Heavy ops run tens of RK4 sims apiece; heavy_ops_left caps how many
-        a single message may start.
-        """
+        """Reserve one heavy op (per-turn CPU fuse) and add its nominal sim
+        count to ``sims_run``."""
         if self.heavy_ops_left < 1:
             return (
                 f"per-message optimizer budget exhausted ({HEAVY_OP_BUDGET} "
                 f"heavy operations/turn) — answer with what you have"
-            )
-        if self.heavy_gate is not None and not self.heavy_gate():
-            return (
-                "too many optimizer/autotune runs from this address in the "
-                "last minute — tell the user to retry shortly"
             )
         self.heavy_ops_left -= 1
         self.result.sims_run += sim_cost
@@ -276,17 +298,16 @@ def _build_config_for(ctx: AgentContext, args: dict[str, Any]):
     user-meaningful message.
     """
     db = ctx.db
-    bike_id = args.get("bike_id")
+    bike_id = _as_int(args.get("bike_id"))
     if not bike_id:
         raise ValueError("bike_id is required (use search_bikes first)")
-    bike_id = int(bike_id)
 
     config_row = db.bikes.get_current_config(bike_id)
     if config_row is None:
         raise ValueError(
             f"no physics config for bike_id {bike_id} — is the id correct?"
         )
-    env = _venue_env(db, args.get("venue_id"))
+    env = _venue_env(db, _as_int(args.get("venue_id")))
     config = db.bikes.to_config(config_row["id"], environment=env)
     if config is None:
         raise ValueError(f"config load failed for bike_id {bike_id}")
@@ -307,16 +328,23 @@ def _build_config_for(ctx: AgentContext, args: dict[str, Any]):
     if part_ids:
         from ..database.parts_repo import PartsRepository
 
+        # De-duplicate, keeping order: the same exhaust can't be fitted twice,
+        # and a repeated id used to stack its ET gain and its price.
+        ids = list(
+            dict.fromkeys(
+                pid for pid in (_as_int(p) for p in part_ids) if pid is not None
+            )
+        )
         repo = PartsRepository(db.conn)
-        config = repo.apply_multiple([int(p) for p in part_ids], config)
-        cost = repo.estimate_build_cost([int(p) for p in part_ids])
-        notes.append(f"{len(part_ids)} parts applied (₹{cost.get('total', 0):,.0f})")
+        config = repo.apply_multiple(ids, config)
+        cost = repo.estimate_build_cost(ids)
+        notes.append(f"{len(ids)} parts applied (₹{cost.get('total', 0):,.0f})")
 
-    rear_tire_id = args.get("rear_tire_id")
+    rear_tire_id = _as_int(args.get("rear_tire_id"))
     if rear_tire_id:
         row = db.conn.execute(
             "SELECT mu_peak, pacejka_D FROM tire_models WHERE id=?",
-            (int(rear_tire_id),),
+            (rear_tire_id,),
         ).fetchone()
         if row:
             r = dict(row)
@@ -331,7 +359,10 @@ def _build_config_for(ctx: AgentContext, args: dict[str, Any]):
 def _sim_to_dict(sim, bike_name: str, notes: list[str]) -> dict[str, Any]:
     out: dict[str, Any] = {
         "bike_name": bike_name,
-        "et_quarter_s": round(float(sim.time_quarter), 4),
+        "finished_quarter": bool(getattr(sim, "finished_quarter", True)),
+        # A DNF maps to DNF_ET_SENTINEL_S so it never reads as the fastest
+        # (0.0 s) to compare_bikes' winner or any downstream ranking.
+        "et_quarter_s": round(effective_et(sim), 4),
         "trap_speed_kmh": round(float(sim.speed_quarter) * MS_TO_KMH, 1),
         "trap_speed_mph": round(float(sim.speed_quarter) * MS_TO_MPH, 1),
         "et_60ft_s": round(float(sim.time_60ft), 4),
@@ -591,7 +622,7 @@ def _exec_search_bikes(ctx: AgentContext, args: dict) -> dict:
     query = (args.get("query") or "").strip()
     if not query:
         return {"error": "empty query"}
-    limit = max(1, min(int(args.get("limit") or 5), 10))
+    limit = max(1, min(_as_int(args.get("limit"), 5) or 5, 10))
     match_id, suggestions = resolve_bike(query, ctx.db)
     out: dict[str, Any] = {"query": query}
     if match_id is not None:
@@ -622,7 +653,7 @@ def _exec_search_bikes(ctx: AgentContext, args: dict) -> dict:
 
 
 def _exec_get_bike_details(ctx: AgentContext, args: dict) -> dict:
-    bike_id = int(args.get("bike_id") or 0)
+    bike_id = _as_int(args.get("bike_id"), 0)
     row = ctx.db.conn.execute(
         """SELECT bm.*, m.name AS manufacturer_name
            FROM bike_models bm JOIN manufacturers m ON bm.manufacturer_id=m.id
@@ -669,16 +700,16 @@ def _exec_run_simulation(ctx: AgentContext, args: dict) -> dict:
     err = ctx.spend_sims(1)
     if err:
         return {"error": err}
-    from ..physics import MotoQuantEngine
+    from ..engine_select import make_engine
 
     try:
         config, notes = _build_config_for(ctx, args)
     except ValueError as e:
         return {"error": str(e)}
-    bike_name = _bike_display_name(ctx.db, int(args["bike_id"]))
+    bike_name = _bike_display_name(ctx.db, _as_int(args.get("bike_id"), 0))
     ctx.tick(0.0, f"Simulating {bike_name}")
     try:
-        sim = MotoQuantEngine(config).run()
+        sim = make_engine(config).run()
     except Exception as e:  # noqa: BLE001
         return {"error": f"simulation failed: {type(e).__name__}: {e}"}
     out = _sim_to_dict(sim, bike_name, notes)
@@ -690,16 +721,16 @@ def _exec_run_top_speed(ctx: AgentContext, args: dict) -> dict:
     err = ctx.spend_sims(1)
     if err:
         return {"error": err}
-    from ..physics import MotoQuantEngine
+    from ..engine_select import make_engine
 
     try:
         config, notes = _build_config_for(ctx, args)
     except ValueError as e:
         return {"error": str(e)}
-    bike_name = _bike_display_name(ctx.db, int(args["bike_id"]))
+    bike_name = _bike_display_name(ctx.db, _as_int(args.get("bike_id"), 0))
     ctx.tick(0.0, f"Top-speed run: {bike_name}")
     try:
-        ts = MotoQuantEngine(config).run_top_speed()
+        ts = make_engine(config).run_top_speed()
     except Exception as e:  # noqa: BLE001
         return {"error": f"top-speed sim failed: {type(e).__name__}: {e}"}
     out = {
@@ -722,7 +753,7 @@ def _exec_compare_bikes(ctx: AgentContext, args: dict) -> dict:
     err = ctx.spend_sims(2)
     if err:
         return {"error": err}
-    from ..physics import MotoQuantEngine
+    from ..engine_select import make_engine
 
     results = {}
     for key, id_key in (("a", "bike_a_id"), ("b", "bike_b_id")):
@@ -731,22 +762,20 @@ def _exec_compare_bikes(ctx: AgentContext, args: dict) -> dict:
             config, notes = _build_config_for(ctx, sub_args)
         except ValueError as e:
             return {"error": f"bike {key}: {e}"}
-        name = _bike_display_name(ctx.db, int(args[id_key]))
+        name = _bike_display_name(ctx.db, _as_int(args.get(id_key), 0))
         ctx.tick(0.0, f"Simulating {name}")
         try:
-            sim = MotoQuantEngine(config).run()
+            sim = make_engine(config).run()
         except Exception as e:  # noqa: BLE001
             return {"error": f"bike {key} sim failed: {type(e).__name__}: {e}"}
         results[key] = _sim_to_dict(sim, name, notes)
-    # B relative to A (bike A is the reference): NEGATIVE = B is quicker —
-    # the same sign as /api/simulate/compare and /api/surrogate/compare.
-    delta_et = results["b"]["et_quarter_s"] - results["a"]["et_quarter_s"]
+    delta_et = results["a"]["et_quarter_s"] - results["b"]["et_quarter_s"]
     out = {
         "bike_a": results["a"],
         "bike_b": results["b"],
         "delta_et_s": round(delta_et, 4),
         "winner": results["a"]["bike_name"]
-        if delta_et > 0
+        if delta_et < 0
         else results["b"]["bike_name"],
     }
     ctx.add_block("compare_result", out)
@@ -754,21 +783,20 @@ def _exec_compare_bikes(ctx: AgentContext, args: dict) -> dict:
 
 
 def _exec_search_parts(ctx: AgentContext, args: dict) -> dict:
-    from ..analysis.roi import _ALL_PARTS_LIMIT
     from ..database.parts_repo import PartsRepository
 
-    bike_id = int(args.get("bike_id") or 0)
-    limit = max(1, min(int(args.get("limit") or 12), 30))
+    bike_id = _as_int(args.get("bike_id"), 0)
+    limit = max(1, min(_as_int(args.get("limit"), 12) or 12, 30))
     repo = PartsRepository(ctx.db.conn)
     try:
         rows = repo.search(
             bike_model_id=bike_id,
             category=args.get("category") or None,
-            limit=_ALL_PARTS_LIMIT,
+            limit=200,
         )
     except TypeError:
         # older search signature — degrade to unfiltered then filter here
-        rows = repo.search(bike_model_id=bike_id, limit=_ALL_PARTS_LIMIT)
+        rows = repo.search(bike_model_id=bike_id, limit=200)
     max_price = args.get("max_price_inr")
     out_rows = []
     for r in rows:
@@ -792,7 +820,7 @@ def _exec_search_parts(ctx: AgentContext, args: dict) -> dict:
 
 
 def _exec_list_tires(ctx: AgentContext, args: dict) -> dict:
-    bike_id = int(args.get("bike_id") or 0)
+    bike_id = _as_int(args.get("bike_id"), 0)
     try:
         fitments = ctx.db.tires.get_bike_fitments(
             bike_id, fitment_type=args.get("fitment_type") or None
@@ -819,9 +847,9 @@ def _exec_list_tires(ctx: AgentContext, args: dict) -> dict:
 
 def _exec_rank_bikes(ctx: AgentContext, args: dict) -> dict:
     """Shortlist by power-to-weight (cheap SQL), then rank by REAL sims."""
-    from ..physics import MotoQuantEngine
+    from ..engine_select import make_engine
 
-    top_n = max(1, min(int(args.get("top_n") or 5), 5))
+    top_n = max(1, min(_as_int(args.get("top_n"), 5) or 5, 5))
     sql = """
         SELECT bm.id, bm.model_name, m.name AS manufacturer,
                bm.peak_power_hp, bm.dry_mass_kg, bm.displacement_cc,
@@ -861,14 +889,16 @@ def _exec_rank_bikes(ctx: AgentContext, args: dict) -> dict:
                 ctx, {"bike_id": row["id"], **{k: args.get(k) for k in _ENV_PROPS}}
             )
             ctx.tick(0.0, f"Simulating {row['manufacturer']} {row['model_name']}")
-            sim = MotoQuantEngine(config).run()
+            sim = make_engine(config).run()
             ranked.append(
                 {
                     "bike_id": row["id"],
                     "bike_name": f"{row['manufacturer']} {row['model_name']}",
                     "displacement_cc": row["displacement_cc"],
                     "power_hp": row["peak_power_hp"],
-                    "et_quarter_s": round(float(sim.time_quarter), 3),
+                    "finished_quarter": bool(getattr(sim, "finished_quarter", True)),
+                    # effective_et: a DNF sorts to the bottom, not the top.
+                    "et_quarter_s": round(effective_et(sim), 3),
                     "trap_speed_kmh": round(float(sim.speed_quarter) * MS_TO_KMH, 1),
                 }
             )
@@ -914,7 +944,7 @@ def _exec_list_venues(ctx: AgentContext, args: dict) -> dict:
 
 
 def _exec_optimize_build(ctx: AgentContext, args: dict) -> dict:
-    bike_id = int(args.get("bike_id") or 0)
+    bike_id = _as_int(args.get("bike_id"), 0)
     tier = resolve_build_tier(args.get("build_tier"))
     tier_info = BUILD_TIERS[tier]
     err = ctx.spend_heavy(OUTLAW_SIM_COST if tier == "stage_4" else HEAVY_OP_SIM_COST)
@@ -923,6 +953,11 @@ def _exec_optimize_build(ctx: AgentContext, args: dict) -> dict:
     budget = args.get("budget_inr")
     if budget is None:
         budget = tier_info["default_budget_inr"]
+    if budget is not None:
+        try:
+            budget = min(float(budget), AGENT_MAX_BUDGET_INR)
+        except (TypeError, ValueError):
+            budget = tier_info["default_budget_inr"]
     goal = args.get("goal") or "min_et"
 
     try:
@@ -1004,7 +1039,7 @@ def _exec_autotune_setup(ctx: AgentContext, args: dict) -> dict:
         return {"error": str(e)}
     from ..analysis.ecu_autotune import autotune
 
-    bike_name = _bike_display_name(ctx.db, int(args["bike_id"]))
+    bike_name = _bike_display_name(ctx.db, _as_int(args.get("bike_id"), 0))
     ctx.tick(0.0, f"Autotuning setup: {bike_name}")
     try:
         result = autotune(config, progress_cb=lambda f, s=None: ctx.tick(f, s))
@@ -1045,7 +1080,7 @@ def _exec_web_search(ctx: AgentContext, args: dict) -> dict:
 
     ctx.tick(0.0, "Searching the web")
     payload = web_search(
-        args.get("query") or "", max_results=int(args.get("max_results") or 5)
+        args.get("query") or "", max_results=_as_int(args.get("max_results"), 5) or 5
     )
     if payload.get("results"):
         ctx.add_block(
@@ -1130,9 +1165,10 @@ def _system_prompt(ctx: AgentContext) -> str:
         )
     tiers = "\n".join(tier_lines)
     return f"""You are the MotoQuant race engineer — the AI assistant of MotoQuant, \
-a first-principles motorcycle drag-racing physics simulator (15 validated \
-sub-models, RK4 solver, weighted-benchmark accuracy |Δ|≈0.25s across 216 \
-instrumented benchmarks). Today is {datetime.now():%d %b %Y}.
+a free, open-source, first-principles motorcycle drag-racing physics \
+simulator (15 sub-models, RK4 solver, validated against a weighted corpus of \
+published drag-strip benchmarks — motoquant.in/validation). Every tool you \
+have is free for every user. Today is {datetime.now():%d %b %Y}.
 
 Catalog right now: {stats.get("bikes")} bikes, {stats.get("parts")} parts, \
 {stats.get("tires")} tires, {stats.get("venues")} venues.
@@ -1207,10 +1243,14 @@ def run_agent_chat(
     history: list[dict[str, Any]] | None = None,
     progress_cb: Callable[[float, str | None], None] | None = None,
     surrogate_getter: Callable[[], tuple[Any, str]] | None = None,
-    heavy_gate: Callable[[], bool] | None = None,
     max_iterations: int = MAX_ITERATIONS,
 ) -> AgentChatResult:
-    """Run one agent chat turn. Never raises — errors land on the result."""
+    """Run one agent chat turn. Never raises — errors land on the result.
+
+    Cost is bounded per turn by MAX_ITERATIONS / FULL_SIM_BUDGET /
+    HEAVY_OP_BUDGET (enforced by the executor) and per client by the API's
+    rate limits (see api._chat_daily_cap).
+    """
     result = AgentChatResult(raw_query=query)
     if client is None:
         from .client import get_default_client
@@ -1230,7 +1270,6 @@ def run_agent_chat(
         result=result,
         progress_cb=progress_cb,
         surrogate_getter=surrogate_getter,
-        heavy_gate=heavy_gate,
     )
 
     system = _system_prompt(ctx)
