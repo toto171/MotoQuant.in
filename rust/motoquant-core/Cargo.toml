@@ -21,4 +21,4 @@ serde = { version = "1", features = ["derive"] }
 # off by one ULP; the engine's parity contract needs the exact double Python
 # serialised (repr round-trip), so the correctly-rounded parser is mandatory.
 serde_json = { version = "1", features = ["float_roundtrip"] }
-pyo3 = { version = "0.25", optional = true, features = ["extension-module", "abi3-py39"] }
+pyo3 = { version = "0.30", optional = true, features = ["extension-module", "abi3-py39"] }
