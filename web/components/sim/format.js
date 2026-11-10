@@ -312,3 +312,10 @@ export function resolveVenueSlug(slug, venues) {
   hits.sort((a, b) => a.n - b.n);
   return hits[0].v;
 }
+
+// True when a catalog tyre can be fitted at ``wheel`` ('front' | 'rear').
+// Tyres marked 'both' (or with no position) fit either wheel.
+export function tyreFitsWheel(tyre, wheel) {
+  const pos = String(tyre?.position || '').toLowerCase();
+  return pos !== 'front' && pos !== 'rear' ? true : pos === wheel;
+}

@@ -820,7 +820,7 @@ class TestUnknownReferences(unittest.TestCase):
     def test_valid_references_still_work(self):
         r = client.post(
             "/api/simulate/quick",
-            json={**self.PRESET, "venue_id": 1, "rear_tire_id": 1, "front_tire_id": 1},
+            json={**self.PRESET, "venue_id": 1, "rear_tire_id": 1, "front_tire_id": 2},
         )
         self.assertEqual(r.status_code, 200, r.text)
 

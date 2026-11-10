@@ -227,7 +227,7 @@ def _apply_order(parts: list[PartROIResult]) -> list[PartROIResult]:
     """Canonical order to apply a selected build: NA parts first, then boost.
 
     Within each tier parts go cheapest-first (the historical price-ascending
-    order). Every consumer that materialises a build — find_best_build,
+    order), ties broken by part id so equal prices cannot reorder a build. Every consumer that materialises a build — find_best_build,
     optimize_build, the outlaw pipeline — must use this order so the bike that
     is priced is the bike that is tuned and verified.
     """
@@ -236,6 +236,7 @@ def _apply_order(parts: list[PartROIResult]) -> list[PartROIResult]:
         key=lambda r: (
             1 if (r.category or "").lower() in _BOOST_CATEGORIES else 0,
             r.price_inr or 0.0,
+            r.part_id,
         ),
     )
 

@@ -12,6 +12,7 @@ import Term from '../Term';
 import { DEFAULT_ALTITUDE_M } from '../ConditionsLine';
 import BikeChooser from './BikeChooser';
 import { ErrorTile, SimDropdown, SimSlider } from './controls';
+import { tyreFitsWheel } from './format';
 
 // Module-level render fns keep SimDropdown's memo effective.
 const venueKey = (v) => v.id ?? 'default';
@@ -109,7 +110,16 @@ export const EnvironmentPanel = memo(function EnvironmentPanel({
 export const TyresPanel = memo(function TyresPanel({
   status, tires, frontTire, rearTire, setFrontTire, setRearTire, onRetry,
 }) {
-  const items = useMemo(() => [STOCK_TIRE, ...tires], [tires]);
+  // Each picker lists only tyres made for that wheel (or for either wheel);
+  // the server refuses a front tyre at the rear and the reverse.
+  const frontItems = useMemo(
+    () => [STOCK_TIRE, ...tires.filter((t) => tyreFitsWheel(t, 'front'))],
+    [tires],
+  );
+  const rearItems = useMemo(
+    () => [STOCK_TIRE, ...tires.filter((t) => tyreFitsWheel(t, 'rear'))],
+    [tires],
+  );
   return (
     <section className="card card-pad" aria-label="Tyres">
       <h2 className="mb-4 font-display text-lg font-semibold text-white">Tyres</h2>
@@ -124,7 +134,7 @@ export const TyresPanel = memo(function TyresPanel({
         <div className="space-y-4">
           <SimDropdown
             label="Front tyre"
-            items={items}
+            items={frontItems}
             selected={frontTire || STOCK_TIRE}
             onSelect={setFrontTire}
             getKey={tireKey}
@@ -136,7 +146,7 @@ export const TyresPanel = memo(function TyresPanel({
           <SimDropdown
             label="Rear tyre"
             hint="The rear tyre sets how hard the bike can launch."
-            items={items}
+            items={rearItems}
             selected={rearTire || STOCK_TIRE}
             onSelect={setRearTire}
             getKey={tireKey}

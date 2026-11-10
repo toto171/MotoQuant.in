@@ -188,7 +188,10 @@ def _evict_locked(now: float) -> None:
             ((jid, j) for jid, j in _JOBS.items() if j.status in _TERMINAL),
             key=lambda kv: kv[1].updated_at,
         )
-        for jid, j in finished:
+        # Never evict the most recently finished job: a single oversized
+        # result would otherwise be deleted in the same pass that marks it
+        # done, and its poller would see "Progress lost".
+        for jid, j in finished[:-1]:
             if total <= MAX_RESULT_BYTES_TOTAL:
                 break
             total -= j.result_bytes

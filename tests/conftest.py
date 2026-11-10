@@ -20,4 +20,15 @@ def _reset_rate_limiter():
         ratelimit.reset()
     except Exception:
         pass
+    # The weather-lookup cache is process-global too; a test that stubs the
+    # upstream must not be answered by another test's cached lookup.
+    try:
+        import sys
+
+        api = sys.modules.get("motoquant.api")
+        if api is not None:
+            with api._owm_cache_lock:
+                api._owm_cache.clear()
+    except Exception:
+        pass
     yield

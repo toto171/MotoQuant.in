@@ -555,9 +555,29 @@ def _precheck_refs(
             raise HTTPException(404, f"Bike {bike_id} not found")
     if venue_id is not None and not _exists("venues", venue_id):
         raise HTTPException(404, f"Venue {venue_id} not found")
-    for tire_id in tire_ids:
-        if tire_id is not None and not _exists("tire_models", tire_id):
+    # tire_ids come in (front, rear) pairs, as every caller passes them.
+    for i, tire_id in enumerate(tire_ids):
+        if tire_id is None:
+            continue
+        row = db.execute(
+            "SELECT position FROM tire_models WHERE id=?", (tire_id,)
+        ).fetchone()
+        if row is None:
             raise HTTPException(404, f"Tire {tire_id} not found")
+        _check_tire_position(tire_id, row[0], "front" if i % 2 == 0 else "rear")
+
+
+def _check_tire_position(tire_id: int, position: str | None, wanted: str) -> None:
+    """422 when a tyre made for one wheel is requested for the other.
+
+    Grip for drive traction comes from the rear tyre, so a front tyre sent as
+    ``rear_tire_id`` would silently change the result. ``both`` fits either.
+    """
+    pos = (position or "").lower()
+    if pos in ("front", "rear") and pos != wanted:
+        raise HTTPException(
+            422, f"Tire {tire_id} is a {pos} tyre and cannot be fitted at the {wanted}"
+        )
 
 
 def _build_config(
@@ -728,6 +748,9 @@ def _build_config(
         )
     if ambient_temp_c is not None:
         cfg.environment.ambient_temp_c = ambient_temp_c
+        if track_temp_c is None:
+            # Same rule as a resolved place: the track runs ~7 °C over the air.
+            cfg.environment.track_temp_c = ambient_temp_c + 7.0
     if track_temp_c is not None:
         cfg.environment.track_temp_c = track_temp_c
     if humidity_pct is not None:
@@ -763,7 +786,7 @@ def _build_config(
                 continue
             try:
                 trow = db.execute(
-                    "SELECT pacejka_D, mu_peak FROM tire_models WHERE id=?",
+                    "SELECT pacejka_D, mu_peak, position FROM tire_models WHERE id=?",
                     (tire_id,),
                 ).fetchone()
             except Exception as e:
@@ -773,7 +796,10 @@ def _build_config(
                 continue
             if trow is None:
                 raise HTTPException(404, f"Tire {tire_id} not found")
+            if tire_id == front_tire_id:
+                _check_tire_position(tire_id, dict(trow).get("position"), "front")
             if tire_id == rear_tire_id:
+                _check_tire_position(tire_id, dict(trow).get("position"), "rear")
                 td = dict(trow)
                 mu = td.get("mu_peak") or td.get("pacejka_D")
                 if mu and float(mu) > 0:
@@ -889,6 +915,7 @@ def _apply_parts_to_config(
         return cfg, parts_applied, build_cost
 
     try:
+        from .analysis.roi import _BOOST_CATEGORIES
         from .database.bridge import apply_part_to_config
         from .parts.compatibility import is_compatible
         from .submodels.forced_induction import VALID_BOOST_TYPES
@@ -904,11 +931,17 @@ def _apply_parts_to_config(
         # part — the same rule the ROI knapsack already enforces via its
         # exclusive-category groups.
         seen: set[int] = set()
+        fitting: list[dict] = []
         for pid in part_ids:
             if pid in seen:
                 continue
             seen.add(pid)
-            row = db.execute("SELECT * FROM parts WHERE id=?", (pid,)).fetchone()
+            row = db.execute(
+                "SELECT p.*, pc.name AS category_name FROM parts p "
+                "LEFT JOIN parts_categories pc ON pc.id = p.category_id "
+                "WHERE p.id=?",
+                (pid,),
+            ).fetchone()
             if not row:
                 why[pid] = (SKIP_UNKNOWN, "No part with this id is in the catalog.")
                 continue
@@ -927,6 +960,22 @@ def _apply_parts_to_config(
                         + (f" ({fit_reason})." if fit_reason else "."),
                     )
                     continue
+            fitting.append(part_dict)
+
+        # Apply in the optimizer's canonical order (roi._apply_order: NA parts
+        # before boost, then cheapest first, then id). Parts whose effects do
+        # not commute (a +10 hp delta and a x1.032 power multiplier) otherwise
+        # gave a different time for the same build depending on click order,
+        # and the simulator disagreed with the time the Upgrades page reported.
+        fitting.sort(
+            key=lambda d: (
+                1 if (d.get("category_name") or "").lower() in _BOOST_CATEGORIES else 0,
+                d.get("price_inr") or 0.0,
+                d["id"],
+            )
+        )
+        for part_dict in fitting:
+            part_dict.pop("category_name", None)
             cfg = apply_part_to_config(cfg, part_dict)
             # A part carrying a typo'd boost_type would otherwise surface as
             # a 500 when the engine's ForcedInductionModel guard fires — turn
@@ -1823,6 +1872,13 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
     Quick ET-only simulation -- no time-series arrays.
     Returns in ~50 ms; ideal for slider-driven UI.
     """
+    # Read the catalog freshness token BEFORE loading the bike: a catalog write
+    # that lands between the two must not file the old baseline under the new
+    # token (the catalog cache reads its token first for the same reason).
+    stock_key = _stock_key(req)
+    # A named place resolves to live weather, which the key cannot capture,
+    # so its baseline is never served from (or written to) the cache.
+    live_place = bool(req.location) or (req.lat is not None and req.lon is not None)
     try:
         cfg = _build_config(
             bike_id=req.bike_id,
@@ -1844,6 +1900,11 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
     except Exception as exc:
         raise HTTPException(400, f"Config error: {exc}")
 
+    # The pre-parts config is the stock baseline. apply_part_to_config returns
+    # a new config, so ``base_cfg`` stays stock; the baseline therefore runs in
+    # exactly the conditions this request resolved (no second weather lookup).
+    base_cfg = cfg
+
     # Apply selected parts
     parts_skipped: list[int] = []
     parts_skipped_detail: list[SkippedPartDict] = []
@@ -1858,30 +1919,15 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
 
     # Run stock sim for comparison if parts are applied
     # "Stock" means same slider overrides but NO parts -- shows parts-only delta
-    stock_key = _stock_key(req)
     stock_et = None
     if parts_applied:
-        stock_et = _stock_cache_get(stock_key)
+        stock_et = None if live_place else _stock_cache_get(stock_key)
         if stock_et is None:
             try:
-                stock_cfg = _build_config(
-                    bike_id=req.bike_id,
-                    bike_preset=req.bike_preset,
-                    power_boost_pct=req.power_boost_pct,
-                    mass_delta_kg=req.mass_delta_kg,
-                    rider_mass_kg=req.rider_mass_kg,
-                    venue_id=req.venue_id,
-                    front_tire_id=req.front_tire_id,
-                    rear_tire_id=req.rear_tire_id,
-                    ambient_temp_c=req.ambient_temp_c,
-                    track_temp_c=req.track_temp_c,
-                    humidity_pct=req.humidity_pct,
-                    headwind_kmh=req.headwind_kmh,
-                    **_conditions_kwargs(req),
-                )
-                stock_sim = engine_select.make_engine(stock_cfg).run()
+                stock_sim = engine_select.make_engine(copy.deepcopy(base_cfg)).run()
                 stock_et = round(float(stock_sim.time_quarter), 4)
-                _stock_cache_put(stock_key, stock_et)
+                if not live_place:
+                    _stock_cache_put(stock_key, stock_et)
             except Exception:
                 # Baseline comparison is optional; stock_et stays None and the
                 # response simply omits the stock delta.
@@ -1911,7 +1957,7 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
         if stock_et
         else None,
     }
-    if not parts_applied:
+    if not parts_applied and not live_place:
         # No parts changed the config, so this run IS the stock baseline.
         _stock_cache_put(stock_key, result["et_quarter_s"])
     return result
@@ -3548,7 +3594,48 @@ def _redact_secrets(text: object, *secrets: str | None) -> str:
     return _SECRET_QUERY_RE.sub(lambda m: f"{m.group(1)}=[REDACTED]", out)
 
 
+# Successful weather lookups are reused for ten minutes. Every simulation
+# route accepts a place now, and the site's Live mode re-posts on every slider
+# change; without this one visitor could spend the shared upstream allowance.
+_OWM_CACHE_TTL_S = 600.0
+_OWM_CACHE_MAX = 256
+_owm_cache: "OrderedDict[tuple, tuple[float, dict]]" = OrderedDict()
+_owm_cache_lock = threading.Lock()
+
+
 def _fetch_owm_for_location(
+    *,
+    location: str | None,
+    lat: float | None,
+    lon: float | None,
+    altitude_m: float | None,
+) -> dict | None:
+    """Cached front of :func:`_fetch_owm_uncached` (errors are never cached)."""
+    key = (
+        (location or "").strip().lower() or None,
+        None if lat is None else round(float(lat), 2),
+        None if lon is None else round(float(lon), 2),
+        altitude_m,
+    )
+    now = _time.monotonic()
+    with _owm_cache_lock:
+        hit = _owm_cache.get(key)
+        if hit is not None and now - hit[0] < _OWM_CACHE_TTL_S:
+            _owm_cache.move_to_end(key)
+            return dict(hit[1])
+    result = _fetch_owm_uncached(
+        location=location, lat=lat, lon=lon, altitude_m=altitude_m
+    )
+    if isinstance(result, dict) and "_error" not in result:
+        with _owm_cache_lock:
+            _owm_cache[key] = (now, dict(result))
+            _owm_cache.move_to_end(key)
+            while len(_owm_cache) > _OWM_CACHE_MAX:
+                _owm_cache.popitem(last=False)
+    return result
+
+
+def _fetch_owm_uncached(
     *,
     location: str | None,
     lat: float | None,
@@ -3742,6 +3829,7 @@ def resolve_venue(req: VenueResolveRequest):
                 "country": venue.get("country"),
                 "latitude": venue.get("latitude"),
                 "longitude": venue.get("longitude"),
+                "surface_type": venue.get("surface_type"),
                 "altitude_m": alt,
                 "temperature_c": round(temp_c, 2),
                 "humidity_pct": round(humidity, 1),
@@ -4889,6 +4977,10 @@ def _apply_resolved_env(config, vd: dict) -> None:
         config.environment.altitude_m = float(vd["altitude_m"])
     if vd.get("venue_name"):
         config.environment.venue_name = vd["venue_name"]
+    # A seeded venue named by `location` races on its own surface, the same
+    # as when it is chosen by venue_id.
+    if vd.get("surface_type"):
+        config.environment.track_surface = str(vd["surface_type"]).lower()
 
 
 def _apply_conditions(config: BikeConfig, req: ConditionsRequest) -> str:
@@ -4927,6 +5019,9 @@ def _apply_conditions(config: BikeConfig, req: ConditionsRequest) -> str:
         manual = True
     if req.ambient_temp_c is not None:
         config.environment.ambient_temp_c = req.ambient_temp_c
+        if req.track_temp_c is None:
+            # Same rule as a resolved place: the track runs ~7 °C over the air.
+            config.environment.track_temp_c = req.ambient_temp_c + 7.0
         manual = True
     if req.track_temp_c is not None:
         config.environment.track_temp_c = req.track_temp_c

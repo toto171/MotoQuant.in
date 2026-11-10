@@ -31,7 +31,7 @@ import { useAuth } from '../AuthProvider';
 import { track, trackSimRun, installErrorHandlers } from '../../lib/telemetry';
 import {
   DEFAULTS, MODE_KEY, bikeName, partSlot, makeKey, normalizeFull,
-  pickDefaultBikeForVariant, resolveBikeSlug, resolveVenueSlug,
+  pickDefaultBikeForVariant, resolveBikeSlug, resolveVenueSlug, tyreFitsWheel,
 } from './format';
 
 const isNumber = (v) => typeof v === 'number' && Number.isFinite(v);
@@ -777,8 +777,9 @@ export default function useSimulatorState(searchParams) {
   const applyPendingTires = useCallback((list) => {
     const p = pendingLinkRef.current;
     if (!p || (p.ft == null && p.rt == null)) return;
-    const ft = list.find((x) => x.id === p.ft);
-    const rt = list.find((x) => x.id === p.rt);
+    // A shared link may carry a tyre for the wrong wheel; ignore it.
+    const ft = list.find((x) => x.id === p.ft && tyreFitsWheel(x, 'front'));
+    const rt = list.find((x) => x.id === p.rt && tyreFitsWheel(x, 'rear'));
     if (ft) setFrontTire(ft);
     if (rt) setRearTire(rt);
     p.ft = null;

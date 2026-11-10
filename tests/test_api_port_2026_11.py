@@ -40,12 +40,15 @@ _REPO_DB = os.path.join(_REPO, "motoquant.db")
 
 _TMP_DIR = None
 _PRIOR_DB_ENV = None
+_PRIOR_OWM_KEY = None
 api = None
 client = None
 
 
 def setUpModule():
-    global _TMP_DIR, _PRIOR_DB_ENV, api, client
+    global _TMP_DIR, _PRIOR_DB_ENV, _PRIOR_OWM_KEY, api, client
+    # No live weather: the place tests assume no provider is configured.
+    _PRIOR_OWM_KEY = os.environ.pop("OPENWEATHERMAP_API_KEY", None)
     _TMP_DIR = tempfile.mkdtemp(prefix="mq_api_port_")
     shutil.copyfile(_REPO_DB, os.path.join(_TMP_DIR, "motoquant.db"))
     _PRIOR_DB_ENV = os.environ.get("MOTOQUANT_DB")
@@ -63,6 +66,8 @@ def tearDownModule():
         os.environ.pop("MOTOQUANT_DB", None)
     else:
         os.environ["MOTOQUANT_DB"] = _PRIOR_DB_ENV
+    if _PRIOR_OWM_KEY is not None:
+        os.environ["OPENWEATHERMAP_API_KEY"] = _PRIOR_OWM_KEY
     shutil.rmtree(_TMP_DIR, ignore_errors=True)
 
 

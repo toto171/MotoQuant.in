@@ -742,6 +742,12 @@ def cmd_sim(args):
         if env is None and venue_id:
             month = args.month or datetime.now().month
             env = db.venues.to_environment(venue_id, month=month)
+            if env is None:
+                # Same answer as the API's 404: never simulate a different
+                # venue than the one asked for.
+                print(f"  Error: venue ID {venue_id} not found")
+                db.close()
+                sys.exit(1)
 
         config = db.bikes.to_config(config_id, environment=env)
         if config is None:
@@ -2338,7 +2344,16 @@ def cmd_analysis(args):
         verbose = not getattr(args, "output_json", False)
 
         if getattr(args, "params", None):
+            from .analysis.sobol import DEFAULT_PARAM_BOUNDS
+
             param_keys = [p.strip() for p in args.params.split(",")]
+            unknown = [k for k in param_keys if k not in DEFAULT_PARAM_BOUNDS]
+            if unknown:
+                print(
+                    f"  Error: unknown parameter(s) {', '.join(unknown)}. "
+                    f"Choose from: {', '.join(sorted(DEFAULT_PARAM_BOUNDS))}"
+                )
+                return 2
             result = compute_sobol_subset(
                 config,
                 param_keys=param_keys,
