@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'yamaha-mt-15-v1-quarter-mile-physics';
-const TITLE = 'Yamaha MT-15 V1 Quarter-Mile Physics: 155cc Naked Drag';
+const TITLE = 'Yamaha MT-15 V1 quarter-mile physics: 155cc naked drag';
 
 function breadcrumbs() {
   return {

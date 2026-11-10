@@ -5,12 +5,12 @@ import SiteFooter from '../../../components/SiteFooter';
 import StructuredData, { articleSchema } from '../../StructuredData';
 
 const SLUG = 'best-mods-for-ktm-rc-390-budget-vs-cost-per-tenth';
-const TITLE = 'Best Mods for KTM RC 390 in India: A Cost-Per-Tenth Ladder';
+const TITLE = 'Best mods for KTM RC 390 in India: a cost-per-tenth ladder';
 const DESCRIPTION =
-  'Best mods for KTM RC 390 in India, ranked by cost-per-tenth of ET at Aamby Valley. ₹950 sprocket drops 0.20s, ₹14,500 Powertronic flash drops another 0.22s, full ₹68,000 build runs a 12.6 stock. Fast Track Racing India ran 11.342s. Here is the gap and what it actually costs to close it.';
+  'The best mods for a KTM RC 390 in India, ranked by rupees per tenth of ET at Aamby Valley. A ₹950 sprocket cuts 0.20s, a ₹14,500 Powertronic flash cuts another 0.22s, and the full ₹68,000 build runs a 12.6 stock. Fast Track Racing India ran 11.342s; here is what closing that gap costs.';
 
 export const metadata = {
-  title: 'Best Mods for KTM RC 390 India: Cost-Per-Tenth | MotoQuant',
+  title: 'Best mods for KTM RC 390 in India: cost per tenth | MotoQuant',
   description: DESCRIPTION,
   keywords: [
     'best mods for ktm rc 390 india',
@@ -40,27 +40,27 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'A stock 2022-onwards KTM RC 390 runs a 13.5-second quarter-mile in MotoQuant at matched Aamby Valley November conditions. Fast Track Racing India ran an 11.342 on a heavily modded version of the same chassis at the ASEAN Superfast event in 2023. That is a 2.16-second gap, and most of it is mod budget. The interesting question is not "can a 390 run an 11?" (a team can build anything given enough rupees). The interesting question is: per rupee spent, which tenth comes off first? This is the cost-per-tenth ladder MotoQuant\'s parts-ROI engine builds for the RC 390, from the ₹950 sprocket on the cheap end to the ₹2 lakh drag-prep build on the expensive end. Every number below is a sim ET at Aamby Valley with a 70 kg rider on stock OEM Metzeler Sportec M5 rubber unless the mod replaces the tire. Indian retail prices are the May 2026 pricing-refresh pass against Store4Riders, RidersPlanet, Performance Racing Store, KustomHub, Motodelic, and Powerstroke.',
+    text: 'A stock 2022-onwards KTM RC 390 runs a 13.5-second quarter mile in MotoQuant at matched Aamby Valley November conditions. Fast Track Racing India ran an 11.342 on a heavily modded version of the same chassis at the ASEAN Superfast event in 2023. That 2.16-second gap is mostly mod budget. Given enough rupees, a team can make a 390 run an 11; the useful question is which tenth comes off first for each rupee you spend. MotoQuant\'s parts-ROI engine builds the RC 390 ladder that follows, from the ₹950 sprocket at the cheap end to the ₹2 lakh drag-prep build at the expensive end. Every number is a sim ET at Aamby Valley with a 70 kg rider on the stock OEM Metzeler Sportec M5 tires, unless the mod replaces the tire. Indian retail prices come from the May 2026 pricing refresh against Store4Riders, RidersPlanet, Performance Racing Store, KustomHub, Motodelic and Powerstroke.',
   },
   {
     type: 'h2',
-    text: 'The Cost-Per-Tenth Framework',
+    text: 'How cost per tenth works',
   },
   {
     type: 'p',
-    text: 'Cost-per-tenth is rupees-spent divided by tenths-of-a-second-removed. A ₹950 front-sprocket swap that drops 0.20 seconds is ₹475 per tenth. A ₹14,500 ECU re-flash that drops 0.22 seconds is ₹6,591 per tenth. A ₹85,000 turbo kit that drops 0.30 seconds is ₹28,333 per tenth, fourteen times more expensive per tenth than the sprocket. The ladder ranks mods by this number, low to high, because that is the order a rational owner spends money in: cheapest tenth first. The first ₹25,000 of mods on an RC 390 buys roughly 0.55 seconds. The next ₹25,000 buys 0.20. The next ₹50,000 buys 0.15. Diminishing returns is not a metaphor. It is what the numbers literally do.',
+    text: 'Cost per tenth is the rupees you spend divided by the tenths of a second you take off. A ₹950 front-sprocket swap that cuts 0.20 seconds is ₹475 per tenth. A ₹14,500 ECU re-flash that cuts 0.22 seconds is ₹6,591 per tenth. A ₹85,000 turbo kit that cuts 0.30 seconds is ₹28,333 per tenth, fourteen times more expensive per tenth than the sprocket. The ladder ranks mods by this number, lowest first, because a sensible owner buys the cheapest tenth first. The first ₹25,000 of mods on an RC 390 buys roughly 0.55 seconds. The next ₹25,000 buys 0.20, and the ₹50,000 after that buys 0.15.',
   },
   {
     type: 'p',
-    text: 'Two reasons this matters in India. First, parts availability is the binding constraint above ₹50,000: many top-end drag mods (drag slicks, stretched swingarms, lightweight wheels) are import-only and the 30 percent customs duty plus 18 percent GST plus ₹1,500 freight pushes landed cost roughly 1.55× of the USD retail. Second, most RC 390 owners ride the bike 350 days a year and drag-race it twice a year; a mod that wrecks daily rideability for a tenth of ET is a bad trade for almost everyone. The ladder below flags street-legality and daily-rideability impact on every line.',
+    text: 'In India the order matters for two more reasons. Above ₹50,000 the limit is what you can buy at all: many top-end drag mods (drag slicks, stretched swingarms, lightweight wheels) are import-only, and 30 percent customs duty plus 18 percent GST plus ₹1,500 freight brings the landed cost to roughly 1.55× the USD retail price. And most RC 390 owners ride the bike 350 days a year and drag-race it twice; a mod that ruins daily riding for a tenth of ET is a bad trade for almost everyone. The ladder below marks street legality and daily rideability on every line.',
   },
   {
     type: 'h2',
-    text: 'Tier 1 (Under ₹10,000): The Cheap Tenths',
+    text: 'Tier 1 (under ₹10,000): the cheap tenths',
   },
   {
     type: 'p',
-    text: 'These are the four mods nobody who tracks an RC 390 should skip. Combined cost: ₹9,700. Combined ET delta on a stock bike: roughly 0.35 seconds. Combined cost-per-tenth: ₹2,771, well below anything in the higher tiers.',
+    text: 'Anyone who takes an RC 390 to the strip should do these four. Together they cost ₹9,700 and take roughly 0.35 seconds off a stock bike, at ₹2,771 per tenth, well below anything in the higher tiers.',
   },
   {
     type: 'table',
@@ -75,23 +75,23 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The sprocket swap is the single highest-ROI mod on any 390-class single. Dropping one tooth at the front shortens overall gearing by 6.25 percent, which keeps the LC4c spinning in the meaty part of the torque curve through the first three gears, exactly where you spend the most time on a quarter-mile. The 15-tooth front is a stock JT JTF1901-15 part, ₹950 at any Indian KTM workshop. Side-effects: about 4 percent lower top speed, slightly busier 100 km/h cruising, a measurable fuel-economy hit in stop-go traffic. None of those matter on a strip where you trap at 168 km/h anyway, well below the bike\'s 180 km/h stock capability.',
+    text: 'The sprocket swap gives the best return of any mod on a 390-class single. One tooth less at the front shortens overall gearing by 6.25 percent. That keeps the LC4c in the strong part of its torque curve through the first three gears, which is where a quarter-mile run spends most of its time. The 15-tooth front is a stock JT JTF1901-15 part, ₹950 at any Indian KTM workshop. The downsides: about 4 percent less top speed, higher revs at a 100 km/h cruise, and a measurable fuel-economy hit in stop-go traffic. None of that matters on a strip where you trap at 168 km/h, well below the bike\'s 180 km/h stock top speed.',
   },
   {
     type: 'p',
-    text: 'The DNA filter is a direct-replacement panel filter that flows roughly 22 percent more air than the OEM paper filter. Real-world dyno gain is 0.8 to 1.5 hp at peak: small in absolute terms, but it stacks cleanly with a re-flash later and survives the rest of the bike\'s service life with one wash a year. No tune required, no airbox modification, fully OBD-compliant. Higher-octane fuel matters slightly because the LC4c runs 12.5:1 compression and the ECU pulls a few degrees of ignition advance on regular 91 RON if it detects knock; running Indian Oil XP-95 or Speed 97 lets the bike hold ignition timing at its mapped value. The 0.04-second number is real but small. Do not pay for it on a daily commute, only on strip days.',
+    text: 'The DNA filter is a drop-in panel filter that flows roughly 22 percent more air than the OEM paper filter. On the dyno it gains 0.8 to 1.5 hp at peak. That is small, but it adds cleanly to a re-flash later and lasts the rest of the bike\'s life with one wash a year. It needs no tune and no airbox change, and it stays fully OBD-compliant. Higher-octane fuel helps a little. The LC4c runs 12.5:1 compression, and on regular 91 RON the ECU pulls a few degrees of ignition advance if it detects knock; Indian Oil XP-95 or Speed 97 lets the bike hold its mapped timing. The 0.04 seconds is real but small, so pay for it on strip days, not on the daily commute.',
   },
   {
     type: 'p',
-    text: 'Dropping rear pressure from the OEM 32 psi to 28 psi for the launch widens the contact patch and adds roughly 8 percent to peak μ during the first two seconds. Free. Reset to 32 psi before the ride home: the bike handles poorly above 100 km/h at strip pressures.',
+    text: 'Dropping rear pressure from the OEM 32 psi to 28 psi for the launch widens the contact patch and adds roughly 8 percent to peak μ during the first two seconds, and it costs nothing. Put it back to 32 psi before you ride home, because at strip pressure the bike handles poorly above 100 km/h.',
   },
   {
     type: 'h2',
-    text: 'Tier 2 (₹10,000 to ₹30,000): The Mid-Range Sweet Spot',
+    text: 'Tier 2 (₹10,000 to ₹30,000): the mid-range',
   },
   {
     type: 'p',
-    text: 'This is where most owners stop. Combined cost on top of Tier 1: ₹21,400 (running total ₹31,100). Combined incremental ET delta: roughly 0.30 seconds. Combined incremental cost-per-tenth: ₹7,133. Running total ET delta vs stock: roughly 0.65 seconds: the bike now runs a 12.85 instead of a 13.50.',
+    text: 'Most owners stop here. On top of Tier 1, this tier costs ₹21,400 (₹31,100 in total) and takes off roughly 0.30 seconds more, at ₹7,133 per tenth. Against stock, the bike is now roughly 0.65 seconds quicker: it runs a 12.85 instead of a 13.50.',
   },
   {
     type: 'table',
@@ -106,23 +106,23 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The Powertronic Stage 1 is the single most installed performance mod on Indian KTM 390s. It is a piggyback ECU that intercepts the fuel-injection signal between the Bosch ME17 main ECU and the injectors, adding 8 to 12 percent more fuel above 6,000 rpm and re-mapping the ignition advance for a slightly leaner cruise. Real dyno gain on the LC4c is 1.5 to 2.5 hp at the top end depending on the tune revision; the May 2026 Powertronic firmware also fixes the bog at 4,200 rpm that the OEM ECU has from the factory. Critically, it keeps the OBD port functional, the bike still passes BS6 emissions, and the install is plug-and-play in under 30 minutes. The 0.22-second figure is the conservative average across Aamby Valley sim sweeps; some bikes pick up 0.30 seconds, some only 0.15.',
+    text: 'The Powertronic Stage 1 is the most installed performance mod on Indian KTM 390s. It is a piggyback ECU that intercepts the fuel-injection signal between the Bosch ME17 main ECU and the injectors. It adds 8 to 12 percent more fuel above 6,000 rpm and remaps the ignition advance for a slightly leaner cruise. On the LC4c it gains 1.5 to 2.5 hp at the top end on the dyno, depending on the tune revision, and the May 2026 Powertronic firmware also fixes the factory bog at 4,200 rpm. The OBD port still works, the bike still passes BS6 emissions, and the install is plug-and-play in under 30 minutes. The 0.22-second figure is the conservative average across Aamby Valley sim sweeps; some bikes pick up 0.30 seconds, some only 0.15.',
   },
   {
     type: 'p',
-    text: 'The TVS Eurogrip Protorq Extreme is the most underrated mod on this list. It is an Indian-made sport-touring tire that meaningfully outgrips the OEM Metzeler Sportec M5 in dry-pavement launch conditions, particularly on strips that have not been freshly prepped. Real μ_peak at 50°C runs about 1.18 versus 1.10 for the OEM rubber. At half the price of a Pirelli Rosso III with comparable grip, it is the dominant value pick. Lasts 12,000 to 14,000 km with mixed riding, slightly worse wet-weather performance than the Metzeler. The Bybre slip-on muffler is the legal option: 95 dB measured at 4,500 rpm, will not get pulled over, KTM dealer-installable, no recalibration needed. It is also the cheapest exhaust mod that actually moves the dyno needle; the louder ₹35,000 SC-Project slip-on adds roughly 0.04 seconds more for ₹26,500 more, which is a terrible cost-per-tenth.',
+    text: 'The TVS Eurogrip Protorq Extreme is the most underrated mod on this list. It is an Indian-made sport-touring tire that grips clearly better than the OEM Metzeler Sportec M5 on dry launches, especially on strips that have not been freshly prepped: μ_peak at 50°C is about 1.18 against 1.10 for the OEM tire. It costs half as much as a Pirelli Rosso III with similar grip, which makes it the best value here. It lasts 12,000 to 14,000 km in mixed riding and is slightly worse in the wet than the Metzeler. The Bybre slip-on muffler is the legal option: 95 dB measured at 4,500 rpm, so it will not get you pulled over, and a KTM dealer can fit it with no recalibration. It is also the cheapest exhaust mod that moves the dyno needle. The louder ₹35,000 SC-Project slip-on adds roughly 0.04 seconds more for ₹26,500 more, a terrible cost per tenth.',
   },
   {
     type: 'callout',
-    text: 'A practical reminder. The Powertronic Stage 1 changes the fuel map. The Bybre slip-on changes the exhaust back-pressure. Installed together, the re-flash should be done after the exhaust to compensate for the new back-pressure curve, otherwise the bike will run rich at low load and you will lose 6 to 8 percent in city fuel economy without an ET benefit. Indian Powertronic dealers know this; ask for the slip-on-aware revision when you book the install.',
+    text: 'If you fit both, fit the exhaust first. The Powertronic Stage 1 changes the fuel map and the Bybre slip-on changes the exhaust back-pressure, so the re-flash has to allow for the new back-pressure curve. Done the other way round, the bike runs rich at low load and loses 6 to 8 percent in city fuel economy with no ET benefit. Indian Powertronic dealers know this; ask for the slip-on-aware revision when you book the install.',
   },
   {
     type: 'h2',
-    text: 'Tier 3 (₹30,000 to ₹70,000): The Diminishing Returns Zone',
+    text: 'Tier 3 (₹30,000 to ₹70,000): diminishing returns',
   },
   {
     type: 'p',
-    text: 'Past ₹30,000 the cost-per-tenth roughly doubles every additional ₹15,000 spent. This tier is for owners who actually compete in regional drag events two or three times a year. Most casual track-day riders should stop at Tier 2. Combined Tier 3 incremental cost: ₹38,000 (running total ₹68,500). Incremental ET delta: roughly 0.25 seconds. Cost-per-tenth in this tier alone: ₹15,200. Running total ET delta vs stock: roughly 0.95 seconds. Bike now runs a 12.55.',
+    text: 'Past ₹30,000, the cost per tenth roughly doubles with every extra ₹15,000. This tier is for owners who compete in regional drag events two or three times a year; most casual track-day riders should stop at Tier 2. Tier 3 adds ₹38,000 (₹68,500 in total) and roughly 0.25 seconds, at ₹15,200 per tenth for this tier alone. Against stock, the bike is now roughly 0.95 seconds quicker and runs a 12.55.',
   },
   {
     type: 'table',
@@ -136,23 +136,23 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The SC-Project CR-T full system replaces the entire stock exhaust from header to muffler, drops about 4.5 kg of mass, and frees an additional 2.5 to 3.5 hp on top of the slip-on figure. The cost-per-tenth is brutal (₹43,333 versus ₹6,591 for the Powertronic), but the trap-speed gain is real and stacks well into a bigger build. The bike at 105 dB is firmly track-only; do not run this on Indian roads, it will draw police attention in any urban area and a noise-violation citation runs ₹5,000 plus impoundment.',
+    text: 'The SC-Project CR-T full system replaces the whole stock exhaust from header to muffler, saves about 4.5 kg and frees another 2.5 to 3.5 hp beyond the slip-on figure. The cost per tenth is brutal (₹43,333 against ₹6,591 for the Powertronic), but the trap-speed gain is real and carries into a bigger build. At 105 dB the bike is track-only. Do not ride it on Indian roads: it will draw police attention in any city, and a noise-violation fine is ₹5,000 plus impoundment.',
   },
   {
     type: 'p',
-    text: 'The JT slipper clutch swap is the underappreciated mid-tier mod. The OEM RC 390 slipper has roughly 32 percent slip at peak engagement; the JT replacement runs about 18 percent, which means more torque hits the rear wheel during the slip phase of the launch and the engine drops less RPM during the upshift between first and second. Real-world gain: about 0.06 seconds. It is also the single mod on this list that improves daily rideability: smoother engagement, less clutch judder in stop-go traffic, longer fade-free life on track. The ₹18,500 number includes labour at a KTM authorised workshop.',
+    text: 'The JT slipper clutch is the mid-tier mod people overlook. The OEM RC 390 slipper has roughly 32 percent slip at peak engagement and the JT replacement about 18 percent. More torque reaches the rear wheel while the clutch slips at launch, and the engine loses less RPM on the shift from first to second. The gain is about 0.06 seconds. It is also the only mod on this list that makes the bike better to ride every day: smoother engagement, less clutch judder in stop-go traffic, and longer fade-free life on track. The ₹18,500 includes labour at an authorised KTM workshop.',
   },
   {
     type: 'p',
-    text: 'Lightweight wheels are the worst-ROI mod in this tier at ₹54,286 per tenth, and yet they show up on most serious Indian drag 390s. The reason: rotational mass at the wheel rim costs roughly 8× more than static mass at the chassis when accelerating: it has to be both translated and rotated. Dropping 2.8 kg of rim mass is functionally equivalent to dropping about 22 kg of frame mass for acceleration purposes. The cost is brutal, but it stacks with every future mod multiplicatively rather than additively. If you are building toward a real 11-second pass, wheels are mandatory. If you are stopping at a 12.5, skip them.',
+    text: 'Lightweight wheels are the worst return in this tier at ₹54,286 per tenth, yet most serious Indian drag 390s run them. Under acceleration, mass at the rim costs roughly 8× more than mass on the chassis, because it has to be both moved forward and spun up. Taking 2.8 kg off the rims does as much for acceleration as taking about 22 kg off the frame. The price is brutal, but the gain multiplies with every later mod instead of just adding to it. If you are building for a real 11-second pass, you need the wheels. If you are stopping at a 12.5, skip them.',
   },
   {
     type: 'h2',
-    text: 'Tier 4 (Above ₹70,000): The Drag-Prep Zone',
+    text: 'Tier 4 (above ₹70,000): drag prep',
   },
   {
     type: 'p',
-    text: 'Past ₹70,000 you are no longer modding a street bike. You are building a strip bike that happens to be road-legal. Most of this tier is import parts with significant Indian-side cost (customs + GST + freight roughly 1.55× of USD retail). Combined Tier 4 incremental cost: ₹95,000 to ₹150,000 depending on choices (running total ₹165,000 to ₹220,000). Incremental ET delta: roughly 0.40 to 0.60 seconds. Bike now runs an 11.95 to 12.15, finally within shouting distance of the Fast Track Racing 11.342 record.',
+    text: 'Past ₹70,000 you are no longer modding a street bike. You are building a strip bike that happens to be road-legal. Most of this tier is imported, and customs, GST and freight bring the landed cost to roughly 1.55× the USD retail price. Tier 4 adds ₹95,000 to ₹150,000 depending on your choices (₹165,000 to ₹220,000 in total) and roughly 0.40 to 0.60 seconds. The bike now runs an 11.95 to 12.15, close to the Fast Track Racing 11.342 record at last.',
   },
   {
     type: 'table',
@@ -167,27 +167,27 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The drag-prep rear tire is the gate to Tier 4. Without it none of the other mods deliver: a stretched swingarm without a sticky rear tire just means a longer wheelie. The Mickey Thompson ET Drag is a DOT-marked drag tire, technically road-legal but completely useless in the wet and worn through in under 300 km of street use. Track-only is the honest description. Pune-based drag shops will fit and balance one for around ₹2,500 labour on top of the part price.',
+    text: 'Start Tier 4 with the drag rear tire. Without it the other mods do not work: a stretched swingarm without a sticky rear tire just gives you a longer wheelie. The Mickey Thompson ET Drag is a DOT-marked drag tire, so it is technically road-legal, but it is useless in the wet and wears through in under 300 km on the street. Treat it as track-only. Drag shops in Pune will fit and balance one for around ₹2,500 labour on top of the part price.',
   },
   {
     type: 'p',
-    text: 'The stretched swingarm fights wheelie. A stock RC 390 with a sticky rear, a re-flash, and an enthusiastic launch will lift the front wheel through first gear, costing roughly 0.4 seconds to the air. The Schnitz or Brock\'s 150 mm stretch moves the rear axle back, lowering the centre of gravity ratio that drives wheelie, and lets the rider transfer full torque to the rear without lifting. Sourcing is the hard part: only one or two Indian shops (Narhe in Pune, occasionally a Hyderabad fabricator) carry these as a stocked part. Direct US import lands at roughly ₹62,000 including duty. Track-only by necessity; the bike turns like a barge with the stretch installed.',
+    text: 'The stretched swingarm stops wheelies. A stock RC 390 with a sticky rear, a re-flash and a hard launch will lift the front wheel through first gear and lose roughly 0.4 seconds in the air. The Schnitz or Brock\'s 150 mm stretch moves the rear axle back, which lowers the centre-of-gravity ratio that causes the wheelie, so the rider can put full torque to the rear without lifting. Finding one is the hard part: only one or two Indian shops (Narhe in Pune, occasionally a Hyderabad fabricator) keep them in stock. A direct US import lands at roughly ₹62,000 including duty. It has to stay on the track, because the bike turns like a barge with the stretch fitted.',
   },
   {
     type: 'p',
-    text: 'The Bazzaz or Rapid Bike full-control ECU replaces the Powertronic piggyback with a true main-ECU override. It can load gear-position-aware fuel and ignition maps, do auto-tune in closed-loop with a wideband O2 sensor, run launch control logic, and pull timing in specific gears to manage wheelie electronically. Indian dyno tuners (Powertec Bangalore, Performance Racing Store Delhi, RidersPlanet Mumbai) charge about ₹8,000 to ₹12,000 for a tune session on top of the part cost. Real gain depends on tuner skill more than part choice: a poorly mapped Bazzaz can give back the entire Powertronic gain.',
+    text: 'The Bazzaz or Rapid Bike full-control ECU replaces the Powertronic piggyback and overrides the main ECU. It can run separate fuel and ignition maps for each gear, auto-tune in closed loop with a wideband O2 sensor, run launch control, and pull timing in chosen gears to control wheelies. Indian dyno tuners (Powertec Bangalore, Performance Racing Store Delhi, RidersPlanet Mumbai) charge about ₹8,000 to ₹12,000 for a tune session on top of the part cost. The gain depends more on the tuner than on the part: a badly mapped Bazzaz can give back the whole Powertronic gain.',
   },
   {
     type: 'p',
-    text: 'The Stage 2 head work is the upper bound of what a single can do without going to a big-bore kit. A skilled head porter at one of three or four Indian shops will flow-bench the OEM head, port and polish the intake runners, and fit a +1 mm lift cam. The LC4c valvetrain can handle the lift without spring upgrades for street use, though competition use needs uprated springs (₹4,500 extra). Combined power gain is roughly 4 to 6 hp on top of all prior mods. This is also the mod that finally makes the slipper clutch wear faster: past about 50 hp the OEM-spec assembly starts to glaze, so plan a clutch swap interval at every 8,000 km if you do strip days.',
+    text: 'Stage 2 head work is as far as a single goes without a big-bore kit. A skilled head porter at one of three or four Indian shops will flow-bench the OEM head, port and polish the intake runners, and fit a +1 mm lift cam. For street use the LC4c valvetrain handles the extra lift on stock springs; for competition it needs uprated springs (₹4,500 extra). The power gain is roughly 4 to 6 hp on top of all earlier mods. This is also the mod that starts to wear the slipper clutch: past about 50 hp the OEM-spec assembly begins to glaze, so if you do strip days, plan a clutch swap every 8,000 km.',
   },
   {
     type: 'h2',
-    text: 'The Full Ladder, Side by Side',
+    text: 'The full ladder',
   },
   {
     type: 'p',
-    text: 'Stacking every tier on top of stock, with a 70 kg rider at Aamby Valley November conditions, the running totals are:',
+    text: 'Each tier stacked on stock, with a 70 kg rider in Aamby Valley November conditions:',
   },
   {
     type: 'table',
@@ -203,59 +203,59 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Two practical observations from the table. First, the first ₹39,100 of spend buys 0.72 seconds, about a third of the entire gap to the Fast Track Racing record. The next ₹70,500 buys another 0.18. The next ₹166,000 buys another 0.57. The remaining ₹374,400 to chase the record buys roughly 0.69 more, but the marginal cost-per-tenth has now climbed to ₹54,260 per tenth on the final stretch. Second, the bike never quite reaches the record on the public mod ladder because a serious 11.3-second pass requires bespoke head work, custom-ratio gearboxes, single-purpose drag-only chassis adjustments, and a dedicated rider with hundreds of launch passes of practice. Money buys the parts; only practice buys the last two tenths.',
+    text: 'The first ₹39,100 buys 0.72 seconds, about a third of the whole gap to the Fast Track Racing record. The next ₹70,500 buys another 0.18, and the next ₹166,000 another 0.57. The last ₹374,400 buys roughly 0.69 more, but by then each tenth costs ₹54,260. Even so, the public mod ladder never quite reaches the record. A serious 11.3-second pass needs custom head work, custom-ratio gearboxes, drag-only chassis changes, and a rider with hundreds of practice launches. Money buys the parts; only practice buys the last two tenths.',
   },
   {
     type: 'h2',
-    text: 'Build Recommendations by Use Case',
+    text: 'Which build for which rider',
   },
   {
     type: 'p',
-    text: 'Three plausible owner profiles, three different stopping points on the ladder.',
+    text: 'Where to stop depends on how you use the bike.',
   },
   {
     type: 'p',
-    text: 'The weekend rider who tracks the bike twice a year should stop at Tier 1 plus one mod from Tier 2, most likely the Powertronic Stage 1, because it improves daily rideability as much as it improves strip times. Total spend: ₹24,200. Total ET delta: about 0.57 seconds. The bike stays street-legal, passes emissions, and still runs a 12.93 on a clean strip day. Cost-per-tenth on this build: ₹4,246.',
+    text: 'A weekend rider who takes the bike to the strip twice a year should stop at Tier 1 plus one Tier 2 mod, most likely the Powertronic Stage 1, because it helps daily riding as much as strip times. That is ₹24,200 for about 0.57 seconds, or ₹4,246 per tenth. The bike stays street-legal, passes emissions, and runs a 12.93 on a clean strip day.',
   },
   {
     type: 'p',
-    text: 'The serious track-day rider who attends Valley Run Summer and Winter plus one other regional event should run the full Tier 1 + Tier 2 ladder plus the JT slipper clutch from Tier 3. Total spend: ₹57,600. Total ET delta: about 0.78 seconds. The bike runs a 12.72. Loud enough to need a strip-only muffler swap, but still road-legal with the OEM exhaust reinstalled on the way home. Cost-per-tenth on this build: ₹7,385.',
+    text: 'A serious track-day rider who does Valley Run Summer and Winter plus one other regional event should do all of Tier 1 and Tier 2, plus the JT slipper clutch from Tier 3. That is ₹57,600 for about 0.78 seconds, or ₹7,385 per tenth, and the bike runs a 12.72. It is loud enough to need a strip-only muffler swap, but it is road-legal again once the OEM exhaust goes back on for the ride home.',
   },
   {
     type: 'p',
-    text: 'The competitive amateur who wants to crack into the 11-second window picks up the rest of Tier 3 (full SC-Project + lightweight wheels), then the drag-prep rear tire and the stretched swingarm and the full-control ECU from Tier 4. Total spend: roughly ₹275,000. Total ET delta: about 1.47 seconds. The bike runs a 12.03. Track-only chassis at this point; a separate street RC 390 or a different daily commuter is now mandatory. Cost-per-tenth on this build: ₹18,748.',
+    text: 'A competitive amateur chasing the 11-second window adds the rest of Tier 3 (full SC-Project and lightweight wheels), then the drag rear tire, the stretched swingarm and the full-control ECU from Tier 4. That is roughly ₹275,000 for about 1.47 seconds, or ₹18,748 per tenth, and the bike runs a 12.03. By now the chassis is track-only, and you need a separate street RC 390 or another bike for daily use.',
   },
   {
     type: 'p',
-    text: 'Notice the ladder pattern: each tier roughly doubles the marginal cost-per-tenth. This is not unique to the RC 390. It is what physics does when you try to extract more performance from any fixed power-to-weight architecture. The LC4c was designed as a 43.5 hp commuter engine. Pushing it to 60 hp requires increasingly heroic interventions that get rapidly more expensive. The Duke 390 follows an identical ladder; only the body changes, the powertrain mods are interchangeable line-for-line.',
+    text: 'Each tier roughly doubles the cost per tenth. The same happens on any bike when you push a fixed power-to-weight design for more. The LC4c was designed as a 43.5 hp commuter engine, and each step toward 60 hp takes more work and costs more than the last. The Duke 390 follows the same ladder: the body differs, but the powertrain mods carry over line for line.',
   },
   {
     type: 'h2',
-    text: 'What This Does Not Cover',
+    text: 'What the ladder leaves out',
   },
   {
     type: 'p',
-    text: 'Three categories of mods that show up in YouTube build videos but did not make the ROI ladder. First, big-bore kits: pushing the 373.3 cc displacement to roughly 430 cc via oversize pistons and machined cylinder sleeves is doable, but the parts cost ₹65,000 to ₹80,000 in India and the reliability penalty over 6,000 km of street use makes the cost-per-tenth math worse than the equivalent Tier 4 spend on bolt-ons. Second, nitrous: a dry-shot 15 to 20 hp nitrous kit costs ₹35,000 to ₹50,000 plus bottle refills, but the LC4c bottom end is not designed for it and engine longevity drops dramatically after 50 to 100 strip passes. Third, forced induction: a turbo or supercharger conversion is technically possible but the Indian aftermarket has no plug-and-play kit for the LC4c, so any build is bespoke at ₹2 to 3 lakh and the result is not warrantied. All three are documented in the MotoQuant parts catalog with simulated ET impact, but none of them appear in the optimal cost-per-tenth ladder for the 11.5-12.5 second window most amateur builds target.',
+    text: 'Three kinds of mod show up in YouTube build videos but did not make the ladder. Big-bore kits can take the 373.3 cc engine to roughly 430 cc with oversize pistons and machined cylinder sleeves, but the parts cost ₹65,000 to ₹80,000 in India, and the reliability penalty over 6,000 km of street use makes the cost per tenth worse than spending the same on Tier 4 bolt-ons. A dry-shot 15 to 20 hp nitrous kit costs ₹35,000 to ₹50,000 plus bottle refills, but the LC4c bottom end is not built for it, and engine life drops sharply after 50 to 100 strip passes. A turbo or supercharger conversion is possible, but the Indian aftermarket has no plug-and-play kit for the LC4c, so every build is custom at ₹2 to 3 lakh, with no warranty. All three are in the MotoQuant parts catalog with simulated ET impact. None of them makes the best cost-per-tenth ladder for the 11.5-12.5 second window most amateur builds aim for.',
   },
   {
     type: 'p',
-    text: 'For everything that did make the ladder, the MotoQuant simulator at motoquant.in lets you build the exact ladder with your specific bike year, rider weight, home strip, and parts catalogue selection. The simulator surfaces the cost-per-tenth ranking on every part-toggle, lets you sweep ambient conditions, and folds in a Dragy timeslip from your own runs to tighten the prediction beyond the current ±0.4-second cluster bias band.',
+    text: 'For the mods that did make it, the MotoQuant simulator at motoquant.in builds the same ladder for your bike year, rider weight, home strip and choice of parts. It shows the cost-per-tenth ranking each time you toggle a part, sweeps ambient conditions, and takes a Dragy timeslip from your own runs to tighten the prediction beyond the current ±0.4-second cluster bias band.',
   },
   {
     type: 'callout',
-    text: 'Three caveats. First, every ET number in this post sits inside the mid-twin-300-500 cluster bias band of ±0.4 seconds. A real Dragy timeslip from your bike would tighten the prediction. Second, Indian aftermarket pricing shifts every quarter and these numbers reflect the May 2026 pricing-refresh pass; budget ±15 percent for the actual moment you buy. Third, every mod has a non-zero failure rate at strip-day stress; the ladder assumes parts work as advertised and tuners do their job. The cheap-tenths Tier 1 has near-zero failure mode; Tier 4 mods routinely require re-tuning sessions to deliver their full headline gain.',
+    text: 'Three caveats. Every ET in this post sits inside the ±0.4-second bias band for the mid-twin-300-500 cluster; a real Dragy timeslip from your bike would tighten the prediction. Indian aftermarket prices change every quarter, and these are from the May 2026 pricing refresh, so allow ±15 percent when you actually buy. And any mod can fail under strip-day stress; the ladder assumes parts work as advertised and tuners do their job. Tier 1 almost never fails, while Tier 4 mods often need more tuning sessions before they deliver their full headline gain.',
   },
   {
     type: 'h2',
-    text: 'Run Your Own Ladder',
+    text: 'Run your own ladder',
   },
   {
     type: 'p',
-    text: 'The honest summary: a stock KTM RC 390 in India is a 13.5-second quarter-mile bike. The first ₹40,000 of mods buys 0.72 seconds and keeps the bike street-legal. The next ₹70,000 buys 0.18 seconds and starts to make the bike track-only. The remaining gap to the Fast Track Racing 11.342-second record costs ₹500,000 and a team. There is no shortcut and no mystery mod: physics and budget govern the curve, and the curve is shaped the same way for every owner. The only variable is where on the curve a given rider stops, which is a function of how many strip days a year they actually do.',
+    text: 'A stock KTM RC 390 in India is a 13.5-second quarter-mile bike. The first ₹40,000 of mods buys 0.72 seconds and keeps it street-legal. The next ₹70,000 buys 0.18 seconds and starts to make it track-only. The rest of the gap to the Fast Track Racing 11.342-second record costs ₹500,000 and a team. Where you stop depends on how many strip days you do in a year.',
   },
   {
     type: 'p',
-    text: 'The MotoQuant simulator at motoquant.in/simulator runs the same physics that produced every ET in this post against any of the 546 parts in the catalog, on any of the 20 seeded venues, with sweeps over rider weight, ambient temperature, density altitude, and tire compound. The simulator surfaces parts-ROI rankings (cost-per-tenth, ET delta, trap delta, compatibility warning) directly on the build page, and the Dragy upload lines your own timeslip up against the simulation. Start with the stock RC 390 and Tier 1: that is the answer for 80 percent of owners and it costs under ₹10,000 to verify.',
+    text: 'The simulator at motoquant.in/simulator runs the same physics that produced every ET in this post. It works with any of the 546 parts in the catalog and any of the 20 seeded venues, and sweeps rider weight, ambient temperature, density altitude and tire compound. The build page shows the parts-ROI ranking (cost per tenth, ET change, trap change, compatibility warning), and the Dragy upload lines your own timeslip up against the simulation. Start with the stock RC 390 and Tier 1. That is the answer for 80 percent of owners, and it costs under ₹10,000 to check.',
   },
 ];
 
@@ -361,7 +361,7 @@ export default function PostPage() {
             ))}
           </div>
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
-            Best Mods for KTM RC 390 in India: A Cost-Per-Tenth Ladder
+            Best mods for KTM RC 390 in India: a cost-per-tenth ladder
           </h1>
           <div className="text-sm text-white/60 mb-12">
             22 May 2026 · 13 min read · MotoQuant Blog
@@ -374,7 +374,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Build your own RC 390 ladder</div>
             <div className="text-white/60 text-sm">
-              Sweep rider weight, density altitude, sprocket choice, ECU re-flash, exhaust, tire compound, and any of the 546 parts in the catalog. Cost-per-tenth ranks appear on every part toggle in the simulator.
+              Sweep rider weight, density altitude, sprocket, ECU re-flash, exhaust, tire compound and any of the 546 parts in the catalog. The simulator shows the cost per tenth on every part toggle.
             </div>
           </div>
           <Link
@@ -394,9 +394,9 @@ export default function PostPage() {
                 href="/blog/ktm-duke-390-vs-rc-390-quarter-mile-physics"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                KTM Duke 390 vs RC 390: Quarter-Mile Physics at Aamby Valley
+                KTM Duke 390 vs RC 390: quarter-mile physics at Aamby Valley
               </Link>:
-              same engine, two tenths apart, and where the gap actually lives.
+              same engine, two tenths apart, and where the gap comes from.
             </li>
             <li>
               ·{' '}
@@ -404,9 +404,9 @@ export default function PostPage() {
                 href="/blog/pulsar-ns400z-quarter-mile-physics"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                Pulsar NS400Z Quarter-Mile Physics (and Why an RC 390 Still Wins)
+                Pulsar NS400Z quarter-mile physics (and why an RC 390 still wins)
               </Link>:
-              the closest segment rival, with the same cost-per-tenth framework applied.
+              the closest rival in the segment, run through the same cost-per-tenth ladder.
             </li>
             <li>
               ·{' '}
@@ -414,7 +414,7 @@ export default function PostPage() {
                 href="/blog/the-physics-of-a-perfect-launch"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                The Physics of a Perfect Launch
+                The physics of a perfect launch
               </Link>:
               clutch slip, weight transfer, and the first 60 feet that decide most of the 390-class quarter-mile.
             </li>
@@ -424,7 +424,7 @@ export default function PostPage() {
                 href="/blog/how-to-tune-for-aamby-valley-in-november"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                How to Tune for Aamby Valley in November
+                How to tune for Aamby Valley in November
               </Link>:
               the venue conditions used for every sim in this post, plus the density altitude math.
             </li>
@@ -434,7 +434,7 @@ export default function PostPage() {
                 href="/blog/how-the-motoquant-physics-engine-works"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                How the MotoQuant Physics Engine Works
+                How the MotoQuant physics engine works
               </Link>:
               the 15-sub-model RK4 engine, the cluster bias bands, and what the residual error means.
             </li>

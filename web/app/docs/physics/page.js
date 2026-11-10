@@ -1,8 +1,8 @@
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Physics Whitepaper',
-  description: 'First-principles physics behind MotoQuant: 15 sub-models, RK4 integrator at 1 ms step, a rear-tyre grip model with load sensitivity and thermal evolution, Willans friction, 2T expansion-chamber Gaussian curve, weight transfer, weighted-benchmark validation. The complete methodology document for the motorcycle quarter-mile simulator.',
+  title: 'Physics whitepaper',
+  description: 'The first-principles physics behind the MotoQuant quarter-mile simulator: 15 sub-models, RK4 integrator at 1 ms step, a rear-tyre grip model with load sensitivity and thermal evolution, Willans friction, 2T expansion-chamber Gaussian curve, weight transfer and weighted-benchmark validation.',
   alternates: { canonical: 'https://motoquant.in/docs/physics' },
   keywords: [
     'rk4 motorcycle simulator',
@@ -21,7 +21,7 @@ const SUBMODELS = [
   { n: '02', name: 'Forced induction', desc: 'Turbocharger (boost curve, compressor map, lag), supercharger (mechanical drive loss, constant boost), nitrous (injection window, jetting-mass-flow). Boost type is a per-part parameter.', file: 'submodels/forced_induction.py' },
   { n: '03', name: 'Drivetrain', desc: 'Gear ratio lookup from 150+ Tier-1 service-manual-accurate families. Chain drive efficiency (0.95–0.97 across the catalog). Quickshifter model (zero-torque cut window, shift time).', file: 'submodels/drivetrain.py' },
   { n: '04', name: 'Clutch dynamics', desc: 'Wet multi-plate clutch with engagement rate (Nm/s) and slip RPM threshold. Slipper clutch branch: overrun torque reversal → spring-preload backstop. Clutch heat accumulation during engagement.', file: 'submodels/clutch.py' },
-  { n: '05', name: 'Chain & sprocket', desc: 'Sprocket ratio applied to rear-wheel torque. Chain stretch factor (efficiency reduction over service interval). Verification that sprocket tooth counts are physically valid.', file: 'submodels/chain.py' },
+  { n: '05', name: 'Chain & sprocket', desc: 'Sprocket ratio applied to rear-wheel torque. Chain stretch factor (efficiency reduction over service interval). Checks that sprocket tooth counts are physically valid.', file: 'submodels/chain.py' },
   { n: '06', name: 'Tyre grip', desc: 'Traction limit μ × F_z,rear, where μ starts from the tyre\'s peak friction coefficient and is adjusted for load sensitivity, tread temperature, pressure rise with temperature and track preparation. Thermal evolution: heat from slip, conduction to the road surface and convection to the air. A Pacejka Magic Formula slip curve is implemented but not yet used by the integrator.', file: 'submodels/tire.py' },
   { n: '07', name: 'Aerodynamics', desc: 'F_drag = ½·ρ·Cd·A·v². Per-bike Cd (0.42–0.92 across the catalog) and frontal area (0.35–0.78 m²). Rider tuck transition: Cd interpolates from upright to tuck posture above a speed threshold. Wind vector support.', file: 'submodels/aero.py' },
   { n: '08', name: 'Weight transfer', desc: 'Longitudinal weight transfer: ΔF_z = m·a_x·h_cog / L_wb. Front axle load approaches zero at wheelie threshold. Rear axle load added to tire normal force for traction calculation.', file: 'submodels/weight_transfer.py' },
@@ -62,7 +62,7 @@ export default function PhysicsPage() {
           we check the results. You do not need any of this to use the simulator.
         </p>
         <p className="rounded-xl border border-accent/25 bg-accent/5 px-4 py-3 text-base leading-relaxed text-white/85">
-          <strong className="font-semibold text-white">In short:</strong> MotoQuant steps your bike forward
+          MotoQuant steps your bike forward
           one millisecond at a time. At each step it works out engine power, gearing, tyre grip, drag and weight
           transfer, until the bike crosses the quarter-mile line.
         </p>
@@ -78,9 +78,9 @@ export default function PhysicsPage() {
           aerodynamic and traction forces at the midpoint of each step.
         </p>
         <p className="text-white/75 text-base leading-relaxed mb-4">
-          The simulation terminates when the bike crosses 402.336 m (the quarter mile), when elapsed time exceeds
-          26 s (prevents infinite loops on bikes that cannot complete), or when a NaN/Inf is detected in the state vector
-          (which triggers an early-exit with an error flag rather than a corrupted result).
+          The simulation stops when the bike crosses 402.336 m (the quarter mile), when elapsed time passes
+          26 s (so a bike that cannot finish does not loop forever), or when a NaN/Inf appears in the state vector.
+          In that last case it exits early with an error flag instead of returning a corrupted result.
         </p>
         <div className="card p-5 mb-4 border-brand-orange/20">
           <div className="label-mono text-brand-accent mb-2">State vector</div>
@@ -108,19 +108,19 @@ export default function PhysicsPage() {
       <section className="mb-14">
         <h2 className="font-display font-bold text-2xl text-white mb-4">Numerical integrator</h2>
         <p className="text-white/75 text-base leading-relaxed mb-4">
-          The fixed-step RK4 integrator runs at dt = 1 ms. For most bikes, this gives adequate accuracy: the maximum
+          The fixed-step RK4 integrator runs at dt = 1 ms. For most bikes that is accurate enough: the maximum
           position error per step is O(dt⁵) ≈ 10⁻¹⁵ m, well within measurement noise.
         </p>
         <p className="text-white/75 text-base leading-relaxed mb-4">
           The adaptive-dt solver uses a fifth-order embedded RK pair (RK45) with error control. Step size is
-          halved when position error exceeds 10⁻⁴ m and doubled when error is below 10⁻⁶ m. The adaptive solver
-          is most useful for clutch-heavy launch phases where the state changes rapidly and 1 ms steps may
-          slightly mis-time the engagement point.
+          halved when position error exceeds 10⁻⁴ m and doubled when error is below 10⁻⁶ m. It helps most in
+          clutch-heavy launches, where the state changes fast and 1 ms steps may mis-time the engagement point
+          slightly.
         </p>
         <p className="text-white/75 text-base leading-relaxed">
           Aerodynamic drag is re-evaluated at the RK4 midpoint (i.e. at v + k₁/2 rather than at v) to reduce
-          the systematic bias that naive Euler or basic RK4 produces at high velocities. This is a minor but
-          measurable improvement for bikes that spend significant run time above 180 km/h.
+          the systematic bias that naive Euler or basic RK4 produces at high velocities. The gain is small but
+          measurable on bikes that spend much of the run above 180 km/h.
         </p>
       </section>
 
@@ -152,9 +152,9 @@ export default function PhysicsPage() {
           defaults, and the 150+ Tier-1 gear ratio families.
         </p>
         <p className="text-white/75 text-base leading-relaxed">
-          Parts mods apply dotted-path notation to override specific fields (e.g. <code className="font-mono text-brand-accent break-words">engine.peak_power_hp</code>,
-          <code className="font-mono text-brand-accent mx-1 break-all">drivetrain.front_sprocket</code>). The bridge module validates every path before applying,
-          logging a warning if the path is stale.
+          Parts mods use dotted paths to override specific fields (e.g. <code className="font-mono text-brand-accent break-words">engine.peak_power_hp</code>,
+          <code className="font-mono text-brand-accent mx-1 break-all">drivetrain.front_sprocket</code>). The bridge module validates every path before applying it
+          and logs a warning if a path is stale.
         </p>
       </section>
 

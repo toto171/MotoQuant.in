@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from "../../StructuredData";
 
 const SLUG = "600cc-supersport-launch-physics-engine-deceleration";
-const TITLE = "Why 600cc Supersports Were Running 200ms Slow in Our Sim";
+const TITLE = "Why 600cc supersports were running 200ms slow in our sim";
 
 function breadcrumbs() {
   return {

@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'indian-drag-strip-elevation-comparison';
-const TITLE = 'Indian Drag Strips Ranked by Elevation: How Altitude Flips Quarter-Mile Order';
+const TITLE = 'Indian drag strips ranked by elevation: how altitude flips quarter-mile order';
 
 function breadcrumbs() {
   return {

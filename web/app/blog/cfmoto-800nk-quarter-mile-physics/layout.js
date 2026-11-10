@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'cfmoto-800nk-quarter-mile-physics';
-const TITLE = 'CFMoto 800NK Quarter-Mile Physics: A KTM 790 Duke in Disguise';
+const TITLE = 'CFMoto 800NK quarter-mile physics: a KTM 790 Duke in disguise';
 
 function breadcrumbs() {
   return {

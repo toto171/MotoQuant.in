@@ -65,9 +65,9 @@ export async function generateMetadata({ params }) {
     // Google re-crawls periodically and will pick up the full metadata
     // once the API is responsive again.
     const fallbackTitle =
-      'Motorcycle Quarter-Mile Drag Simulator | MotoQuant';
+      'Motorcycle quarter-mile drag simulator | MotoQuant';
     const fallbackDesc =
-      'Physics-based quarter-mile drag-racing simulator for this motorcycle. 534 bikes in the catalog. Free and in-browser.';
+      'A physics-based quarter-mile simulator for this motorcycle. 534 bikes in the catalog. Free, in your browser.';
     return {
       title: fallbackTitle,
       description: fallbackDesc,
@@ -93,15 +93,15 @@ export async function generateMetadata({ params }) {
   //   "<bike name> quarter mile time"
   //   "<bike name> drag simulator"
   //   "<bike name> specs"
-  const title = `${name}: Quarter-Mile ET, Drag Simulator & Full Specs`;
+  const title = `${name}: quarter-mile ET, drag simulator and full specs`;
 
   const descParts = [
-    `Simulate ${name} quarter-mile drag times with MotoQuant.`,
+    `Simulate quarter-mile times for the ${name} on MotoQuant.`,
     disp && power && mass
       ? `${disp} · ${power} · ${mass} dry.`
       : [disp, power, mass].filter(Boolean).join(' · '),
-    `Full physics-based ET prediction, individual aero (Cd ${bike.cd?.toFixed?.(2) || '–'}, frontal area ${bike.frontal_area_m2?.toFixed?.(2) || '–'} m²), gear ratios, and OEM tire fitments.`,
-    'Free and in-browser, no signup.',
+    `The ET prediction runs the full physics with this bike's own aero (Cd ${bike.cd?.toFixed?.(2) || '–'}, frontal area ${bike.frontal_area_m2?.toFixed?.(2) || '–'} m²), gear ratios and OEM tire fitments.`,
+    'Free, in your browser, no signup.',
   ]
     .filter(Boolean)
     .join(' ');
@@ -137,7 +137,7 @@ export async function generateMetadata({ params }) {
     alternates: { canonical },
     keywords,
     openGraph: {
-      title: `${name}: Quarter-Mile Drag Simulator & Specs`,
+      title: `${name}: quarter-mile drag simulator and specs`,
       description: descParts,
       url: `${SITE_URL}${canonical}`,
       type: 'website',
@@ -152,7 +152,7 @@ export async function generateMetadata({ params }) {
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${name}: Quarter-Mile Drag Simulator`,
+      title: `${name}: quarter-mile drag simulator`,
       description: descParts,
     },
     robots: {
@@ -247,7 +247,7 @@ function vehicleSchema(bike) {
         : undefined,
     url: `${SITE_URL}/bikes/${bike.id}`,
     image: `${SITE_URL}/og-image.png`,
-    description: `Full physics-based quarter-mile drag simulation data for the ${name} on MotoQuant.`,
+    description: `Quarter-mile simulation data for the ${name} from MotoQuant's physics model.`,
     offers: {
       '@type': 'Offer',
       url: `${SITE_URL}/simulator?bike_id=${bike.id}`,

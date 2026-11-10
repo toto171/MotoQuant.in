@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'royal-enfield-bullet-350-quarter-mile-physics';
-const TITLE = 'Royal Enfield Bullet 350 Quarter-Mile Physics: 17.7s on the Strip';
+const TITLE = 'Royal Enfield Bullet 350 quarter-mile physics: 17.7s on the strip';
 
 function breadcrumbs() {
   return {

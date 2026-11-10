@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'harley-nightster-rh975-quarter-mile-physics';
-const TITLE = 'Harley Nightster RH975: Revolution Max Quarter-Mile Physics';
+const TITLE = 'Harley Nightster RH975: Revolution Max quarter-mile physics';
 
 function breadcrumbs() {
   return {
