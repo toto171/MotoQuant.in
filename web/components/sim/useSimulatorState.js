@@ -1,0 +1,917 @@
+'use client';
+
+/**
+ * useSimulatorState — every piece of state, data fetching and async task for
+ * the /simulator page, in one hook so the UI components stay presentational.
+ *
+ * Correctness rules this hook enforces (audit F1/F2/F6/F8/F12):
+ *  - Every result is TAGGED with a snapshot of the inputs it was computed for
+ *    (`meta.key`, `meta.bikeId`, …). The UI only shows / saves a result whose
+ *    bike matches the current bike, and only saves one whose key matches the
+ *    current inputs. Changing bike stops + resets every task.
+ *  - Late responses never land: useAsyncTask drops results of aborted runs and
+ *    the tasks below re-check the signal after every await.
+ *  - ?bike / ?bike_id / ?venue / … are applied on mount AND whenever the query
+ *    string changes while the page stays mounted (command-palette navigation).
+ *  - Bikes/venues are usable as soon as they arrive; the heavy parts catalogue,
+ *    tyres and categories load lazily (Advanced only), abortable, with retry.
+ *  - Live quick-sim ticks emit telemetry only for the first run per bike; a
+ *    429 shows the server's message and pauses Live updates briefly.
+ */
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  API_URL as API, simulateJob, topspeedJob, compareJob, saveRun,
+} from '../../lib/api';
+import useAsyncTask from '../../lib/useAsyncTask';
+import { predictQuick, preloadSurrogate } from '../../lib/surrogate';
+import { useAuth } from '../AuthProvider';
+import { track, trackSimRun, installErrorHandlers } from '../../lib/telemetry';
+import {
+  DEFAULTS, MODE_KEY, bikeName, exclusiveGroup, makeKey, normalizeFull,
+  pickDefaultBikeForVariant, resolveBikeSlug,
+} from './format';
+
+const abortError = () => new DOMException('Aborted', 'AbortError');
+const throwIfAborted = (signal) => { if (signal?.aborted) throw abortError(); };
+
+const ENV_KEYS = ['temp', 'track', 'hum', 'wind'];
+const ADVANCED_KEYS = ['parts', 'ft', 'rt', ...ENV_KEYS];
+
+function linkWantsAdvanced(sp) {
+  return ADVANCED_KEYS.some((k) => sp?.has?.(k));
+}
+
+async function readDetail(res) {
+  try {
+    const j = await res.json();
+    if (typeof j?.detail === 'string') return j.detail;
+  } catch { /* not JSON */ }
+  return '';
+}
+
+export default function useSimulatorState(searchParams) {
+  const qs = searchParams?.toString() ?? '';
+  const defaultBikeVariant = searchParams?.get('variant') === 'B' ? 'B' : 'A';
+
+  // ─── Catalogue data ────────────────────────────────────────────────────────
+  const [bikes, setBikes] = useState([]);
+  const [venues, setVenues] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [allParts, setAllParts] = useState([]);
+  const [allTires, setAllTires] = useState([]);
+  const [bikesStatus, setBikesStatus] = useState('loading'); // loading | ready | error
+  const [venuesStatus, setVenuesStatus] = useState('loading');
+  const [bootError, setBootError] = useState(null);
+  const [bootProgress, setBootProgress] = useState(0);
+  const [partsStatus, setPartsStatus] = useState('idle'); // idle | loading | ready | error
+  const [partsError, setPartsError] = useState(null);
+  const [partsBikeId, setPartsBikeId] = useState(null); // bike the parts list is annotated for
+  const [tiresStatus, setTiresStatus] = useState('idle');
+
+  // ─── Selections ────────────────────────────────────────────────────────────
+  const [bike, setBike] = useState(null);
+  const [selectedParts, setSelectedParts] = useState([]);
+  const [frontTire, setFrontTire] = useState(null);
+  const [rearTire, setRearTire] = useState(null);
+  const [venue, setVenue] = useState(null);
+  const [location, setLocation] = useState(null); // resolved env payload (LocationPicker)
+  const [riderKg, setRiderKg] = useState(DEFAULTS.riderKg);
+  const [powerBoost, setPowerBoost] = useState(DEFAULTS.powerBoost);
+  const [massChange, setMassChange] = useState(DEFAULTS.massChange);
+  const [ambientTemp, setAmbientTemp] = useState(DEFAULTS.ambientTemp);
+  const [trackTemp, setTrackTemp] = useState(DEFAULTS.trackTemp);
+  const [humidity, setHumidity] = useState(DEFAULTS.humidity);
+  const [headwind, setHeadwind] = useState(DEFAULTS.headwind);
+  const [envTouched, setEnvTouched] = useState(false);
+  const [showEnv, setShowEnv] = useState(false);
+
+  // ─── View state ────────────────────────────────────────────────────────────
+  const [mode, setModeState] = useState('simple');
+  const [modeReady, setModeReady] = useState(false);
+  const [activeTab, setActiveTab] = useState('quarter');
+  const [liveSim, setLiveSim] = useState(true);
+  const [livePausedUntil, setLivePausedUntil] = useState(0);
+  const [focusRequest, setFocusRequest] = useState(null);
+  const [linkReady, setLinkReady] = useState(false);
+  const [linkPending, setLinkPending] = useState(false);
+  const [bikeNotice, setBikeNotice] = useState(false);
+
+  // ─── Compare config ────────────────────────────────────────────────────────
+  const [compareBike, setCompareBike] = useState(null);
+  const [comparePower, setComparePower] = useState(0);
+  const [compareMass, setCompareMass] = useState(0);
+
+  // ─── Uploads / save / share ────────────────────────────────────────────────
+  const [uploadResult, setUploadResult] = useState(null);
+  const [savedRun, setSavedRun] = useState(null);
+  const [shareCopied, setShareCopied] = useState(false);
+  const lastDragyFileRef = useRef(null);
+  const lastDynoFileRef = useRef(null);
+
+  const { accessToken } = useAuth();
+
+  // ─── Refs ──────────────────────────────────────────────────────────────────
+  const bikeRef = useRef(null);
+  bikeRef.current = bike;
+  const linkAppliedRef = useRef(false);
+  const lastQsRef = useRef(null);
+  const pendingLinkRef = useRef(null); // { parts: number[]|null, ft, rt }
+  const partsAbortRef = useRef(null);
+  const coreAbortRef = useRef(null);
+  const lastTrackedBikeRef = useRef(null);
+  const saveSourceRef = useRef(null);
+  const catNameRef = useRef({});
+  const allTiresRef = useRef([]);
+  allTiresRef.current = allTires;
+
+  // ─── Derived ───────────────────────────────────────────────────────────────
+  const categoryNameById = useMemo(() => {
+    const m = {};
+    for (const c of categories) m[c.id] = c.name;
+    return m;
+  }, [categories]);
+  catNameRef.current = categoryNameById;
+
+  const buildCost = useMemo(
+    () => selectedParts.reduce((s, p) => s + (p.price_inr || 0), 0),
+    [selectedParts],
+  );
+  const weatherDefault =
+    ambientTemp === DEFAULTS.ambientTemp && trackTemp === DEFAULTS.trackTemp &&
+    humidity === DEFAULTS.humidity && headwind === DEFAULTS.headwind;
+  const envCustom = location ? envTouched : !weatherDefault;
+
+  const vals = { bike, selectedParts, frontTire, rearTire, venue, riderKg, powerBoost,
+    massChange, ambientTemp, trackTemp, humidity, headwind };
+  const keyFull = makeKey(vals, true);
+  const keyNoParts = makeKey(vals, false);
+
+  // Snapshot of the inputs a run is about to use — attached to its result.
+  function makeSnap(withParts = true) {
+    return {
+      key: withParts ? keyFull : keyNoParts,
+      bikeId: bike?.id ?? null,
+      bikeName: bikeName(bike),
+      riderKg,
+      venueId: venue?.id ?? null,
+      venueName: venue?.name ?? null,
+      venueAltM: venue?.altitude_m ?? location?.altitude_m ?? null,
+      placeLabel: !venue && location ? (location._label || location.location_name || 'your location') : null,
+      tempC: ambientTemp,
+      humidity,
+      envCustom,
+      partCount: selectedParts.length,
+      powerBoost,
+      massChange,
+    };
+  }
+
+  // Shared sim request body (read fresh at call time — useAsyncTask keeps fn current).
+  function baseSimBody(extra = {}) {
+    const body = {
+      rider_mass_kg: riderKg,
+      power_boost_pct: powerBoost,
+      mass_delta_kg: massChange,
+      ambient_temp_c: ambientTemp,
+      track_temp_c: trackTemp,
+      humidity_pct: humidity,
+      headwind_kmh: headwind,
+      ...extra,
+    };
+    if (bike?.id != null) body.bike_id = bike.id;
+    else if (bike?.preset) body.bike_preset = bike.preset;
+    if (frontTire?.id != null) body.front_tire_id = frontTire.id;
+    if (rearTire?.id != null) body.rear_tire_id = rearTire.id;
+    if (venue?.id != null) body.venue_id = venue.id;
+    return body;
+  }
+
+  /* ═══════════════ Async tasks ═══════════════ */
+
+  // Quick sim. Live mode answers locally from the in-browser surrogate when it
+  // can (default weather, no parts/tyres); everything else — and every explicit
+  // Calculate press — goes to the exact server sim. Request shapes unchanged.
+  const quickTask = useAsyncTask(async (signal, _onProgress, trigger = 'auto') => {
+    if (!bike) return null;
+    const emit = trigger !== 'auto' || lastTrackedBikeRef.current !== bike.id;
+    if (trigger === 'auto') lastTrackedBikeRef.current = bike.id;
+
+    if (
+      trigger === 'auto' && bike?.id != null && weatherDefault &&
+      selectedParts.length === 0 && frontTire?.id == null && rearTire?.id == null
+    ) {
+      const est = await predictQuick({
+        bikeId: bike.id,
+        riderMassKg: riderKg,
+        powerBoostPct: powerBoost,
+        massDeltaKg: massChange,
+        venueId: venue?.id ?? null,
+      });
+      throwIfAborted(signal);
+      if (est.ok) {
+        const runEvent = emit
+          ? trackSimRun('simulator_page', 'quarter', {
+              trigger, engine: 'client-surrogate', bike_id: bike.id, part_count: 0,
+            })
+          : null;
+        const data = {
+          et_quarter_s: est.etS,
+          trap_speed_kmh: est.trapKmh,
+          peak_power_hp: est.peakPowerHp,
+          total_mass_kg: est.totalMassKg,
+          estimated: true,
+          meta: { ...makeSnap(true), estimated: true },
+        };
+        runEvent?.success({ et_quarter_s: data.et_quarter_s, trap_speed_kmh: data.trap_speed_kmh });
+        return data;
+      }
+      // est.ok === false → fall through to the server path.
+    }
+
+    const runEvent = emit
+      ? trackSimRun('simulator_page', 'quarter', {
+          trigger, engine: 'server', bike_id: bike?.id ?? null, part_count: selectedParts.length,
+        })
+      : null;
+    try {
+      const snap = makeSnap(true);
+      const body = baseSimBody({ part_ids: selectedParts.map((p) => p.id) });
+      const res = await fetch(`${API}/api/simulate/quick`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal,
+      });
+      if (!res.ok) {
+        const detail = await readDetail(res);
+        const err = new Error(
+          res.status === 429
+            ? detail || 'You are calculating very quickly — live updates are paused for a few seconds.'
+            : detail || `The simulator returned an error (${res.status}). Please try again.`,
+        );
+        err.status = res.status;
+        err.retryAfter = Number(res.headers.get('retry-after')) || null;
+        throw err;
+      }
+      const data = await res.json();
+      throwIfAborted(signal);
+      runEvent?.success({
+        et_quarter_s: data?.et_quarter_s ?? null,
+        trap_speed_kmh: data?.trap_speed_kmh ?? null,
+      });
+      return { ...data, estimated: false, meta: { ...snap, estimated: false } };
+    } catch (e) {
+      if (e?.name === 'AbortError') runEvent?.cancelled();
+      else runEvent?.error(e);
+      if (e?.status === 429) {
+        setLivePausedUntil(Date.now() + (e.retryAfter || 15) * 1000);
+      }
+      throw e;
+    }
+  });
+
+  // Full simulation — job-backed with real RK4 progress. The server's full-sim
+  // route has no part list, so this result never includes parts (the UI says so).
+  const fullSimTask = useAsyncTask(async (signal, onProgress) => {
+    const runEvent = trackSimRun('simulator_page', 'full', { bike_id: bike?.id ?? null });
+    try {
+      const snap = makeSnap(false);
+      const data = await simulateJob(baseSimBody(), onProgress, signal);
+      throwIfAborted(signal);
+      runEvent.success({
+        et_quarter_s: data?.et_quarter_s ?? null,
+        trap_speed_kmh: data?.trap_speed_kmh ?? null,
+      });
+      return { ...data, meta: snap };
+    } catch (e) {
+      if (e?.name === 'AbortError') runEvent.cancelled();
+      else runEvent.error(e);
+      throw e;
+    }
+  });
+
+  const topSpeedTask = useAsyncTask(async (signal, onProgress) => {
+    const runEvent = trackSimRun('simulator_page', 'topspeed', {
+      bike_label: bike?.model_name ?? bike?.model ?? 'unknown',
+      bike_id: bike?.id ?? null,
+    });
+    try {
+      const snap = makeSnap(true);
+      const body = baseSimBody({ part_ids: selectedParts.map((p) => p.id), include_timeseries: true });
+      const data = await topspeedJob(body, onProgress, signal);
+      throwIfAborted(signal);
+      runEvent.success({
+        terminal_velocity_kmh: data?.terminal_velocity_kmh ?? null,
+        reached_plateau: data?.reached_plateau ?? null,
+      });
+      return { ...data, meta: snap };
+    } catch (e) {
+      if (e?.name === 'AbortError') runEvent.cancelled();
+      else runEvent.error(e);
+      throw e;
+    }
+  });
+
+  const compareKey = JSON.stringify([keyFull, compareBike?.id ?? null, comparePower, compareMass]);
+
+  const compareTask = useAsyncTask(async (signal, onProgress) => {
+    const bBike = compareBike || bike;
+    const body = {
+      a_bike_id: bike.id != null ? bike.id : undefined,
+      a_bike_preset: bike.preset || undefined,
+      a_power_boost_pct: powerBoost,
+      a_mass_delta_kg: massChange,
+      a_rider_mass_kg: riderKg,
+      a_part_ids: selectedParts.map((p) => p.id),
+      a_front_tire_id: frontTire?.id ?? undefined,
+      a_rear_tire_id: rearTire?.id ?? undefined,
+      b_bike_id: bBike.id != null ? bBike.id : undefined,
+      b_bike_preset: bBike.preset || undefined,
+      b_power_boost_pct: comparePower,
+      b_mass_delta_kg: compareMass,
+      b_rider_mass_kg: riderKg,
+      b_part_ids: [],
+      venue_id: venue?.id ?? undefined,
+      ambient_temp_c: ambientTemp,
+      track_temp_c: trackTemp,
+      humidity_pct: humidity,
+      headwind_kmh: headwind,
+    };
+    const runEvent = trackSimRun('simulator_page', 'compare', {
+      bike_id: bike?.id ?? null,
+      compare_bike_id: bBike?.id ?? null,
+    });
+    try {
+      const snap = { ...makeSnap(true), compareKey, bBikeName: bikeName(bBike) };
+      const data = await compareJob(body, onProgress, signal);
+      throwIfAborted(signal);
+      runEvent.success({
+        delta_et_s: data?.delta?.et_s ?? null,
+        faster: data?.delta?.faster ?? null,
+      });
+      return { ...data, meta: snap };
+    } catch (e) {
+      if (e?.name === 'AbortError') runEvent.cancelled();
+      else runEvent.error(e);
+      throw e;
+    }
+  });
+
+  const dragyTask = useAsyncTask(async (signal, _p, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (bike?.id != null) formData.append('bike_id', bike.id.toString());
+    else if (bike?.preset) formData.append('bike_preset', bike.preset);
+    const forBike = bike?.id ?? null;
+    const res = await fetch(`${API}/api/calibrate/dragy`, { method: 'POST', body: formData, signal });
+    if (!res.ok) throw new Error((await readDetail(res)) || `Upload failed (${res.status})`);
+    const data = await res.json();
+    throwIfAborted(signal);
+    if (forBike !== (bikeRef.current?.id ?? null)) throw abortError();
+    setUploadResult({ type: 'dragy', bikeId: forBike, ...data });
+    return data;
+  });
+
+  const dynoTask = useAsyncTask(async (signal, _p, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch(`${API}/api/calibrate/dyno`, { method: 'POST', body: formData, signal });
+    if (!res.ok) throw new Error((await readDetail(res)) || `Upload failed (${res.status})`);
+    const data = await res.json();
+    throwIfAborted(signal);
+    setUploadResult({ type: 'dyno', ...data });
+    return data;
+  });
+
+  // Save: always the result's OWN bike/venue, never whatever is selected now.
+  const saveTask = useAsyncTask(async (signal, _p, override) => {
+    const src = override || saveSourceRef.current;
+    if (!src || src.estimated || src.et_quarter_s == null || src.meta?.bikeId == null) return null;
+    const body = {
+      bike_id: src.meta.bikeId,
+      venue_id: src.meta.venueId ?? null,
+      et_quarter_s: src.et_quarter_s,
+      trap_speed_kmh: src.trap_speed_kmh,
+      et_60ft_s: src.et_60ft_s ?? null,
+      et_eighth_s: src.et_eighth_s ?? null,
+    };
+    const resp = await saveRun(body, accessToken, signal);
+    throwIfAborted(signal);
+    setSavedRun({ ...resp, forKey: src.meta.key });
+    track('save_run', { bike_id: src.meta.bikeId, surface: 'simulator_page' });
+    return resp;
+  });
+
+  // Stable handles (the task objects themselves are new every render).
+  const { run: runQuick, stop: stopQuick, reset: resetQuick } = quickTask;
+  const { run: runFull, stop: stopFull, reset: resetFull } = fullSimTask;
+  const { stop: stopTop, reset: resetTop } = topSpeedTask;
+  const { stop: stopCompare, reset: resetCompare } = compareTask;
+  const { stop: stopDragy, reset: resetDragy } = dragyTask;
+  const { stop: stopSave, reset: resetSave } = saveTask;
+
+  /* ═══════════════ Result derivation ═══════════════ */
+
+  const quickRes =
+    quickTask.result && quickTask.result.meta?.bikeId === bike?.id ? quickTask.result : null;
+  const fullRes =
+    fullSimTask.result && fullSimTask.result.meta?.bikeId === bike?.id ? fullSimTask.result : null;
+  const topRes =
+    topSpeedTask.result && topSpeedTask.result.meta?.bikeId === bike?.id ? topSpeedTask.result : null;
+  const compareRes =
+    compareTask.result && compareTask.result.meta?.bikeId === bike?.id ? compareTask.result : null;
+
+  const quickFresh = !!quickRes && quickRes.meta.key === keyFull;
+  const fullFresh = !!fullRes && fullRes.meta.key === keyNoParts;
+  const topFresh = !!topRes && topRes.meta.key === keyFull;
+  const compareFresh = !!compareRes && compareRes.meta.compareKey === compareKey;
+
+  const exactFull = fullFresh && selectedParts.length === 0 ? normalizeFull(fullRes) : null;
+  const headline = exactFull || quickRes;
+  const headlineFresh = exactFull ? true : quickFresh;
+  const saveable = headline && !headline.estimated && headlineFresh ? headline : null;
+  saveSourceRef.current = saveable;
+  const savedForHeadline = savedRun && saveable && savedRun.forKey === saveable.meta.key ? savedRun : null;
+
+  /* ═══════════════ Actions ═══════════════ */
+
+  const setMode = useCallback((m) => {
+    setModeState(m);
+    try { localStorage.setItem(MODE_KEY, m); } catch { /* private mode */ }
+  }, []);
+
+  // Stop every in-flight task and drop every result tied to the old bike (F1).
+  const changeBike = useCallback((b) => {
+    stopQuick(); resetQuick();
+    stopFull(); resetFull();
+    stopTop(); resetTop();
+    stopCompare(); resetCompare();
+    stopSave(); resetSave();
+    stopDragy(); resetDragy();
+    setSavedRun(null);
+    setBikeNotice(false);
+    setUploadResult((prev) => (prev?.type === 'dragy' ? null : prev));
+    setSelectedParts([]);
+    setFrontTire(null);
+    setRearTire(null);
+    setBike(b);
+  }, [stopQuick, resetQuick, stopFull, resetFull, stopTop, resetTop, stopCompare, resetCompare,
+    stopSave, resetSave, stopDragy, resetDragy]);
+
+  const togglePart = useCallback((part) => {
+    setSelectedParts((prev) => {
+      if (prev.some((p) => p.id === part.id)) return prev.filter((p) => p.id !== part.id);
+      const grp = exclusiveGroup(catNameRef.current[part.category_id]);
+      const kept = grp
+        ? prev.filter((p) => exclusiveGroup(catNameRef.current[p.category_id]) !== grp)
+        : prev;
+      return [...kept, part];
+    });
+  }, []);
+  const removePart = useCallback((id) => {
+    setSelectedParts((prev) => prev.filter((p) => p.id !== id));
+  }, []);
+
+  // Slider setters that remember "the user changed the weather by hand".
+  const setAmbientTempUser = useCallback((v) => { setEnvTouched(true); setAmbientTemp(v); }, []);
+  const setTrackTempUser = useCallback((v) => { setEnvTouched(true); setTrackTemp(v); }, []);
+  const setHumidityUser = useCallback((v) => { setEnvTouched(true); setHumidity(v); }, []);
+  const setHeadwindUser = useCallback((v) => { setEnvTouched(true); setHeadwind(v); }, []);
+
+  const resetEnv = useCallback(() => {
+    setLocation(null);
+    setVenue(null);
+    setEnvTouched(false);
+    setAmbientTemp(DEFAULTS.ambientTemp);
+    setTrackTemp(DEFAULTS.trackTemp);
+    setHumidity(DEFAULTS.humidity);
+    setHeadwind(DEFAULTS.headwind);
+  }, []);
+
+  // LocationPicker resolved a place: venue (if it matched one), temperature, humidity.
+  const applyLocation = useCallback((env) => {
+    setLocation(env);
+    setEnvTouched(false);
+    if (env?.matched_venue_id != null) {
+      const v = venues.find((x) => x.id === env.matched_venue_id);
+      setVenue(v || {
+        id: env.matched_venue_id,
+        name: env.venue_name || env.location_name || 'Venue',
+        altitude_m: env.altitude_m ?? null,
+      });
+    } else {
+      setVenue(null);
+    }
+    if (env?.temperature_c != null) setAmbientTemp(Math.round(env.temperature_c));
+    if (env?.humidity_pct != null) setHumidity(Math.round(env.humidity_pct));
+  }, [venues]);
+
+  // Venue chosen from the plain list in Advanced (not via the location picker).
+  const pickVenue = useCallback((v) => {
+    setLocation(null);
+    setVenue(v && v.id != null ? v : null);
+  }, []);
+
+  const resetAll = useCallback(() => {
+    setSelectedParts([]);
+    setFrontTire(null);
+    setRearTire(null);
+    setPowerBoost(DEFAULTS.powerBoost);
+    setMassChange(DEFAULTS.massChange);
+    setRiderKg(DEFAULTS.riderKg);
+    resetEnv();
+    setCompareBike(null);
+    setComparePower(0);
+    setCompareMass(0);
+    stopFull(); resetFull();
+    stopTop(); resetTop();
+    stopCompare(); resetCompare();
+    setUploadResult(null);
+    setSavedRun(null);
+  }, [resetEnv, stopFull, resetFull, stopTop, resetTop, stopCompare, resetCompare]);
+
+  const startFullSim = useCallback((opts = {}) => {
+    if (!bikeRef.current || fullSimTask.active) return Promise.resolve(undefined);
+    if (opts.goTo) setActiveTab(opts.goTo);
+    return runFull();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fullSimTask.active, runFull]);
+
+  const startTopSpeed = useCallback(() => {
+    if (!bikeRef.current || topSpeedTask.active) return;
+    setActiveTab('topspeed');
+    topSpeedTask.run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [topSpeedTask.active, topSpeedTask.run]);
+
+  const startCompare = useCallback(() => {
+    if (!bikeRef.current || compareTask.active) return;
+    setActiveTab('compare');
+    compareTask.run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [compareTask.active, compareTask.run]);
+
+  const calculateNow = useCallback(() => runQuick('manual'), [runQuick]);
+
+  const goAdvanced = useCallback((tab = null, focus = null) => {
+    setMode('advanced');
+    if (tab) setActiveTab(tab);
+    if (focus) setFocusRequest(focus);
+  }, [setMode]);
+
+  const onDragyFile = useCallback((e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    lastDragyFileRef.current = file;
+    setUploadResult(null);
+    dragyTask.run(file);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dragyTask.run]);
+  const onDynoFile = useCallback((e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    lastDynoFileRef.current = file;
+    setUploadResult(null);
+    dynoTask.run(file);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dynoTask.run]);
+
+  // Share the exact setup (every query key old links used still works).
+  const buildShareUrl = useCallback(() => {
+    const params = new URLSearchParams();
+    if (bike?.id) params.set('bike', String(bike.id));
+    if (venue?.id) params.set('venue', String(venue.id));
+    if (riderKg !== DEFAULTS.riderKg) params.set('rider', String(riderKg));
+    if (powerBoost !== 0) params.set('boost', String(powerBoost));
+    if (massChange !== 0) params.set('mass', String(massChange));
+    if (selectedParts.length > 0) params.set('parts', selectedParts.map((p) => p.id).join(','));
+    if (frontTire?.id != null) params.set('ft', String(frontTire.id));
+    if (rearTire?.id != null) params.set('rt', String(rearTire.id));
+    if (ambientTemp !== DEFAULTS.ambientTemp) params.set('temp', String(ambientTemp));
+    if (trackTemp !== DEFAULTS.trackTemp) params.set('track', String(trackTemp));
+    if (humidity !== DEFAULTS.humidity) params.set('hum', String(humidity));
+    if (headwind !== DEFAULTS.headwind) params.set('wind', String(headwind));
+    return `${window.location.origin}/simulator?${params.toString()}`;
+  }, [bike, venue, riderKg, powerBoost, massChange, selectedParts, frontTire, rearTire,
+    ambientTemp, trackTemp, humidity, headwind]);
+
+  const copyOrShare = useCallback(async (url, title) => {
+    try {
+      if (navigator.share) {
+        await navigator.share({ title, url });
+        return true;
+      }
+    } catch { /* dismissed — fall through to copy */ }
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2200);
+      return true;
+    } catch { return false; }
+  }, []);
+
+  const shareBuild = useCallback(async () => {
+    const ok = await copyOrShare(buildShareUrl(), `MotoQuant — ${bikeName(bike)}`);
+    if (ok) track('share_build', { bike_id: bike?.id });
+  }, [buildShareUrl, copyOrShare, bike]);
+
+  // "Save and share this run": make the result exact if needed, save, copy /r/{id}.
+  const saveAndShare = useCallback(async () => {
+    let src = saveSourceRef.current;
+    if (!src) {
+      const full = await startFullSim();
+      if (!full) return;
+      src = normalizeFull(full);
+    }
+    const resp = await saveTask.run(src);
+    if (resp?.run_id != null) {
+      await copyOrShare(`${window.location.origin}/r/${resp.run_id}`, `MotoQuant — ${bikeName(bike)}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startFullSim, saveTask.run, copyOrShare, bike]);
+
+  /* ═══════════════ Data loading ═══════════════ */
+
+  // Clear the "waiting for the share link's parts/tyres" gate once nothing is pending.
+  const settlePending = useCallback(() => {
+    const p = pendingLinkRef.current;
+    if (!p || (!p.parts && p.ft == null && p.rt == null)) setLinkPending(false);
+  }, []);
+
+  const loadCore = useCallback(async () => {
+    coreAbortRef.current?.abort();
+    const ctl = new AbortController();
+    coreAbortRef.current = ctl;
+    setBikesStatus('loading');
+    setVenuesStatus('loading');
+    setBootError(null);
+    setBootProgress(0);
+    const tick = () => setBootProgress((v) => Math.min(1, v + 0.5));
+    const getJson = async (url) => {
+      const res = await fetch(url, { signal: ctl.signal });
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      return res.json();
+    };
+    getJson(`${API}/api/bikes?limit=2000`)
+      .then((d) => {
+        if (ctl.signal.aborted) return;
+        const list = d.bikes || [];
+        setBikes(list);
+        if (list.length) setBikesStatus('ready');
+        else {
+          setBikesStatus('error');
+          setBootError('The simulator is running but has no bikes loaded yet. Please try again in a moment.');
+        }
+      })
+      .catch((e) => {
+        if (e?.name === 'AbortError') return;
+        console.error('bikes load failed', e);
+        setBikesStatus('error');
+        setBootError('We could not load the bike list. The server may be waking up, which can take up to a minute.');
+      })
+      .finally(() => { if (!ctl.signal.aborted) tick(); });
+    getJson(`${API}/api/venues`)
+      .then((d) => { if (!ctl.signal.aborted) { setVenues(d.venues || []); setVenuesStatus('ready'); } })
+      .catch((e) => { if (e?.name !== 'AbortError') setVenuesStatus('error'); })
+      .finally(() => { if (!ctl.signal.aborted) tick(); });
+  }, []);
+
+  // Tyres + part categories: only needed by the Advanced workbench.
+  const applyPendingTires = useCallback((list) => {
+    const p = pendingLinkRef.current;
+    if (!p || (p.ft == null && p.rt == null)) return;
+    const ft = list.find((x) => x.id === p.ft);
+    const rt = list.find((x) => x.id === p.rt);
+    if (ft) setFrontTire(ft);
+    if (rt) setRearTire(rt);
+    p.ft = null;
+    p.rt = null;
+  }, []);
+
+  const loadAdvanced = useCallback(async () => {
+    setTiresStatus('loading');
+    try {
+      const [tires, cats] = await Promise.all([
+        fetch(`${API}/api/tires?limit=2000`).then((r) => (r.ok ? r.json() : Promise.reject(r.status))),
+        fetch(`${API}/api/parts/categories`).then((r) => (r.ok ? r.json() : Promise.reject(r.status))),
+      ]);
+      const list = tires.tires || [];
+      setAllTires(list);
+      setCategories(cats.categories || []);
+      setTiresStatus('ready');
+      applyPendingTires(list);
+    } catch (e) {
+      console.warn('advanced data load failed', e);
+      setTiresStatus('error');
+      if (pendingLinkRef.current) { pendingLinkRef.current.ft = null; pendingLinkRef.current.rt = null; }
+    } finally {
+      settlePending();
+    }
+  }, [applyPendingTires, settlePending]);
+
+  const loadParts = useCallback(async (bikeId) => {
+    partsAbortRef.current?.abort();
+    const ctl = new AbortController();
+    partsAbortRef.current = ctl;
+    setPartsStatus('loading');
+    setPartsError(null);
+    try {
+      const res = await fetch(
+        `${API}/api/parts?bike_id=${bikeId}&compatible_only=false&limit=2000`,
+        { signal: ctl.signal },
+      );
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      const data = await res.json();
+      if (ctl.signal.aborted) return;
+      const list = Array.isArray(data.parts) ? data.parts : [];
+      setAllParts(list);
+      setPartsBikeId(bikeId);
+      setPartsStatus('ready');
+      const pending = pendingLinkRef.current;
+      if (pending?.parts) {
+        const found = pending.parts
+          .map((id) => list.find((p) => p.id === id))
+          .filter((p) => p && p.compatible !== false);
+        if (found.length) setSelectedParts(found);
+        pending.parts = null;
+      }
+      setSelectedParts((prev) => prev.filter((p) => {
+        const hit = list.find((x) => x.id === p.id);
+        return !hit || hit.compatible !== false;
+      }));
+    } catch (e) {
+      if (e?.name === 'AbortError') return;
+      console.warn('parts load failed', e);
+      setPartsStatus('error');
+      setPartsError('We could not load the parts list.');
+      if (pendingLinkRef.current) pendingLinkRef.current.parts = null;
+    } finally {
+      if (!ctl.signal.aborted) settlePending();
+    }
+  }, [settlePending]);
+
+  /* ═══════════════ Effects ═══════════════ */
+
+  // Mount: mode preference, error handlers, surrogate preload, core data.
+  useEffect(() => {
+    installErrorHandlers();
+    track('page_view', { surface: 'simulator_page' });
+    preloadSurrogate();
+    let m = 'simple';
+    try { if (localStorage.getItem(MODE_KEY) === 'advanced') m = 'advanced'; } catch { /* ignore */ }
+    if (linkWantsAdvanced(searchParams)) m = 'advanced';
+    setModeState(m);
+    setModeReady(true);
+    loadCore();
+    return () => { coreAbortRef.current?.abort(); partsAbortRef.current?.abort(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Apply a share link / deep link to the state (initial AND on query changes — F2).
+  const applyLink = useCallback((sp, initial) => {
+    const qsNum = (key, set, min, max) => {
+      if (!sp.has(key)) return false;
+      const v = parseFloat(sp.get(key) ?? '');
+      if (Number.isFinite(v) && v >= min && v <= max) { set(v); return true; }
+      return false;
+    };
+    const hasBikeParam = sp.has('bike') || sp.has('bike_id');
+    let target = null;
+    let slugMissed = false;
+    if (hasBikeParam) {
+      const raw = (sp.get('bike') ?? sp.get('bike_id') ?? '').trim();
+      if (/^\d+$/.test(raw)) target = bikes.find((b) => b.id === parseInt(raw, 10)) || null;
+      else target = resolveBikeSlug(raw, bikes);
+      slugMissed = !target;
+    }
+    if (!target && initial) target = pickDefaultBikeForVariant(bikes, defaultBikeVariant);
+    if (target && target.id !== bikeRef.current?.id) changeBike(target);
+    if (hasBikeParam) setBikeNotice(slugMissed);
+
+    if (sp.has('venue')) {
+      const vid = parseInt(sp.get('venue') ?? '', 10);
+      const v = Number.isFinite(vid) ? venues.find((x) => x.id === vid) : null;
+      if (v) { setVenue(v); setLocation(null); }
+    }
+    qsNum('rider', setRiderKg, 50, 130);
+    qsNum('boost', setPowerBoost, -20, 50);
+    qsNum('mass', setMassChange, -30, 30);
+    const envSet = [
+      qsNum('temp', setAmbientTemp, 0, 50),
+      qsNum('track', setTrackTemp, 10, 65),
+      qsNum('hum', setHumidity, 0, 100),
+      qsNum('wind', setHeadwind, -30, 30),
+    ].some(Boolean);
+    if (envSet) { setShowEnv(true); setEnvTouched(true); setLocation(null); }
+
+    const partIds = (sp.get('parts') || '').split(',').map((s) => parseInt(s, 10)).filter(Number.isFinite);
+    const ft = parseInt(sp.get('ft') ?? '', 10);
+    const rt = parseInt(sp.get('rt') ?? '', 10);
+    if (partIds.length || Number.isFinite(ft) || Number.isFinite(rt)) {
+      pendingLinkRef.current = {
+        parts: partIds.length ? partIds : null,
+        ft: Number.isFinite(ft) ? ft : null,
+        rt: Number.isFinite(rt) ? rt : null,
+      };
+      setLinkPending(true);
+      if (allTiresRef.current.length) applyPendingTires(allTiresRef.current);
+      settlePending();
+    }
+    if (linkWantsAdvanced(sp)) setModeState('advanced');
+  }, [bikes, venues, defaultBikeVariant, changeBike, applyPendingTires, settlePending]);
+
+  useEffect(() => {
+    if (linkAppliedRef.current) return;
+    if (bikesStatus !== 'ready' || venuesStatus === 'loading') return;
+    linkAppliedRef.current = true;
+    lastQsRef.current = qs;
+    applyLink(searchParams, true);
+    setLinkReady(true);
+  }, [bikesStatus, venuesStatus, qs, searchParams, applyLink]);
+
+  useEffect(() => {
+    if (!linkAppliedRef.current || qs === lastQsRef.current) return;
+    lastQsRef.current = qs;
+    applyLink(searchParams, false);
+  }, [qs, searchParams, applyLink]);
+
+  // Advanced-only data.
+  useEffect(() => {
+    if (mode === 'advanced' && modeReady && (tiresStatus === 'idle')) loadAdvanced();
+  }, [mode, modeReady, tiresStatus, loadAdvanced]);
+
+  useEffect(() => {
+    if (mode !== 'advanced' || !bike?.id) return;
+    if (partsBikeId === bike.id && partsStatus === 'ready') return;
+    loadParts(bike.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, bike?.id]);
+
+  // Live quick-sim (400 ms debounce). Simple mode is always live.
+  const liveActive = mode === 'simple' || liveSim;
+  useEffect(() => {
+    if (!bike || !linkReady || linkPending || !liveActive) return undefined;
+    const wait = livePausedUntil - Date.now();
+    if (wait > 0) {
+      const t = setTimeout(() => setLivePausedUntil(0), wait + 50);
+      return () => clearTimeout(t);
+    }
+    const t = setTimeout(() => runQuick('auto'), 400);
+    return () => clearTimeout(t);
+  }, [bike, selectedParts, frontTire, rearTire, venue, riderKg, powerBoost, massChange,
+    ambientTemp, trackTemp, humidity, headwind, liveActive, livePausedUntil, linkReady,
+    linkPending, runQuick]);
+
+  // A new run invalidates the previous "Saved" state.
+  useEffect(() => { setSavedRun(null); resetSave(); }, [keyFull, resetSave]);
+
+  const clearFocusRequest = useCallback(() => setFocusRequest(null), []);
+
+  // Which op feeds the header progress chip (jobs first, quick last).
+  const activeOp = fullSimTask.active
+    ? { task: fullSimTask, label: 'Full simulation' }
+    : topSpeedTask.active
+      ? { task: topSpeedTask, label: 'Top speed' }
+      : compareTask.active
+        ? { task: compareTask, label: 'Comparing' }
+        : quickTask.active && !liveActive
+          ? { task: quickTask, label: 'Calculating' }
+          : null;
+
+  return {
+    // data
+    bikes, venues, categories, allParts, allTires, categoryNameById,
+    bikesStatus, venuesStatus, bootError, bootProgress, partsStatus, partsError, partsBikeId, tiresStatus,
+    reloadCore: loadCore,
+    retryParts: () => bike?.id && loadParts(bike.id),
+    retryAdvanced: () => { setTiresStatus('idle'); },
+    // selections
+    bike, selectedParts, frontTire, rearTire, venue, location,
+    riderKg, powerBoost, massChange, ambientTemp, trackTemp, humidity, headwind,
+    envCustom, showEnv, buildCost,
+    setRiderKg, setPowerBoost, setMassChange, setFrontTire, setRearTire, setShowEnv,
+    setAmbientTemp: setAmbientTempUser, setTrackTemp: setTrackTempUser,
+    setHumidity: setHumidityUser, setHeadwind: setHeadwindUser,
+    changeBike, togglePart, removePart, applyLocation, pickVenue, resetEnv, resetAll,
+    // view
+    mode, modeReady, setMode, activeTab, setActiveTab, liveSim, setLiveSim, liveActive,
+    bikeNotice, dismissBikeNotice: () => setBikeNotice(false),
+    focusRequest, clearFocusRequest, goAdvanced, defaultBikeVariant,
+    // compare config
+    compareBike, setCompareBike, comparePower, setComparePower, compareMass, setCompareMass,
+    // tasks + results
+    quickTask, fullSimTask, topSpeedTask, compareTask, dragyTask, dynoTask, saveTask,
+    quickRes, fullRes, topRes, compareRes,
+    quickFresh, fullFresh, topFresh, compareFresh,
+    headline, headlineFresh, saveable, savedRun: savedForHeadline, exactFull,
+    activeOp, livePausedUntil,
+    // actions
+    startFullSim, startTopSpeed, startCompare, calculateNow, saveAndShare,
+    shareBuild, shareCopied,
+    uploadResult, onDragyFile, onDynoFile, lastDragyFileRef, lastDynoFileRef,
+    keyFull, keyNoParts,
+  };
+}
