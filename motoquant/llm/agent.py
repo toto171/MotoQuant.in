@@ -301,11 +301,126 @@ def _bike_display_name(db, bike_id: int) -> str:
     return f"bike #{bike_id}"
 
 
+# Why a requested part was not applied — the same three codes the simulation
+# routes return in ``parts_skipped_detail[].reason`` (api.SKIP_*).
+SKIP_UNKNOWN = "unknown_part"
+SKIP_DOES_NOT_FIT = "does_not_fit"
+SKIP_NOT_APPLIED = "not_applied"
+
+
+class _BuildNotes(list):
+    """The applied-modification notes of one build (a plain list of strings),
+    plus what happened to the parts that were asked for."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.parts_applied: list[int] = []
+        self.parts_skipped: list[int] = []
+        self.parts_skipped_detail: list[dict[str, Any]] = []
+
+
+def _fit_parts(
+    db, bike_id: int, ids: list[int]
+) -> tuple[list[int], list[dict[str, Any]]]:
+    """Split requested part ids into (ids that fit ``bike_id``, skipped detail).
+
+    The rule is the simulation routes' (``api._apply_parts_to_config``): the
+    bike's catalog row, enriched by ``enrich_bike_row_for_fitment``, and each
+    part row go through ``parts.compatibility.is_compatible`` — the engine
+    ``GET /api/parts?bike_id=`` lists by — so the chat can never fit a part
+    the simulator refuses. An id the catalog does not have is skipped too.
+    When the bike has no catalog row there is nothing to judge against and
+    every known part is kept. Each skipped entry is ``{id, reason, detail}``
+    with the routes' reason codes and wording
+    (tests/test_agent.py pins both against the route helper).
+    """
+    from ..database.parts_repo import enrich_bike_row_for_fitment
+    from ..parts.compatibility import is_compatible
+
+    conn = db.conn
+    fit_row = None
+    try:
+        raw = conn.execute(
+            "SELECT * FROM bike_models WHERE id = ?", (bike_id,)
+        ).fetchone()
+        if raw is not None:
+            fit_row = dict(raw)
+            enrich_bike_row_for_fitment(conn, fit_row)
+    except Exception as exc:  # noqa: BLE001 — a lookup fault must not kill the turn
+        logger.warning("fitment lookup failed for bike_id=%s: %s", bike_id, exc)
+        fit_row = None
+
+    fitting: list[int] = []
+    skipped: list[dict[str, Any]] = []
+    for pid in ids:
+        row = conn.execute("SELECT * FROM parts WHERE id = ?", (pid,)).fetchone()
+        if not row:
+            skipped.append(
+                {
+                    "id": pid,
+                    "reason": SKIP_UNKNOWN,
+                    "detail": "No part with this id is in the catalog.",
+                }
+            )
+            continue
+        part = dict(row)
+        if fit_row is not None:
+            fits, fit_reason = is_compatible(part, fit_row)
+            if not fits:
+                label = " ".join(
+                    x for x in (part.get("brand"), part.get("model_name")) if x
+                )
+                skipped.append(
+                    {
+                        "id": pid,
+                        "reason": SKIP_DOES_NOT_FIT,
+                        "detail": f"{label or 'This part'} does not fit this bike"
+                        + (f" ({fit_reason})." if fit_reason else "."),
+                    }
+                )
+                continue
+        fitting.append(pid)
+    return fitting, skipped
+
+
+def _report_parts(out: dict[str, Any], notes: Any) -> dict[str, Any]:
+    """Put a build's skipped parts on a tool result (no-op when none were).
+
+    ``parts_skipped`` / ``parts_skipped_detail`` have the simulation routes'
+    shape; ``parts_warning`` tells the model what the numbers do and do not
+    include, so the answer says the part does not fit instead of quoting the
+    time as if it were fitted.
+    """
+    skipped = list(getattr(notes, "parts_skipped", None) or [])
+    if not skipped:
+        return out
+    detail = list(getattr(notes, "parts_skipped_detail", None) or [])
+    applied = list(getattr(notes, "parts_applied", None) or [])
+    out["parts_applied"] = applied
+    out["parts_skipped"] = skipped
+    out["parts_skipped_detail"] = detail
+    reasons = " ".join(str(d.get("detail") or "") for d in detail).strip()
+    out["parts_warning"] = (
+        f"Part id(s) {skipped} were NOT fitted. {reasons} "
+        + (
+            "These numbers include only the parts in parts_applied."
+            if applied
+            else "No requested part was fitted: these numbers are the bike WITHOUT them."
+        )
+        + " Tell the user which parts do not fit and why; do not present "
+        "this result as the bike with those parts."
+    ).replace("  ", " ")
+    return out
+
+
 def _build_config_for(ctx: AgentContext, args: dict[str, Any]):
     """Build a BikeConfig for args {bike_id, venue_id?, env?, mods?}.
 
-    Returns (config, applied_notes list) or raises ValueError with a
-    user-meaningful message.
+    Returns (config, applied_notes) or raises ValueError with a
+    user-meaningful message. ``applied_notes`` is a list of strings that also
+    carries ``parts_applied`` / ``parts_skipped`` / ``parts_skipped_detail``:
+    a requested part that does not fit the bike is NOT applied (see
+    ``_fit_parts``); pass the notes to ``_report_parts`` to say so.
     """
     db = ctx.db
     bike_id = _as_int(args.get("bike_id"))
@@ -322,7 +437,7 @@ def _build_config_for(ctx: AgentContext, args: dict[str, Any]):
     if config is None:
         raise ValueError(f"config load failed for bike_id {bike_id}")
 
-    notes: list[str] = []
+    notes = _BuildNotes()
     _apply_env_args(config, args)
     _apply_power_boost(config, args.get("power_boost_pct"))
     if args.get("power_boost_pct"):
@@ -346,9 +461,35 @@ def _build_config_for(ctx: AgentContext, args: dict[str, Any]):
             )
         )
         repo = PartsRepository(db.conn)
-        config = repo.apply_multiple(ids, config)
-        cost = repo.estimate_build_cost(ids)
-        notes.append(f"{len(ids)} parts applied (₹{cost.get('total', 0):,.0f})")
+        # Only parts that fit this bike are applied (the simulation routes'
+        # rule); the rest are reported, never silently simulated.
+        fitting, skipped = _fit_parts(db, bike_id, ids)
+        applied: list[int] = []
+        for pid in fitting:
+            try:
+                config = repo.apply_to_config(pid, config)
+                applied.append(pid)
+            except Exception as exc:  # noqa: BLE001 — report it, keep the rest
+                logger.warning("part %s could not be applied: %s", pid, exc)
+                skipped.append(
+                    {
+                        "id": pid,
+                        "reason": SKIP_NOT_APPLIED,
+                        "detail": "The part could not be applied.",
+                    }
+                )
+        skipped.sort(key=lambda d: ids.index(d["id"]))  # request order
+        notes.parts_applied = applied
+        notes.parts_skipped = [d["id"] for d in skipped]
+        notes.parts_skipped_detail = skipped
+        if applied:
+            cost = repo.estimate_build_cost(applied)
+            notes.append(f"{len(applied)} parts applied (₹{cost.get('total', 0):,.0f})")
+        if skipped:
+            notes.append(
+                f"{len(skipped)} requested part(s) NOT fitted: "
+                + " ".join(d["detail"] for d in skipped)
+            )
 
     rear_tire_id = _as_int(args.get("rear_tire_id"))
     if rear_tire_id:
@@ -387,7 +528,8 @@ def _sim_to_dict(sim, bike_name: str, notes: list[str]) -> dict[str, Any]:
         if val:
             out[key] = round(float(val), 4)
     if notes:
-        out["modifications"] = notes
+        out["modifications"] = list(notes)
+    _report_parts(out, notes)
     return out
 
 
@@ -413,7 +555,11 @@ _MOD_PROPS = {
     "part_ids": {
         "type": "array",
         "items": {"type": "integer"},
-        "description": "Catalog part ids (from search_parts) to bolt on before the run",
+        "description": (
+            "Catalog part ids (from search_parts) to bolt on before the run. A "
+            "part that does not fit the bike is NOT applied: it comes back in "
+            "parts_skipped / parts_skipped_detail with the reason"
+        ),
     },
     "rear_tire_id": {
         "type": "integer",
@@ -760,7 +906,8 @@ def _exec_run_top_speed(ctx: AgentContext, args: dict) -> dict:
         "reached_plateau": bool(ts.reached_plateau),
     }
     if notes:
-        out["modifications"] = notes
+        out["modifications"] = list(notes)
+    _report_parts(out, notes)
     ctx.add_block("top_speed", out)
     return out
 
@@ -1053,7 +1200,7 @@ def _exec_autotune_setup(ctx: AgentContext, args: dict) -> dict:
     if err:
         return {"error": err}
     try:
-        config, _ = _build_config_for(ctx, args)
+        config, notes = _build_config_for(ctx, args)
     except ValueError as e:
         return {"error": str(e)}
     from ..analysis.ecu_autotune import autotune
@@ -1065,6 +1212,7 @@ def _exec_autotune_setup(ctx: AgentContext, args: dict) -> dict:
     except Exception as e:  # noqa: BLE001
         return {"error": f"autotune failed: {type(e).__name__}: {e}"}
     payload = result.to_dict()
+    _report_parts(payload, notes)
     ctx.add_block("autotune_result", payload)
     return payload
 
@@ -1224,6 +1372,10 @@ context from the conversation — reuse known bike_ids instead of re-searching.
 - "Best possible / fastest configuration" for a bike = stage_4 outlaw \
 optimize_build. Summarize the result: baseline → final ET, the parts list \
 with prices, the gearing/launch setup, and total cost.
+- If a result carries parts_skipped, those parts were NOT fitted (see \
+parts_skipped_detail for why): say they do not fit this bike and never quote \
+the returned time as the bike with them — offer search_parts with the \
+bike_id to find ones that fit.
 - Be a race engineer in tone: precise, numbers-first, no hype. Use km/h \
 (mention mph for US bikes). Prices in ₹ (INR).
 - Budgets: you have {FULL_SIM_BUDGET} full sims and {HEAVY_OP_BUDGET} heavy \

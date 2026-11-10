@@ -715,6 +715,119 @@ class TestChatApi(unittest.TestCase):
         self.assertEqual(r.json()["error"], "rate_limited")
 
 
+# ───────────────────────────────────────────────────────────────────
+# Parts that do not fit the bike are not applied — the simulation routes' rule
+# ───────────────────────────────────────────────────────────────────
+
+
+class TestAgentRefusesPartsThatDoNotFit(unittest.TestCase):
+    """The simulation routes skip a part that does not fit the chosen bike and
+    report it (parts_skipped / parts_skipped_detail). The chat agent applies
+    parts through the same fitment engine: it must never return a time for a
+    part the simulator refuses."""
+
+    @classmethod
+    def setUpClass(cls):
+        db = _get_db()
+
+        def model_id(name):
+            return db.conn.execute(
+                "SELECT id FROM bike_models WHERE model_name = ? ORDER BY id LIMIT 1",
+                (name,),
+            ).fetchone()[0]
+
+        cls.k5 = model_id("GSX-R 1000 K5/K6")
+        cls.busa = model_id("Hayabusa GSX1300R Gen1")
+        cls.busa_exhaust = db.conn.execute(
+            "SELECT id FROM parts WHERE brand = 'Akrapovic' "
+            "AND model_name = 'Racing Full System Hayabusa'"
+        ).fetchone()[0]
+        cls.k5_ecu = db.parts.search(category="ecu", bike_model_id=cls.k5, limit=1)[0][
+            "id"
+        ]
+
+    def _sim(self, args):
+        client, state = _scripted_client([[("run_simulation", args)], "answered"])
+        res = run_agent_chat("sim it", _get_db(), client=client)
+        return res, _last_tool_payload(state["kwargs_log"], "run_simulation")
+
+    def test_hayabusa_exhaust_on_the_k5_is_skipped_and_reported(self):
+        _, stock = self._sim({"bike_id": self.k5})
+        res, out = self._sim({"bike_id": self.k5, "part_ids": [self.busa_exhaust]})
+        # not fitted: the number is the stock bike's, and the result says so
+        self.assertEqual(out["parts_skipped"], [self.busa_exhaust])
+        self.assertEqual(out["parts_applied"], [])
+        self.assertEqual(out["et_quarter_s"], stock["et_quarter_s"])
+        detail = out["parts_skipped_detail"]
+        self.assertEqual(len(detail), 1)
+        self.assertEqual(detail[0]["id"], self.busa_exhaust)
+        self.assertEqual(detail[0]["reason"], "does_not_fit")
+        self.assertIn("does not fit this bike", detail[0]["detail"])
+        self.assertIn("NOT fitted", out["parts_warning"])
+        self.assertIn("WITHOUT", out["parts_warning"])
+        self.assertFalse(any("parts applied" in m for m in out["modifications"]))
+        # the same report reaches the UI block
+        block = res.last_block("sim_result")
+        self.assertEqual(block["parts_skipped"], [self.busa_exhaust])
+
+    def test_the_same_exhaust_is_applied_on_the_hayabusa(self):
+        _, stock = self._sim({"bike_id": self.busa})
+        _, out = self._sim({"bike_id": self.busa, "part_ids": [self.busa_exhaust]})
+        self.assertNotIn("parts_skipped", out)
+        self.assertNotIn("parts_warning", out)
+        self.assertLess(out["et_quarter_s"], stock["et_quarter_s"] - 0.01)
+        self.assertTrue(
+            any(m.startswith("1 parts applied") for m in out["modifications"])
+        )
+
+    def test_fitting_parts_are_kept_and_the_rest_reported_in_request_order(self):
+        _, stock = self._sim({"bike_id": self.k5})
+        ids = [self.busa_exhaust, self.k5_ecu, 99_999_999]
+        _, out = self._sim({"bike_id": self.k5, "part_ids": ids})
+        self.assertEqual(out["parts_applied"], [self.k5_ecu])
+        self.assertEqual(out["parts_skipped"], [self.busa_exhaust, 99_999_999])
+        self.assertEqual(
+            [d["reason"] for d in out["parts_skipped_detail"]],
+            ["does_not_fit", "unknown_part"],
+        )
+        self.assertNotEqual(out["et_quarter_s"], stock["et_quarter_s"])
+        self.assertIn("only the parts in parts_applied", out["parts_warning"])
+        _, only_ecu = self._sim({"bike_id": self.k5, "part_ids": [self.k5_ecu]})
+        self.assertEqual(out["et_quarter_s"], only_ecu["et_quarter_s"])
+
+    def test_top_speed_reports_skipped_parts_too(self):
+        args = {"bike_id": self.k5, "part_ids": [self.busa_exhaust]}
+        client, state = _scripted_client([[("run_top_speed", args)], "answered"])
+        run_agent_chat("top speed", _get_db(), client=client)
+        out = _last_tool_payload(state["kwargs_log"], "run_top_speed")
+        self.assertEqual(out["parts_skipped"], [self.busa_exhaust])
+        self.assertEqual(out["parts_skipped_detail"][0]["reason"], "does_not_fit")
+
+    def test_verdicts_match_the_simulation_routes(self):
+        """Same ids, same reasons, same wording as api._apply_parts_to_config
+        (which reads MOTOQUANT_DB — this module's copy, see setUpModule)."""
+        from motoquant import api
+        from motoquant.llm.agent import _fit_parts
+
+        db = _get_db()
+        pool = [p["id"] for p in db.parts.search(limit=100_000)][::7]
+        ids = [self.busa_exhaust, self.k5_ecu, 99_999_999, *pool]
+        ids = list(dict.fromkeys(ids))
+        for bike in (self.k5, self.busa):
+            row = db.bikes.get_current_config(bike)
+            cfg = db.bikes.to_config(row["id"])
+            api_skipped: list = []
+            api_detail: list = []
+            api._apply_parts_to_config(
+                cfg, ids, skipped=api_skipped, skipped_detail=api_detail, bike_id=bike
+            )
+            fitting, detail = _fit_parts(db, bike, ids)
+            self.assertEqual([d["id"] for d in detail], api_skipped, bike)
+            self.assertEqual(detail, api_detail, bike)
+            self.assertEqual(fitting, [i for i in ids if i not in set(api_skipped)])
+            self.assertTrue(api_skipped and fitting, bike)  # both outcomes exercised
+
+
 def setUpModule():
     global _OLD_ENV_DB
     _OLD_ENV_DB = os.environ.get("MOTOQUANT_DB")
