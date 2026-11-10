@@ -28,7 +28,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'The Aamby Valley airstrip in Maharashtra sits at 679 m above sea level. MotoQuant\'s November normals for it are 22°C, 40% humidity and a 26°C track, on asphalt. Each of those numbers changes your quarter-mile time. Here is how.',
+    text: 'The Aamby Valley airstrip in Maharashtra sits at 679 m above sea level. MotoQuant\'s November normals for it are 22°C, 40% humidity and a 26°C track, on asphalt. Each of those numbers changes your quarter-mile time. Here is how. (Updated 10 November 2026: the venue facts now match the catalog, and every simulated time was re-run on the current engine.)',
   },
   {
     type: 'h2',

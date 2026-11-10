@@ -30,6 +30,15 @@ export const metadata = {
 
 const POSTS = [
   {
+    slug: "motoquant-2-0-is-open-source",
+    date: "2026-11-10",
+    readTime: "5 min",
+    tags: ["release", "open source", "accuracy"],
+    title: "MotoQuant 2.0 Is Open Source, Including Where It Is Wrong",
+    excerpt:
+      "MotoQuant 2.0 is free and open source under Apache-2.0, with no accounts and no paid plans. Across 263 matches with published tests it is off by 0.25 s on average; sport bikes do best, and small bikes, singles and two-strokes are still off by up to a quarter of a second. What changed, where it is wrong, and how a timeslip from you makes it better.",
+  },
+  {
     slug: "pulsar-n125-vs-raider-125-vs-glamour-125-quarter-mile-physics",
     date: "2026-05-31",
     readTime: "13 min",
@@ -703,6 +712,9 @@ export default function BlogIndexPage() {
 
       <main id="main" className="pb-24 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
+          <p className="mb-8 max-w-3xl text-sm text-white/60">
+            Simulated times in each post come from the engine as it stood on the post&apos;s date. The engine has been re-tuned since, so the simulator today can differ by a few tenths, and accuracy figures quoted with an older date are history. Posts marked &ldquo;Updated 10 November 2026&rdquo; were re-run on the current engine.
+          </p>
           <FeaturedPostCard post={featured} />
 
           {grouped.map((rubric) => (

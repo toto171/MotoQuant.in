@@ -40,7 +40,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'The Suzuki Hayabusa and the Kawasaki Ninja ZX-14R have shared the title of "fastest production motorcycle on a public road" for over twenty years. The two bikes trade wins on every dyno chart, every magazine timing run, and every Sunday morning argument outside Pune coffee shops. MotoQuant simulates the Hayabusa Gen1 reference baseline at 10.1100 seconds and pegs the ZX-14R 2012 in the same hyper-sport cluster. The numbers tell a clearer story than the marketing does — and the answer to "which is faster off the line" depends on what you mean by "off the line".',
+    text: 'The Suzuki Hayabusa and the Kawasaki Ninja ZX-14R have shared the title of "fastest production motorcycle on a public road" for over twenty years. The two bikes trade wins on every dyno chart, every magazine timing run, and every Sunday morning argument outside Pune coffee shops. MotoQuant simulates the Hayabusa Gen1 reference baseline at 10.1100 seconds and pegs the ZX-14R 2012 in the same hyper-sport cluster. The numbers tell a clearer story than the marketing does — and the answer to "which is faster off the line" depends on what you mean by "off the line". (Updated 10 November 2026: the simulated times were re-run on the current engine.)',
   },
   {
     type: 'h2',

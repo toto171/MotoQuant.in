@@ -166,16 +166,16 @@ const CONTENT = [
     type: 'table',
     rows: [
       ['Venue', 'Nov DA', 'Stock Duke ET (sim)', 'After ₹49k build (sim)'],
-      ['MMRT Chennai', '~150 m', '13.05 s', '12.30 s'],
-      ['Buddh International Circuit', '~250 m', '13.10 s', '12.35 s'],
-      ['Aamby Valley', '~1,100 m', '13.30 s', '12.55 s'],
-      ['Kari Speedway Coimbatore', '~600 m', '13.18 s', '12.43 s'],
+      ['MMRT Chennai', '~600 m', '13.05 s', '12.30 s'],
+      ['Buddh International Circuit', '~490 m', '13.10 s', '12.35 s'],
+      ['Aamby Valley', '~1,120 m', '13.30 s', '12.55 s'],
+      ['Kari Speedway Coimbatore', '~790 m', '13.18 s', '12.43 s'],
       ['Leh (reference, not a real strip)', '~3,500 m', '13.95 s', '13.20 s'],
     ],
   },
   {
     type: 'p',
-    text: 'The roughly 0.25 second swing between MMRT and Aamby Valley is the largest accuracy-relevant variable on a stock Duke 390. If you have ever wondered why the Pune-area Duke 390 community runs three to four tenths slower than the Chennai community at apparently similar mod levels, this is most of the answer. None of this is news to active Indian drag racers, but it is worth running through the simulator before booking flights for a specific Valley Run weekend.',
+    text: 'The times in this table come from the engine as it stood in May 2026; the DA column uses the current catalog\'s November normals. On the current engine a stock 2017-2023 Duke 390 is 0.19 s quicker at MMRT than at Aamby Valley in November, and BIC edges MMRT because of MMRT\'s humidity (see the venue comparison post). The roughly 0.2 second swing between MMRT and Aamby Valley is the largest accuracy-relevant variable on a stock Duke 390. If you have ever wondered why the Pune-area Duke 390 community runs three to four tenths slower than the Chennai community at apparently similar mod levels, this is a large part of the answer. None of this is news to active Indian drag racers, but it is worth running through the simulator before booking flights for a specific Valley Run weekend.',
   },
   {
     type: 'h2',
