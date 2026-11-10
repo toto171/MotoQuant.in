@@ -1,28 +1,20 @@
-'use client';
-
 /**
- * PageHero — unified inner-page hero (IGNITION v5 skin, same API).
+ * PageHero — slim header for CONTENT pages (CLARITY v6). Tool routes use
+ * PageHeader instead.
  *
- * One drop-in block giving every inner page the v4 voice: StageDots +
- * label kicker, condensed uppercase display title, quiet Inter subcopy,
- * mono stat row, centerline underneath.
- *
- * Usage (unchanged since June 2026)
- * ---------------------------------
  *   <PageHero
- *     kicker="Motorcycle database"
- *     badge="541 bikes"
- *     title={<>Every bike. <span className="text-gradient-volt">Real physics.</span></>}
- *     sub="541 bikes with full physics data — individual aero, dyno curves, gear cassettes."
- *     stats={[{ value: 541, label: 'BIKES' }, { value: 254, label: 'TIRES' }]}
+ *     kicker="Motorcycle database"          // small eyebrow (optional)
+ *     badge="541 bikes"                     // small pill (optional)
+ *     title={<>Every bike. <span className="text-accent">Real physics.</span></>}
+ *     sub="One plain sentence."
+ *     stats={[{ value: 541, label: 'Bikes' }]}   // optional, static (no count-up)
+ *     align="left" | "center"
  *   />
  *
- * Opacity/transform-only (Reveal) and reduced-motion-safe by construction —
- * do not add position:fixed children here.
+ * Same props as v5 so existing callers keep working. Everything is rendered
+ * in server HTML — no counters, no animation, no decorative dots/rulers.
  */
 
-import CodeComment from './CodeComment';
-import { Reveal } from './Reveal';
 import { ScoreboardCounter } from './ScoreboardDigits';
 
 export default function PageHero({
@@ -35,45 +27,29 @@ export default function PageHero({
   children = null,
   className = '',
 }) {
-  const alignCls = align === 'center' ? 'text-center items-center' : 'text-left items-start';
+  const center = align === 'center';
+  const alignCls = center ? 'text-center items-center' : 'text-left items-start';
 
   return (
-    <section className={`relative pt-28 md:pt-32 pb-10 md:pb-14 px-6 ${className}`}>
-      <div className={`relative max-w-6xl mx-auto flex flex-col gap-4 ${alignCls}`}>
-        {kicker && (
-          <Reveal y={12} duration={0.5}>
-            <CodeComment center={align === 'center'}>{kicker}</CodeComment>
-          </Reveal>
-        )}
-        {badge && (
-          <Reveal y={14} duration={0.55} delay={0.05}>
-            <span className="chip chip-volt">{badge}</span>
-          </Reveal>
-        )}
-        <Reveal y={20} duration={0.65} delay={0.1}>
-          <h1 className="font-display font-bold text-4xl md:text-6xl tracking-tight text-white max-w-3xl">
-            {title}
-          </h1>
-        </Reveal>
-        {sub && (
-          <Reveal y={16} duration={0.6} delay={0.16}>
-            <p className="text-white/65 text-lg leading-relaxed max-w-2xl">{sub}</p>
-          </Reveal>
-        )}
+    <section className={`relative px-4 pb-8 pt-24 sm:px-6 md:pb-10 md:pt-28 ${className}`}>
+      <div className={`mx-auto flex max-w-6xl flex-col gap-3 ${alignCls}`}>
+        {kicker && <p className="eyebrow">{kicker}</p>}
+        {badge && <span className="chip chip-volt">{badge}</span>}
+        <h1 className="max-w-3xl font-display text-3xl font-bold tracking-tight text-white md:text-5xl">
+          {title}
+        </h1>
+        {sub && <p className="max-w-2xl text-base leading-relaxed text-white/70 md:text-lg">{sub}</p>}
         {stats && stats.length > 0 && (
-          <Reveal y={14} duration={0.6} delay={0.22}>
-            <div className="mt-2 flex flex-wrap gap-x-10 gap-y-4">
-              {stats.map((s) => (
-                <div key={s.label} className="flex flex-col gap-1.5">
-                  <ScoreboardCounter value={s.value} h={s.h ?? 24} />
-                  <span className="label-mono">{s.label}</span>
-                </div>
-              ))}
-            </div>
-          </Reveal>
+          <div className={`mt-2 flex flex-wrap gap-x-10 gap-y-4 ${center ? 'justify-center' : ''}`}>
+            {stats.map((s) => (
+              <div key={s.label} className="flex flex-col gap-1">
+                <ScoreboardCounter value={s.value} h={s.h ?? 24} />
+                <span className="text-sm text-white/60">{s.label}</span>
+              </div>
+            ))}
+          </div>
         )}
         {children}
-        <div className="centerline mt-6 w-full" aria-hidden="true" />
       </div>
     </section>
   );

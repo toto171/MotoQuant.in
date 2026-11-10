@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * CommandPalette — ⌘K / Ctrl+K jump-anywhere (IGNITION v5 skin).
+ * CommandPalette — ⌘K / Ctrl+K jump-anywhere (CLARITY v6).
  *
  * One input, grouped results:
  *   - Actions/pages: static route list with keyword aliases (fuzzy-ish match)
@@ -30,20 +30,21 @@ import {
 import { API_URL } from '@/lib/api';
 
 const ACTIONS = [
-  { label: 'Run the simulator', href: '/simulator', kw: 'sim simulate quarter mile et run race', icon: Gauge, group: 'Tools' },
-  { label: 'Optimize a build', href: '/optimize', kw: 'parts budget knapsack roi upgrade build optimizer', icon: Wrench, group: 'Tools' },
-  { label: 'ECU autotune setup', href: '/autotune', kw: 'tune gearing launch rpm tyre pressure conditions ecu', icon: Zap, group: 'Tools' },
-  { label: 'Browse the bike catalog', href: '/bikes', kw: 'bikes motorcycles catalog database specs', icon: Search, group: 'Tools' },
-  { label: 'Leaderboard', href: '/leaderboard', kw: 'top runs fastest board ranking times', icon: Trophy, group: 'Tools' },
-  { label: 'Source code on GitHub', href: 'https://github.com/toto171/MotoQuant.in', kw: 'github open source mit license code repo contribute', icon: ArrowRight, group: 'Pages' },
-  { label: 'Docs — getting started', href: '/docs/getting-started', kw: 'documentation guide help how to start', icon: BookOpen, group: 'Pages' },
-  { label: 'Docs — physics engine', href: '/docs/physics', kw: 'rk4 submodels engine model documentation', icon: BookOpen, group: 'Pages' },
-  { label: 'Docs — validation data', href: '/docs/validation', kw: 'accuracy benchmarks validation error', icon: BookOpen, group: 'Pages' },
-  { label: 'Features', href: '/features', kw: 'what can it do capabilities overview', icon: ArrowRight, group: 'Pages' },
-  { label: 'Whitepaper', href: '/whitepaper', kw: 'paper methodology research physics', icon: BookOpen, group: 'Pages' },
-  { label: 'Blog', href: '/blog', kw: 'articles posts guides comparisons', icon: BookOpen, group: 'Pages' },
-  { label: 'About MotoQuant', href: '/about', kw: 'company founders story contact', icon: ArrowRight, group: 'Pages' },
-  { label: 'Your account', href: '/account', kw: 'profile garage saved runs sign in', icon: ArrowRight, group: 'Pages' },
+  { label: 'Quarter-mile simulator', desc: 'See how fast a bike runs the quarter mile', href: '/simulator', kw: 'sim simulate run race et elapsed time calculate calculator', icon: Gauge, group: 'Tools' },
+  { label: 'Upgrades — best parts for your budget', desc: 'We test every compatible part and pick the quickest mix', href: '/optimize', kw: 'optimize optimizer parts budget knapsack roi upgrade build mods', icon: Wrench, group: 'Tools' },
+  { label: 'Race-day setup', desc: 'Gearing, launch RPM and tyre pressure for today\'s air', href: '/autotune', kw: 'autotune tune tuning gearing launch rpm tyre tire pressure conditions ecu setup', icon: Zap, group: 'Tools' },
+  { label: 'Browse bikes', desc: 'Search every motorcycle you can simulate', href: '/bikes', kw: 'bikes motorcycles catalog database specs', icon: Search, group: 'Tools' },
+  { label: 'Leaderboard', desc: 'The quickest saved runs', href: '/leaderboard', kw: 'top runs fastest board ranking times', icon: Trophy, group: 'Tools' },
+  { label: 'Getting started', desc: 'A 5-minute walkthrough of the simulator', href: '/docs/getting-started', kw: 'documentation guide help how to start tutorial', icon: BookOpen, group: 'Learn' },
+  { label: 'Glossary', desc: 'Drag-racing terms in plain English', href: '/docs/glossary', kw: 'terms jargon meaning et trap sixty launch definitions what is', icon: BookOpen, group: 'Learn' },
+  { label: 'How the physics works', desc: 'What the simulator calculates, step by step', href: '/docs/physics', kw: 'rk4 submodels engine model documentation physics', icon: BookOpen, group: 'Learn' },
+  { label: 'Accuracy', desc: 'How close predictions are to real timeslips', href: '/validation', kw: 'validation benchmarks error trust accurate', icon: BookOpen, group: 'Learn' },
+  { label: 'Blog', desc: 'Guides and deep dives', href: '/blog', kw: 'articles posts guides comparisons', icon: BookOpen, group: 'Learn' },
+  { label: 'About MotoQuant', desc: 'Who builds this, and why it is open source', href: '/about', kw: 'story founders contact team', icon: ArrowRight, group: 'Learn' },
+  { label: 'Features', desc: 'Everything the simulator can do', href: '/features', kw: 'what can it do capabilities overview', icon: ArrowRight, group: 'Learn' },
+  { label: 'Whitepaper', desc: 'The method behind the numbers', href: '/whitepaper', kw: 'paper methodology research physics', icon: BookOpen, group: 'Learn' },
+  { label: 'Source code on GitHub', desc: 'MotoQuant is free and open source (MIT)', href: 'https://github.com/toto171/MotoQuant.in', kw: 'github open source mit license code repo contribute', icon: ArrowRight, group: 'Project' },
+  { label: 'Your saved runs', desc: 'Runs you saved, and your password', href: '/account', kw: 'account profile garage saved runs sign in login', icon: ArrowRight, group: 'Project' },
 ];
 
 function matchActions(q) {
@@ -51,7 +52,7 @@ function matchActions(q) {
   if (!t) return ACTIONS.slice(0, 6);
   const terms = t.split(/\s+/);
   return ACTIONS.filter((a) => {
-    const hay = `${a.label} ${a.kw}`.toLowerCase();
+    const hay = `${a.label} ${a.desc} ${a.kw}`.toLowerCase();
     return terms.every((term) => hay.includes(term));
   }).slice(0, 6);
 }
@@ -139,7 +140,7 @@ export default function CommandPalette({ open, onClose }) {
       kind: 'action',
       key: `a:${a.href}`,
       label: a.label,
-      sub: a.group,
+      sub: a.desc,
       icon: a.icon,
       href: a.href,
     }));
@@ -151,7 +152,7 @@ export default function CommandPalette({ open, onClose }) {
         label: name,
         sub: `${b.displacement_cc ? `${Math.round(b.displacement_cc)}cc` : ''}${
           b.peak_power_hp ? ` · ${Math.round(b.peak_power_hp)} hp` : ''
-        } — view specs`,
+        } · view specs`,
         icon: Search,
         href: `/bikes/${b.id}`,
       });
@@ -159,7 +160,7 @@ export default function CommandPalette({ open, onClose }) {
         kind: 'bike-sim',
         key: `s:${b.id}`,
         label: `Simulate the ${name}`,
-        sub: 'open in the simulator',
+        sub: 'Open it in the simulator',
         icon: Gauge,
         href: `/simulator?bike_id=${b.id}`,
       });
@@ -214,7 +215,7 @@ export default function CommandPalette({ open, onClose }) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: reduced ? 0 : 0.15 }}
-          className="fixed inset-0 z-[100] flex items-start justify-center bg-asphalt-0/80 backdrop-blur-sm px-4 pt-[12vh]"
+          className="fixed inset-0 z-[100] flex items-start justify-center bg-black/50 backdrop-blur-sm px-4 pt-[12vh]"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget) onClose();
           }}
@@ -227,11 +228,11 @@ export default function CommandPalette({ open, onClose }) {
             animate={{ opacity: 1, y: 0 }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, y: -10 }}
             transition={{ duration: reduced ? 0 : 0.18 }}
-            className="w-full max-w-xl overflow-hidden rounded-xl border border-white/10 bg-asphalt-1 shadow-2xl"
+            className="w-full max-w-xl overflow-hidden rounded-2xl border border-white/10 bg-asphalt-1 shadow-[var(--overlay-shadow)]"
           >
             {/* Input strip — the .input-base voice (asphalt field, quiet placeholder) */}
             <div className="flex items-center gap-3 border-b border-white/10 bg-asphalt-3/60 px-4">
-              <Search size={16} className="shrink-0 text-white/40" aria-hidden="true" />
+              <Search size={16} className="shrink-0 text-white/55" aria-hidden="true" />
               <input
                 ref={inputRef}
                 type="text"
@@ -243,16 +244,16 @@ export default function CommandPalette({ open, onClose }) {
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 onKeyDown={onKeyDown}
-                placeholder="Search bikes, pages, actions…"
-                className="h-14 w-full bg-transparent text-[15px] text-white placeholder:text-white/30 focus:outline-none"
+                placeholder="Search bikes, pages and tools…"
+                className="h-14 w-full bg-transparent text-base text-white placeholder:text-white/50 focus:outline-none"
               />
-              <kbd className="chip shrink-0">esc</kbd>
+              <kbd className="chip shrink-0">Esc</kbd>
             </div>
 
             <div ref={listRef} id="cmdk-results" role="listbox" className="max-h-[46vh] overflow-y-auto p-2">
               {rows.length === 0 && !bikesLoading && (
-                <p className="px-3 py-6 text-center font-mono text-xs text-white/40">
-                  No matches — try a bike name, “optimize”, “docs”…
+                <p className="px-3 py-6 text-center text-sm text-white/60">
+                  No matches. Try a bike name, “upgrades” or “glossary”.
                 </p>
               )}
               {rows.map((row, i) => {
@@ -263,7 +264,7 @@ export default function CommandPalette({ open, onClose }) {
                 const header =
                   i === 0
                     ? row.kind === 'action'
-                      ? 'Pages & actions'
+                      ? 'Pages and tools'
                       : 'Bikes'
                     : row.kind === 'bike' && rows[i - 1]?.kind === 'action'
                       ? 'Bikes'
@@ -292,11 +293,11 @@ export default function CommandPalette({ open, onClose }) {
                       <Icon
                         size={15}
                         aria-hidden="true"
-                        className={i === hi ? 'text-white/80' : 'text-white/40'}
+                        className={i === hi ? 'text-white/80' : 'text-white/55'}
                       />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm text-white/90">{row.label}</span>
-                        <span className="block truncate font-mono text-[10px] uppercase tracking-[0.2em] text-white/35">
+                        <span className="block truncate text-xs text-white/60">
                           {row.sub}
                         </span>
                       </span>
@@ -314,8 +315,8 @@ export default function CommandPalette({ open, onClose }) {
             </div>
 
             <div className="flex items-center justify-between border-t border-white/10 px-4 py-2">
-              <span className="label-mono">↑↓ navigate · ↵ open</span>
-              <span className="label-mono">full catalog searchable</span>
+              <span className="label-mono">↑↓ to move · Enter to open</span>
+              <span className="label-mono">Every bike is searchable</span>
             </div>
           </motion.div>
         </motion.div>

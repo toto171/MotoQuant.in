@@ -49,7 +49,7 @@ function TopCtaInner({ bikeId }) {
       data-variant={variant}
       data-cta="bike-detail-top"
       data-bike-id={bikeId ?? ''}
-      className="shrink-0 inline-flex items-center gap-2 px-5 py-3 bg-brand-orange text-black font-display font-bold rounded-xl transition-all hover:shadow-[0_0_30px_rgba(255,94,31,0.4)] text-sm"
+      className="shrink-0 inline-flex items-center gap-2 px-5 py-3 bg-brand-orange text-on-accent font-display font-bold rounded-xl transition-all hover:shadow-[0_0_30px_rgba(255,94,31,0.4)] text-sm"
     >
       <Gauge size={16} /> {label} →
     </Link>
@@ -67,7 +67,7 @@ function TopCtaFallback({ bikeId }) {
       data-variant="A"
       data-cta="bike-detail-top"
       data-bike-id={bikeId ?? ''}
-      className="shrink-0 inline-flex items-center gap-2 px-5 py-3 bg-brand-orange text-black font-display font-bold rounded-xl transition-all hover:shadow-[0_0_30px_rgba(255,94,31,0.4)] text-sm"
+      className="shrink-0 inline-flex items-center gap-2 px-5 py-3 bg-brand-orange text-on-accent font-display font-bold rounded-xl transition-all hover:shadow-[0_0_30px_rgba(255,94,31,0.4)] text-sm"
     >
       <Gauge size={16} /> Simulate this bike →
     </Link>

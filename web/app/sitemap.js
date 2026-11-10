@@ -403,6 +403,12 @@ export default async function sitemap() {
       priority: 0.8,
     },
     {
+      url: `${SITE_URL}/docs/glossary`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       url: `${SITE_URL}/docs/physics`,
       lastModified: now,
       changeFrequency: "monthly",

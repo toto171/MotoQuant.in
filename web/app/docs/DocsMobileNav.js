@@ -21,7 +21,7 @@ export default function DocsMobileNav({ pages }) {
       <summary className="flex items-center justify-between gap-3 px-4 py-3 cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden min-h-[44px]">
         <span className="flex items-baseline gap-3 min-w-0">
           <span className="label-mono shrink-0">Docs</span>
-          <span className="font-mono text-sm text-white/85 truncate">
+          <span className="font-medium text-sm text-white/85 truncate">
             {current ? current.label : 'Documentation'}
           </span>
         </span>
@@ -41,7 +41,7 @@ export default function DocsMobileNav({ pages }) {
               href={p.href}
               aria-current={active ? 'page' : undefined}
               className={[
-                'block px-4 py-2.5 text-sm font-mono border-l-2 transition-colors min-h-[40px]',
+                'block px-4 py-2.5 text-sm font-medium border-l-2 transition-colors min-h-[40px]',
                 active
                   ? 'border-accent text-white bg-white/5'
                   : 'border-transparent text-white/65 hover:text-white hover:bg-white/5',

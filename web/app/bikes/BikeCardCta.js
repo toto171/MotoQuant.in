@@ -50,7 +50,7 @@ function VariantPillInner({ bikeId }) {
       data-variant="B"
       data-cta="bikes-card-run-sim"
       data-bike-id={bikeId ?? ''}
-      className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-brand-orange/60 bg-brand-orange/10 text-brand-orange text-[10px] font-mono uppercase tracking-wider hover:bg-brand-orange hover:text-black transition-colors"
+      className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-brand-orange/60 bg-brand-orange/10 text-brand-orange text-[10px] font-mono uppercase tracking-wider hover:bg-brand-orange hover:text-on-accent transition-colors"
       aria-label="Run a quarter-mile simulation"
     >
       <Zap size={10} /> Run sim

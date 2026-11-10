@@ -390,7 +390,7 @@ export default function PostPage() {
           </div>
           <Link
             href="/simulator?bike=yamaha-mt-15-v1"
-            className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
+            className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
           >
             Run sim →
           </Link>

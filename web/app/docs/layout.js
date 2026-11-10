@@ -5,6 +5,7 @@ import DocsMobileNav from './DocsMobileNav';
 
 const DOC_PAGES = [
   { href: '/docs/getting-started', label: 'Getting Started' },
+  { href: '/docs/glossary',        label: 'Glossary' },
   { href: '/docs/physics',         label: 'Physics Whitepaper' },
   { href: '/docs/validation',      label: 'Validation Data' },
   { href: '/whitepaper',           label: 'MotoQuant Whitepaper' },

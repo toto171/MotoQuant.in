@@ -176,7 +176,7 @@ export default function PostPage() {
             <div className="font-display font-bold text-white mb-1">Set Aamby Valley as your venue</div>
             <div className="text-white/60 text-sm">Select your bike, open the Location Picker, choose Aamby Valley City, and the November conditions load automatically.</div>
           </div>
-          <Link href="/simulator" className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">Run sim →</Link>
+          <Link href="/simulator" className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">Run sim →</Link>
         </div>
       </article>
 

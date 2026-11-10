@@ -26,7 +26,7 @@ export default function PrintTimeslip({ run, id }) {
   ].filter((s) => s.value != null);
 
   return (
-    <div className="hidden print:block bg-white text-black px-10 py-10">
+    <div className="hidden print:block bg-[rgb(255_255_255)] text-[rgb(0_0_0)] px-10 py-10">
       {/* masthead — wordmark + site, then the timing-assoc letterhead line */}
       <header>
         <div className="flex items-baseline justify-between gap-4">

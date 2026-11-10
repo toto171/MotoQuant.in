@@ -220,7 +220,7 @@ export default function PostPage() {
             <div className="font-display font-bold text-white mb-1">Test your own launch physics</div>
             <div className="text-white/60 text-sm">Free simulator — pick your bike, adjust rider weight, and watch the 60-ft time change.</div>
           </div>
-          <Link href="/simulator" className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">
+          <Link href="/simulator" className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">
             Run sim →
           </Link>
         </div>

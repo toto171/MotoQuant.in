@@ -64,7 +64,7 @@ function InlineSimCtaInner() {
         data-variant="B"
         data-cta="blog-inline-mid-article"
         data-post="pulsar-ns200-vs-apache-rtr-200"
-        className="shrink-0 px-4 py-2 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
+        className="shrink-0 px-4 py-2 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
         aria-label="Run a quarter-mile simulation comparing NS200 and Apache RTR 200 4V"
       >
         Run this comparison →

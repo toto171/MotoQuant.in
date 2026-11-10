@@ -332,7 +332,7 @@ export default function PostPage() {
             <div className="font-display font-bold text-white mb-1">Simulate NS200 vs Apache RTR 200 4V side-by-side</div>
             <div className="text-white/60 text-sm">Pick both bikes, swap mods, sweep rider weight and venue conditions, and see the ET delta before you spend a rupee.</div>
           </div>
-          <Link href="/simulator" className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">Run sim →</Link>
+          <Link href="/simulator" className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">Run sim →</Link>
         </div>
 
         <div className="max-w-2xl mx-auto mt-16">

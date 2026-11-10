@@ -202,7 +202,7 @@ export default function PostPage() {
             <div className="font-display font-bold text-white mb-1">Simulate your R15 setup</div>
             <div className="text-white/60 text-sm">Select the YZF-R15 V3 and try the sprocket mod in the parts builder. See the ET delta before you buy anything.</div>
           </div>
-          <Link href="/simulator" className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">Run sim →</Link>
+          <Link href="/simulator" className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">Run sim →</Link>
         </div>
       </article>
 

@@ -10,11 +10,11 @@
  *   <GaugeMark size={28} />
  *   <GaugeMark size={20} className="opacity-80" />
  *
- * Server-component-safe (no hooks). `ring` defaults to white; pass e.g.
- * ring="#0A0A0B" for light surfaces (kit mark-light variant).
+ * Server-component-safe (no hooks). `ring` defaults to the theme foreground
+ * (white in dark, ink in light); override only for fixed-colour surfaces.
  */
 
-export default function GaugeMark({ size = 28, ring = '#FFFFFF', className = '' }) {
+export default function GaugeMark({ size = 28, ring = 'rgb(var(--fg))', className = '' }) {
   return (
     <svg
       viewBox="0 0 600 600"
@@ -26,13 +26,13 @@ export default function GaugeMark({ size = 28, ring = '#FFFFFF', className = '' 
     >
       <path
         d="M 464.54 213.93 A 190 190 0 1 1 395.00 144.39 L 366.50 193.75 A 133.0 133.0 0 1 0 415.18 242.43 Z"
-        fill={ring}
+        style={{ fill: ring }}
       />
       <path
         d="M 329.02 293.61 L 474.69 172.53 L 468.95 101.69 L 315.32 279.91 Z"
-        fill="#FF5E1F"
+        style={{ fill: 'rgb(var(--accent))' }}
       />
-      <circle cx="300" cy="308.93" r="15.96" fill="#FF5E1F" />
+      <circle cx="300" cy="308.93" r="15.96" style={{ fill: 'rgb(var(--accent))' }} />
     </svg>
   );
 }

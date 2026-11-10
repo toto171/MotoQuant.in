@@ -54,7 +54,7 @@ function RunSimCtaInner() {
       </p>
       <Link
         href="/simulator"
-        className="inline-block px-5 py-2.5 rounded-lg bg-brand-orange text-black font-mono text-sm font-bold hover:bg-brand-orange/85 transition-colors"
+        className="inline-block px-5 py-2.5 rounded-lg bg-brand-orange text-on-accent font-mono text-sm font-bold hover:bg-brand-orange/85 transition-colors"
         data-exp="EXP-014"
         data-variant="B"
         data-cta-link="getting-started-bottom"

@@ -1,5 +1,6 @@
 import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
+import { THEME_INIT_SCRIPT } from '../lib/theme';
 import { AuthProvider } from '../components/AuthProvider';
 import StructuredData, {
   organizationSchema,
@@ -33,7 +34,12 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const viewport = {
-  themeColor: '#0A0A0B',
+  // Follows the OS preference; the in-page toggle only changes the page chrome.
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#fafaf9' },
+    { media: '(prefers-color-scheme: dark)', color: '#09090b' },
+  ],
+  colorScheme: 'dark light',
   width: 'device-width',
   initialScale: 1,
   // Allow zoom — Lighthouse flags "user-scalable=no" as an accessibility failure
@@ -245,9 +251,12 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={[inter.variable, spaceGrotesk.variable, jetbrainsMono.variable].join(' ')}
     >
       <head>
+        {/* No-flash theme: apply the saved/OS theme before first paint. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         {/* Preconnect to the API origin — shaves ~100-300ms off first sim call */}
         <link rel="preconnect" href={SITE_URL} crossOrigin="anonymous" />
         <link rel="dns-prefetch" href={SITE_URL} />
@@ -261,7 +270,7 @@ export default function RootLayout({ children }) {
             harmless anchor behavior. */}
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-xl focus:bg-accent focus:px-4 focus:py-2 focus:font-display focus:text-sm focus:font-bold focus:text-black"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-xl focus:bg-accent focus:px-4 focus:py-2 focus:font-display focus:text-sm focus:font-bold focus:text-on-accent"
         >
           Skip to content
         </a>

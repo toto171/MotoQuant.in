@@ -79,7 +79,7 @@ export default function RunPage() {
   return (
     <main
       id="main"
-      className="min-h-screen bg-asphalt-0 text-white print:min-h-0 print:bg-white print:text-black"
+      className="min-h-screen bg-asphalt-0 text-white print:min-h-0 print:bg-[rgb(255_255_255)] print:text-[rgb(0_0_0)]"
     >
       {/* screen chrome — hidden when printing so the slip is the whole page */}
       <div className="print:hidden">

@@ -1,42 +1,41 @@
 /** @type {import('tailwindcss').Config} */
 //
-// STAGED design system (v4, July 2026) — see web/DESIGN.md.
+// CLARITY design system (v6, November 2026) — see web/DESIGN.md §3.
 //
-// Token model:
-//   asphalt-*  surfaces (blue-cast near-black)
-//   accent     signal orange — THE brand color (primary actions + live data)
-//   signal-*   go / stage / foul — state only, never decoration
-//   mint       status chips only
-//
-// `ink-*` and `brand-*` are LEGACY ALIASES pointing at the new palette so the
-// ~50 untouched blog/content pages re-skin without churn. New code must use
-// the v4 names — the aliases exist for compatibility, not for new work.
+// Every colour is a CSS variable (defined per theme in app/globals.css) so
+// the whole site can switch between dark and light. The class NAMES from
+// v4/v5 are unchanged, which is how ~80 content/blog pages re-skin with no
+// edits:
+//   white       = foreground ink   (white in dark, near-black in light)
+//   black       = deepest background (black in dark, white in light)
+//   asphalt-*   = surfaces 0..4
+//   accent      = brand orange (primary actions)
+//   signal-*    = go / stage / foul — state only
+//   on-accent   = text that sits ON an accent fill (never theme-inverted)
+//   mint        = alias of signal-go (no longer a tier colour)
+//   ink-*/brand-* = legacy aliases onto the same variables
 
-// IGNITION v5 (July 2026): the orange cockpit identity, rebuilt flagship on
-// the v4 token architecture. Values follow MotoQuant_Identity_Kit (Ink
-// #0A0A0B / Signal #FF5E1F / white) + the Cockpit v3 carbon inks. The key
-// names are stable, so every page re-skins without churn.
+const v = (name) => `rgb(var(${name}) / <alpha-value>)`;
+
 const asphalt = {
-  0: '#050506',
-  1: '#0A0A0B',
-  2: '#111113',
-  3: '#1A1A1D',
-  4: '#27272A',
+  0: v('--surface-0'),
+  1: v('--surface-1'),
+  2: v('--surface-2'),
+  3: v('--surface-3'),
+  4: v('--surface-4'),
 };
 
 const accent = {
-  DEFAULT: '#FF5E1F',
-  bright: '#FF8F57',
-  deep: '#CC4000',
+  DEFAULT: v('--accent'),
+  bright: v('--accent-bright'),
+  deep: v('--accent-deep'),
 };
 
 const signal = {
-  go: '#22C55E',
-  stage: '#F59E0B',
-  foul: '#EF4444',
+  go: v('--go'),
+  stage: v('--stage'),
+  foul: v('--foul'),
 };
-
-const mint = '#00FFB2';
 
 module.exports = {
   content: [
@@ -51,21 +50,24 @@ module.exports = {
         mono: ['var(--font-jetbrains-mono)', 'ui-monospace', 'monospace'],
       },
       colors: {
+        white: v('--fg'),
+        black: v('--bg-deep'),
         asphalt,
         accent,
         signal,
-        mint,
+        'on-accent': v('--on-accent'),
+        mint: v('--go'),
         // ── legacy aliases (blog/content compatibility — do not use in new code)
         ink: asphalt,
         brand: {
-          orange: accent.DEFAULT,
-          orangeLight: accent.bright,
-          orangeDeep: accent.deep,
-          accent: mint,
-          green: signal.go,
-          greenGlow: signal.go,
-          amber: signal.stage,
-          red: signal.foul,
+          orange: v('--accent'),
+          orangeLight: v('--accent-bright'),
+          orangeDeep: v('--accent-deep'),
+          accent: v('--go'),
+          green: v('--go'),
+          greenGlow: v('--go'),
+          amber: v('--stage'),
+          red: v('--foul'),
         },
       },
       keyframes: {
@@ -91,12 +93,12 @@ module.exports = {
         'stage-light': 'stage-light 0.3s ease-out both',
       },
       boxShadow: {
-        'lamp-amber': '0 0 28px rgba(245,158,11,0.7)',
-        'lamp-green': '0 0 36px rgba(34,197,94,0.85)',
-        'lamp-red': '0 0 28px rgba(239,68,68,0.7)',
-        'orange-soft': '0 0 40px rgba(255,94,31,0.25), 0 0 80px rgba(255,94,31,0.10)',
+        'lamp-amber': '0 0 28px rgb(var(--stage) / 0.7)',
+        'lamp-green': '0 0 36px rgb(var(--go) / 0.85)',
+        'lamp-red': '0 0 28px rgb(var(--foul) / 0.7)',
+        'orange-soft': '0 0 40px rgb(var(--accent) / 0.22), 0 0 80px rgb(var(--accent) / 0.08)',
         // legacy v4 name — same orange glow
-        'volt-soft': '0 0 40px rgba(255,94,31,0.25), 0 0 80px rgba(255,94,31,0.10)',
+        'volt-soft': '0 0 40px rgb(var(--accent) / 0.22), 0 0 80px rgb(var(--accent) / 0.08)',
       },
     },
   },

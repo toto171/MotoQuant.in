@@ -23,7 +23,7 @@ export default function DocsSidebarNav({ pages }) {
             href={p.href}
             aria-current={active ? 'page' : undefined}
             className={[
-              'block py-2 pr-3 pl-3 rounded-md text-sm font-mono transition-colors border-l-2',
+              'block py-2 pr-3 pl-3 rounded-md text-sm font-medium transition-colors border-l-2',
               active
                 ? 'border-accent text-white bg-white/5'
                 : 'border-transparent text-white/65 hover:text-white hover:bg-white/5',
