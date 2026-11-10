@@ -46,7 +46,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'You keep the engine. Same 80 hp claimed at the crank, same 39 Nm peak torque at 13,000 rpm, same 15,500 rpm redline. The ZX-4R is one of only two production motorcycles in the world right now built around a 400cc inline-four screamer (the other is its own ZX-25R sibling at 250cc), and it behaves like nothing else at this displacement. A KTM RC 390 single makes its peak torque at 7,000 rpm and signs off by 10,000. The ZX-4R wants to be ridden like a 600cc supersport: rev it past 11,000, hold the throttle pinned, and shift at 15,000.',
+    text: 'You keep the engine. Same 80 hp claimed at the crank, same 39 Nm peak torque at 13,000 rpm, same 15,500 rpm redline. The bike is one of only two production motorcycles in the world right now built around a 400cc inline-four screamer (the other is its own ZX-25R sibling at 250cc), and it behaves like nothing else at this displacement. A KTM RC 390 single makes its peak torque at 7,000 rpm and signs off by 10,000. The ZX-4R wants to be ridden like a 600cc supersport: rev it past 11,000, hold the throttle pinned, and shift at 15,000.',
   },
   {
     type: 'h2',
@@ -54,7 +54,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Stock-tune numbers for the ZX-4R in MotoQuant under Aamby Valley November conditions (density altitude ≈ 1100 m, 22°C ambient, dry asphalt, μ_peak 1.32 on the OEM Dunlop Sportmax GPR-300 rear), with a 78 kg rider on a 191 kg dry bike:',
+    text: 'Results for the ZX-4R in MotoQuant under Aamby Valley November conditions (density altitude ≈ 1100 m, 22°C ambient, dry asphalt, μ_peak 1.32 on the OEM Dunlop Sportmax GPR-300 rear), with a 78 kg rider on a 191 kg dry bike:',
   },
   {
     type: 'table',
@@ -70,7 +70,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The simulation lands in the middle of the published instrumented band. That is typical for the litre-sport-600-1000 cluster, where the April 27 sweep documented a 0.22s mean absolute error across 29 matched benchmarks. The ZX-4R sits in that cluster despite its 400cc because its engine, a high-revving inline-four with peak power at 14,500 rpm, behaves like a scaled-down 600cc supersport rather than a scaled-up 400cc twin. The tyre grip model, the gear-cassette torque multiplication and the synthesized 0.88 redline-factor torque tail all carry over directly from the ZX-6R class.',
+    text: 'The simulation lands in the middle of the published instrumented band. That is typical for the litre-sport-600-1000 cluster, where the April 27 sweep documented a 0.22s mean absolute error across 29 matched benchmarks. The bike sits in that cluster despite its 400cc because its engine, a high-revving inline-four with peak power at 14,500 rpm, behaves like a scaled-down 600cc supersport rather than a scaled-up 400cc twin. The tyre grip model, the gear-cassette torque multiplication and the synthesized 0.88 redline-factor torque tail all carry over directly from the ZX-6R class.',
   },
   {
     type: 'callout',
@@ -119,7 +119,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "Suspension is the exception. The ZX-4RR ships with a fully adjustable 37 mm Showa BPF front fork; the ZX-4R gets a non-adjustable Showa SFF-BP unit. For street riding and casual track days the base fork is fine. For repeated quarter-mile launches, where rebound damping controls how the front wheel goes from compressed to extended, the ZX-4RR fork is better. The ZX-4R fork is hard to upgrade without going aftermarket (an Öhlins NIX30 cartridge kit runs about ₹85,000 fitted), so the base trim's cost-per-tenth advantage shrinks if you plan to race the bike seriously.",
+    text: "Suspension is the exception. The ZX-4RR ships with a fully adjustable 37 mm Showa BPF front fork; the ZX-4R gets a non-adjustable Showa SFF-BP unit. For street riding and casual track days the base fork is fine. For repeated quarter-mile launches, where rebound damping controls how the front wheel goes from compressed to extended, the ZX-4RR fork is better. Upgrading the base fork means going aftermarket (an Öhlins NIX30 cartridge kit runs about ₹85,000 fitted), so the base trim's cost-per-tenth advantage shrinks if you plan to race the bike seriously.",
   },
   {
     type: 'h2',
@@ -135,7 +135,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: '2. Aerodynamics above 170 km/h. The ZX-4R has a Cd of about 0.62 and a frontal area of 0.41 m², for a Cd × A of roughly 0.254 m². That is excellent for a small-displacement sport bike (about 8 percent lower than a Ninja 400, thanks to the deeper full fairing), but it still limits the back half of the run. Above 170 km/h, the simulator shows aerodynamic drag taking about 55 percent of the rear-wheel power. The only fix is a tail fairing extension, which is not legal on public roads in India.',
+    text: '2. Aerodynamics above 170 km/h. Its Cd of about 0.62 and frontal area of 0.41 m² give a Cd × A of roughly 0.254 m². That is excellent for a small-displacement sport bike (about 8 percent lower than a Ninja 400, thanks to the deeper full fairing), but it still limits the back half of the run. Above 170 km/h, the simulator shows aerodynamic drag taking about 55 percent of the rear-wheel power. The only fix is a tail fairing extension, which is not legal on public roads in India.',
   },
   {
     type: 'p',
@@ -165,7 +165,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'If you are weighing the ZX-4R against a used Ninja ZX-6R 636 or a CBR650R, the spec-sheet horsepower numbers mislead. The ZX-4R does not match a 600cc supersport in absolute ET, but it gets within 1.4 seconds and ~22 km/h of trap. What you lose in top-end power you gain in gear-1 wheelie limit, low-speed manners, road tax and insurance premium. For the 80 percent of owners who never touch a quarter-mile strip outside the occasional track day, the ZX-4R is the more practical 400-class flagship.',
+    text: 'If you are weighing the ZX-4R against a used Ninja ZX-6R 636 or a CBR650R, the spec-sheet horsepower numbers mislead. It does not match a 600cc supersport in absolute ET, but it gets within 1.4 seconds and ~22 km/h of trap. What you lose in top-end power you gain in gear-1 wheelie limit, low-speed manners, road tax and insurance premium. For the 80 percent of owners who never touch a quarter-mile strip outside the occasional track day, the ZX-4R is the more practical 400-class flagship.',
   },
   {
     type: 'h2',
@@ -201,7 +201,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'It is not a wheelie machine. The ZX-4R does not easily lift the front wheel without aggressive clutch work or a slope, because peak torque comes so high in the rev range that the bike is already moving when it arrives. That matters on the strip, because launches are much more consistent on a torque-late inline-four than on a torque-early single. A first-time ZX-4R rider can typically get within 0.15s of their best ET inside ten passes; a first-time Pulsar NS400Z rider often needs thirty passes to learn the wheelie-management line.',
+    text: 'It is not a wheelie machine. The front wheel does not lift easily without aggressive clutch work or a slope, because peak torque comes so high in the rev range that the bike is already moving when it arrives. That matters on the strip, because launches are much more consistent on a torque-late inline-four than on a torque-early single. A first-time ZX-4R rider can typically get within 0.15s of their best ET inside ten passes; a first-time Pulsar NS400Z rider often needs thirty passes to learn the wheelie-management line.',
   },
   {
     type: 'h2',

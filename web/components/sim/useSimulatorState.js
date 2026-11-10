@@ -346,7 +346,7 @@ export default function useSimulatorState(searchParams) {
           const detail = await readDetail(res);
           const err = new Error(
             res.status === 429
-              ? detail || 'You are calculating very quickly. Live updates are paused for a few seconds.'
+              ? detail || 'Too many runs in a short time. Live updates are paused for a few seconds.'
               : detail || `The simulator returned an error (${res.status}). Please try again.`,
           );
           err.status = res.status;

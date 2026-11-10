@@ -206,7 +206,7 @@ export default function MyDataTab({ sim }) {
       {!u && !busy && !dragyTask.error && !dynoTask.error && (
         <div className="py-4 text-center text-sm text-white/65">
           <Upload size={28} aria-hidden="true" className="mx-auto mb-2 text-white/35" />
-          We will read your file, show the split times and lay it over the simulator so you can see how close it is.
+          We will read your file, show the split times and compare your run with the simulator&apos;s.
         </div>
       )}
     </div>

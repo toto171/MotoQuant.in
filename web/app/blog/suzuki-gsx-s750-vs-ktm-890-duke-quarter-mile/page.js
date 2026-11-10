@@ -4,12 +4,12 @@ import SiteFooter from '../../../components/SiteFooter';
 import StructuredData, { articleSchema } from '../../StructuredData';
 
 const SLUG = 'suzuki-gsx-s750-vs-ktm-890-duke-quarter-mile';
-const TITLE = 'Suzuki GSX-S750 vs KTM 890 Duke: Quarter-Mile Physics';
+const TITLE = 'Suzuki GSX-S750 vs KTM 890 Duke: Quarter-mile physics';
 const DESCRIPTION =
-  'MotoQuant simulates the GSX-S750 at 11.58s and the 890 Duke at 11.42s. 27 kg lighter, 0.16s quicker. How mass beats displacement at the strip, and what actually limits each bike.';
+  'MotoQuant simulates the GSX-S750 at 11.58s and the 890 Duke at 11.42s. The Duke is 27 kg lighter and 0.16s quicker. How mass beats displacement at the strip, and what limits each bike.';
 
 export const metadata = {
-  title: 'Suzuki GSX-S750 vs KTM 890 Duke Quarter-Mile | MotoQuant',
+  title: 'Suzuki GSX-S750 vs KTM 890 Duke quarter mile | MotoQuant',
   description: DESCRIPTION,
   keywords: [
     'Suzuki GSX-S750 quarter mile',
@@ -33,31 +33,31 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'MotoQuant simulates the Suzuki GSX-S750 at 11.58 seconds and 193 km/h trap, and the KTM 890 Duke at 11.42 seconds and 196 km/h trap. The 890 Duke weighs 27 kg less and wins by 0.16 seconds. But the reason it wins is not mass alone, and a stock GSX-S750 is faster than a stock 890 Duke in one specific part of the run.',
+    text: "MotoQuant simulates the Suzuki GSX-S750 at 11.58 seconds and 193 km/h trap, and the KTM 890 Duke at 11.42 seconds and 196 km/h trap. The 890 Duke weighs 27 kg less and wins by 0.16 seconds. Mass is not the only reason, though, and over one part of the run a stock GSX-S750 is faster than a stock 890 Duke.",
   },
   {
     type: 'h2',
-    text: 'The Two Bikes and What They Actually Are',
+    text: "The two bikes and what they are",
   },
   {
     type: 'p',
-    text: "The Suzuki GSX-S750 (2015–2021) is a naked repackage of the 2005–2006 GSX-R750 K5/K6 engine. Same 70 mm bore, same 48.7 mm stroke, same basic combustion chamber geometry, but with revised cam profiles that pull the power delivery toward mid-range and push the torque peak up to 9,000 rpm. The result is a 114 hp / 81 Nm inline-four that makes most of its power between 8,000 and 11,000 rpm. On the road that is an effortless, slightly droney experience. On a drag strip it means the bike is working against its own redline preference in gear 1, where you never touch 10,000 rpm.",
+    text: "The Suzuki GSX-S750 (2015–2021) puts the 2005–2006 GSX-R750 K5/K6 engine in a naked bike. It keeps the 70 mm bore, the 48.7 mm stroke and the basic combustion chamber geometry, with revised cam profiles that pull the power delivery toward the mid-range and move the torque peak up to 9,000 rpm. The result is a 114 hp / 81 Nm inline-four that makes most of its power between 8,000 and 11,000 rpm. On the road it feels effortless and slightly droney. On a drag strip it means the bike works against its own preference for revs in gear 1, where you never touch 10,000 rpm.",
   },
   {
     type: 'p',
-    text: "The KTM 890 Duke (2020–2023) is the standard, non-R variant of the LC8c parallel twin. It makes 105 hp at 8,000 rpm and 92 Nm at 6,500 rpm: 9 hp less than the GSX-S750 on paper, but with 11 Nm more torque and a peak that arrives 2,500 rpm earlier. Its dry mass is 166 kg per the KTM EU spec sheet. The GSX-S750 sits at 193 kg. That is a 27 kg difference, roughly one adult passenger removed from the Suzuki.",
+    text: "The KTM 890 Duke (2020–2023) is the standard, non-R variant of the LC8c parallel twin. It makes 105 hp at 8,000 rpm and 92 Nm at 6,500 rpm: 9 hp less than the GSX-S750 on paper, but 11 Nm more torque, with the peak arriving 2,500 rpm earlier. Its dry mass is 166 kg on the KTM EU spec sheet, against 193 kg for the GSX-S750. That 27 kg difference is roughly one adult passenger removed from the Suzuki.",
   },
   {
     type: 'p',
-    text: "Both bikes are in the MotoQuant catalog now. The GSX-S750 uses a dedicated gear cassette from Suzuki service manual 99500-36160-03E, not the GSX-R750 K5/K6 transmission, which is a distinct unit. The 890 Duke shares its gearbox cassette with the 890 Duke R (confirmed via KTM service manual KTM-TI-2020-890D). Sprockets: GSX-S750 runs 16F/45R, 890 Duke runs 15F/42R, both on 520-pitch chain.",
+    text: "Both bikes are in the MotoQuant catalog. The GSX-S750 uses its own gear cassette, taken from Suzuki service manual 99500-36160-03E; the GSX-R750 K5/K6 transmission is a different unit. The 890 Duke shares its gearbox cassette with the 890 Duke R (confirmed in KTM service manual KTM-TI-2020-890D). The GSX-S750 runs 16F/45R sprockets and the 890 Duke runs 15F/42R, both on 520-pitch chain.",
   },
   {
     type: 'h2',
-    text: 'The Simulation Numbers',
+    text: "The simulation numbers",
   },
   {
     type: 'p',
-    text: 'Running both bikes through MotoQuant under Aamby Valley November conditions (density altitude approximately 1,100 m, 22°C ambient, dry asphalt, 78 kg rider, OEM Bridgestone tires) produces these stock-tune numbers:',
+    text: "Both bikes ran through MotoQuant in Aamby Valley November conditions: density altitude approximately 1,100 m, 22°C ambient, dry asphalt, a 78 kg rider and OEM Bridgestone tires. The stock-tune numbers:",
   },
   {
     type: 'table',
@@ -72,51 +72,51 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "The 0.18s documented bias comes from the litre_sport_600_1000 cluster both bikes fall into (both sit between 600 and 1000cc). For the GSX-S750, Motorcycle Consumer News measured a stock test bike at 11.4s and 194 km/h in November 2017. The simulator comes in at 11.58s, which is 0.18s over the real-world result and sits exactly within the documented +0.15–0.22s bias band for this cluster. That is validation in the right direction: the simulator is calibrated to a 50th-percentile rider, not a trained journalist doing launch-control-optimised drag runs.",
+    text: "The 0.18s documented bias belongs to the litre_sport_600_1000 cluster, which both bikes fall into because both sit between 600 and 1000cc. Motorcycle Consumer News measured a stock GSX-S750 test bike at 11.4s and 194 km/h in November 2017. The simulator's 11.58s is 0.18s over that result, inside the documented +0.15–0.22s bias band for this cluster. The bias runs the expected way: the simulator is calibrated to a 50th-percentile rider, not a trained journalist making drag runs optimised with launch control.",
   },
   {
     type: 'callout',
-    text: "No instrumented quarter-mile record exists in the MotoQuant benchmark list for the stock 890 Duke (distinct from the 890 R and the 790 Duke). KTM factory literature puts 0-100 km/h at 3.1 seconds for the standard 890 Duke, which maps to approximately 11.3–11.5s at the quarter depending on trap speed. The simulator's 11.42s is consistent with that range. If you have a Dragy run on a stock 890 Duke, the import-dragy CLI can calibrate the sim to your bike specifically.",
+    text: "The MotoQuant benchmark list has no instrumented quarter-mile record for the stock 890 Duke (as distinct from the 890 R and the 790 Duke). KTM factory literature puts 0-100 km/h at 3.1 seconds for the standard 890 Duke, which works out to approximately 11.3–11.5s over the quarter depending on trap speed. The simulator's 11.42s falls in that range. If you have a Dragy run on a stock 890 Duke, the import-dragy CLI can calibrate the simulator to your bike.",
   },
   {
     type: 'h2',
-    text: 'Why Mass Wins More Than Displacement',
+    text: "Why mass wins more than displacement",
   },
   {
     type: 'p',
-    text: "The naive prediction looking at a 749cc I4 vs an 889cc parallel twin would favour the bigger-displacement bike. That prediction is wrong, and the physics explains why.",
+    text: "A naive prediction, looking at a 749cc I4 against an 889cc parallel twin, would favour the bigger-displacement bike. That prediction is wrong.",
   },
   {
     type: 'p',
-    text: "In a quarter mile, the limiting factor for the first 60 feet is not peak power: it is available traction multiplied by the force the drivetrain can put at the rear wheel. Both bikes have comparable grip (Bridgestone S21/S22 OEM fitments, μ_peak ≈ 1.35 on both). But the lighter bike accelerates faster at any given wheel force. At 166 kg dry, the 890 Duke needs only 90 N of net force per unit acceleration where the 193 kg GSX-S750 needs 111 N for the same rate. The Duke gets to launch harder before the front wheel lifts, which means its traction advantage is compounded through the first gear interval.",
+    text: "Over the first 60 feet of a quarter mile, the limit is not peak power. It is the available traction multiplied by the force the drivetrain can put at the rear wheel. Grip is comparable on both bikes (Bridgestone S21/S22 OEM fitments, μ_peak ≈ 1.35), and at any given wheel force the lighter bike accelerates faster. At 166 kg dry, the 890 Duke needs only 90 N of net force per unit acceleration, where the 193 kg GSX-S750 needs 111 N for the same rate. The Duke can launch harder before the front wheel lifts, and that traction advantage compounds through first gear.",
   },
   {
     type: 'p',
-    text: "The GSX-S750 recovers some of this deficit in the top half of the run. Between 130 and 190 km/h, where the engine is pulling through 9,000–10,500 rpm, the inline-four produces more power than the parallel twin. The GSX-S750's torque curve holds up better past 9,000 rpm; the LC8c twin starts to fall off around 8,500 rpm. This is why the trap speed gap is only 3 km/h rather than 6 or 7 km/h: the Suzuki claws back power across the back half of the run even though it loses the launch decisively.",
+    text: "The GSX-S750 wins some of this back in the top half of the run. Between 130 and 190 km/h, with the engine pulling through 9,000–10,500 rpm, the inline-four makes more power than the parallel twin: its torque curve holds up better past 9,000 rpm, while the LC8c twin starts to fall off around 8,500 rpm. That is why the trap speed gap is only 3 km/h rather than 6 or 7 km/h, even though the Suzuki clearly loses the launch.",
   },
   {
     type: 'p',
-    text: "If you ran these bikes on a 200 m sprint instead of a 402 m quarter, the result would likely be much closer. The Duke's launch advantage would dominate, but it would not have had time to compress into the trap. At 402 m the deficit is 0.16s; at 200 m it would be closer to 0.25s because the Suzuki has less time to recover.",
+    text: "On a 200 m sprint instead of a 402 m quarter, the result would likely be much closer. The Duke's launch advantage would dominate, but it would not have had time to compress into the trap. At 402 m the deficit is 0.16s; at 200 m it would be closer to 0.25s, because the Suzuki has less time to recover.",
   },
   {
     type: 'h2',
-    text: 'Gearing: Where the Tenths Are',
+    text: "Gearing: Where the tenths are",
   },
   {
     type: 'p',
-    text: "GSX-S750 gearing: [2.615, 1.882, 1.500, 1.261, 1.103, 0.966] with 16F/45R. Effective final drive ratio in 6th (0.966 × 16/45) = 0.343. With a 180/55ZR17 rear tire at approximately 295 mm rolling radius, that puts the top speed in 6th at full redline (12,000 rpm) at roughly 240 km/h. The quarter-mile trap at 193 km/h means the bike is crossing the timing beam in 5th gear, short of 5th gear's redline. The 6th gear overdrive is a highway gear that never does drag-strip work.",
+    text: "GSX-S750 gearing: [2.615, 1.882, 1.500, 1.261, 1.103, 0.966] with 16F/45R. Effective final drive ratio in 6th (0.966 × 16/45) = 0.343. With a 180/55ZR17 rear tire at approximately 295 mm rolling radius, top speed in 6th at full redline (12,000 rpm) is roughly 240 km/h. At a 193 km/h trap the bike crosses the timing beam in 5th gear, short of 5th gear's redline. The 6th-gear overdrive is a highway gear that never does drag-strip work.",
   },
   {
     type: 'p',
-    text: "KTM 890 Duke gearing: [2.625, 1.941, 1.580, 1.346, 1.185, 1.071] with 15F/42R. Effective final drive in 6th (1.071 × 15/42) = 0.383. With a 180/55ZR17 rear, top speed in 6th at 9,000 rpm (peak power) is approximately 207 km/h. The quarter-mile trap at 196 km/h means the Duke is crossing the line right at peak power RPM in 6th, which is nearly optimal. The gearing is shorter and better matched to the bike's powerband for a drag strip.",
+    text: "KTM 890 Duke gearing: [2.625, 1.941, 1.580, 1.346, 1.185, 1.071] with 15F/42R. Effective final drive in 6th (1.071 × 15/42) = 0.383. With a 180/55ZR17 rear, top speed in 6th at 9,000 rpm (peak power) is approximately 207 km/h. At a 196 km/h trap the Duke crosses the line right at peak-power rpm in 6th, which is nearly ideal. Its gearing is shorter and better matched to its powerband for a drag strip.",
   },
   {
     type: 'p',
-    text: "This gearing difference is a meaningful contributor to the ET gap. The GSX-S750's taller gearing means more time spent in the gear-change deadband before 5th gear can pull through to trap speed. A sprocket swap to 16F/42R on the Suzuki (shortening final drive by ~7%) would move the trap crossing into 6th gear territory and likely recover 0.04–0.06s. Cost: approximately ₹3,200 for a JT sprocket pair on 520-pitch, which is among the lowest cost-per-tenth mods in the catalog.",
+    text: "The gearing difference accounts for a real part of the ET gap. The GSX-S750's taller gearing means more time in the gear-change deadband before 5th gear can pull through to trap speed. A sprocket swap to 16F/42R on the Suzuki (shortening final drive by ~7%) would move the trap crossing into 6th gear and likely recover 0.04–0.06s. A JT sprocket pair in 520 pitch costs approximately ₹3,200, which makes it one of the lowest cost-per-tenth mods in the catalog.",
   },
   {
     type: 'h2',
-    text: 'Where Each Bike Loses Time: Section by Section',
+    text: "Where each bike loses time: Section by section",
   },
   {
     type: 'table',
@@ -146,23 +146,23 @@ const CONTENT = [
   },
   {
     type: 'h2',
-    text: 'The Indian Market Context',
+    text: "The Indian market context",
   },
   {
     type: 'p',
-    text: "The Suzuki GSX-S750 was officially sold in India in limited batches as a CBU import. Second-hand prices on IndiaMART and BikeWale typically land in the ₹6–8 lakh range for good-condition 2018–2020 examples, making it one of the most accessible liquid-cooled inline-fours available to the Indian drag scene. The 890 Duke was never officially launched in India as a standalone model (only the Duke 390 and Duke 790 saw proper CKD/CBU launches), but grey-market units via Nepal and Dubai arrive at approximately ₹10–12 lakh. Most 890 Duke owners in India are running the 890 R variant at the same price point, which has 16 hp more (121 hp) and slightly different suspension.",
+    text: "The Suzuki GSX-S750 was officially sold in India in limited batches as a CBU import. Used 2018–2020 bikes in good condition typically sell for ₹6–8 lakh on IndiaMART and BikeWale, which makes it one of the most accessible liquid-cooled inline-fours for the Indian drag scene. The 890 Duke was never officially launched in India as a standalone model (only the Duke 390 and Duke 790 had proper CKD/CBU launches), but grey-market bikes arrive via Nepal and Dubai at approximately ₹10–12 lakh. Most 890 Duke owners in India ride the 890 R, which costs the same and has 16 hp more (121 hp) and slightly different suspension.",
   },
   {
     type: 'p',
-    text: "For drag strip use at Aamby Valley or MMRT, the GSX-S750 at ₹7 lakh gives you an 11.58s bike that responds well to gearing and ECU tuning. The 890 Duke at ₹11 lakh gives you an 11.42s bike that is lighter from the factory but less easily sourced. If your goal is the lowest quarter-mile cost-per-second, a used GSX-S750 with a sprocket swap and a Woolich ECU flash (₹25,000) gets you to approximately 11.4s for around ₹7.25 lakh all-in, competitive with a stock 890 Duke for a fraction of the purchase price.",
+    text: "For drag strip use at Aamby Valley or MMRT, the GSX-S750 at ₹7 lakh gives you an 11.58s bike that responds well to gearing and ECU tuning. The 890 Duke at ₹11 lakh gives you an 11.42s bike that is lighter from the factory but harder to find. If you want the lowest cost per second over the quarter mile, a used GSX-S750 with a sprocket swap and a Woolich ECU flash (₹25,000) gets you to approximately 11.4s for around ₹7.25 lakh all-in, competitive with a stock 890 Duke for a fraction of the purchase price.",
   },
   {
     type: 'p',
-    text: "That comparison flips if you prioritise the riding experience off the strip. The 890 Duke is noticeably lighter to throw around corners, and 92 Nm at 6,500 rpm makes it easier to ride fast without being in the powerband. The GSX-S750 feels more planted but rewards more aggressive rev management. Neither is a bad choice: they are just different tools.",
+    text: "Off the strip, the comparison flips. The 890 Duke is noticeably lighter to throw around corners, and 92 Nm at 6,500 rpm makes it easy to ride fast without being in the powerband. The GSX-S750 feels more planted but asks you to work the revs harder.",
   },
   {
     type: 'h2',
-    text: 'Three Mods Per Bike That Move the Needle',
+    text: "Three mods per bike worth doing",
   },
   {
     type: 'p',
@@ -192,39 +192,39 @@ const CONTENT = [
   },
   {
     type: 'callout',
-    text: "Both bikes show the same pattern: sprockets first (lowest cost per tenth by a large margin), ECU second (mid-range value), exhaust a distant third. The slip-on exhaust is the most commonly purchased part in both categories because it sounds better and looks better, but on a cost-per-tenth basis it is the worst value. Buy the sprockets, book a dyno day for the ECU tune, and use the remaining budget for track fees.",
+    text: "The pattern is the same on both bikes: sprockets first, with the lowest cost per tenth by a large margin; the ECU second; the exhaust a distant third. The slip-on exhaust is the part riders buy most often for both bikes, because it sounds and looks better, but per tenth it is the worst value. Buy the sprockets, book a dyno day for the ECU tune, and spend what is left on track fees.",
   },
   {
     type: 'h2',
-    text: 'The Physics of the I4 vs Twin Torque Curve',
+    text: "The physics of the I4 vs twin torque curve",
   },
   {
     type: 'p',
-    text: "One of the more interesting sim outputs when you run both bikes is the shape of the gear-change events. The GSX-S750's inline-four has its torque curve peaking at 9,000 rpm with a relatively narrow Gaussian band: the synthetic torque curve the simulator builds from the 114 hp / 81 Nm spec points tapers off more steeply below peak-torque RPM than the LC8c twin's curve does.",
+    text: "Run both bikes and look at the gear changes. The GSX-S750's inline-four has its torque curve peaking at 9,000 rpm in a relatively narrow Gaussian band: the synthetic torque curve the simulator builds from the 114 hp / 81 Nm spec points tapers off more steeply below peak-torque rpm than the LC8c twin's curve does.",
   },
   {
     type: 'p',
-    text: "The result: after every upshift, the GSX-S750 spends a longer interval below its power peak, waiting for RPM to climb back into the sweet spot. On the 890 Duke, 92 Nm arrives at 6,500 rpm, which means after a shift into 2nd or 3rd gear the engine is already in its torque peak almost immediately. The Duke essentially has a wider window of useful traction across the 402 m; it does not need to rev as aggressively to find its power.",
+    text: "So after every upshift the GSX-S750 spends longer below its power peak, waiting for the revs to climb back into the sweet spot. On the 890 Duke, 92 Nm arrives at 6,500 rpm, so after a shift into 2nd or 3rd gear the engine is at its torque peak almost immediately. Across the 402 m the Duke has a wider window of useful traction, and it does not need to rev as hard to find its power.",
   },
   {
     type: 'p',
-    text: "This is the physics argument for the parallel twin's mid-range advantage that the spec sheet does not capture. The inline-four's displacement and redline advantages are real but they only materialise in the top half of the run. By the time the GSX-S750 is using its 114 hp advantage at 10,500 rpm, the Duke is already across the line.",
+    text: "The spec sheet does not capture this mid-range advantage of the parallel twin. The inline-four's displacement and redline advantages are real, but they only show up in the top half of the run. By the time the GSX-S750 is using its 114 hp advantage at 10,500 rpm, the Duke is already across the line.",
   },
   {
     type: 'h2',
-    text: 'Run Your Own Numbers',
+    text: "Run your own numbers",
   },
   {
     type: 'p',
-    text: "If you own either bike (or are deciding between them), the MotoQuant simulator lets you dial in your exact conditions: rider weight, ambient temperature, elevation at your local strip, and parts-catalog mods. Both the GSX-S750 and the 890 Duke are now in the catalog with service-manual-accurate gear ratios and Cd values. The comparison at motoquant.in/simulator takes about 30 seconds per run.",
+    text: "If you own either bike or are choosing between them, the MotoQuant simulator lets you set your own conditions: rider weight, ambient temperature, the elevation of your local strip, and parts-catalog mods. Both bikes are in the catalog with gear ratios from the service manuals and Cd values. Each run at motoquant.in/simulator takes about 30 seconds.",
   },
   {
     type: 'p',
-    text: "A few practical notes on what the simulator can and cannot tell you. It can tell you the relative ranking of mods per bike (sprockets vs ECU vs exhaust) with high confidence, because the relative physics does not depend on whether the absolute ET is 11.42s or 11.25s. It can tell you the impact of weather and altitude, which is genuinely useful when you are planning a trip to Aamby Valley from a sea-level city. What it cannot tell you is the exact ET you will personally run on your first pass: launch technique variation between riders is the largest uncontrolled variable at this power level, worth approximately ±0.2s depending on how well you can modulate the clutch at 6,500 rpm.",
+    text: "The simulator can rank the mods on each bike (sprockets vs ECU vs exhaust) with high confidence, because the ranking does not depend on whether the absolute ET is 11.42s or 11.25s. It can show the effect of weather and altitude, which helps when you are planning a trip to Aamby Valley from a sea-level city. It cannot tell you the exact ET you will run on your first pass. At this power level, launch technique is the largest uncontrolled variable between riders, worth approximately ±0.2s depending on how well you can modulate the clutch at 6,500 rpm.",
   },
   {
     type: 'p',
-    text: "Both bikes reward precise launch RPM. The GSX-S750 is more forgiving of a slightly low launch RPM because its inline-four builds revs quickly; the 890 Duke needs to be staged closer to its peak-torque RPM to get the front wheel up correctly. The simulator documents both bikes' optimal launch RPM in the parts ROI output. Look at the sensitivity curve for 'staging.launch_rpm' to see where your tenths come from.",
+    text: "Both bikes reward a precise launch rpm. The GSX-S750 is more forgiving of a slightly low launch rpm because its inline-four builds revs quickly; the 890 Duke needs to be staged closer to its peak-torque rpm to get the front wheel up correctly. The parts ROI output lists the best launch rpm for each bike, and the sensitivity curve for 'staging.launch_rpm' shows where your tenths come from.",
   },
 ];
 
@@ -331,7 +331,7 @@ export default function PostPage() {
             ))}
           </div>
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
-            Suzuki GSX-S750 vs KTM 890 Duke: Quarter-Mile Physics
+            Suzuki GSX-S750 vs KTM 890 Duke: Quarter-mile physics
           </h1>
           <div className="text-sm text-white/60 mb-12">
             18 May 2026 · 11 min read · MotoQuant Blog
@@ -347,30 +347,30 @@ export default function PostPage() {
             <li>
               ·{' '}
               <Link href="/blog/cfmoto-800nk-quarter-mile-physics" className="text-brand-accent hover:text-brand-orange transition-colors">
-                CFMoto 800NK Quarter-Mile Physics
+                CFMoto 800NK quarter-mile physics
               </Link>:{' '}
               the other LC8c-derived parallel twin in the Indian market.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/the-physics-of-a-perfect-launch" className="text-brand-accent hover:text-brand-orange transition-colors">
-                The Physics of a Perfect Launch
+                The physics of a perfect launch
               </Link>:{' '}
               clutch engagement, tire slip, and weight transfer in the first 60 feet.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/how-to-tune-for-aamby-valley-in-november" className="text-brand-accent hover:text-brand-orange transition-colors">
-                How to Tune for Aamby Valley in November
+                How to tune for Aamby Valley in November
               </Link>:{' '}
               the venue conditions used for both simulations in this post.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/hayabusa-vs-zx-14r-which-is-faster" className="text-brand-accent hover:text-brand-orange transition-colors">
-                Hayabusa vs ZX-14R: Which Is Faster Off the Line?
+                Hayabusa vs ZX-14R: Which is faster off the line?
               </Link>:{' '}
-              the same comparison framework at the hyper-sport class.
+              the same comparison for two hyper-sport bikes.
             </li>
             <li>
               ·{' '}
@@ -387,7 +387,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Run both bikes yourself</div>
             <div className="text-white/60 text-sm">
-              Free simulator: pick the GSX-S750 or 890 Duke, dial in your local conditions, and compare them head-to-head.
+              Free simulator: pick the GSX-S750 or 890 Duke, set your local conditions and compare the two.
             </div>
           </div>
           <Link
