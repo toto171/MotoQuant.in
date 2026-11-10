@@ -9,6 +9,7 @@ import json
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
+from functools import lru_cache
 from typing import Any
 
 _logger = logging.getLogger(__name__)
@@ -147,6 +148,17 @@ class FitmentRules:
         return cls.from_dict(d)
 
 
+@lru_cache(maxsize=4096)
+def _parse_rules(fitment_rules_str: str) -> "FitmentRules":
+    """Parse a ``fitment_rules`` JSON string once per distinct string.
+
+    Keyed on the JSON text itself, so an edited rule is a different key and the
+    cache can never serve stale rules; unparseable text raises and is not
+    cached. The returned object is shared — callers must not mutate it.
+    """
+    return FitmentRules.from_json(fitment_rules_str)
+
+
 def is_compatible(part_row: dict, bike_row: dict) -> tuple[bool, str]:
     """
     Check if a part fits a motorcycle.
@@ -186,7 +198,7 @@ def is_compatible(part_row: dict, bike_row: dict) -> tuple[bool, str]:
     # PARSE fitment_rules
     # ───────────────────────────────────────────────────
     try:
-        rules = FitmentRules.from_json(fitment_rules_str)
+        rules = _parse_rules(fitment_rules_str)
     except (json.JSONDecodeError, ValueError) as e:
         _logger.warning(
             f"Invalid fitment_rules JSON for part {part_row.get('id')}: {e}"

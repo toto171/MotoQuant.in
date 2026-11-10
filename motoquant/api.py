@@ -28,14 +28,18 @@ Deploy (Railway / Render / DigitalOcean App Platform)
 
 import asyncio
 import copy
+import hashlib
 import json
 import logging
+import math
 import os
 import sqlite3
 import tempfile
 import threading
+from collections import OrderedDict
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import (
     Depends,
@@ -43,19 +47,24 @@ from fastapi import (
     File,
     Form,
     HTTPException,
+    Path,
     Query,
     Request,
     UploadFile,
 )
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from pydantic import BaseModel, Field
+from fastapi.responses import JSONResponse, Response
+from pydantic import BaseModel, ConfigDict, Field
 
 # TypedDict must come from typing_extensions on Python < 3.12 when used in
 # Pydantic/FastAPI annotations (pydantic raises PydanticUserError otherwise).
 # python:3.11-slim in prod hit exactly that and crash-looped — 2026-06-06.
 from typing_extensions import TypedDict
 
+from .database.connection import bump_catalog_generation, catalog_generation
 from .defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 from .models import BikeConfig
 from .physics import MotoQuantEngine
@@ -102,7 +111,48 @@ app.add_middleware(
 # catalog fetches, sim timeseries) uncompressed, which is pure egress waste
 # on the free-tier instance and slow on Indian mobile links. minimum_size
 # keeps tiny health/quick-sim responses uncompressed (gzip overhead > win).
-app.add_middleware(GZipMiddleware, minimum_size=1024)
+# compresslevel=5: level 9 costs ~2.3x the CPU of level 5 for ~4% smaller output
+# on the catalog JSON (0.5-CPU instance).
+app.add_middleware(GZipMiddleware, minimum_size=1024, compresslevel=5)
+
+# Database row ids are SQLite INTEGERs (signed 64-bit) but the catalog never
+# approaches 2**31; bounding request ids keeps absurd values (which sqlite3
+# rejects with OverflowError) a clean 422 instead of a 500.
+MAX_DB_ID = 2**31 - 1
+DbId = Annotated[int, Field(ge=1, le=MAX_DB_ID)]
+
+
+def _json_safe_float(x: float) -> float | str:
+    return x if math.isfinite(x) else str(x)
+
+
+@app.exception_handler(RequestValidationError)
+async def _validation_error_handler(request: Request, exc: RequestValidationError):
+    """422 body in FastAPI's default shape, but always JSON-serialisable.
+
+    The default handler echoes each offending ``input`` back; a JSON ``NaN`` /
+    ``Infinity`` there makes the (strict-JSON) encoder raise, turning a plain
+    validation failure into a 500. Non-finite floats are echoed as strings.
+    """
+    try:
+        detail = jsonable_encoder(
+            exc.errors(), custom_encoder={float: _json_safe_float}
+        )
+        content = {"detail": detail}
+        json.dumps(content, allow_nan=False)
+    except (TypeError, ValueError):
+        content = {
+            "detail": [
+                {
+                    "type": e.get("type"),
+                    "loc": list(e.get("loc", ())),
+                    "msg": e.get("msg"),
+                }
+                for e in exc.errors()
+            ]
+        }
+    return JSONResponse(status_code=422, content=content)
+
 
 # ─── DB helper ────────────────────────────────────────────────────────────
 
@@ -134,6 +184,9 @@ def _get_db():
         db_path = os.environ.get("MOTOQUANT_DB", "motoquant.db")
         db = MotoQuantDB(db_path)
         _db_conn = db.conn
+        # A new connection may be a different database file: nothing cached
+        # from the previous one may be served.
+        bump_catalog_generation()
         return _db_conn
     except Exception as e:
         logging.getLogger(__name__).error(
@@ -200,6 +253,27 @@ class AppliedPartDict(TypedDict, total=False):
     price_inr: float | None
 
 
+class EnvironmentEchoDict(TypedDict):
+    """The conditions a result was actually simulated under.
+
+    ``name`` is the venue (or resolved location) name, ``"Custom conditions"``
+    when only manual values were supplied, or ``"Default conditions"`` when the
+    server defaults were used (``is_default`` is then true). Numbers are read
+    off the config the engine ran, never restated from the request.
+    """
+
+    name: str
+    is_default: bool
+    source: str  # "default" | "manual" | "venue"
+    altitude_m: float
+    ambient_temp_c: float
+    track_temp_c: float
+    humidity_pct: float
+    pressure_hpa: float
+    headwind_kmh: float
+    track_surface: str
+
+
 class QuickSimResultDict(TypedDict):
     """Shape of the dict returned by the ``/api/simulate/quick`` endpoint.
 
@@ -224,6 +298,8 @@ class QuickSimResultDict(TypedDict):
     total_mass_kg: float
     parts_applied: list[AppliedPartDict]
     build_cost_inr: float
+    parts_skipped: list[int]
+    environment: EnvironmentEchoDict
     stock_et_s: float | None
     et_delta_s: float | None
 
@@ -246,8 +322,9 @@ class TopSpeedTimeseriesDict(TypedDict):
     """Downsampled timeseries payload for ``/api/simulate/top-speed``.
 
     Only populated when the request sets ``include_timeseries=True``.
-    Stride is chosen in :func:`simulate_top_speed` so the payload is
-    ~100 Hz regardless of the underlying solver ``dt``.
+    Built by :func:`_topspeed_timeseries`: ~100 Hz source, decimated to at most
+    ``TOPSPEED_MAX_SERIES_POINTS`` samples (first, last and peak kept) and
+    rounded to plotting precision.
     """
 
     t: list[float]
@@ -282,6 +359,8 @@ class TopSpeedResultDict(TypedDict, total=False):
     peak_power_hp: float
     total_mass_kg: float
     parts_applied: list[AppliedPartDict]
+    parts_skipped: list[int]
+    environment: EnvironmentEchoDict
     build_cost_inr: float
     timeseries: TopSpeedTimeseriesDict
 
@@ -303,6 +382,8 @@ class DistanceResultDict(TypedDict):
     bike_name: str
     peak_power_hp: float
     total_mass_kg: float
+    parts_skipped: list[int]
+    environment: EnvironmentEchoDict
 
 
 # ─── Request / response models ────────────────────────────────────────────
@@ -312,7 +393,7 @@ class SimulateRequest(BaseModel):
     """POST /api/simulate -- full simulation request."""
 
     # Bike selection -- one of these must be provided
-    bike_id: int | None = Field(None, description="DB bike model ID")
+    bike_id: DbId | None = Field(None, description="DB bike model ID")
     bike_preset: str | None = Field(
         None, description="'gsxr1000_k5' | 'yzfr1_4c8' | 'hayabusa_gen1'"
     )
@@ -333,9 +414,13 @@ class SimulateRequest(BaseModel):
     rider_mass_kg: float = Field(
         75.0, ge=20.0, le=250.0, description="Rider weight [kg]"
     )
-    front_tire_id: int | None = Field(None, description="Override front tire DB ID")
-    rear_tire_id: int | None = Field(None, description="Override rear tire DB ID")
-    venue_id: int | None = Field(
+    # Same cap as QuickSimRequest.part_ids.
+    part_ids: list[DbId] = Field(
+        default_factory=list, max_length=30, description="Part IDs to apply"
+    )
+    front_tire_id: DbId | None = Field(None, description="Override front tire DB ID")
+    rear_tire_id: DbId | None = Field(None, description="Override rear tire DB ID")
+    venue_id: DbId | None = Field(
         None, description="Venue for DA and surface conditions"
     )
 
@@ -362,8 +447,8 @@ class SimulateRequest(BaseModel):
         False, description="Use adaptive RK4 timestep (slower)"
     )
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "bike_id": 1,
                 "power_boost_pct": 5.0,
@@ -371,12 +456,13 @@ class SimulateRequest(BaseModel):
                 "rider_mass_kg": 70.0,
             }
         }
+    )
 
 
 class QuickSimRequest(BaseModel):
     """POST /api/simulate/quick -- minimal input for slider-driven UI."""
 
-    bike_id: int | None = None
+    bike_id: DbId | None = None
     bike_preset: str | None = None
     power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
@@ -385,12 +471,12 @@ class QuickSimRequest(BaseModel):
     # unbounded (2026-08-11 hardening) — a single request carrying tens of
     # thousands of ids became a free CPU/DB amplifier. No real build exceeds
     # ~15 parts; 30 leaves 2x headroom.
-    part_ids: list[int] = Field(
+    part_ids: list[DbId] = Field(
         default_factory=list, max_length=30, description="Part IDs to apply"
     )
-    front_tire_id: int | None = None
-    rear_tire_id: int | None = None
-    venue_id: int | None = None
+    front_tire_id: DbId | None = None
+    rear_tire_id: DbId | None = None
+    venue_id: DbId | None = None
     # Environment overrides
     ambient_temp_c: float | None = Field(None, ge=-30, le=60)
     track_temp_c: float | None = Field(None, ge=-30, le=80)
@@ -399,6 +485,45 @@ class QuickSimRequest(BaseModel):
 
 
 # ─── Config builder ────────────────────────────────────────────────────────
+
+_PRESETS = {
+    "gsxr1000_k5": gsxr1000_k5,
+    "yzfr1_4c8": yzfr1_4c8,
+    "hayabusa_gen1": hayabusa_gen1,
+}
+
+
+def _precheck_refs(
+    *,
+    bike_ids=(),
+    bike_presets=(),
+    venue_id: int | None = None,
+    tire_ids=(),
+) -> None:
+    """404 on catalog ids / presets that do not exist.
+
+    Job routes run their work on a worker thread, where an unknown id would
+    only surface as a failed job on the first poll; checking up front gives the
+    caller the same 404 the synchronous routes return.
+    """
+    for bike_id, preset in zip(bike_ids, bike_presets):
+        if bike_id is None and preset and preset not in _PRESETS:
+            raise HTTPException(404, f"Unknown bike_preset: {preset}")
+    db = _get_db()
+    if not db:
+        return
+
+    def _exists(table: str, row_id: int) -> bool:
+        return db.execute(f"SELECT 1 FROM {table} WHERE id=?", (row_id,)).fetchone()
+
+    for bike_id in bike_ids:
+        if bike_id is not None and not _exists("bike_models", bike_id):
+            raise HTTPException(404, f"Bike {bike_id} not found")
+    if venue_id is not None and not _exists("venues", venue_id):
+        raise HTTPException(404, f"Venue {venue_id} not found")
+    for tire_id in tire_ids:
+        if tire_id is not None and not _exists("tire_models", tire_id):
+            raise HTTPException(404, f"Tire {tire_id} not found")
 
 
 def _build_config(
@@ -479,12 +604,7 @@ def _build_config(
         raise HTTPException(404, f"Bike {bike_id} not found")
 
     if cfg is None and bike_preset:
-        presets = {
-            "gsxr1000_k5": gsxr1000_k5,
-            "yzfr1_4c8": yzfr1_4c8,
-            "hayabusa_gen1": hayabusa_gen1,
-        }
-        fn = presets.get(bike_preset)
+        fn = _PRESETS.get(bike_preset)
         if fn:
             cfg = fn()
         else:
@@ -514,6 +634,10 @@ def _build_config(
     cfg.chassis.rider_mass_kg = rider_mass_kg
 
     # -- Venue conditions ----------------------------------------------------
+    # An id that matches no catalog row is a client error (404), like an
+    # unknown bike_id — silently returning stock-condition numbers for a
+    # typo'd venue or tire looks like a valid answer.
+    unknown_ref: str | None = None
     if venue_id is not None:
         db = _get_db()
         if db:
@@ -521,8 +645,11 @@ def _build_config(
                 row = db.execute(
                     "SELECT * FROM venues WHERE id=?", (venue_id,)
                 ).fetchone()
-                if row:
+                if row is None:
+                    unknown_ref = f"Venue {venue_id} not found"
+                else:
                     d = dict(row)
+                    cfg.environment.venue_name = d["name"]
                     if d.get("altitude_m") is not None:
                         cfg.environment.altitude_m = float(d["altitude_m"])
                     # Route the venue's surface type into track_surface — the
@@ -536,8 +663,18 @@ def _build_config(
                 logging.getLogger(__name__).warning(
                     "Failed to load venue %s: %s", venue_id, e
                 )
+        if unknown_ref:
+            raise HTTPException(404, unknown_ref)
 
     # -- Environment overrides (on top of venue) -----------------------------
+    if venue_id is None:
+        manual = any(
+            v is not None
+            for v in (ambient_temp_c, track_temp_c, humidity_pct, headwind_kmh)
+        )
+        cfg.environment.venue_name = (
+            CUSTOM_CONDITIONS_NAME if manual else DEFAULT_CONDITIONS_NAME
+        )
     if ambient_temp_c is not None:
         cfg.environment.ambient_temp_c = ambient_temp_c
     if track_temp_c is not None:
@@ -550,27 +687,31 @@ def _build_config(
 
     # -- Tire overrides ------------------------------------------------------
     # TireParams carries ONE scalar mu_peak, and drive traction is rear-tire
-    # physics — so ONLY the rear tire may set grip. Previously the loop ran
-    # (front, rear) and both wrote the same field: a front-only selection
-    # silently replaced rear grip with the front tire's compound.
-    for tire_id in (rear_tire_id,):
-        if tire_id is not None:
-            db = _get_db()
-            if db:
-                try:
-                    trow = db.execute(
-                        "SELECT pacejka_D, mu_peak FROM tire_models WHERE id=?",
-                        (tire_id,),
-                    ).fetchone()
-                    if trow:
-                        td = dict(trow)
-                        mu = td.get("mu_peak") or td.get("pacejka_D")
-                        if mu and float(mu) > 0:
-                            cfg.tires.mu_peak = float(mu)
-                except Exception as e:
-                    logging.getLogger(__name__).warning(
-                        "Failed to load tire_id=%s: %s", tire_id, e
-                    )
+    # physics — so ONLY the rear tire may set grip. A front-only selection
+    # must not replace rear grip with the front tire's compound; it is still
+    # checked for existence.
+    db = _get_db() if (front_tire_id is not None or rear_tire_id is not None) else None
+    if db:
+        for tire_id in (front_tire_id, rear_tire_id):
+            if tire_id is None:
+                continue
+            try:
+                trow = db.execute(
+                    "SELECT pacejka_D, mu_peak FROM tire_models WHERE id=?",
+                    (tire_id,),
+                ).fetchone()
+            except Exception as e:
+                logging.getLogger(__name__).warning(
+                    "Failed to load tire_id=%s: %s", tire_id, e
+                )
+                continue
+            if trow is None:
+                raise HTTPException(404, f"Tire {tire_id} not found")
+            if tire_id == rear_tire_id:
+                td = dict(trow)
+                mu = td.get("mu_peak") or td.get("pacejka_D")
+                if mu and float(mu) > 0:
+                    cfg.tires.mu_peak = float(mu)
 
     return cfg
 
@@ -580,6 +721,7 @@ def _apply_parts_to_config(
     part_ids: list[int] | None,
     *,
     include_price_in_summary: bool = True,
+    skipped: list[int] | None = None,
 ) -> tuple[BikeConfig, list[AppliedPartDict], float]:
     """Apply a list of selected ``part_ids`` to *cfg* and report what was used.
 
@@ -595,6 +737,10 @@ def _apply_parts_to_config(
       prior "if db:" guarded paths.
     * If any single part row raises while being applied, the whole batch
       is logged and dropped (mirrors the prior outer ``try/except``).
+    * When ``skipped`` is a list, it is filled with the (de-duplicated, ordered)
+      requested ids that were NOT applied — unknown to the catalog, or dropped
+      by a failure — so routes can report ``parts_skipped`` instead of
+      silently returning stock-part numbers for a stale id.
     * The ``parts_applied`` dict shape is ``{id, name, brand[, price_inr]}``
       — the optional ``price_inr`` key is omitted when
       ``include_price_in_summary=False`` (used by ``_run_build`` whose
@@ -612,8 +758,14 @@ def _apply_parts_to_config(
     if not part_ids:
         return cfg, parts_applied, build_cost
 
+    def _report_skipped() -> None:
+        if skipped is not None:
+            applied_ids = {p["id"] for p in parts_applied}
+            skipped.extend(p for p in dict.fromkeys(part_ids) if p not in applied_ids)
+
     db = _get_db()
     if not db:
+        _report_skipped()
         return cfg, parts_applied, build_cost
 
     try:
@@ -670,7 +822,162 @@ def _apply_parts_to_config(
         # came from a late row); cfg likewise carries any deltas already
         # applied. This matches the inline try/except behaviour we replaced.
 
+    _report_skipped()
     return cfg, parts_applied, build_cost
+
+
+DEFAULT_CONDITIONS_NAME = "Default conditions"
+CUSTOM_CONDITIONS_NAME = "Custom conditions"
+
+
+def _environment_echo(cfg: BikeConfig) -> EnvironmentEchoDict:
+    e = cfg.environment
+    name = e.venue_name
+    is_default = name == DEFAULT_CONDITIONS_NAME
+    source = (
+        "default"
+        if is_default
+        else "manual"
+        if name == CUSTOM_CONDITIONS_NAME
+        else "venue"
+    )
+    headwind = (
+        float(e.wind_speed_ms) * 3.6 * math.cos(math.radians(e.wind_direction_deg))
+    )
+    return {
+        "name": name,
+        "is_default": is_default,
+        "source": source,
+        "altitude_m": float(e.altitude_m),
+        "ambient_temp_c": float(e.ambient_temp_c),
+        "track_temp_c": float(e.track_temp_c),
+        "humidity_pct": float(e.relative_humidity_pct),
+        "pressure_hpa": float(e.barometric_pressure_hpa),
+        "headwind_kmh": round(headwind, 2),
+        "track_surface": str(e.track_surface),
+    }
+
+
+# ─── Stock-baseline cache ─────────────────────────────────────────────────
+# A quick sim with parts needs the same bike WITHOUT parts for its delta. That
+# baseline depends only on the bike/slider/venue/tyre/environment inputs, so it
+# is memoised (bounded LRU, thread-safe). The key carries the catalog
+# generation, so a runtime catalog write retires every entry. Values are the
+# already-rounded stock ET, i.e. exactly what an uncached run would report.
+_STOCK_CACHE_MAX = 256
+_stock_cache: "OrderedDict[tuple, float]" = OrderedDict()
+_stock_cache_lock = threading.Lock()
+
+
+def _stock_key(req: "QuickSimRequest") -> tuple:
+    return (
+        catalog_generation(),
+        req.bike_id,
+        req.bike_preset,
+        req.power_boost_pct,
+        req.mass_delta_kg,
+        req.rider_mass_kg,
+        req.venue_id,
+        req.front_tire_id,
+        req.rear_tire_id,
+        req.ambient_temp_c,
+        req.track_temp_c,
+        req.humidity_pct,
+        req.headwind_kmh,
+    )
+
+
+def _stock_cache_get(key: tuple) -> float | None:
+    with _stock_cache_lock:
+        et = _stock_cache.get(key)
+        if et is not None:
+            _stock_cache.move_to_end(key)
+        return et
+
+
+def _stock_cache_put(key: tuple, et: float) -> None:
+    with _stock_cache_lock:
+        _stock_cache[key] = et
+        _stock_cache.move_to_end(key)
+        while len(_stock_cache) > _STOCK_CACHE_MAX:
+            _stock_cache.popitem(last=False)
+
+
+# ─── Catalog response cache ───────────────────────────────────────────────
+# The catalog GETs (bikes, bike detail, parts, categories, tires, venues) are
+# immutable between deploys apart from the rare runtime catalog write. The
+# serialized body is cached per (route, validated params) and tagged with the
+# catalog generation; a write bumps the generation, which retires every entry.
+# Responses carry a weak ETag and a short public Cache-Control so browsers and
+# the CDN revalidate instead of re-downloading.
+CATALOG_CACHE_CONTROL = "public, max-age=300, stale-while-revalidate=3600"
+_CATALOG_CACHE_MAX_ENTRIES = 256
+_CATALOG_CACHE_MAX_BYTES = 24 * 1024 * 1024
+_CATALOG_CACHE_MAX_ENTRY_BYTES = 4 * 1024 * 1024
+_catalog_cache: "OrderedDict[tuple, tuple[int, bytes, str]]" = OrderedDict()
+_catalog_cache_bytes = 0
+_catalog_cache_lock = threading.Lock()
+# hits / misses, exposed for tests and diagnostics
+catalog_cache_stats = {"hits": 0, "misses": 0}
+
+
+def _etag_matches(header: str | None, etag: str) -> bool:
+    if not header:
+        return False
+    want = etag.removeprefix("W/")
+    for tok in header.split(","):
+        tok = tok.strip()
+        if tok == "*" or tok.removeprefix("W/") == want:
+            return True
+    return False
+
+
+def _serve_catalog(request: Request | None, key: tuple, build):
+    """Serve ``build()`` (a JSON-able dict) through the catalog cache.
+
+    ``request`` is None when a route function is called directly (MCP local
+    backend, tests): the plain dict is returned, uncached. Errors raised by
+    ``build`` are never cached.
+    """
+    global _catalog_cache_bytes
+    if request is None:
+        return build()
+    gen = catalog_generation()
+    with _catalog_cache_lock:
+        ent = _catalog_cache.get(key)
+        if ent is not None and ent[0] == gen:
+            _catalog_cache.move_to_end(key)
+            catalog_cache_stats["hits"] += 1
+        else:
+            ent = None
+    if ent is None:
+        payload = build()
+        try:
+            raw = json.dumps(payload, separators=(",", ":"), allow_nan=False)
+        except (TypeError, ValueError):
+            raw = json.dumps(jsonable_encoder(payload), separators=(",", ":"))
+        body = raw.encode("utf-8")
+        etag = 'W/"' + hashlib.sha1(body).hexdigest()[:20] + '"'
+        ent = (gen, body, etag)
+        with _catalog_cache_lock:
+            catalog_cache_stats["misses"] += 1
+            old = _catalog_cache.pop(key, None)
+            if old is not None:
+                _catalog_cache_bytes -= len(old[1])
+            if len(body) <= _CATALOG_CACHE_MAX_ENTRY_BYTES:
+                _catalog_cache[key] = ent
+                _catalog_cache_bytes += len(body)
+                while _catalog_cache and (
+                    len(_catalog_cache) > _CATALOG_CACHE_MAX_ENTRIES
+                    or _catalog_cache_bytes > _CATALOG_CACHE_MAX_BYTES
+                ):
+                    _, evicted = _catalog_cache.popitem(last=False)
+                    _catalog_cache_bytes -= len(evicted[1])
+    _, body, etag = ent
+    headers = {"ETag": etag, "Cache-Control": CATALOG_CACHE_CONTROL}
+    if _etag_matches(request.headers.get("if-none-match"), etag):
+        return Response(status_code=304, headers=headers)
+    return Response(content=body, media_type="application/json", headers=headers)
 
 
 # ─── Endpoints ────────────────────────────────────────────────────────────
@@ -894,216 +1201,228 @@ def list_bikes(
     category: str | None = Query(None),
     limit: int = Query(100, ge=1, le=5000),
     offset: int = Query(0, ge=0),
+    request: Request = None,
 ):
-    db = _get_db()
-    if not db:
-        raise HTTPException(503, "Database unavailable")
+    def _build():
+        db = _get_db()
+        if not db:
+            raise HTTPException(503, "Database unavailable")
 
-    try:
-        query = """SELECT bm.*, m.name AS manufacturer
-                   FROM bike_models bm
-                   JOIN manufacturers m ON bm.manufacturer_id = m.id
-                   WHERE 1=1"""
-        params: list[Any] = []
+        try:
+            query = """SELECT bm.*, m.name AS manufacturer
+                       FROM bike_models bm
+                       JOIN manufacturers m ON bm.manufacturer_id = m.id
+                       WHERE 1=1"""
+            params: list[Any] = []
 
-        if search:
-            query += " AND (m.name LIKE ? OR bm.model_name LIKE ?)"
-            params += [f"%{search}%", f"%{search}%"]
-        if manufacturer:
-            query += " AND LOWER(m.name) = LOWER(?)"
-            params.append(manufacturer)
-        if category:
-            query += " AND LOWER(bm.category) = LOWER(?)"
-            params.append(category)
+            if search:
+                query += " AND (m.name LIKE ? OR bm.model_name LIKE ?)"
+                params += [f"%{search}%", f"%{search}%"]
+            if manufacturer:
+                query += " AND LOWER(m.name) = LOWER(?)"
+                params.append(manufacturer)
+            if category:
+                query += " AND LOWER(bm.category) = LOWER(?)"
+                params.append(category)
 
-        query += " ORDER BY m.name, bm.model_name LIMIT ? OFFSET ?"
-        params += [limit, offset]
+            query += " ORDER BY m.name, bm.model_name LIMIT ? OFFSET ?"
+            params += [limit, offset]
 
-        rows = db.execute(query, params).fetchall()
+            rows = db.execute(query, params).fetchall()
 
-        count_query = """SELECT COUNT(*) FROM bike_models bm
-                         JOIN manufacturers m ON bm.manufacturer_id = m.id
-                         WHERE 1=1"""
-        count_params: list[Any] = []
-        if search:
-            count_query += " AND (m.name LIKE ? OR bm.model_name LIKE ?)"
-            count_params += [f"%{search}%", f"%{search}%"]
-        # Mirror ALL row-query filters — total previously ignored
-        # manufacturer/category, so filtered pagination reported the full
-        # catalog count (e.g. 38 cruisers with total: 501).
-        if manufacturer:
-            count_query += " AND LOWER(m.name) = LOWER(?)"
-            count_params.append(manufacturer)
-        if category:
-            count_query += " AND LOWER(bm.category) = LOWER(?)"
-            count_params.append(category)
+            count_query = """SELECT COUNT(*) FROM bike_models bm
+                             JOIN manufacturers m ON bm.manufacturer_id = m.id
+                             WHERE 1=1"""
+            count_params: list[Any] = []
+            if search:
+                count_query += " AND (m.name LIKE ? OR bm.model_name LIKE ?)"
+                count_params += [f"%{search}%", f"%{search}%"]
+            # Mirror ALL row-query filters — total previously ignored
+            # manufacturer/category, so filtered pagination reported the full
+            # catalog count (e.g. 38 cruisers with total: 501).
+            if manufacturer:
+                count_query += " AND LOWER(m.name) = LOWER(?)"
+                count_params.append(manufacturer)
+            if category:
+                count_query += " AND LOWER(bm.category) = LOWER(?)"
+                count_params.append(category)
 
-        total = db.execute(count_query, count_params).fetchone()[0]
+            total = db.execute(count_query, count_params).fetchone()[0]
 
-        return {
-            "total": total,
-            "offset": offset,
-            "limit": limit,
-            "bikes": [_bike_row_to_summary(dict(r)) for r in rows],
-        }
-    except Exception as exc:
-        raise HTTPException(500, f"Database error: {exc}")
+            return {
+                "total": total,
+                "offset": offset,
+                "limit": limit,
+                "bikes": [_bike_row_to_summary(dict(r)) for r in rows],
+            }
+        except Exception as exc:
+            raise HTTPException(500, f"Database error: {exc}")
+
+    return _serve_catalog(
+        request, ("bikes", search, manufacturer, category, limit, offset), _build
+    )
 
 
 @app.get("/api/bikes/{bike_id}")
-def get_bike(bike_id: int):
-    db = _get_db()
-    if not db:
-        raise HTTPException(503, "Database unavailable")
+def get_bike(bike_id: int = Path(..., ge=1, le=MAX_DB_ID), request: Request = None):
+    def _build():
+        db = _get_db()
+        if not db:
+            raise HTTPException(503, "Database unavailable")
 
-    try:
-        row = db.execute(
-            """SELECT bm.*, m.name AS manufacturer
-               FROM bike_models bm
-               JOIN manufacturers m ON bm.manufacturer_id = m.id
-               WHERE bm.id = ?""",
-            (bike_id,),
-        ).fetchone()
-    except Exception as exc:
-        raise HTTPException(500, f"Database error: {exc}")
+        try:
+            row = db.execute(
+                """SELECT bm.*, m.name AS manufacturer
+                   FROM bike_models bm
+                   JOIN manufacturers m ON bm.manufacturer_id = m.id
+                   WHERE bm.id = ?""",
+                (bike_id,),
+            ).fetchone()
+        except Exception as exc:
+            raise HTTPException(500, f"Database error: {exc}")
 
-    if not row:
-        raise HTTPException(404, f"Bike {bike_id} not found")
+        if not row:
+            raise HTTPException(404, f"Bike {bike_id} not found")
 
-    # Expose all bike_models columns (not just the summary subset)
-    full = dict(row)
-    d = _bike_row_to_summary(full)
-    # Merge in remaining headline columns that detail pages need
-    for extra in (
-        "model_code",
-        "year_to",
-        "subcategory",
-        "cylinder_count",
-        "cylinder_config",
-        "bore_mm",
-        "stroke_mm",
-        "compression_ratio",
-        "peak_power_rpm",
-        "peak_torque_nm",
-        "peak_torque_rpm",
-        "wet_mass_kg",
-        "wheelbase_mm",
-        "seat_height_mm",
-        "fuel_capacity_l",
-        "validation_et_s",
-        "validation_trap_kmh",
-        "validation_source",
-    ):
-        if extra in full:
-            d[extra] = full[extra]
+        # Expose all bike_models columns (not just the summary subset)
+        full = dict(row)
+        d = _bike_row_to_summary(full)
+        # Merge in remaining headline columns that detail pages need
+        for extra in (
+            "model_code",
+            "year_to",
+            "subcategory",
+            "cylinder_count",
+            "cylinder_config",
+            "bore_mm",
+            "stroke_mm",
+            "compression_ratio",
+            "peak_power_rpm",
+            "peak_torque_nm",
+            "peak_torque_rpm",
+            "wet_mass_kg",
+            "wheelbase_mm",
+            "seat_height_mm",
+            "fuel_capacity_l",
+            "validation_et_s",
+            "validation_trap_kmh",
+            "validation_source",
+        ):
+            if extra in full:
+                d[extra] = full[extra]
 
-    # Attach latest bike_config JSON sub-blocks (aero, drivetrain, engine extras, tire)
-    try:
-        cfg_row = db.execute(
-            """SELECT engine_params, aero_params, drivetrain_params, tire_params,
-                      chassis_params, config_name
-               FROM bike_configs
-               WHERE bike_model_id = ? AND is_current = 1
-               ORDER BY version DESC
-               LIMIT 1""",
-            (bike_id,),
-        ).fetchone()
-        if cfg_row:
-            import json as _json
+        # Attach latest bike_config JSON sub-blocks (aero, drivetrain, engine extras, tire)
+        try:
+            cfg_row = db.execute(
+                """SELECT engine_params, aero_params, drivetrain_params, tire_params,
+                          chassis_params, config_name
+                   FROM bike_configs
+                   WHERE bike_model_id = ? AND is_current = 1
+                   ORDER BY version DESC
+                   LIMIT 1""",
+                (bike_id,),
+            ).fetchone()
+            if cfg_row:
+                import json as _json
 
-            def _safe_parse(blob):
-                if not blob:
-                    return {}
-                try:
-                    return _json.loads(blob)
-                except Exception:
-                    return {}
+                def _safe_parse(blob):
+                    if not blob:
+                        return {}
+                    try:
+                        return _json.loads(blob)
+                    except Exception:
+                        return {}
 
-            engine = _safe_parse(cfg_row["engine_params"])
-            aero = _safe_parse(cfg_row["aero_params"])
-            drive = _safe_parse(cfg_row["drivetrain_params"])
-            tire = _safe_parse(cfg_row["tire_params"])
-            chassis = _safe_parse(cfg_row["chassis_params"])
+                engine = _safe_parse(cfg_row["engine_params"])
+                aero = _safe_parse(cfg_row["aero_params"])
+                drive = _safe_parse(cfg_row["drivetrain_params"])
+                tire = _safe_parse(cfg_row["tire_params"])
+                chassis = _safe_parse(cfg_row["chassis_params"])
 
-            # Expose common simulation-relevant fields at top level
-            if engine:
-                for k in ("redline_rpm", "cylinder_count", "cylinder_config"):
-                    v = engine.get(k)
-                    if v is not None and d.get(k) in (None, ""):
-                        d[k] = v
-            if aero:
-                for k in ("cd", "frontal_area_m2"):
-                    v = aero.get(k)
+                # Expose common simulation-relevant fields at top level
+                if engine:
+                    for k in ("redline_rpm", "cylinder_count", "cylinder_config"):
+                        v = engine.get(k)
+                        if v is not None and d.get(k) in (None, ""):
+                            d[k] = v
+                if aero:
+                    for k in ("cd", "frontal_area_m2"):
+                        v = aero.get(k)
+                        if v is not None:
+                            d[k] = v
+                if drive:
+                    for k in ("front_sprocket", "rear_sprocket", "chain_pitch"):
+                        v = drive.get(k)
+                        if v is not None:
+                            d[k] = v
+                if tire:
+                    # Expose mu_peak so the bike-detail UI can show grip class
+                    # alongside the raw tire model. Other tire fields stay
+                    # tucked inside tire_params for the detail-card expander.
+                    v = tire.get("mu_peak")
                     if v is not None:
-                        d[k] = v
-            if drive:
-                for k in ("front_sprocket", "rear_sprocket", "chain_pitch"):
-                    v = drive.get(k)
-                    if v is not None:
-                        d[k] = v
-            if tire:
-                # Expose mu_peak so the bike-detail UI can show grip class
-                # alongside the raw tire model. Other tire fields stay
-                # tucked inside tire_params for the detail-card expander.
-                v = tire.get("mu_peak")
-                if v is not None:
-                    d["tire_mu_peak"] = v
-            if chassis:
-                # CoG height is stored as mm in chassis_params (matches
-                # wheelbase_mm / seat_height_mm convention). Expose both units
-                # so the detail page can format consistently.
-                cog_mm = chassis.get("cog_height_mm")
-                if cog_mm is None and chassis.get("cog_height_m") is not None:
-                    cog_mm = chassis["cog_height_m"] * 1000.0
-                if cog_mm is not None:
-                    d["cog_height_mm"] = cog_mm
-                    d["cog_height_m"] = cog_mm / 1000.0
-                # Derived: wet mass = dry + fluids + fuel (bike_models.wet_mass_kg
-                # is rarely populated by the scraper; config has the components).
-                if d.get("wet_mass_kg") in (None, 0):
-                    dry = chassis.get("dry_mass_kg")
-                    fluid = chassis.get("fluid_mass_kg") or 0.0
-                    fuel = chassis.get("fuel_mass_kg") or 0.0
-                    if dry is not None:
-                        d["wet_mass_kg"] = round(dry + fluid + fuel, 1)
-                        d["wet_mass_derived"] = True
-            # Derived: wheelbase in meters for display
-            if d.get("wheelbase_mm") is not None:
-                d["wheelbase_m"] = d["wheelbase_mm"] / 1000.0
-    except Exception:
-        # Detail page degrades gracefully if JSON blobs are malformed.
-        pass
+                        d["tire_mu_peak"] = v
+                if chassis:
+                    # CoG height is stored as mm in chassis_params (matches
+                    # wheelbase_mm / seat_height_mm convention). Expose both units
+                    # so the detail page can format consistently.
+                    cog_mm = chassis.get("cog_height_mm")
+                    if cog_mm is None and chassis.get("cog_height_m") is not None:
+                        cog_mm = chassis["cog_height_m"] * 1000.0
+                    if cog_mm is not None:
+                        d["cog_height_mm"] = cog_mm
+                        d["cog_height_m"] = cog_mm / 1000.0
+                    # Derived: wet mass = dry + fluids + fuel (bike_models.wet_mass_kg
+                    # is rarely populated by the scraper; config has the components).
+                    if d.get("wet_mass_kg") in (None, 0):
+                        dry = chassis.get("dry_mass_kg")
+                        fluid = chassis.get("fluid_mass_kg") or 0.0
+                        fuel = chassis.get("fuel_mass_kg") or 0.0
+                        if dry is not None:
+                            d["wet_mass_kg"] = round(dry + fluid + fuel, 1)
+                            d["wet_mass_derived"] = True
+                # Derived: wheelbase in meters for display
+                if d.get("wheelbase_mm") is not None:
+                    d["wheelbase_m"] = d["wheelbase_mm"] / 1000.0
+        except Exception:
+            # Detail page degrades gracefully if JSON blobs are malformed.
+            pass
 
-    # Attach OEM tire fitments
-    try:
-        fitments = db.execute(
-            """SELECT tf.position, tf.fitment_type,
-                      tmfr.name AS manufacturer, tm.model_name AS model,
-                      tm.size_designation, tm.compound_type,
-                      tm.id AS tire_id
-               FROM bike_tire_fitments tf
-               JOIN tire_models tm ON tf.tire_model_id = tm.id
-               JOIN tire_manufacturers tmfr ON tm.manufacturer_id = tmfr.id
-               WHERE tf.bike_model_id = ?""",
-            (bike_id,),
-        ).fetchall()
-        d["tire_fitments"] = [dict(f) for f in fitments]
-    except Exception:
-        d["tire_fitments"] = []
+        # Attach OEM tire fitments
+        try:
+            fitments = db.execute(
+                """SELECT tf.position, tf.fitment_type,
+                          tmfr.name AS manufacturer, tm.model_name AS model,
+                          tm.size_designation, tm.compound_type,
+                          tm.id AS tire_id
+                   FROM bike_tire_fitments tf
+                   JOIN tire_models tm ON tf.tire_model_id = tm.id
+                   JOIN tire_manufacturers tmfr ON tm.manufacturer_id = tmfr.id
+                   WHERE tf.bike_model_id = ?""",
+                (bike_id,),
+            ).fetchall()
+            d["tire_fitments"] = [dict(f) for f in fitments]
+        except Exception:
+            d["tire_fitments"] = []
 
-    return d
+        return d
+
+    return _serve_catalog(request, ("bike", bike_id), _build)
 
 
 @app.get("/api/venues")
-def list_venues():
-    db = _get_db()
-    if not db:
-        raise HTTPException(503, "Database unavailable")
-    try:
-        rows = db.execute("SELECT * FROM venues ORDER BY country, name").fetchall()
-        return {"venues": [dict(r) for r in rows]}
-    except Exception as exc:
-        raise HTTPException(500, f"Database error: {exc}")
+def list_venues(request: Request = None):
+    def _build():
+        db = _get_db()
+        if not db:
+            raise HTTPException(503, "Database unavailable")
+        try:
+            rows = db.execute("SELECT * FROM venues ORDER BY country, name").fetchall()
+            return {"venues": [dict(r) for r in rows]}
+        except Exception as exc:
+            raise HTTPException(500, f"Database error: {exc}")
+
+    return _serve_catalog(request, ("venues",), _build)
 
 
 @app.get("/api/tires")
@@ -1111,41 +1430,45 @@ def list_tires(
     compound: str | None = Query(None),
     manufacturer: str | None = Query(None),
     limit: int = Query(1000, ge=1, le=5000),
+    request: Request = None,
 ):
-    db = _get_db()
-    if not db:
-        raise HTTPException(503, "Database unavailable")
-    try:
-        count_query = """SELECT COUNT(*)
-                   FROM tire_models tm
-                   JOIN tire_manufacturers tmfr ON tm.manufacturer_id = tmfr.id
-                   WHERE 1=1"""
-        query = """SELECT tm.*, tmfr.name AS manufacturer
-                   FROM tire_models tm
-                   JOIN tire_manufacturers tmfr ON tm.manufacturer_id = tmfr.id
-                   WHERE 1=1"""
-        params: list[Any] = []
-        if compound:
-            count_query += " AND LOWER(tm.compound_type) = LOWER(?)"
-            query += " AND LOWER(tm.compound_type) = LOWER(?)"
-            params.append(compound)
-        if manufacturer:
-            count_query += " AND LOWER(tmfr.name) LIKE LOWER(?)"
-            query += " AND LOWER(tmfr.name) LIKE LOWER(?)"
-            params.append(f"%{manufacturer}%")
-        total = db.execute(count_query, params).fetchone()[0]
-        query += " ORDER BY tmfr.name, tm.model_name LIMIT ?"
-        params.append(limit)
-        rows = db.execute(query, params).fetchall()
-        # Reshape to frontend-friendly format
-        tires = []
-        for r in rows:
-            d = dict(r)
-            d["model"] = d.get("model_name", "")
-            tires.append(d)
-        return {"tires": tires, "total": total}
-    except Exception as exc:
-        raise HTTPException(500, f"Database error: {exc}")
+    def _build():
+        db = _get_db()
+        if not db:
+            raise HTTPException(503, "Database unavailable")
+        try:
+            count_query = """SELECT COUNT(*)
+                       FROM tire_models tm
+                       JOIN tire_manufacturers tmfr ON tm.manufacturer_id = tmfr.id
+                       WHERE 1=1"""
+            query = """SELECT tm.*, tmfr.name AS manufacturer
+                       FROM tire_models tm
+                       JOIN tire_manufacturers tmfr ON tm.manufacturer_id = tmfr.id
+                       WHERE 1=1"""
+            params: list[Any] = []
+            if compound:
+                count_query += " AND LOWER(tm.compound_type) = LOWER(?)"
+                query += " AND LOWER(tm.compound_type) = LOWER(?)"
+                params.append(compound)
+            if manufacturer:
+                count_query += " AND LOWER(tmfr.name) LIKE LOWER(?)"
+                query += " AND LOWER(tmfr.name) LIKE LOWER(?)"
+                params.append(f"%{manufacturer}%")
+            total = db.execute(count_query, params).fetchone()[0]
+            query += " ORDER BY tmfr.name, tm.model_name LIMIT ?"
+            params.append(limit)
+            rows = db.execute(query, params).fetchall()
+            # Reshape to frontend-friendly format
+            tires = []
+            for r in rows:
+                d = dict(r)
+                d["model"] = d.get("model_name", "")
+                tires.append(d)
+            return {"tires": tires, "total": total}
+        except Exception as exc:
+            raise HTTPException(500, f"Database error: {exc}")
+
+    return _serve_catalog(request, ("tires", compound, manufacturer, limit), _build)
 
 
 def _simulate_impl(req: SimulateRequest, progress=None):
@@ -1176,6 +1499,11 @@ def _simulate_impl(req: SimulateRequest, progress=None):
         raise
     except Exception as exc:
         raise HTTPException(400, f"Config error: {exc}")
+
+    parts_skipped: list[int] = []
+    cfg, parts_applied, build_cost_inr = _apply_parts_to_config(
+        cfg, req.part_ids, skipped=parts_skipped
+    )
 
     try:
         engine = MotoQuantEngine(cfg)
@@ -1216,6 +1544,10 @@ def _simulate_impl(req: SimulateRequest, progress=None):
             "1000ft_s": round(float(sim.time_1000ft), 4),
             "1320ft_s": round(float(sim.time_quarter), 4),
         },
+        "environment": _environment_echo(cfg),
+        "parts_applied": parts_applied,
+        "parts_skipped": parts_skipped,
+        "build_cost_inr": round(build_cost_inr, 0),
         "bike": {
             "manufacturer": _mfr,
             "model": cfg.name or "Unknown",
@@ -1244,9 +1576,8 @@ def _simulate_impl(req: SimulateRequest, progress=None):
             "rpm": _safe_array(sim.rpm, lambda v: round(float(v), 0)),
             "gear": _safe_array(sim.gear, lambda v: int(v)),
             "accel_g": _safe_array(sim.a, lambda v: round(float(v) / 9.81, 3)),
-            "traction_pct": _safe_array(
-                sim.traction_pct, lambda v: round(float(v) * 100, 1)
-            ),
+            # SimResult.traction_pct is already a 0-100 percentage.
+            "traction_pct": _safe_array(sim.traction_pct, lambda v: round(float(v), 1)),
             "tire_temp_c": _safe_array(sim.T_tire, lambda v: round(float(v), 1)),
             "power_kw": _safe_array(sim.power_kw, lambda v: round(float(v), 1)),
             "F_drive_N": _safe_array(sim.F_drive, lambda v: round(float(v), 0)),
@@ -1302,33 +1633,40 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
         raise HTTPException(400, f"Config error: {exc}")
 
     # Apply selected parts
-    cfg, parts_applied, build_cost_inr = _apply_parts_to_config(cfg, req.part_ids)
+    parts_skipped: list[int] = []
+    cfg, parts_applied, build_cost_inr = _apply_parts_to_config(
+        cfg, req.part_ids, skipped=parts_skipped
+    )
 
     # Run stock sim for comparison if parts are applied
     # "Stock" means same slider overrides but NO parts -- shows parts-only delta
+    stock_key = _stock_key(req)
     stock_et = None
     if parts_applied:
-        try:
-            stock_cfg = _build_config(
-                bike_id=req.bike_id,
-                bike_preset=req.bike_preset,
-                power_boost_pct=req.power_boost_pct,
-                mass_delta_kg=req.mass_delta_kg,
-                rider_mass_kg=req.rider_mass_kg,
-                venue_id=req.venue_id,
-                front_tire_id=req.front_tire_id,
-                rear_tire_id=req.rear_tire_id,
-                ambient_temp_c=req.ambient_temp_c,
-                track_temp_c=req.track_temp_c,
-                humidity_pct=req.humidity_pct,
-                headwind_kmh=req.headwind_kmh,
-            )
-            stock_sim = MotoQuantEngine(stock_cfg).run()
-            stock_et = round(float(stock_sim.time_quarter), 4)
-        except Exception:
-            # Baseline comparison is optional; stock_et stays None and the
-            # response simply omits the stock delta.
-            pass
+        stock_et = _stock_cache_get(stock_key)
+        if stock_et is None:
+            try:
+                stock_cfg = _build_config(
+                    bike_id=req.bike_id,
+                    bike_preset=req.bike_preset,
+                    power_boost_pct=req.power_boost_pct,
+                    mass_delta_kg=req.mass_delta_kg,
+                    rider_mass_kg=req.rider_mass_kg,
+                    venue_id=req.venue_id,
+                    front_tire_id=req.front_tire_id,
+                    rear_tire_id=req.rear_tire_id,
+                    ambient_temp_c=req.ambient_temp_c,
+                    track_temp_c=req.track_temp_c,
+                    humidity_pct=req.humidity_pct,
+                    headwind_kmh=req.headwind_kmh,
+                )
+                stock_sim = MotoQuantEngine(stock_cfg).run()
+                stock_et = round(float(stock_sim.time_quarter), 4)
+                _stock_cache_put(stock_key, stock_et)
+            except Exception:
+                # Baseline comparison is optional; stock_et stays None and the
+                # response simply omits the stock delta.
+                pass
 
     try:
         engine = MotoQuantEngine(cfg)
@@ -1345,28 +1683,33 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
         "peak_power_hp": round(float(cfg.engine.peak_power_hp), 1),
         "total_mass_kg": round(float(cfg.chassis.total_mass_kg), 1),
         "parts_applied": parts_applied,
+        "parts_skipped": parts_skipped,
+        "environment": _environment_echo(cfg),
         "build_cost_inr": round(build_cost_inr, 0),
         "stock_et_s": stock_et,
         "et_delta_s": round(float(sim.time_quarter) - stock_et, 4)
         if stock_et
         else None,
     }
+    if not parts_applied:
+        # No parts changed the config, so this run IS the stock baseline.
+        _stock_cache_put(stock_key, result["et_quarter_s"])
     return result
 
 
 class TopSpeedRequest(BaseModel):
     """POST /api/simulate/top-speed — runs until terminal velocity."""
 
-    bike_id: int | None = None
+    bike_id: DbId | None = None
     bike_preset: str | None = None
     power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
     rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
     # Same cap rationale as QuickSimRequest.part_ids (2026-08-11 hardening).
-    part_ids: list[int] = Field(default_factory=list, max_length=30)
-    front_tire_id: int | None = None
-    rear_tire_id: int | None = None
-    venue_id: int | None = None
+    part_ids: list[DbId] = Field(default_factory=list, max_length=30)
+    front_tire_id: DbId | None = None
+    rear_tire_id: DbId | None = None
+    venue_id: DbId | None = None
     ambient_temp_c: float | None = Field(None, ge=-30, le=60)
     track_temp_c: float | None = Field(None, ge=-30, le=80)
     humidity_pct: float | None = Field(None, ge=0, le=100)
@@ -1383,6 +1726,49 @@ class TopSpeedRequest(BaseModel):
     # DistanceRunRequest keeps le=300 — a 20 km LSR run genuinely needs it.
     max_time_s: float = Field(120.0, ge=0.1, le=120.0)
     include_timeseries: bool = False
+
+
+# Upper bound on plotted points in the top-speed timeseries. The web chart draws
+# one curve; ~2,000 points is far beyond what a chart can resolve, whereas the
+# native 100 Hz stream of a 120 s run is ~12,000 points x 7 series.
+TOPSPEED_MAX_SERIES_POINTS = 2000
+
+
+def _topspeed_timeseries(sim) -> TopSpeedTimeseriesDict:
+    """Plot-ready top-speed series: 100 Hz source, decimated and rounded.
+
+    Keeps the first sample, the last sample and the peak-speed sample, spreads
+    the rest evenly, and rounds each channel to the precision a chart can show.
+    Scalar results are computed from the full-resolution run elsewhere and are
+    not derived from this series.
+    """
+    import numpy as np
+
+    stride = max(1, int(0.01 / max(sim.dt, 0.0001)))
+    t = np.asarray(sim.t[::stride])
+    n = len(t)
+    if n > TOPSPEED_MAX_SERIES_POINTS:
+        keep = set(
+            np.linspace(0, n - 1, TOPSPEED_MAX_SERIES_POINTS).astype(int).tolist()
+        )
+        keep.add(int(np.argmax(np.asarray(sim.v[::stride]))))
+        idx = np.array(sorted(keep), dtype=int)
+    else:
+        idx = np.arange(n)
+
+    def pick(arr):
+        return np.asarray(arr[::stride])[idx]
+
+    v = pick(sim.v)
+    return {
+        "t": np.round(pick(sim.t), 3).tolist(),
+        "v_ms": np.round(v, 3).tolist(),
+        "v_kmh": np.round(v * 3.6, 2).tolist(),
+        "rpm": np.round(pick(sim.rpm), 0).tolist(),
+        "gear": pick(sim.gear).astype(int).tolist(),
+        "power_kw": np.round(pick(sim.power_kw), 2).tolist(),
+        "x_m": np.round(pick(sim.x), 2).tolist(),
+    }
 
 
 def _topspeed_impl(req: TopSpeedRequest, progress=None) -> TopSpeedResultDict:
@@ -1414,7 +1800,10 @@ def _topspeed_impl(req: TopSpeedRequest, progress=None) -> TopSpeedResultDict:
     except Exception as exc:
         raise HTTPException(400, f"Config error: {exc}")
 
-    cfg, parts_applied, build_cost_inr = _apply_parts_to_config(cfg, req.part_ids)
+    parts_skipped: list[int] = []
+    cfg, parts_applied, build_cost_inr = _apply_parts_to_config(
+        cfg, req.part_ids, skipped=parts_skipped
+    )
 
     try:
         engine = MotoQuantEngine(cfg)
@@ -1453,23 +1842,13 @@ def _topspeed_impl(req: TopSpeedRequest, progress=None) -> TopSpeedResultDict:
         "peak_power_hp": round(float(cfg.engine.peak_power_hp), 1),
         "total_mass_kg": round(float(cfg.chassis.total_mass_kg), 1),
         "parts_applied": parts_applied,
+        "parts_skipped": parts_skipped,
+        "environment": _environment_echo(cfg),
         "build_cost_inr": round(build_cost_inr, 0),
     }
 
     if req.include_timeseries:
-        # Downsample to 100 Hz (every 10 ms) for web payload sanity
-        sim = ts.full_sim
-        stride = max(1, int(0.01 / max(sim.dt, 0.0001)))
-        timeseries: TopSpeedTimeseriesDict = {
-            "t": sim.t[::stride].tolist(),
-            "v_ms": sim.v[::stride].tolist(),
-            "v_kmh": (sim.v[::stride] * 3.6).tolist(),
-            "rpm": sim.rpm[::stride].tolist(),
-            "gear": sim.gear[::stride].tolist(),
-            "power_kw": sim.power_kw[::stride].tolist(),
-            "x_m": sim.x[::stride].tolist(),
-        }
-        response["timeseries"] = timeseries
+        response["timeseries"] = _topspeed_timeseries(ts.full_sim)
 
     return response
 
@@ -1490,7 +1869,7 @@ def simulate_top_speed(req: TopSpeedRequest) -> TopSpeedResultDict:
 class DistanceRunRequest(BaseModel):
     """POST /api/simulate/distance — arbitrary distance for LSR events."""
 
-    bike_id: int | None = None
+    bike_id: DbId | None = None
     bike_preset: str | None = None
     distance_m: float = Field(
         ..., gt=0, le=20000, description="Target distance in meters"
@@ -1499,10 +1878,10 @@ class DistanceRunRequest(BaseModel):
     mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
     rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
     # Same cap rationale as QuickSimRequest.part_ids (2026-08-11 hardening).
-    part_ids: list[int] = Field(default_factory=list, max_length=30)
-    front_tire_id: int | None = None
-    rear_tire_id: int | None = None
-    venue_id: int | None = None
+    part_ids: list[DbId] = Field(default_factory=list, max_length=30)
+    front_tire_id: DbId | None = None
+    rear_tire_id: DbId | None = None
+    venue_id: DbId | None = None
     ambient_temp_c: float | None = Field(None, ge=-30, le=60)
     track_temp_c: float | None = Field(None, ge=-30, le=80)
     humidity_pct: float | None = Field(None, ge=0, le=100)
@@ -1549,7 +1928,8 @@ def simulate_distance(req: DistanceRunRequest) -> DistanceResultDict:
 
     # Apply parts (distance run doesn't surface parts_applied/cost in its
     # response, but the helper handles that consistently).
-    cfg, _, _ = _apply_parts_to_config(cfg, req.part_ids)
+    parts_skipped: list[int] = []
+    cfg, _, _ = _apply_parts_to_config(cfg, req.part_ids, skipped=parts_skipped)
 
     try:
         engine = MotoQuantEngine(cfg)
@@ -1586,30 +1966,40 @@ def simulate_distance(req: DistanceRunRequest) -> DistanceResultDict:
         "bike_name": cfg.name,
         "peak_power_hp": round(float(cfg.engine.peak_power_hp), 1),
         "total_mass_kg": round(float(cfg.chassis.total_mass_kg), 1),
+        "parts_skipped": parts_skipped,
+        "environment": _environment_echo(cfg),
     }
     return result
 
 
 @app.get("/api/parts/categories")
-def list_parts_categories():
+def list_parts_categories(request: Request = None):
     """Return all parts categories."""
-    db = _get_db()
-    if not db:
-        raise HTTPException(503, "Database unavailable")
-    try:
-        rows = db.execute(
-            "SELECT * FROM parts_categories ORDER BY display_name"
-        ).fetchall()
-        return {"categories": [dict(r) for r in rows]}
-    except Exception as exc:
-        raise HTTPException(500, f"Database error: {exc}")
+
+    def _build():
+        db = _get_db()
+        if not db:
+            raise HTTPException(503, "Database unavailable")
+        try:
+            rows = db.execute(
+                "SELECT * FROM parts_categories ORDER BY display_name"
+            ).fetchall()
+            return {"categories": [dict(r) for r in rows]}
+        except Exception as exc:
+            raise HTTPException(500, f"Database error: {exc}")
+
+    return _serve_catalog(request, ("parts_categories",), _build)
 
 
 @app.get("/api/parts")
 def list_parts(
     category: str | None = Query(None, description="Filter by category name"),
-    category_id: int | None = Query(None, description="Filter by category ID"),
-    bike_id: int | None = Query(None, description="Show compatibility for this bike"),
+    category_id: int | None = Query(
+        None, ge=1, le=MAX_DB_ID, description="Filter by category ID"
+    ),
+    bike_id: int | None = Query(
+        None, ge=1, le=MAX_DB_ID, description="Show compatibility for this bike"
+    ),
     compatible_only: bool = Query(
         True,
         description="When bike_id is set: if True (default) only return compatible "
@@ -1618,12 +2008,27 @@ def list_parts(
     ),
     search: str | None = Query(None),
     limit: int = Query(500, ge=1, le=5000),
+    fields: str | None = Query(
+        None,
+        pattern="^id$",
+        description="'id' returns only the matching part ids "
+        '({"part_ids": [...], "total", "bike_id", "compatible_only"}) instead of '
+        "full rows — use with bike_id + compatible_only to learn which catalog "
+        "parts fit a bike without re-downloading the catalog.",
+    ),
+    include_rules: bool = Query(
+        False,
+        description="Include each part's raw 'fitment_rules' and 'specifications' "
+        "JSON (omitted by default: they are ~25% of the list payload and the "
+        "compatibility verdict is already in 'compatible'/'fitment_reason').",
+    ),
+    request: Request = None,
 ):
     """Return parts catalog, optionally filtered by category and bike compatibility.
 
     ``total`` in the response is the number of MATCHING parts (after category /
     search / compatibility filtering, before ``limit`` slicing) so paginating
-    callers can detect truncation. Cap is 5000 (563-part catalog as of Jun 2026).
+    callers can detect truncation. Cap is 5000 (593-part catalog as of Nov 2026).
 
     When ``bike_id`` is provided, each returned part is evaluated against the
     bike's fitment rules (stroke_type, manufacturer, engine_config, displacement,
@@ -1631,111 +2036,143 @@ def list_parts(
     annotation instead of a hard filter (useful for the Streamlit/Next.js UI
     which greys-out incompatible options).
     """
-    db = _get_db()
-    if not db:
-        raise HTTPException(503, "Database unavailable")
-    try:
-        query = """SELECT p.*, pc.name as category_name, pc.display_name as category_display
-                   FROM parts p
-                   JOIN parts_categories pc ON p.category_id = pc.id
-                   WHERE 1=1"""
-        params: list[Any] = []
+    # Direct (non-HTTP) callers omit params, so FastAPI's Query defaults arrive
+    # as Query objects; only a real value counts.
+    ids_only = isinstance(fields, str) and fields == "id"
+    with_rules = include_rules is True
 
-        if category:
-            query += " AND LOWER(pc.name) = LOWER(?)"
-            params.append(category)
-        if category_id:
-            query += " AND p.category_id = ?"
-            params.append(category_id)
-        if search:
-            query += " AND (p.brand LIKE ? OR p.model_name LIKE ?)"
-            params += [f"%{search}%", f"%{search}%"]
+    def _build():
+        db = _get_db()
+        if not db:
+            raise HTTPException(503, "Database unavailable")
+        try:
+            query = """SELECT p.*, pc.name as category_name, pc.display_name as category_display
+                       FROM parts p
+                       JOIN parts_categories pc ON p.category_id = pc.id
+                       WHERE 1=1"""
+            params: list[Any] = []
 
-        query += " ORDER BY pc.display_name, p.brand, p.model_name"
-        if bike_id is None:
-            # Plain catalog listing: SQL LIMIT is safe, but COUNT first for total.
-            count_q = query.replace(
-                "SELECT p.*, pc.name as category_name, pc.display_name as category_display",
-                "SELECT COUNT(*)",
-                1,
-            ).split(" ORDER BY")[0]
-            sql_total = db.execute(count_q, params).fetchone()[0]
-            query += " LIMIT ?"
-            params.append(limit)
-        else:
-            # Compatibility filtering happens in Python below -- applying the SQL
-            # LIMIT first silently starved brands late in the sort order
-            # (June 11 QA / parts-audit handoff). Fetch all, filter, then slice.
-            sql_total = None
+            if category:
+                query += " AND LOWER(pc.name) = LOWER(?)"
+                params.append(category)
+            if category_id:
+                query += " AND p.category_id = ?"
+                params.append(category_id)
+            if search:
+                query += " AND (p.brand LIKE ? OR p.model_name LIKE ?)"
+                params += [f"%{search}%", f"%{search}%"]
 
-        rows = db.execute(query, params).fetchall()
+            query += " ORDER BY pc.display_name, p.brand, p.model_name"
+            if bike_id is None:
+                # Plain catalog listing: SQL LIMIT is safe, but COUNT first for total.
+                count_q = query.replace(
+                    "SELECT p.*, pc.name as category_name, pc.display_name as category_display",
+                    "SELECT COUNT(*)",
+                    1,
+                ).split(" ORDER BY")[0]
+                sql_total = db.execute(count_q, params).fetchone()[0]
+                query += " LIMIT ?"
+                params.append(limit)
+            else:
+                # Compatibility filtering happens in Python below -- applying the
+                # SQL LIMIT first silently starved brands late in the sort order
+                # (June 11 QA / parts-audit handoff). Fetch all, filter, then slice.
+                sql_total = None
 
-        # ── Bike compatibility annotation / filter ─────────────────────────
-        bike_row: dict | None = None
-        if bike_id is not None:
-            from .database.parts_repo import enrich_bike_row_for_fitment
-            from .parts.compatibility import is_compatible  # noqa: F401
+            rows = db.execute(query, params).fetchall()
 
-            raw = db.execute(
-                "SELECT * FROM bike_models WHERE id = ?", (bike_id,)
-            ).fetchone()
-            if raw is None:
-                raise HTTPException(404, f"Bike {bike_id} not found")
-            bike_row = dict(raw)
-            enrich_bike_row_for_fitment(db, bike_row)
+            # -- Bike compatibility annotation / filter -----------------------
+            bike_row: dict | None = None
+            if bike_id is not None:
+                from .database.parts_repo import enrich_bike_row_for_fitment
 
-        parts = []
-        for r in rows:
-            d = dict(r)
-            # Evaluate compatibility BEFORE parsing JSON fields in-place
-            # (is_compatible expects the raw fitment_rules JSON string).
-            if bike_row is not None:
-                from .parts.compatibility import is_compatible
+                raw = db.execute(
+                    "SELECT * FROM bike_models WHERE id = ?", (bike_id,)
+                ).fetchone()
+                if raw is None:
+                    raise HTTPException(404, f"Bike {bike_id} not found")
+                bike_row = dict(raw)
+                enrich_bike_row_for_fitment(db, bike_row)
 
-                compat, reason = is_compatible(d, bike_row)
-                if compatible_only and not compat:
+            from .parts.compatibility import is_compatible
+
+            parts = []
+            for r in rows:
+                d = dict(r)
+                # Evaluate compatibility BEFORE parsing JSON fields in-place
+                # (is_compatible expects the raw fitment_rules JSON string).
+                if bike_row is not None:
+                    compat, reason = is_compatible(d, bike_row)
+                    if compatible_only and not compat:
+                        continue
+                    d["compatible"] = bool(compat)
+                    d["fitment_reason"] = reason
+
+                if ids_only:
+                    parts.append(d["id"])
                     continue
-                d["compatible"] = bool(compat)
-                d["fitment_reason"] = reason
 
-            # Parse JSON fields for frontend
-            for field in (
-                "param_overrides",
-                "param_deltas",
-                "param_multipliers",
-                "specifications",
-                "compatible_bikes",
-                "fitment_rules",
-            ):
-                if d.get(field) and isinstance(d[field], str):
-                    try:
-                        d[field] = json.loads(d[field])
-                    except (json.JSONDecodeError, TypeError):
-                        pass
-            parts.append(d)
+                if not with_rules:
+                    d.pop("fitment_rules", None)
+                    d.pop("specifications", None)
 
-        total = sql_total if sql_total is not None else len(parts)
-        if bike_id is not None and len(parts) > limit:
-            parts = parts[:limit]
+                # Parse JSON fields for frontend
+                for field in (
+                    "param_overrides",
+                    "param_deltas",
+                    "param_multipliers",
+                    "specifications",
+                    "compatible_bikes",
+                    "fitment_rules",
+                ):
+                    if d.get(field) and isinstance(d[field], str):
+                        try:
+                            d[field] = json.loads(d[field])
+                        except (json.JSONDecodeError, TypeError):
+                            pass
+                parts.append(d)
 
-        return {
-            "parts": parts,
-            "total": total,
-            "bike_id": bike_id,
-            "compatible_only": bool(bike_id is not None and compatible_only),
-        }
-    except HTTPException:
-        raise
-    except Exception as exc:
-        raise HTTPException(500, f"Database error: {exc}")
+            total = sql_total if sql_total is not None else len(parts)
+            if bike_id is not None and len(parts) > limit:
+                parts = parts[:limit]
+
+            out = {
+                "parts": parts,
+                "total": total,
+                "bike_id": bike_id,
+                "compatible_only": bool(bike_id is not None and compatible_only),
+            }
+            if ids_only:
+                out["part_ids"] = out.pop("parts")
+            return out
+        except HTTPException:
+            raise
+        except Exception as exc:
+            raise HTTPException(500, f"Database error: {exc}")
+
+    return _serve_catalog(
+        request,
+        (
+            "parts",
+            category,
+            category_id,
+            bike_id,
+            bool(compatible_only),
+            search,
+            limit,
+            ids_only,
+            with_rules,
+        ),
+        _build,
+    )
 
 
 class SaveRunRequest(BaseModel):
     """POST /api/simulate/save — persist a sim result to the sim_runs table
     so it surfaces on /api/leaderboard and the desktop History tab."""
 
-    bike_id: int
-    venue_id: int | None = None
+    bike_id: DbId
+    venue_id: DbId | None = None
     # Physically-plausible bounds (2026-07-06): negative/zero ETs and
     # absurd trap speeds were accepted and surfaced on the leaderboard.
     et_quarter_s: float = Field(gt=0, le=120)
@@ -1842,7 +2279,9 @@ def save_simulation(
 @app.get("/api/leaderboard")
 def leaderboard(
     limit: int = Query(20, ge=1, le=100),
-    venue_id: int | None = Query(None, description="Filter to one venue"),
+    venue_id: int | None = Query(
+        None, ge=1, le=MAX_DB_ID, description="Filter to one venue"
+    ),
 ):
     """Return the top simulation runs saved to the local database,
     optionally filtered to a single venue (per-venue leaderboards)."""
@@ -1880,7 +2319,7 @@ def leaderboard(
 
 
 @app.get("/api/runs/{run_id}")
-def get_public_run(run_id: int):
+def get_public_run(run_id: int = Path(..., ge=1, le=MAX_DB_ID)):
     """Public, immutable view of one saved sim run — powers the shareable
     /r/[id] timeslip pages (the WhatsApp/OG share loop). Only exposes the
     run's results + bike/venue names, never the owning account."""
@@ -1917,28 +2356,28 @@ class CompareRequest(BaseModel):
     """POST /api/simulate/compare - two builds side-by-side."""
 
     # Build A (baseline)
-    a_bike_id: int | None = None
+    a_bike_id: DbId | None = None
     a_bike_preset: str | None = None
     a_power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     a_mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
     a_rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
     # Same cap rationale as QuickSimRequest.part_ids (2026-08-11 hardening).
-    a_part_ids: list[int] = Field(default_factory=list, max_length=30)
-    a_front_tire_id: int | None = None
-    a_rear_tire_id: int | None = None
+    a_part_ids: list[DbId] = Field(default_factory=list, max_length=30)
+    a_front_tire_id: DbId | None = None
+    a_rear_tire_id: DbId | None = None
 
     # Build B (modified)
-    b_bike_id: int | None = None
+    b_bike_id: DbId | None = None
     b_bike_preset: str | None = None
     b_power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     b_mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
     b_rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
-    b_part_ids: list[int] = Field(default_factory=list, max_length=30)
-    b_front_tire_id: int | None = None
-    b_rear_tire_id: int | None = None
+    b_part_ids: list[DbId] = Field(default_factory=list, max_length=30)
+    b_front_tire_id: DbId | None = None
+    b_rear_tire_id: DbId | None = None
 
     # Shared conditions
-    venue_id: int | None = None
+    venue_id: DbId | None = None
     ambient_temp_c: float | None = Field(None, ge=-30, le=60)
     track_temp_c: float | None = Field(None, ge=-30, le=80)
     humidity_pct: float | None = Field(None, ge=0, le=100)
@@ -1961,7 +2400,7 @@ def _run_build(
     headwind_kmh,
     progress_cb=None,
 ):
-    """Build config, apply parts, run sim, return (sim, cfg, parts_applied, cost)."""
+    """Build config, apply parts, run sim; return (sim, cfg, parts_applied, cost, parts_skipped)."""
     cfg = _build_config(
         bike_id=bike_id,
         bike_preset=bike_preset,
@@ -1976,15 +2415,24 @@ def _run_build(
         humidity_pct=humidity_pct,
         headwind_kmh=headwind_kmh,
     )
+    parts_skipped: list[int] = []
     cfg, parts_applied, build_cost = _apply_parts_to_config(
-        cfg, part_ids, include_price_in_summary=False
+        cfg, part_ids, include_price_in_summary=False, skipped=parts_skipped
     )
 
     sim = MotoQuantEngine(cfg).run(progress_cb=progress_cb)
-    return sim, cfg, parts_applied, build_cost
+    return sim, cfg, parts_applied, build_cost, parts_skipped
 
 
-def _build_summary(sim, cfg, parts_applied, build_cost, label, include_timeseries=True):
+def _build_summary(
+    sim,
+    cfg,
+    parts_applied,
+    build_cost,
+    label,
+    include_timeseries=True,
+    parts_skipped=(),
+):
     """Create a response dict from a sim run."""
     step = max(1, len(sim.t) // 1000)
     idx = list(range(0, len(sim.t), step))
@@ -2004,6 +2452,7 @@ def _build_summary(sim, cfg, parts_applied, build_cost, label, include_timeserie
         "peak_power_hp": round(float(cfg.engine.peak_power_hp), 1),
         "total_mass_kg": round(float(cfg.chassis.total_mass_kg), 1),
         "parts_applied": parts_applied,
+        "parts_skipped": list(parts_skipped),
         "build_cost_inr": round(build_cost, 0),
     }
     if include_timeseries:
@@ -2013,10 +2462,28 @@ def _build_summary(sim, cfg, parts_applied, build_cost, label, include_timeserie
             "rpm": _sa(sim.rpm, lambda v: round(float(v), 0)),
             "gear": _sa(sim.gear, lambda v: int(v)),
             "accel_g": _sa(sim.a, lambda v: round(float(v) / 9.81, 3)),
-            "traction_pct": _sa(sim.traction_pct, lambda v: round(float(v) * 100, 1)),
+            "traction_pct": _sa(sim.traction_pct, lambda v: round(float(v), 1)),
             "power_kw": _sa(sim.power_kw, lambda v: round(float(v), 1)),
         }
     return result
+
+
+def _same_build(req: CompareRequest) -> bool:
+    """True when builds A and B are defined by identical inputs."""
+
+    def norm(pids):  # repeated ids are applied once, in first-seen order
+        return tuple(dict.fromkeys(pids))
+
+    return (
+        req.a_bike_id == req.b_bike_id
+        and req.a_bike_preset == req.b_bike_preset
+        and req.a_power_boost_pct == req.b_power_boost_pct
+        and req.a_mass_delta_kg == req.b_mass_delta_kg
+        and req.a_rider_mass_kg == req.b_rider_mass_kg
+        and norm(req.a_part_ids) == norm(req.b_part_ids)
+        and req.a_front_tire_id == req.b_front_tire_id
+        and req.a_rear_tire_id == req.b_rear_tire_id
+    )
 
 
 def _compare_impl(req: CompareRequest, progress=None):
@@ -2032,7 +2499,7 @@ def _compare_impl(req: CompareRequest, progress=None):
     try:
         if progress is not None:
             progress(0.01, "Simulating build A")
-        sim_a, cfg_a, parts_a, cost_a = _run_build(
+        sim_a, cfg_a, parts_a, cost_a, skipped_a = _run_build(
             req.a_bike_id,
             req.a_bike_preset,
             req.a_power_boost_pct,
@@ -2050,22 +2517,35 @@ def _compare_impl(req: CompareRequest, progress=None):
         )
         if progress is not None:
             progress(0.5, "Simulating build B")
-        sim_b, cfg_b, parts_b, cost_b = _run_build(
-            req.b_bike_id,
-            req.b_bike_preset,
-            req.b_power_boost_pct,
-            req.b_mass_delta_kg,
-            req.b_rider_mass_kg,
-            req.b_part_ids,
-            req.b_front_tire_id,
-            req.b_rear_tire_id,
-            req.venue_id,
-            req.ambient_temp_c,
-            req.track_temp_c,
-            req.humidity_pct,
-            req.headwind_kmh,
-            progress_cb=_span(0.5, 0.98, "Simulating build B"),
-        )
+        if _same_build(req):
+            # Identical inputs give an identical (deterministic) run: reuse A's
+            # result for B instead of integrating the same trajectory twice.
+            sim_b, cfg_b, parts_b, cost_b, skipped_b = (
+                sim_a,
+                cfg_a,
+                parts_a,
+                cost_a,
+                skipped_a,
+            )
+            if progress is not None:
+                progress(0.98, "Simulating build B")
+        else:
+            sim_b, cfg_b, parts_b, cost_b, skipped_b = _run_build(
+                req.b_bike_id,
+                req.b_bike_preset,
+                req.b_power_boost_pct,
+                req.b_mass_delta_kg,
+                req.b_rider_mass_kg,
+                req.b_part_ids,
+                req.b_front_tire_id,
+                req.b_rear_tire_id,
+                req.venue_id,
+                req.ambient_temp_c,
+                req.track_temp_c,
+                req.humidity_pct,
+                req.headwind_kmh,
+                progress_cb=_span(0.5, 0.98, "Simulating build B"),
+            )
     except HTTPException:
         raise  # e.g. 404 for an unknown bike_id — don't relabel as 500
     except Exception as exc:
@@ -2073,8 +2553,8 @@ def _compare_impl(req: CompareRequest, progress=None):
 
     if progress is not None:
         progress(0.99, "Building comparison")
-    a = _build_summary(sim_a, cfg_a, parts_a, cost_a, "A")
-    b = _build_summary(sim_b, cfg_b, parts_b, cost_b, "B")
+    a = _build_summary(sim_a, cfg_a, parts_a, cost_a, "A", parts_skipped=skipped_a)
+    b = _build_summary(sim_b, cfg_b, parts_b, cost_b, "B", parts_skipped=skipped_b)
 
     delta_et = round(b["et_quarter_s"] - a["et_quarter_s"], 4)
     delta_trap = round(b["trap_speed_kmh"] - a["trap_speed_kmh"], 2)
@@ -2082,6 +2562,7 @@ def _compare_impl(req: CompareRequest, progress=None):
     return {
         "a": a,
         "b": b,
+        "environment": _environment_echo(cfg_a),
         "delta": {
             "et_s": delta_et,
             "trap_kmh": delta_trap,
@@ -2160,7 +2641,9 @@ async def _read_upload_capped(file: UploadFile) -> bytes:
 )
 async def upload_dragy(
     file: UploadFile = File(..., description="Dragy CSV or JSON export"),
-    bike_id: int | None = Form(None, description="Bike to overlay sim against"),
+    bike_id: int | None = Form(
+        None, ge=1, le=MAX_DB_ID, description="Bike to overlay sim against"
+    ),
     bike_preset: str | None = Form(None),
 ):
     """
@@ -2389,8 +2872,8 @@ class BikeSuggestionRequest(BaseModel):
         None, max_length=500, description="Optional spec-sheet URL"
     )
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "make": "Kawasaki",
                 "model": "ZX-6R 636",
@@ -2403,6 +2886,7 @@ class BikeSuggestionRequest(BaseModel):
                 "submitter_email": "rider@example.com",
             }
         }
+    )
 
 
 @app.post("/api/bikes/suggest", status_code=201)
@@ -2465,7 +2949,7 @@ def suggest_bike(req: BikeSuggestionRequest):
 class SpecCorrectionRequest(BaseModel):
     """POST /api/specs/correct — propose a correction for one spec field."""
 
-    bike_id: int = Field(..., description="DB bike model ID to correct")
+    bike_id: DbId = Field(..., description="DB bike model ID to correct")
     field_name: str = Field(
         ...,
         max_length=80,
@@ -2485,8 +2969,8 @@ class SpecCorrectionRequest(BaseModel):
     )
     notes: str | None = Field(None, max_length=2000, description="Free-form context")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "bike_id": 42,
                 "field_name": "peak_power_hp",
@@ -2496,6 +2980,7 @@ class SpecCorrectionRequest(BaseModel):
                 "notes": "Indian Autos Mag wheel-dyno, stock R15 V4, July 2024 issue",
             }
         }
+    )
 
 
 def _fetch_current_value(db, bike_id: int, field_name: str) -> str | None:
@@ -2670,8 +3155,7 @@ class VenueResolveRequest(BaseModel):
         description="Elevation above sea level [m]. Overrides OWM's estimate if provided.",
     )
 
-    class Config:
-        json_schema_extra = {"example": {"location": "Pune, IN"}}
+    model_config = ConfigDict(json_schema_extra={"example": {"location": "Pune, IN"}})
 
 
 def _match_seeded_venue(db, location: str) -> dict | None:
@@ -3012,7 +3496,6 @@ def _load_surrogate():
     return None, "none"
 
 
-@app.on_event("startup")
 async def _startup_load_surrogate():
     global _SURROGATE, _SURROGATE_SOURCE
     with _SURROGATE_LOCK:
@@ -3023,7 +3506,7 @@ async def _startup_load_surrogate():
 
 
 class SurrogatePredictRequest(BaseModel):
-    bike_id: int | None = Field(None, description="DB bike_models.id (optional)")
+    bike_id: DbId | None = Field(None, description="DB bike_models.id (optional)")
     power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
     aero_cd_override: float | None = Field(None, ge=0.30, le=1.20)
@@ -3270,7 +3753,7 @@ class PricingRefreshOut(BaseModel):
 
 
 @app.get("/api/pricing/part/{part_id}", response_model=PartPricingOut)
-def pricing_for_part(part_id: int):
+def pricing_for_part(part_id: int = Path(..., ge=1, le=MAX_DB_ID)):
     """
     Return the 3 cheapest live prices for *part_id* from the part_prices table.
     Flags stale rows (>14 days).  Falls back gracefully when no live prices exist.
@@ -3308,7 +3791,9 @@ def pricing_for_part(part_id: int):
 
 
 @app.get("/api/pricing/bike/{bike_id}", response_model=BikePricingSummaryOut)
-def pricing_for_bike(bike_id: int, limit: int = Query(50, ge=1, le=500)):
+def pricing_for_bike(
+    bike_id: int = Path(..., ge=1, le=MAX_DB_ID), limit: int = Query(50, ge=1, le=500)
+):
     """
     Pricing summary for all parts in the catalog, showing the cheapest live
     retailer per part.  ``total_cheapest_inr`` sums the cheapest price per part
@@ -3419,7 +3904,9 @@ def _last_price_fetch(db, part_id: int) -> tuple[str, float, dict] | None:
     response_model=PricingRefreshOut,
     dependencies=[Depends(rate_limit("pricing_refresh", 5, 60.0))],
 )
-def refresh_part_price(part_id: int, force: bool = Query(False)):
+def refresh_part_price(
+    part_id: int = Path(..., ge=1, le=MAX_DB_ID), force: bool = Query(False)
+):
     """
     Trigger a live price refresh for a single part.
 
@@ -3634,9 +4121,9 @@ class ChatResponse(BaseModel):
     mode: str = "classic"
     intent_type: str | None = None
     bike_name: str = ""
-    bike_id: int | None = None
+    bike_id: DbId | None = None
     venue_name: str | None = None
-    venue_id: int | None = None
+    venue_id: DbId | None = None
     parsed_notes: str = ""
     optimization_goal: str = "minimize_et"
     bike_suggestions: list[ChatBikeSuggestion] = Field(default_factory=list)
@@ -3804,10 +4291,29 @@ def job_chat(
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-class OptimizeBuildRequest(BaseModel):
+class ConditionsRequest(BaseModel):
+    """Optional race conditions shared by the optimiser, autotune and outlaw
+    routes. Precedence: a resolved ``location`` / ``lat``+``lon`` sets the
+    environment, then explicit values override it; ``venue_id`` (seeded venue)
+    sets altitude and surface first."""
+
+    location: str | None = Field(
+        None, max_length=200, description="City/venue, e.g. 'Pune, IN'"
+    )
+    venue_id: DbId | None = Field(None, description="Seeded venue id (sets altitude)")
+    lat: float | None = Field(None, ge=-90, le=90)
+    lon: float | None = Field(None, ge=-180, le=180)
+    altitude_m: float | None = Field(None, ge=-500, le=8000)
+    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
+    track_temp_c: float | None = Field(None, ge=-30, le=80)
+    humidity_pct: float | None = Field(None, ge=0, le=100)
+    pressure_hpa: float | None = Field(None, ge=800, le=1100)
+
+
+class OptimizeBuildRequest(ConditionsRequest):
     """POST /api/optimize/build — best on-budget parts build for a goal."""
 
-    bike_id: int | None = Field(None, description="DB bike_models.id")
+    bike_id: DbId | None = Field(None, description="DB bike_models.id")
     bike_preset: str | None = Field(
         None, description="Fallback preset: gsxr1000_k5 | yzfr1_4c8 | hayabusa_gen1"
     )
@@ -3830,9 +4336,6 @@ class OptimizeBuildRequest(BaseModel):
     rider_weight_kg: float = Field(75.0, ge=40, le=150)
     power_boost_pct: float = Field(0.0, ge=-50, le=200)
     mass_delta_kg: float = Field(0.0, ge=-100, le=200)
-    venue_id: int | None = Field(
-        None, description="Optional venue for ambient conditions"
-    )
     max_candidates: int | None = Field(
         None,
         ge=1,
@@ -3871,6 +4374,8 @@ def _optimize_impl(req: OptimizeBuildRequest, progress=None):
         raise
     except Exception as exc:
         raise HTTPException(400, f"Config construction failed: {exc}") from exc
+
+    env_source = _apply_conditions(config, req)
 
     # Lazy-load the surrogate (same pattern as /api/surrogate/predict).
     global _SURROGATE, _SURROGATE_SOURCE
@@ -3917,7 +4422,10 @@ def _optimize_impl(req: OptimizeBuildRequest, progress=None):
     # the route. json_safe nulls them so the response always serializes.
     from .analysis.roi import json_safe
 
-    return json_safe(result.to_dict())
+    out = json_safe(result.to_dict())
+    out["environment"] = _environment_echo(config)
+    out["environment_source"] = env_source
+    return out
 
 
 @app.post(
@@ -3931,22 +4439,11 @@ def optimize_build_route(
     return _optimize_impl(req)
 
 
-class AutotuneRequest(BaseModel):
+class AutotuneRequest(ConditionsRequest):
     """POST /api/autotune/ecu — conditions-aware drag setup advisor."""
 
-    bike_id: int | None = Field(None, description="DB bike_models.id")
+    bike_id: DbId | None = Field(None, description="DB bike_models.id")
     bike_preset: str | None = Field(None, description="Fallback preset name")
-    location: str | None = Field(
-        None, max_length=200, description="City/venue, e.g. 'Pune, IN'"
-    )
-    venue_id: int | None = Field(None, description="Seeded venue id (sets altitude)")
-    lat: float | None = Field(None, ge=-90, le=90)
-    lon: float | None = Field(None, ge=-180, le=180)
-    altitude_m: float | None = Field(None, ge=-500, le=8000)
-    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
-    track_temp_c: float | None = Field(None, ge=-30, le=80)
-    humidity_pct: float | None = Field(None, ge=0, le=100)
-    pressure_hpa: float | None = Field(None, ge=800, le=1100)
     rider_weight_kg: float = Field(75.0, ge=40, le=150)
     gear_span: int = Field(
         3, ge=1, le=6, description="± sprocket-tooth sweep half-width"
@@ -3970,6 +4467,57 @@ def _apply_resolved_env(config, vd: dict) -> None:
         config.environment.altitude_m = float(vd["altitude_m"])
     if vd.get("venue_name"):
         config.environment.venue_name = vd["venue_name"]
+
+
+def _apply_conditions(config: BikeConfig, req: ConditionsRequest) -> str:
+    """Apply the request's optional location / manual conditions to *config*.
+
+    Returns a short source tag (``config_default``, the resolver's source, or a
+    ``resolution_*`` failure marker). Afterwards ``config.environment`` is the
+    single source of truth for what is simulated — and for what the response
+    echoes (see :func:`_environment_echo`).
+    """
+    env_source = "config_default"
+    if req.location or (req.lat is not None and req.lon is not None):
+        try:
+            resolved = resolve_venue(
+                VenueResolveRequest(
+                    location=req.location,
+                    lat=req.lat,
+                    lon=req.lon,
+                    altitude_m=req.altitude_m,
+                )
+            )
+            _apply_resolved_env(config, resolved)
+            env_source = resolved.get("source", "resolved")
+            if config.environment.venue_name == DEFAULT_CONDITIONS_NAME:
+                config.environment.venue_name = req.location or "Resolved location"
+        except HTTPException as exc:
+            env_source = f"resolution_unavailable_{exc.status_code}"
+        except Exception as exc:
+            logging.getLogger(__name__).warning("env resolve failed: %s", exc)
+            env_source = "resolution_error"
+
+    # Explicit condition overrides take precedence over any resolution.
+    manual = False
+    if req.altitude_m is not None:
+        config.environment.altitude_m = req.altitude_m
+        manual = True
+    if req.ambient_temp_c is not None:
+        config.environment.ambient_temp_c = req.ambient_temp_c
+        manual = True
+    if req.track_temp_c is not None:
+        config.environment.track_temp_c = req.track_temp_c
+        manual = True
+    if req.humidity_pct is not None:
+        config.environment.relative_humidity_pct = req.humidity_pct
+        manual = True
+    if req.pressure_hpa is not None:
+        config.environment.barometric_pressure_hpa = req.pressure_hpa
+        manual = True
+    if manual and config.environment.venue_name == DEFAULT_CONDITIONS_NAME:
+        config.environment.venue_name = CUSTOM_CONDITIONS_NAME
+    return env_source
 
 
 def _autotune_impl(req: AutotuneRequest, progress=None):
@@ -3997,36 +4545,7 @@ def _autotune_impl(req: AutotuneRequest, progress=None):
     except Exception as exc:
         raise HTTPException(400, f"Config construction failed: {exc}") from exc
 
-    env_source = "config_default"
-    if req.location or (req.lat is not None and req.lon is not None):
-        try:
-            resolved = resolve_venue(
-                VenueResolveRequest(
-                    location=req.location,
-                    lat=req.lat,
-                    lon=req.lon,
-                    altitude_m=req.altitude_m,
-                )
-            )
-            _apply_resolved_env(config, resolved)
-            env_source = resolved.get("source", "resolved")
-        except HTTPException as exc:
-            env_source = f"resolution_unavailable_{exc.status_code}"
-        except Exception as exc:
-            logging.getLogger(__name__).warning("autotune env resolve failed: %s", exc)
-            env_source = "resolution_error"
-
-    # Explicit condition overrides take precedence over any resolution.
-    if req.altitude_m is not None:
-        config.environment.altitude_m = req.altitude_m
-    if req.ambient_temp_c is not None:
-        config.environment.ambient_temp_c = req.ambient_temp_c
-    if req.track_temp_c is not None:
-        config.environment.track_temp_c = req.track_temp_c
-    if req.humidity_pct is not None:
-        config.environment.relative_humidity_pct = req.humidity_pct
-    if req.pressure_hpa is not None:
-        config.environment.barometric_pressure_hpa = req.pressure_hpa
+    env_source = _apply_conditions(config, req)
 
     from .analysis.ecu_autotune import autotune
 
@@ -4045,6 +4564,18 @@ def _autotune_impl(req: AutotuneRequest, progress=None):
 
     out = result.to_dict()
     out["environment_source"] = env_source
+    # Keep the autotune block's keys; add the shared echo markers so every
+    # route labels default / custom / venue conditions the same way.
+    echo = _environment_echo(config)
+    out["environment"] = {
+        **out.get("environment", {}),
+        "location": echo["name"],
+        "name": echo["name"],
+        "is_default": echo["is_default"],
+        "source": echo["source"],
+        "track_surface": echo["track_surface"],
+        "headwind_kmh": echo["headwind_kmh"],
+    }
     return out
 
 
@@ -4092,6 +4623,12 @@ def _start_job(kind: str, runner) -> dict:
 )
 def job_simulate(req: SimulateRequest):
     """Start a full simulation as a background job (real progress)."""
+    _precheck_refs(
+        bike_ids=[req.bike_id],
+        bike_presets=[req.bike_preset],
+        venue_id=req.venue_id,
+        tire_ids=[req.front_tire_id, req.rear_tire_id],
+    )
     return _start_job("simulate", lambda progress: _simulate_impl(req, progress))
 
 
@@ -4105,6 +4642,12 @@ def job_simulate(req: SimulateRequest):
 )
 def job_topspeed(req: TopSpeedRequest):
     """Start a top-speed run as a background job (real progress)."""
+    _precheck_refs(
+        bike_ids=[req.bike_id],
+        bike_presets=[req.bike_preset],
+        venue_id=req.venue_id,
+        tire_ids=[req.front_tire_id, req.rear_tire_id],
+    )
     return _start_job("topspeed", lambda progress: _topspeed_impl(req, progress))
 
 
@@ -4117,6 +4660,9 @@ def job_optimize(
     req: OptimizeBuildRequest,
 ):
     """Start the build optimiser as a background job (real progress)."""
+    _precheck_refs(
+        bike_ids=[req.bike_id], bike_presets=[req.bike_preset], venue_id=req.venue_id
+    )
     return _start_job("optimize", lambda progress: _optimize_impl(req, progress))
 
 
@@ -4129,10 +4675,13 @@ def job_autotune(
     req: AutotuneRequest,
 ):
     """Start the ECU autotune as a background job (real progress)."""
+    _precheck_refs(
+        bike_ids=[req.bike_id], bike_presets=[req.bike_preset], venue_id=req.venue_id
+    )
     return _start_job("autotune", lambda progress: _autotune_impl(req, progress))
 
 
-class OutlawRequest(BaseModel):
+class OutlawRequest(ConditionsRequest):
     """POST /api/jobs/outlaw — composed outlaw/open-class max-effort build.
 
     Pipeline: best drag_prep rubber → full_race parts knapsack (budget
@@ -4140,7 +4689,7 @@ class OutlawRequest(BaseModel):
     bike → combined verification sim.
     """
 
-    bike_id: int | None = Field(None, description="DB bike_models.id")
+    bike_id: DbId | None = Field(None, description="DB bike_models.id")
     bike_preset: str | None = Field(
         None, description="Fallback preset: gsxr1000_k5 | yzfr1_4c8 | hayabusa_gen1"
     )
@@ -4149,7 +4698,6 @@ class OutlawRequest(BaseModel):
     )
     goal: str = Field("min_et")
     rider_weight_kg: float = Field(75.0, ge=40, le=150)
-    venue_id: int | None = Field(None)
     max_candidates: int | None = Field(None, ge=1, le=200)
 
 
@@ -4171,6 +4719,8 @@ def _outlaw_impl(req: OutlawRequest, progress=None) -> dict:
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(400, f"Config construction failed: {exc}") from exc
 
+    env_source = _apply_conditions(config, req)
+
     surrogate, surrogate_source = _get_surrogate_pair()
 
     from .analysis.outlaw import optimize_outlaw
@@ -4178,7 +4728,7 @@ def _outlaw_impl(req: OutlawRequest, progress=None) -> dict:
     from .database.tire_repo import TireRepository
 
     try:
-        return optimize_outlaw(
+        out = optimize_outlaw(
             config,
             PartsRepository(conn),
             TireRepository(conn),
@@ -4190,6 +4740,9 @@ def _outlaw_impl(req: OutlawRequest, progress=None) -> dict:
             max_candidates=req.max_candidates,
             progress_cb=progress,
         )
+        out["environment"] = _environment_echo(config)
+        out["environment_source"] = env_source
+        return out
     except HTTPException:
         raise
     except Exception as exc:  # noqa: BLE001
@@ -4208,6 +4761,9 @@ def job_outlaw(
     req: OutlawRequest,
 ):
     """Start the composed outlaw/open-class build as a background job."""
+    _precheck_refs(
+        bike_ids=[req.bike_id], bike_presets=[req.bike_preset], venue_id=req.venue_id
+    )
     return _start_job("outlaw", lambda progress: _outlaw_impl(req, progress))
 
 
@@ -4219,6 +4775,17 @@ def job_outlaw(
 )
 def job_compare(req: CompareRequest):
     """Start an A-vs-B comparison as a background job (real progress)."""
+    _precheck_refs(
+        bike_ids=[req.a_bike_id, req.b_bike_id],
+        bike_presets=[req.a_bike_preset, req.b_bike_preset],
+        venue_id=req.venue_id,
+        tire_ids=[
+            req.a_front_tire_id,
+            req.a_rear_tire_id,
+            req.b_front_tire_id,
+            req.b_rear_tire_id,
+        ],
+    )
     return _start_job("compare", lambda progress: _compare_impl(req, progress))
 
 
@@ -4238,7 +4805,17 @@ def job_status(job_id: str):
         "stage": job.stage,
     }
     if job.status == "done":
-        out["result"] = job.result
+        # The finished result is held as compressed JSON; splice its bytes into
+        # the envelope instead of decoding and re-encoding a multi-MB object on
+        # every poll.
+        raw = job.result_json()
+        if raw is not None:
+            head = json.dumps(out, separators=(",", ":")).encode("utf-8")
+            return Response(
+                content=head[:-1] + b',"result":' + raw + b"}",
+                media_type="application/json",
+            )
+        out["result"] = None
     elif job.status == "error":
         out["error"] = job.error
     return out
@@ -4275,7 +4852,6 @@ def job_cancel(job_id: str):
 # ─────────────────────────────────────────────
 
 
-@app.on_event("startup")
 async def _start_keepwarm_loop() -> None:
     try:
         from .keepwarm import start_keepwarm
@@ -4330,7 +4906,6 @@ except ImportError as _exc:  # pragma: no cover — optional-deps fallback
     logging.getLogger(__name__).warning("Auth router not mounted: %s", _exc)
 
 
-@app.on_event("startup")
 async def _ensure_account_schema() -> None:
     """Guarded ALTERs so pre-June-2026 DBs gain run-attribution + auth tables."""
     try:
@@ -4359,3 +4934,16 @@ async def _ensure_account_schema() -> None:
         logging.getLogger(__name__).warning(
             "account schema ensure failed", exc_info=True
         )
+
+
+@asynccontextmanager
+async def _lifespan(_app: FastAPI):
+    """Startup hooks, in registration order: surrogate load, keep-warm loop,
+    account-schema top-up."""
+    await _startup_load_surrogate()
+    await _start_keepwarm_loop()
+    await _ensure_account_schema()
+    yield
+
+
+app.router.lifespan_context = _lifespan

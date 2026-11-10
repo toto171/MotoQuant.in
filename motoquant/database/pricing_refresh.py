@@ -46,6 +46,8 @@ import logging
 import urllib.parse
 from dataclasses import dataclass
 
+from .connection import bump_catalog_generation
+
 log = logging.getLogger(__name__)
 
 # ──────────────────────────────────────────────────────────────────
@@ -268,6 +270,7 @@ def refresh_retailer_urls(
 
     if not dry_run:
         conn.commit()
+        bump_catalog_generation()
 
     log.info(
         "Pricing refresh: total=%d urls_filled=%d stamps=%d skipped=%d",
@@ -456,6 +459,7 @@ def fetch_live_price(
         ),
     )
     conn.commit()
+    bump_catalog_generation()
     log.info(
         "part_id=%d: fetched ₹%.0f in_stock=%s from %s",
         part_id,
