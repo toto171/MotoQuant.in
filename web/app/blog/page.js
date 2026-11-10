@@ -5,7 +5,7 @@ import PageHero from "../../components/PageHero";
 
 export const metadata = {
   title:
-    "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
+    "MotoQuant Blog: Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
   // ≤160 chars; the per-post pages carry their own long-tail metadata —
   // stuffing the index was a keyword-cannibalisation risk, not a win.
   description:
@@ -53,7 +53,7 @@ const POSTS = [
     title:
       "Pulsar N125 vs Raider 125 vs Glamour 125: Which 125cc Commuter Is the Fastest?",
     excerpt:
-      "MotoQuant sims the TVS Raider 125 at 20.63s, Pulsar P125 at 20.68s, Pulsar N125 at 20.70s, and Glamour 125 at 21.28s on a flat quarter mile. India's most-bought motorcycle class has zero published ET data because the segment buyer searches for fuel economy, not drag times. The Raider 125 wins by 0.07s on a sharper ignition map and 5 kg less mass; the Glamour 125 trails by 0.65s but saves ₹25,000/year in petrol. Cost-per-tenth ladder topped by a ₹450 13F sprocket (~0.20s) and a ₹2,100 sport-rubber rear (~0.18s) — the cheapest tenth in the entire MotoQuant catalog on any bike under 200cc.",
+      "MotoQuant sims the TVS Raider 125 at 20.63s, Pulsar P125 at 20.68s, Pulsar N125 at 20.70s, and Glamour 125 at 21.28s on a flat quarter mile. India's most-bought motorcycle class has zero published ET data because the segment buyer searches for fuel economy, not drag times. The Raider 125 wins by 0.07s on a sharper ignition map and 5 kg less mass; the Glamour 125 trails by 0.65s but saves ₹25,000/year in petrol. Cost-per-tenth ladder topped by a ₹450 13F sprocket (~0.20s) and a ₹2,100 sport-rubber rear (~0.18s), the cheapest tenth in the entire MotoQuant catalog on any bike under 200cc.",
   },
   {
     slug: "royal-enfield-interceptor-650-quarter-mile-physics",
@@ -70,7 +70,7 @@ const POSTS = [
     title:
       "Royal Enfield Interceptor 650 Quarter-Mile Physics: 14.15s on 47hp",
     excerpt:
-      "MotoQuant sims the Royal Enfield Interceptor 650 at 14.151s and 155.8 km/h trap under Aamby Valley November — 0.05s slower than the GT 650 sibling on identical engine because upright bars push 0.50 m² of frontal area instead of the cafe-racer's 0.46 m². Cost-per-tenth ladder topped by the F15/R46 sprocket swap (₹2,400, drops ET 0.16s) and the Powertronic Stage 1 flash (₹14,500, drops another 0.21s). ₹17,000 mod combo lands the bike at a 13.81s sim ET — faster than a stock Pulsar NS400Z.",
+      "MotoQuant sims the Royal Enfield Interceptor 650 at 14.151s and 155.8 km/h trap under Aamby Valley November, 0.05s slower than the GT 650 sibling on identical engine because upright bars push 0.50 m² of frontal area instead of the cafe-racer's 0.46 m². Cost-per-tenth ladder topped by the F15/R46 sprocket swap (₹2,400, drops ET 0.16s) and the Powertronic Stage 1 flash (₹14,500, drops another 0.21s). ₹17,000 mod combo lands the bike at a 13.81s sim ET, faster than a stock Pulsar NS400Z.",
   },
   {
     slug: "triumph-tiger-900-gt-pro-quarter-mile-physics",
@@ -87,7 +87,7 @@ const POSTS = [
     title:
       "Triumph Tiger 900 GT Pro Quarter-Mile Physics: 108hp Triple at 12.08s",
     excerpt:
-      "MotoQuant sims the 2024 Triumph Tiger 900 GT Pro at 12.081s and 196.5 km/h trap under Aamby Valley November — dead-heat on ET with the BMW F 900 GS, 3 km/h faster at the trap. The +13 hp the 2024 refresh added moves the back half of the quarter, not the launch. Stage 1 + F15/R42 sprocket combo (₹42,200) lands the bike at 11.78s — Street Triple 765 R territory for ₹2 lakh less than the next variant up.",
+      "MotoQuant sims the 2024 Triumph Tiger 900 GT Pro at 12.081s and 196.5 km/h trap under Aamby Valley November: dead-heat on ET with the BMW F 900 GS, 3 km/h faster at the trap. The +13 hp the 2024 refresh added moves the back half of the quarter, not the launch. Stage 1 + F15/R42 sprocket combo (₹42,200) lands the bike at 11.78s: Street Triple 765 R territory for ₹2 lakh less than the next variant up.",
   },
   {
     slug: "yamaha-rd350-quarter-mile-physics",
@@ -103,7 +103,7 @@ const POSTS = [
     ],
     title: "Yamaha RD350 Quarter-Mile Physics: Why a 1973 2-Stroke Still Runs 14.7s",
     excerpt:
-      "MotoQuant sims the 1973 Yamaha RD350 at 14.707s and ~145 km/h trap under Aamby Valley November conditions — quicker than a 2026 Pulsar NS200, Hunter 350, or R15 V4. Cycle World clocked the real bike at 14.000s in 1973. The May 31 2026 two-stroke clutch calibration shaved 347ms off the sim ET. Includes the Indian Rajdoot RD350 HT / LT detune math, the cluster-bias honest framing, and the cheapest mod tenth on the bike (a ₹450 sprocket swap).",
+      "MotoQuant sims the 1973 Yamaha RD350 at 14.707s and ~145 km/h trap under Aamby Valley November conditions, quicker than a 2026 Pulsar NS200, Hunter 350, or R15 V4. Cycle World clocked the real bike at 14.000s in 1973. The May 31 2026 two-stroke clutch calibration shaved 347ms off the sim ET. Includes the Indian Rajdoot RD350 HT / LT detune math, the cluster-bias honest framing, and the cheapest mod tenth on the bike (a ₹450 sprocket swap).",
   },
   {
     slug: "bmw-f-900-gs-quarter-mile-physics",
@@ -118,7 +118,7 @@ const POSTS = [
     ],
     title: "BMW F 900 GS Quarter-Mile Physics: 105hp Mid-ADV at 12.08s",
     excerpt:
-      "MotoQuant sims the 2024 BMW F 900 GS at 12.083s and 193.5 km/h trap under Aamby Valley conditions — 0.45s quicker than the F 850 GS it replaces, dead-heat on ET with the Triumph Tiger 900 GT Pro, 0.91s behind the R 1300 GS sibling. The 14 kg weight reduction is doing as much for ET as the +10 hp engine bump. Cost-per-tenth ladder topped by a ₹17,200 road-biased ADV tire swap (~0.13s).",
+      "MotoQuant sims the 2024 BMW F 900 GS at 12.083s and 193.5 km/h trap under Aamby Valley conditions: 0.45s quicker than the F 850 GS it replaces, dead-heat on ET with the Triumph Tiger 900 GT Pro, 0.91s behind the R 1300 GS sibling. The 14 kg weight reduction is doing as much for ET as the +10 hp engine bump. Cost-per-tenth ladder topped by a ₹17,200 road-biased ADV tire swap (~0.13s).",
   },
   {
     slug: "cfmoto-675sr-r-quarter-mile-physics",
@@ -133,7 +133,7 @@ const POSTS = [
     ],
     title: "CFMoto 675SR-R Quarter-Mile Physics: The 95hp Daytona 660 Rival",
     excerpt:
-      "MotoQuant sims the CFMoto 675SR-R at 11.323s and 214.4 km/h trap — 5.6 km/h faster at the trap than a Daytona 660 with the same 95 hp, on better aerodynamics. CFMoto first inline triple targets sub-₹6 lakh ex-showroom in India for FY26. Physics breakdown vs Daytona 660 / Street Triple 765 R / MT-09 / 800NK sibling, plus the cost-per-tenth mod ladder topped by the ₹32,000 Powertronic Stage 1 flash.",
+      "MotoQuant sims the CFMoto 675SR-R at 11.323s and 214.4 km/h trap, 5.6 km/h faster at the trap than a Daytona 660 with the same 95 hp, on better aerodynamics. CFMoto first inline triple targets sub-₹6 lakh ex-showroom in India for FY26. Physics breakdown vs Daytona 660 / Street Triple 765 R / MT-09 / 800NK sibling, plus the cost-per-tenth mod ladder topped by the ₹32,000 Powertronic Stage 1 flash.",
   },
   {
     slug: "aprilia-tuono-457-vs-rs-457-quarter-mile-physics",
@@ -149,7 +149,7 @@ const POSTS = [
     ],
     title: "Aprilia Tuono 457 vs RS 457: Same Engine, 0.41s Different ET",
     excerpt:
-      "MotoQuant sims the Aprilia Tuono 457 at 13.681s and 162.2 km/h trap, and the RS 457 at 13.275s / 175.9 km/h. Same 47 hp twin, same 175 kg dry, same six-speed cassette, same 14F/42R sprockets. The 0.41 second gap is entirely aerodynamic — Cd climbs from 0.58 on the faired RS to 0.74 on the naked Tuono. Indian price math (₹3.95 lakh vs ₹4.20 lakh), cost-per-tenth mod ladder topped by the ₹3,050 sprocket-swap combo, and the comparison against KTM 390 Duke + Pulsar NS400Z.",
+      "MotoQuant sims the Aprilia Tuono 457 at 13.681s and 162.2 km/h trap, and the RS 457 at 13.275s / 175.9 km/h. Same 47 hp twin, same 175 kg dry, same six-speed cassette, same 14F/42R sprockets. The 0.41 second gap is entirely aerodynamic: Cd climbs from 0.58 on the faired RS to 0.74 on the naked Tuono. Indian price math (₹3.95 lakh vs ₹4.20 lakh), cost-per-tenth mod ladder topped by the ₹3,050 sprocket-swap combo, and the comparison against KTM 390 Duke + Pulsar NS400Z.",
   },
   {
     slug: "600cc-supersport-launch-physics-engine-deceleration",
@@ -173,7 +173,7 @@ const POSTS = [
     tags: ["Honda", "CBR150R", "K56F", "150cc", "SE Asia", "physics"],
     title: "Honda CBR150R Quarter-Mile Physics: 17hp SE Asia Sport Single",
     excerpt:
-      "MotoQuant simulates the Indonesian Honda CBR150R at 18.42s and 130.5 km/h trap — quicker than a stock R15 V4 by 0.08s on a 1hp deficit. Why the 136 kg dry mass and 0.62 Cd beat the heavier R15 V4 fairing, how the CBR150R compares to the Malaysian RS150R underbone and the Y15ZR V2, and the four mods under ₹15,000 that move the needle for India grey-market owners.",
+      "MotoQuant simulates the Indonesian Honda CBR150R at 18.42s and 130.5 km/h trap, quicker than a stock R15 V4 by 0.08s on a 1hp deficit. Why the 136 kg dry mass and 0.62 Cd beat the heavier R15 V4 fairing, how the CBR150R compares to the Malaysian RS150R underbone and the Y15ZR V2, and the four mods under ₹15,000 that move the needle for India grey-market owners.",
   },
   {
     slug: "suzuki-gsx-r600-k8-quarter-mile-physics",
@@ -188,7 +188,7 @@ const POSTS = [
     ],
     title: "Suzuki GSX-R600 K8 Quarter-Mile Physics: 125hp 600cc Supersport",
     excerpt:
-      "Sport Rider clocked the 2008 GSX-R600 K8 at 10.91s and 204.4 km/h trap at sea level. MotoQuant simulates it at 11.04s under Aamby Valley November conditions. Where the 0.13s gap lives, what the K8 actually gained over the K6 (12 hp, lower Cd, shorter final drive), and a head-to-head against the 2008 R6 + 2007 CBR600RR + 2009 ZX-6R. Plus four India-priced mods that move the needle on a used K8/K9/L0 — the F15-to-F16 sprocket swap is unusual but pays back 0.08s at Aamby Valley specifically.",
+      "Sport Rider clocked the 2008 GSX-R600 K8 at 10.91s and 204.4 km/h trap at sea level. MotoQuant simulates it at 11.04s under Aamby Valley November conditions. Where the 0.13s gap lives, what the K8 actually gained over the K6 (12 hp, lower Cd, shorter final drive), and a head-to-head against the 2008 R6 + 2007 CBR600RR + 2009 ZX-6R. Plus four India-priced mods that move the needle on a used K8/K9/L0. The F15-to-F16 sprocket swap is unusual but pays back 0.08s at Aamby Valley specifically.",
   },
   {
     slug: "indian-drag-strip-elevation-comparison",
@@ -221,7 +221,7 @@ const POSTS = [
     ],
     title: "Royal Enfield Hunter 350 Quarter-Mile Time & Top Speed (India)",
     excerpt:
-      "MotoQuant simulates the Hunter 350 at 16.895s ET, a 127.9 km/h trap, and the claimed 114 km/h top speed — the quickest J-platform sibling, 0.84s ahead of the Bullet 350 and 1.025s ahead of the Classic 350. All four bikes share the same 20.2 hp single. Every tenth of the gap is mass and aerodynamics, not engine. Physics breakdown of why the lightest RE is also the fastest RE at the strip, plus the three cheapest mods under ₹25,000.",
+      "MotoQuant simulates the Hunter 350 at 16.895s ET, a 127.9 km/h trap, and the claimed 114 km/h top speed: the quickest J-platform sibling, 0.84s ahead of the Bullet 350 and 1.025s ahead of the Classic 350. All four bikes share the same 20.2 hp single. Every tenth of the gap is mass and aerodynamics, not engine. Physics breakdown of why the lightest RE is also the fastest RE at the strip, plus the three cheapest mods under ₹25,000.",
   },
   {
     slug: "harley-nightster-rh975-quarter-mile-physics",
@@ -237,7 +237,7 @@ const POSTS = [
     ],
     title: "Harley Nightster RH975: Revolution Max Quarter-Mile Physics",
     excerpt:
-      "Cycle World clocked the Nightster RH975 at 11.99s — quicker than a Triumph Street Triple 765 R. MotoQuant simulates it at 12.45s; the 0.46s gap is almost entirely launch phase. Physics breakdown of why a 90 hp 212 kg belt-drive Harley runs an 11.x, and why the Sportster S RH1250S posts nearly the same time despite 31 more horsepower.",
+      "Cycle World clocked the Nightster RH975 at 11.99s, quicker than a Triumph Street Triple 765 R. MotoQuant simulates it at 12.45s; the 0.46s gap is almost entirely launch phase. Physics breakdown of why a 90 hp 212 kg belt-drive Harley runs an 11.x, and why the Sportster S RH1250S posts nearly the same time despite 31 more horsepower.",
   },
   {
     slug: "kawasaki-ninja-h2-sx-quarter-mile-physics",
@@ -262,7 +262,7 @@ const POSTS = [
     tags: ["Honda", "CB125R", "Neo Sports Café", "125cc", "physics"],
     title: "Honda CB125R Quarter-Mile Physics: 14.7hp Neo Sports Café",
     excerpt:
-      "MotoQuant simulates the Honda CB125R at 18.61s and 122 km/h trap — the fastest stock 125cc in the entry cluster. Why a 14.7 hp single out-traps a KTM 125 Duke by 4.4 km/h, where the ₹1.4 lakh price premium over an R15 V4 actually buys you, and the four cheapest tenths for the small-cc Honda owner. JC91 platform, Showa SFF-BP forks, radial-mount Nissin caliper — class-leading hardware that India never officially got.",
+      "MotoQuant simulates the Honda CB125R at 18.61s and 122 km/h trap, the fastest stock 125cc in the entry cluster. Why a 14.7 hp single out-traps a KTM 125 Duke by 4.4 km/h, where the ₹1.4 lakh price premium over an R15 V4 actually buys you, and the four cheapest tenths for the small-cc Honda owner. JC91 platform, Showa SFF-BP forks, radial-mount Nissin caliper: class-leading hardware that India never officially got.",
   },
   {
     slug: "husqvarna-svartpilen-250-vs-ktm-duke-250-quarter-mile-physics",
@@ -278,7 +278,7 @@ const POSTS = [
     ],
     title: "Husqvarna Svartpilen 250 vs KTM Duke 250: Quarter-Mile Physics",
     excerpt:
-      "MotoQuant sims the Svartpilen 250 at 14.767s / 149 km/h and the Duke 250 at 15.083s / 143 km/h. Same engine, same Bajaj Chakan plant, same Pierer Mobility parts shelf — and 0.316 seconds separates them at the strip. Physics breakdown of where the gap lives (final drive, frontal area, mass), why the Husky surprises everyone, and the cheapest mod that lets a Duke 250 owner match a stock Svartpilen.",
+      "MotoQuant sims the Svartpilen 250 at 14.767s / 149 km/h and the Duke 250 at 15.083s / 143 km/h. Same engine, same Bajaj Chakan plant, same Pierer Mobility parts shelf, and 0.316 seconds separates them at the strip. Physics breakdown of where the gap lives (final drive, frontal area, mass), why the Husky surprises everyone, and the cheapest mod that lets a Duke 250 owner match a stock Svartpilen.",
   },
   {
     slug: "royal-enfield-bullet-350-quarter-mile-physics",
@@ -309,7 +309,7 @@ const POSTS = [
     ],
     title: "Honda Hornet 2.0 vs Pulsar NS200: Which Wins the Quarter Mile?",
     excerpt:
-      "MotoQuant simulates the Honda Hornet 2.0 at ~17.55s and the Pulsar NS200 at ~15.9s under matched Aamby Valley conditions. Seven horsepower and 18 kg separate them — physics-first breakdown of why the gap is engine architecture, not tuning, plus the mod ceiling on each platform.",
+      "MotoQuant simulates the Honda Hornet 2.0 at ~17.55s and the Pulsar NS200 at ~15.9s under matched Aamby Valley conditions. Seven horsepower and 18 kg separate them. Physics-first breakdown of why the gap is engine architecture, not tuning, plus the mod ceiling on each platform.",
   },
   {
     slug: "bajaj-dominar-400-quarter-mile-physics",
@@ -327,7 +327,7 @@ const POSTS = [
     tags: ["Yamaha", "MT-15 V1", "Indian 155cc", "naked sport", "physics"],
     title: "Yamaha MT-15 V1 Quarter-Mile Physics: 155cc Naked Drag",
     excerpt:
-      "MotoQuant simulates the Yamaha MT-15 V1 at 17.05s and 125.5 km/h trap. The 2019 R15 V3 platform without VVA loses about a tenth and a half to its faired sibling — most of it aero, not engine. Where the cheap tenths actually live for Indian 155cc owners, and why a ₹3,850 sprocket-and-tire combo beats a ₹38,000 slip-on.",
+      "MotoQuant simulates the Yamaha MT-15 V1 at 17.05s and 125.5 km/h trap. The 2019 R15 V3 platform without VVA loses about a tenth and a half to its faired sibling, most of it aero, not engine. Where the cheap tenths actually live for Indian 155cc owners, and why a ₹3,850 sprocket-and-tire combo beats a ₹38,000 slip-on.",
   },
   {
     slug: "hayabusa-quarter-mile-physics-what-limits-9-6-seconds",
@@ -343,7 +343,7 @@ const POSTS = [
     ],
     title: "Hayabusa Quarter-Mile Physics: What Limits the 9.6",
     excerpt:
-      "MotoQuant locks the Hayabusa Gen1 at 10.1100 s, a reference baseline CI holds to four decimals. A drag-prepped Hayabusa runs 9.5-9.7s. The four to six tenths between are not engine power. They are traction, geometry, gearing, and air — broken down with a stage-by-stage Indian cost-per-tenth table.",
+      "MotoQuant locks the Hayabusa Gen1 at 10.1100 s, a reference baseline CI holds to four decimals. A drag-prepped Hayabusa runs 9.5-9.7s. The four to six tenths between are not engine power. They are traction, geometry, gearing, and air, broken down with a stage-by-stage Indian cost-per-tenth table.",
   },
   {
     slug: "aprilia-tuono-660-factory-quarter-mile-physics",
@@ -359,7 +359,7 @@ const POSTS = [
     title:
       "Aprilia Tuono 660 Factory Quarter-Mile Physics: 11.02s on the Strip",
     excerpt:
-      "MotoQuant simulates the Aprilia Tuono 660 Factory at 11.02s and 215.7 km/h trap. 5 extra hp, 14 kg less, sharper gearing — where the 0.3s gap over the base Tuono 660 actually lives, and why the Factory trim is the value pick of the Indian middleweight-naked segment at ₹16.15 lakh.",
+      "MotoQuant simulates the Aprilia Tuono 660 Factory at 11.02s and 215.7 km/h trap. 5 extra hp, 14 kg less, sharper gearing: where the 0.3s gap over the base Tuono 660 actually lives, and why the Factory trim is the value pick of the Indian middleweight-naked segment at ₹16.15 lakh.",
   },
   {
     slug: "triumph-street-triple-765r-quarter-mile-physics",
@@ -387,7 +387,7 @@ const POSTS = [
     readTime: "12 min",
     tags: ["KTM", "890 Duke R", "India grey market", "mid-cc naked", "physics"],
     excerpt:
-      "MotoQuant simulates the KTM 890 Duke R at 11.07s and 202 km/h trap at Aamby Valley — 0.35s quicker than the standard 890 Duke. Why almost every 890 Duke in India is actually the R variant, where the tenths come from, and the ₹46,400 Tier-1 stack that closes the gap to a stock MT-09.",
+      "MotoQuant simulates the KTM 890 Duke R at 11.07s and 202 km/h trap at Aamby Valley, 0.35s quicker than the standard 890 Duke. Why almost every 890 Duke in India is actually the R variant, where the tenths come from, and the ₹46,400 Tier-1 stack that closes the gap to a stock MT-09.",
   },
   {
     slug: "best-mods-for-ktm-rc-390-budget-vs-cost-per-tenth",
@@ -406,7 +406,7 @@ const POSTS = [
     readTime: "12 min",
     tags: ["Kawasaki", "Ninja 400", "ZX-4R", "Indian 400cc", "comparison"],
     excerpt:
-      "MotoQuant simulates the Ninja 400 at ~13.1s and the ZX-4R at 12.681s and 192.6 km/h trap — same 400cc class, 0.4s apart. Architecture, redline, and the ₹3.7 lakh price gap explain everything. India cost-per-tenth mods for both bikes, and a modded Ninja 400 gets within 0.10s of a stock ZX-4R for ₹21,000.",
+      "MotoQuant simulates the Ninja 400 at ~13.1s and the ZX-4R at 12.681s and 192.6 km/h trap: same 400cc class, 0.4s apart. Architecture, redline, and the ₹3.7 lakh price gap explain everything. India cost-per-tenth mods for both bikes, and a modded Ninja 400 gets within 0.10s of a stock ZX-4R for ₹21,000.",
   },
   {
     slug: "suzuki-gsx-s750-vs-ktm-890-duke-quarter-mile",
@@ -422,7 +422,7 @@ const POSTS = [
       "mid-cc naked",
     ],
     excerpt:
-      "MotoQuant simulates the GSX-S750 at 11.58s and the 890 Duke at 11.42s. The Duke weighs 27 kg less and wins by 0.16s — but the Suzuki inline-four claws back 3 km/h in trap speed. Physics-based breakdown of where each bike wins and loses, plus sprocket-first tuning strategy for both.",
+      "MotoQuant simulates the GSX-S750 at 11.58s and the 890 Duke at 11.42s. The Duke weighs 27 kg less and wins by 0.16s, but the Suzuki inline-four claws back 3 km/h in trap speed. Physics-based breakdown of where each bike wins and loses, plus sprocket-first tuning strategy for both.",
   },
   {
     slug: "yezdi-roadster-quarter-mile-physics",
@@ -449,7 +449,7 @@ const POSTS = [
     readTime: "11 min",
     tags: ["Yamaha", "XSR900 GP", "MT-09", "CP3 triple", "comparison"],
     excerpt:
-      "MotoQuant simulates the Yamaha XSR900 GP at 10.98s and the MT-09 at 10.86s — same 890cc CP3 triple, same 6-speed cassette, 0.12s apart. Spec-by-spec physics breakdown of where the mass lives, why the fairing pays it back at top speed, and the Indian CBU pricing math.",
+      "MotoQuant simulates the Yamaha XSR900 GP at 10.98s and the MT-09 at 10.86s: same 890cc CP3 triple, same 6-speed cassette, 0.12s apart. Spec-by-spec physics breakdown of where the mass lives, why the fairing pays it back at top speed, and the Indian CBU pricing math.",
   },
   {
     slug: "kawasaki-ninja-zx-4r-quarter-mile-physics",
@@ -458,7 +458,7 @@ const POSTS = [
     readTime: "11 min",
     tags: ["Kawasaki", "Ninja ZX-4R", "400cc", "inline-four", "physics"],
     excerpt:
-      "MotoQuant simulates the 2024 Kawasaki Ninja ZX-4R at 12.681s and 192.6 km/h trap. Why a 76 hp 400cc inline-four runs a 12.6 when every other 400-class bike runs a 13.5 — plus three mods under ₹30,000 that close the gap to the ZX-4RR.",
+      "MotoQuant simulates the 2024 Kawasaki Ninja ZX-4R at 12.681s and 192.6 km/h trap. Why a 76 hp 400cc inline-four runs a 12.6 when every other 400-class bike runs a 13.5, plus three mods under ₹30,000 that close the gap to the ZX-4RR.",
   },
   {
     slug: "yamaha-mt-125-xsr125-platform-physics",
@@ -467,7 +467,7 @@ const POSTS = [
     readTime: "10 min",
     tags: ["Yamaha", "MT-125", "XSR125", "A1 licence", "platform physics"],
     excerpt:
-      "MotoQuant simulates the MT-125 at 19.123s and the XSR125 at 19.222s — same engine, same gearbox, same final drive, 0.10s apart. Where the tenth lives, why the heritage tax is paid in frontal area, and why the YZF-R125 beats both.",
+      "MotoQuant simulates the MT-125 at 19.123s and the XSR125 at 19.222s: same engine, same gearbox, same final drive, 0.10s apart. Where the tenth lives, why the heritage tax is paid in frontal area, and why the YZF-R125 beats both.",
   },
   {
     slug: "cfmoto-800nk-quarter-mile-physics",
@@ -476,7 +476,7 @@ const POSTS = [
     readTime: "11 min",
     tags: ["CFMoto", "800NK", "LC8c", "Indian mid-cc", "physics"],
     excerpt:
-      "MotoQuant simulates the CFMoto 800NK at 11.386s and 203.2 km/h trap. The KTM-derived LC8c parallel twin sits at ₹9-12 lakh in India — the cheapest LC8c-engined bike on the market. Physics breakdown of where the tenths live and why a 95 hp parallel twin runs an 11.4.",
+      "MotoQuant simulates the CFMoto 800NK at 11.386s and 203.2 km/h trap. The KTM-derived LC8c parallel twin sits at ₹9-12 lakh in India, the cheapest LC8c-engined bike on the market. Physics breakdown of where the tenths live and why a 95 hp parallel twin runs an 11.4.",
   },
   {
     slug: "ktm-duke-390-vs-rc-390-quarter-mile-physics",
@@ -485,7 +485,7 @@ const POSTS = [
     readTime: "12 min",
     tags: ["KTM", "Duke 390", "RC 390", "Indian 400cc", "comparison"],
     excerpt:
-      "MotoQuant simulates the RC 390 at ~13.5s and 166 km/h trap, the Duke 390 at ~13.7s and 162 km/h at Aamby Valley. Same engine, two tenths apart — almost all of it aerodynamic. Plus four cost-per-tenth mods under ₹25,000 and a look at the Fast Track Racing 11.342s record.",
+      "MotoQuant simulates the RC 390 at ~13.5s and 166 km/h trap, the Duke 390 at ~13.7s and 162 km/h at Aamby Valley. Same engine, two tenths apart, almost all of it aerodynamic. Plus four cost-per-tenth mods under ₹25,000 and a look at the Fast Track Racing 11.342s record.",
   },
   {
     slug: "ktm-duke-390-quarter-mile-stock-to-11s",
@@ -494,7 +494,7 @@ const POSTS = [
     readTime: "13 min",
     tags: ["KTM", "Duke 390", "Indian 400cc", "drag mods", "cost per tenth"],
     excerpt:
-      "MotoQuant simulates the stock 2022 Duke 390 at 13.30s and 162 km/h trap at Aamby Valley. Fast Track Racing India ran 11.342s with the same engine. Two seconds of ET decomposed mod-by-mod, with Indian retail pricing — plus a practical ₹49k build that puts the bike under 12.6s.",
+      "MotoQuant simulates the stock 2022 Duke 390 at 13.30s and 162 km/h trap at Aamby Valley. Fast Track Racing India ran 11.342s with the same engine. Two seconds of ET decomposed mod-by-mod, with Indian retail pricing, plus a practical ₹49k build that puts the bike under 12.6s.",
   },
   {
     slug: "pulsar-ns400z-quarter-mile-physics",
@@ -503,7 +503,7 @@ const POSTS = [
     readTime: "12 min",
     tags: ["Bajaj", "Pulsar NS400Z", "KTM RC 390", "Indian 400cc", "physics"],
     excerpt:
-      "MotoQuant simulates the Pulsar NS400Z at ~13.8s and 158 km/h trap at Aamby Valley. A stock RC 390 still beats it by 0.3s. Physics-based explanation of the 23 kg, the gearing, and the Cd that the press release glossed over — plus three cost-per-tenth mods under ₹22,000.",
+      "MotoQuant simulates the Pulsar NS400Z at ~13.8s and 158 km/h trap at Aamby Valley. A stock RC 390 still beats it by 0.3s. Physics-based explanation of the 23 kg, the gearing, and the Cd that the press release glossed over, plus three cost-per-tenth mods under ₹22,000.",
   },
   {
     slug: "re-continental-gt-650-quarter-mile-physics",
@@ -512,7 +512,7 @@ const POSTS = [
     readTime: "10 min",
     tags: ["Royal Enfield", "Continental GT 650", "Indian 650cc", "cafe racer"],
     excerpt:
-      "MotoQuant simulates the RE Continental GT 650 at ~14.1s and 158 km/h trap. Why the 47 hp / 52 Nm air/oil-cooled twin is rev-limited rather than power-limited — and the ₹7,800 sprocket-and-tire combo that closes most of the gap.",
+      "MotoQuant simulates the RE Continental GT 650 at ~14.1s and 158 km/h trap. Why the 47 hp / 52 Nm air/oil-cooled twin is rev-limited rather than power-limited, and the ₹7,800 sprocket-and-tire combo that closes most of the gap.",
   },
   {
     slug: "pulsar-ns200-vs-apache-rtr-200-quarter-mile-physics",
@@ -537,7 +537,7 @@ const POSTS = [
     readTime: "11 min",
     tags: ["2-stroke", "expansion chamber", "physics", "RX100", "RD350"],
     excerpt:
-      "A pressure wave at 500 m/s, a tuned-RPM peak about 1,500 rpm wide, and a +0.494 s simulator bias on the 2T cluster. Why the pipe IS the engine on an RX100, RD350, or RGV250 — and what that means for cost-per-tenth at an Indian drag strip.",
+      "A pressure wave at 500 m/s, a tuned-RPM peak about 1,500 rpm wide, and a +0.494 s simulator bias on the 2T cluster. Why the pipe IS the engine on an RX100, RD350, or RGV250, and what that means for cost-per-tenth at an Indian drag strip.",
   },
   {
     slug: "hayabusa-vs-zx-14r-which-is-faster",
@@ -553,7 +553,7 @@ const POSTS = [
       "comparison",
     ],
     excerpt:
-      "MotoQuant simulates a stock Hayabusa Gen1 at 10.218 s and a ZX-14R 2012 at 9.872 s at Aamby Valley in November. Spec-by-spec breakdown of the two flagship hyper-bikes — where each one wins, and why.",
+      "MotoQuant simulates a stock Hayabusa Gen1 at 10.218 s and a ZX-14R 2012 at 9.872 s at Aamby Valley in November. Spec-by-spec breakdown of the two flagship hyper-bikes: where each one wins, and why.",
   },
   {
     slug: "hero-xtreme-200s-4v-quarter-mile-physics",
@@ -562,7 +562,7 @@ const POSTS = [
     readTime: "9 min",
     tags: ["Hero", "Xtreme 200S 4V", "Indian 200cc", "commuter sport"],
     excerpt:
-      "MotoQuant simulates the Hero Xtreme 200S 4V at 17.40s and 125 km/h trap. Why the 19.1 hp / 17.35 Nm 4-valve oil-cooled single is gearing-limited, not power-limited — and the two ₹3,600 mods that close most of the gap.",
+      "MotoQuant simulates the Hero Xtreme 200S 4V at 17.40s and 125 km/h trap. Why the 19.1 hp / 17.35 Nm 4-valve oil-cooled single is gearing-limited, not power-limited, and the two ₹3,600 mods that close most of the gap.",
   },
   {
     slug: "ktm-1390-super-duke-r-evo-quarter-mile-physics",
@@ -571,7 +571,7 @@ const POSTS = [
     readTime: "9 min",
     tags: ["KTM", "1390 Super Duke R", "physics", "litre naked"],
     excerpt:
-      "MotoQuant simulates the 2024 KTM 1390 Super Duke R EVO at 10.225s and 237 km/h trap. MCN clocked stock test bikes at 9.95s. Here is exactly what the 0.275s gap is — and what actually limits the bike at the strip.",
+      "MotoQuant simulates the 2024 KTM 1390 Super Duke R EVO at 10.225s and 237 km/h trap. MCN clocked stock test bikes at 9.95s. Here is exactly what the 0.275s gap is, and what actually limits the bike at the strip.",
   },
   {
     slug: "how-the-motoquant-physics-engine-works",
@@ -580,7 +580,7 @@ const POSTS = [
     readTime: "14 min",
     tags: ["physics", "engine", "validation", "methodology"],
     excerpt:
-      "A first-principles tour of the 15-sub-model RK4 physics engine. Engine torque curves, tyre grip and temperature, clutch slip dynamics, weight transfer — what we simulate, what we validate against, and what the residual error actually means.",
+      "A first-principles tour of the 15-sub-model RK4 physics engine. Engine torque curves, tyre grip and temperature, clutch slip dynamics, weight transfer: what we simulate, what we validate against, and what the residual error actually means.",
   },
   {
     slug: "the-physics-of-a-perfect-launch",
@@ -598,7 +598,7 @@ const POSTS = [
     readTime: "10 min",
     tags: ["small-cc", "Yamaha R15", "Indian bikes", "tuning"],
     excerpt:
-      "The Yamaha YZF-R15 V3 should run ~14.5s based on factory power. Most stock bikes run 15.5–16s. The gap is not about engine power — it is about gearing, clutch slip, and traction. We break down every second.",
+      "The Yamaha YZF-R15 V3 should run ~14.5s based on factory power. Most stock bikes run 15.5–16s. The gap is not about engine power. It is about gearing, clutch slip, and traction. We break down every second.",
   },
   {
     slug: "how-to-tune-for-aamby-valley-in-november",

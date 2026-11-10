@@ -38,7 +38,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'MotoQuant simulates the Suzuki Hayabusa Gen1 at exactly 10.1100 seconds — a reference baseline pinned to four decimal places that every physics commit has to preserve. A drag-prepped Hayabusa with a stretched swingarm, 14-tooth front sprocket, sticky DOT drag rear, and a Power Commander tune runs the strip in 9.5 to 9.7 seconds. The four to six tenths between those two numbers are not engine power. They are traction, geometry, gearing, and air. Here is exactly where each tenth lives, what it costs in rupees, and why a stock Hayabusa cannot break 10 seconds no matter how good the rider is.',
+    text: 'MotoQuant simulates the Suzuki Hayabusa Gen1 at exactly 10.1100 seconds, a reference baseline pinned to four decimal places that every physics commit has to preserve. A drag-prepped Hayabusa with a stretched swingarm, 14-tooth front sprocket, sticky DOT drag rear, and a Power Commander tune runs the strip in 9.5 to 9.7 seconds. The four to six tenths between those two numbers are not engine power. They are traction, geometry, gearing, and air. Here is exactly where each tenth lives, what it costs in rupees, and why a stock Hayabusa cannot break 10 seconds no matter how good the rider is.',
   },
   {
     type: 'h2',
@@ -46,11 +46,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The Hayabusa Gen1 reference configuration inside MotoQuant is a 1999-2007 spec — 1299 cc inline-four, 170 hp at the rear wheel, 220 kg dry, 1485 mm wheelbase, 530 mm centre of gravity height, 51 percent front weight, 25 degrees of rake, 190/50ZR17 OEM Bridgestone Battlax BT-014 rear. Run that configuration in MotoQuant\'s 15-sub-model RK4 physics engine at the reference conditions (sea level, 25 degrees Celsius, 50 percent humidity, dry asphalt, rear-tyre mu_peak 1.40, 75 kg rider) and the simulator returns 10.1100 seconds at 232.4 km/h trap, on the first run and on the thousandth.',
+    text: 'The Hayabusa Gen1 reference configuration inside MotoQuant is a 1999-2007 spec: 1299 cc inline-four, 170 hp at the rear wheel, 220 kg dry, 1485 mm wheelbase, 530 mm centre of gravity height, 51 percent front weight, 25 degrees of rake, 190/50ZR17 OEM Bridgestone Battlax BT-014 rear. Run that configuration in MotoQuant\'s 15-sub-model RK4 physics engine at the reference conditions (sea level, 25 degrees Celsius, 50 percent humidity, dry asphalt, rear-tyre mu_peak 1.40, 75 kg rider) and the simulator returns 10.1100 seconds at 232.4 km/h trap, on the first run and on the thousandth.',
   },
   {
     type: 'p',
-    text: 'That number is contractually load-bearing. The other two reference baselines pinned alongside it are the Suzuki GSX-R 1000 K5 at 10.0436 seconds and the Yamaha YZF-R1 4C8 at 10.1092 seconds. Every commit to the physics engine — every tweak to the torque curve generator, every change to the clutch slip model, every adjustment to the tyre grip model, every new gear cassette in the Tier-1 lookup — has to leave all three numbers at delta plus 0.0000 seconds. The published tests behind them are 9.97 s for the K5 (Cycle World), 10.30 s for the R1 (Sport Rider) and 10.40 s for the Hayabusa (Cycle World). The pins are not fitted to those three numbers; they come out of a fit across all 250 published tests, so the K5 runs 0.07 s slow against its magazine time, and the R1 and the Hayabusa run 0.19 s and 0.29 s quick against theirs.',
+    text: 'That number is contractually load-bearing. The other two reference baselines pinned alongside it are the Suzuki GSX-R 1000 K5 at 10.0436 seconds and the Yamaha YZF-R1 4C8 at 10.1092 seconds. Every commit to the physics engine (every tweak to the torque curve generator, every change to the clutch slip model, every adjustment to the tyre grip model, every new gear cassette in the Tier-1 lookup) has to leave all three numbers at delta plus 0.0000 seconds. The published tests behind them are 9.97 s for the K5 (Cycle World), 10.30 s for the R1 (Sport Rider) and 10.40 s for the Hayabusa (Cycle World). The pins are not fitted to those three numbers; they come out of a fit across all 250 published tests, so the K5 runs 0.07 s slow against its magazine time, and the R1 and the Hayabusa run 0.19 s and 0.29 s quick against theirs.',
   },
   {
     type: 'p',
@@ -62,11 +62,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'A stock Hayabusa wheelies in first gear at full throttle from rest. This is not a personality trait — it is the wheelie sub-model output. With 220 kg dry mass, 530 mm CoG height, 1485 mm wheelbase, and roughly 600 Nm of torque at the rear wheel in first gear (170 hp at 9500 rpm crank, gear ratio 2.583, primary 1.596, final drive 2.353, all multiplied through with about 92 percent driveline efficiency), the longitudinal acceleration that lifts the front wheel arrives at about 1.05 g. The bike makes that with 800 rpm of clutch slip and one careful right hand. The moment the front goes light, the rider has to roll out of throttle to keep the bike from going vertical, which means the bike spends the first 60 feet making less torque than it can deliver.',
+    text: 'A stock Hayabusa wheelies in first gear at full throttle from rest. This is not a personality trait. It is the wheelie sub-model output. With 220 kg dry mass, 530 mm CoG height, 1485 mm wheelbase, and roughly 600 Nm of torque at the rear wheel in first gear (170 hp at 9500 rpm crank, gear ratio 2.583, primary 1.596, final drive 2.353, all multiplied through with about 92 percent driveline efficiency), the longitudinal acceleration that lifts the front wheel arrives at about 1.05 g. The bike makes that with 800 rpm of clutch slip and one careful right hand. The moment the front goes light, the rider has to roll out of throttle to keep the bike from going vertical, which means the bike spends the first 60 feet making less torque than it can deliver.',
   },
   {
     type: 'p',
-    text: 'A drag-prepped Hayabusa attacks this with a stretched swingarm — typically a Schnitz Racing 8-inch or 10-inch extension that pushes the wheelbase from 1485 mm to about 1700 mm — and a lowered front end that drops CoG height from 530 mm to about 400 mm. Those two changes together cut the wheelie tendency roughly in half. The simulator shows the launch acceleration window opening from 0.95 g to about 1.25 g in the first 0.4 seconds, which is worth 0.25 to 0.30 seconds of ET on its own. A Schnitz extension costs roughly ₹95,000 landed in India with import duty and GST. A lowering link adds another ₹15,000. Combined cost-per-tenth on the geometry change works out to about ₹40,000 per tenth.',
+    text: 'A drag-prepped Hayabusa attacks this with a stretched swingarm (typically a Schnitz Racing 8-inch or 10-inch extension that pushes the wheelbase from 1485 mm to about 1700 mm) and a lowered front end that drops CoG height from 530 mm to about 400 mm. Those two changes together cut the wheelie tendency roughly in half. The simulator shows the launch acceleration window opening from 0.95 g to about 1.25 g in the first 0.4 seconds, which is worth 0.25 to 0.30 seconds of ET on its own. A Schnitz extension costs roughly ₹95,000 landed in India with import duty and GST. A lowering link adds another ₹15,000. Combined cost-per-tenth on the geometry change works out to about ₹40,000 per tenth.',
   },
   {
     type: 'h2',
@@ -74,15 +74,15 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The OEM Bridgestone BT-014 fitted to the Gen1 Hayabusa has a mu_peak around 1.18 at the optimal operating temperature of 65 degrees Celsius. On a cold strip in November at Aamby Valley, the first launch typically happens with tire temperatures around 25 to 30 degrees Celsius, which puts the contact patch about 10 to 15 degrees below the peak mu window. MotoQuant\'s thermal sub-model captures this — cold-tire mu sits at roughly 1.05 to 1.10 for the first 100 metres of the run, climbing to 1.18 only as the burnout and launch heat soaks in.',
+    text: 'The OEM Bridgestone BT-014 fitted to the Gen1 Hayabusa has a mu_peak around 1.18 at the optimal operating temperature of 65 degrees Celsius. On a cold strip in November at Aamby Valley, the first launch typically happens with tire temperatures around 25 to 30 degrees Celsius, which puts the contact patch about 10 to 15 degrees below the peak mu window. MotoQuant\'s thermal sub-model captures this: cold-tire mu sits at roughly 1.05 to 1.10 for the first 100 metres of the run, climbing to 1.18 only as the burnout and launch heat soaks in.',
   },
   {
     type: 'p',
-    text: 'A sport-compound DOT drag tire — Pirelli Diablo Supercorsa SC1 in 190/50 or 200/50, or Bridgestone Battlax R11 — has a mu_peak around 1.40 to 1.50 at the same operating temperature, with a steeper warm-up curve that gets to peak grip inside the first 20 metres of a properly executed burnout. Swapping to a sticky DOT tire is worth about 0.20 seconds of ET in the simulator. The math is straightforward: at 1.05 g of cold-launch acceleration, the bike covers the first 60 feet in 1.74 seconds. At 1.30 g of warm-tire acceleration, the same 60 feet drops to 1.55 seconds. The remaining tenths come from carrying that higher launch speed through the entire run.',
+    text: 'A sport-compound DOT drag tire (Pirelli Diablo Supercorsa SC1 in 190/50 or 200/50, or Bridgestone Battlax R11) has a mu_peak around 1.40 to 1.50 at the same operating temperature, with a steeper warm-up curve that gets to peak grip inside the first 20 metres of a properly executed burnout. Swapping to a sticky DOT tire is worth about 0.20 seconds of ET in the simulator. The math is straightforward: at 1.05 g of cold-launch acceleration, the bike covers the first 60 feet in 1.74 seconds. At 1.30 g of warm-tire acceleration, the same 60 feet drops to 1.55 seconds. The remaining tenths come from carrying that higher launch speed through the entire run.',
   },
   {
     type: 'p',
-    text: 'A Pirelli Diablo Supercorsa SC1 190/50ZR17 lists at roughly ₹18,000 in Indian retail. That is about ₹9,000 per tenth — the single best cost-per-tenth modification on the bike. It is also the first thing the parts-ROI engine inside MotoQuant recommends when you ask it to optimise a Hayabusa build under any budget above ₹15,000.',
+    text: 'A Pirelli Diablo Supercorsa SC1 190/50ZR17 lists at roughly ₹18,000 in Indian retail. That is about ₹9,000 per tenth, the single best cost-per-tenth modification on the bike. It is also the first thing the parts-ROI engine inside MotoQuant recommends when you ask it to optimise a Hayabusa build under any budget above ₹15,000.',
   },
   {
     type: 'callout',
@@ -94,15 +94,15 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The stock Hayabusa runs 17F/40R final drive on a 530 chain — a road-bike ratio engineered to give a 290+ km/h top speed and a comfortable 110 km/h cruise in 6th gear. For drag racing this is too tall in the lower gears. First gear at the OEM ratio carries the bike from launch to about 110 km/h before redline; the simulator shows the bike shifting to second at roughly 0.9 seconds elapsed. A drag-prepped Hayabusa runs 16F/45R or even 15F/47R, which shortens first gear enough that the bike crosses 60 feet in first gear without needing a shift, and crosses the 1/8-mile mark in third instead of fourth.',
+    text: 'The stock Hayabusa runs 17F/40R final drive on a 530 chain, a road-bike ratio engineered to give a 290+ km/h top speed and a comfortable 110 km/h cruise in 6th gear. For drag racing this is too tall in the lower gears. First gear at the OEM ratio carries the bike from launch to about 110 km/h before redline; the simulator shows the bike shifting to second at roughly 0.9 seconds elapsed. A drag-prepped Hayabusa runs 16F/45R or even 15F/47R, which shortens first gear enough that the bike crosses 60 feet in first gear without needing a shift, and crosses the 1/8-mile mark in third instead of fourth.',
   },
   {
     type: 'p',
-    text: 'The MotoQuant gear-ratio sweep on a Hayabusa shows the picture clearly. The stock 17/40 setup hits the trap line in fourth gear at about 9,200 rpm — roughly 300 rpm short of the peak power RPM. A 16/45 setup hits the trap line in fourth at 9,400 rpm, basically on the peak. A 15/47 setup hits the trap in third at 9,700 rpm, slightly past peak power, which means more time spent in the meat of the torque curve through the middle of the run. The 15/47 ratio is worth about 0.12 seconds of ET versus stock, with a top-speed penalty of roughly 25 km/h. For a 1320-foot strip that is a clean win; for a top-speed run on a long stretch it is the wrong tool.',
+    text: 'The MotoQuant gear-ratio sweep on a Hayabusa shows the picture clearly. The stock 17/40 setup hits the trap line in fourth gear at about 9,200 rpm, roughly 300 rpm short of the peak power RPM. A 16/45 setup hits the trap line in fourth at 9,400 rpm, basically on the peak. A 15/47 setup hits the trap in third at 9,700 rpm, slightly past peak power, which means more time spent in the meat of the torque curve through the middle of the run. The 15/47 ratio is worth about 0.12 seconds of ET versus stock, with a top-speed penalty of roughly 25 km/h. For a 1320-foot strip that is a clean win; for a top-speed run on a long stretch it is the wrong tool.',
   },
   {
     type: 'p',
-    text: 'A 16-tooth front sprocket in 530 pitch costs about ₹2,500 in Indian retail. A 47-tooth rear sprocket runs about ₹4,200. A new 530 X-ring chain to match (DID VX3 or RK GB) adds ₹9,000 to ₹11,000. The full gearing change comes in under ₹18,000 for about 0.12 seconds of ET — roughly ₹15,000 per tenth, second-best cost-per-tenth after the tire swap.',
+    text: 'A 16-tooth front sprocket in 530 pitch costs about ₹2,500 in Indian retail. A 47-tooth rear sprocket runs about ₹4,200. A new 530 X-ring chain to match (DID VX3 or RK GB) adds ₹9,000 to ₹11,000. The full gearing change comes in under ₹18,000 for about 0.12 seconds of ET, roughly ₹15,000 per tenth, second-best cost-per-tenth after the tire swap.',
   },
   {
     type: 'h2',
@@ -110,7 +110,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'At 235 km/h the aerodynamic drag force on a Hayabusa is about 92 percent of the engine\'s output. The bike is fighting air harder than it is fighting acceleration. The Gen1 Hayabusa runs a Cd of roughly 0.62 with a frontal area of 0.50 square metres, giving a Cd-times-A product of 0.31. The Gen3 cleaned this up modestly — Cd dropped to roughly 0.58 with the same frontal area, giving 0.29. That 7 percent improvement in drag area is worth about 4 km/h at the trap and roughly 0.04 to 0.05 seconds of ET on a stock-tune simulation.',
+    text: 'At 235 km/h the aerodynamic drag force on a Hayabusa is about 92 percent of the engine\'s output. The bike is fighting air harder than it is fighting acceleration. The Gen1 Hayabusa runs a Cd of roughly 0.62 with a frontal area of 0.50 square metres, giving a Cd-times-A product of 0.31. The Gen3 cleaned this up modestly: Cd dropped to roughly 0.58 with the same frontal area, giving 0.29. That 7 percent improvement in drag area is worth about 4 km/h at the trap and roughly 0.04 to 0.05 seconds of ET on a stock-tune simulation.',
   },
   {
     type: 'p',
@@ -118,7 +118,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Beyond the rider position, the next aerodynamic step is a fairing replacement — a Sharkskinz race fairing without the OEM rear cowl light cluster, mirror mounts, or stock windscreen. That swap is worth maybe 0.03 to 0.04 seconds of ET and costs roughly ₹45,000 landed in India. Cost-per-tenth runs over ₹100,000, which is why aerodynamic mods rank dead last on the parts-ROI ladder for the strip. They are top of the ladder for top-speed runs, where Cd dominates the entire calculation.',
+    text: 'Beyond the rider position, the next aerodynamic step is a fairing replacement: a Sharkskinz race fairing without the OEM rear cowl light cluster, mirror mounts, or stock windscreen. That swap is worth maybe 0.03 to 0.04 seconds of ET and costs roughly ₹45,000 landed in India. Cost-per-tenth runs over ₹100,000, which is why aerodynamic mods rank dead last on the parts-ROI ladder for the strip. They are top of the ladder for top-speed runs, where Cd dominates the entire calculation.',
   },
   {
     type: 'h2',
@@ -132,7 +132,7 @@ const CONTENT = [
     type: 'table',
     rows: [
       ['Stage', 'Mod stack', 'Sim ET', 'Trap', 'Indian cost', '₹/tenth (cumulative)'],
-      ['Stock', 'OEM, factory tune, BT-014 rear', '10.47 s', '235 km/h', '—', '—'],
+      ['Stock', 'OEM, factory tune, BT-014 rear', '10.47 s', '235 km/h', '–', '–'],
       ['Stage 1a', '+ Pirelli Supercorsa rear DOT', '10.27 s', '237 km/h', '₹18,000', '₹9,000'],
       ['Stage 1b', '+ 16F/45R gearing + DID 530 VX3', '10.15 s', '232 km/h', '₹32,000', '₹10,000'],
       ['Stage 2', '+ Akrapovic slip-on + K&N filter + Power Commander V', '9.94 s', '241 km/h', '₹1,55,000', '₹29,000'],
@@ -142,7 +142,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Two patterns jump out of that table. First, the first ₹50,000 spent on a Hayabusa buys 0.32 seconds of ET — a tire and a sprocket. Past that point every additional tenth gets meaningfully more expensive. Second, even at ₹3.15 lakh of mod budget the simulator stops at 9.55 seconds. Getting below that requires either a turbo kit (₹4 to 6 lakh landed, worth another 1.0 to 1.2 seconds of ET if the fuel system and clutch can handle it) or a fully race-prepped chassis with billet wheels, lithium-ion battery, removed instrumentation, and ECU launch control. Neither is a Sunday-morning weekend mod.',
+    text: 'Two patterns jump out of that table. First, the first ₹50,000 spent on a Hayabusa buys 0.32 seconds of ET: a tire and a sprocket. Past that point every additional tenth gets meaningfully more expensive. Second, even at ₹3.15 lakh of mod budget the simulator stops at 9.55 seconds. Getting below that requires either a turbo kit (₹4 to 6 lakh landed, worth another 1.0 to 1.2 seconds of ET if the fuel system and clutch can handle it) or a fully race-prepped chassis with billet wheels, lithium-ion battery, removed instrumentation, and ECU launch control. Neither is a Sunday-morning weekend mod.',
   },
   {
     type: 'callout',
@@ -154,7 +154,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The cleanest answer to "what limits the Hayabusa at 9.6" is also the answer to "why does a stock bike never break 10". The four constraints — wheelie geometry, cold-tire traction, road-spec gearing, and a road-spec rider posture — together cost the stock bike roughly half a second of ET versus what the engine and the chassis could otherwise deliver. The engine itself is not the bottleneck. A stock 197-horsepower Hayabusa Gen2 dyno chart shows roughly 170 hp at the rear wheel; that is enough power to push a 220 kg bike with a 95 kg rider through the 402 metres of a quarter mile in about 9.5 seconds if every other constraint were removed.',
+    text: 'The cleanest answer to "what limits the Hayabusa at 9.6" is also the answer to "why does a stock bike never break 10". The four constraints (wheelie geometry, cold-tire traction, road-spec gearing, and a road-spec rider posture) together cost the stock bike roughly half a second of ET versus what the engine and the chassis could otherwise deliver. The engine itself is not the bottleneck. A stock 197-horsepower Hayabusa Gen2 dyno chart shows roughly 170 hp at the rear wheel; that is enough power to push a 220 kg bike with a 95 kg rider through the 402 metres of a quarter mile in about 9.5 seconds if every other constraint were removed.',
   },
   {
     type: 'p',
@@ -170,11 +170,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'If the goal is the fastest possible quarter-mile time at Aamby Valley or BIC: a used Gen2 with ₹3 lakh of mods runs 9.55 seconds. A brand-new Gen3 in showroom trim runs around 10.05 seconds. The used bike wins by half a second for less total spend. If the goal is a fast bike that does daily 100-kilometre commutes, weekend rides to Lonavla, occasional trips to a strip, and remains under warranty: the Gen3 wins on every other axis. The strip ET difference between stock Gen3 and a lightly-modded Gen2 (rear tire plus sprocket only) is roughly 0.10 to 0.12 seconds — well inside what a better rider on either bike will improve through practice.',
+    text: 'If the goal is the fastest possible quarter-mile time at Aamby Valley or BIC: a used Gen2 with ₹3 lakh of mods runs 9.55 seconds. A brand-new Gen3 in showroom trim runs around 10.05 seconds. The used bike wins by half a second for less total spend. If the goal is a fast bike that does daily 100-kilometre commutes, weekend rides to Lonavla, occasional trips to a strip, and remains under warranty: the Gen3 wins on every other axis. The strip ET difference between stock Gen3 and a lightly-modded Gen2 (rear tire plus sprocket only) is roughly 0.10 to 0.12 seconds, well inside what a better rider on either bike will improve through practice.',
   },
   {
     type: 'p',
-    text: 'For Pune and Narhe drag shops, the Hayabusa pattern is well-established. Used Gen1 and Gen2 platforms get bought from grey-market or first-owner trade-ins, stripped for strip duty, and run through a 6-to-12-month build cycle that lands them in the 9.4 to 9.7 second range. A turbo Hayabusa build from one of the established Narhe shops typically delivers 8.5 to 8.8 second ETs at the strip and runs roughly ₹14 to 18 lakh in mod budget on top of the donor bike. Those builds are a different category of conversation — the simulator inside MotoQuant supports forced-induction physics via the `forced_induction.boost_type` field, but the assumptions involved (clutch lockup, fuel pump capacity, intercooler thermal management) push outside the validated stock-tune envelope.',
+    text: 'For Pune and Narhe drag shops, the Hayabusa pattern is well-established. Used Gen1 and Gen2 platforms get bought from grey-market or first-owner trade-ins, stripped for strip duty, and run through a 6-to-12-month build cycle that lands them in the 9.4 to 9.7 second range. A turbo Hayabusa build from one of the established Narhe shops typically delivers 8.5 to 8.8 second ETs at the strip and runs roughly ₹14 to 18 lakh in mod budget on top of the donor bike. Those builds are a different category of conversation. The simulator inside MotoQuant supports forced-induction physics via the `forced_induction.boost_type` field, but the assumptions involved (clutch lockup, fuel pump capacity, intercooler thermal management) push outside the validated stock-tune envelope.',
   },
   {
     type: 'h2',
@@ -182,7 +182,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Every number in this post is a simulator output under specific conditions. Change rider weight by 15 kilograms, change ambient temperature by 10 degrees Celsius, change density altitude from Aamby Valley\'s 1100 metres to MMRT Chennai\'s 78 metres, change the launch RPM, change the surface from asphalt to a prepped strip — and the absolute ETs shift on every line of the table above. The relative ordering of where the tenths come from stays the same: tire first, gearing second, geometry third, engine fourth, aerodynamics last for the strip and first for top-speed.',
+    text: 'Every number in this post is a simulator output under specific conditions. Change rider weight by 15 kilograms, change ambient temperature by 10 degrees Celsius, change density altitude from Aamby Valley\'s 1100 metres to MMRT Chennai\'s 78 metres, change the launch RPM, change the surface from asphalt to a prepped strip, and the absolute ETs shift on every line of the table above. The relative ordering of where the tenths come from stays the same: tire first, gearing second, geometry third, engine fourth, aerodynamics last for the strip and first for top-speed.',
   },
   {
     type: 'p',
@@ -314,36 +314,36 @@ export default function PostPage() {
               ·{' '}
               <Link href="/blog/hayabusa-vs-zx-14r-which-is-faster" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Hayabusa vs ZX-14R: Which Is Faster Off the Line?
-              </Link>{' '}
-              — spec-by-spec head-to-head with the Kawasaki ZX-14R, the other half of the hyper-sport conversation.
+              </Link>
+              : spec-by-spec head-to-head with the Kawasaki ZX-14R, the other half of the hyper-sport conversation.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/the-physics-of-a-perfect-launch" className="text-brand-accent hover:text-brand-orange transition-colors">
                 The Physics of a Perfect Launch
-              </Link>{' '}
-              — clutch slip, weight transfer, and traction in the first 0.4 seconds. Why launch composure decides hyper-sport ET more than peak power does.
+              </Link>
+              : clutch slip, weight transfer, and traction in the first 0.4 seconds. Why launch composure decides hyper-sport ET more than peak power does.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/how-to-tune-for-aamby-valley-in-november" className="text-brand-accent hover:text-brand-orange transition-colors">
                 How to Tune for Aamby Valley in November
-              </Link>{' '}
-              — the venue conditions used for every simulation in this post.
+              </Link>
+              : the venue conditions used for every simulation in this post.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/how-the-motoquant-physics-engine-works" className="text-brand-accent hover:text-brand-orange transition-colors">
                 How the MotoQuant Physics Engine Works
-              </Link>{' '}
-              — the 15-sub-model RK4 architecture that locks the Hayabusa Gen1 baseline at 10.1100s and keeps it there across every commit.
+              </Link>
+              : the 15-sub-model RK4 architecture that locks the Hayabusa Gen1 baseline at 10.1100s and keeps it there across every commit.
             </li>
             <li>
               ·{' '}
               <Link href="/bikes" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Browse the full bike catalog
-              </Link>{' '}
-              — Hayabusa Gen1, Gen2, Gen3 and 330+ other bikes with full spec sheets and OEM tire fitments.
+              </Link>
+              : Hayabusa Gen1, Gen2, Gen3 and 330+ other bikes with full spec sheets and OEM tire fitments.
             </li>
           </ul>
         </div>
@@ -353,7 +353,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Walk the Hayabusa upgrade ladder yourself</div>
             <div className="text-white/60 text-sm">
-              Free simulator — pick the Hayabusa, dial in your local conditions and rider weight, then toggle mods one at a time to see exactly which tenths cost what.
+              Free simulator: pick the Hayabusa, dial in your local conditions and rider weight, then toggle mods one at a time to see exactly which tenths cost what.
             </div>
           </div>
           <Link

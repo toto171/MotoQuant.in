@@ -40,27 +40,27 @@ export function describeEnvironment(env, { placeLabel = null } = {}) {
       : null;
 
   if (env.is_default || env.source === 'default') {
-    return `default — ${[alt && `${alt} altitude`, temp].filter(Boolean).join(', ')}`;
+    return `default (${[alt && `${alt} altitude`, temp].filter(Boolean).join(', ')})`;
   }
   if (env.source === 'venue') {
     // A venue sets altitude and surface; the numbers below are what the server ran.
-    return `${env.name || 'your venue'} — ${[alt && `${alt} altitude`, temp].filter(Boolean).join(', ')}`;
+    return `${env.name || 'your venue'} (${[alt && `${alt} altitude`, temp].filter(Boolean).join(', ')})`;
   }
   // manual
   if (placeLabel) {
     // The echoed block is what the engine ran: name the place and its altitude.
-    return `${placeLabel} — ${[alt && `${alt} altitude`, temp, hum, wind].filter(Boolean).join(', ')}`;
+    return `${placeLabel} (${[alt && `${alt} altitude`, temp, hum, wind].filter(Boolean).join(', ')})`;
   }
-  return `your custom values — ${[alt && `${alt} altitude`, temp, hum, wind].filter(Boolean).join(', ')}`;
+  return `your custom values (${[alt && `${alt} altitude`, temp, hum, wind].filter(Boolean).join(', ')})`;
 }
 
 /** Plain words for what an in-browser instant estimate assumes. */
 export function describeEstimate({ venueName = null, altitudeM = null } = {}) {
   if (venueName) {
-    const alt = isNum(altitudeM) ? ` — ${rnd(altitudeM)} m altitude` : '';
+    const alt = isNum(altitudeM) ? `, ${rnd(altitudeM)} m altitude` : '';
     return `${venueName}${alt} (the instant estimate uses the altitude only, not the weather)`;
   }
-  return `default — ${DEFAULT_ALTITUDE_M} m altitude, ${DEFAULT_TEMP_C} °C (the instant estimate uses these defaults)`;
+  return `default, ${DEFAULT_ALTITUDE_M} m altitude, ${DEFAULT_TEMP_C} °C (the instant estimate uses these defaults)`;
 }
 
 /**

@@ -286,21 +286,21 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
         // loses the job. Self-heal: the sims are pure compute, so re-submit
         // the same work once instead of surfacing an error.
         if (restarts >= 1) {
-          throw new Error('Progress lost (the engine restarted mid-run) — please run again');
+          throw new Error('Progress lost (the engine restarted mid-run). Please run again');
         }
         restarts += 1;
         lostCount = 0;
         onProgress?.({
           status: 'connecting',
           progress: null,
-          stage: 'Engine restarted — running again from the start',
+          stage: 'Engine restarted: running again from the start',
         });
         try {
           started = await startJob(kind, body, signal);
         } catch (e) {
           if (e?.name === 'AbortError') throw aborted();
           throw new Error(
-            'Progress lost and the engine is not reachable — please run again'
+            'Progress lost and the engine is not reachable. Please run again'
           );
         }
         firstFailAt = null;
@@ -312,7 +312,7 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
     } else if (Date.now() - firstFailAt > 150_000) {
       cancelJob(started.job_id).catch(() => {}); // don't leave a zombie burning CPU
       throw new Error(
-        'Connection lost while the simulation was running — check your network and run again'
+        'Connection lost while the simulation was running. Check your network and run again'
       );
     }
 

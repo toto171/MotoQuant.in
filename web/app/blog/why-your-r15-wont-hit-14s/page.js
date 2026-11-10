@@ -5,13 +5,13 @@ import CodeComment from '../../../components/CodeComment';
 import ScoreboardDigits from '../../../components/ScoreboardDigits';
 
 export const metadata = {
-  title: "R15 V4 Quarter-Mile Time: Why Your R15 Won't Hit 14s — MotoQuant",
-  description: "Yamaha R15 V3/V4 quarter-mile time explained. Factory power predicts ~14.5s, but real R15s run 15.5–17.6s at Indian drag strips. Where each second goes — gearing, clutch slip, traction, aero.",
+  title: "R15 V4 Quarter-Mile Time: Why Your R15 Won't Hit 14s | MotoQuant",
+  description: "Yamaha R15 V3/V4 quarter-mile time explained. Factory power predicts ~14.5s, but real R15s run 15.5–17.6s at Indian drag strips. Where each second goes: gearing, clutch slip, traction, aero.",
   keywords: ['R15 V4 quarter mile time', 'R15 V3 quarter mile', 'Yamaha R15 quarter mile', 'R15 V4 drag time', 'R15 V4 0-100 india', 'Indian 150cc drag', 'R15 tuning', 'why is my R15 slow', 'r15 vs ns200 drag', 'r15 vs hornet 2.0'],
   alternates: { canonical: 'https://motoquant.in/blog/why-your-r15-wont-hit-14s' },
   openGraph: {
     title: "Why Your R15 Won't Hit 14s",
-    description: 'The gap between factory power and real-world drag times on the R15 V3 — analysed.',
+    description: 'The gap between factory power and real-world drag times on the R15 V3, analysed.',
     url: 'https://motoquant.in/blog/why-your-r15-wont-hit-14s',
     type: 'article',
     publishedTime: '2026-04-24T00:00:00Z',
@@ -41,15 +41,15 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The R15\'s wet multi-plate clutch is tuned for street riding — smooth, progressive engagement. On the strip, a jerky release causes two problems: the tyre spins up too fast (hurting traction) or the engine bogs (losing RPM). Either costs time.',
+    text: 'The R15\'s wet multi-plate clutch is tuned for street riding: smooth, progressive engagement. On the strip, a jerky release causes two problems: the tyre spins up too fast (hurting traction) or the engine bogs (losing RPM). Either costs time.',
   },
   {
     type: 'p',
-    text: 'Chain drive losses on a 428-pitch chain (R15 uses 428) with a worn or improperly tensioned chain can account for 2–4% of engine power. That is 0.4–0.7 hp — meaningful when the total is 18 hp. MotoQuant models chain efficiency at 0.94 for small-cc bikes with budget-grade chains.',
+    text: 'Chain drive losses on a 428-pitch chain (R15 uses 428) with a worn or improperly tensioned chain can account for 2–4% of engine power. That is 0.4–0.7 hp, meaningful when the total is 18 hp. MotoQuant models chain efficiency at 0.94 for small-cc bikes with budget-grade chains.',
   },
   {
     type: 'callout',
-    text: 'The single biggest clutch fix for the R15 is practice, not parts. A smooth, fast release at 4,000–4,500 RPM consistently beats a slip-and-dump at 6,000 RPM. MotoQuant\'s simulation shows the optimal R15 launch RPM is around 4,200 RPM — 56% of peak power RPM.',
+    text: 'The single biggest clutch fix for the R15 is practice, not parts. A smooth, fast release at 4,000–4,500 RPM consistently beats a slip-and-dump at 6,000 RPM. MotoQuant\'s simulation shows the optimal R15 launch RPM is around 4,200 RPM (56% of peak power RPM).',
   },
   {
     type: 'h2',
@@ -61,11 +61,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The tall first gear is a deliberate design choice — it helps with fuel economy and reduces wheelspin on slippery roads. On a drag strip, it means you spend more time in a lower-torque part of the curve before the bike fully gets on the pipe.',
+    text: 'The tall first gear is a deliberate design choice: it helps with fuel economy and reduces wheelspin on slippery roads. On a drag strip, it means you spend more time in a lower-torque part of the curve before the bike fully gets on the pipe.',
   },
   {
     type: 'p',
-    text: 'The most common gearing mod for the R15 on the strip is a front sprocket drop from F14 to F13 (−7% overall ratio), which drops first-gear top speed to ~37 km/h and extends the time the bike spends near peak torque. MotoQuant\'s parts catalog includes this mod — it typically shows an ET improvement of 0.15–0.25 seconds on the R15.',
+    text: 'The most common gearing mod for the R15 on the strip is a front sprocket drop from F14 to F13 (−7% overall ratio), which drops first-gear top speed to ~37 km/h and extends the time the bike spends near peak torque. MotoQuant\'s parts catalog includes this mod. It typically shows an ET improvement of 0.15–0.25 seconds on the R15.',
   },
   {
     type: 'h2',
@@ -77,7 +77,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'For a 155cc bike making 18 hp, aero drag becomes significant earlier in the run than for a litre-class bike. The R15 reaches its aero-limited terminal velocity — roughly 140–145 km/h at full tuck — before the 402 m mark. The last 100 metres of the run are fought almost entirely against drag rather than being powered by engine torque.',
+    text: 'For a 155cc bike making 18 hp, aero drag becomes significant earlier in the run than for a litre-class bike. The R15 reaches its aero-limited terminal velocity (roughly 140–145 km/h at full tuck) before the 402 m mark. The last 100 metres of the run are fought almost entirely against drag rather than being powered by engine torque.',
   },
   {
     type: 'h2',
@@ -89,7 +89,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Maximum traction-limited force at launch is roughly (0.95 × 211 kg × 9.81 m/s²) × rear_load_fraction ≈ 1,000 N on the rear wheel. At 18 hp and a first-gear ratio of 2.833, the engine can deliver more torque than the tyre can use in the first gear — meaning the tyre is the bottleneck, not the engine.',
+    text: 'Maximum traction-limited force at launch is roughly (0.95 × 211 kg × 9.81 m/s²) × rear_load_fraction ≈ 1,000 N on the rear wheel. At 18 hp and a first-gear ratio of 2.833, the engine can deliver more torque than the tyre can use in the first gear, meaning the tyre is the bottleneck, not the engine.',
   },
   {
     type: 'p',
@@ -125,7 +125,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'None of these will get a stock R15 V3 to a genuine 14s ET without also optimising the launch and conditions. But a well-prepared R15 with a good driver, correct sprocket, sticky tyres, and a cold-weather session at Aamby Valley can realistically hit 15.0–15.2 seconds — a meaningful improvement over the stock 15.8–16.2s.',
+    text: 'None of these will get a stock R15 V3 to a genuine 14s ET without also optimising the launch and conditions. But a well-prepared R15 with a good driver, correct sprocket, sticky tyres, and a cold-weather session at Aamby Valley can realistically hit 15.0–15.2 seconds, a meaningful improvement over the stock 15.8–16.2s.',
   },
   {
     type: 'h2',
@@ -133,7 +133,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'A 35°C day at a low-altitude strip versus a 20°C morning at 1,100 m density altitude can change your R15\'s ET by 0.3–0.5 seconds. Air density affects both engine power (less oxygen at altitude) and aerodynamic drag (lower drag at altitude — a net positive at DA >800 m). MotoQuant\'s location picker lets you input your strip conditions and see the exact impact.',
+    text: 'A 35°C day at a low-altitude strip versus a 20°C morning at 1,100 m density altitude can change your R15\'s ET by 0.3–0.5 seconds. Air density affects both engine power (less oxygen at altitude) and aerodynamic drag (lower drag at altitude, a net positive at DA >800 m). MotoQuant\'s location picker lets you input your strip conditions and see the exact impact.',
   },
 ];
 

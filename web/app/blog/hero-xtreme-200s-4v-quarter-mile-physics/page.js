@@ -9,7 +9,7 @@ const DESCRIPTION =
   'MotoQuant simulates the Hero Xtreme 200S 4V at 17.40s and 125 km/h trap. What the 19.1 hp 4-valve oil-cooled single can really do at an Indian drag strip.';
 
 export const metadata = {
-  title: 'Hero Xtreme 200S 4V Quarter-Mile Physics — MotoQuant',
+  title: 'Hero Xtreme 200S 4V Quarter-Mile Physics | MotoQuant',
   description: DESCRIPTION,
   keywords: [
     'Hero Xtreme 200S 4V quarter mile',
@@ -32,7 +32,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'MotoQuant simulates the Hero Xtreme 200S 4V at 17.40 seconds with a 125.1 km/h trap — sim-only, no instrumented Indian magazine ET on the books yet. The bike makes 19.1 hp at 8,500 rpm and 17.35 Nm at 6,500 rpm out of a 199.6 cc oil-cooled single, and on paper that puts it within a hair of the Bajaj Pulsar NS200 on power-to-weight. On the strip it sits in a different place entirely, and the reasons are interesting.',
+    text: 'MotoQuant simulates the Hero Xtreme 200S 4V at 17.40 seconds with a 125.1 km/h trap (sim-only, no instrumented Indian magazine ET on the books yet). The bike makes 19.1 hp at 8,500 rpm and 17.35 Nm at 6,500 rpm out of a 199.6 cc oil-cooled single, and on paper that puts it within a hair of the Bajaj Pulsar NS200 on power-to-weight. On the strip it sits in a different place entirely, and the reasons are interesting.',
   },
   {
     type: 'h2',
@@ -40,11 +40,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The Xtreme 200S 4V is the 2023 refresh of the older 2-valve Xtreme 200S. Hero MotoCorp dropped a Karizma-derived 4-valve cylinder head onto the 199.6 cc oil-cooled single and picked up roughly 3 hp over the outgoing 2V variant. Bore is 67 mm, stroke 56.5 mm, compression 9.8:1. The frame, the half-fairing, the 17-inch wheels, the telescopic forks, the 5-speed gearbox with 14F/42R 428-pitch chain — all carried over from the 2V bike. This is a head swap and an ECU re-flash, not a clean-sheet redesign, and the chassis dates back to the original Karizma R platform Hero has been iterating on since 2003.',
+    text: 'The Xtreme 200S 4V is the 2023 refresh of the older 2-valve Xtreme 200S. Hero MotoCorp dropped a Karizma-derived 4-valve cylinder head onto the 199.6 cc oil-cooled single and picked up roughly 3 hp over the outgoing 2V variant. Bore is 67 mm, stroke 56.5 mm, compression 9.8:1. The frame, the half-fairing, the 17-inch wheels, the telescopic forks, the 5-speed gearbox with 14F/42R 428-pitch chain are all carried over from the 2V bike. This is a head swap and an ECU re-flash, not a clean-sheet redesign, and the chassis dates back to the original Karizma R platform Hero has been iterating on since 2003.',
   },
   {
     type: 'p',
-    text: 'For a drag-strip analysis that matters because the chassis was designed around a long-stroke commuter single — wide handlebars, soft fork rate, comfort-tuned rear monoshock, and a 158 kg dry mass that is heavy for the displacement class. The Xtreme is a sport-styled commuter, not a sport bike with commuter pricing. The simulator has to model it as exactly what it is, and the resulting numbers are honest rather than flattering.',
+    text: 'For a drag-strip analysis that matters because the chassis was designed around a long-stroke commuter single: wide handlebars, soft fork rate, comfort-tuned rear monoshock, and a 158 kg dry mass that is heavy for the displacement class. The Xtreme is a sport-styled commuter, not a sport bike with commuter pricing. The simulator has to model it as exactly what it is, and the resulting numbers are honest rather than flattering.',
   },
   {
     type: 'h2',
@@ -67,11 +67,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'There is no published Indian Autos Mag or BikeWale instrumented quarter-mile time on the 200S 4V at the time of writing — only 0-60 km/h numbers (around 4.6 seconds) and a manufacturer-claimed top speed near 119 km/h. The simulator carries a documented +0.5 to +1.4 second slow bias on the entry-200-300 cc cluster (Pulsar NS200, Apache RTR 200 4V, Duke 200, Pulsar N250 territory), so the real-world Xtreme is plausibly running closer to 16.5–17.0 seconds in the hands of a competent rider on a warmed bike.',
+    text: 'There is no published Indian Autos Mag or BikeWale instrumented quarter-mile time on the 200S 4V at the time of writing: only 0-60 km/h numbers (around 4.6 seconds) and a manufacturer-claimed top speed near 119 km/h. The simulator carries a documented +0.5 to +1.4 second slow bias on the entry-200-300 cc cluster (Pulsar NS200, Apache RTR 200 4V, Duke 200, Pulsar N250 territory), so the real-world Xtreme is plausibly running closer to 16.5–17.0 seconds in the hands of a competent rider on a warmed bike.',
   },
   {
     type: 'callout',
-    text: 'Why the simulator runs slow on small-cc Indian bikes: the cluster bias is honest, not a bug. Most published 0-100 km/h times for this class are converted to ETs by multiplying by 1.6 — a magazine shortcut, not a real timing trap. Real instrumented Indian small-cc data is thin, so the model is conservatively calibrated to the slower end of plausible until instrumented timeslips arrive through the "Submit a timeslip" form.',
+    text: 'Why the simulator runs slow on small-cc Indian bikes: the cluster bias is honest, not a bug. Most published 0-100 km/h times for this class are converted to ETs by multiplying by 1.6 (a magazine shortcut, not a real timing trap). Real instrumented Indian small-cc data is thin, so the model is conservatively calibrated to the slower end of plausible until instrumented timeslips arrive through the "Submit a timeslip" form.',
   },
   {
     type: 'h2',
@@ -91,7 +91,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: '3. Aerodynamics. Hero rates the half-faired Xtreme at a Cd of around 0.78 with a frontal area near 0.46 m². The NS200 — a naked sport — sits at Cd ≈ 0.80 with frontal area ~0.42 m². The half-fairing helps the Xtreme slightly at higher speeds but the wider commuter handlebars and more upright rider position give back most of the gain. At 125 km/h the two bikes are within 5% of each other on aerodynamic drag, which is too close to matter for ET but does cap the Xtreme below the NS200 in trap.',
+    text: '3. Aerodynamics. Hero rates the half-faired Xtreme at a Cd of around 0.78 with a frontal area near 0.46 m². The NS200, a naked sport, sits at Cd ≈ 0.80 with frontal area ~0.42 m². The half-fairing helps the Xtreme slightly at higher speeds but the wider commuter handlebars and more upright rider position give back most of the gain. At 125 km/h the two bikes are within 5% of each other on aerodynamic drag, which is too close to matter for ET but does cap the Xtreme below the NS200 in trap.',
   },
   {
     type: 'h2',
@@ -103,15 +103,15 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: '1. Gearing. The 5-speed cassette ratios on the 200S 4V are [3.182, 1.778, 1.318, 1.045, 0.875] with 14F/42R sprockets and a tire rolling radius around 290 mm on the 130/70-17 rear. With those numbers, fifth gear at 8,500 rpm gives a theoretical road speed of about 122 km/h — almost exactly the manufacturer-claimed top speed. That means the bike is gearing-limited, not power-limited, in 5th. The simulator log shows the Xtreme crossing the trap line in 4th gear at roughly 8,200 rpm, then up-shifting to 5th about 30 m before the trap line and arriving in 5th at about 7,400 rpm. A drop from 14F to 13F (a one-tooth-down sprocket swap, around ₹400 in parts) shortens 5th enough to land the bike in the trap with 5th still pulling.',
+    text: '1. Gearing. The 5-speed cassette ratios on the 200S 4V are [3.182, 1.778, 1.318, 1.045, 0.875] with 14F/42R sprockets and a tire rolling radius around 290 mm on the 130/70-17 rear. With those numbers, fifth gear at 8,500 rpm gives a theoretical road speed of about 122 km/h, almost exactly the manufacturer-claimed top speed. That means the bike is gearing-limited, not power-limited, in 5th. The simulator log shows the Xtreme crossing the trap line in 4th gear at roughly 8,200 rpm, then up-shifting to 5th about 30 m before the trap line and arriving in 5th at about 7,400 rpm. A drop from 14F to 13F (a one-tooth-down sprocket swap, around ₹400 in parts) shortens 5th enough to land the bike in the trap with 5th still pulling.',
   },
   {
     type: 'p',
-    text: "2. Clutch and launch. With only 17.35 Nm at 6,500 rpm, the Xtreme has the opposite problem of a litre bike: there is barely enough torque to wheelie, and the launch window is narrow. Drop the clutch below 5,000 rpm and the engine bogs; bring the launch above 7,500 rpm and the rear tire — bias-ply OEM rubber, μ_peak 1.05 — actually does start to spin on dry asphalt because the clutch hooks too hard. The simulator's small-cc clutch over-clutching factor (added in the May 2026 calibration pass) lets the Xtreme launch closer to its peak-torque rpm without snatching, which closes about 0.3 seconds of the bigger pre-fix gap. A real rider on a real strip needs to find that window by feel, and most do not.",
+    text: "2. Clutch and launch. With only 17.35 Nm at 6,500 rpm, the Xtreme has the opposite problem of a litre bike: there is barely enough torque to wheelie, and the launch window is narrow. Drop the clutch below 5,000 rpm and the engine bogs; bring the launch above 7,500 rpm and the rear tire (bias-ply OEM rubber, μ_peak 1.05) actually does start to spin on dry asphalt because the clutch hooks too hard. The simulator's small-cc clutch over-clutching factor (added in the May 2026 calibration pass) lets the Xtreme launch closer to its peak-torque rpm without snatching, which closes about 0.3 seconds of the bigger pre-fix gap. A real rider on a real strip needs to find that window by feel, and most do not.",
   },
   {
     type: 'p',
-    text: '3. Tire compound. The OEM tire is a bias-ply commuter compound — durable for 25,000 km of city riding, but sticky it is not. A radial sport tire of the same size (a Pirelli Diablo Rosso II or an Apollo Alpha H1 in 130/70-17) bumps μ_peak from around 1.05 to 1.30, which translates to roughly 0.4 seconds of ET gain through better launch traction and better mid-corner stability. At ~₹6,500 a pair, this is the cheapest tenth on the bike. The simulator scores tire mods explicitly per part per bike — the rear tire alone is the highest-ROI ₹ per tenth on the Xtreme catalog page.',
+    text: '3. Tire compound. The OEM tire is a bias-ply commuter compound: durable for 25,000 km of city riding, but sticky it is not. A radial sport tire of the same size (a Pirelli Diablo Rosso II or an Apollo Alpha H1 in 130/70-17) bumps μ_peak from around 1.05 to 1.30, which translates to roughly 0.4 seconds of ET gain through better launch traction and better mid-corner stability. At ~₹6,500 a pair, this is the cheapest tenth on the bike. The simulator scores tire mods explicitly per part per bike: the rear tire alone is the highest-ROI ₹ per tenth on the Xtreme catalog page.',
   },
   {
     type: 'h2',
@@ -133,7 +133,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Two patterns stand out. First, the Xtreme is the slowest of the four and the gap to the next-slowest (Apache RTR 200 4V) is roughly 1.2 seconds — bigger than the spec-sheet difference would suggest. The Apache makes its 20.5 hp at the same 8,500 rpm as the Xtreme but uses a stiffer chassis, a sport tire OEM, and a sharper gearbox. Second, the gap from the Xtreme to the Duke 200 is almost two full seconds, and the Duke is only 5 kg lighter and 6 hp up. The Duke wins because of revs (10,000 rpm peak), a sportier chassis geometry, and a tighter close-ratio gearbox.',
+    text: 'Two patterns stand out. First, the Xtreme is the slowest of the four and the gap to the next-slowest (Apache RTR 200 4V) is roughly 1.2 seconds, bigger than the spec-sheet difference would suggest. The Apache makes its 20.5 hp at the same 8,500 rpm as the Xtreme but uses a stiffer chassis, a sport tire OEM, and a sharper gearbox. Second, the gap from the Xtreme to the Duke 200 is almost two full seconds, and the Duke is only 5 kg lighter and 6 hp up. The Duke wins because of revs (10,000 rpm peak), a sportier chassis geometry, and a tighter close-ratio gearbox.',
   },
   {
     type: 'p',
@@ -145,7 +145,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The 200S 4V is rare at organised drag meets — most Indian 200cc strip regulars run NS200, RTR 200 4V, or Duke 200 platforms because of the larger aftermarket. Aamby Valley and BIC see roughly half a dozen private Xtreme owners across a typical season, mostly running stock or near-stock. The handful of modded Xtremes that do show up tend to focus on the cheapest-per-tenth mods, which the simulator quantifies cleanly:',
+    text: 'The 200S 4V is rare at organised drag meets: most Indian 200cc strip regulars run NS200, RTR 200 4V, or Duke 200 platforms because of the larger aftermarket. Aamby Valley and BIC see roughly half a dozen private Xtreme owners across a typical season, mostly running stock or near-stock. The handful of modded Xtremes that do show up tend to focus on the cheapest-per-tenth mods, which the simulator quantifies cleanly:',
   },
   {
     type: 'table',
@@ -160,11 +160,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The first two items are basically free relative to ET gain. The sprocket and the rear tire together cost roughly ₹3,600 and shave nearly 0.6 seconds off the simulator ET — that is the single best ROI any 200cc Indian bike can offer. Beyond those, the cost-per-tenth ramps fast and the gains plateau. A full Powertronic flash plus a slip-on plus an air filter together get you another ~0.5 seconds for ~₹53,000, which on a ₹1.4 lakh bike is a 38% cost increase for a 3% ET improvement. Most owners stop at sprocket-and-tire and keep the rest of the budget for fuel and track time.',
+    text: 'The first two items are basically free relative to ET gain. The sprocket and the rear tire together cost roughly ₹3,600 and shave nearly 0.6 seconds off the simulator ET. That is the single best ROI any 200cc Indian bike can offer. Beyond those, the cost-per-tenth ramps fast and the gains plateau. A full Powertronic flash plus a slip-on plus an air filter together get you another ~0.5 seconds for ~₹53,000, which on a ₹1.4 lakh bike is a 38% cost increase for a 3% ET improvement. Most owners stop at sprocket-and-tire and keep the rest of the budget for fuel and track time.',
   },
   {
     type: 'callout',
-    text: 'Fastest cheap path on the 200S 4V: drop a 13F front sprocket and fit a sport-compound rear tire. That is ~₹3,600 for ~0.6 s ET. Skip the slip-on exhaust unless you also want the noise — the gain is real but the cost-per-tenth is brutal on a sub-25 hp bike.',
+    text: 'Fastest cheap path on the 200S 4V: drop a 13F front sprocket and fit a sport-compound rear tire. That is ~₹3,600 for ~0.6 s ET. Skip the slip-on exhaust unless you also want the noise. The gain is real but the cost-per-tenth is brutal on a sub-25 hp bike.',
   },
   {
     type: 'h2',
@@ -172,11 +172,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The simulator carries a +0.5 to +1.4 second slow bias on the entry-200-300 cc cluster — wider than the +0.15 to +0.30 second band on the litre nakeds, because the underlying benchmark data is thinner. Most 200cc Indian magazine tests are 0-100 km/h numbers (the only metric the testers actually time at the strip) converted to quarter-mile ETs by multiplying by 1.6. That conversion factor works for litre bikes that pull through to high trap speeds; it under-predicts ET on small-cc bikes that arrive at the trap line in a lower gear and at lower trap speeds. So a magazine "quarter-mile" of 16.0 seconds on a 200cc bike is often actually a 0-100 of 10.0 seconds with a multiplier applied, and the real timed quarter is closer to 17.0.',
+    text: 'The simulator carries a +0.5 to +1.4 second slow bias on the entry-200-300 cc cluster, wider than the +0.15 to +0.30 second band on the litre nakeds, because the underlying benchmark data is thinner. Most 200cc Indian magazine tests are 0-100 km/h numbers (the only metric the testers actually time at the strip) converted to quarter-mile ETs by multiplying by 1.6. That conversion factor works for litre bikes that pull through to high trap speeds; it under-predicts ET on small-cc bikes that arrive at the trap line in a lower gear and at lower trap speeds. So a magazine "quarter-mile" of 16.0 seconds on a 200cc bike is often actually a 0-100 of 10.0 seconds with a multiplier applied, and the real timed quarter is closer to 17.0.',
   },
   {
     type: 'p',
-    text: 'For the Xtreme specifically that means the simulator 17.40 second ET and a magazine 16.0 second ET are probably describing the same physical bike — they are just produced by different methodologies. The honest answer for an owner is: take the Xtreme to a real timed strip, run a Dragy or a VBOX, and trust the timing trap over the magazine number. The gap will close as more instrumented Indian small-cc timeslips join the benchmark set.',
+    text: 'For the Xtreme specifically that means the simulator 17.40 second ET and a magazine 16.0 second ET are probably describing the same physical bike. They are just produced by different methodologies. The honest answer for an owner is: take the Xtreme to a real timed strip, run a Dragy or a VBOX, and trust the timing trap over the magazine number. The gap will close as more instrumented Indian small-cc timeslips join the benchmark set.',
   },
   {
     type: 'h2',
@@ -184,11 +184,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'If you own an Xtreme 200S 4V (or are deciding between it and an NS200, RTR 200 4V, or Duke 200), the simulator at motoquant.in lets you sweep rider weight, ambient temperature, density altitude, tire choice, gearing, and parts-catalog mods to see exactly where your tenths come from. The cluster bias is built into the model — when the simulator says your bike runs 17.40, expect the strip to confirm closer to 16.5–17.0 with a competent rider on a warmed bike with sport rubber.',
+    text: 'If you own an Xtreme 200S 4V (or are deciding between it and an NS200, RTR 200 4V, or Duke 200), the simulator at motoquant.in lets you sweep rider weight, ambient temperature, density altitude, tire choice, gearing, and parts-catalog mods to see exactly where your tenths come from. The cluster bias is built into the model: when the simulator says your bike runs 17.40, expect the strip to confirm closer to 16.5–17.0 with a competent rider on a warmed bike with sport rubber.',
   },
   {
     type: 'p',
-    text: "More relevant for everyday tuning: the simulator's parts-ROI engine quantifies cost-per-tenth for every bike in the catalog. On a 200S 4V the answer is loud and clear — sprocket swap and sport tire first, exhaust last. Most owners spend money in the wrong order, which is why most modded 200cc bikes cost ₹50,000 in upgrades and gain less ET than a ₹3,600 sprocket-and-tire combo would have delivered.",
+    text: "More relevant for everyday tuning: the simulator's parts-ROI engine quantifies cost-per-tenth for every bike in the catalog. On a 200S 4V the answer is loud and clear: sprocket swap and sport tire first, exhaust last. Most owners spend money in the wrong order, which is why most modded 200cc bikes cost ₹50,000 in upgrades and gain less ET than a ₹3,600 sprocket-and-tire combo would have delivered.",
   },
   {
     type: 'p',
@@ -320,36 +320,36 @@ export default function PostPage() {
               ·{' '}
               <Link href="/blog/why-your-r15-wont-hit-14s" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Why Your R15 Won&apos;t Hit 14s
-              </Link>{' '}
-              — same small-cc cluster, same gearing-and-traction story, different bike.
+              </Link>:{' '}
+              same small-cc cluster, same gearing-and-traction story, different bike.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/how-the-motoquant-physics-engine-works" className="text-brand-accent hover:text-brand-orange transition-colors">
                 How the MotoQuant Physics Engine Works
-              </Link>{' '}
-              — the 15-sub-model architecture behind every ET prediction in this post.
+              </Link>:{' '}
+              the 15-sub-model architecture behind every ET prediction in this post.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/the-physics-of-a-perfect-launch" className="text-brand-accent hover:text-brand-orange transition-colors">
                 The Physics of a Perfect Launch
-              </Link>{' '}
-              — clutch, slip, and weight transfer in the first 0.4 seconds.
+              </Link>:{' '}
+              clutch, slip, and weight transfer in the first 0.4 seconds.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/how-to-tune-for-aamby-valley-in-november" className="text-brand-accent hover:text-brand-orange transition-colors">
                 How to Tune for Aamby Valley in November
-              </Link>{' '}
-              — the venue conditions used for the simulation in this post.
+              </Link>:{' '}
+              the venue conditions used for the simulation in this post.
             </li>
             <li>
               ·{' '}
               <Link href="/bikes" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Browse the full bike catalog
-              </Link>{' '}
-              — every spec, every gear ratio, every Cd value used by the simulator.
+              </Link>:{' '}
+              every spec, every gear ratio, every Cd value used by the simulator.
             </li>
           </ul>
         </div>
@@ -359,7 +359,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Run the Xtreme 200S 4V yourself</div>
             <div className="text-white/60 text-sm">
-              Free simulator — pick the Hero Xtreme 200S 4V, dial in your local conditions and a sport tire, and watch the ET tighten live.
+              Free simulator: pick the Hero Xtreme 200S 4V, dial in your local conditions and a sport tire, and watch the ET tighten live.
             </div>
           </div>
           <Link

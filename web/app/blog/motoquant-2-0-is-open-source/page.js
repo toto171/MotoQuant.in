@@ -7,7 +7,7 @@ const REPO = 'https://github.com/toto171/MotoQuant.in';
 const SLUG = 'motoquant-2-0-is-open-source';
 
 export const metadata = {
-  title: 'MotoQuant 2.0 Is Open Source, Including Where It Is Wrong — MotoQuant Blog',
+  title: 'MotoQuant 2.0 Is Open Source, Including Where It Is Wrong | MotoQuant Blog',
   description:
     'MotoQuant 2.0 is free and open source under Apache-2.0, with no accounts and no paid plans. What it gets right, where it is still wrong, and how a timeslip from you makes it better.',
   keywords: [

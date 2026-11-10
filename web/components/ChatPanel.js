@@ -508,7 +508,7 @@ export default function ChatPanel({ apiUrl }) {
             id: idRef.current++,
             role: 'assistant',
             content: '',
-            failed: e?.message || 'Request failed — please try again',
+            failed: e?.message || 'Request failed. Please try again',
           },
         ]);
       }

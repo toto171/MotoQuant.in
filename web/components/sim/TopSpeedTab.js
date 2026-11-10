@@ -38,7 +38,7 @@ export default function TopSpeedTab({ sim }) {
   if (task.error) {
     return (
       <div className="space-y-4 py-4">
-        <ErrorTile message={`The top-speed run failed — ${task.error}`} onRetry={startTopSpeed} />
+        <ErrorTile message={`The top-speed run failed: ${task.error}`} onRetry={startTopSpeed} />
       </div>
     );
   }
@@ -77,7 +77,7 @@ export default function TopSpeedTab({ sim }) {
           {r.terminal_velocity_mph?.toFixed(1)} mph · {r.terminal_velocity_ms?.toFixed(1)} m/s
         </p>
         <p className={`chip mt-3 !h-auto py-1 ${r.reached_plateau ? 'chip-go' : 'chip-stage'}`}>
-          {r.reached_plateau ? 'It stopped speeding up — this is its top speed' : 'Still speeding up when the run ended, so it could go faster'}
+          {r.reached_plateau ? 'It stopped speeding up: this is its top speed' : 'Still speeding up when the run ended, so it could go faster'}
         </p>
       </div>
 

@@ -9,7 +9,7 @@ const DESCRIPTION =
   "Sport Rider clocked the 2008 GSX-R600 K8 at 10.91s sea level. MotoQuant sims 11.04s at Aamby Valley. K8 vs K6, four India mods for a used 600.";
 
 export const metadata = {
-  title: "Suzuki GSX-R600 K8 Quarter-Mile Physics — MotoQuant",
+  title: "Suzuki GSX-R600 K8 Quarter-Mile Physics | MotoQuant",
   description: DESCRIPTION,
   keywords: [
     "suzuki gsx-r600 k8 quarter mile",
@@ -36,7 +36,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: "lead",
-    text: "Sport Rider strapped its test gear to a stock 2008 Suzuki GSX-R600 K8 and clocked 10.91 seconds at 204.4 km/h trap at sea level. MotoQuant simulates the same bike at 11.04 seconds and 198.6 km/h trap under Aamby Valley November conditions — a 0.13 second gap that is entirely the 1,100 m density altitude penalty, not a physics bug. The interesting question is not how fast a stock K8 runs. It is what the K8 actually changed over the 2006-2007 K6 that already sat in the catalogue, and whether the 12 extra horsepower buys back the 2 kg of frame weight.",
+    text: "Sport Rider strapped its test gear to a stock 2008 Suzuki GSX-R600 K8 and clocked 10.91 seconds at 204.4 km/h trap at sea level. MotoQuant simulates the same bike at 11.04 seconds and 198.6 km/h trap under Aamby Valley November conditions, a 0.13 second gap that is entirely the 1,100 m density altitude penalty, not a physics bug. The interesting question is not how fast a stock K8 runs. It is what the K8 actually changed over the 2006-2007 K6 that already sat in the catalogue, and whether the 12 extra horsepower buys back the 2 kg of frame weight.",
   },
   {
     type: "h2",
@@ -44,19 +44,19 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Suzuki launched the third-generation GSX-R600 at INTERMOT 2007 as the 2008 model year, internal code K8. The naming convention is uniquely Suzuki — K8 is the 2008 model, K9 is the 2009 carryover, L0 is the 2010 carryover. All three years share the same chassis, engine map, and bodywork. Suzuki replaced the K8 in 2011 with a heavily-revised model called the L1, so the K8 to L0 three-year window is one self-contained generation.",
+    text: "Suzuki launched the third-generation GSX-R600 at INTERMOT 2007 as the 2008 model year, internal code K8. The naming convention is uniquely Suzuki: K8 is the 2008 model, K9 is the 2009 carryover, L0 is the 2010 carryover. All three years share the same chassis, engine map, and bodywork. Suzuki replaced the K8 in 2011 with a heavily-revised model called the L1, so the K8 to L0 three-year window is one self-contained generation.",
   },
   {
     type: "p",
-    text: "The engine carried over from the K6 dimensionally — same 67.0 mm bore, same 42.5 mm stroke, same 599 cc displacement, same DOHC four-valve head architecture. What changed was the internals. Suzuki fitted lighter pistons (3 g lighter per piston per the service-manual bulletin), revised intake cam timing, larger throttle bodies, and a new SDTV secondary butterfly map. Compression went from 12.9:1 on the K6 to 13.3:1 on the K8. The peak power number moved from 113 hp at 13,500 rpm to 125 hp at the same 13,500 rpm. Peak torque moved from 66.8 Nm at 12,000 rpm to 69 Nm at 11,200 rpm — slightly higher and slightly lower in the rev range, which matters at the strip.",
+    text: "The engine carried over from the K6 dimensionally: same 67.0 mm bore, same 42.5 mm stroke, same 599 cc displacement, same DOHC four-valve head architecture. What changed was the internals. Suzuki fitted lighter pistons (3 g lighter per piston per the service-manual bulletin), revised intake cam timing, larger throttle bodies, and a new SDTV secondary butterfly map. Compression went from 12.9:1 on the K6 to 13.3:1 on the K8. The peak power number moved from 113 hp at 13,500 rpm to 125 hp at the same 13,500 rpm. Peak torque moved from 66.8 Nm at 12,000 rpm to 69 Nm at 11,200 rpm: slightly higher and slightly lower in the rev range, which matters at the strip.",
   },
   {
     type: "p",
-    text: "Chassis-wise, Suzuki rebuilt the frame around a new aluminium twin-spar casting that swapped the K6's diagonal upper rail for a wider, hollower section. The new frame added 2 kg (162 vs 160 kg dry) and gained roughly 8 percent torsional rigidity per the Suzuki engineering brief. Brakes moved from axial four-piston to radial-mount four-piston Tokico calipers — derived from the same supplier as the contemporary GSX-R1000 K8. Suspension is Showa SFF-BP up front and a Showa monoshock at the rear; both adjustable for preload, compression, and rebound.",
+    text: "Chassis-wise, Suzuki rebuilt the frame around a new aluminium twin-spar casting that swapped the K6's diagonal upper rail for a wider, hollower section. The new frame added 2 kg (162 vs 160 kg dry) and gained roughly 8 percent torsional rigidity per the Suzuki engineering brief. Brakes moved from axial four-piston to radial-mount four-piston Tokico calipers, derived from the same supplier as the contemporary GSX-R1000 K8. Suspension is Showa SFF-BP up front and a Showa monoshock at the rear; both adjustable for preload, compression, and rebound.",
   },
   {
     type: "p",
-    text: "The K8 sat alongside the GSX-R750 K8 on the same dealership floor and shared an enormous amount of hardware with it — same frame casting (re-tuned for the 750cc engine torque), same swingarm, same brakes, same forks. The 750 made 148 hp from 750 cc on the same wheelbase and added roughly 1 kg. For the 2008 model year, Suzuki was the only manufacturer offering a 600cc and a 750cc supersport on the same chassis — Honda, Yamaha, and Kawasaki only had 600s.",
+    text: "The K8 sat alongside the GSX-R750 K8 on the same dealership floor and shared an enormous amount of hardware with it: same frame casting (re-tuned for the 750cc engine torque), same swingarm, same brakes, same forks. The 750 made 148 hp from 750 cc on the same wheelbase and added roughly 1 kg. For the 2008 model year, Suzuki was the only manufacturer offering a 600cc and a 750cc supersport on the same chassis. Honda, Yamaha, and Kawasaki only had 600s.",
   },
   {
     type: "h2",
@@ -81,15 +81,15 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The 0.13 second gap between the simulator and the Sport Rider sea-level number is almost entirely density altitude. Aamby Valley at 1,100 m loses roughly 11 percent of standard sea-level air density, which costs the engine about 13 horsepower at the crank and adds roughly 0.1 to 0.15 seconds of ET on a 125 hp bike. The trap-speed delta of 5.8 km/h is in the same ballpark — DA scaling at peak crank power. Run the same K8 through MotoQuant with sea-level Madras Motor Race Track conditions and the simulator returns 10.93 s and 203.8 km/h trap, within 0.02 s and 0.6 km/h of the Sport Rider number. The physics engine is calibrated; the K8 just lands inside the litre-sport-600-1000 cluster's documented ±0.22 s mean absolute delta band.",
+    text: "The 0.13 second gap between the simulator and the Sport Rider sea-level number is almost entirely density altitude. Aamby Valley at 1,100 m loses roughly 11 percent of standard sea-level air density, which costs the engine about 13 horsepower at the crank and adds roughly 0.1 to 0.15 seconds of ET on a 125 hp bike. The trap-speed delta of 5.8 km/h is in the same ballpark: DA scaling at peak crank power. Run the same K8 through MotoQuant with sea-level Madras Motor Race Track conditions and the simulator returns 10.93 s and 203.8 km/h trap, within 0.02 s and 0.6 km/h of the Sport Rider number. The physics engine is calibrated; the K8 just lands inside the litre-sport-600-1000 cluster's documented ±0.22 s mean absolute delta band.",
   },
   {
     type: "callout",
-    text: "Reading the gap right: a 600cc supersport at Aamby Valley is roughly 0.15 seconds slower than the same bike at MMRT Chennai. That is half a bike length over the quarter. If you are deciding between strips for a personal-best run, sea-level Chennai wins for any naturally-aspirated 600 — and the trap-speed delta widens further at the top end where DA penalties compound.",
+    text: "Reading the gap right: a 600cc supersport at Aamby Valley is roughly 0.15 seconds slower than the same bike at MMRT Chennai. That is half a bike length over the quarter. If you are deciding between strips for a personal-best run, sea-level Chennai wins for any naturally-aspirated 600, and the trap-speed delta widens further at the top end where DA penalties compound.",
   },
   {
     type: "h2",
-    text: "K8 vs K6 — Where the 12 Horsepower Went",
+    text: "K8 vs K6: Where the 12 Horsepower Went",
   },
   {
     type: "p",
@@ -111,11 +111,11 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Three changes do almost all the work. The 12 horsepower buys roughly 0.10 seconds on its own — the simulator's power sensitivity on a 162 kg supersport at this displacement is around 0.85 hundredths per horsepower in the top third of the run. The aerodynamic refresh is bigger than the spec sheet suggests: Cd dropped from 0.68 to 0.60 because the K8 cowl reshape moved the stagnation point lower on the screen and Suzuki added a small lip on the upper fairing that re-attaches the flow before it separates off the rider's helmet. That 0.08 Cd reduction is worth another 0.08 to 0.10 seconds at trap speeds above 180 km/h, where drag dominates.",
+    text: "Three changes do almost all the work. The 12 horsepower buys roughly 0.10 seconds on its own: the simulator's power sensitivity on a 162 kg supersport at this displacement is around 0.85 hundredths per horsepower in the top third of the run. The aerodynamic refresh is bigger than the spec sheet suggests: Cd dropped from 0.68 to 0.60 because the K8 cowl reshape moved the stagnation point lower on the screen and Suzuki added a small lip on the upper fairing that re-attaches the flow before it separates off the rider's helmet. That 0.08 Cd reduction is worth another 0.08 to 0.10 seconds at trap speeds above 180 km/h, where drag dominates.",
   },
   {
     type: "p",
-    text: "The third change is the gearing. Suzuki dropped the front sprocket from F17 (K6 OEM) to F15 (K8 OEM) while keeping R42 at the rear. The final drive ratio jumps from 2.471 (K6) to 2.800 (K8) — 13.3 percent shorter. Combined with the K8's revised cassette (slightly closer first-to-second ratios per the K8 service manual GSF-8A-M5), the bike spends less time bouncing off the rev limiter between shifts and arrives at the trap line in fifth gear at roughly 13,200 rpm instead of the K6's high-fifth-just-shy-of-sixth situation. The gearing change alone is worth about 0.08 seconds — and unusually for a stock-bike spec change, it doesn't sacrifice top-end. Both bikes are gearing-limited at a theoretical sixth-gear top speed around 263 km/h, well above the simulated trap.",
+    text: "The third change is the gearing. Suzuki dropped the front sprocket from F17 (K6 OEM) to F15 (K8 OEM) while keeping R42 at the rear. The final drive ratio jumps from 2.471 (K6) to 2.800 (K8), 13.3 percent shorter. Combined with the K8's revised cassette (slightly closer first-to-second ratios per the K8 service manual GSF-8A-M5), the bike spends less time bouncing off the rev limiter between shifts and arrives at the trap line in fifth gear at roughly 13,200 rpm instead of the K6's high-fifth-just-shy-of-sixth situation. The gearing change alone is worth about 0.08 seconds, and unusually for a stock-bike spec change, it doesn't sacrifice top-end. Both bikes are gearing-limited at a theoretical sixth-gear top speed around 263 km/h, well above the simulated trap.",
   },
   {
     type: "p",
@@ -141,11 +141,11 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The 2008 R6 is the fastest of the four on paper and in the simulator, by 0.07 seconds and 2.6 km/h. The R6's edge comes from 2 extra horsepower, marginally better aerodynamics, and an even shorter final drive — all paid for with 4 kg of additional mass and a notoriously narrow powerband below 9,000 rpm. The CBR600RR runs 0.04 s behind the K8 despite 7 fewer horsepower; the Honda recovers the gap with 7 kg less mass and a more aggressive 60-foot launch from its slipper-equipped cassette. The 2009 ZX-6R is the slowest of the four primarily on aerodynamics — the older 599 cc Kawasaki carried a higher Cd and a less-aggressive intake, and the difference shows in the trap-speed column.",
+    text: "The 2008 R6 is the fastest of the four on paper and in the simulator, by 0.07 seconds and 2.6 km/h. The R6's edge comes from 2 extra horsepower, marginally better aerodynamics, and an even shorter final drive, all paid for with 4 kg of additional mass and a notoriously narrow powerband below 9,000 rpm. The CBR600RR runs 0.04 s behind the K8 despite 7 fewer horsepower; the Honda recovers the gap with 7 kg less mass and a more aggressive 60-foot launch from its slipper-equipped cassette. The 2009 ZX-6R is the slowest of the four primarily on aerodynamics: the older 599 cc Kawasaki carried a higher Cd and a less-aggressive intake, and the difference shows in the trap-speed column.",
   },
   {
     type: "p",
-    text: "What the table doesn't show is what every Indian used-supersport buyer cares about: parts availability. The K8 chassis carried through to 2010 unchanged. Tokico front pads, Showa fork seals, and OEM SDTV throttle-body service kits are all still in current Suzuki India catalogue support. The 2008 R6 chassis carried through 2016 with only minor revisions, so Yamaha parts are similarly available. The 2007 CBR600RR was a clean-sheet for one year — Honda redesigned in 2008 with a new frame — which makes the 2007 specifically a slightly harder used buy in India. The 2009 ZX-6R was the last year of the 599 cc generation; Kawasaki moved to 636 cc in 2013, and 599 cc parts are now grey-market only.",
+    text: "What the table doesn't show is what every Indian used-supersport buyer cares about: parts availability. The K8 chassis carried through to 2010 unchanged. Tokico front pads, Showa fork seals, and OEM SDTV throttle-body service kits are all still in current Suzuki India catalogue support. The 2008 R6 chassis carried through 2016 with only minor revisions, so Yamaha parts are similarly available. The 2007 CBR600RR was a clean-sheet for one year (Honda redesigned in 2008 with a new frame), which makes the 2007 specifically a slightly harder used buy in India. The 2009 ZX-6R was the last year of the 599 cc generation; Kawasaki moved to 636 cc in 2013, and 599 cc parts are now grey-market only.",
   },
   {
     type: "h2",
@@ -157,15 +157,15 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "1. The 1.81 s 60-foot. A modern litre superbike with the same rider posts 1.55 to 1.60 s to the 60-foot line — the K8 gives away roughly two-tenths in the first 18 metres. The reason is straightforward: 125 hp at 13,500 rpm is not enough torque at 4,000 rpm to break the rear loose, but it is enough to require careful clutch slip through the first half of gear 1. The simulator runs an idealised launch and still leaves 1.81 s on the table because below 80 km/h the bike is acceleration-limited by raw engine output, not by tyre grip. The K8 has the traction in hand to launch harder; what it lacks is the torque to use that traction. This is the textbook 600cc strip story.",
+    text: "1. The 1.81 s 60-foot. A modern litre superbike with the same rider posts 1.55 to 1.60 s to the 60-foot line. The K8 gives away roughly two-tenths in the first 18 metres. The reason is straightforward: 125 hp at 13,500 rpm is not enough torque at 4,000 rpm to break the rear loose, but it is enough to require careful clutch slip through the first half of gear 1. The simulator runs an idealised launch and still leaves 1.81 s on the table because below 80 km/h the bike is acceleration-limited by raw engine output, not by tyre grip. The K8 has the traction in hand to launch harder; what it lacks is the torque to use that traction. This is the textbook 600cc strip story.",
   },
   {
     type: "p",
-    text: "2. The 198.6 km/h trap. The K8 crosses the trap line in fifth gear at roughly 13,000 rpm — just below the 13,500 rpm power peak. Sixth gear is essentially a highway cruise gear at the strip; the bike never uses it for a quarter. The 198.6 km/h trap is a clean reflection of the bike's gearing and aero state. To push the trap higher you need either more power (ECU flash, slip-on exhaust, or both) or less drag (rider tuck position, taller windscreen, removed mirrors). Both routes recover ground but neither is free.",
+    text: "2. The 198.6 km/h trap. The K8 crosses the trap line in fifth gear at roughly 13,000 rpm, just below the 13,500 rpm power peak. Sixth gear is essentially a highway cruise gear at the strip; the bike never uses it for a quarter. The 198.6 km/h trap is a clean reflection of the bike's gearing and aero state. To push the trap higher you need either more power (ECU flash, slip-on exhaust, or both) or less drag (rider tuck position, taller windscreen, removed mirrors). Both routes recover ground but neither is free.",
   },
   {
     type: "p",
-    text: "3. The 11.2-second band is the K8's effective lower bound on stock gearing. The simulator shows you can shave to roughly 10.80 s with the standard 600cc mod ladder (Yoshimura R-77 slip-on, Power Commander V map, K&N drop-in filter, 16T rear sprocket reduction, lithium battery, race-pad up). Going below 10.80 s requires moving into wet-clutch slip-on slicks plus an aftermarket airbox — the same investment that gets a 2025 ZX-6R into the high 10.7s with less effort, which is exactly the trade-off the used-K8 buyer is making against a new bike.",
+    text: "3. The 11.2-second band is the K8's effective lower bound on stock gearing. The simulator shows you can shave to roughly 10.80 s with the standard 600cc mod ladder (Yoshimura R-77 slip-on, Power Commander V map, K&N drop-in filter, 16T rear sprocket reduction, lithium battery, race-pad up). Going below 10.80 s requires moving into wet-clutch slip-on slicks plus an aftermarket airbox, the same investment that gets a 2025 ZX-6R into the high 10.7s with less effort, which is exactly the trade-off the used-K8 buyer is making against a new bike.",
   },
   {
     type: "h2",
@@ -177,7 +177,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "That puts the K8 in a strange price band. A used 2022 Kawasaki Ninja 400 sells for roughly ₹4.5 lakh and runs the quarter in the high 12s. A used 2018 Suzuki GSX-R600 K8 sells for the same money and runs the quarter in the low 11s — a 1.4-second gap for the same cash outlay. The catch is parts and service: the Ninja 400 has full Kawasaki India dealer support, the K8 has none. Service costs roughly 3x at any of the four or five qualified Indian supersport mechanics (Naveen in Bangalore, Dhruva in Pune, Shaheed in Hyderabad), and a major service interval at 24,000 km runs ₹35,000 to ₹50,000.",
+    text: "That puts the K8 in a strange price band. A used 2022 Kawasaki Ninja 400 sells for roughly ₹4.5 lakh and runs the quarter in the high 12s. A used 2018 Suzuki GSX-R600 K8 sells for the same money and runs the quarter in the low 11s: a 1.4-second gap for the same cash outlay. The catch is parts and service: the Ninja 400 has full Kawasaki India dealer support, the K8 has none. Service costs roughly 3x at any of the four or five qualified Indian supersport mechanics (Naveen in Bangalore, Dhruva in Pune, Shaheed in Hyderabad), and a major service interval at 24,000 km runs ₹35,000 to ₹50,000.",
   },
   {
     type: "p",
@@ -197,23 +197,23 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The 16-tooth front-sprocket swap is unusual for a supersport because the K8 already runs an aggressively short F15. Going to F16 lengthens the final drive by 6.7 percent, which trades 60-foot time for a higher trap-line gear and slightly lower trap rpm. The simulator catches it as a net 0.08 s improvement at Aamby Valley because the K8 spends roughly 0.18 s of the run bouncing off the rev limiter in third and fourth on stock F15 — the longer F16 lets the engine breathe past peak power instead of clipping the limiter mid-shift. At MMRT Chennai (sea level, denser air, more engine output) the gain narrows to roughly 0.05 s, so this is specifically an altitude-strip optimisation.",
+    text: "The 16-tooth front-sprocket swap is unusual for a supersport because the K8 already runs an aggressively short F15. Going to F16 lengthens the final drive by 6.7 percent, which trades 60-foot time for a higher trap-line gear and slightly lower trap rpm. The simulator catches it as a net 0.08 s improvement at Aamby Valley because the K8 spends roughly 0.18 s of the run bouncing off the rev limiter in third and fourth on stock F15. The longer F16 lets the engine breathe past peak power instead of clipping the limiter mid-shift. At MMRT Chennai (sea level, denser air, more engine output) the gain narrows to roughly 0.05 s, so this is specifically an altitude-strip optimisation.",
   },
   {
     type: "callout",
-    text: "Fastest cheap path on a used K8 in India: 16T front sprocket (₹950, 0.08 s) plus K&N drop-in (₹4,600, 0.04 s) plus lithium battery (₹8,200, 0.05 s) — total ₹13,750 for 0.17 s of ET. A used Yoshimura R-77 slip-on adds 0.12 s for another ₹32,000, putting the full stack at ₹45,750 for 0.29 s of ET gain. Below 10.80 s requires a full race exhaust plus mapping, which approaches ₹1.2 lakh — at that spend the buyer should be asking whether a new ZX-6R 2024 makes more sense.",
+    text: "Fastest cheap path on a used K8 in India: 16T front sprocket (₹950, 0.08 s) plus K&N drop-in (₹4,600, 0.04 s) plus lithium battery (₹8,200, 0.05 s). Total: ₹13,750 for 0.17 s of ET. A used Yoshimura R-77 slip-on adds 0.12 s for another ₹32,000, putting the full stack at ₹45,750 for 0.29 s of ET gain. Below 10.80 s requires a full race exhaust plus mapping, which approaches ₹1.2 lakh. At that spend the buyer should be asking whether a new ZX-6R 2024 makes more sense.",
   },
   {
     type: "h2",
-    text: "Gearing — Where the K8's Cassette Falls Out",
+    text: "Gearing: Where the K8's Cassette Falls Out",
   },
   {
     type: "p",
-    text: "Stock gearing on the K8 cassette is [2.733, 2.000, 1.590, 1.310, 1.130, 1.000] from Suzuki service manual 99500-36142-01E. Combined with the F15/R42 sprocket pair (2.800 final drive) and a 180/55ZR17 rear with rolling radius approximately 306 mm, the bike hits its 13,500 rpm power peak at exactly 86 km/h in first, 118 km/h in second, 148 km/h in third, 180 km/h in fourth, 209 km/h in fifth, and a theoretical 237 km/h in sixth. The simulator's 198.6 km/h trap puts the K8 about 10 km/h shy of the fifth-gear power peak at the line — meaning the bike crosses the trap line still pulling hard rather than tapering off, which is exactly where you want a supersport at the strip.",
+    text: "Stock gearing on the K8 cassette is [2.733, 2.000, 1.590, 1.310, 1.130, 1.000] from Suzuki service manual 99500-36142-01E. Combined with the F15/R42 sprocket pair (2.800 final drive) and a 180/55ZR17 rear with rolling radius approximately 306 mm, the bike hits its 13,500 rpm power peak at exactly 86 km/h in first, 118 km/h in second, 148 km/h in third, 180 km/h in fourth, 209 km/h in fifth, and a theoretical 237 km/h in sixth. The simulator's 198.6 km/h trap puts the K8 about 10 km/h shy of the fifth-gear power peak at the line, meaning the bike crosses the trap line still pulling hard rather than tapering off, which is exactly where you want a supersport at the strip.",
   },
   {
     type: "p",
-    text: "Switching to F16/R42 lengthens every shift point by 6.7 percent — first becomes 92 km/h, fifth becomes 223 km/h, sixth becomes 253 km/h. The trap-line rpm in fifth drops from roughly 13,000 to about 12,200, which is still well inside the meaningful power band on a 125 hp DOHC inline-four with a flat top end. The simulator catches 0.08 seconds of ET because the K8 stops bouncing off the rev limiter in lower gears. Going further to F16/R41 or F17/R42 starts to leave first-gear launch too tall for an Aamby Valley standing start and reverses the gain.",
+    text: "Switching to F16/R42 lengthens every shift point by 6.7 percent: first becomes 92 km/h, fifth becomes 223 km/h, sixth becomes 253 km/h. The trap-line rpm in fifth drops from roughly 13,000 to about 12,200, which is still well inside the meaningful power band on a 125 hp DOHC inline-four with a flat top end. The simulator catches 0.08 seconds of ET because the K8 stops bouncing off the rev limiter in lower gears. Going further to F16/R41 or F17/R42 starts to leave first-gear launch too tall for an Aamby Valley standing start and reverses the gain.",
   },
   {
     type: "h2",
@@ -221,11 +221,11 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "If you are considering a used K8 import — or already own one and want to know what the bike's strip ceiling actually is — the simulator at motoquant.in lets you sweep rider weight, ambient temperature, density altitude, and parts-catalogue mods to see where each tenth lives. The K8 is in the catalogue along with the K6 reference, the 2008 R6, the 2007 CBR600RR, and the 2009 ZX-6R for direct head-to-head comparisons. Toggle Aamby Valley to MMRT Chennai to see exactly how much altitude is costing you, and toggle the F15 stock sprocket to F16 to see the gearing math the same way the engineering brief computes it.",
+    text: "If you are considering a used K8 import (or already own one and want to know what the bike's strip ceiling actually is), the simulator at motoquant.in lets you sweep rider weight, ambient temperature, density altitude, and parts-catalogue mods to see where each tenth lives. The K8 is in the catalogue along with the K6 reference, the 2008 R6, the 2007 CBR600RR, and the 2009 ZX-6R for direct head-to-head comparisons. Toggle Aamby Valley to MMRT Chennai to see exactly how much altitude is costing you, and toggle the F15 stock sprocket to F16 to see the gearing math the same way the engineering brief computes it.",
   },
   {
     type: "p",
-    text: "Two caveats on the numbers. First, the Sport Rider 10.91 s test was on a professional drag rider with a launch-control technique that is not what a club-day owner replicates. Real-world Indian K8 strip times sit in the 11.2 to 11.7 second band depending on rider technique, surface temperature, and humidity — the simulator's 11.04 s number is closer to the professional-rider envelope than the typical club-day number. Second, the litre-sport-600-1000 cluster's documented bias is roughly +0.15 s mean (sim slightly slow) with a band of ±0.22 s, so the absolute number you see is conservative and the relative deltas (K8 vs K6, K8 vs CBR600RR, F15 vs F16) are what should drive the buying decision.",
+    text: "Two caveats on the numbers. First, the Sport Rider 10.91 s test was on a professional drag rider with a launch-control technique that is not what a club-day owner replicates. Real-world Indian K8 strip times sit in the 11.2 to 11.7 second band depending on rider technique, surface temperature, and humidity. The simulator's 11.04 s number is closer to the professional-rider envelope than the typical club-day number. Second, the litre-sport-600-1000 cluster's documented bias is roughly +0.15 s mean (sim slightly slow) with a band of ±0.22 s, so the absolute number you see is conservative and the relative deltas (K8 vs K6, K8 vs CBR600RR, F15 vs F16) are what should drive the buying decision.",
   },
   {
     type: "p",
@@ -365,8 +365,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Hayabusa Quarter-Mile Physics: What Limits the 9.6
-              </Link>{" "}
-              — the litre-class big brother to the GSX-R600 with the same Suzuki
+              </Link>:{" "}
+              the litre-class big brother to the GSX-R600 with the same Suzuki
               SDTV throttle architecture.
             </li>
             <li>
@@ -376,8 +376,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 How to Tune for MMRT Chennai
-              </Link>{" "}
-              — the sea-level Chennai strip where the K8 should genuinely break
+              </Link>:{" "}
+              the sea-level Chennai strip where the K8 should genuinely break
               into the 10.9s band like the Sport Rider test.
             </li>
             <li>
@@ -387,8 +387,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Triumph Street Triple 765 R Quarter-Mile Physics
-              </Link>{" "}
-              — the 118 hp triple that runs within 0.3 s of the K8 with a totally
+              </Link>:{" "}
+              the 118 hp triple that runs within 0.3 s of the K8 with a totally
               different engine architecture.
             </li>
             <li>
@@ -398,8 +398,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 How the MotoQuant Physics Engine Works
-              </Link>{" "}
-              — the 15-sub-model RK4 stack that produces every number in this
+              </Link>:{" "}
+              the 15-sub-model RK4 stack that produces every number in this
               post.
             </li>
             <li>
@@ -409,8 +409,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Browse the full bike catalog
-              </Link>{" "}
-              — every GSX-R600 spec, every gear ratio, every Cd value used by the
+              </Link>:{" "}
+              every GSX-R600 spec, every gear ratio, every Cd value used by the
               simulator.
             </li>
           </ul>
@@ -423,7 +423,7 @@ export default function PostPage() {
               Run the GSX-R600 K8 yourself
             </div>
             <div className="text-white/60 text-sm">
-              Free simulator — pick the 2008 Suzuki GSX-R600 K8, dial in your
+              Free simulator: pick the 2008 Suzuki GSX-R600 K8, dial in your
               local conditions, and watch the ET update live as you toggle
               sprockets, slip-ons, and lithium batteries.
             </div>
