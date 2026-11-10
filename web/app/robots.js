@@ -7,8 +7,8 @@
  * THIS IS THE ONLY SOURCE OF CRAWLER POLICY. `public/robots.txt` was deleted
  * on 2026-08-08: in the App Router a static file in public/ WINS over the
  * route handler of the same name, so the static copy silently shadowed this
- * file and the Disallow of /account, /login and /signup never reached a
- * single crawler. Do not re-add public/robots.txt.
+ * file and its Disallow rules never reached a single crawler. Do not re-add
+ * public/robots.txt.
  *
  * Two deliberate design rules, both learned from the file this replaced:
  *
@@ -48,13 +48,12 @@ export default function robots() {
       {
         userAgent: '*',
         allow: '/',
-        // Private user pages + server internals. Every crawler that is not
-        // explicitly blocked below matches this group, so this is the list
-        // that actually ships.
+        // Server internals. Every crawler that is not explicitly blocked below
+        // matches this group, so this is the list that actually ships.
+        // /timeslip and /runs are NOT listed: link-preview bots honour
+        // robots.txt, and a disallow would blank every shared timeslip's
+        // preview. Their pages carry `noindex` instead.
         disallow: [
-          '/account',
-          '/login',
-          '/signup',
           '/api/',
           '/_next/',
           '/_vercel/',

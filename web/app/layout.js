@@ -1,7 +1,6 @@
 import localFont from 'next/font/local';
 import './globals.css';
 import { THEME_INIT_SCRIPT } from '../lib/theme';
-import { AuthProvider } from '../components/AuthProvider';
 import StructuredData, {
   organizationSchema,
   websiteSchema,
@@ -284,7 +283,7 @@ export default function RootLayout({ children }) {
         <StructuredData data={websiteSchema()} />
         <StructuredData data={softwareApplicationSchema()} />
         <StructuredData data={faqSchema()} />
-        <AuthProvider>{children}</AuthProvider>
+        {children}
       </body>
     </html>
   );

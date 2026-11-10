@@ -7,7 +7,7 @@ name = "motoquant"
 # the Docker lock are built from.
 dynamic = ["version", "dependencies", "optional-dependencies"]
 description = "The physics of faster — free, open-source first-principles motorcycle quarter-mile simulation & optimization"
-authors = [{name = "Hritwik Mudhai", email = "dhisetu@gmail.com"}]
+authors = [{name = "Hritwik Mudhai"}]
 requires-python = ">=3.10"
 # PEP 639 SPDX expression (+ the files that must ship with every copy: the
 # licence text and the NOTICE, Apache-2.0 section 4). Needs setuptools>=77,

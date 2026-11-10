@@ -72,35 +72,20 @@ services:
       # Optional: surface FastAPI / uvicorn logs at INFO level
       - key: UVICORN_LOG_LEVEL
         value: info
-      # Everything is free and anonymous; there is no billing configuration.
-      # Optional settings (Render dashboard, never in git — see
-      # docs/SELF_HOSTING.md for the full list):
-      #   JWT_SECRET (32+ random bytes) — keeps optional sign-ins alive across
-      #     restarts. Unset on a deployed host, the API signs with an
-      #     EPHEMERAL per-process secret (secure, but sessions reset on every
-      #     restart) — it never falls back to the public dev default.
-      #   RESEND_API_KEY + SMTP_FROM, or SMTP_HOST/PORT/USER/PASS/FROM —
-      #     magic-link email (password sign-in works without either).
+      # Everything is free and anonymous: no billing, no accounts, and no
+      # visitor data stored, so the catalog database baked into the image is
+      # all the server needs (no persistent disk).
+      # Optional settings (Render dashboard, never in git; the full list is in
+      # docs/SELF_HOSTING.md):
       #   GROQ_API_KEY / GEMINI_API_KEY / ... + LLM_PROVIDER — the chat agent.
       #   MOTOQUANT_CHAT_DAILY_LIMIT — per-IP chat turns per day, the bill
       #     fuse on whoever pays for the LLM key (default 200; 0 disables).
+      #   OPENWEATHERMAP_API_KEY — live weather for a named place.
+      #   SEARCH_PROVIDER=brave|serper + SEARCH_API_KEY — upgrade the agent's
+      #     web_search tool from the free DuckDuckGo fallback;
+      #     MOTOQUANT_WEB_TOOLS=0 turns its web access off entirely.
       #   SENTRY_DSN — error tracking.
-      #   POSTHOG_API_KEY — OPT-IN server-side usage telemetry; nothing is
+      #   POSTHOG_API_KEY — opt-in server-side usage telemetry; nothing is
       #     sent anywhere unless this is set.
-      # Secrets are set manually in the Render dashboard under Environment ->
-      # Add Environment Variable so they never land in git. All of them are
-      # optional — the API serves the simulator and catalog without any.
-      # Chat-agent web lookup (optional): SEARCH_PROVIDER=brave|serper +
-      # SEARCH_API_KEY upgrade the agent's web_search tool from the free
-      # DuckDuckGo HTML fallback to a proper search API. MOTOQUANT_WEB_TOOLS=0
-      # turns the agent's web access off entirely.
-    # ──────────────────────────────────────────────────────────────────────
-    # ACCOUNT + SAVED-RUN DURABILITY (Render disks need a paid hosting plan —
-    # they are unavailable on the free one). Uncomment this block AND repoint
-    # MOTOQUANT_DB to /data/motoquant.db above. First boot copies the seeded
-    # catalog onto the disk; thereafter optional accounts and saved runs
-    # persist across deploys. See docs/SELF_HOSTING.md.
-    # disk:
-    #   name: motoquant-data
-    #   mountPath: /data
-    #   sizeGB: 1
+      # All of them are optional: the API serves the simulator and catalog
+      # without any.

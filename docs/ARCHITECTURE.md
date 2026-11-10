@@ -47,7 +47,7 @@ flowchart TD
     SR --> API["api.py (FastAPI)"]
     REPOS --> API
     subgraph AppLayer["Application layer"]
-        AUTH["auth (optional accounts)<br/>ratelimit (abuse fuses)"]
+        AUTH["ratelimit (abuse fuses)"]
         JOBS["jobs.py<br/>async progress"]
         ANALYSIS["analysis/<br/>roi, optimizer, surrogate"]
         LLM["llm/<br/>agentic chat"]
@@ -132,7 +132,6 @@ flowchart TD
 | `motoquant/scraper/fetcher.py` | `PoliteFetcher` — dev-only Scrapling-backed scraping (cache → robots.txt → rate limit → tier escalation). Soft-imported; **not** a production dependency | `PoliteFetcher.fetch()` |
 | `motoquant/api.py` | FastAPI app + all HTTP routes | grep `@app.` |
 | `motoquant/run.py` | CLI (`python -m motoquant.run <subcommand>`) | `main()` |
-| `motoquant/auth.py` | Optional accounts: magic-link + password sign-in, JWT sessions, `get_current_user()` / `get_optional_user()` | bottom (endpoints) |
 | `motoquant/ratelimit.py` | Per-IP fixed-window rate limits on every compute-heavy route + the daily chat cap (abuse/LLM-bill fuses; everything is free, so these replace quotas) | `rate_limit()` |
 | `motoquant/jobs.py` | In-memory async job registry (progress + cancel) | `create_job()` |
 | `motoquant/observability.py` | Sentry wiring (env-gated, no-op without DSN) | top of file |
@@ -154,7 +153,6 @@ flowchart TD
 | Tune physics accuracy | `category_profiles.py` (per-cluster knobs) or `submodels/` | **must not** move K5/R1/Hayabusa baselines; regenerate the surrogate |
 | Add an API route | `api.py` | add a test in `tests/test_api.py`; for slow work use `jobs.py` |
 | Add a part / tire | `database/seed_catalogs/`, then reseed | tighten fitment rules; `tests/test_catalog_integration.py` guards leaks |
-| Change optional accounts | `auth.py`, `database/users_repo.py` | accounts must stay optional: every sim/analysis route works anonymously (ADR-0006) |
 | Add a compute-heavy route | `api.py` + `rate_limit(...)` dependency | everything is free, so a per-IP fuse is the only protection; test it (`tests/test_public_route_fuses.py`) |
 | Add a chat capability | `llm/agent.py` (tools), `llm/runner.py` | budget/iteration caps live in the executor |
 
@@ -192,9 +190,9 @@ print(m.MotoQuantEngine(m.gsxr1000_k5()).run().time_quarter, \
   same-origin `/api/*`, which is rewritten to the API (`web/next.config.js` +
   the root `vercel.json`). `NEXT_PUBLIC_API_URL` is only for local dev
   (`make web-dev`).
-- **DB**: `motoquant.db` is tracked in git and ships inside the Docker image,
-  so a deploy wipes optional accounts and saved runs unless the DB lives on a
-  persistent disk ([SELF_HOSTING.md](SELF_HOSTING.md) §3d).
+- **DB**: `motoquant.db` is tracked in git and ships inside the Docker image.
+  The website never writes to it (no accounts; saved runs live in the
+  browser), so each deploy simply ships the latest catalog.
 - **Self-hosting**: the same stack runs on any Docker host; see
   [SELF_HOSTING.md](SELF_HOSTING.md).
 - **Desktop app**: discontinued (July 2026, ADR-0005); the `desktop/`

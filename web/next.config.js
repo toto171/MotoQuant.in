@@ -32,14 +32,21 @@ const nextConfig = {
   },
 
   // ─── Permanent redirects for removed pages ─────────────────────────────
-  // MotoQuant is free and open source: the pricing and refunds pages are
-  // gone, so old links land on the home page instead of a 404.
+  // MotoQuant is free and open source and has no accounts: the pricing,
+  // refunds and sign-in pages are gone, so old links land somewhere useful
+  // instead of a 404. Saved runs now live in the browser (/runs); old
+  // server-side timeslip links (/r/<id>) pointed at runs that no longer
+  // exist, so they open the simulator.
   async redirects() {
     return [
       { source: '/pricing', destination: '/', permanent: true },
       { source: '/pricing/:path*', destination: '/', permanent: true },
       { source: '/refunds', destination: '/', permanent: true },
       { source: '/refunds/:path*', destination: '/', permanent: true },
+      { source: '/login', destination: '/runs', permanent: true },
+      { source: '/signup', destination: '/runs', permanent: true },
+      { source: '/account', destination: '/runs', permanent: true },
+      { source: '/r/:id', destination: '/simulator', permanent: true },
     ];
   },
 

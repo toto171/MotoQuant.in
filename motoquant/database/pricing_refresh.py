@@ -463,8 +463,8 @@ def fetch_live_price(
         cached = _stored_price_result(existing) if existing else None
         if cached is not None:
             # A cache hit is a success, not a skip: return the stored fresh
-            # price. Returning None here made POST /api/pricing/refresh report
-            # 'fetch_failed' with a null price for a part priced minutes ago.
+            # price. Returning None here made a refresh report 'fetch_failed'
+            # with a null price for a part priced minutes ago.
             log.debug(
                 "part_id=%d retailer=%s — price fresh (fetched %s), not re-fetching",
                 part_id,

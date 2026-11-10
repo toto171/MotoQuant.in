@@ -226,13 +226,11 @@ export default function ResultCard({ sim, advanced = false }) {
           savedRun ? (
             <div className="rounded-xl border border-signal-go/30 bg-signal-go/[0.07] p-3 text-sm">
               <p className="flex items-center gap-2 font-medium text-signal-go">
-                <Check size={16} aria-hidden="true" /> Saved to your runs
+                <Check size={16} aria-hidden="true" /> Saved in this browser
               </p>
               <p className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-white/80">
-                {savedRun.run_id != null && (
-                  <Link href={`/r/${savedRun.run_id}`} className="font-medium text-accent underline underline-offset-2">View your timeslip</Link>
-                )}
-                <Link href="/leaderboard" className="underline underline-offset-2">See the leaderboard</Link>
+                <Link href={`/timeslip?${savedRun.query}`} className="font-medium text-accent underline underline-offset-2">Open the timeslip</Link>
+                <Link href="/runs" className="underline underline-offset-2">Your runs</Link>
               </p>
             </div>
           ) : (

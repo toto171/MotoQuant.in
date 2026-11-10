@@ -507,9 +507,10 @@ CREATE INDEX IF NOT EXISTS idx_fitments_tire     ON bike_tire_fitments(tire_mode
 CREATE INDEX IF NOT EXISTS idx_fitments_position ON bike_tire_fitments(position);
 
 -- ═══════════════════════════════════════════════════════════
--- 15. BIKE SUGGESTIONS  (user-submitted additions via web form)
---     Users can request bikes missing from the catalog. Entries
---     are reviewed manually before being promoted to bike_models.
+-- 15. BIKE SUGGESTIONS  (bikes the chat assistant had to estimate)
+--     When a question names a bike missing from the catalog, the chat
+--     assistant estimates its specs and logs them here for review.
+--     Riders suggest bikes through the public issue tracker instead.
 -- ═══════════════════════════════════════════════════════════
 
 CREATE TABLE IF NOT EXISTS bike_suggestions (
@@ -550,33 +551,7 @@ CREATE INDEX IF NOT EXISTS idx_part_prices_part  ON part_prices(part_id);
 CREATE INDEX IF NOT EXISTS idx_part_prices_fetch ON part_prices(fetched_at);
 
 -- ════════════════════════════════════════════════════════════
--- 16. SPEC CORRECTIONS  (user-submitted field-level corrections)
---     Indian forum users and verified tuners can propose corrections
---     to individual spec fields on any bike_model row.  Each row is
---     reviewed before being applied to the live catalog.
--- ════════════════════════════════════════════════════════════
-
-CREATE TABLE IF NOT EXISTS spec_corrections (
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,
-    bike_model_id   INTEGER NOT NULL REFERENCES bike_models(id) ON DELETE CASCADE,
-    field_name      TEXT    NOT NULL,           -- dotted or flat field name (e.g. 'peak_power_hp')
-    current_value   TEXT,                       -- snapshot of current DB value (for audit trail)
-    proposed_value  TEXT    NOT NULL,           -- submitter's suggested replacement
-    source_url      TEXT,                       -- URL of supporting evidence
-    submitter_email TEXT,                       -- optional reply address
-    notes           TEXT,                       -- free-form context from submitter
-    status          TEXT    NOT NULL DEFAULT 'pending'
-                                   CHECK(status IN ('pending','approved','rejected')),
-    created_at      TEXT    DEFAULT (datetime('now','utc')),
-    reviewed_at     TEXT                        -- set when approved or rejected
-);
-
-CREATE INDEX IF NOT EXISTS idx_spec_corr_bike   ON spec_corrections(bike_model_id);
-CREATE INDEX IF NOT EXISTS idx_spec_corr_status ON spec_corrections(status);
-CREATE INDEX IF NOT EXISTS idx_spec_corr_field  ON spec_corrections(field_name);
-
--- ════════════════════════════════════════════════════════════
--- 17. BIKE ARCHETYPES  (pre-built modded variants)
+-- 16. BIKE ARCHETYPES  (pre-built modded variants)
 --     Famous turbo/nitrous/big-bore drag-scene builds. Each archetype
 --     layers deltas/multipliers onto a base bike_model row.
 -- ════════════════════════════════════════════════════════════

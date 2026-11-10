@@ -340,15 +340,6 @@ class TestCostBearingRoutesAreFused(unittest.TestCase):
 
         ratelimit.reset()
 
-    def test_pricing_refresh_is_rate_limited(self):
-        codes = [
-            self.client.post("/api/pricing/refresh/8?force=true").status_code
-            for _ in range(9)
-        ]
-        self.assertIn(429, codes, f"pricing refresh never rate-limited: {codes}")
-        # The fuse must precede the handler, i.e. the 429s come at the tail.
-        self.assertEqual(codes[-1], 429, f"limit not enforced on later calls: {codes}")
-
     def test_venue_resolve_is_rate_limited(self):
         codes = [
             self.client.post(

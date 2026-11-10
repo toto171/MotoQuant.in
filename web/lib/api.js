@@ -27,15 +27,7 @@
 //    `web/.env.local` so the fetches go to your local uvicorn.
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
-// 2) API_URL_DIRECT — same env override, but falls back to the absolute
-//    Render URL instead of the rewrite. Used by the auth surfaces
-//    (AuthProvider, /login, /account) which were built against the
-//    direct cross-origin base and must keep identical fetch/cookie semantics
-//    even when NEXT_PUBLIC_API_URL is unset.
-export const API_URL_DIRECT =
-  process.env.NEXT_PUBLIC_API_URL || 'https://motoquant-api.onrender.com';
-
-// 3) serverApiBase(fallback) — for server-side code (sitemap.js, metadata
+// 2) serverApiBase(fallback) — for server-side code (sitemap.js, metadata
 //    layouts) that runs at build/ISR time where a relative URL cannot work.
 //    Resolution order: public env override, then the server-only
 //    MOTOQUANT_INTERNAL_API_URL, then the caller-supplied absolute fallback
@@ -399,42 +391,6 @@ export function chatJob(query, messages, { signal, onProgress } = {}) {
     signal,
     fallbackPath: '/api/chat',
   });
-}
-
-/**
- * Persist a simulation result to sim_runs (leaderboard + account Garage).
- * Anonymous saves work; pass the AuthProvider access token to bind the run
- * to the signed-in user so it shows in their Garage.
- *
- * @param {object} body  {bike_id, venue_id?, et_quarter_s, trap_speed_kmh,
- *                        et_60ft_s?, et_eighth_s?, et_1000ft_s?, notes?}
- * @param {string|null} accessToken
- */
-export async function saveRun(body, accessToken = null, signal) {
-  const res = await fetch(`${API_URL}/api/simulate/save`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-    },
-    body: JSON.stringify(body),
-    signal,
-  });
-  if (!res.ok) {
-    let msg = `API error ${res.status}`;
-    try {
-      const j = await res.json();
-      if (j?.detail) {
-        msg = typeof j.detail === 'string' ? j.detail : JSON.stringify(j.detail);
-      }
-    } catch {
-      /* keep the status-only message */
-    }
-    const err = new Error(msg);
-    err.status = res.status;
-    throw err;
-  }
-  return res.json();
 }
 
 // ── Bike catalog (shared, memoised) ─────────────────────────────────────

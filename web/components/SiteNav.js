@@ -7,7 +7,7 @@
  * otherwise become the containing block of their position:fixed boxes).
  *
  * Desktop (>= lg): Simulator · Upgrades · Race-day setup · Bikes ·
- *   Leaderboard · Learn ▾ | search · GitHub · theme · Sign in · Open simulator
+ *   Leaderboard · Learn ▾ | search · GitHub · theme · Your runs · Open simulator
  * Below lg: logo, search, theme toggle, (sm+) CTA, hamburger drawer.
  * Paths are unchanged from earlier versions; only labels were renamed.
  */
@@ -17,7 +17,6 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Github, Menu, Search, X } from 'lucide-react';
-import { useAuth } from './AuthProvider';
 import CommandPalette from './CommandPalette';
 import GaugeMark from './GaugeMark';
 import MobileToolBar from './MobileToolBar';
@@ -51,7 +50,6 @@ function isActive(pathname, link) {
 
 export default function SiteNav() {
   const pathname = usePathname();
-  const { user, isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
   const [learnOpen, setLearnOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -196,10 +194,10 @@ export default function SiteNav() {
                         <Github size={15} aria-hidden="true" /> Source code on GitHub
                       </a>
                       <Link
-                        href={isAuthenticated ? '/account' : '/login'}
+                        href="/runs"
                         className="block rounded-lg px-3.5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/5"
                       >
-                        {isAuthenticated ? 'Your saved runs' : 'Sign in'}
+                        Your runs
                       </Link>
                     </li>
                   </motion.ul>
@@ -230,27 +228,13 @@ export default function SiteNav() {
               <Github size={18} aria-hidden="true" />
             </a>
             <ThemeToggle />
-            {isAuthenticated ? (
-              <Link
-                href="/account"
-                title="Your saved runs and account"
-                className="hidden h-11 items-center gap-2 rounded-xl border border-white/[0.12] px-3 transition-colors hover:border-white/30 xl:flex"
-              >
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/15 text-xs font-bold uppercase text-accent">
-                  {user?.email?.[0] ?? 'U'}
-                </span>
-                <span className="max-w-[8rem] truncate text-sm text-white/80">
-                  {user?.email?.split('@')[0]}
-                </span>
-              </Link>
-            ) : (
-              <Link
-                href="/login"
-                className="hidden h-11 items-center whitespace-nowrap rounded-xl px-2 text-sm font-medium text-white/70 transition-colors hover:text-white xl:inline-flex"
-              >
-                Sign in
-              </Link>
-            )}
+            <Link
+              href="/runs"
+              title="Runs you saved in this browser"
+              className="hidden h-11 items-center whitespace-nowrap rounded-xl px-2 text-sm font-medium text-white/70 transition-colors hover:text-white xl:inline-flex"
+            >
+              Your runs
+            </Link>
             <Link href="/simulator" className="btn-primary btn-sm hidden whitespace-nowrap sm:inline-flex">
               Open simulator
             </Link>
@@ -295,11 +279,8 @@ export default function SiteNav() {
                   <Github size={16} aria-hidden="true" /> Source code on GitHub
                 </a>
                 <div className="my-1 border-t border-white/10" />
-                <Link
-                  href={isAuthenticated ? '/account' : '/login'}
-                  className={drawerLinkCls(isActive(pathname, { href: isAuthenticated ? '/account' : '/login' }))}
-                >
-                  {isAuthenticated ? `Your saved runs — ${user?.email?.split('@')[0] ?? ''}` : 'Sign in'}
+                <Link href="/runs" className={drawerLinkCls(isActive(pathname, { href: '/runs' }))}>
+                  Your runs
                 </Link>
                 <Link href="/simulator" className="btn-primary mt-2">
                   Open simulator

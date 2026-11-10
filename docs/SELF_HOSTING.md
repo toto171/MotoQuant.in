@@ -5,10 +5,10 @@ MotoQuant is free and open source (Apache-2.0). Everything that runs
 copy: on a laptop, on Render + Vercel the way the public instance does, or on
 any host that runs Docker.
 
-There is no billing, licence-key or payment-provider configuration of any
-kind. **Every environment variable on this page is optional.** With none of
-them set, the API serves the simulator, catalog, optimizer, autotune,
-leaderboard and optional accounts.
+There is no billing, account or email configuration of any kind, and the
+server stores nothing a visitor sends. **Every environment variable on this
+page is optional.** With none of them set, the API serves the simulator,
+catalog, optimizer, race-day setup and leaderboard.
 
 The full annotated variable list is in [`.env.example`](../.env.example) at
 the repo root. This page explains what each group is for and how to deploy.
@@ -40,10 +40,9 @@ away:
 python -m motoquant.run sim --bike-id 1 --venue-id 1
 ```
 
-Locally, sign-in links are printed to the API's stdout instead of being
-emailed, and sessions are signed with the public development JWT secret.
-That is fine on your own machine and wrong anywhere else; section 3 covers
-what to set on a real host.
+The CLI can save runs to the local database (`sim --save-run`, then
+`history` and `leaderboard`). The website never writes to it: saved runs live
+in each visitor's browser.
 
 ---
 
@@ -56,10 +55,11 @@ browser ──► web (Next.js, static + one route handler) ──/api/* rewrite
 - **API**: `motoquant/api.py`, served by uvicorn from the root
   [`Dockerfile`](../Dockerfile). It runs a single process
   ([`docker-entrypoint.sh`](../docker-entrypoint.sh)). Keep it that way:
-  the job registry, rate-limit counters and (when no `JWT_SECRET` is set) the
-  ephemeral signing secret all live in process memory.
-- **Database**: one SQLite file. The image carries the seeded copy at
-  `/app/motoquant.db`.
+  the job registry, the rate-limit counters and the weather and catalog
+  caches all live in process memory.
+- **Database**: one SQLite file, read-only in practice. The image carries the
+  seeded catalog at `/app/motoquant.db`, so every deploy ships the latest
+  catalog and nothing needs a persistent disk.
 - **Web**: `web/` (Next.js App Router). The browser calls same-origin
   `/api/*`, and `web/next.config.js` (plus the root `vercel.json` on Vercel)
   rewrites those calls to the API. `MOTOQUANT_API_BACKEND` overrides the
@@ -70,112 +70,7 @@ browser ──► web (Next.js, static + one route handler) ──/api/* rewrite
 
 ## 3. Settings for a real host
 
-### 3a. Tell the API it is deployed
-
-Render sets `RENDER` and `RENDER_EXTERNAL_URL` automatically. **On any other
-host, set `MOTOQUANT_DEPLOYED=1`.** A deployed API:
-
-- never echoes magic-link tokens in HTTP responses (the dev convenience that
-  makes local sign-in work without email), and
-- never signs sessions with the public development JWT secret.
-
-### 3b. `JWT_SECRET` — keeps optional sign-ins alive across restarts
-
-| Situation | What the API signs sessions with |
-|---|---|
-| `JWT_SECRET` set (32+ random bytes) | Your secret. Sessions survive restarts and redeploys. |
-| Deployed host, `JWT_SECRET` unset (or left at the public default) | An **ephemeral, per-process random secret**, plus a loud boot warning. Tokens cannot be forged, but every sign-in resets whenever the process restarts. The API never refuses to boot over this; accounts are optional and must not take the simulator down. |
-| Local / tests | The documented public dev default, with a warning. |
-
-Generate a secret with:
-
-```bash
-python -c "import secrets; print(secrets.token_hex(32))"   # or: openssl rand -hex 32
-```
-
-### 3c. Magic-link email transport
-
-Password sign-in works with no email configured. Magic links (passwordless
-sign-in) need a transport, chosen from whatever you set:
-
-| Set | Transport |
-|---|---|
-| `RESEND_API_KEY` + `SMTP_FROM` | [Resend](https://resend.com) HTTP API (highest precedence). Verify the sending domain in the Resend dashboard first, or Resend answers 403. |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | Plain SMTP (STARTTLS). |
-| neither | Dev mode: the link is printed to stdout. |
-
-Precedence is `MOTOQUANT_EMAIL_BACKEND` (an explicit `resend` / `smtp` /
-`stdout` override) → Resend → SMTP → stdout. `SMTP_FROM` is the From address
-for both transports. Set `MOTOQUANT_BASE_URL` to your web origin so the links
-point at your site rather than motoquant.in.
-
-On a deployed host with no transport, `POST /api/auth/magic-link` answers
-**503** instead of claiming that an email was sent, and the API logs a
-warning at boot.
-
-> History: before 2026-08-10, `MOTOQUANT_EMAIL_BACKEND` defaulted to `stdout`
-> and short-circuited the send guard, so a correctly configured SMTP host
-> still sent nothing while the API reported success. The transport is now
-> derived from what you configure. If magic links "send" but never arrive on
-> an older checkout, that bug is why.
-
-### 3d. Durable storage — persistent disk for accounts and saved runs
-
-The catalog is read-only, but optional accounts, sessions and saved runs (the
-leaderboard and each user's garage) are written to the same SQLite file. In
-the image that file lives at `/app/motoquant.db` and **is replaced on every
-deploy**. On a free hosting plan with no disk, that is the trade: accounts and
-saved runs reset whenever you deploy.
-
-To keep them, put the DB on a persistent volume:
-
-1. Mount a volume (Render: a paid instance plus a disk; any Docker host: a
-   named volume or bind mount) at, say, `/data`. It must be writable by the
-   image's unprivileged `app` user.
-2. Set `MOTOQUANT_DB=/data/motoquant.db`.
-
-`docker-entrypoint.sh` copies the seeded catalog onto the volume on first
-boot and leaves it alone on every boot after that. When `MOTOQUANT_DB` is the
-baked `/app` path it does nothing, so the same image works with or without a
-disk.
-
-For Render, both edits are already in [`render.yaml`](../render.yaml) as
-comments: uncomment the `disk:` block and switch `MOTOQUANT_DB` to
-`/data/motoquant.db`. To verify, register a test account, deploy, and check
-that the account is still there. `/api/health` should report the same
-`bike_count` as before.
-
-> **Catalog updates on a persistent disk.** Because the entrypoint never
-> overwrites an existing DB, a deploy that ships a newer catalog in
-> `motoquant.db` does not reach a disk-backed instance automatically. Apply
-> catalog changes to the live file with the repo's idempotent
-> `scripts/patch_*.py` scripts, or re-seed from the image deliberately after
-> taking a backup.
-
-### 3e. Backups — set these up with the disk
-
-[`scripts/backup_db.py`](../scripts/backup_db.py) takes a hot,
-integrity-checked, gzipped snapshot with SQLite's online-backup API, which is
-safe to run against concurrent writers including WAL mode, and prunes old
-snapshots down to the newest N.
-
-```bash
-python scripts/backup_db.py --db /data/motoquant.db --keep 14
-```
-
-Snapshots go to `<db-dir>/backups` by default. That protects against a bad
-migration or an errant `DELETE`, but not against losing the disk. Set
-`MOTOQUANT_BACKUP_UPLOAD_CMD` to copy each snapshot off the box; `{path}` is
-replaced with the snapshot's path:
-
-```bash
-MOTOQUANT_BACKUP_UPLOAD_CMD='rclone copy {path} r2:motoquant-backups/'
-```
-
-Exit codes: `0` ok · `1` backup failed · `2` snapshot ok but upload failed.
-Run it daily (a Render Cron Job, systemd timer or plain cron).
-
-### 3f. Chat agent (`POST /api/chat`)
+### 3a. Chat agent (`POST /api/chat`)
 
 The chat agent needs an LLM provider. Set `LLM_PROVIDER` (`groq` is the
 default; also `gemini`, `anthropic`, `deepseek`, `openrouter`) and that
@@ -202,12 +97,12 @@ Agent web lookup is optional: `SEARCH_PROVIDER=brave|serper` plus
 HTML fallback. `MOTOQUANT_WEB_TOOLS=0` turns the agent's web access off.
 Details: [CHAT_AGENT.md](CHAT_AGENT.md).
 
-### 3g. Abuse fuses (on by default)
+### 3b. Abuse fuses (on by default)
 
 Every simulation and analysis route is free and anonymous, so each
 compute-heavy route has a per-IP fixed-window rate limit (`motoquant/ratelimit.py`):
 simulate, top speed, distance, compare, optimizer, autotune, calibration
-uploads, saving a run, telemetry, and chat. Over the limit, a route answers
+uploads, place lookup, telemetry, and chat. Over the limit, a route answers
 `429` with a `Retry-After` header.
 
 The client IP comes from `X-Forwarded-For` only as far as you trust it,
@@ -228,11 +123,11 @@ actually run lets clients spoof their IP and dodge the limits.
 a public instance. These counters are in-process; for multi-replica or
 DDoS-grade protection, rate-limit at your edge as well.
 
-### 3h. Optional extras
+### 3c. Optional extras
 
 | Variable | Effect |
 |---|---|
-| `OPENWEATHERMAP_API_KEY` | Live venue weather for the `weather` CLI (`weather --refresh-all`). Without it, venues use their stored seasonal data. |
+| `OPENWEATHERMAP_API_KEY` | Live weather when a visitor names a place, and for the `weather` CLI (`weather --refresh-all`). Successful lookups are cached for ten minutes. Without a key, a place keeps the default conditions and seeded venues use their stored seasonal data. |
 | `SENTRY_DSN` (+ `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE`, `SENTRY_TRACES_SAMPLE_RATE`, `SENTRY_SEND_PII`) | Error tracking. A no-op unless the DSN is set. See [OBSERVABILITY.md](OBSERVABILITY.md). |
 | `POSTHOG_API_KEY` (+ `POSTHOG_HOST`) | **Opt-in** forwarding of the anonymous web telemetry beacon to PostHog. Unset, beacons are written to the server log only and nothing is sent to a third party. |
 | `MOTOQUANT_KEEPWARM_URL` / `MOTOQUANT_KEEPWARM_INTERVAL_S` | In-app self-ping that keeps a sleeping free-tier host awake during the day. Starts automatically on Render (from `RENDER_EXTERNAL_URL`); off elsewhere unless you set the URL. |
@@ -263,7 +158,7 @@ your copy:
   service URL differs.
 - `web/app/api/wake/route.js` + the `crons` block in `vercel.json`: Vercel
   cron.
-- `motoquant/keepwarm.py`: in-app self-ping (section 3h).
+- `motoquant/keepwarm.py`: in-app self-ping (section 3c).
 
 **Web on Vercel.** Import the repo with **root directory `web`**. Point the
 `/api/*` rewrite at your API: edit the destination in the root
@@ -280,23 +175,15 @@ The historical Railway → Render cutover runbook is in
 
 ```bash
 docker build -t motoquant-api .
-docker volume create motoquant-data
-docker run -d --name motoquant-api -p 8000:8000 \
-  -e MOTOQUANT_DEPLOYED=1 \
-  -e JWT_SECRET="$(openssl rand -hex 32)" \
-  -e MOTOQUANT_DB=/data/motoquant.db \
-  -v motoquant-data:/data \
-  motoquant-api
+docker run -d --name motoquant-api -p 8000:8000 motoquant-api
 curl http://localhost:8000/api/health
 ```
 
-Generate `JWT_SECRET` once and store it (in a secrets manager or a `.env`
-file passed with `--env-file`) rather than regenerating it on every run, or
-sessions will reset. If the volume's mount point is owned by root, make it
-writable by the container's `app` user (uid 1000 in the stock image).
+The container needs no volume: the catalog is baked into the image, and a new
+image is how a catalog update ships.
 
 Terminate TLS in a reverse proxy such as Caddy or nginx and keep exactly one
-proxy hop in front of the API (see 3g). For the web frontend, run
+proxy hop in front of the API (see 3b). For the web frontend, run
 `cd web && npm ci && npm run build && npm start` behind the same proxy with
 `MOTOQUANT_API_BACKEND` pointing at the API, or deploy `web/` to any host
 that supports Next.js.
@@ -306,11 +193,6 @@ that supports Next.js.
 ## 5. Health checklist
 
 - [ ] `/api/health` returns `status: ok` and the expected `bike_count`.
-- [ ] `MOTOQUANT_DEPLOYED=1` (non-Render hosts) and a stored `JWT_SECRET`.
-- [ ] Persistent disk mounted and `MOTOQUANT_DB` points at it (if you want
-      accounts and saved runs to survive deploys).
-- [ ] `scripts/backup_db.py` scheduled, with an off-box upload command.
-- [ ] An email transport configured, or you accept password-only sign-in.
 - [ ] `MOTOQUANT_CHAT_DAILY_LIMIT` set to fit your LLM budget, if chat is
       enabled.
 - [ ] One trusted proxy hop in front of the API, so per-IP fuses key on the

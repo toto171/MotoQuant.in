@@ -106,53 +106,6 @@ class TestCatalogCacheFreshness(unittest.TestCase):
         rows = after["venues"] if isinstance(after, dict) else after
         self.assertEqual(next(v["name"] for v in rows if v["id"] == 1), "OTHER-CONN")
 
-    def test_price_refresh_twice_then_parts_fresh(self):
-        from datetime import datetime, timezone
-
-        from motoquant.database import retail_adapters
-
-        conn = api._get_db()
-        pid = conn.execute(
-            "SELECT id FROM parts WHERE price_inr IS NOT NULL LIMIT 1"
-        ).fetchone()[0]
-        conn.execute(
-            "UPDATE parts SET retailer='tester', retailer_url='http://x.invalid/p' "
-            "WHERE id=?",
-            (pid,),
-        )
-        conn.commit()
-        orig = retail_adapters.fetch_price
-        try:
-            for price in (1111.0, 2222.0):
-                retail_adapters.fetch_price = lambda url, p=price: (
-                    retail_adapters.PriceResult(
-                        price_inr=p,
-                        in_stock=True,
-                        fetched_at=datetime.now(timezone.utc),
-                        source_url=url,
-                        retailer="tester",
-                    )
-                )
-                conn.execute(
-                    "UPDATE part_prices SET fetched_at='2000-01-01T00:00:00+00:00' "
-                    "WHERE part_id=?",
-                    (pid,),
-                )
-                conn.commit()  # outside the one-hour force floor
-                r = client.post(f"/api/pricing/refresh/{pid}?force=true")
-                self.assertEqual(r.status_code, 200, r.text)
-                live = conn.execute(
-                    "SELECT price_inr FROM part_prices WHERE part_id=? AND retailer='tester'",
-                    (pid,),
-                ).fetchone()[0]
-                self.assertEqual(live, price)
-                # the catalog byte cache must be rebuilt after each refresh
-                before = api.catalog_cache_stats["misses"]
-                client.get("/api/parts?limit=5")
-                self.assertEqual(api.catalog_cache_stats["misses"], before + 1)
-        finally:
-            retail_adapters.fetch_price = orig
-
     def test_stock_baseline_follows_a_catalog_write(self):
         conn = api._get_db()
         part = client.get("/api/parts?bike_id=192&limit=1").json()["parts"][0]["id"]
@@ -175,32 +128,14 @@ class TestCatalogCacheFreshness(unittest.TestCase):
         self.assertEqual(len(set(stocks)), 3, stocks)
 
 
-# ── SEC-3: anonymous DB-writing routes are rate limited and queue-capped ─────
+# ── SEC-3: the surrogate routes are rate limited ─────────────────────────────
 
 
-class TestAnonymousWritersAreFused(unittest.TestCase):
+class TestSurrogateRoutesAreFused(unittest.TestCase):
     def setUp(self):
         from motoquant import ratelimit
 
         ratelimit.reset()
-
-    def test_suggest_is_rate_limited(self):
-        codes = [
-            client.post(
-                "/api/bikes/suggest", json={"make": "Test", "model": f"M{i}"}
-            ).status_code
-            for i in range(8)
-        ]
-        self.assertEqual(codes[:5], [201] * 5)
-        self.assertIn(429, codes[5:])
-
-    def test_spec_correct_is_rate_limited_in_its_own_bucket(self):
-        body = {"bike_id": 192, "field_name": "peak_power_hp", "proposed_value": "50"}
-        codes = [
-            client.post("/api/specs/correct", json=body).status_code for _ in range(8)
-        ]
-        self.assertEqual(codes[:5], [201] * 5, codes)
-        self.assertIn(429, codes[5:])
 
     def test_surrogate_routes_are_rate_limited(self):
         codes = [
@@ -208,20 +143,6 @@ class TestAnonymousWritersAreFused(unittest.TestCase):
             for _ in range(70)
         ]
         self.assertIn(429, codes)
-
-    def test_queue_cap_stops_unbounded_growth(self):
-        conn = api._get_db()
-        old = api.MAX_PENDING_SUBMISSIONS
-        n = conn.execute("SELECT COUNT(*) FROM bike_suggestions").fetchone()[0]
-        api.MAX_PENDING_SUBMISSIONS = n
-        try:
-            r = client.post("/api/bikes/suggest", json={"make": "Cap", "model": "Full"})
-        finally:
-            api.MAX_PENDING_SUBMISSIONS = old
-        self.assertEqual(r.status_code, 503)
-        self.assertEqual(
-            conn.execute("SELECT COUNT(*) FROM bike_suggestions").fetchone()[0], n
-        )
 
 
 # ── WB-4: every sim route accepts the shared conditions fields ───────────────

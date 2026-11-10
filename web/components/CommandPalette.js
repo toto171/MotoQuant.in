@@ -34,7 +34,7 @@ const ACTIONS = [
   { label: 'Upgrades — best parts for your budget', desc: 'We test every compatible part and pick the quickest mix', href: '/optimize', kw: 'optimize optimizer parts budget knapsack roi upgrade build mods', icon: Wrench, group: 'Tools' },
   { label: 'Race-day setup', desc: 'Gearing, launch RPM and tyre pressure for today\'s air', href: '/autotune', kw: 'autotune tune tuning gearing launch rpm tyre tire pressure conditions ecu setup', icon: Zap, group: 'Tools' },
   { label: 'Browse bikes', desc: 'Search every motorcycle you can simulate', href: '/bikes', kw: 'bikes motorcycles catalog database specs', icon: Search, group: 'Tools' },
-  { label: 'Leaderboard', desc: 'The quickest saved runs', href: '/leaderboard', kw: 'top runs fastest board ranking times', icon: Trophy, group: 'Tools' },
+  { label: 'Leaderboard', desc: 'Every bike ranked by simulated stock time', href: '/leaderboard', kw: 'top fastest quickest board ranking times stock compare', icon: Trophy, group: 'Tools' },
   { label: 'Getting started', desc: 'A 5-minute walkthrough of the simulator', href: '/docs/getting-started', kw: 'documentation guide help how to start tutorial', icon: BookOpen, group: 'Learn' },
   { label: 'Glossary', desc: 'Drag-racing terms in plain English', href: '/docs/glossary', kw: 'terms jargon meaning et trap sixty launch definitions what is', icon: BookOpen, group: 'Learn' },
   { label: 'How the physics works', desc: 'What the simulator calculates, step by step', href: '/docs/physics', kw: 'rk4 submodels engine model documentation physics', icon: BookOpen, group: 'Learn' },
@@ -44,7 +44,7 @@ const ACTIONS = [
   { label: 'Features', desc: 'Everything the simulator can do', href: '/features', kw: 'what can it do capabilities overview', icon: ArrowRight, group: 'Learn' },
   { label: 'Whitepaper', desc: 'The method behind the numbers', href: '/whitepaper', kw: 'paper methodology research physics', icon: BookOpen, group: 'Learn' },
   { label: 'Source code on GitHub', desc: 'MotoQuant is free and open source (Apache-2.0)', href: 'https://github.com/toto171/MotoQuant.in', kw: 'github open source apache license code repo contribute', icon: ArrowRight, group: 'Project' },
-  { label: 'Your saved runs', desc: 'Runs you saved, and your password', href: '/account', kw: 'account profile garage saved runs sign in login', icon: ArrowRight, group: 'Project' },
+  { label: 'Your runs', desc: 'Runs you saved in this browser', href: '/runs', kw: 'saved runs history garage timeslips my runs', icon: ArrowRight, group: 'Project' },
 ];
 
 function matchActions(q) {

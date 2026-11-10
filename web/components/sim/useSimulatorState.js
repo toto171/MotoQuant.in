@@ -21,13 +21,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  API_URL as API, simulateJob, topspeedJob, compareJob, saveRun,
+  API_URL as API, simulateJob, topspeedJob, compareJob,
   getBikeCatalog, getPartsCatalog, getCompatiblePartIds,
 } from '../../lib/api';
 import useAsyncTask from '../../lib/useAsyncTask';
 import { predictQuick, preloadSurrogate } from '../../lib/surrogate';
 import { instantBlocker, venueSurface } from '../../lib/instantEstimate';
-import { useAuth } from '../AuthProvider';
+import { saveRun as storeRun, timeslipQuery } from '../../lib/runs';
 import { track, trackSimRun, installErrorHandlers } from '../../lib/telemetry';
 import {
   DEFAULTS, MODE_KEY, bikeName, partSlot, makeKey, normalizeFull,
@@ -114,8 +114,6 @@ export default function useSimulatorState(searchParams) {
   const lastDragyFileRef = useRef(null);
   const lastDynoFileRef = useRef(null);
 
-  const { accessToken } = useAuth();
-
   // ─── Refs ──────────────────────────────────────────────────────────────────
   const bikeRef = useRef(null);
   bikeRef.current = bike;
@@ -184,6 +182,8 @@ export default function useSimulatorState(searchParams) {
       partCount: selectedParts.length,
       powerBoost,
       massChange,
+      frontTireId: frontTire?.id ?? null,
+      rearTireId: rearTire?.id ?? null,
     };
   }
 
@@ -476,23 +476,44 @@ export default function useSimulatorState(searchParams) {
     return data;
   });
 
-  // Save: always the result's OWN bike/venue, never whatever is selected now.
-  const saveTask = useAsyncTask(async (signal, _p, override) => {
+  // Save: always the result's OWN setup, never whatever is selected now. The
+  // run is kept in this browser; its timeslip link carries the setup and the
+  // conditions the server simulated, so opening it re-runs the same race.
+  const saveTask = useAsyncTask(async (_signal, _p, override) => {
     const src = override || saveSourceRef.current;
     if (!src || src.estimated || src.et_quarter_s == null || src.meta?.bikeId == null) return null;
-    const body = {
-      bike_id: src.meta.bikeId,
-      venue_id: src.meta.venueId ?? null,
-      et_quarter_s: src.et_quarter_s,
-      trap_speed_kmh: src.trap_speed_kmh,
-      et_60ft_s: src.et_60ft_s ?? null,
-      et_eighth_s: src.et_eighth_s ?? null,
-    };
-    const resp = await saveRun(body, accessToken, signal);
-    throwIfAborted(signal);
-    setSavedRun({ ...resp, forKey: src.meta.key });
-    track('save_run', { bike_id: src.meta.bikeId, surface: 'simulator_page' });
-    return resp;
+    const m = src.meta;
+    const query = timeslipQuery({
+      bikeId: m.bikeId,
+      venueId: m.venueId,
+      riderKg: m.riderKg,
+      powerBoost: m.powerBoost,
+      massChange: m.massChange,
+      partIds: (src.parts_applied || []).map((p) => p.id),
+      frontTireId: m.frontTireId,
+      rearTireId: m.rearTireId,
+      environment: src.environment,
+    });
+    const stored = storeRun({
+      query,
+      bikeName: m.bikeName,
+      et: src.et_quarter_s,
+      trap: src.trap_speed_kmh,
+      et60: src.et_60ft_s ?? null,
+      eighth: src.et_eighth_s ?? null,
+      environment: src.environment || null,
+      riderKg: m.riderKg,
+      powerBoost: m.powerBoost,
+      massChange: m.massChange,
+      parts: (src.parts_applied || []).map((p) => [p.brand, p.name].filter(Boolean).join(' ')),
+      tyresChanged: m.frontTireId != null || m.rearTireId != null,
+    });
+    if (!stored) {
+      throw new Error('This browser would not store the run (private browsing or storage full). You can still share the link.');
+    }
+    setSavedRun({ query, forKey: m.key });
+    track('save_run', { bike_id: m.bikeId, surface: 'simulator_page' });
+    return { query };
   });
 
   // Stable handles (the task objects themselves are new every render).
@@ -711,7 +732,8 @@ export default function useSimulatorState(searchParams) {
     if (ok) track('share_build', { bike_id: bike?.id });
   }, [buildShareUrl, copyOrShare, bike]);
 
-  // "Save and share this run": make the result exact if needed, save, copy /r/{id}.
+  // "Save and share this run": make the result exact if needed, save it in
+  // this browser, then share its timeslip link.
   const saveAndShare = useCallback(async () => {
     let src = saveSourceRef.current;
     if (!src) {
@@ -720,8 +742,8 @@ export default function useSimulatorState(searchParams) {
       src = normalizeFull(full);
     }
     const resp = await saveTask.run(src);
-    if (resp?.run_id != null) {
-      await copyOrShare(`${window.location.origin}/r/${resp.run_id}`, `MotoQuant — ${bikeName(bike)}`);
+    if (resp?.query) {
+      await copyOrShare(`${window.location.origin}/timeslip?${resp.query}`, `MotoQuant — ${bikeName(bike)}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startFullSim, saveTask.run, copyOrShare, bike]);

@@ -1,7 +1,8 @@
 /**
  * MotoQuant — Terms of Service
- * Last updated: November 9, 2026 — rewritten for the open-source (Apache-2.0)
- * release: no plans, payments, refunds or license keys.
+ * Last updated: 10 November 2026 — accounts removed; saved runs live in the
+ * visitor's browser. (9 November 2026: rewritten for the open-source
+ * Apache-2.0 release: no plans, payments, refunds or license keys.)
  */
 
 import SiteNav from "../../components/SiteNav";
@@ -25,7 +26,7 @@ export default function TermsPage() {
         sub="Plain terms for a free, hosted instance of open-source software."
         className="pb-8 md:pb-10"
       >
-        <p className="label-mono">Last updated &middot; 9 November 2026</p>
+        <p className="label-mono">Last updated &middot; 10 November 2026</p>
       </PageHero>
 
       <main id="main" className="pt-10 pb-20 px-4 sm:px-6">
@@ -73,17 +74,10 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section title="4. Optional accounts">
+        <Section title="4. No accounts">
           <p>
-            You do not need an account to run simulations. An optional account lets you save
-            runs to a personal garage and share timeslip links. Creating one requires a valid
-            email address. You can sign in with a password, which we store only as a salted
-            scrypt hash and never in plaintext, or with a passwordless magic-link email. You
-            are responsible for keeping your email account and any password you set secure.
-          </p>
-          <p>
-            You may request account deletion at any time by emailing{" "}
-            <a href="mailto:motoquant@gmail.com" className="font-mono text-white/80 hover:text-white transition-colors">motoquant@gmail.com</a>.
+            There is nothing to sign up for. Runs you save are kept in your own browser, not on
+            our servers, so we cannot recover them if you clear your browser data.
           </p>
         </Section>
 
@@ -100,13 +94,13 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section title="6. Data you submit">
+        <Section title="6. What you send us">
           <p>
-            Runs you save, builds you share, and files you voluntarily upload (Dragy GPS logs,
-            dyno CSVs) are used to provide the service. Shared timeslip links are viewable by
-            anyone who has the link. See our{" "}
-            <a href="/privacy" className="text-accent hover:text-accent-bright transition-colors">Privacy Policy</a>{" "}
-            for details.
+            Simulation requests, chat questions and files you upload (Dragy GPS logs, dyno
+            sheets) are used only to produce your result. A timeslip link shows its setup to
+            anyone who has the link. The{" "}
+            <a href="/privacy" className="text-accent hover:text-accent-bright transition-colors">privacy page</a>{" "}
+            lists what is kept and who else sees it.
           </p>
         </Section>
 
@@ -114,7 +108,8 @@ export default function TermsPage() {
           <p>
             Manufacturer specifications and published test results used in the bike catalog
             and validation set are publicly available data and remain the property of their
-            respective owners. MotoQuant is not affiliated with any motorcycle manufacturer.
+            respective owners. Brand and model names identify the products they belong to.
+            MotoQuant is not affiliated with any motorcycle, parts or tyre manufacturer.
           </p>
         </Section>
 
@@ -136,7 +131,7 @@ export default function TermsPage() {
           <p>MotoQuant &middot; Pune, Maharashtra, India</p>
           <p>Contact: <a href="mailto:motoquant@gmail.com" className="font-mono text-white/80 hover:text-white transition-colors">motoquant@gmail.com</a></p>
           <div className="mt-4 flex flex-wrap gap-4">
-            <a href="/privacy" className="text-accent hover:text-accent-bright transition-colors">Privacy Policy</a>
+            <a href="/privacy" className="text-accent hover:text-accent-bright transition-colors">Privacy</a>
             <a href="/contact" className="text-accent hover:text-accent-bright transition-colors">Contact</a>
             <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className="text-accent hover:text-accent-bright transition-colors">GitHub</a>
           </div>

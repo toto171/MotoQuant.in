@@ -128,7 +128,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: 'Is MotoQuant free?',
-    a: 'Yes. MotoQuant is free and open source under the Apache License 2.0. You do not need an account to run simulations; an optional free account just lets you save runs. motoquant.in is a free public copy of the open-source project, and you can also run it yourself from the GitHub repository.',
+    a: 'Yes. MotoQuant is free and open source under the Apache License 2.0. There is no account to create: saved runs stay in your browser. motoquant.in is a free public copy of the open-source project, and you can also run it yourself from the GitHub repository.',
   },
   {
     q: 'Can I use it for Indian drag strips?',

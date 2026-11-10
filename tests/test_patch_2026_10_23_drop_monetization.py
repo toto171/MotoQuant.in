@@ -203,23 +203,6 @@ class TestDropMonetization(unittest.TestCase):
         self.assertEqual(summary["dropped_tables"], [])
         self.assertTrue(set(patch_mod.DEAD_TABLES) <= _tables(self.db))
 
-    def test_patched_users_table_still_accepts_signups(self):
-        """The live INSERTs (users_repo) must work on the patched schema."""
-        from motoquant.database import users_repo
-
-        patch_mod.apply(self.db, verbose=False)
-        conn = sqlite3.connect(self.db)
-        conn.row_factory = sqlite3.Row
-        try:
-            users_repo.ensure_tables(conn)
-            u = users_repo.get_or_create_user(conn, "new@t.in")
-            p = users_repo.create_user_with_password(conn, "pw@t.in", "scrypt$x")
-        finally:
-            conn.close()
-        self.assertEqual(u["email"], "new@t.in")
-        self.assertEqual(p["email"], "pw@t.in")
-        self.assertNotIn("tier", u)
-
     def test_failed_post_condition_rolls_back(self):
         """If verification fails, NOTHING is committed."""
         original = patch_mod._row_counts

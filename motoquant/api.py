@@ -2,7 +2,8 @@
 MotoQuant — FastAPI Web Server
 ==============================
 REST API wrapper around the MotoQuant physics engine and database.
-Serves the motoquant.in web simulator, public leaderboard, and bike library.
+Serves the motoquant.in simulator, tools and bike library. It has no accounts
+and stores nothing a visitor sends for other visitors to see.
 
 Endpoints
 ---------
@@ -13,17 +14,16 @@ GET  /api/bikes/{id}          Bike detail + default config
 GET  /api/venues              List venues with current DA
 POST /api/simulate            Full simulation (returns v(t), RPM(t), etc.)
 POST /api/simulate/quick      Quick ET-only simulation (faster for UI sliders)
-GET  /api/leaderboard         Top simulation results
 GET  /api/tires               List tire models
+GET  /docs                    Every route, with request and response schemas
 
 Run locally
 -----------
-    cd "Vehicle Dynamics"
     uvicorn motoquant.api:app --reload --port 8000
 
-Deploy (Railway / Render / DigitalOcean App Platform)
+Deploy
 ------
-    Set PORT env var; Render builds via render.yaml (Docker).
+    Set the PORT env var; render.yaml builds the Docker image.
 """
 
 import asyncio
@@ -74,28 +74,6 @@ from .database.connection import (
 from .defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 from .models import BikeConfig
 from .ratelimit import heavy_gate_for, rate_limit
-
-# ─── Optional accounts (imported early so Depends() default-args resolve) ─────
-# Accounts are OPTIONAL: they only attribute saved runs to a garage. The sim
-# API must still boot in a stripped dev environment without the account deps
-# (PyJWT / email-validator), so a failed import degrades to "everyone is
-# anonymous" — but it is logged at ERROR level and the router mount at the
-# bottom of this file keys off the same flag, so a broken auth module can
-# never silently 404 /api/auth/* while looking healthy
-# (tests/test_open_source_pivot.py pins GET /api/auth/me -> 401, not 404).
-try:
-    from . import auth as _auth_mod
-    from .auth import get_optional_user as get_optional_user  # noqa: PLC0414
-
-    _AUTH_IMPORT_ERROR: ImportError | None = None
-except ImportError as _auth_exc:  # pragma: no cover — prod installs both deps
-    _auth_mod = None  # type: ignore[assignment]
-    _AUTH_IMPORT_ERROR = _auth_exc
-
-    def get_optional_user() -> dict | None:  # type: ignore[misc]
-        """Stub — no account layer, so every caller is anonymous."""
-        return None
-
 
 # ─── App init ─────────────────────────────────────────────────────────────
 
@@ -301,15 +279,19 @@ class EnvironmentEchoDict(TypedDict):
     track_surface: str
 
 
+class TyreLabelDict(TypedDict):
+    """A catalog tyre fitted by the request (``tyres`` in quick results)."""
+
+    position: str
+    id: int
+    name: str
+
+
 class QuickSimResultDict(TypedDict):
     """Shape of the dict returned by the ``/api/simulate/quick`` endpoint.
 
-    Mirrors the ``QuickSimResponse`` TypeScript interface in
-    ``desktop/src/types/api.ts``. Built inline in :func:`simulate_quick`.
-
-    Keep field names + types in lockstep with
-    ``desktop/src/types/api.ts::QuickSimResponse`` — any drift between the
-    two silently breaks the desktop BuildPage slider UI.
+    Built inline in :func:`simulate_quick`. The website's simulator and
+    timeslip pages read these keys by name, so treat them as a public contract.
 
     ``stock_et_s`` and ``et_delta_s`` are nullable because they are only
     populated when ``parts_applied`` is non-empty (otherwise "stock" equals
@@ -327,6 +309,7 @@ class QuickSimResultDict(TypedDict):
     build_cost_inr: float
     parts_skipped: list[int]
     parts_skipped_detail: list[SkippedPartDict]
+    tyres: list[TyreLabelDict]
     environment: EnvironmentEchoDict
     stock_et_s: float | None
     et_delta_s: float | None
@@ -1083,6 +1066,32 @@ def _engine_tag() -> str:
         return "native" if engine_select.native_active() else "python"
     except Exception:  # noqa: BLE001 — native forced but unusable: the sim will raise
         return "unavailable"
+
+
+def _tyre_labels(front_id: int | None, rear_id: int | None) -> list[TyreLabelDict]:
+    """Names of the catalog tyres a request fitted, for result cards and slips."""
+    out: list[TyreLabelDict] = []
+    db = _get_db() if (front_id is not None or rear_id is not None) else None
+    if not db:
+        return out
+    for position, tid in (("front", front_id), ("rear", rear_id)):
+        if tid is None:
+            continue
+        row = db.execute(
+            "SELECT tm.id, tmf.name AS maker, tm.model_name, tm.size_designation "
+            "FROM tire_models tm LEFT JOIN tire_manufacturers tmf "
+            "ON tmf.id = tm.manufacturer_id WHERE tm.id = ?",
+            (tid,),
+        ).fetchone()
+        if row:
+            d = dict(row)
+            name = " ".join(
+                str(x)
+                for x in (d["maker"], d["model_name"], d["size_designation"])
+                if x
+            )
+            out.append({"position": position, "id": int(d["id"]), "name": name})
+    return out
 
 
 def _stock_key(req: "QuickSimRequest") -> tuple:
@@ -1940,6 +1949,7 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
         raise HTTPException(500, f"Simulation error: {exc}")
 
     result: QuickSimResultDict = {
+        "tyres": _tyre_labels(req.front_tire_id, req.rear_tire_id),
         "et_quarter_s": round(float(sim.time_quarter), 4),
         "trap_speed_kmh": round(float(sim.speed_quarter) * 3.6, 2),
         "et_60ft_s": round(float(sim.time_60ft), 4),
@@ -2470,192 +2480,6 @@ def list_parts(
         ),
         _build,
     )
-
-
-class SaveRunRequest(BaseModel):
-    """POST /api/simulate/save — persist a sim result to the sim_runs table
-    so it surfaces on /api/leaderboard and the desktop History tab."""
-
-    bike_id: DbId
-    venue_id: DbId | None = None
-    # Physically-plausible bounds (2026-07-06): negative/zero ETs and
-    # absurd trap speeds were accepted and surfaced on the leaderboard.
-    et_quarter_s: float = Field(gt=0, le=120)
-    trap_speed_kmh: float = Field(gt=0, le=500)
-    et_60ft_s: float | None = None
-    et_eighth_s: float | None = None
-    et_1000ft_s: float | None = None
-    # Bounded (2026-07-25 audit §3.4): unbounded free text on an anonymous
-    # writer whose rows render on the PUBLIC leaderboard. 500 chars is well
-    # past any real "K5, 32C, street tyres" note.
-    notes: str | None = Field(None, max_length=500)
-
-
-@app.post(
-    "/api/simulate/save",
-    status_code=201,
-    dependencies=[Depends(rate_limit("save_run", 10, 60.0))],
-)
-def save_simulation(
-    req: SaveRunRequest,
-    auth_user: dict | None = Depends(get_optional_user),  # noqa: B008
-):
-    """Persist a single sim result to sim_runs. Resolves the incoming
-    bike_models.id to a bike_configs.id using the seed's 1:1 mapping.
-
-    Sign-in is OPTIONAL: anonymous saves are accepted (they land on the
-    public leaderboard only); with a valid bearer token the run is also
-    attributed to that account's garage (GET /api/me/runs).
-
-    Rate-limited per IP (2026-07-25 audit): the route accepts anonymous
-    writes and trusts the client-supplied ET, so an unfused loop simply owns
-    /api/leaderboard. The field bounds above stop absurd values; this stops
-    volume.
-    """
-    from . import __version__
-
-    db = _get_db()
-    if not db:
-        raise HTTPException(503, "Database unavailable")
-
-    row = db.execute(
-        "SELECT id FROM bike_configs WHERE bike_model_id = ? "
-        "ORDER BY is_current DESC LIMIT 1",
-        (req.bike_id,),
-    ).fetchone()
-    if not row:
-        raise HTTPException(
-            404,
-            f"No bike_config found for bike_model_id={req.bike_id}. "
-            "Re-seed with `python -m motoquant.run import --known-bikes`.",
-        )
-    bike_config_id = row["id"]
-
-    split_times = {
-        "time_60ft": req.et_60ft_s,
-        "time_eighth": req.et_eighth_s,
-        "time_1000ft": req.et_1000ft_s,
-        "time_quarter": req.et_quarter_s,
-        "speed_quarter_kmh": req.trap_speed_kmh,
-    }
-
-    try:
-        cur = db.execute(
-            """INSERT INTO sim_runs
-               (bike_config_id, venue_id, et_quarter_s, trap_speed_kmh,
-                et_eighth_s, time_60ft_s, time_1000ft_s,
-                sim_version, split_times_json, notes)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (
-                bike_config_id,
-                req.venue_id,
-                req.et_quarter_s,
-                req.trap_speed_kmh,
-                req.et_eighth_s,
-                req.et_60ft_s,
-                req.et_1000ft_s,
-                __version__,
-                json.dumps(split_times),
-                req.notes,
-            ),
-        )
-        db.commit()
-    except sqlite3.Error as exc:
-        raise HTTPException(500, f"Failed to persist run: {exc}")
-
-    # Attribute the run to the signed-in user (no-op for anonymous saves).
-    if auth_user and auth_user.get("id"):
-        try:
-            db.execute(
-                "UPDATE sim_runs SET user_id = ? WHERE id = ?",
-                (auth_user["id"], cur.lastrowid),
-            )
-            db.commit()
-        except sqlite3.Error:
-            logging.getLogger(__name__).warning(
-                "sim_runs.user_id attribution failed (column missing?)",
-                exc_info=True,
-            )
-
-    return {
-        "run_id": cur.lastrowid,
-        "bike_id": req.bike_id,
-        "bike_config_id": bike_config_id,
-        "saved_to_account": bool(auth_user and auth_user.get("id")),
-    }
-
-
-@app.get("/api/leaderboard")
-def leaderboard(
-    limit: int = Query(20, ge=1, le=100),
-    venue_id: int | None = Query(
-        None, ge=1, le=MAX_DB_ID, description="Filter to one venue"
-    ),
-):
-    """Return the top simulation runs saved to the local database,
-    optionally filtered to a single venue (per-venue leaderboards)."""
-    db = _get_db()
-    if not db:
-        raise HTTPException(503, "Database unavailable")
-
-    try:
-        # sim_runs table stores saved runs from the CLI `sim save-run` command
-        query = """SELECT sr.id, sr.et_quarter_s, sr.trap_speed_kmh,
-                      m.name AS manufacturer, bm.model_name AS model,
-                      bm.year_from AS year, v.name AS venue, sr.created_at
-               FROM sim_runs sr
-               LEFT JOIN bike_configs bc ON sr.bike_config_id = bc.id
-               LEFT JOIN bike_models bm ON bc.bike_model_id = bm.id
-               LEFT JOIN manufacturers m ON bm.manufacturer_id = m.id
-               LEFT JOIN venues v ON sr.venue_id = v.id
-               WHERE sr.et_quarter_s IS NOT NULL"""
-        params: list[Any] = []
-        if venue_id is not None:
-            query += " AND sr.venue_id = ?"
-            params.append(venue_id)
-        query += " ORDER BY sr.et_quarter_s ASC LIMIT ?"
-        params.append(limit)
-        rows = db.execute(query, params).fetchall()
-        return {
-            "leaderboard": [dict(r) for r in rows],
-            "total": len(rows),
-        }
-    except sqlite3.OperationalError as exc:
-        # sim_runs table may not exist yet on a fresh DB -- return empty,
-        # but say so in the logs instead of swallowing silently.
-        logging.getLogger(__name__).warning("leaderboard query failed: %s", exc)
-        return {"leaderboard": [], "total": 0}
-
-
-@app.get("/api/runs/{run_id}")
-def get_public_run(run_id: int = Path(..., ge=1, le=MAX_DB_ID)):
-    """Public, immutable view of one saved sim run — powers the shareable
-    /r/[id] timeslip pages (the WhatsApp/OG share loop). Only exposes the
-    run's results + bike/venue names, never the owning account."""
-    db = _get_db()
-    if not db:
-        raise HTTPException(503, "Database unavailable")
-    try:
-        row = db.execute(
-            """SELECT sr.id, sr.et_quarter_s, sr.trap_speed_kmh,
-                      sr.et_eighth_s, sr.time_60ft_s, sr.time_330ft_s,
-                      sr.time_1000ft_s, sr.created_at,
-                      m.name AS manufacturer, bm.model_name AS model,
-                      bm.year_from AS year, v.name AS venue
-               FROM sim_runs sr
-               LEFT JOIN bike_configs bc ON sr.bike_config_id = bc.id
-               LEFT JOIN bike_models bm ON bc.bike_model_id = bm.id
-               LEFT JOIN manufacturers m ON bm.manufacturer_id = m.id
-               LEFT JOIN venues v ON sr.venue_id = v.id
-               WHERE sr.id = ?""",
-            (run_id,),
-        ).fetchone()
-    except sqlite3.OperationalError as exc:
-        logging.getLogger(__name__).warning("run lookup failed: %s", exc)
-        row = None
-    if not row:
-        raise HTTPException(404, "Run not found")
-    return dict(row)
 
 
 # --- A vs B Comparison ---------------------------------------------------
@@ -3189,328 +3013,6 @@ async def upload_dyno(
             ],
             "torque_nm": [round(float(dyno_result.torque_nm[i]), 2) for i in idx],
         },
-    }
-
-
-# --- Bike Suggestions (user submissions) ---------------------------------
-
-
-# Review queues fed by anonymous submissions. Per-IP rate limits bound the
-# rate; this bounds the total so a distributed flood cannot fill the disk or
-# bury the maintainer's review queue.
-MAX_PENDING_SUBMISSIONS = 5000
-
-
-def _enforce_queue_cap(db, table: str) -> None:
-    try:
-        n = db.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]  # noqa: S608
-    except Exception:  # noqa: BLE001 -- table is created lazily by its repo
-        return
-    if n >= MAX_PENDING_SUBMISSIONS:
-        raise HTTPException(
-            503, "The review queue is full right now. Please try again later."
-        )
-
-
-class BikeSuggestionRequest(BaseModel):
-    """POST /api/bikes/suggest -- user-submitted bike addition request."""
-
-    make: str = Field(
-        ..., min_length=1, max_length=60, description="Manufacturer (e.g. 'Kawasaki')"
-    )
-    model: str = Field(
-        ..., min_length=1, max_length=80, description="Model name (e.g. 'ZX-6R 636')"
-    )
-    year: int | None = Field(None, ge=1960, le=2099, description="Model year")
-    displacement_cc: float | None = Field(
-        None, gt=0, le=5000, description="Engine displacement in cc"
-    )
-    peak_power_hp: float | None = Field(
-        None, gt=0, le=600, description="Peak power (hp)"
-    )
-    dry_mass_kg: float | None = Field(None, gt=0, le=800, description="Dry mass (kg)")
-    category: str | None = Field(
-        None,
-        max_length=40,
-        description="sport / naked / cruiser / adv / drag / touring",
-    )
-    notes: str | None = Field(
-        None, max_length=2000, description="Free-form rider context"
-    )
-    submitter_email: str | None = Field(
-        None, max_length=254, description="Optional -- reply address"
-    )
-    source_url: str | None = Field(
-        None, max_length=500, description="Optional spec-sheet URL"
-    )
-
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "make": "Kawasaki",
-                "model": "ZX-6R 636",
-                "year": 2024,
-                "displacement_cc": 636,
-                "peak_power_hp": 128,
-                "dry_mass_kg": 196,
-                "category": "sport",
-                "notes": "Would love to see this in the simulator",
-                "submitter_email": "rider@example.com",
-            }
-        }
-    )
-
-
-@app.post(
-    "/api/bikes/suggest",
-    status_code=201,
-    dependencies=[Depends(rate_limit("suggest", 5, 60.0))],
-)
-def suggest_bike(req: BikeSuggestionRequest):
-    """
-    Submit a bike to be added to the catalog.
-
-    Returns `201 Created` with the suggestion id on success. Plausibility
-    violations (displacement > 3500cc, etc.) are stored anyway but flagged for
-    manual review; the `flagged_out_of_bounds` field in the response tells the
-    client whether the submission was accepted as-is or flagged.
-    """
-    db = _get_db()
-    if not db:
-        raise HTTPException(503, "Database unavailable")
-    _enforce_queue_cap(db, "bike_suggestions")
-
-    try:
-        # Reuse the shared DB connection directly -- the repo only needs a
-        # connection-like object, so we skip the MotoQuantDB facade here.
-        from .database.bike_suggestions_repo import BikeSuggestionsRepository
-
-        repo = BikeSuggestionsRepository(db)
-        result = repo.create(
-            make=req.make,
-            model=req.model,
-            year=req.year,
-            displacement_cc=req.displacement_cc,
-            peak_power_hp=req.peak_power_hp,
-            dry_mass_kg=req.dry_mass_kg,
-            category=req.category,
-            notes=req.notes,
-            submitter_email=req.submitter_email,
-            source_url=req.source_url,
-        )
-    except ValueError as exc:
-        # Empty make/model -- shouldn't happen thanks to Pydantic min_length, but belt-and-braces
-        raise HTTPException(422, str(exc))
-    except Exception as exc:
-        logging.getLogger(__name__).error(
-            "Failed to store bike suggestion: %s", exc, exc_info=True
-        )
-        raise HTTPException(500, f"Database error: {exc}")
-
-    return {
-        "id": result["id"],
-        "status": "pending",
-        "flagged_out_of_bounds": result["flagged_out_of_bounds"],
-        "issues": result["issues"],
-        "message": (
-            "Thanks! Your submission is queued for review."
-            if not result["flagged_out_of_bounds"]
-            else "Submission stored, but some fields are out of expected range and will be manually verified."
-        ),
-    }
-
-
-# --- Spec Corrections (user-submitted field-level fixes) -----------------
-
-
-class SpecCorrectionRequest(BaseModel):
-    """POST /api/specs/correct — propose a correction for one spec field."""
-
-    bike_id: DbId = Field(..., description="DB bike model ID to correct")
-    field_name: str = Field(
-        ...,
-        max_length=80,
-        description=(
-            "Field to correct — must be one of the allowed spec fields "
-            "(see GET /api/specs/correction-fields for the full list)"
-        ),
-    )
-    proposed_value: str = Field(
-        ..., max_length=500, description="Corrected value as a string"
-    )
-    source_url: str | None = Field(
-        None, max_length=500, description="URL of supporting evidence (optional)"
-    )
-    submitter_email: str | None = Field(
-        None, max_length=254, description="Optional reply address"
-    )
-    notes: str | None = Field(None, max_length=2000, description="Free-form context")
-
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "bike_id": 42,
-                "field_name": "peak_power_hp",
-                "proposed_value": "185.5",
-                "source_url": "https://example.com/r15-dyno-2024.pdf",
-                "submitter_email": "rider@example.com",
-                "notes": "Indian Autos Mag wheel-dyno, stock R15 V4, July 2024 issue",
-            }
-        }
-    )
-
-
-def _fetch_current_value(db, bike_id: int, field_name: str) -> str | None:
-    """
-    Snapshot the current value of ``field_name`` from the DB for the audit trail.
-    Returns None if the field can't be found cleanly (non-blocking — we always
-    store the correction regardless).
-    """
-    # Fields that live directly on bike_models as columns
-    _HEADLINE_COLS = {
-        "peak_power_hp",
-        "peak_torque_nm",
-        "peak_power_rpm",
-        "peak_torque_rpm",
-        "displacement_cc",
-        "bore_mm",
-        "stroke_mm",
-        "compression_ratio",
-        "dry_mass_kg",
-        "wet_mass_kg",
-        "cylinder_count",
-        "wheelbase_mm",
-        "seat_height_mm",
-        "fuel_capacity_l",
-    }
-    # Fields that live inside bike_configs JSON blobs
-    _BLOB_FIELD_MAP = {
-        "front_sprocket": "drivetrain_params",
-        "rear_sprocket": "drivetrain_params",
-        "gear_ratios": "drivetrain_params",
-        "redline_rpm": "engine_params",
-        "cd": "aero_params",
-        "frontal_area_m2": "aero_params",
-    }
-    try:
-        if field_name in _HEADLINE_COLS:
-            row = db.execute(
-                f"SELECT {field_name} FROM bike_models WHERE id = ?",  # noqa: S608
-                (bike_id,),
-            ).fetchone()
-            if row:
-                val = row[0]
-                return str(val) if val is not None else None
-        elif field_name in _BLOB_FIELD_MAP:
-            blob_col = _BLOB_FIELD_MAP[field_name]
-            cfg_row = db.execute(
-                f"SELECT {blob_col} FROM bike_configs "  # noqa: S608
-                "WHERE bike_model_id = ? AND is_current = 1 ORDER BY version DESC LIMIT 1",
-                (bike_id,),
-            ).fetchone()
-            if cfg_row and cfg_row[0]:
-                blob = json.loads(cfg_row[0])
-                val = blob.get(field_name)
-                return str(val) if val is not None else None
-    except Exception:
-        # Probe helper: malformed/missing config blob degrades to None.
-        pass
-    return None
-
-
-@app.get("/api/specs/correction-fields")
-def list_correction_fields():
-    """Return the set of field names that users can propose corrections for.
-
-    Shape: ``[{value, label}, ...]`` — standard dropdown-source format. The
-    list is sorted by ``value`` so the dropdown ordering is stable across
-    deploys.
-    """
-    from .database.spec_corrections_repo import FIELD_LABELS, VALID_CORRECTION_FIELDS
-
-    return [
-        {"value": field, "label": FIELD_LABELS.get(field, field)}
-        for field in sorted(VALID_CORRECTION_FIELDS)
-    ]
-
-
-@app.post(
-    "/api/specs/correct",
-    status_code=201,
-    dependencies=[Depends(rate_limit("spec_correct", 5, 60.0))],
-)
-def submit_spec_correction(req: SpecCorrectionRequest):
-    """
-    Submit a user correction for a single spec field on a bike model.
-
-    Stored as ``status='pending'`` — not applied to the catalog until a
-    maintainer reviews it.  The ``field_name`` must be in the whitelist
-    returned by ``GET /api/specs/correction-fields``.
-
-    Returns ``201 Created`` with ``{id, status, message}`` on success.
-    """
-    from .database.spec_corrections_repo import (
-        VALID_CORRECTION_FIELDS,
-        SpecCorrectionsRepository,
-    )
-
-    db = _get_db()
-    if not db:
-        raise HTTPException(503, "Database unavailable")
-
-    _enforce_queue_cap(db, "spec_corrections")
-
-    # Validate field_name against whitelist
-    if req.field_name not in VALID_CORRECTION_FIELDS:
-        raise HTTPException(
-            422,
-            f"field_name {req.field_name!r} is not correctable. "
-            f"Valid fields: {sorted(VALID_CORRECTION_FIELDS)}",
-        )
-
-    # Confirm bike exists
-    bike_row = db.execute(
-        """SELECT bm.id, bm.model_name, m.name AS manufacturer
-           FROM bike_models bm
-           JOIN manufacturers m ON bm.manufacturer_id = m.id
-           WHERE bm.id = ?""",
-        (req.bike_id,),
-    ).fetchone()
-    if not bike_row:
-        raise HTTPException(404, f"Bike {req.bike_id} not found")
-
-    # Snapshot current value for the audit trail
-    current_value = _fetch_current_value(db, req.bike_id, req.field_name)
-
-    try:
-        repo = SpecCorrectionsRepository(db)
-        result = repo.create(
-            bike_model_id=req.bike_id,
-            field_name=req.field_name,
-            proposed_value=req.proposed_value,
-            current_value=current_value,
-            source_url=req.source_url,
-            submitter_email=req.submitter_email,
-            notes=req.notes,
-        )
-    except ValueError as exc:
-        raise HTTPException(422, str(exc))
-    except Exception as exc:
-        logging.getLogger(__name__).error(
-            "Failed to store spec correction: %s", exc, exc_info=True
-        )
-        raise HTTPException(500, f"Database error: {exc}")
-
-    bike_label = f"{dict(bike_row)['manufacturer']} {dict(bike_row)['model_name']}"
-    return {
-        "id": result["id"],
-        "status": "pending",
-        "bike": bike_label,
-        "field": req.field_name,
-        "message": (
-            "Thanks! Your correction is queued for review. "
-            "If accepted, it will be applied to the catalog in the next release."
-        ),
     }
 
 
@@ -4197,18 +3699,6 @@ class BikePricingSummaryOut(BaseModel):
     total_cheapest_inr: float
 
 
-class PricingRefreshOut(BaseModel):
-    part_id: int
-    retailer: str | None = None
-    price_inr: float | None = None
-    in_stock: bool | None = None
-    fetched_at: str | None = None
-    status: str
-    # Set when a server-side floor short-circuited the outbound fetch, so the
-    # caller can tell "we looked and it is unchanged" from "we did not look".
-    note: str | None = None
-
-
 @app.get("/api/pricing/part/{part_id}", response_model=PartPricingOut)
 def pricing_for_part(part_id: int = Path(..., ge=1, le=MAX_DB_ID)):
     """
@@ -4321,138 +3811,6 @@ def pricing_for_bike(
 # aim the 44 s worst-case outbound fetch at the same URL in a loop. The rate
 # limit bounds the caller; this bounds the third party we call.
 PRICING_FORCE_FLOOR_S = 3600.0
-
-
-def _last_price_fetch(db, part_id: int) -> tuple[str, float, dict] | None:
-    """Most recent part_prices row for ``part_id`` as (fetched_at, age_s, row).
-
-    Parses in Python rather than comparing in SQL: fetched_at is written as
-    ``datetime.isoformat()`` ('T' separator, sometimes a +00:00 offset) while
-    SQLite's ``datetime('now')`` yields a space separator, so a string
-    comparison between the two is not reliably ordered. Returns None when
-    there is no row, no parseable timestamp, or no table.
-    """
-    try:
-        rows = db.execute(
-            "SELECT retailer, price_inr, in_stock, fetched_at FROM part_prices "
-            "WHERE part_id = ? AND fetched_at IS NOT NULL",
-            (part_id,),
-        ).fetchall()
-    except sqlite3.Error:
-        return None
-    now = datetime.now(timezone.utc)
-    best: tuple[str, float, dict] | None = None
-    for row in rows:
-        raw = str(row["fetched_at"])
-        try:
-            ts = datetime.fromisoformat(raw.replace(" ", "T"))
-        except ValueError:
-            continue
-        if ts.tzinfo is None:  # stored naive == UTC by convention
-            ts = ts.replace(tzinfo=timezone.utc)
-        age = (now - ts).total_seconds()
-        if best is None or age < best[1]:
-            best = (raw, age, dict(row))
-    return best
-
-
-@app.post(
-    "/api/pricing/refresh/{part_id}",
-    response_model=PricingRefreshOut,
-    dependencies=[Depends(rate_limit("pricing_refresh", 5, 60.0))],
-)
-def refresh_part_price(
-    part_id: int = Path(..., ge=1, le=MAX_DB_ID), force: bool = Query(False)
-):
-    """
-    Trigger a live price refresh for a single part.
-
-    Uses the part's ``retailer_url`` field to hit the live retailer page.
-    Set ``force=true`` to bypass the 14-day freshness check.
-
-    Rate-limited per IP (2026-07-25 audit). This is a *sync* route that makes a
-    blocking outbound HTTP request to a third-party retailer, so each in-flight
-    call occupies one anyio threadpool worker (default 40) for as long as the
-    fetch takes — measured worst case 44.4 s (3 attempts x 10 s timeout plus
-    2+4+8 s backoff). Unauthenticated and unthrottled, a loop over the 72 parts
-    that carry a retailer_url exhausted the pool and starved every other sync
-    route, including ``/api/health`` — which is Render's healthCheckPath and the
-    keep-alive target, so the instance would be marked unhealthy. ``force=true``
-    made it worse by bypassing the 14-day freshness check so repeats could never
-    become no-ops.
-
-    ``force=true`` now still honours a one-hour server-side floor
-    (``PRICING_FORCE_FLOOR_S``): within that window the last stored price is
-    returned as ``status="floor_cached"`` with an explanatory ``note`` and no
-    outbound request is made. That keeps force useful (re-check a part that
-    genuinely changed today) while making a repeat loop a cheap no-op instead
-    of an amplifier pointed at a third-party retailer.
-
-    NOTE: open (no auth) by design — there is no admin role in this
-    project. The per-IP rate limit plus the force floor are the fuses.
-    """
-    db = _get_db()
-    if db is None:
-        raise HTTPException(503, "Database unavailable")
-
-    part_row = db.execute(
-        "SELECT id, brand, model_name, retailer, retailer_url FROM parts WHERE id = ?",
-        (part_id,),
-    ).fetchone()
-    if part_row is None:
-        raise HTTPException(404, f"Part {part_id} not found")
-
-    if not part_row["retailer_url"]:
-        return PricingRefreshOut(
-            part_id=part_id,
-            retailer=part_row["retailer"],
-            price_inr=None,
-            in_stock=None,
-            fetched_at=None,
-            status="no_url",
-        )
-
-    if force:
-        recent = _last_price_fetch(db, part_id)
-        if recent is not None and recent[1] < PRICING_FORCE_FLOOR_S:
-            fetched_at, age_s, row = recent
-            return PricingRefreshOut(
-                part_id=part_id,
-                retailer=row.get("retailer") or part_row["retailer"],
-                price_inr=row.get("price_inr"),
-                in_stock=None if row.get("in_stock") is None else bool(row["in_stock"]),
-                fetched_at=fetched_at,
-                status="floor_cached",
-                note=(
-                    f"force ignored: this part was priced {int(age_s // 60)} min "
-                    f"ago and the server enforces a "
-                    f"{int(PRICING_FORCE_FLOOR_S // 60)}-minute minimum between "
-                    "live retailer fetches. Returning the stored price."
-                ),
-            )
-
-    from motoquant.database.pricing_refresh import fetch_live_price
-
-    result = fetch_live_price(db, part_id, force=force)
-
-    if result is None:
-        return PricingRefreshOut(
-            part_id=part_id,
-            retailer=part_row["retailer"],
-            price_inr=None,
-            in_stock=None,
-            fetched_at=None,
-            status="fetch_failed",
-        )
-
-    return PricingRefreshOut(
-        part_id=part_id,
-        retailer=result.retailer,
-        price_inr=result.price_inr,
-        in_stock=result.in_stock,
-        fetched_at=result.fetched_at.isoformat(),
-        status="refreshed",
-    )
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -5393,89 +4751,22 @@ async def _probe_physics_engine() -> None:
         logging.getLogger(__name__).warning("engine probe failed", exc_info=True)
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# OPTIONAL ACCOUNTS — router mount (/api/auth/*) + the saved-runs garage
-# ═══════════════════════════════════════════════════════════════════════════
-# Accounts are optional and free: they only attribute saved runs to a garage.
-# The mount keys off the SAME import flag as the early get_optional_user
-# import at the top of this module — there is no second try/except here that
-# could swallow an unrelated ImportError and silently 404 /api/auth/*. (The
-# old block wrapped three routers in one `except ImportError: log.warning`,
-# so any one stale import unmounted accounts AND the garage while the API
-# still looked healthy.) Pinned by tests/test_open_source_pivot.py.
-
-if _auth_mod is not None:
-    _get_current_user = _auth_mod.get_current_user
-    app.include_router(_auth_mod.router, prefix="/api/auth")
-
-    @app.get("/api/me/runs")
-    def my_runs(
-        user: dict = Depends(_get_current_user),  # noqa: B008
-        limit: int = Query(25, ge=1, le=100),
-    ):
-        """Saved runs for the signed-in user (powers the account Garage)."""
-        db = _get_db()
-        if not db:
-            raise HTTPException(503, "Database unavailable")
-        try:
-            rows = db.execute(
-                """SELECT sr.id, sr.et_quarter_s, sr.trap_speed_kmh,
-                          sr.et_eighth_s, sr.time_60ft_s, sr.notes,
-                          sr.created_at,
-                          m.name AS manufacturer, bm.model_name AS model,
-                          bm.year_from AS year, v.name AS venue
-                   FROM sim_runs sr
-                   LEFT JOIN bike_configs bc ON sr.bike_config_id = bc.id
-                   LEFT JOIN bike_models bm ON bc.bike_model_id = bm.id
-                   LEFT JOIN manufacturers m ON bm.manufacturer_id = m.id
-                   LEFT JOIN venues v ON sr.venue_id = v.id
-                   WHERE sr.user_id = ?
-                   ORDER BY sr.id DESC
-                   LIMIT ?""",
-                (user["id"], limit),
-            ).fetchall()
-            return {"runs": [dict(r) for r in rows], "count": len(rows)}
-        except sqlite3.Error:
-            return {"runs": [], "count": 0}
-
-else:  # pragma: no cover — only in a dev env missing PyJWT/email-validator
-    logging.getLogger(__name__).error(
-        "Account routes NOT mounted (/api/auth/*, /api/me/runs will 404): "
-        "motoquant.auth failed to import: %s",
-        _AUTH_IMPORT_ERROR,
-    )
-
-
 async def _ensure_runtime_schema() -> None:
-    """Guarded ALTERs so older DBs gain run attribution + the account tables.
+    """Guarded ALTER so an older catalog gains the ``category_tag`` column.
 
-    Deliberately creates ONLY what live code uses. The retired monetization
-    tables (subscriptions, license_keys, payment_events, sim_usage) used to be
-    re-created here on every boot; they are now dropped from shipped DBs by
-    scripts/patch_2026_10_23_drop_monetization.py and nothing recreates them.
+    Deliberately creates ONLY what live code uses. There are no accounts and
+    no server-side saved runs; scripts/patch_2026_11_10_remove_accounts.py
+    drops their tables from shipped databases and nothing recreates them.
     """
     try:
         db = _get_db()
         if not db:
             return
         try:
-            db.execute("ALTER TABLE sim_runs ADD COLUMN user_id INTEGER")
-            db.commit()
-        except sqlite3.OperationalError:
-            pass  # column already exists
-        try:
             db.execute("ALTER TABLE bike_configs ADD COLUMN category_tag TEXT")
             db.commit()
         except sqlite3.OperationalError:
             pass  # column already exists
-        from .database import users_repo as _users_repo
-        from .database.connection import connect as _db_connect
-
-        conn = _db_connect()
-        try:
-            _users_repo.ensure_tables(conn)
-        finally:
-            conn.close()
     except Exception:  # noqa: BLE001 — schema top-up is best-effort
         logging.getLogger(__name__).warning(
             "runtime schema ensure failed", exc_info=True

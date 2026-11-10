@@ -23,7 +23,6 @@ import shutil
 import tempfile
 import time
 import unittest
-from datetime import datetime, timezone
 
 import pytest
 
@@ -507,36 +506,21 @@ class TestCatalogCache(unittest.TestCase):
         s2 = client.get("/api/tires?limit=2000").json()
         self.assertLess(len(s1["tires"]), len(s2["tires"]))
 
-    def test_price_refresh_invalidates(self):
-        from motoquant.database import retail_adapters
+    def test_price_write_invalidates(self):
+        # Prices are refreshed by maintainers through the CLI, which writes the
+        # parts row; the next catalog read must see it.
         from motoquant.database.connection import catalog_generation
 
         conn = api._get_db()
         part_id = conn.execute(
             "SELECT id FROM parts WHERE price_inr IS NOT NULL LIMIT 1"
         ).fetchone()[0]
-        conn.execute(
-            "UPDATE parts SET retailer='tester', retailer_url='http://x.invalid/p' "
-            "WHERE id=?",
-            (part_id,),
-        )
-        conn.commit()
         client.get("/api/parts?limit=5")  # warm
         gen = catalog_generation()
-        orig = retail_adapters.fetch_price
-        retail_adapters.fetch_price = lambda url: retail_adapters.PriceResult(
-            price_inr=1234.0,
-            in_stock=True,
-            fetched_at=datetime.now(timezone.utc),
-            source_url=url,
-            retailer="tester",
+        conn.execute(
+            "UPDATE parts SET price_inr = price_inr + 1 WHERE id=?", (part_id,)
         )
-        try:
-            r = client.post(f"/api/pricing/refresh/{part_id}?force=true")
-        finally:
-            retail_adapters.fetch_price = orig
-        self.assertEqual(r.status_code, 200, r.text)
-        self.assertEqual(r.json()["status"], "refreshed")
+        conn.commit()
         self.assertGreater(catalog_generation(), gen)
         seen, undo = _sql_counter()
         try:
@@ -561,12 +545,13 @@ class TestCatalogCache(unittest.TestCase):
         from motoquant.database.connection import catalog_generation
 
         client.get("/api/venues")
+        conn = api._get_db()
         gen = catalog_generation()
-        r = client.post(
-            "/api/simulate/save",
-            json={"bike_id": 192, "et_quarter_s": 13.5, "trap_speed_kmh": 160.0},
+        conn.execute(
+            "INSERT INTO sim_runs (bike_config_id, et_quarter_s, trap_speed_kmh) "
+            "VALUES (1, 13.5, 160.0)"
         )
-        self.assertIn(r.status_code, (200, 201), r.text)
+        conn.commit()
         self.assertEqual(catalog_generation(), gen)
 
     def test_parts_list_omits_heavy_rule_fields_unless_asked(self):
@@ -703,14 +688,11 @@ class TestNonFiniteBodies(unittest.TestCase):
 
 
 ID_CASES = [
-    ("get", f"/api/runs/{HUGE}", None),
-    ("get", f"/api/leaderboard?venue_id={HUGE}", None),
     ("get", f"/api/bikes/{HUGE}", None),
     ("get", f"/api/parts?bike_id={HUGE}", None),
     ("get", f"/api/parts?category_id={HUGE}", None),
     ("get", f"/api/pricing/part/{HUGE}", None),
     ("get", f"/api/pricing/bike/{HUGE}", None),
-    ("post", f"/api/pricing/refresh/{HUGE}", None),
     ("post", "/api/simulate/quick", {"bike_id": 2**70}),
     ("post", "/api/simulate/quick", {"bike_preset": "gsxr1000_k5", "venue_id": HUGE}),
     ("post", "/api/simulate/quick", {"bike_preset": "gsxr1000_k5", "part_ids": [HUGE]}),
@@ -720,11 +702,6 @@ ID_CASES = [
         {"bike_preset": "gsxr1000_k5", "rear_tire_id": HUGE},
     ),
     ("post", "/api/simulate/compare", {"a_bike_id": HUGE}),
-    (
-        "post",
-        "/api/simulate/save",
-        {"bike_id": HUGE, "et_quarter_s": 11.0, "trap_speed_kmh": 200},
-    ),
     ("post", "/api/jobs/simulate", {"bike_id": HUGE}),
     ("post", "/api/optimize/build", {"bike_id": HUGE}),
     ("post", "/api/autotune/ecu", {"bike_id": HUGE}),
@@ -744,7 +721,7 @@ class TestIdBounds(unittest.TestCase):
 
     def test_non_positive_ids_are_rejected(self):
         self.assertEqual(client.get("/api/bikes/0").status_code, 422)
-        self.assertEqual(client.get("/api/runs/-1").status_code, 422)
+        self.assertEqual(client.get("/api/pricing/part/-1").status_code, 422)
 
 
 UNKNOWN_REF_ROUTES = [
@@ -1144,7 +1121,7 @@ class TestLifespanMigration(unittest.TestCase):
         self.assertEqual(ran, list(hooks))
 
     def test_request_models_use_model_config(self):
-        for model in (api.SimulateRequest, api.BikeSuggestionRequest):
+        for model in (api.SimulateRequest, api.VenueResolveRequest):
             self.assertFalse(hasattr(model, "Config"), model)
             self.assertIn("json_schema_extra", model.model_config)
 

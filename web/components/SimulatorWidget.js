@@ -41,9 +41,8 @@ const LocationPicker = dynamic(() => import('./LocationPicker'), {
 
 // Curated bikes. `match` is the catalog name (year range stripped) used to
 // find the CURRENT id at runtime; when several rows share a name the newest
-// model year wins. `presetId` bikes are the three hand-validated reference
-// bikes (no id lookup needed; `linkId` is only for the "open in simulator"
-// link — ids 1-3 are pinned reference rows).
+// model year wins. `catalogId` names a row directly (the three hand-validated
+// reference bikes are pinned at ids 1-3).
 const BIKE_GROUPS = [
   {
     name: 'Indian sport bikes',
@@ -81,9 +80,11 @@ const BIKE_GROUPS = [
   {
     name: 'Dream bikes',
     bikes: [
-      { label: 'Suzuki GSX-R 1000 K5', presetId: 'gsxr1000_k5', linkId: 1, cc: 999, hp: 178 },
-      { label: 'Suzuki Hayabusa Gen1', presetId: 'hayabusa_gen1', linkId: 3, cc: 1299, hp: 175 },
-      { label: 'Yamaha YZF-R1 (4C8)', presetId: 'yzfr1_4c8', linkId: 2, cc: 998, hp: 180 },
+      // The three reference bikes, by catalog id, so they run in the same
+      // default conditions as every other bike on the site.
+      { label: 'Suzuki GSX-R 1000 K5', catalogId: 1 },
+      { label: 'Suzuki Hayabusa Gen1', catalogId: 3 },
+      { label: 'Yamaha YZF-R1 (4C8)', catalogId: 2 },
       { label: 'Suzuki Hayabusa (2021)', match: 'Suzuki Hayabusa' },
       { label: 'BMW S 1000 RR', match: 'BMW S 1000 RR' },
       { label: 'Kawasaki Ninja H2', match: 'Kawasaki Ninja H2' },
@@ -106,11 +107,11 @@ function resolveCatalog(bikes) {
     const prev = byName.get(k);
     if (!prev || (b.year ?? 0) > (prev.year ?? 0)) byName.set(k, b);
   }
+  const byId = new Map(bikes.map((b) => [b.id, b]));
   const out = {};
   for (const g of BIKE_GROUPS) {
     for (const e of g.bikes) {
-      if (e.presetId) continue;
-      const hit = byName.get(e.match.toLowerCase());
+      const hit = e.catalogId != null ? byId.get(e.catalogId) : byName.get(e.match.toLowerCase());
       if (hit) {
         out[e.label] = {
           id: hit.id,
@@ -243,14 +244,13 @@ export default function SimulatorWidget() {
     if (armed) preloadSurrogate();
   }, [armed]);
 
-  // Chips: presets always; catalog bikes only once resolved.
+  // Chips appear once the catalog resolves their ids.
   const groups = useMemo(
     () =>
       BIKE_GROUPS.map((g) => ({
         name: g.name,
         bikes: g.bikes
           .map((e) => {
-            if (e.presetId) return e;
             const r = catalog.map[e.label];
             return r ? { ...e, ...r } : null;
           })
@@ -261,16 +261,15 @@ export default function SimulatorWidget() {
 
   // Keep the selected bike pointing at its resolved record (id for catalog).
   const bike = useMemo(() => {
-    if (selectedBike.presetId) return selectedBike;
     const r = catalog.map[selectedBike.label];
     return r ? { ...selectedBike, ...r } : null;
   }, [selectedBike, catalog.map]);
 
-  const bikeReady = bike != null && (bike.presetId || bike.id != null);
-  const bikeId = bike ? (bike.presetId ? bike.linkId : bike.id) : null;
+  const bikeReady = bike != null && bike.id != null;
+  const bikeId = bike ? bike.id : null;
   const env = useMemo(() => environmentOverridesFromLocation(location), [location]);
 
-  const sig = JSON.stringify([bike?.presetId ?? bike?.id ?? null, riderKg, powerBoost, massChange, env]);
+  const sig = JSON.stringify([bike?.id ?? null, riderKg, powerBoost, massChange, env]);
 
   // ── Live in-browser estimate ───────────────────────────────────────────
   // Only for catalog bikes, only after the id map resolved, and only while NO
@@ -283,7 +282,6 @@ export default function SimulatorWidget() {
       armed &&
       catalog.state === 'ready' &&
       bike &&
-      !bike.presetId &&
       bike.id != null &&
       !instantBlocker({ bikeId: bike.id, hasParts: false, hasTyres: false, weatherDefault: true, hasPlace: !!location });
     if (!canEstimate) {
@@ -325,7 +323,6 @@ export default function SimulatorWidget() {
     const runEvent = trackSimRun('landing_widget', mode, {
       bike_label: bike.label,
       bike_id: bike.id ?? null,
-      bike_preset: bike.presetId ?? null,
       power_boost_pct: powerBoost,
       mass_delta_kg: massChange,
       rider_kg: riderKg,
@@ -337,8 +334,7 @@ export default function SimulatorWidget() {
         mass_delta_kg: massChange,
         ...env,
       };
-      if (bike.presetId) body.bike_preset = bike.presetId;
-      else body.bike_id = bike.id;
+      body.bike_id = bike.id;
 
       let data;
       if (kind === 'topspeed') {
@@ -380,7 +376,7 @@ export default function SimulatorWidget() {
 
   const exact = run && run.sig === sig ? run : null;
   const placeName = location ? locationName(location) : null;
-  const catalogBlocked = !bike?.presetId && catalog.state !== 'ready';
+  const catalogBlocked = catalog.state !== 'ready';
 
   // With a place chosen there is no instant estimate (see above), so work the
   // exact time out for it straight away — once per distinct setup, after the

@@ -109,18 +109,12 @@ check, and the release checklist.
 - **`web_fetch` re-checks the SSRF guard on every redirect hop** and bounds the
   whole chain to one timeout. Any server-side fetch of a user/LLM-controlled URL
   must too. — `tests/test_webtools_ssrf.py`.
-- **A deployed host never signs sessions with the public dev JWT secret.**
-  On a deployed host (`RENDER`, `RENDER_EXTERNAL_URL` or
-  `MOTOQUANT_DEPLOYED=1`) with `JWT_SECRET` unset or equal to the public
-  default, `motoquant.auth` signs with an **ephemeral per-process random
-  secret** and logs a loud warning. Sessions reset on restart; tokens are
-  never forgeable; boot never fails, because accounts are optional and must
-  not take the simulator down. Local dev and tests keep the documented dev
-  default. The policy keys on the secret's *value*, not on whether the env
-  var is set. (This replaced the old guard, which was keyed on the deleted
-  billing switch.) — `tests/test_auth.py::TestJwtSecretPolicy`. Relatedly, a
-  deployed host never echoes magic-link tokens in HTTP responses —
-  `tests/test_auth.py` (`test_no_dev_token_leak_in_deployed_env`).
+- **No accounts, and nothing a visitor sends is shown to other visitors.**
+  Saved runs stay in the browser; timeslips re-simulate the setup in their
+  link, so a shared time is always one the physics produced. The POST routes
+  are an explicit allow-list of computations, and no route accepts PUT, PATCH
+  or DELETE. — `tests/test_open_source_pivot.py` (`TestNoAccounts`,
+  `TestPublicWriteSurface`).
 - **SQL is always parameterized.** No f-string/format into queries with user
   data.
 - **No secrets in tracked files.** — `scripts/health_check.py` secret scan,

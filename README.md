@@ -120,7 +120,7 @@ shows `motoquant.db` as modified although no data changed. Undo that with
 `cp motoquant.db /tmp/mq.db`.)
 
 To host your own instance on Render + Vercel or any Docker host, including
-the optional settings (accounts, email, LLM keys for chat, persistent disk),
+the optional settings (LLM keys for chat, live weather, error tracking),
 follow **[docs/SELF_HOSTING.md](docs/SELF_HOSTING.md)**.
 
 **Use MotoQuant from your AI:** `python -m motoquant.mcp_server` is a stdio MCP

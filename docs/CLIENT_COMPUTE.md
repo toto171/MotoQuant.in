@@ -112,10 +112,10 @@ What is still missing before a "run locally" button ships:
    load, so a retry re-fetches).
 
 What client full sims deliberately do NOT change:
-- **Leaderboard integrity** — saved runs stay server-authoritative. (Note:
-  `/api/simulate/save` currently trusts the client-supplied ET — a documented,
-  rate-limited beta posture. Client-side sims neither worsen nor fix that;
-  the fix is server-side recomputation at save time, tracked separately.)
+- **Leaderboard and timeslip integrity** — both come from the server. The
+  leaderboard is generated from the physics (`scripts/gen_stock_leaderboard.py`)
+  and a timeslip re-runs the setup in its link through the API, so no number a
+  browser computes is ever shown to another visitor.
 - ~~**The paid tier** — Optimizer/Autotune/Outlaw stay pro-gated~~ —
   *superseded 2026-10-23 (ADR-0006).* There is no paid tier. The whole
   engine and analysis layer are open source, so moving more of them to the

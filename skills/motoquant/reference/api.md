@@ -24,7 +24,6 @@ Interactive OpenAPI docs live at `/docs`.
 | `/api/tires` | `?compound=&manufacturer=&limit=` (limit 1–5000). |
 | `/api/parts` | `?bike_id=&category=&category_id=&search=&compatible_only=&limit=&fields=id&include_rules=`. **Pass `bike_id`** — each part is then checked against the bike's fitment rules (chain pitch, engine layout, displacement, stroke type). With `compatible_only=false` every part comes back annotated `{compatible, fitment_reason}` instead of filtered. `fields=id` returns just `{part_ids, total, bike_id, compatible_only}`: the cheap way to learn which parts fit a bike. `total` counts matching parts before `limit` slicing; `include_rules=true` adds each part's raw `fitment_rules` / `specifications`. |
 | `/api/parts/categories` | Category list. |
-| `/api/leaderboard`, `/api/runs/{id}` | Saved public runs / a shareable timeslip. |
 
 ### Simulation (POST, JSON body)
 

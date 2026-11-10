@@ -140,10 +140,10 @@ export default function GettingStartedPage() {
 
       <Step n="7" title="Save and share a run">
         <p>
-          Press <strong className="text-white">Share</strong> to copy a link that opens the same bike, parts and conditions.
-          If you create a free account you can also <strong className="text-white">Save</strong> a run, which gives it a public
-          timeslip page and a place on the <A href="/leaderboard">leaderboard</A>. Only runs saved from the full simulation
-          are listed, never instant estimates.
+          Press <strong className="text-white">Share</strong> to copy a link that opens the same bike, parts and conditions in
+          the simulator. Press <strong className="text-white">Save</strong> to keep the run in this browser: it appears on{' '}
+          <A href="/runs">Your runs</A> with a timeslip link you can send to anyone. Only exact results can be saved, never
+          instant estimates. There is no account, so saved runs stay on the device where you saved them.
         </p>
       </Step>
 

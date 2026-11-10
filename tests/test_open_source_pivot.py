@@ -6,17 +6,17 @@ tier gating and the free-tier sim-quota meter were deleted. What stays and
 what replaced the old protections is pinned here, each through the REAL app
 (docs/INVARIANTS.md I8):
 
-1. Optional accounts are still MOUNTED. The old router-mount block wrapped
-   auth + payments + subscriptions in one ``except ImportError: warning``, so a
-   single stale import silently 404'd /api/auth/* AND the garage. GET
-   /api/auth/me must answer 401 (route exists, needs a token), never 404.
-2. The monetization surface is GONE — routes, modules, and the auth knobs.
+1. There are no accounts (2026-11-10): no sign-in routes, no saved-run store,
+   no account modules. Saved runs live in the visitor's browser.
+2. The monetization surface is GONE — routes and modules.
 3. Every formerly gated route answers anonymous callers (no 401/402).
-4. Save + garage still work end-to-end: anonymous save → leaderboard only;
-   signed-in save → attributed and listed by /api/me/runs.
+4. The public write surface is an explicit allow-list: every POST route
+   computes and returns a result. Nothing a visitor sends is stored and shown
+   to other visitors (no leaderboard posts, suggestions, corrections or price
+   refreshes). A new POST route must be added here deliberately.
 5. The per-IP DAILY chat cap (MOTOQUANT_CHAT_DAILY_LIMIT, LLM-bill fuse) —
    shared by /api/chat and /api/jobs/chat, 0 disables it.
-6. The startup schema hook no longer re-creates the dropped billing tables.
+6. The startup schema hook creates no account or billing tables.
 """
 
 from __future__ import annotations
@@ -134,44 +134,42 @@ class _AppTest(unittest.TestCase):
 
 
 # ───────────────────────────────────────────────────────────────────────────
-# 1. Accounts stay mounted
+# 1. No accounts and no server-side saved runs
 # ───────────────────────────────────────────────────────────────────────────
 
 
-class TestAccountsAreMounted(_AppTest):
-    def test_auth_me_is_401_not_404(self):
-        r = self.client.get("/api/auth/me")
-        self.assertEqual(
-            r.status_code,
-            401,
-            "GET /api/auth/me must exist and demand a token — a 404 means the "
-            f"account router silently failed to mount: {r.status_code} {r.text}",
-        )
-
-    def test_garage_is_401_not_404(self):
-        self.assertEqual(self.client.get("/api/me/runs").status_code, 401)
-
-    def test_every_account_route_is_registered(self):
-        # app.openapi() rather than app.routes: newer FastAPI keeps included
-        # routers as lazy _IncludedRouter entries, so their paths are not
-        # flat in app.routes.
+class TestNoAccounts(_AppTest):
+    def test_account_and_run_routes_are_gone(self):
         paths = set(app.openapi()["paths"])
-        for p in (
-            "/api/auth/magic-link",
-            "/api/auth/verify",
-            "/api/auth/register",
-            "/api/auth/login",
-            "/api/auth/password/change",
-            "/api/auth/refresh",
-            "/api/auth/logout",
-            "/api/auth/me",
-            "/api/me/runs",
+        stray = [
+            p
+            for p in paths
+            if p.startswith(("/api/auth", "/api/me", "/api/runs"))
+            or p in ("/api/leaderboard", "/api/simulate/save")
+        ]
+        self.assertEqual(stray, [])
+        for method, path in (
+            ("get", "/api/auth/me"),
+            ("post", "/api/auth/login"),
+            ("post", "/api/auth/magic-link"),
+            ("get", "/api/me/runs"),
+            ("get", "/api/runs/1"),
+            ("get", "/api/leaderboard"),
+            ("post", "/api/simulate/save"),
         ):
-            self.assertIn(p, paths)
+            r = getattr(self.client, method)(path)
+            self.assertIn(r.status_code, (404, 405), f"{method.upper()} {path}")
 
-    def test_auth_import_did_not_fail(self):
-        self.assertIsNone(api_mod._AUTH_IMPORT_ERROR)
-        self.assertIsNotNone(api_mod._auth_mod)
+    def test_account_modules_are_deleted(self):
+        for name in (
+            "motoquant.auth",
+            "motoquant.database.users_repo",
+            "motoquant.database.spec_corrections_repo",
+        ):
+            with self.subTest(module=name):
+                sys.modules.pop(name, None)
+                with self.assertRaises(ImportError):
+                    importlib.import_module(name)
 
 
 # ───────────────────────────────────────────────────────────────────────────
@@ -206,15 +204,6 @@ class TestMonetizationIsGone(_AppTest):
                 sys.modules.pop(name, None)
                 with self.assertRaises(ImportError):
                     importlib.import_module(name)
-
-    def test_auth_has_no_billing_knobs(self):
-        import motoquant.auth as auth
-
-        for attr in ("BILLING_ENFORCE", "require_tier"):
-            self.assertFalse(hasattr(auth, attr), attr)
-        for field in ("tier", "subscription_status", "license_keys"):
-            self.assertNotIn(field, auth.MeResponse.model_fields)
-        self.assertNotIn("tier", auth.TokenResponse.model_fields)
 
     def test_agent_has_no_paywall(self):
         import motoquant.llm.agent as agent
@@ -283,39 +272,54 @@ class TestFormerlyGatedRoutesAreOpen(_AppTest):
 
 
 # ───────────────────────────────────────────────────────────────────────────
-# 4. Save + garage end-to-end
+# 4. The public write surface is an explicit allow-list
 # ───────────────────────────────────────────────────────────────────────────
 
+# Every route that accepts a POST. Each one computes and returns a result (or
+# cancels a job / logs a usage beacon); none stores visitor content that other
+# visitors can see. Adding a route here is a review decision: anything that
+# would publish visitor input belongs in the issue tracker instead.
+PUBLIC_POST_ROUTES = {
+    "/api/autotune/ecu",
+    "/api/calibrate/dragy",
+    "/api/calibrate/dyno",
+    "/api/chat",
+    "/api/jobs/autotune",
+    "/api/jobs/chat",
+    "/api/jobs/compare",
+    "/api/jobs/optimize",
+    "/api/jobs/outlaw",
+    "/api/jobs/simulate",
+    "/api/jobs/topspeed",
+    "/api/jobs/{job_id}/cancel",
+    "/api/optimize/build",
+    "/api/simulate",
+    "/api/simulate/compare",
+    "/api/simulate/distance",
+    "/api/simulate/quick",
+    "/api/simulate/top-speed",
+    "/api/surrogate/compare",
+    "/api/surrogate/predict",
+    "/api/telemetry/event",
+    "/api/venues/resolve",
+}
 
-class TestSaveAndGarage(_AppTest):
-    _RUN = {"bike_id": _BIKE_MODEL_ID, "et_quarter_s": 10.25, "trap_speed_kmh": 240.0}
 
-    def test_anonymous_save_lands_on_the_leaderboard_only(self):
-        r = self.client.post("/api/simulate/save", json=self._RUN)
-        self.assertEqual(r.status_code, 201, r.text[:300])
-        self.assertFalse(r.json()["saved_to_account"])
+class TestPublicWriteSurface(_AppTest):
+    def test_post_routes_are_the_allow_list(self):
+        spec = app.openapi()["paths"]
+        posts = {p for p, ops in spec.items() if "post" in ops}
+        self.assertEqual(posts, PUBLIC_POST_ROUTES)
 
-    def test_signed_in_save_is_attributed_to_the_garage(self):
-        reg = self.client.post(
-            "/api/auth/register",
-            json={"email": "garage@test.in", "password": "lights-out-9s"},
-        )
-        self.assertEqual(reg.status_code, 201, reg.text[:300])
-        headers = {"Authorization": f"Bearer {reg.json()['access_token']}"}
-        r = self.client.post(
-            "/api/simulate/save",
-            json={**self._RUN, "notes": "pivot garage"},
-            headers=headers,
-        )
-        self.assertEqual(r.status_code, 201, r.text[:300])
-        self.assertTrue(r.json()["saved_to_account"])
-        runs = self.client.get("/api/me/runs", headers=headers)
-        self.assertEqual(runs.status_code, 200, runs.text[:300])
-        notes = [row["notes"] for row in runs.json()["runs"]]
-        self.assertIn("pivot garage", notes)
-        me = self.client.get("/api/auth/me", headers=headers).json()
-        self.assertEqual(me["email"], "garage@test.in")
-        self.assertNotIn("tier", me)
+    def test_no_put_patch_or_delete_routes(self):
+        spec = app.openapi()["paths"]
+        other = {
+            (m, p)
+            for p, ops in spec.items()
+            for m in ops
+            if m in ("put", "patch", "delete")
+        }
+        self.assertEqual(other, set())
 
 
 # ───────────────────────────────────────────────────────────────────────────
@@ -399,12 +403,12 @@ class TestChatDailyCap(_AppTest):
 
 
 # ───────────────────────────────────────────────────────────────────────────
-# 6. Boot no longer re-creates the billing tables
+# 6. Boot creates no account or billing tables
 # ───────────────────────────────────────────────────────────────────────────
 
 
 class TestStartupSchemaHook(_AppTest):
-    def test_hook_creates_account_tables_but_no_billing_tables(self):
+    def test_hook_creates_no_account_or_billing_tables(self):
         asyncio.run(api_mod._ensure_runtime_schema())
         conn = sqlite3.connect(_TMP_DB_PATH)
         try:
@@ -414,17 +418,21 @@ class TestStartupSchemaHook(_AppTest):
                     "SELECT name FROM sqlite_master WHERE type='table'"
                 )
             }
-            user_cols = {r[1] for r in conn.execute("PRAGMA table_info(users)")}
             run_cols = {r[1] for r in conn.execute("PRAGMA table_info(sim_runs)")}
         finally:
             conn.close()
-        for live in ("users", "sessions", "magic_links"):
-            self.assertIn(live, tables)
-        for dead in ("subscriptions", "license_keys", "payment_events", "sim_usage"):
+        for dead in (
+            "users",
+            "sessions",
+            "magic_links",
+            "spec_corrections",
+            "subscriptions",
+            "license_keys",
+            "payment_events",
+            "sim_usage",
+        ):
             self.assertNotIn(dead, tables)
-        for dead in ("tier", "razorpay_customer_id", "stripe_customer_id"):
-            self.assertNotIn(dead, user_cols)
-        self.assertIn("user_id", run_cols)
+        self.assertNotIn("user_id", run_cols)
 
 
 if __name__ == "__main__":

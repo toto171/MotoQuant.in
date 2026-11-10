@@ -60,9 +60,9 @@ Render is dashboard-driven. There is nothing to install on your machine.
 
 ### Setting optional secrets
 
-If/when you want chat (`GEMINI_API_KEY`, `GROQ_API_KEY`), error tracking
-(`SENTRY_DSN`), or optional accounts (`JWT_SECRET`, plus an email transport;
-see [SELF_HOSTING.md](SELF_HOSTING.md)), add them in the Render dashboard:
+If/when you want chat (`GEMINI_API_KEY`, `GROQ_API_KEY`), live weather
+(`OPENWEATHERMAP_API_KEY`) or error tracking (`SENTRY_DSN`; see
+[SELF_HOSTING.md](SELF_HOSTING.md)), add them in the Render dashboard:
 
 `motoquant-api` → **Environment** → **Add Environment Variable**
 

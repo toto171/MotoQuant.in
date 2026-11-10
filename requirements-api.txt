@@ -28,11 +28,6 @@ python-multipart>=0.0.18,<1.0
 # Database
 # (sqlite3 is stdlib -- no extra package needed)
 
-# Optional accounts (sign-in to keep saved runs in a personal garage).
-# No payment SDKs: MotoQuant is free and open source (2026-10-23 pivot).
-PyJWT>=2.8,<3
-email-validator>=2.0.0,<3
-
 # NL chat layer (POST /api/chat, `motoquant chat`).
 # The LLMClient supports multiple providers selected via the LLM_PROVIDER
 # env var (default 'gemini'). Anthropic uses its own SDK; Gemini /

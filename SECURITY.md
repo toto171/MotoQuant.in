@@ -46,12 +46,11 @@ aim for 90 days or less.
 
 In scope:
 
-- The FastAPI backend in `motoquant/`, including the API routes, optional
-  accounts (magic link, password, JWT sessions), the chat agent and its tools
-  (for example SSRF through `web_fetch` / `web_search`), file uploads
-  (Dragy/dyno CSVs), rate limiting, and SQL handling.
-- The Next.js web app in `web/`, including XSS, open redirects, and leaks of
-  tokens or user data.
+- The FastAPI backend in `motoquant/`, including the API routes, the chat
+  agent and its tools (for example SSRF through `web_fetch` / `web_search`),
+  file uploads (Dragy/dyno CSVs), rate limiting, and SQL handling.
+- The Next.js web app in `web/`, including XSS, open redirects, and anything
+  a crafted timeslip link can make the site display or do.
 - The CLI and the MCP server (`motoquant/mcp_server.py`), where untrusted
   input is involved.
 - Deployment defaults shipped in this repo (`Dockerfile`,
@@ -65,20 +64,19 @@ Out of scope:
   whoever hosts a deployment.
 - Findings that need a compromised device, browser or hosting account.
 - Self-hosted deployments that ignore [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md)
-  (for example, running publicly without `MOTOQUANT_DEPLOYED`/`JWT_SECRET` on
-  a non-Render host, or with several untrusted proxies in front of the API).
+  (for example, running publicly with several untrusted proxies in front of
+  the API).
 - Simulation accuracy disagreements. Those are bugs, not vulnerabilities;
   please open a normal issue with your benchmark source.
 - Vulnerabilities in third-party services (Render, Vercel, LLM providers,
-  Resend). Report those to the vendor.
+  OpenWeatherMap). Report those to the vendor.
 
 ## Hardening already in place
 
 So that a report can focus on what is new: SQL is parameterized; the chat
 agent's `web_fetch` re-checks the SSRF guard on every redirect hop; per-IP
 rate limits trust `X-Forwarded-For` only for the configured proxy hops
-(`MOTOQUANT_TRUSTED_PROXY_HOPS`); magic-link tokens are
-never echoed in responses on a deployed host; a deployed host never signs
-sessions with the public development JWT secret (it uses an ephemeral secret
-if none is configured). [docs/INVARIANTS.md](docs/INVARIANTS.md) lists the
-gates that enforce each of these.
+(`MOTOQUANT_TRUSTED_PROXY_HOPS`); there are no accounts, and no route stores
+visitor input that other visitors can see (the POST routes are a tested
+allow-list). [docs/INVARIANTS.md](docs/INVARIANTS.md) lists the gates that
+enforce each of these.

@@ -89,9 +89,9 @@ const THINGS = [
   {
     icon: Share2,
     q: 'Can I save and share a run?',
-    body: 'Share a link that reopens your exact bike, parts and conditions. With a free account you can save a run to get a timeslip page of its own and a place on the leaderboard. You do not need an account for anything else.',
-    href: '/leaderboard',
-    cta: 'See the leaderboard',
+    body: 'Yes, without an account. Save keeps the run in your browser, and its timeslip link opens the same bike, upgrades and conditions for anyone you send it to. The slip re-runs the physics when it opens, so nobody can type a time in.',
+    href: '/runs',
+    cta: 'Your runs',
   },
   {
     icon: Code2,

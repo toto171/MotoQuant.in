@@ -49,6 +49,11 @@ jobs:
       - name: Source integrity (npm run verify)
         run: node scripts/verify-web.mjs
 
+      # Saved runs and timeslip links (lib/runs.js, lib/timeslip.js). Pure
+      # functions, no install needed.
+      - name: Unit tests (lib)
+        run: node --test scripts/*.test.mjs
+
       # Step 2 — full install, then real build. Catches every other
       # JSX/TSX issue that the integrity check is too loose to detect.
       - name: Install

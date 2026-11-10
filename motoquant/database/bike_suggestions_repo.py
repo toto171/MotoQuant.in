@@ -1,12 +1,14 @@
 """
 MotoQuant — Bike Suggestions Repository
 =======================================
-Stores user-submitted bike addition requests from the web form at
-``motoquant.in/bikes`` (and the matching ``POST /api/bikes/suggest`` endpoint).
+Stores bikes the chat assistant had to estimate because they are missing from
+the catalog (``motoquant/llm/estimator.py``), so a maintainer can review them
+and add the ones worth adding. Riders suggest bikes through the public issue
+tracker, not through this table.
 
 Workflow
 --------
-    web form → POST /api/bikes/suggest → repo.create(...)
+    chat estimate → repo.create(...)
         ↓
     (human review later)
         ↓

@@ -90,12 +90,11 @@ before a big change.
 
 ## 4. Security posture (keep it)
 
-- Accounts are **optional**: magic-link + password (scrypt), JWT sessions.
-  Every sim/analysis route must keep working anonymously. A deployed host
-  (`RENDER` / `RENDER_EXTERNAL_URL` / `MOTOQUANT_DEPLOYED=1`) never signs
-  with the public dev JWT secret: with no `JWT_SECRET` it uses an ephemeral
-  per-process secret and warns. Don't reintroduce the `dev.` unsigned-token
-  path outside the JWT-library-absent branch.
+- There are **no accounts** and **no anonymous writes that other visitors
+  see**. Saved runs live in the visitor's browser; a timeslip link carries its
+  setup and the page re-simulates it. Every POST route is on the allow-list in
+  `tests/test_open_source_pivot.py::PUBLIC_POST_ROUTES`; anything that would
+  publish visitor input belongs in the issue tracker, not a new route.
 - Everything is free, so **per-IP rate limits are the abuse fuse**. Every
   compute-heavy public route gets a `rate_limit(...)` dependency, plus the
   daily chat cap (`MOTOQUANT_CHAT_DAILY_LIMIT`) for the LLM bill. Buckets
