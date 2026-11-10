@@ -27,13 +27,12 @@ help: ## Show this help
 # ── Setup ──────────────────────────────────────────────────────────────────
 .PHONY: install
 install: ## Install runtime + dev dependencies and the package (editable)
-	$(PY) -m pip install -r requirements-api.txt -r requirements-dev.txt
-	$(PY) -m pip install -e .
+	$(PY) -m pip install -e ".[dev]"
 
 .PHONY: db
-db: ## Initialise + seed a fresh dev database (motoquant.db ships seeded)
-	$(PY) -m motoquant.run db init
-	$(PY) -m motoquant.run db seed
+db: ## Fresh MINIMAL dev DB (3 reference bikes + starter data) in ./motoquant.dev.db; the shipped motoquant.db is the full catalog
+	$(PY) -m motoquant.run --db motoquant.dev.db db init
+	$(PY) -m motoquant.run --db motoquant.dev.db db seed
 
 .PHONY: lock
 lock: ## Regenerate requirements-api.lock (clean-venv resolve of requirements-api.txt)

@@ -1,7 +1,7 @@
 ---
 name: motoquant
 description: Answers motorcycle drag-racing and performance-tuning questions with real physics instead of guesswork — quarter-mile ET and trap speed, 60-foot launch times, top speed, sprocket/gearing what-ifs, parts ROI in INR, and bike-vs-bike comparisons — by driving the MotoQuant simulator through its MCP tools or REST API. Use this whenever someone asks how fast a bike is, what a modification is worth, which sprockets or parts to run, how altitude or weather changes a run, or how two bikes compare over a quarter mile. Also use it when working on the MotoQuant codebase itself, for the drag-racing vocabulary (ET, trap, 60-foot, density altitude, over-clutching, stage/outlaw build tiers) and the project's honest-accuracy conventions.
-license: Proprietary — MotoQuant
+license: MIT
 ---
 
 # MotoQuant
@@ -153,9 +153,9 @@ mean something.
 4. **Pass `bike_id` to `search_parts`.** Without it you will happily suggest a
    530-pitch sprocket for a 428-chain commuter. The fitment engine checks
    chain pitch, engine layout, displacement and stroke type — use it.
-5. **State the accuracy honestly.** Weighted mean error is about **0.27 s
-   across 277 matched real-world benchmarks** (bias ≈ 0, so it is not
-   systematically optimistic). That is good enough to rank builds and answer
+5. **State the accuracy honestly.** Weighted mean error is about **0.26 s
+   across 276 matched real-world benchmarks** (bias about +0.007 s, so it is
+   not systematically optimistic). That is good enough to rank builds and answer
    what-ifs, and *not* good enough to promise a given bike will run a given
    ET. Say so when someone is about to bet money.
 6. **Never invent a spec.** If a bike is not in the catalog, say it is not in

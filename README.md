@@ -44,7 +44,12 @@ make baselines        # confirm the three pinned reference bikes are bit-identic
 make                  # list every target
 ```
 
-The repo ships a seeded `motoquant.db`, so everything below works immediately.
+The repo ships a ready-made `motoquant.db` holding the full curated catalog
+(bikes, parts, tires, fitments, venues, benchmarks); everything below uses it
+and works immediately. `db init` + `db seed` build only a small starter
+database (the three reference bikes, ids 1-3, plus starter tires, parts and
+venues) — it is not a rebuild of the shipped catalog. See
+[CONTRIBUTING.md](CONTRIBUTING.md) for the maintainer rebuild path.
 
 Run one simulation from Python (stock GSX-R 1000 K5, sea-level defaults):
 

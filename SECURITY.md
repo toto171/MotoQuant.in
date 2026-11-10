@@ -12,7 +12,7 @@ Please report security issues **privately** — do not open a public issue.
 
 1. **Preferred:** open a private security advisory on the repository:
    <https://github.com/toto171/MotoQuant.in/security/advisories/new>
-2. **Or** email **support@motoquant.in** with the subject line
+2. **Or** email **motoquant@gmail.com** with the subject line
    `SECURITY: <short summary>`.
 
 Include what you found, how to reproduce it (a request/response or a minimal

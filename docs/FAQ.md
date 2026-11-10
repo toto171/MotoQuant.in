@@ -273,7 +273,7 @@ CLI: `python -m motoquant.run sim --bike-id 1 --part-ids 10,20,30 --json > resul
 Yes, it is free and open source, with no tiers, payments or usage quota. You can simulate without an account; an optional account only lets you save runs to a garage. Per-IP rate limits exist purely to prevent abuse.
 
 ### How do I report a bug?
-Open an issue on GitHub (https://github.com/toto171/MotoQuant.in/issues) or email **support@motoquant.in** with:
+Open an issue on GitHub (https://github.com/toto171/MotoQuant.in/issues) or email **motoquant@gmail.com** with:
 - Your bike model (make, year)
 - Modifications you applied
 - The unexpected result
@@ -283,7 +283,7 @@ Open an issue on GitHub (https://github.com/toto171/MotoQuant.in/issues) or emai
 Security problems: report privately per [SECURITY.md](../SECURITY.md).
 
 ### Can I request a new bike or tire?
-Yes — open a "bike / benchmark data" issue (or email **requests@motoquant.in**) with the make, model, year, and any available specs (power, weight, dimensions, OEM tire fitment) **and the source** for them. We prioritize Indian-market bikes and popular international models.
+Yes — open a "bike / benchmark data" issue (or email **motoquant@gmail.com**) with the make, model, year, and any available specs (power, weight, dimensions, OEM tire fitment) **and the source** for them. We prioritize Indian-market bikes and popular international models.
 
 ### Is there a community or forum?
 Use GitHub Discussions on the repository (https://github.com/toto171/MotoQuant.in/discussions) for questions and show-and-tell, and see [CONTRIBUTING.md](../CONTRIBUTING.md) if you want to help.
@@ -319,4 +319,4 @@ Yes — simulation runs are your own unless you explicitly submit to the public 
 ---
 
 **Last updated:** November 2026  
-**Questions?** Contact support@motoquant.in or visit motoquant.in
+**Questions?** Contact motoquant@gmail.com or visit motoquant.in

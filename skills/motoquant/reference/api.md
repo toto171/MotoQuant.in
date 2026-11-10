@@ -21,8 +21,8 @@ Interactive OpenAPI docs live at `/docs`.
 | `/api/bikes` | `?search=&manufacturer=&category=&limit=&offset=`. Returns `{total, bikes:[{id, manufacturer, model, year, category, displacement_cc, peak_power_hp, dry_mass_kg}]}`. `total` respects the filters. |
 | `/api/bikes/{id}` | Full spec sheet + config sub-blocks (aero `cd`, sprockets, `redline_rpm`, `tire_mu_peak`) + `tire_fitments`. 404 on an unknown id. |
 | `/api/venues` | The 20 seeded strips with `altitude_m` and `surface_type`. |
-| `/api/tires` | `?compound=&manufacturer=&limit=`. |
-| `/api/parts` | `?bike_id=&category=&search=&compatible_only=&limit=`. **Pass `bike_id`** — each part is then checked against the bike's fitment rules (chain pitch, engine layout, displacement, stroke type). With `compatible_only=false` every part comes back annotated `{compatible, fitment_reason}` instead of filtered. |
+| `/api/tires` | `?compound=&manufacturer=&limit=` (limit 1–5000). |
+| `/api/parts` | `?bike_id=&category=&category_id=&search=&compatible_only=&limit=&fields=id&include_rules=`. **Pass `bike_id`** — each part is then checked against the bike's fitment rules (chain pitch, engine layout, displacement, stroke type). With `compatible_only=false` every part comes back annotated `{compatible, fitment_reason}` instead of filtered. `fields=id` returns just `{part_ids, total, bike_id, compatible_only}` — the cheap way to learn which parts fit a bike. `total` counts matching parts before `limit` slicing; `include_rules=true` adds each part's raw `fitment_rules` / `specifications`. |
 | `/api/parts/categories` | Category list. |
 | `/api/leaderboard`, `/api/runs/{id}` | Saved public runs / a shareable timeslip. |
 
@@ -31,29 +31,50 @@ Interactive OpenAPI docs live at `/docs`.
 Every sim body identifies the bike with `bike_id` **or** `bike_preset`
 (`gsxr1000_k5` / `yzfr1_4c8` / `hayabusa_gen1`) and accepts the same
 conditions: `rider_mass_kg` (20–250, default 75), `power_boost_pct`
-(−50…200), `mass_delta_kg` (−100…200), `venue_id`, `ambient_temp_c`,
-`track_temp_c`, `humidity_pct`, `headwind_kmh`, `rear_tire_id`. Out-of-range
-values are rejected with 422 rather than absorbed into a meaningless answer.
+(−50…200), `mass_delta_kg` (−100…200), `part_ids` (at most 30),
+`front_tire_id`, `rear_tire_id`, `venue_id`, and the manual overrides
+`ambient_temp_c` (−30…60), `track_temp_c` (−30…80), `humidity_pct` (0–100),
+`headwind_kmh` (−200…200). Out-of-range values are rejected with 422 rather
+than absorbed into a meaningless answer; an unknown bike, preset, venue or
+tyre id is a 404, never a silent default. `compare` takes `a_*` / `b_*` copies
+of the per-build fields (`a_part_ids`, `b_rear_tire_id`, …) and shared
+conditions at the top level.
+
+Every sim result carries an `environment` block — the conditions the engine
+actually ran, read back off the config: `{name, is_default, source
+("default" | "manual" | "venue"), altitude_m, ambient_temp_c, track_temp_c,
+humidity_pct, pressure_hpa, headwind_kmh, track_surface}`. When
+`is_default` is true you passed no venue or manual conditions — the answer is
+for the server's sea-level defaults, so say so. `parts_applied` lists
+`{id, name, brand, price_inr}` for each part that took effect; `parts_skipped`
+lists the ids that were ignored (unknown id, or not fitting the bike), and
+`build_cost_inr` totals the applied ones.
 
 | Endpoint | Body extras | Returns |
 |---|---|---|
-| `POST /api/simulate/quick` | `part_ids: [int]` | `{et_quarter_s, trap_speed_kmh, et_60ft_s, et_eighth_s, bike_name, peak_power_hp, total_mass_kg, parts_applied, build_cost_inr, stock_et_s, et_delta_s}`. ~50 ms. **The workhorse.** |
-| `POST /api/simulate` | `use_adaptive_dt` | Everything above plus all five splits and 100 Hz time-series arrays (`v_kmh`, `rpm`, `gear`, `accel_g`, `traction_pct`, …). No `part_ids` on this route. |
-| `POST /api/simulate/top-speed` | `part_ids`, `max_time_s` (0.1–300), `include_timeseries` | Terminal velocity in m/s, km/h and mph; time and distance to reach it; terminal gear, RPM, power; LSR splits. |
-| `POST /api/simulate/distance` | `distance_m` | Arbitrary-distance run, for land-speed events. |
-| `POST /api/simulate/compare` | `a_*` and `b_*` copies of the fields above, shared conditions at the top level | `{a, b, delta:{et_s, trap_kmh, faster, cost_diff_inr}}`. Runs two sims. |
+| `POST /api/simulate/quick` | — | `{et_quarter_s, trap_speed_kmh, et_60ft_s, et_eighth_s, bike_name, peak_power_hp, total_mass_kg, parts_applied, parts_skipped, build_cost_inr, environment, stock_et_s, et_delta_s}`. ~50 ms. **The workhorse.** `stock_et_s` / `et_delta_s` are null unless parts were applied (`et_delta_s` = with parts − without, negative = quicker). |
+| `POST /api/simulate` | `use_adaptive_dt` | `{et_quarter_s, trap_speed_kmh, trap_speed_ms, splits{60ft_s, 330ft_s, 660ft_s, 1000ft_s, 1320ft_s}, environment, parts_applied, parts_skipped, build_cost_inr, bike, config}` plus a `timeseries` block (about 1,000 points: `t_s`, `v_kmh`, `x_m`, `rpm`, `gear`, `accel_g`, `traction_pct`, `tire_temp_c`, `power_kw`, `F_drive_N`, `F_drag_N`). Accepts `part_ids` like every sim route. |
+| `POST /api/simulate/top-speed` | `max_time_s` (0.1–120), `include_timeseries` | Terminal velocity in m/s, km/h and mph; time and distance to reach it; `reached_plateau`; terminal gear, RPM, power; LSR splits; `parts_applied`, `parts_skipped`, `build_cost_inr`, `environment`. With `include_timeseries` the series is decimated to at most 2,000 points (first, last and peak kept) and rounded for plotting. |
+| `POST /api/simulate/distance` | `distance_m` (>0, ≤20000), `max_time_s` (≤300) | Arbitrary-distance run, for land-speed events: `{distance_m, time_s, trap_speed_*, peak_velocity_kmh, bike_name, parts_skipped, environment}`. |
+| `POST /api/simulate/compare` | `a_*` and `b_*` copies of the fields above, shared conditions at the top level | `{a, b, environment, delta:{et_s, trap_kmh, faster, cost_diff_inr}}`; each of `a` / `b` is a build summary with splits, `parts_applied` and `parts_skipped`. `delta` is B − A (negative = B quicker). Runs two sims. |
 | `POST /api/chat` | `message`, `messages` | The agentic chat — 15 tools, multi-step. |
 | `POST /api/jobs/{simulate\|topspeed\|compare\|optimize\|autotune\|outlaw\|chat}` | same bodies | Returns `{job_id}`; poll `GET /api/jobs/{id}` for `{status, progress, stage, result}` and `POST /api/jobs/{id}/cancel` to stop. Use for anything slow. |
 
-`POST /api/optimize/build` (best parts for a budget) and `POST /api/autotune/ecu`
-(conditions-aware gearing and setup advisor) are open like every other route.
-They are slow (tens of seconds), so prefer their `/api/jobs/…` variants.
+`POST /api/optimize/build` (best parts for a budget), `POST /api/autotune/ecu`
+(conditions-aware gearing and setup advisor) and the composed
+`POST /api/jobs/outlaw` are open like every other route. They are slow (tens
+of seconds), so prefer their `/api/jobs/…` variants. All three accept the
+optional conditions block `location` (city or venue text), `venue_id`, `lat` /
+`lon`, `altitude_m`, `ambient_temp_c`, `track_temp_c`, `humidity_pct` and
+`pressure_hpa`; a resolved location sets the environment first and explicit
+values override it. `budget_inr` null / 0 means no limit; the response echoes
+the conditions used in `environment` and `environment_source`.
 
 ### Deltas and limits
 
 - Public `delta_et_s` / `et_delta_s` is **after − before**: negative = faster.
 - `*_gain_s` fields are positive-is-good. Do not mix the two conventions.
-- There are no tiers, accounts are optional, and nothing is metered. Every
+- There are no tiers, accounts are optional, and there is no usage quota. Every
   expensive route has a per-IP rate limit; a `429` means back off and retry.
 
 ### There is no gearing parameter

@@ -62,13 +62,15 @@ source .venv/bin/activate          # macOS / Linux
 # .venv\Scripts\activate            # Windows PowerShell
 
 # 3. Install dependencies
-pip install -r requirements-api.txt
-pip install -r requirements-dev.txt # pytest + hypothesis (test-only deps)
-pip install -e .                    # editable install of the motoquant package
+pip install -e ".[dev]"   # the motoquant package + runtime deps (requirements-api.txt)
+                          # + the dev extra (requirements-dev.txt: pytest, ruff, hypothesis, ...)
 
-# 4. Initialise + seed a fresh dev database
+# 4. (Optional) a scratch database. The repo already ships motoquant.db, the
+#    full curated catalog -- use that (read-only) for normal development.
+#    `db init` + `db seed` create a small STARTER database only: the three
+#    reference bikes (ids 1-3: K5, R1, Hayabusa) plus starter tires, parts and
+#    venues. Keep this order: seed first, so those three keep ids 1-3.
 python -m motoquant.run --db /tmp/motoquant-dev.db db init
-python -m motoquant.run --db /tmp/motoquant-dev.db import --known-bikes
 python -m motoquant.run --db /tmp/motoquant-dev.db db seed
 
 # 5. Run the focused test subset first (~3 min) — expect 0 failures
@@ -80,6 +82,16 @@ python -m pytest tests/ -q
 ```
 
 If those are green, you're set.
+
+A fresh seed is NOT the shipped catalog: it has the three reference bikes and
+starter data, so its counts and ETs will not match the published ones. The
+shipped `motoquant.db` is produced by maintainers: `import --known-bikes` on
+top of a seeded DB, then the idempotent re-seed/patch chain
+(`scripts/reseed_configs_from_specs.py` followed by the dated
+`scripts/patch_*.py` scripts, in the order listed under "Re-seed chain" in
+`CLAUDE.md` and [docs/KNOWN_TRAPS.md](docs/KNOWN_TRAPS.md) T3/T17), then
+regenerating the golden snapshots and the surrogate. Run that chain only if you
+are changing physics or importer behaviour.
 
 The committed `motoquant.db` in the repo root is the production seeded DB. Do not run migrations against it during dev — always use a `/tmp/` path like above, or `:memory:` for tests.
 

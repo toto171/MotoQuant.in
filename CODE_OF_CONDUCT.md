@@ -41,7 +41,7 @@ the project in public spaces.
 
 ## Reporting and enforcement
 
-Report unacceptable behaviour to the maintainers at **support@motoquant.in**.
+Report unacceptable behaviour to the maintainers at **motoquant@gmail.com**.
 All complaints will be reviewed and investigated promptly and fairly, and
 reporters' privacy will be respected. Maintainers follow the
 [Contributor Covenant enforcement guidelines](https://www.contributor-covenant.org/version/2/1/code_of_conduct/#enforcement-guidelines)

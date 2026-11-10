@@ -132,7 +132,7 @@ Hosting and provider credentials (Render, Vercel, the `motoquant.in` registrar, 
 
 - [ ] Fork or clone the repo (https://github.com/toto171/MotoQuant.in) and create a branch.
 - [ ] Get the test suite green locally (`CONTRIBUTING.md` §2 — use the focused subset first, the full run takes ~30 min).
-- [ ] Run a sim: `python -m motoquant.run sim --bike-id 1 --venue-id 1` → ≈ 10.03 s for the K5.
+- [ ] Run a sim: `python -m motoquant.run sim --bike-id 1 --venue-id 1` → ≈ 10.04 s for the K5 on the shipped `motoquant.db` (bike id 1 at venue 1; the pinned sea-level reference is 9.9331 s via `motoquant.gsxr1000_k5()`). A fresh `db init` + `db seed` database also has the K5 as id 1 but only the three reference bikes — use the shipped DB.
 - [ ] Boot the API (`uvicorn motoquant.api:app --reload`) and the web app (`cd web && npm install && npm run dev`), click through the simulator and the chat.
 - [ ] Read `CLAUDE.md`'s latest session entry + the trailing evergreen sections.
 - [ ] Pick one §4 good-first-issue, scope it as a GitHub Issue, then ship a PR — however small. Proving the workflow end-to-end on day one beats a big first contribution.
