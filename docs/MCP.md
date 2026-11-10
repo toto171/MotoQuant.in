@@ -1,17 +1,15 @@
-# MCP.md — the MotoQuant MCP server
-
-> *"Ask your AI what 16/45 vs 16/47 does to your 60-foot."*
+# The MotoQuant MCP server
 
 `motoquant/mcp_server.py` exposes the drag-racing physics engine as
 [Model Context Protocol](https://modelcontextprotocol.io) tools, so any MCP
-client (Claude Desktop, Claude Code, …) can run real simulations instead of
-guessing from memory. It is the P2 "distribution channels" item in
-[ROADMAP.md](ROADMAP.md), and it ships with a companion skill at
-[`skills/motoquant/SKILL.md`](../skills/motoquant/SKILL.md) that teaches a
-model the vocabulary to drive it well.
+client (Claude Desktop, Claude Code, …) can run simulations instead of
+guessing from memory. A companion skill at
+[`skills/motoquant/SKILL.md`](../skills/motoquant/SKILL.md) teaches a model
+the terms it needs to use the tools well. The server is the P2 "distribution
+channels" item in [ROADMAP.md](ROADMAP.md).
 
-Nothing here is a new production dependency: the server is **stdlib-only**,
-speaks the stdio transport directly, and is not imported by `motoquant.api`.
+The server adds no production dependency. It is **stdlib-only**, speaks the
+stdio transport directly and is not imported by `motoquant.api`.
 
 ---
 
@@ -23,7 +21,7 @@ speaks the stdio transport directly, and is not imported by `motoquant.api`.
 claude mcp add motoquant -- python -m motoquant.mcp_server
 ```
 
-…or commit a `.mcp.json` at the repo root so the whole team gets it:
+Or commit a `.mcp.json` at the repo root so everyone on the team gets it:
 
 ```json
 {
@@ -56,11 +54,10 @@ Windows: `%APPDATA%\Claude\`) and restart the app:
 }
 ```
 
-`python` must be a interpreter that can `import motoquant` — either the repo's
-virtualenv (`/path/to/.venv/bin/python`) or a checkout installed with
-`pip install -e .` (which also installs the runtime dependencies). In HTTP
-mode nothing beyond the stdlib is needed at runtime, so a bare
-`pip install -e . --no-deps` is enough.
+`python` must be an interpreter that can `import motoquant`: either the
+repo's virtualenv (`/path/to/.venv/bin/python`) or a checkout installed with
+`pip install -e .` (which also installs the runtime dependencies). HTTP mode
+needs only the stdlib at runtime, so `pip install -e . --no-deps` is enough.
 
 ### Local (no network, full fidelity)
 
@@ -79,8 +76,7 @@ mode nothing beyond the stdlib is needed at runtime, so a bare
 ```
 
 Local mode needs the runtime dependencies (`pip install -e .`, or
-`pip install -r requirements-api.txt`; it imports
-`motoquant.api` so the MCP tools and the REST routes cannot drift apart).
+`pip install -r requirements-api.txt`), because it imports `motoquant.api`.
 
 ### Verify without a client
 
@@ -102,15 +98,15 @@ python -m motoquant.mcp_server --local --selftest
 | Rate limits | the hosted API's per-IP fuses apply (HTTP 429 when tripped) | none |
 
 The hosted backend runs on Render's **free tier**, which sleeps after 15
-minutes of inactivity. The first call after a nap can take ~50 s while the
-container boots — the client sees a slow tool, not an error (the default
-timeout is 90 s, tunable with `MOTOQUANT_MCP_TIMEOUT`). A keep-alive cron
+minutes of inactivity. The first call after it sleeps can take ~50 s while
+the container boots. The client sees a slow tool, not an error: the default
+timeout is 90 s, and `MOTOQUANT_MCP_TIMEOUT` changes it. A keep-alive cron
 covers 00:00–18:00 UTC, so evening-IST calls are usually warm.
 
 Local mode calls the *same* functions the HTTP routes call
 (`_build_config`, `_apply_parts_to_config`, `_compare_impl`, …), so the two
-backends cannot silently diverge — that is the whole reason `LocalBackend`
-imports `motoquant.api` instead of re-deriving anything.
+backends cannot silently diverge. That is why `LocalBackend` imports
+`motoquant.api` instead of re-deriving anything.
 
 ### Environment variables
 
@@ -125,10 +121,10 @@ imports `motoquant.api` instead of re-deriving anything.
 
 ## Tools
 
-Nine tools. Every result is compact JSON with units in the field names
-(`et_s`, `trap_kmh`, `price_inr`) — no time-series arrays, because model
-context is the scarce resource. **`et_delta_s` is always *after − before*, so
-negative means faster**, matching the REST API and the CLI.
+There are nine tools. Each returns compact JSON with units in the field names
+(`et_s`, `trap_kmh`, `price_inr`) and no time-series arrays, because model
+context is scarce. `et_delta_s` is always *after − before*, so **negative
+means faster**, as in the REST API and the CLI.
 
 | Tool | Arguments | Returns |
 |---|---|---|
@@ -143,7 +139,7 @@ negative means faster**, matching the REST API and the CLI.
 | `gearing_impact` | bike + `front_a`/`rear_a`/`front_b`/`rear_b` | Both setups' ET, trap and 60-foot, plus the delta. |
 
 Bike selection is `bike_id` (from `search_bikes`) or `bike_preset`
-(`gsxr1000_k5`, `yzfr1_4c8`, `hayabusa_gen1` — the three hand-curated
+(`gsxr1000_k5`, `yzfr1_4c8` or `hayabusa_gen1`, the three hand-curated
 reference bikes). Shared condition arguments: `rider_mass_kg`,
 `power_boost_pct`, `mass_delta_kg`, `venue_id`, `ambient_temp_c`,
 `humidity_pct`, `headwind_kmh`.
@@ -153,15 +149,15 @@ reference bikes). Shared condition arguments: `rider_mass_kg`,
 The REST API has no gearing parameter, so the two backends get there
 differently:
 
-* **local** — sets `DrivetrainParams.front_sprocket` / `rear_sprocket` on a
-  config built by the production builder and runs two full passes. Any tooth
-  count in 8–30 front / 25–80 rear.
-* **http** — expresses each tooth count as the catalog sprocket part that
-  carries it (`param_overrides: {"drivetrain.front_sprocket": 16}`) and runs
-  `/api/simulate/compare`. The catalog covers **front 13–18T, rear 38–50T**;
-  anything outside that returns an honest error listing what *is* available
-  and pointing at local mode. Pass `bike_id` (not just a preset) so the
-  fitment engine checks chain pitch.
+* The local backend sets `DrivetrainParams.front_sprocket` / `rear_sprocket`
+  on a config built by the production builder and runs two full passes. It
+  takes any tooth count in 8–30 front / 25–80 rear.
+* The http backend expresses each tooth count as the catalog sprocket part
+  that carries it (`param_overrides: {"drivetrain.front_sprocket": 16}`) and
+  runs `/api/simulate/compare`. The catalog covers **front 13–18T, rear
+  38–50T**. Anything outside that returns an error that lists what *is*
+  available and points to local mode. Pass `bike_id` (not just a preset) so
+  the fitment engine checks chain pitch.
 
 The `method` field in the result says which path produced the numbers.
 
@@ -182,43 +178,42 @@ The `method` field in the result says which path produced the numbers.
 }
 ```
 
-Shorter gearing buys 0.057 s of 60-foot and 0.068 s of ET, and costs 0.2 km/h
-of trap. **This direction is not universal** — run the same query on the K5
-preset and 17/42 → 17/47 *loses* 0.20 s, because a 178 hp litre bike is
-grip- and shift-limited off the line, not gearing-limited. That is exactly
-why this is a tool and not a rule of thumb.
+Shorter gearing gains 0.057 s in the 60-foot and 0.068 s in ET, and costs
+0.2 km/h of trap speed. It does not always help: run the same query on
+the K5 preset and 17/42 → 17/47 *loses* 0.20 s, because a 178 hp
+litre bike is limited by grip and shifting off the line, not by gearing.
 
 ---
 
 ## Protocol details (for maintainers)
 
-* **Transport**: stdio, newline-delimited JSON-RPC 2.0 (MCP's stdio transport
-  — *not* the LSP-style `Content-Length` framing). One JSON object per line on
+* Transport: stdio, newline-delimited JSON-RPC 2.0 (MCP's stdio transport,
+  *not* the LSP-style `Content-Length` framing). One JSON object per line on
   stdin, one response object per line on stdout. Diagnostics go to **stderr
-  only**; anything printed to stdout would corrupt the stream.
-* **Protocol versions**: advertises `2025-06-18`, and echoes `2025-03-26` or
+  only**, because anything printed to stdout would corrupt the stream.
+* Protocol versions: advertises `2025-06-18`, and echoes `2025-03-26` or
   `2024-11-05` back when a client asks for them.
-* **Capabilities**: `tools` only (`listChanged: false`). `resources/*` and
-  `prompts/*` correctly answer `-32601 method not found`.
-* **Methods**: `initialize`, `notifications/initialized`, `ping`,
-  `tools/list`, `tools/call`. JSON-RPC batches are supported; notifications
-  (no `id`) are never answered.
-* **Error split** (the one thing implementers get wrong): protocol faults —
-  bad JSON, unknown method, non-object `params` — use the JSON-RPC `error`
-  channel. *Tool* failures (unknown bike id, incompatible part, unreachable
-  API) come back as a normal `result` with `isError: true` and a human-readable
-  message, so the model can read the problem and retry instead of the
-  transport blowing up.
+* Capabilities: `tools` only (`listChanged: false`). `resources/*` and
+  `prompts/*` answer `-32601 method not found`.
+* Methods: `initialize`, `notifications/initialized`, `ping`, `tools/list`,
+  `tools/call`. JSON-RPC batches are supported; notifications (no `id`) are
+  never answered.
+
+Implementers most often get the error split wrong. Protocol faults (bad
+JSON, unknown method, non-object `params`) use the JSON-RPC `error` channel.
+*Tool* failures (unknown bike id, incompatible part, unreachable API) come
+back as a normal `result` with `isError: true` and a human-readable message, so the
+model can read the problem and retry instead of the transport failing.
 
 ### Tests
 
-`tests/test_mcp_server.py` drives the real stdio loop in-process with zero
+`tests/test_mcp_server.py` drives the real stdio loop in-process with no
 network: handshake, `tools/list` schema validation, `tools/call` in local mode
-against a **temp copy** of `motoquant.db`, both `gearing_impact` paths (the
-HTTP one served by a loopback stub), and every malformed-input branch. The
-gearing test asserts that setup A at the K5's stock 17/42 reproduces the pinned
-`10.0436 s` baseline — proof the sprocket override rides the production config
-builder rather than a parallel implementation.
+against a temp copy of `motoquant.db`, both `gearing_impact` paths (the HTTP
+one served by a loopback stub), and every malformed-input branch. The gearing
+test asserts that setup A at the K5's stock 17/42 reproduces the pinned
+`10.0436 s` baseline. That proves the sprocket override goes through the
+production config builder, not a parallel implementation.
 
 ```bash
 python -m pytest tests/test_mcp_server.py -q
@@ -232,21 +227,22 @@ python -m pytest tests/test_mcp_server.py -q
 3. Add a `tools/call` test. `tools/list` is validated generically, so a
    malformed schema fails the existing suite automatically.
 
-Keep descriptions honest about limits — a model reads them as ground truth
-and will happily over-claim on your behalf.
+State each tool's limits in its description. A model reads descriptions as
+ground truth and will over-claim on your behalf.
 
 ---
 
-## Honest limits
+## Limits
 
 * Accuracy is **weighted mean |error| ≈ 0.25 s over 263 matched benchmarks**
-  (`reports/acc_final_2026_11_10.json`). Good for ranking builds and answering
-  what-ifs; not a promise that a given bike will run an exact ET.
+  (`reports/acc_final_2026_11_10.json`). That is good enough to rank builds
+  and answer what-if questions. It does not promise that a given bike will
+  run an exact ET.
 * Top-speed predictions are weaker than ET: over 83 matched top-speed
   benchmarks the mean |error| is ~13 km/h with a ~+7 km/h (sim fast) bias
   (`reports/acc_final_2026_11_10.json` `topspeed`).
 * The parts catalog is Indian-market priced (INR) and does not cover engine
-  internals (cams, big-bore) — "stage 3" is approximated with bolt-on power
+  internals (cams, big-bore). "Stage 3" is approximated with bolt-on power
   adders.
 * Simulations assume a competent launch. There is no rider-skill knob.
 * The hosted API is free but rate-limited per IP; heavy interactive or

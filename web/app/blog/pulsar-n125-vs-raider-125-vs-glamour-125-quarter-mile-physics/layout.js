@@ -7,7 +7,7 @@ import StructuredData, { SITE_URL } from "../../StructuredData";
 
 const SLUG = "pulsar-n125-vs-raider-125-vs-glamour-125-quarter-mile-physics";
 const TITLE =
-  "Pulsar N125 vs Raider 125 vs Glamour 125: 125cc Drag";
+  "Pulsar N125 vs Raider 125 vs Glamour 125: 125cc drag";
 
 function breadcrumbs() {
   return {

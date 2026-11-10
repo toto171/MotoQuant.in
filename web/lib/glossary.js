@@ -19,7 +19,7 @@ export const GLOSSARY = {
   trap: {
     label: 'Finish-line speed',
     short: 'How fast the bike is going when it crosses the quarter-mile finish line. Racers call it "trap speed".',
-    long: 'It tells you about top-end power, while your quarter-mile time is also shaped by the launch. A stock litre-class sport bike crosses the line at around 215 to 235 km/h.',
+    long: 'It shows top-end power. Your quarter-mile time also depends on the launch. A stock litre-class sport bike crosses the line at around 215 to 235 km/h.',
   },
   sixty: {
     label: 'First 60 ft (launch)',
@@ -27,7 +27,7 @@ export const GLOSSARY = {
     long: 'Every extra 0.1 s lost here is roughly 0.07 to 0.1 s lost over the whole quarter mile. A strong launch on a sport bike is about 1.6 to 1.9 seconds.',
   },
   eighth: {
-    label: 'Halfway — ⅛ mile',
+    label: 'Halfway (⅛ mile)',
     short: 'The time and speed at the halfway point of the run: one eighth of a mile (201 metres).',
     long: 'Many strips run eighth-mile races. The quarter-mile time is usually about 1.5 to 1.6 times the eighth-mile time.',
   },
@@ -44,7 +44,7 @@ export const GLOSSARY = {
   two_step: {
     label: 'Two-step (launch control)',
     short: 'A rev limiter that holds the engine at a fixed speed while you wait on the line, so every launch starts from the same RPM.',
-    long: 'You hold the throttle fully open, the limiter keeps the revs steady, and you release the clutch. It makes launches consistent.',
+    long: 'You hold the throttle fully open, the limiter keeps the revs steady, and you release the clutch.',
   },
   gearing: {
     label: 'Gearing (sprockets)',
@@ -79,12 +79,12 @@ export const GLOSSARY = {
   instant_estimate: {
     label: 'Instant estimate',
     short: 'A very fast approximate answer calculated in your browser. It is close to the full simulation but not exact.',
-    long: 'It is meant for quick what-if checks as you change things. Run the full simulation when you want exact splits, charts and a result you can save.',
+    long: 'Use it for quick what-if checks as you change things. Run the full simulation when you want exact splits, charts and a result you can save.',
   },
   full_sim: {
     label: 'Full simulation',
     short: 'The complete, exact calculation that follows the bike millisecond by millisecond along the whole quarter mile.',
-    long: 'It takes a moment longer than the instant estimate, and it gives you the exact splits and speed-over-time charts. Only full-simulation results can be saved.',
+    long: 'It takes a moment longer than the instant estimate and gives you the exact splits and speed-over-time charts. Only full-simulation results can be saved.',
   },
   power_boost: {
     label: 'Engine power change',
@@ -109,7 +109,7 @@ export const GLOSSARY = {
   slip: {
     label: 'Wheelspin (slip)',
     short: 'How much faster the rear tyre is spinning than the bike is moving. A little slip is normal and gives the best grip.',
-    long: 'Too much slip means power is being burned as smoke instead of pushing you forward. The simulator tracks it moment by moment.',
+    long: 'Too much slip burns power as smoke instead of pushing you forward. The simulator tracks it moment by moment.',
   },
   build_profile: {
     label: 'Build type',

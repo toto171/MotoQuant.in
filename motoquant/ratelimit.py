@@ -238,8 +238,9 @@ def _evict_locked(now: float) -> None:
             _WINDOWS.pop(k, None)
 
 
-def check(key: str, limit: int, window_s: float) -> tuple[bool, int]:
-    """Count one hit against ``key``. Returns (allowed, retry_after_s)."""
+def check(key: str, limit: int, window_s: float, cost: int = 1) -> tuple[bool, int]:
+    """Count ``cost`` units (default one hit) against ``key``. Returns
+    (allowed, retry_after_s)."""
     now = time.monotonic()
     with _LOCK:
         if len(_WINDOWS) > _MAX_KEYS:
@@ -247,7 +248,7 @@ def check(key: str, limit: int, window_s: float) -> tuple[bool, int]:
         t0, count, _ = _WINDOWS.get(key, (now, 0, window_s))
         if now - t0 > window_s:
             t0, count = now, 0
-        count += 1
+        count += max(1, int(cost))
         _WINDOWS[key] = (t0, count, window_s)
         if count > limit:
             return False, max(1, int(window_s - (now - t0)) + 1)
@@ -264,14 +265,17 @@ def _describe_window(window_s: float) -> str:
     return f"{int(window_s)}s"
 
 
-def enforce(request: Request, name: str, limit: int, window_s: float) -> None:
-    """Count one hit for this client against bucket ``name``; raise 429 when
-    over ``limit``. The imperative form of :func:`rate_limit`, for callers
-    whose limit is read at request time (e.g. the daily chat cap)."""
+def enforce(
+    request: Request, name: str, limit: int, window_s: float, cost: int = 1
+) -> None:
+    """Count ``cost`` units (default one hit) for this client against bucket
+    ``name``; raise 429 when over ``limit``. The imperative form of
+    :func:`rate_limit`, for callers whose limit or cost is known only at
+    request time (e.g. the daily chat cap, where a doctor question costs 2)."""
     if not RATE_LIMIT_ENABLED:
         return
     ip = client_ip(request)
-    allowed, retry_after = check(f"{name}:{ip}", limit, window_s)
+    allowed, retry_after = check(f"{name}:{ip}", limit, window_s, cost)
     if not allowed:
         raise HTTPException(
             429,

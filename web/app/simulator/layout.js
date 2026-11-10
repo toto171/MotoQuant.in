@@ -6,9 +6,9 @@
 import StructuredData, { SITE_URL } from '../StructuredData';
 
 const TITLE =
-  'Motorcycle Quarter-Mile Calculator — Physics-Based ET Predictor for 534 Bikes';
+  'Motorcycle quarter-mile calculator: physics-based ET predictor for 534 bikes';
 const DESCRIPTION =
-  'Free physics-based motorcycle quarter-mile calculator — not a power-to-weight formula. Predict ET, trap speed, and 60-ft split for 534 bikes at Aamby Valley, MMRT, BIC, and 17 more venues. Tweak rider weight, power delta, mass, and conditions live. Validated to ±0.2s on GSX-R K5, YZF-R1, and Hayabusa.';
+  'A free motorcycle quarter-mile calculator that runs the physics instead of a power-to-weight formula. Predict ET, trap speed and 60-ft split for 534 bikes at Aamby Valley, MMRT, BIC and 17 more venues. Change rider weight, power, mass and conditions and see the result live. Validated to ±0.2s on GSX-R K5, YZF-R1 and Hayabusa.';
 
 export const metadata = {
   title: TITLE,
@@ -87,7 +87,7 @@ export const metadata = {
         url: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'MotoQuant Simulator — live quarter-mile drag simulation for 534 motorcycles',
+        alt: 'MotoQuant simulator: live quarter-mile drag simulation for 534 motorcycles',
       },
     ],
   },
@@ -123,7 +123,7 @@ function webApplicationSchema() {
     url: `${SITE_URL}/simulator`,
     applicationCategory: 'AutomotiveApplication',
     operatingSystem: 'Any (web browser)',
-    browserRequirements: 'Requires JavaScript and modern browser (Chrome 90+, Safari 14+, Firefox 88+)',
+    browserRequirements: 'Requires JavaScript and a modern browser (Chrome 90+, Safari 14+, Firefox 88+)',
     isAccessibleForFree: true,
     license: 'https://www.apache.org/licenses/LICENSE-2.0',
     offers: {
@@ -132,11 +132,11 @@ function webApplicationSchema() {
       priceCurrency: 'INR',
     },
     featureList: [
-      '534 motorcycles in catalog',
+      '534 motorcycles in the catalog',
       '20 drag strip venues with seasonal weather',
-      'ET + trap + splits in <1 second',
+      'ET, trap speed and splits in under 1 second',
       'Dragy GPS import for calibration',
-      'Parts ROI with cost per tenth',
+      'Cost per tenth for each part',
     ],
   };
 }

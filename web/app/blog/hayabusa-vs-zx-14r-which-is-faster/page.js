@@ -4,12 +4,12 @@ import SiteFooter from '../../../components/SiteFooter';
 import StructuredData, { articleSchema } from '../../StructuredData';
 
 const SLUG = 'hayabusa-vs-zx-14r-which-is-faster';
-const TITLE = 'Hayabusa vs ZX-14R: Quarter-Mile Drag Race Physics (India)';
+const TITLE = 'Hayabusa vs ZX-14R: Quarter-mile drag race physics (India)';
 const DESCRIPTION =
-  'Hayabusa quarter-mile time vs Ninja ZX-14R in India: MotoQuant simulates a stock Suzuki Hayabusa Gen1 at 10.218 s and a Kawasaki ZX-14R 2012 at 9.872 s at Aamby Valley in November. Spec-by-spec physics breakdown of where each bike wins.';
+  'Hayabusa vs Ninja ZX-14R quarter-mile times in India: MotoQuant simulates a stock Suzuki Hayabusa Gen1 at 10.218 s and a Kawasaki ZX-14R 2012 at 9.872 s at Aamby Valley in November. Where each bike wins, spec by spec.';
 
 export const metadata = {
-  title: 'Hayabusa vs ZX-14R: Quarter-Mile Physics Breakdown (India)',
+  title: 'Hayabusa vs ZX-14R: Quarter-mile physics breakdown (India)',
   description: DESCRIPTION,
   keywords: [
     'Hayabusa vs ZX-14R',
@@ -40,19 +40,19 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'The Suzuki Hayabusa and the Kawasaki Ninja ZX-14R have shared the title of "fastest production motorcycle on a public road" for over twenty years. The two bikes trade wins on every dyno chart, every magazine timing run, and every Sunday morning argument outside Pune coffee shops. MotoQuant simulates the Hayabusa Gen1 reference baseline at 10.1100 seconds and pegs the ZX-14R 2012 in the same hyper-sport cluster. The numbers tell a clearer story than the marketing does — and the answer to "which is faster off the line" depends on what you mean by "off the line". (Updated 10 November 2026: the simulated times were re-run on the current engine.)',
+    text: "Over a full quarter mile at Aamby Valley, MotoQuant puts a stock Kawasaki Ninja ZX-14R 0.35 seconds ahead of a stock Suzuki Hayabusa. Over the first 60 feet, the simulator has the Hayabusa 0.035 seconds quicker. So the answer to \"which is faster off the line\" depends on what you mean by \"off the line\". The two bikes have shared the title of \"fastest production motorcycle on a public road\" for over twenty years, and they trade wins on dyno charts, in magazine timing runs and in Sunday morning arguments outside Pune coffee shops. The Hayabusa Gen1 is one of the simulator's reference bikes, pinned at 10.1100 seconds, and the ZX-14R 2012 sits in the same hyper-sport class. (Updated 10 November 2026: the simulated times were re-run on the current engine.)",
   },
   {
     type: 'h2',
-    text: 'The Two Bikes on Paper',
+    text: "The two bikes on paper",
   },
   {
     type: 'p',
-    text: 'Both bikes are 4-cylinder inline 1300cc-class hyper-sports. Both are geared for a 290+ km/h top speed. Both weigh north of 220 kg dry. They share roughly the same wheelbase, the same rear tire size, the same chain pitch (530), and the same sport-touring riding position. They also share the same problem at the strip: getting all that mass and power down to a 190/50 rear tire in less than half a second of clutch engagement.',
+    text: "Both bikes are 1300cc-class inline-four hyper-sports, geared for a 290+ km/h top speed and weighing north of 220 kg dry. They have roughly the same wheelbase, rear tire size, chain pitch (530) and sport-touring riding position. They also have the same problem at the strip: putting all that mass and power through a 190/50 rear tire in less than half a second of clutch engagement.",
   },
   {
     type: 'p',
-    text: 'Below is the spec-sheet comparison MotoQuant uses as input for the simulation. Numbers come from the catalog entries seeded in the project (SUZUKI_HAYABUSA_GEN2 and KAWASAKI_ZX14R_2012). The Hayabusa Gen1 reference baseline used for the validated 10.1100 s ET is a slightly older variant (1999-2007, 170 hp at the wheel) defined separately in defaults.py.',
+    text: "The spec sheet MotoQuant simulates, in the table below, comes from the catalog entries seeded in the project (SUZUKI_HAYABUSA_GEN2 and KAWASAKI_ZX14R_2012). The Hayabusa Gen1 reference bike behind the validated 10.1100 s ET is a slightly older model (1999-2007, 170 hp at the wheel), defined separately in defaults.py.",
   },
   {
     type: 'table',
@@ -74,15 +74,15 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Two real differences sit in that table. The ZX-14R has 101 cc more displacement, 7.5 Nm more torque, and a meaningfully tighter aerodynamic profile (Cd 0.58 vs 0.62). The Hayabusa is the more refined package — older, more developed, with a sport-touring chassis that has been iterated on since 1999. On peak power the two are within 3 hp of each other, which is well inside the run-to-run variation of any production motorcycle dyno test.',
+    text: "The table shows two real differences. The ZX-14R has 101 cc more displacement, 7.5 Nm more torque and noticeably less drag (Cd 0.58 vs 0.62). The Hayabusa is the more refined package: older, with a sport-touring chassis that has been developed since 1999. Peak power is within 3 hp, well inside the run-to-run spread of any production motorcycle dyno test.",
   },
   {
     type: 'h2',
-    text: 'What MotoQuant Says: Stock-Tune Simulation Numbers',
+    text: "What MotoQuant says: Stock-tune simulation numbers",
   },
   {
     type: 'p',
-    text: 'Running both bikes in MotoQuant under matched Aamby Valley November conditions (density altitude around 1100 m, 22°C ambient, dry asphalt with stock OEM tires at μ_peak around 1.30, 75 kg rider on the 220 kg dry bike) produces the following stock-tune output:',
+    text: "Both bikes ran in MotoQuant under the same Aamby Valley November conditions: density altitude around 1100 m, 22°C ambient, dry asphalt, stock OEM tires at μ_peak around 1.30, and a 75 kg rider on the 220 kg dry bike. The stock-tune results:",
   },
   {
     type: 'table',
@@ -97,83 +97,83 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The Hayabusa Gen1 is one of three reference bikes pinned in the simulator: exactly 10.1100 seconds at the sea-level reference conditions, 10.218 seconds at Aamby Valley in November as above. The ZX-14R is a regular catalog bike. Both sit in the litre sport 195 hp-and-up class, which shows a weighted mean absolute error of 0.171 seconds against published tests. The simulator gives the ZX-14R an ET advantage of 0.35 seconds and a trap advantage of 15.7 km/h; the ET gap is about twice the class\'s typical error.',
+    text: "The Hayabusa Gen1 is one of three reference bikes pinned in the simulator: exactly 10.1100 seconds at the sea-level reference conditions, and 10.218 seconds at Aamby Valley in November. The ZX-14R is a regular catalog bike. Both sit in the litre sport 195 hp-and-up class, which shows a weighted mean absolute error of 0.171 seconds against published tests. The simulator puts the ZX-14R 0.35 seconds ahead on ET and 15.7 km/h ahead at the trap. That ET gap is about twice the class's typical error.",
   },
   {
     type: 'callout',
-    text: 'These are stock-tune simulations. A modded Hayabusa with a stretched swingarm, a 14-tooth front sprocket, drag tires, a 4-into-1 stainless system, and a Power Commander tune will run mid-9s territory at well over 250 km/h trap. A modded ZX-14R does the same. The differences in this post describe stock bikes on stock tires under controlled launch conditions — not strip-prepped drag specials.',
+    text: "These are stock-tune simulations. A Hayabusa with a stretched swingarm, a 14-tooth front sprocket, drag tires, a 4-into-1 stainless system and a Power Commander tune will run in the mid-9s with a trap well over 250 km/h, and so will a ZX-14R built the same way. This post compares stock bikes on stock tires with controlled launches, not strip-prepped drag specials.",
   },
   {
     type: 'h2',
-    text: 'Where the ZX-14R Wins: Top-End Pull',
+    text: "Where the ZX-14R wins: Top-end pull",
   },
   {
     type: 'p',
-    text: 'The ZX-14R has more displacement, more torque, and less aerodynamic drag. All three of those advantages compound in the second half of the quarter mile. From the 1/8-mile mark to the trap, the ZX-14R out-pulls the Hayabusa clearly in the simulator. The difference is most visible at the trap (15.7 km/h in identical conditions), and that gap grows further if you let both bikes run to their geared top speed.',
+    text: "More displacement, more torque and less drag all add up in the second half of the quarter mile. From the 1/8-mile mark to the trap, the ZX-14R clearly out-pulls the Hayabusa in the simulator. The gap shows most at the trap, 15.7 km/h in identical conditions, and it keeps growing if both bikes run on to their geared top speed.",
   },
   {
     type: 'p',
-    text: 'Three things drive this. First, the lower Cd. At 240 km/h the aerodynamic drag force is roughly 92% of the engine output for both bikes; the ZX-14R is just 4-5% better there because of its more streamlined fairing and lower handlebar position. Second, the longer rear sprocket (43 teeth vs 40 on the Hayabusa) means the ZX-14R lives lower in each gear at the trap, which keeps it closer to the meat of the torque curve. Third, the slightly higher peak-power RPM (10,000 vs 9,500) gives it about 500 more usable rpm of headroom in 4th gear at the trap line.',
+    text: "Three things drive this. The first is the lower Cd. At 240 km/h the aerodynamic drag force is roughly 92% of the engine output on both bikes, and the ZX-14R is only 4-5% better there, thanks to its more streamlined fairing and lower handlebar. The second is the larger rear sprocket (43 teeth vs 40 on the Hayabusa), which keeps the ZX-14R lower in each gear at the trap and closer to the meat of its torque curve. The third is its slightly higher peak-power rpm (10,000 vs 9,500), which gives it about 500 more usable rpm in 4th gear at the trap line.",
   },
   {
     type: 'p',
-    text: 'In raw 1/4-mile terms this is worth about 0.10 seconds — meaningful at the bench, invisible on a stopwatch. For a rider chasing a 290+ km/h top-speed run on a long stretch, the same advantage translates into about 8-12 km/h of terminal velocity. That is the gap that has fueled twenty years of "which is faster" magazine covers.',
+    text: "Over a quarter mile this is worth about 0.10 seconds: meaningful on paper, invisible on a stopwatch. On a 290+ km/h top-speed run down a long stretch, the same advantage is worth about 8-12 km/h of terminal speed, and that gap has fuelled twenty years of \"which is faster\" magazine covers.",
   },
   {
     type: 'h2',
-    text: 'Where the Hayabusa Wins: Launch and Composure',
+    text: "Where the Hayabusa wins: Launch and composure",
   },
   {
     type: 'p',
-    text: 'In the first 60 feet, the simulator output favors the Hayabusa by a hair. The reasons sit in the chassis and the clutch, not the engine. The Hayabusa Gen1 reference setup runs a 1485 mm wheelbase, a 530 mm CoG height, a 51% front-weight distribution, and 25° of rake. Those are touring numbers, not litre-bike numbers — and at full-throttle launch they make the bike less wheelie-prone, more progressive on clutch engagement, and easier to launch consistently across multiple runs.',
+    text: "Over the first 60 feet the simulator favours the Hayabusa by a hair, and the reasons are in the chassis and the clutch rather than the engine. The Hayabusa Gen1 reference setup has a 1485 mm wheelbase, a 530 mm CoG height, 51% of its weight on the front and 25° of rake. Those are touring numbers. At a full-throttle launch they make the bike less prone to wheelies, smoother as the clutch bites, and easier to launch the same way run after run.",
   },
   {
     type: 'p',
-    text: 'The ZX-14R has the same wheelbase but a slightly more aggressive geometry and the marketing-grade 200-section rear tire. That wider rear tire is largely cosmetic for ET purposes — the contact patch grows, but the slip angle distribution shifts the load further back on launch, which means you have to feed clutch a little more carefully to avoid a nose-up event in 1st gear. The simulator captures this through the wheelie sub-model: at full clutch dump from 7,500 rpm, the ZX-14R goes light on the front earlier than the Hayabusa, and the rider control input has to back off to keep the front from skywalking.',
+    text: "The ZX-14R has the same wheelbase but slightly more aggressive geometry and a marketing-grade 200-section rear tire. For ET, the wider tire is largely cosmetic. The contact patch grows, but the slip angle distribution shifts the load further back at launch, so you have to feed the clutch in a little more carefully to keep the nose down in 1st gear. The simulator handles this in its wheelie sub-model: on a full clutch dump from 7,500 rpm the ZX-14R goes light at the front earlier than the Hayabusa, and the simulated rider has to back off to keep the front from skywalking.",
   },
   {
     type: 'p',
-    text: 'For an experienced strip rider, the difference is invisible — both bikes can be launched cleanly with practice. For a first-time strip visitor on a stock bike, the Hayabusa is the more forgiving package and tends to produce more consistent ETs across a five-run session. Real-world Indian strip experience at Aamby Valley and BIC bears this out: Hayabusa owners typically post tighter run-to-run variance than ZX-14R owners running the same launch RPM.',
+    text: "An experienced strip rider will not notice the difference, because both bikes launch cleanly with practice. A first-timer on a stock bike will: the Hayabusa is more forgiving and tends to give more consistent ETs over a five-run session. That matches what riders see at Aamby Valley and BIC, where Hayabusa owners usually post tighter run-to-run spreads than ZX-14R owners using the same launch rpm.",
   },
   {
     type: 'h2',
-    text: 'How the Simulator Validates the Hayabusa Number',
+    text: "How the simulator validates the Hayabusa number",
   },
   {
     type: 'p',
-    text: 'The 10.1100-second Hayabusa Gen1 ET (at the sea-level reference conditions) is one of three reference baselines that every physics change in MotoQuant has to preserve to four decimal places. The other two are the Suzuki GSX-R 1000 K5 at 10.0436 seconds and the Yamaha YZF-R1 4C8 at 10.1092 seconds. These three numbers work like a unit test: every commit that touches engine torque curves, gear ratio handling, clutch dynamics, aero, or tire physics has to leave them at exactly Δ +0.0000 s, unless it is a deliberate accuracy pass backed by a full benchmark sweep.',
+    text: "The 10.1100-second Hayabusa Gen1 ET (at the sea-level reference conditions) is one of three reference baselines that every physics change in MotoQuant has to preserve to four decimal places. The other two are the Suzuki GSX-R 1000 K5 at 10.0436 seconds and the Yamaha YZF-R1 4C8 at 10.1092 seconds. The three numbers work like a unit test. Any commit that touches engine torque curves, gear ratios, clutch dynamics, aero or tire physics has to leave them at exactly Δ +0.0000 s, unless it is a deliberate accuracy pass backed by a full benchmark sweep.",
   },
   {
     type: 'p',
-    text: 'For a Hayabusa-vs-ZX-14R comparison, that means the Hayabusa side cannot drift between releases by accident. It is still a simulator output, not a magazine number: Cycle World\'s published test of a stock Gen1 is 10.40 s. The ZX-14R side carries the class error of about 0.17 seconds, so read "ZX-14R is 0.35 seconds faster" as "the simulator says the ZX-14R is faster by about twice its typical error for this class".',
+    text: "So the Hayabusa side of this comparison cannot drift between releases by accident. It is still a simulator output, not a magazine number: Cycle World's published test of a stock Gen1 is 10.40 s. The ZX-14R side carries the class error of about 0.17 seconds, so read \"ZX-14R is 0.35 seconds faster\" as \"the simulator says the ZX-14R is faster by about twice its typical error for this class\".",
   },
   {
     type: 'p',
-    text: 'In honest terms: the simulator gives the ZX-14R the edge, and instrumented strip data on a stock ZX-14R would confirm or correct it. If you have a Dragy timeslip from a stock 2012 ZX-14R at Aamby Valley or BIC, submit it through the "Submit a timeslip" form; a reviewed run joins the benchmark set and the class error will tighten.',
+    text: "The simulator gives the ZX-14R the edge, and instrumented strip data on a stock ZX-14R would confirm or correct it. If you have a Dragy timeslip from a stock 2012 ZX-14R at Aamby Valley or BIC, send it through the \"Submit a timeslip\" form. Once a run is reviewed it joins the benchmark set, and the class error tightens.",
   },
   {
     type: 'h2',
-    text: 'Indian Drag-Strip Reality and the Cost of Ownership',
+    text: "Indian drag-strip reality and the cost of ownership",
   },
   {
     type: 'p',
-    text: 'The on-paper ET difference is small. The on-the-ground difference between owning these two bikes in India is large. The Hayabusa Gen3 (the current production model) is officially imported by Suzuki Motorcycle India at roughly ₹16.9 lakh ex-showroom in 2026 spec. The ZX-14R was officially withdrawn from the Indian market after the 2018 model year — Kawasaki India never imported the post-2018 update — and most ZX-14R bikes on Indian roads today are either pre-2018 ex-CKD examples or grey-market parallel imports running between ₹10-14 lakh used.',
+    text: "The ET difference on paper is small. The difference in owning these two bikes in India is large. Suzuki Motorcycle India officially imports the Hayabusa Gen3, the current production model, at roughly ₹16.9 lakh ex-showroom in 2026 spec. The ZX-14R was officially withdrawn from the Indian market after the 2018 model year, and Kawasaki India never imported the post-2018 update. Most ZX-14Rs on Indian roads today are pre-2018 ex-CKD bikes or grey-market parallel imports, selling used for ₹10-14 lakh.",
   },
   {
     type: 'p',
-    text: 'For an Indian buyer chasing the fastest production motorcycle they can register and ride to a strip, the practical decision is between a 2024 Hayabusa Gen3 with full warranty and dealer service network, or a used 2012-2018 ZX-14R with parallel-import paperwork and aftermarket service support. The simulator says they perform within a hair of each other off the line. The ownership math says the Hayabusa is the easier bike to live with in India and the ZX-14R is the more interesting bike to find well-priced.',
+    text: "An Indian buyer who wants the fastest production motorcycle they can register and ride to a strip is choosing between a 2024 Hayabusa Gen3 with a full warranty and dealer service network, and a used 2012-2018 ZX-14R with parallel-import paperwork and aftermarket service support. Off the line, the simulator puts them within a hair of each other. The Hayabusa is the easier bike to live with in India; the ZX-14R is the more interesting one to find at a good price.",
   },
   {
     type: 'p',
-    text: 'On the strip itself, both bikes are over-tired and under-traction-limited at stock launch. The first ₹20,000 of mod money on either bike should go to a sticky DOT drag rear tire (Pirelli Diablo Supercorsa or Bridgestone Battlax R11) — that single change closes about 0.20 seconds of ET on either bike. After that, the cost-per-tenth math diverges sharply between the two platforms.',
+    text: "On the strip, both bikes are traction-limited at a stock launch. Spend the first ₹20,000 of mod money on either bike on a sticky DOT drag rear tire (Pirelli Diablo Supercorsa or Bridgestone Battlax R11). That one change takes about 0.20 seconds off the ET on either bike. After that, the cost-per-tenth math diverges sharply between the two.",
   },
   {
     type: 'h2',
-    text: 'Mod Path Comparison: Where the ETs Diverge',
+    text: "Mod path comparison: Where the ETs diverge",
   },
   {
     type: 'p',
-    text: 'Both bikes have deep aftermarket support — Hayabusa more than any other production motorcycle in history, and ZX-14R with a strong-but-narrower drag-specific catalog. Below is a stock-to-stage-1 comparison generated by MotoQuant\'s parts-ROI engine for both bikes. ET deltas are simulator output under the same Aamby Valley November conditions:',
+    text: "Both bikes have deep aftermarket support: the Hayabusa more than any other production motorcycle in history, the ZX-14R a strong but narrower drag-specific catalog. The table is a stock-to-stage-1 comparison from MotoQuant's parts-ROI engine, with ET deltas simulated in the same Aamby Valley November conditions.",
   },
   {
     type: 'table',
@@ -189,31 +189,27 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Two patterns stand out. First, the cheapest tenths on both bikes are the rear tire and the sprocket — under ₹25,000 combined for around 0.30 seconds of ET gain on either platform. Second, the ZX-14R responds slightly better to most performance mods than the Hayabusa, mostly because its 1441 cc engine has more thermal headroom for an exhaust-and-tune package. A staged Hayabusa runs out of fuel-system capacity at the OEM injectors around the 220 hp mark; a staged ZX-14R has another 15-20 hp of injector-and-fuel-pump headroom before you have to upgrade the fuel system. For Pune drag-shop operators, that translates into a slightly lower cost-per-horsepower on a staged ZX-14R build.',
+    text: "The cheapest tenths on both bikes are the rear tire and the sprocket: under ₹25,000 together for around 0.30 seconds of ET on either bike. Beyond those, the ZX-14R responds slightly better to most performance mods, mostly because its 1441 cc engine has more thermal headroom for an exhaust and tune. A staged Hayabusa runs out of fuel-system capacity at the OEM injectors around the 220 hp mark; a staged ZX-14R has another 15-20 hp of injector and fuel-pump headroom before you have to upgrade the fuel system. For Pune drag shops, that means a slightly lower cost per horsepower on a staged ZX-14R build.",
   },
   {
     type: 'p',
-    text: 'For a stretched and lowered drag-prep build — the path most serious Indian Hayabusa and ZX-14R owners take when they decide to chase mid-9s — the simulator predicts the ZX-14R holds onto its ET advantage and stretches it slightly. A drag-prepped Hayabusa lands in the 9.5-9.7 second range under matched conditions; a drag-prepped ZX-14R lands in the 9.4-9.6 range. Both are silly fast for street-registered bikes; both are well below what either platform can do with a turbo.',
+    text: "Most serious Indian Hayabusa and ZX-14R owners who decide to chase the mid-9s stretch and lower the bike. For that drag-prep build the simulator has the ZX-14R keeping its ET advantage and stretching it slightly: a drag-prepped Hayabusa lands in the 9.5-9.7 second range under matched conditions, and a drag-prepped ZX-14R in the 9.4-9.6 range. Both are silly fast for street-registered bikes, and both are well short of what either platform can do with a turbo.",
   },
   {
     type: 'h2',
-    text: 'Run Your Own Numbers',
+    text: "Run your own numbers",
   },
   {
     type: 'p',
-    text: 'The honest answer to "Hayabusa vs ZX-14R, which is faster off the line" is: the ZX-14R has a 0.35 second simulated advantage over the quarter mile in matched stock-tune conditions, about twice the model\'s typical error for this class. Over the first 60 feet the Hayabusa is 0.035 seconds quicker in the simulator, thanks to its more forgiving chassis geometry. On a top-speed run, the ZX-14R\'s better aero wins. On the wallet, the Hayabusa is the easier Indian-market ownership story.',
+    text: "If you own one of these bikes, or are choosing between a used 2018 ZX-14R and a 2024 Hayabusa Gen3 at the same Pune dealer, the simulator at motoquant.in lets you change rider weight, ambient temperature, density altitude, tire choice, gearing and parts-catalog mods to see where your tenths come from. The Hayabusa Gen1 stays locked at 10.1100 seconds as a reference; the catalog Hayabusa Gen2 and Gen3 and the ZX-14R 2012 all run through the same physics with their own spec-sheet inputs.",
   },
   {
     type: 'p',
-    text: 'If you own one of these bikes (or are deciding between a used 2018 ZX-14R and a 2024 Hayabusa Gen3 at the same Pune dealer), the simulator at motoquant.in lets you sweep rider weight, ambient temperature, density altitude, tire choice, gearing, and parts-catalog mods to see exactly where your tenths come from. The Hayabusa Gen1 reference number is reference-locked at 10.1100 seconds; the catalog Hayabusa Gen2 and Gen3 entries plus the ZX-14R 2012 entry all run through the same physics with their own spec-sheet inputs.',
+    text: "Two caveats. Every number in this post is a stock-tune simulation under specific conditions. Change the rider weight by 15 kg, the ambient temperature by 10°C, the track surface from asphalt to a prepped strip, or the launch rpm, and the ETs shift on both bikes, but the order stays the same: the ZX-14R ahead on ET, the Hayabusa ahead to 60 feet. And the Indian aftermarket prices in the mod table are 2026 retailer data that shift every quarter. The parts catalog uses retailer prices where it has them; where it does not, it falls back to a landed-cost formula (USD × 84 × 1.30 import duty × 1.18 GST + ₹1500 freight).",
   },
   {
     type: 'p',
-    text: 'Two final caveats. First, every number in this post is a stock-tune simulation under specific conditions. Change rider weight by 15 kg, change ambient temperature by 10°C, change the track surface from asphalt to a prepped strip, change launch RPM, and the absolute ETs shift on both bikes — but the relative ordering (ZX-14R ET advantage, Hayabusa 60-foot advantage) stays stable. Second, the Indian aftermarket pricing in the mod-path table reflects 2026 retailer data and shifts every quarter; the parts catalog uses retailer prices where it has them and falls back to formula-based landing-cost math (USD × 84 × 1.30 import duty × 1.18 GST + ₹1500 freight) where it cannot.',
-  },
-  {
-    type: 'p',
-    text: 'If you take one practical thing from this post, take this: pick the Hayabusa for ownership ease and launch consistency, pick the ZX-14R for top-end and slightly better mod scaling, and never trust an internet drag-race video at face value because both bikes are within their own run-to-run variance of each other. The simulator is honest about the gap. The strip will be too.',
+    text: "Pick the Hayabusa for easy ownership and consistent launches, and the ZX-14R for top-end pull and slightly better gains from mods. Do not take an internet drag-race video at face value: the two bikes are within each other's run-to-run variance.",
   },
 ];
 
@@ -320,7 +316,7 @@ export default function PostPage() {
             ))}
           </div>
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
-            Hayabusa vs ZX-14R: Which Is Faster Off the Line?
+            Hayabusa vs ZX-14R: Which is faster off the line?
           </h1>
           <div className="text-sm text-white/60 mb-12">
             8 May 2026 · 11 min read · MotoQuant Blog
@@ -336,37 +332,37 @@ export default function PostPage() {
             <li>
               ·{' '}
               <Link href="/blog/how-the-motoquant-physics-engine-works" className="text-brand-accent hover:text-brand-orange transition-colors">
-                How the MotoQuant Physics Engine Works
-              </Link>{' '}
-              — the 15-sub-model RK4 architecture that locks the Hayabusa Gen1 baseline at 10.1100s.
+                How the MotoQuant physics engine works
+              </Link>:{' '}
+              the 15-sub-model RK4 architecture that locks the Hayabusa Gen1 baseline at 10.1100s.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/the-physics-of-a-perfect-launch" className="text-brand-accent hover:text-brand-orange transition-colors">
-                The Physics of a Perfect Launch
-              </Link>{' '}
-              — clutch slip, weight transfer, and traction in the first 0.4 seconds. Why launch composure matters for hyper-sport bikes specifically.
+                The physics of a perfect launch
+              </Link>:{' '}
+              clutch slip, weight transfer and traction in the first 0.4 seconds, and why launch composure matters on hyper-sport bikes.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/how-to-tune-for-aamby-valley-in-november" className="text-brand-accent hover:text-brand-orange transition-colors">
-                How to Tune for Aamby Valley in November
-              </Link>{' '}
-              — the venue conditions used for the simulation in this post.
+                How to tune for Aamby Valley in November
+              </Link>:{' '}
+              the venue conditions used for the simulation in this post.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/ktm-1390-super-duke-r-evo-quarter-mile-physics" className="text-brand-accent hover:text-brand-orange transition-colors">
-                KTM 1390 Super Duke R EVO Quarter-Mile Physics
-              </Link>{' '}
-              — a different take on litre-plus power, with a naked chassis instead of a hyper-sport one.
+                KTM 1390 Super Duke R EVO quarter-mile physics
+              </Link>:{' '}
+              litre-plus power in a naked chassis instead of a hyper-sport one.
             </li>
             <li>
               ·{' '}
               <Link href="/bikes" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Browse the full bike catalog
-              </Link>{' '}
-              — Hayabusa Gen2/Gen3, ZX-14R 2012, and 330+ other bikes with full spec sheets.
+              </Link>:{' '}
+              Hayabusa Gen2/Gen3, ZX-14R 2012, and 330+ other bikes with full spec sheets.
             </li>
           </ul>
         </div>
@@ -376,7 +372,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Run your own Hayabusa-vs-ZX-14R</div>
             <div className="text-white/60 text-sm">
-              Free simulator — pick either bike, dial in your local conditions and rider weight, then re-run with the other to see exactly where the tenths move.
+              Free simulator: pick one bike, set your local conditions and rider weight, then run the other to see where the tenths move.
             </div>
           </div>
           <Link

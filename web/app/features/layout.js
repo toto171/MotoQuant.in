@@ -4,7 +4,7 @@
 
 import StructuredData, { SITE_URL } from '../StructuredData';
 
-const TITLE = "What you can do with MotoQuant — free quarter-mile simulator for motorcycles";
+const TITLE = "What you can do with MotoQuant: free quarter-mile simulator for motorcycles";
 const DESCRIPTION = "Pick a bike from the 534-bike catalog and see its quarter-mile time, find the best parts for your budget, get a race-day setup for your strip, compare two bikes, check your own timeslips and save and share runs. Free and open source.";
 
 export const metadata = {

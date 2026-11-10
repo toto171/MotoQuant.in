@@ -14,7 +14,7 @@ const EMAIL = "motoquant@gmail.com";
 const REPO_URL = "https://github.com/toto171/MotoQuant.in";
 
 export const metadata = {
-  title: "Contact — MotoQuant",
+  title: "Contact | MotoQuant",
   description:
     "Report a bug or request a feature on GitHub, or email the MotoQuant maintainers.",
   alternates: { canonical: "https://motoquant.in/contact" },

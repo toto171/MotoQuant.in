@@ -211,7 +211,7 @@ class TestRunChatPipelineErrors(unittest.TestCase):
         client = LLMClient(_call_override=fake)
         db = MagicMock()
         result = run_chat_pipeline("hi", db, client=client)
-        self.assertEqual(result.error, "llm_not_configured")
+        self.assertEqual(result.error, "assistant_unavailable")
         self.assertIn("no API key", result.error_detail)
         self.assertIsNone(result.sim_result)
 
@@ -383,7 +383,7 @@ class TestChatEndpoint(unittest.TestCase):
         r = self.client.post("/api/chat", json={"query": "anything", "mode": "classic"})
         self.assertEqual(r.status_code, 200)
         body = r.json()
-        self.assertEqual(body["error"], "llm_not_configured")
+        self.assertEqual(body["error"], "assistant_unavailable")
         self.assertIsNone(body["sim_result"])
         self.assertIn("ANTHROPIC_API_KEY", body["error_detail"])
 

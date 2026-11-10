@@ -1,8 +1,8 @@
-# docs/ — index
+# Documentation index
 
-Start here if you're new: **[../AGENTS.md](../AGENTS.md)** (the working
+If you're new, read these in order: **[../AGENTS.md](../AGENTS.md)** (the working
 contract) → **[ONBOARDING.md](ONBOARDING.md)** → **[ARCHITECTURE.md](ARCHITECTURE.md)**
-→ [../CONTRIBUTING.md](../CONTRIBUTING.md). One-command tour: `make health`.
+→ [../CONTRIBUTING.md](../CONTRIBUTING.md). For a one-command tour, run `make health`.
 
 MotoQuant is free and open source under the Apache License 2.0
 ([../LICENSE](../LICENSE), [../NOTICE](../NOTICE)).
@@ -24,6 +24,7 @@ MotoQuant is free and open source under the Apache License 2.0
 | [../CONTRIBUTING.md](../CONTRIBUTING.md) | Setup, testing, code style, PR workflow; how contributions are licensed. |
 | [../CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md) | Contributor Covenant 2.1. |
 | [../SECURITY.md](../SECURITY.md) | Reporting vulnerabilities privately; scope. |
+| [WRITING.md](WRITING.md) | House style for site text and docs. |
 
 ## Subsystems
 | Doc | What it covers |

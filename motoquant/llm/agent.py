@@ -21,13 +21,18 @@ prompt + executor):
     executor, not by trusting the model.
   * Estimated-bike results are always labelled as estimates with confidence.
 
-The loop is provider-agnostic via LLMClient.call_tools (Anthropic native /
-OpenAI-compatible function calling) and fully testable offline through the
-``_call_override`` seam ("tools" kind).
+The loop runs on Claude through LLMClient.call_tools and is fully testable
+offline through the ``_call_override`` seam ("tools" kind). Each turn echoes
+the assistant content verbatim (thinking blocks included), handles every
+stop_reason (refusal, max_tokens, pause_turn, tool_use), returns all tool
+results in one user message as compact valid JSON, and ends an exhausted
+iteration budget with ``tool_choice={"type": "none"}`` instead of dropping
+the tools.
 """
 
 from __future__ import annotations
 
+import copy
 import json
 import logging
 import re
@@ -43,9 +48,10 @@ from ..physics import effective_et
 from .client import (
     AgentStep,
     LLMClient,
-    LLMNotConfiguredError,
-    LLMRateLimitError,
+    LLMError,
     ToolCall,
+    redact_secrets,
+    strict_json_schema,
 )
 
 logger = logging.getLogger(__name__)
@@ -56,7 +62,10 @@ HEAVY_OP_BUDGET = 2  # optimizer / autotune / outlaw runs per chat turn
 TOOL_RESULT_MAX_CHARS = 6_000
 HISTORY_MAX_MESSAGES = 16
 HISTORY_MAX_CHARS = 16_000
-AGENT_MAX_TOKENS = 2_048
+# Thinking counts toward max_tokens on both models; billing is per token
+# actually used, so a roomy ceiling costs nothing extra.
+AGENT_MAX_TOKENS = 16_000
+MAX_PAUSE_RESUMES = 3  # pause_turn: resend as-is at most this many times
 # Same ceiling the API enforces on OptimizeBuildRequest.budget_inr; an
 # unclamped chat budget sizes roi's knapsack DP (budget // 100 buckets).
 AGENT_MAX_BUDGET_INR = 5_000_000.0
@@ -108,20 +117,20 @@ OUTLAW_SIM_COST = 2 * HEAVY_OP_SIM_COST
 # pistons / big-bore), so its recipe leans on nitrous + supporting mods.
 BUILD_TIERS: dict[str, dict[str, Any]] = {
     "stage_1": {
-        "label": "Stage 1 — bolt-ons",
+        "label": "Stage 1: bolt-ons",
         "description": "exhaust, high-flow air filter, ECU flash/fuel controller",
         "profile": "street_legal",
         "default_budget_inr": 60_000,
     },
     "stage_2": {
-        "label": "Stage 2 — bolt-ons + drivetrain",
+        "label": "Stage 2: bolt-ons + drivetrain",
         "description": "stage 1 + full exhaust, clutch, quickshifter, "
         "sprockets/chain, lightweight battery, dyno tune",
         "profile": "street_legal",
         "default_budget_inr": 200_000,
     },
     "stage_3": {
-        "label": "Stage 3 — serious power",
+        "label": "Stage 3: serious power",
         "description": "stage 2 + nitrous, upgraded fuel system, suspension; "
         "(engine internals like cams/big-bore are not in the parts catalog, "
         "so stage 3 is approximated with bolt-on power adders)",
@@ -129,9 +138,9 @@ BUILD_TIERS: dict[str, dict[str, Any]] = {
         "default_budget_inr": 500_000,
     },
     "stage_4": {
-        "label": "Stage 4 / Outlaw — full drag prep",
+        "label": "Stage 4 / Outlaw: full drag prep",
         "description": "stage 3 + forced induction, extended swingarm, "
-        "wheelie bar, drag slicks, lockup clutch — open/outlaw class, "
+        "wheelie bar, drag slicks, lockup clutch; open/outlaw class, "
         "no budget limit",
         "profile": "full_race",
         "default_budget_inr": None,  # unlimited (resolved server-side)
@@ -164,6 +173,7 @@ class AgentChatResult:
 
     raw_query: str
     reply: str | None = None
+    assistant: str | None = None
     blocks: list[dict[str, Any]] = field(default_factory=list)
     tool_trace: list[dict[str, Any]] = field(default_factory=list)
     sims_run: int = 0
@@ -175,6 +185,7 @@ class AgentChatResult:
         return {
             "raw_query": self.raw_query,
             "reply": self.reply,
+            "assistant": self.assistant,
             "blocks": self.blocks,
             "tool_trace": self.tool_trace,
             "sims_run": self.sims_run,
@@ -580,7 +591,7 @@ def _tool(name: str, description: str, props: dict, required: list[str]) -> dict
     }
 
 
-AGENT_TOOLS: list[dict[str, Any]] = [
+_AGENT_TOOL_DEFS: list[dict[str, Any]] = [
     _tool(
         "search_bikes",
         "Find bikes in the MotoQuant catalog by name (fuzzy). ALWAYS use this "
@@ -707,8 +718,18 @@ AGENT_TOOLS: list[dict[str, Any]] = [
                 "type": "string",
                 "enum": ["stage_1", "stage_2", "stage_3", "stage_4", "outlaw"],
             },
-            "budget_inr": {"type": "number"},
-            "goal": {"type": "string", "enum": ["min_et", "max_trap"]},
+            "budget_inr": {
+                "type": "number",
+                "description": (
+                    "Parts budget in rupees, converted from the user's words "
+                    "(1.5 lakh = 150000, 80k = 80000)"
+                ),
+            },
+            "goal": {
+                "type": "string",
+                "enum": ["min_et", "max_trap"],
+                "description": "min_et = quickest ET; max_trap = highest trap speed",
+            },
             "venue_id": {"type": "integer"},
         },
         ["bike_id"],
@@ -773,6 +794,196 @@ AGENT_TOOLS: list[dict[str, Any]] = [
         [],
     ),
 ]
+
+
+# ─── Tools as sent to the API ─────────────────────────────────────────────
+# Static and sorted by name so the tools prefix is byte-identical on every
+# request (the prompt cache matches on the exact prefix). Strict tool use
+# guarantees schema-valid arguments; it is applied where the schema allows
+# (no free-form objects) within a conservative per-request budget for strict
+# schemas. Tools left over stay non-strict and are validated by the
+# executors, as before.
+STRICT_TOOL_LIMIT = 20
+STRICT_OPTIONAL_PARAM_BUDGET = 24
+
+
+def _move_defaults_to_descriptions(schema: dict[str, Any]) -> dict[str, Any]:
+    out = copy.deepcopy(schema)
+    for prop in (out.get("properties") or {}).values():
+        if isinstance(prop, dict) and "default" in prop:
+            default = prop.pop("default")
+            desc = prop.get("description", "")
+            prop["description"] = f"{desc} Default {default}.".strip()
+    return out
+
+
+def _strict_compatible(schema: dict[str, Any]) -> bool:
+    """False when any property is a free-form object (strict mode would
+    forbid every key in it)."""
+
+    def ok(node: Any) -> bool:
+        if not isinstance(node, dict):
+            return True
+        if node.get("type") == "object" and not node.get("properties"):
+            return node is schema  # an empty top-level object is fine
+        children = list((node.get("properties") or {}).values())
+        if isinstance(node.get("items"), dict):
+            children.append(node["items"])
+        return all(ok(c) for c in children)
+
+    return ok(schema)
+
+
+def _optional_count(schema: dict[str, Any]) -> int:
+    props = schema.get("properties") or {}
+    return len([k for k in props if k not in set(schema.get("required") or [])])
+
+
+def _finalize_tools(defs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    tools = [
+        {
+            "name": t["name"],
+            "description": t["description"],
+            "input_schema": _move_defaults_to_descriptions(t["input_schema"]),
+        }
+        for t in sorted(defs, key=lambda t: t["name"])
+    ]
+    candidates = sorted(
+        (t for t in tools if _strict_compatible(t["input_schema"])),
+        key=lambda t: (_optional_count(t["input_schema"]), t["name"]),
+    )
+    n_strict = optional_used = 0
+    for t in candidates:
+        n_opt = _optional_count(t["input_schema"])
+        if n_strict >= STRICT_TOOL_LIMIT:
+            break
+        if optional_used + n_opt > STRICT_OPTIONAL_PARAM_BUDGET:
+            continue
+        t["input_schema"] = strict_json_schema(t["input_schema"])
+        t["strict"] = True
+        n_strict += 1
+        optional_used += n_opt
+    return tools
+
+
+AGENT_TOOLS: list[dict[str, Any]] = _finalize_tools(_AGENT_TOOL_DEFS)
+
+
+# ─── Tool results: compact, always valid JSON ─────────────────────────────
+
+
+def _dumps(obj: Any) -> str:
+    return json.dumps(obj, default=str, separators=(",", ":"), ensure_ascii=False)
+
+
+def _round_floats(obj: Any, nd: int = 4) -> Any:
+    if isinstance(obj, float):
+        return round(obj, nd) if obj == obj and abs(obj) != float("inf") else None
+    if isinstance(obj, dict):
+        return {k: _round_floats(v, nd) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_round_floats(v, nd) for v in obj]
+    return obj
+
+
+def _shrink(obj: Any, max_items: int, max_str: int) -> Any:
+    if isinstance(obj, str):
+        return obj if len(obj) <= max_str else obj[:max_str] + "..."
+    if isinstance(obj, dict):
+        return {k: _shrink(v, max_items, max_str) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        items = [_shrink(v, max_items, max_str) for v in list(obj)[:max_items]]
+        if len(obj) > max_items:
+            items.append(f"... {len(obj) - max_items} more")
+        return items
+    return obj
+
+
+def compact_json(payload: Any, limit: int = TOOL_RESULT_MAX_CHARS) -> str:
+    """Serialise a tool payload to compact JSON no longer than ``limit``.
+
+    Never cuts a string mid-JSON: when the full payload is too long, lists
+    and long strings are shortened step by step (marked ``"truncated":
+    true``) until it fits, and as a last resort only the top-level keys and
+    any error are returned. The result always parses with json.loads.
+    """
+    payload = _round_floats(payload)
+    text = _dumps(payload)
+    if len(text) <= limit:
+        return text
+    for max_items, max_str in ((20, 1000), (10, 400), (5, 200), (3, 120), (1, 60)):
+        small = _shrink(payload, max_items, max_str)
+        if isinstance(small, dict):
+            small = {"truncated": True, **small}
+        else:
+            small = {"truncated": True, "items": small}
+        text = _dumps(small)
+        if len(text) <= limit:
+            return text
+    fallback: dict[str, Any] = {
+        "truncated": True,
+        "note": "result too large to show; ask a narrower question",
+    }
+    if isinstance(payload, dict):
+        if "error" in payload:
+            fallback["error"] = str(payload["error"])[:500]
+        fallback["keys"] = [str(k)[:40] for k in list(payload)[:40]]
+    text = _dumps(fallback)
+    return text if len(text) <= limit else '{"truncated":true}'
+
+
+def _build_summary(payload: dict[str, Any]) -> dict[str, Any]:
+    """What the model needs to explain an optimize_build result (the full
+    payload still goes to the web UI as the build_result block)."""
+    parts = []
+    for p in payload.get("parts") or []:
+        if not isinstance(p, dict):
+            continue
+        parts.append(
+            {
+                "name": p.get("name"),
+                "brand": p.get("brand"),
+                "category": p.get("category_display") or p.get("category"),
+                "price_inr": p.get("price_inr"),
+                "delta_et_s": p.get("delta_et_s"),
+                "cost_per_tenth_inr": p.get("cost_per_tenth_inr"),
+                "no_straight_line_effect": p.get("no_straight_line_effect") or None,
+            }
+        )
+    parts = [{k: v for k, v in p.items() if v is not None} for p in parts]
+    out = {
+        "bike_name": payload.get("bike_name"),
+        "build_tier": payload.get("build_tier"),
+        "tier_label": payload.get("tier_label"),
+        "goal": payload.get("goal"),
+        "budget_inr": payload.get("budget_inr"),
+        "base_et_s": payload.get("base_et_s"),
+        "base_trap_kmh": payload.get("base_trap_kmh"),
+        "optimized_et_s": payload.get("optimized_et_s"),
+        "optimized_trap_kmh": payload.get("optimized_trap_kmh"),
+        "delta_et_s": payload.get("delta_et_s"),
+        "delta_trap_kmh": payload.get("delta_trap_kmh"),
+        "total_cost_inr": payload.get("total_cost_inr"),
+        "budget_used_pct": payload.get("budget_used_pct"),
+        "cost_per_tenth_inr": payload.get("cost_per_tenth_inr"),
+        "parts": parts,
+        "warnings": payload.get("warnings") or [],
+        "synergies": payload.get("synergies") or [],
+        "next_upgrade": payload.get("next_upgrade"),
+    }
+    return {k: v for k, v in out.items() if v is not None}
+
+
+def tool_result_content(name: str, payload: Any) -> str:
+    """Tool result text for the model: compact valid JSON within the limit."""
+    if (
+        name == "optimize_build"
+        and isinstance(payload, dict)
+        and "error" not in payload
+        and "optimized_et_s" in payload
+    ):
+        payload = _build_summary(payload)
+    return compact_json(payload)
 
 
 # ─── Tool executors ───────────────────────────────────────────────────────
@@ -1073,7 +1284,10 @@ def _exec_rank_bikes(ctx: AgentContext, args: dict) -> dict:
     ranked.sort(key=lambda r: r["et_quarter_s"])
     payload = {
         "method": f"top {n_sim} power-to-weight candidates fully simulated",
+        # The shortlist query stops at 12 rows, so this is a lower bound on
+        # the bikes that match the filter, not their count.
         "candidates_considered": len(rows),
+        "candidates_simulated": n_sim,
         "ranking": ranked[:top_n],
     }
     ctx.add_block("rank_result", payload)
@@ -1323,69 +1537,112 @@ def execute_tool(ctx: AgentContext, call: ToolCall) -> dict:
 
 
 # ─── System prompt ────────────────────────────────────────────────────────
+# Two blocks: a frozen block (byte-identical on every request, so tools plus
+# this block form a cached prefix) and a small dynamic block with today's
+# date and the live catalog counts.
 
 
-def _system_prompt(ctx: AgentContext) -> str:
-    stats = _exec_catalog_stats(ctx, {})
-    tier_lines = []
+def _tier_glossary() -> str:
+    lines = []
     for info in BUILD_TIERS.values():
         budget = info["default_budget_inr"]
         budget_txt = "no limit" if budget is None else f"₹{budget:,}"
-        tier_lines.append(
+        lines.append(
             f"  - {info['label']}: {info['description']} (default budget: {budget_txt})"
         )
-    tiers = "\n".join(tier_lines)
-    return f"""You are the MotoQuant race engineer — the AI assistant of MotoQuant, \
-a free, open-source, first-principles motorcycle drag-racing physics \
-simulator (15 sub-models, RK4 solver, validated against a weighted corpus of \
-published drag-strip benchmarks — motoquant.in/validation). Every tool you \
-have is free for every user. Today is {datetime.now():%d %b %Y}.
+    return "\n".join(lines)
 
-Catalog right now: {stats.get("bikes")} bikes, {stats.get("parts")} parts, \
-{stats.get("tires")} tires, {stats.get("venues")} venues.
 
-CORE DISCIPLINE — these rules are absolute:
-1. NEVER invent a physics number. Every ET, trap speed, top speed, or delta \
-you state MUST come from a tool result in this conversation. Quote ETs to 3 \
-decimals, trap speeds to 1.
-2. NEVER invent parts, prices, or specs. Parts come from search_parts / \
-optimize_build; specs from get_bike_details or verified web sources.
-3. If the user's bike is not in the catalog: gather REAL specs (your own \
+STATIC_SYSTEM_PROMPT = f"""You are the MotoQuant race engineer, the chat \
+assistant of MotoQuant: a free, open-source, first-principles motorcycle \
+drag-racing physics simulator (15 sub-models, RK4 solver, checked against a \
+weighted set of published drag-strip results at motoquant.in/validation). \
+Every tool you have is free for every user.
+
+CORE RULES. These are absolute:
+1. Never invent a physics number. Every ET, trap speed, top speed or delta \
+you state must come from a tool result in this conversation. Quote ETs to 3 \
+decimals and trap speeds to 1.
+2. Never invent parts, prices or specs. Parts come from search_parts or \
+optimize_build; specs from get_bike_details or web sources you cite.
+3. If the user's bike is not in the catalog: gather real specs (your own \
 knowledge if you are confident, web_search/web_fetch if not), then use \
-simulate_estimated_bike. ALWAYS present those results as estimates with \
-their confidence score and key assumptions — never as validated numbers.
-4. When you use web facts, cite the source URL inline.
-5. If a tool returns an error, adapt (fix arguments, try another tool) or \
-tell the user honestly what failed. Never fabricate a replacement result.
+simulate_estimated_bike. Always present those results as estimates, with \
+their confidence score and key assumptions.
+4. When you use facts from the web, cite the source URL inline.
+5. If a tool returns an error, adapt (fix the arguments, try another tool) or \
+tell the user plainly what failed. Never make up a replacement result.
 
 BUILD-STAGE GLOSSARY (use these definitions consistently):
-{tiers}
-"Outlaw class" / "open class" build requests = stage_4: run \
-optimize_build with build_tier="stage_4" — it composes drag rubber, the \
-full-race parts knapsack, gearing + launch autotune and a combined \
+{_tier_glossary()}
+"Outlaw class" or "open class" build requests mean stage_4: run \
+optimize_build with build_tier="stage_4". It combines drag tyres, the \
+full-race parts search, gearing and launch autotune and a combined \
 verification sim, with no budget limit.
 
+BUILD PLANNER. When the user gives a budget and a goal in plain words:
+- Convert the budget to rupees for budget_inr: "1.5 lakh" = 150000, \
+"₹80k" or "80 thousand" = 80000, "under 50 thousand" = 50000, \
+"2 lakh" = 200000. A budget in another currency: say you are converting \
+and use a round rupee figure.
+- Convert the goal: "quickest ET", "fastest quarter", "best time" = \
+goal "min_et"; "max speed", "highest trap", "top end" = goal "max_trap". \
+Default to "min_et" when unclear.
+- Find the bike_id with search_bikes, then call optimize_build once with \
+bike_id, budget_inr and goal (and venue_id if a venue was named). Pick a \
+build_tier only if the user named a stage; an explicit budget overrides \
+the tier default.
+- Then explain the result: one line per part (what it does, the time it \
+saves from delta_et_s, and rupees per tenth from cost_per_tenth_inr), the \
+total cost against the budget, base and new ET and trap speed, any \
+warnings, and what the next rupee should buy (next_upgrade). If no part \
+was picked, say why from the result. Use only parts and numbers from the \
+tool result.
+
 HOW TO WORK:
-- Simple factual/conceptual questions (physics, technique, rules, product): \
-answer directly; use tools only when they add real numbers.
-- Any question about a specific bike's performance: search_bikes → \
-run_simulation (with venue/conditions when mentioned). Follow-ups inherit \
-context from the conversation — reuse known bike_ids instead of re-searching.
-- "Fastest/quickest <class>" questions: use rank_bikes (one call, real sims) \
-— do NOT search and simulate bikes one at a time.
-- "Best possible / fastest configuration" for a bike = stage_4 outlaw \
-optimize_build. Summarize the result: baseline → final ET, the parts list \
-with prices, the gearing/launch setup, and total cost.
-- If a result carries parts_skipped, those parts were NOT fitted (see \
-parts_skipped_detail for why): say they do not fit this bike and never quote \
-the returned time as the bike with them — offer search_parts with the \
-bike_id to find ones that fit.
-- Be a race engineer in tone: precise, numbers-first, no hype. Use km/h \
-(mention mph for US bikes). Prices in ₹ (INR).
+- Simple factual or conceptual questions (physics, technique, rules, the \
+product): answer directly; use tools only when they add real numbers.
+- Any question about a specific bike's performance: search_bikes, then \
+run_simulation (with venue or conditions when mentioned). Follow-ups keep \
+the context of the conversation: reuse known bike_ids instead of searching \
+again.
+- "Fastest/quickest <class>" questions: use rank_bikes (one call, real \
+sims). Do not search and simulate bikes one at a time.
+- "Best possible / fastest configuration" for a bike means a stage_4 \
+optimize_build. Summarise baseline to final ET, the parts with prices, the \
+gearing and launch setup and the total cost.
+- If a result carries parts_skipped, those parts were not fitted (see \
+parts_skipped_detail for why): say they do not fit this bike, never quote \
+the returned time as the bike with them, and offer search_parts with the \
+bike_id to find parts that fit.
+- Tone: a race engineer. Precise, numbers first, no hype. Use km/h (mention \
+mph for US bikes). Prices in ₹ (INR).
 - Budgets: you have {FULL_SIM_BUDGET} full sims and {HEAVY_OP_BUDGET} heavy \
-operations (optimizer/autotune) per message — plan tool use accordingly.
+operations (optimizer/autotune) per message. Plan tool use accordingly.
 - End with the answer, not with what you did. Keep replies tight: lead with \
-the number(s), then the how/why in 2-6 sentences, then optional next steps."""
+the number(s), then the how and why in 2-6 sentences, then optional next \
+steps."""
+
+
+def _dynamic_system_text(ctx: AgentContext) -> str:
+    stats = _exec_catalog_stats(ctx, {})
+    return (
+        f"Today is {datetime.now():%d %b %Y}. Catalog right now: "
+        f"{stats.get('bikes')} bikes, {stats.get('parts')} parts, "
+        f"{stats.get('tires')} tires, {stats.get('venues')} venues."
+    )
+
+
+def _system_prompt(ctx: AgentContext) -> list[dict[str, Any]]:
+    """System blocks: the frozen prompt (cached) plus the dynamic line."""
+    return [
+        {
+            "type": "text",
+            "text": STATIC_SYSTEM_PROMPT,
+            "cache_control": {"type": "ephemeral"},
+        },
+        {"type": "text", "text": _dynamic_system_text(ctx)},
+    ]
 
 
 # ─── Main loop ────────────────────────────────────────────────────────────
@@ -1410,6 +1667,27 @@ def _clip_history(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return list(reversed(out))
 
 
+def _fail(result: AgentChatResult, code: str, detail: Any) -> AgentChatResult:
+    result.error = code
+    result.error_detail = redact_secrets(detail)
+    return result
+
+
+_REFUSED_DETAIL = (
+    "The assistant declined to answer this question. Try rephrasing it "
+    "around the bike, the conditions or the build."
+)
+_CUT_OFF_NOTE = (
+    "(Your last reply was cut off before its tool call was complete, so it "
+    "was not run. Make the call again with shorter arguments, or answer in "
+    "fewer words.)"
+)
+_FINAL_TURN_NOTE = (
+    "(The tool budget for this message is used up. Give your final answer "
+    "now, using only the results above.)"
+)
+
+
 def run_agent_chat(
     query: str,
     db,
@@ -1421,7 +1699,7 @@ def run_agent_chat(
     max_iterations: int = MAX_ITERATIONS,
     heavy_gate: Callable[[], bool] | None = None,
 ) -> AgentChatResult:
-    """Run one agent chat turn. Never raises — errors land on the result.
+    """Run one agent chat turn. Never raises: errors land on the result.
 
     Cost is bounded per turn by MAX_ITERATIONS / FULL_SIM_BUDGET /
     HEAVY_OP_BUDGET (enforced by the executor) and per client by the API's
@@ -1433,14 +1711,15 @@ def run_agent_chat(
         from .client import get_default_client
 
         client = get_default_client()
+    result.assistant = getattr(client, "assistant", None)
 
     if not client.is_configured:
-        result.error = "llm_not_configured"
-        result.error_detail = (
-            f"LLM provider {client.provider!r} is not configured — set the "
-            f"provider API key (e.g. GROQ_API_KEY) on the server"
+        return _fail(
+            result,
+            "assistant_unavailable",
+            "No Anthropic key is set on the server (ANTHROPIC_API_KEY). Add your "
+            "own key to ask questions.",
         )
-        return result
 
     ctx = AgentContext(
         db=db,
@@ -1454,45 +1733,68 @@ def run_agent_chat(
     messages: list[dict[str, Any]] = _clip_history(history or [])
     messages.append({"role": "user", "content": query})
 
-    for iteration in range(max_iterations):
-        result.iterations = iteration + 1
+    def step_once(tool_choice: dict[str, Any] | None = None) -> AgentStep:
+        return client.call_tools(
+            system,
+            messages,
+            AGENT_TOOLS,
+            max_tokens=AGENT_MAX_TOKENS,
+            tool_choice=tool_choice,
+        )
+
+    pauses = 0
+    cut_off_retry_used = False
+    iteration = 0
+    while iteration < max_iterations:
+        iteration += 1
+        result.iterations = iteration
         ctx.tick(
-            min(0.9, 0.1 + iteration * (0.8 / max_iterations)),
-            "Thinking" if iteration == 0 else None,
+            min(0.9, 0.1 + (iteration - 1) * (0.8 / max_iterations)),
+            "Thinking" if iteration == 1 else None,
         )
         try:
-            step: AgentStep = client.call_tools(
-                system, messages, AGENT_TOOLS, max_tokens=AGENT_MAX_TOKENS
-            )
-        except LLMRateLimitError as e:
-            result.error = "rate_limited"
-            result.error_detail = str(e)
-            return result
-        except LLMNotConfiguredError as e:
-            result.error = "llm_not_configured"
-            result.error_detail = str(e)
-            return result
+            step = step_once()
+        except LLMError as e:
+            return _fail(result, e.code, str(e))
         except Exception as e:  # noqa: BLE001
-            result.error = "agent_failed"
-            result.error_detail = f"{type(e).__name__}: {e}"
+            return _fail(result, "agent_failed", f"{type(e).__name__}: {e}")
+
+        stop = step.stop_reason
+        if stop == "refusal":
+            # Refused after the server-side fallbacks: never run its tools.
+            return _fail(result, "refused", _REFUSED_DETAIL)
+
+        if stop == "pause_turn":
+            if pauses < MAX_PAUSE_RESUMES:
+                pauses += 1
+                # Resend as-is: the paused content goes back unchanged and
+                # the model continues from it. No extra user message.
+                messages.append(_assistant_message(step))
+                continue
+            result.reply = step.text or ""
+            ctx.tick(1.0, "Done")
             return result
+
+        if stop == "max_tokens" and step.tool_calls:
+            # The last tool call was cut off mid-arguments: never run it.
+            if cut_off_retry_used:
+                return _fail(
+                    result,
+                    "agent_failed",
+                    "The assistant's reply was cut off twice. Try a shorter question.",
+                )
+            cut_off_retry_used = True
+            messages.append({"role": "user", "content": _CUT_OFF_NOTE})
+            continue
 
         if not step.tool_calls:
             result.reply = step.text or ""
             ctx.tick(1.0, "Done")
             return result
 
-        # Record the assistant turn, then execute every requested tool.
-        messages.append(
-            {
-                "role": "assistant",
-                "content": step.text,
-                "tool_calls": [
-                    {"id": tc.id, "name": tc.name, "arguments": tc.arguments}
-                    for tc in step.tool_calls
-                ],
-            }
-        )
+        # Echo the assistant turn, then run every requested tool. The
+        # results go back together in one user message.
+        messages.append(_assistant_message(step))
         for tc in step.tool_calls:
             payload = execute_tool(ctx, tc)
             result.tool_trace.append(
@@ -1502,33 +1804,45 @@ def run_agent_chat(
                     "error": payload.get("error"),
                 }
             )
-            content = json.dumps(payload, default=str)
-            if len(content) > TOOL_RESULT_MAX_CHARS:
-                content = content[:TOOL_RESULT_MAX_CHARS] + '… (truncated)"}'
             messages.append(
                 {
                     "role": "tool",
                     "tool_call_id": tc.id,
                     "name": tc.name,
-                    "content": content,
+                    "content": tool_result_content(tc.name, payload),
                 }
             )
 
-    # Iteration budget exhausted — ask for a final answer without tools.
+    # Iteration budget exhausted: ask for a final answer. The tools stay in
+    # the request (tool_use blocks are in the history) and tool_choice none
+    # rules out another call.
+    messages.append({"role": "user", "content": _FINAL_TURN_NOTE})
     try:
-        messages.append(
-            {
-                "role": "user",
-                "content": (
-                    "(system: tool budget exhausted — give your final answer "
-                    "now using only the results above)"
-                ),
-            }
-        )
-        step = client.call_tools(system, messages, [], max_tokens=AGENT_MAX_TOKENS)
-        result.reply = step.text or ""
+        step = step_once({"type": "none"})
+    except LLMError as e:
+        return _fail(result, e.code, str(e))
     except Exception as e:  # noqa: BLE001
-        result.error = "agent_failed"
-        result.error_detail = f"iteration budget exhausted: {type(e).__name__}: {e}"
+        return _fail(
+            result,
+            "agent_failed",
+            f"iteration budget exhausted: {type(e).__name__}: {e}",
+        )
+    if step.stop_reason == "refusal":
+        return _fail(result, "refused", _REFUSED_DETAIL)
+    result.reply = step.text or ""
     ctx.tick(1.0, "Done")
     return result
+
+
+def _assistant_message(step: AgentStep) -> dict[str, Any]:
+    msg: dict[str, Any] = {
+        "role": "assistant",
+        "content": step.text,
+        "tool_calls": [
+            {"id": tc.id, "name": tc.name, "arguments": tc.arguments}
+            for tc in step.tool_calls
+        ],
+    }
+    if step.raw_content:
+        msg["raw_content"] = step.raw_content
+    return msg

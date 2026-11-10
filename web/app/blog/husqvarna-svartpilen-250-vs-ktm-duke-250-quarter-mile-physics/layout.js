@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'husqvarna-svartpilen-250-vs-ktm-duke-250-quarter-mile-physics';
-const TITLE = 'Husqvarna Svartpilen 250 vs KTM Duke 250: Quarter-Mile Physics';
+const TITLE = 'Husqvarna Svartpilen 250 vs KTM Duke 250: quarter-mile physics';
 
 function breadcrumbs() {
   return {

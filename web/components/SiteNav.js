@@ -35,7 +35,7 @@ const LEARN_LINKS = [
   { href: '/docs/glossary',        label: 'Glossary',               desc: 'Drag-racing terms in plain English' },
   { href: '/docs/physics',         label: 'How the physics works',  desc: 'What the simulator calculates, step by step' },
   { href: '/validation',           label: 'Accuracy',               desc: 'How close the predictions are to real timeslips' },
-  { href: '/blog',                 label: 'Blog',                   desc: 'Guides and deep dives' },
+  { href: '/blog',                 label: 'Blog',                   desc: 'Guides and explainers' },
   { href: '/about',                label: 'About',                  desc: 'Who builds this, and why it is open source' },
 ];
 

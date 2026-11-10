@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'ktm-duke-390-quarter-mile-stock-to-11s';
-const TITLE = 'KTM Duke 390 Quarter Mile: From 13.3s Stock to an 11.342s Record';
+const TITLE = 'KTM Duke 390 quarter mile: from 13.3s stock to an 11.342s record';
 
 function breadcrumbs() {
   return {

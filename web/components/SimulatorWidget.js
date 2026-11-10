@@ -666,7 +666,7 @@ export default function SimulatorWidget() {
               className={`w-full ${runningKind === 'topspeed' ? 'btn-running' : 'btn-ghost'}`}
             >
               {runningKind === 'topspeed'
-                ? `Stop${prog?.progress != null ? ` — ${Math.round(prog.progress * 100)}%` : ''}`
+                ? `Stop${prog?.progress != null ? ` (${Math.round(prog.progress * 100)}%)` : ''}`
                 : 'Top speed'}
             </button>
           </div>
@@ -787,7 +787,7 @@ function QuarterResult({ data, riderKg, placeName, placeLabel, onChange }) {
         )}
         {has(data.et_eighth_s) && (
           <div className="stat-row">
-            <span><Term k="eighth">Halfway — ⅛ mile</Term></span>
+            <span><Term k="eighth">Halfway (⅛ mile)</Term></span>
             <span>{data.et_eighth_s.toFixed(2)} s</span>
           </div>
         )}

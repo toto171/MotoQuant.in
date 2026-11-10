@@ -74,9 +74,12 @@ services:
       # all the server needs (no persistent disk).
       # Optional settings (Render dashboard, never in git; the full list is in
       # docs/SELF_HOSTING.md):
-      #   GROQ_API_KEY / GEMINI_API_KEY / ... + LLM_PROVIDER — the chat agent.
-      #   MOTOQUANT_CHAT_DAILY_LIMIT — per-IP chat turns per day, the bill
-      #     fuse on whoever pays for the LLM key (default 200; 0 disables).
+      #   ANTHROPIC_API_KEY: the chat assistant's server key (Claude). Set it
+      #     as a secret in the dashboard; without it visitors can still chat
+      #     with their own key.
+      #   MOTOQUANT_CHAT_DAILY_LIMIT: per-IP units per day for questions on
+      #     the server key (mechanic 1, doctor 2; default 200; 0 disables).
+      #     Questions asked with a visitor's own key skip it.
       #   OPENWEATHERMAP_API_KEY — live weather for a named place.
       #   SEARCH_PROVIDER=brave|serper + SEARCH_API_KEY — upgrade the agent's
       #     web_search tool from the free DuckDuckGo fallback;

@@ -1,7 +1,8 @@
 /**
  * MotoQuant — Privacy
  * Last updated: 10 November 2026. Accounts and server-side saved runs were
- * removed; saved runs now live in the visitor's browser.
+ * removed; saved runs now live in the visitor's browser. The chat assistant
+ * runs on Anthropic's Claude, and a visitor may bring their own Anthropic key.
  *
  * Every statement here is checked against the code. When the code changes
  * what leaves the browser or what the server keeps, change this page in the
@@ -13,7 +14,7 @@ import SiteFooter from '../../components/SiteFooter';
 import PageHero from '../../components/PageHero';
 
 export const metadata = {
-  title: 'Privacy — MotoQuant',
+  title: 'Privacy | MotoQuant',
   description:
     'MotoQuant has no accounts and sets no cookies. What leaves your browser, where it goes, and what we keep.',
   alternates: { canonical: 'https://motoquant.in/privacy' },
@@ -28,7 +29,7 @@ export default function PrivacyPage() {
 
       <PageHero
         title="Privacy"
-        sub="No accounts, no cookies, and nothing kept that identifies you. Here is exactly what leaves your browser and where it goes."
+        sub="No accounts, no cookies, and nothing kept that identifies you. This page lists what leaves your browser and where it goes."
         className="pb-8 md:pb-10"
       >
         <p className="label-mono">Last updated &middot; 10 November 2026</p>
@@ -50,7 +51,14 @@ export default function PrivacyPage() {
               is never uploaded. Delete runs there, or clear your browser data to remove them all.
             </Row>
             <Row label="Preferences">
-              Light or dark theme, Simple or Advanced mode, and which option panels you opened.
+              Light or dark theme, Simple or Advanced mode, which option panels you opened, and
+              which assistant you picked in the chat.
+            </Row>
+            <Row label="Your Anthropic key">
+              Only if you add one under &ldquo;Use your own key&rdquo; in the chat. By default it
+              is kept in this tab&rsquo;s session storage and cleared when you close the tab. If
+              you tick &ldquo;Remember on this device&rdquo;, it is kept in local storage until
+              you press Remove key or clear your browser data.
             </Row>
           </Section>
 
@@ -67,6 +75,12 @@ export default function PrivacyPage() {
               What you type into the assistant, and the conversation so far, so it can answer.
               Not stored by us, and neither is anything the assistant estimates for a bike that is
               missing from the catalog.
+            </Row>
+            <Row label="Your Anthropic key">
+              If you added your own key, it is sent with each question in a request header. Our
+              server passes it to Anthropic to answer that one question, then drops it. We never
+              store it, never write it to our logs and never send it back to your browser. Like
+              every request, it travels through Vercel and Render on the way.
             </Row>
             <Row label="Usage events">
               Short labels such as &ldquo;simulation run&rdquo; or &ldquo;page error&rdquo;, with
@@ -89,8 +103,10 @@ export default function PrivacyPage() {
                 request logs under their own terms.
               </li>
               <li>
-                <strong>An AI model provider</strong> receives chat questions. The server is
-                configured with one of Groq, Google Gemini, Anthropic, DeepSeek or OpenRouter.
+                <strong>Anthropic</strong> receives chat questions and the conversation so far,
+                because the assistant is Anthropic&rsquo;s Claude model. If you added your own key,
+                the question is sent to Anthropic under your key and Anthropic&rsquo;s terms for your
+                account apply.
               </li>
               <li>
                 <strong>A web search provider</strong> (Brave, Serper or DuckDuckGo) receives the

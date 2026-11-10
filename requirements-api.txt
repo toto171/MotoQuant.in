@@ -28,16 +28,13 @@ python-multipart>=0.0.18,<1.0
 # Database
 # (sqlite3 is stdlib -- no extra package needed)
 
-# NL chat layer (POST /api/chat, `motoquant chat`).
-# The LLMClient supports multiple providers selected via the LLM_PROVIDER
-# env var (default 'gemini'). Anthropic uses its own SDK; Gemini /
-# DeepSeek / Groq / OpenRouter all use the openai SDK with a base_url
-# override (their OpenAI-compatible endpoints).
-# Set ONE of: GEMINI_API_KEY (default), ANTHROPIC_API_KEY, DEEPSEEK_API_KEY,
-# GROQ_API_KEY, OPENROUTER_API_KEY. Falls through gracefully if missing --
-# callers get a typed LLMNotConfiguredError.
-anthropic>=0.34.0,<1.0
-openai>=1.40.0,<3
+# NL chat layer (POST /api/chat, `motoquant chat`): Claude only.
+# The server's own key comes from the ANTHROPIC_API_KEY environment variable
+# (Render dashboard, never a file). Visitors may send their own key per
+# request in the X-Anthropic-Key header; it is used for that request only.
+# Without either key, chat answers "assistant_unavailable".
+# 2.x speaks API version 2026-10-21 and is built on httpx2.
+anthropic>=2.8.0,<3
 
 # Chat-agent web lookup (motoquant/llm/webtools.py). requests is a DIRECT
 # dependency (it used to arrive transitively via the now-removed razorpay SDK)

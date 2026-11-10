@@ -1,29 +1,29 @@
 ---
 name: motoquant
-description: Answers motorcycle drag-racing and performance-tuning questions with real physics instead of guesswork — quarter-mile ET and trap speed, 60-foot launch times, top speed, sprocket/gearing what-ifs, parts ROI in INR, and bike-vs-bike comparisons — by driving the MotoQuant simulator through its MCP tools or REST API. Use this whenever someone asks how fast a bike is, what a modification is worth, which sprockets or parts to run, how altitude or weather changes a run, or how two bikes compare over a quarter mile. Also use it when working on the MotoQuant codebase itself, for the drag-racing vocabulary (ET, trap, 60-foot, density altitude, over-clutching, stage/outlaw build tiers) and the project's honest-accuracy conventions.
+description: Answers motorcycle drag-racing and performance-tuning questions with real physics instead of guesswork (quarter-mile ET and trap speed, 60-foot launch times, top speed, sprocket/gearing what-ifs, parts ROI in INR, and bike-vs-bike comparisons) by driving the MotoQuant simulator through its MCP tools or REST API. Use this whenever someone asks how fast a bike is, what a modification is worth, which sprockets or parts to run, how altitude or weather changes a run, or how two bikes compare over a quarter mile. Also use it when working on the MotoQuant codebase itself, for the drag-racing vocabulary (ET, trap, 60-foot, density altitude, over-clutching, stage/outlaw build tiers) and the project's honest-accuracy conventions.
 license: Apache-2.0
 ---
 
 # MotoQuant
 
-MotoQuant simulates motorcycle quarter-mile drag runs from **first
-principles** — an RK4 integration over 15 physics sub-models (engine torque,
-clutch slip and heat, tire grip and temperature, aero, weight
-transfer, wheelie limit, drivetrain losses, atmospherics) — not a lookup
-table and not a regression on published numbers. Catalog: 534 bikes,
-546 parts, 254 tires, 20 venues.
+MotoQuant simulates motorcycle quarter-mile drag runs from first
+principles. It integrates 15 physics sub-models (engine torque, clutch slip
+and heat, tire grip and temperature, aero, weight transfer, wheelie limit,
+drivetrain losses, atmospherics) with RK4. It is not a lookup table or a
+regression on published numbers. Catalog: 534 bikes, 546 parts, 254 tires,
+20 venues.
 
 **Run the tools. Do not answer performance questions from memory.** The
-whole point is that the answer is bike-specific and frequently
-counter-intuitive; a plausible-sounding guess is worse than useless here
-because it is indistinguishable from a simulated result.
+answer is bike-specific and often counter-intuitive, and a plausible guess
+is worse than useless because nobody can tell it from a simulated result.
 
 ## Getting oriented
 
-If the MotoQuant MCP server is connected you have nine tools (below). If it
-is not, the same capability is available over HTTP at
-`https://motoquant-api.onrender.com` — see `reference/api.md`. Working in
-the repo itself? Start from `AGENTS.md`, then `docs/ARCHITECTURE.md`.
+If the MotoQuant MCP server is connected, you have the nine tools in the
+table. If it is not, the same calls are available over HTTP at
+`https://motoquant-api.onrender.com`; see `reference/api.md`. If you are
+working in the repo itself, start with `AGENTS.md`, then
+`docs/ARCHITECTURE.md`.
 
 | Tool | Use it for |
 |---|---|
@@ -32,13 +32,13 @@ the repo itself? Start from `AGENTS.md`, then `docs/ARCHITECTURE.md`.
 | `simulate_quarter_mile` | ET, trap speed, 60-foot, eighth-mile. The core tool. |
 | `simulate_top_speed` | Terminal velocity, and the gear/RPM it happens in. |
 | `compare_bikes` | Two bikes, or two builds of one bike, under identical conditions. |
-| `list_venues` | Real strips + their altitude (feeds density altitude). |
+| `list_venues` | Real strips and their altitude (feeds density altitude). |
 | `search_parts` | Catalog parts, fitment-filtered when you pass `bike_id`. |
 | `part_impact` | What one part is worth: ET delta + cost per tenth in INR. |
 | `gearing_impact` | Sprocket what-if: two tooth combos, head to head. |
 
 Identify the bike with `bike_id` from `search_bikes`, or `bike_preset`
-(`gsxr1000_k5`, `yzfr1_4c8`, `hayabusa_gen1` — the three hand-curated
+(`gsxr1000_k5`, `yzfr1_4c8`, `hayabusa_gen1`: the three hand-curated
 reference bikes, pinned bit-identical as the project's regression guard).
 
 ## The one convention that matters
@@ -52,37 +52,37 @@ both ETs and subtract them yourself.
 
 ## Vocabulary
 
-Enough to talk to a racer without sounding like a brochure. Full glossary,
-including the physics-model terms, in `reference/glossary.md`.
+Enough to talk to a racer without sounding like a brochure. The full
+glossary, with the physics-model terms, is in `reference/glossary.md`.
 
-- **ET** — elapsed time over 402.3 m (a quarter mile) from a standing start.
+- ET: elapsed time over 402.3 m (a quarter mile) from a standing start.
   The headline number.
-- **Trap speed** — speed crossing the quarter-mile line. Tracks power-to-weight
+- Trap speed: speed crossing the quarter-mile line. It tracks power-to-weight
   far more tightly than ET does, because it is nearly immune to launch quality.
-- **60-foot** — elapsed time over the first 18.3 m. The launch-quality number:
-  traction, clutch technique, wheelie limit, and gearing all show up here
+- 60-foot: elapsed time over the first 18.3 m. The launch-quality number:
+  traction, clutch technique, wheelie limit and gearing all show up here
   first. A tenth lost in the 60-foot is usually two tenths lost at the stripe.
-- **Eighth mile (660 ft)** — the mid-point split; how many small-bore and
-  street classes actually run.
-- **Rollout** — the ~30 cm (1 ft) the bike rolls before the front wheel
+- Eighth mile (660 ft): the mid-point split, and the distance many
+  small-bore and street classes actually run.
+- Rollout: the ~30 cm (1 ft) the bike rolls before the front wheel
   clears the stage beam and the clock starts. Timeslips, most magazine tests
   and Dragy all time from there, and so does MotoQuant: every ET and split is
   t(distance) − t(0.3048 m). A figure timed from first motion is a few tenths
   longer for the same run, so check the convention before comparing.
-- **Two-step / launch RPM** — a rev limiter that holds the engine at a chosen
+- Two-step / launch RPM: a rev limiter that holds the engine at a chosen
   launch RPM against the clutch.
-- **Over-clutching** — deliberately slipping the clutch to hold the engine in
+- Over-clutching: deliberately slipping the clutch to hold the engine in
   its torque band while the tire hooks up. MotoQuant models this per bike
   class; it is the dominant effect in the first 60 feet on small-capacity
   bikes.
-- **Density altitude (DA)** — the altitude the air *behaves* like, once heat,
+- Density altitude (DA): the altitude the air *behaves* like, once heat,
   humidity and pressure are folded in. Hot, humid, high = less oxygen = less
   power. A 35 °C day at Aamby Valley is worth several thousand feet of DA.
-- **Build tiers** — `stage_1` bolt-ons (exhaust, filter, ECU flash, ~₹60k);
+- Build tiers: `stage_1` bolt-ons (exhaust, filter, ECU flash, ~₹60k);
   `stage_2` adds drivetrain (clutch, quickshifter, sprockets, chain, ~₹200k);
   `stage_3` adds nitrous, fuel system, suspension (~₹500k); `stage_4`, also
-  called **outlaw** or **open class**, is unlimited — forced induction,
-  extended swingarm, wheelie bar, slicks, lockup clutch.
+  called outlaw or open class, is unlimited: forced induction, extended
+  swingarm, wheelie bar, slicks, lockup clutch.
 
 ## Worked examples
 
@@ -103,12 +103,12 @@ gearing_impact(bike_id=81, front_a=14, rear_a=48,
 Report it as: *52T buys about six hundredths off the 60-foot and seven off
 the ET, at a cost of a couple of tenths of a km/h at the stripe.*
 
-**Now the important part.** Run the identical question on the K5 preset —
-17/42 vs 17/47 — and shorter gearing **loses 0.20 s**. A 178 hp litre bike
-is grip- and shift-limited off the line, so extra wheel torque just costs it
-an extra shift. The R15 is power-limited, so it gains. *There is no universal
-"shorter gearing launches better" rule.* Never state a direction you have not
-simulated for that specific bike.
+Now ask the same question on the K5 preset (17/42 vs 17/47): shorter
+gearing **loses 0.20 s**. A 178 hp litre bike is grip- and shift-limited off
+the line, so extra wheel torque just costs it an extra shift. The R15 is
+power-limited, so it gains. There is no universal "shorter gearing launches
+better" rule. Never state a direction you have not simulated for that
+specific bike.
 
 ### "I have ₹15,000 for my R15. What should I buy?"
 
@@ -124,78 +124,78 @@ rank by **cost per tenth**.
 | Aracer RC Mini X ECU | ₹10,162 | −0.668 s | ₹1,522 |
 | Daytona TPS full system | ₹14,500 | −0.878 s | ₹1,652 |
 
-Two honest caveats to pass on: the ₹/tenth column ranks *efficiency*, not
-outright gain — the full system is the biggest single improvement and it
-fits the budget. And these are **independent** evaluations; parts interact
-(an exhaust plus a fuel controller is worth more than the sum, a second air
-filter is worth nothing), so verify a stacked build by passing all the
-`part_ids` to `simulate_quarter_mile` in one call rather than adding up the
-individual deltas.
+Pass on two caveats. The ₹/tenth column ranks efficiency, not outright
+gain: the full system is the biggest single improvement, and it fits the
+budget. And each part was evaluated on its own. Parts interact (an exhaust
+plus a fuel controller is worth more than the sum, a second air filter is
+worth nothing), so check a stacked build by passing all the `part_ids` to
+`simulate_quarter_mile` in one call instead of adding up the individual
+deltas.
 
 ### "Is a Hayabusa faster than a K5 GSX-R?"
 
 `compare_bikes(a_bike_preset="gsxr1000_k5", b_bike_preset="hayabusa_gen1")`
 → 10.044 s vs 10.110 s; the K5 wins by 0.07 s despite giving away
-displacement, because it is 60 kg lighter. Mention conditions: both were run
-at the same venue and rider mass, which is exactly what makes the comparison
-mean something.
+displacement, because it is 60 kg lighter. Mention the conditions: both ran
+at the same venue and rider mass, which is what makes the comparison mean something.
 
 ## How to answer well
 
-1. **Search, then simulate.** Model names are ambiguous (four Hayabusa
+1. Search, then simulate. Model names are ambiguous (four Hayabusa
    generations, five GSX-R 1000 generations); confirm the id and year range
    before quoting a number.
-2. **Quote sensible precision.** Two decimals of ET (`10.24 s`), one of trap
+2. Quote sensible precision. Two decimals of ET (`10.24 s`), one of trap
    (`245.5 km/h`), three when reporting a small delta (`−0.068 s`). The
    engine returns four; four implies a confidence the model does not have.
-3. **Say what conditions you assumed.** The default rider is 75 kg. Default
+3. Say what conditions you assumed. The default rider is 75 kg. Default
    air depends on how you named the bike: a catalog `bike_id` runs at the
    conditions stored with the catalog (Aamby Valley: 679 m, 22 °C), a
    `bike_preset` at sea level. Over REST every result carries an
    `environment` block with the values actually simulated (see
    `reference/api.md`); the MCP tools return a compact result without it, so
    state the default yourself. If someone asks about a real strip, pass
-   `venue_id` from `list_venues` — altitude alone can move ET by half a
+   `venue_id` from `list_venues`; altitude alone can move ET by half a
    second.
-4. **Pass `bike_id` to `search_parts`.** Without it you will happily suggest a
+4. Pass `bike_id` to `search_parts`. Without it you will happily suggest a
    530-pitch sprocket for a 428-chain commuter. The fitment engine checks
-   chain pitch, engine layout, displacement and stroke type — use it.
-5. **State the accuracy honestly.** Weighted mean error is about **0.25 s
+   chain pitch, engine layout, displacement and stroke type, so use it.
+5. State the accuracy honestly. Weighted mean error is about **0.25 s
    across 263 matched real-world benchmarks** (bias ≈ +0.02 s, so it is not
-   systematically optimistic; some small classes — entry 200-300cc,
-   two-strokes, 300-500cc singles — still carry ±0.2-0.27 s of class bias). That is good enough to rank builds and answer
-   what-ifs, and *not* good enough to promise a given bike will run a given
-   ET. Say so when someone is about to bet money.
-6. **Never invent a spec.** If a bike is not in the catalog, say it is not in
+   systematically optimistic). Some small classes (entry 200-300cc,
+   two-strokes, 300-500cc singles) still carry ±0.2-0.27 s of class bias.
+   That is good enough to rank builds and answer what-ifs, and *not* good
+   enough to promise a given bike will run a given ET. Say so when someone
+   is about to bet money.
+6. Never invent a spec. If a bike is not in the catalog, say it is not in
    the catalog. Do not substitute a "similar" model and quietly report its
    numbers as the asked-for bike's.
 
 ## Traps
 
-- **Top speed is the weak spot.** ET accuracy is good; top speed is off by
+- Top speed is the weak spot. ET accuracy is good; top speed is off by
   ~13 km/h on average (fleet bias ~+7 km/h, sim fast), and only a few bikes
   carry their factory 299 km/h limiter. Caveat every top-speed answer.
-- **Rider skill is not modelled.** Every run is a competent launch. Real-world
+- Rider skill is not modelled. Every run is a competent launch. Real-world
   slips will be slower, sometimes by a lot on a bike that is hard to launch.
-- **The catalog has no engine internals.** No cams, pistons or big-bore kits,
+- The catalog has no engine internals. No cams, pistons or big-bore kits,
   so "stage 3" is approximated with bolt-on power adders. Do not imply a
   built motor was simulated.
-- **DERIVED benchmarks are weak evidence.** Some entry-class validation rows
+- DERIVED benchmarks are weak evidence. Some entry-class validation rows
   were derived from 0–100 km/h times, not measured on a strip. `get_bike`
   exposes `validation_source`; read it before citing a benchmark as truth.
-- **Prices are Indian-market INR** including duty and GST on imports. They are
+- Prices are Indian-market INR, including duty and GST on imports. They are
   point-in-time and drift.
-- **The hosted API sleeps.** It runs on Render's free hosting tier, so expect a
-  ~50 s cold start. A slow first tool call is normal, not a failure — wait,
-  do not retry in a loop. It is also rate-limited per IP (HTTP 429 with
+- The hosted API sleeps. It runs on Render's free hosting tier, so expect a
+  ~50 s cold start. A slow first tool call is normal: wait, and do not retry
+  in a loop. It is also rate-limited per IP (HTTP 429 with
   `Retry-After`); for heavy or batch use, run the MCP server in local mode
   or self-host.
-- **MotoQuant is free and open source (Apache-2.0).** There are no paid
+- MotoQuant is free and open source (Apache-2.0). There are no paid
   tiers, quotas or licence keys. Never tell a user a feature needs an
   upgrade.
 
 ## Reference files
 
-- `reference/glossary.md` — full drag-racing and physics-model vocabulary.
-- `reference/api.md` — REST endpoints, request shapes and the CLI, for when
+- `reference/glossary.md`: full drag-racing and physics-model vocabulary.
+- `reference/api.md`: REST endpoints, request shapes and the CLI, for when
   the MCP server is not connected or you are working in the repo.

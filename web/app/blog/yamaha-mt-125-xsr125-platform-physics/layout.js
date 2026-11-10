@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'yamaha-mt-125-xsr125-platform-physics';
-const TITLE = 'Yamaha MT-125 vs XSR125: Same Engine, 0.10s Apart at the Strip';
+const TITLE = 'Yamaha MT-125 vs XSR125: same engine, 0.10s apart at the strip';
 
 function breadcrumbs() {
   return {

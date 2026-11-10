@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        This is the primary issue type for domain contributors. Once accepted, the data lands in one of:
+        This is the main issue type for domain contributors. Accepted data goes into one of these files:
         - `motoquant/scraper/known_bikes.py` (new bike)
         - `motoquant/database/seed_catalogs/*.py` (new part)
         - `motoquant/scraper/gear_ratios.py` (new gear-ratio family)
@@ -40,7 +40,7 @@ body:
       label: The data
       description: |
         Paste the spec(s) in the same dataclass format you see in `known_bikes.py` / `seed_catalogs/*.py`.
-        For parts, include `fitment_rules` with `family`, `manufacturers`, `engine_configs`, `chain_pitch`, `stroke_type` where relevant — catalog-integration tests will reject cross-brand leaks.
+        For parts, include `fitment_rules` with `family`, `manufacturers`, `engine_configs`, `chain_pitch`, `stroke_type` where relevant. The catalog-integration tests reject parts that leak to other brands.
       render: python
     validations:
       required: true
@@ -50,8 +50,8 @@ body:
     attributes:
       label: Source (required)
       description: |
-        Non-negotiable. Service manual, magazine test, manufacturer spec sheet, retailer page, dyno chart. Link or cite.
-        Data without sources will be closed. For benchmarks (quarter-mile ET / trap / top speed), say whether the run is instrumented (Dragy / VBox / Racelogic) or a magazine / aggregator figure, whether the bike was stock, and whether the time is from the 1-ft beam rollout or from first motion if the source says.
+        Service manual, magazine test, manufacturer spec sheet, retailer page or dyno chart. Link or cite it.
+        Issues with unsourced data are closed. For benchmarks (quarter-mile ET / trap / top speed), say whether the run is instrumented (Dragy / VBox / Racelogic) or a magazine / aggregator figure, whether the bike was stock, and whether the time is from the 1-ft beam rollout or from first motion if the source says.
     validations:
       required: true
 

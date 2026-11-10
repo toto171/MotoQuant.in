@@ -3,7 +3,7 @@ import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 
 export const metadata = {
-  title: 'How to Tune for Aamby Valley in November — MotoQuant Blog',
+  title: 'How to tune for Aamby Valley in November | MotoQuant Blog',
   description: 'November at Aamby Valley means 679 m of elevation, about 22°C and a density altitude near 1,100 m on an asphalt strip. What that costs each class of bike, and how to tune for it.',
   keywords: [
     'Aamby Valley drag racing',
@@ -17,7 +17,7 @@ export const metadata = {
   ],
   alternates: { canonical: 'https://motoquant.in/blog/how-to-tune-for-aamby-valley-in-november' },
   openGraph: {
-    title: 'How to Tune for Aamby Valley in November',
+    title: 'How to tune for Aamby Valley in November',
     description: 'Density altitude, temperature, tyres and wind: how Aamby Valley conditions affect your quarter-mile.',
     url: 'https://motoquant.in/blog/how-to-tune-for-aamby-valley-in-november',
     type: 'article',
@@ -28,11 +28,11 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'The Aamby Valley airstrip in Maharashtra sits at 679 m above sea level. MotoQuant\'s November normals for it are 22°C, 40% humidity and a 26°C track, on asphalt. Each of those numbers changes your quarter-mile time. Here is how. (Updated 10 November 2026: the venue facts now match the catalog, and every simulated time was re-run on the current engine.)',
+    text: 'The Aamby Valley airstrip in Maharashtra sits 679 m above sea level. MotoQuant\'s November normals for it are 22°C, 40% humidity and a 26°C track, on asphalt. Each of those numbers changes your quarter-mile time. (Updated 10 November 2026: the venue facts now match the catalog, and every simulated time was re-run on the current engine.)',
   },
   {
     type: 'h2',
-    text: 'Density Altitude: The Number That Governs Everything',
+    text: 'Density altitude',
   },
   {
     type: 'p',
@@ -40,7 +40,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'As a rule of thumb, every 300 m of density altitude costs about 3% of engine power. The simulator\'s own correction for Aamby in November is 0.895 against its sea-level reference day, a loss of about 10.5% before the run starts. A 178 hp GSX-R 1000 K5 effectively makes about 159 hp; an 18 hp R15 V3 makes about 16 hp.',
+    text: 'As a rule of thumb, every 300 m of density altitude costs about 3% of engine power. The simulator\'s own correction for Aamby in November is 0.895 against its sea-level reference day, a loss of about 10.5% before the run starts. A 178 hp GSX-R 1000 K5 makes about 159 hp there; an 18 hp R15 V3 makes about 16 hp.',
   },
   {
     type: 'p',
@@ -48,11 +48,11 @@ const CONTENT = [
   },
   {
     type: 'callout',
-    text: 'Lower air density also means lower aerodynamic drag, because drag force is proportional to density. On the current engine the drag saving never makes up for the power loss on a stock bike: every bike in the table below is slower at Aamby than at sea level, and small bikes lose the most.',
+    text: 'Lower air density also means lower aerodynamic drag, because drag force is proportional to density. On the current engine the drag saving never makes up for the power loss on a stock bike: every bike simulated in this post is slower at Aamby than at sea level, and small bikes lose the most.',
   },
   {
     type: 'h2',
-    text: 'Temperature: Why November is the Best Month',
+    text: 'Temperature: why November is the best month',
   },
   {
     type: 'p',
@@ -60,15 +60,15 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Lower temperature helps in two ways. First, cooler air is denser, so engine volumetric efficiency improves. Second, the intake charge temperature drops, which marginally increases knock resistance and allows slightly more aggressive ignition advance on bikes with DOHC or programmable ignition.',
+    text: 'Cooler air helps in two ways. It is denser, so volumetric efficiency improves. And a cooler intake charge resists knock a little better, which allows slightly more ignition advance on bikes with DOHC or programmable ignition.',
   },
   {
     type: 'p',
-    text: 'Tyre temperature is the other side of the November equation. At 20°C ambient, your tyres start cold and take longer to reach optimal operating temperature. For a short quarter-mile run, the first 100 metres may be on tyres that are 10–15°C below their peak μ window. A warm-up burnout (if allowed at the event) or staged staging passes help here.',
+    text: 'Tyre temperature works against you in November. At 20°C ambient your tyres start cold and take longer to reach their working temperature. In a quarter-mile run the first 100 metres may be on tyres 10–15°C below their peak μ window. A warm-up burnout, if the event allows one, or staged staging passes help.',
   },
   {
     type: 'h2',
-    text: 'Surface: Asphalt'
+    text: 'Surface: asphalt'
   },
   {
     type: 'p',
@@ -80,23 +80,23 @@ const CONTENT = [
   },
   {
     type: 'h2',
-    text: 'How to Set Up Your Bike for Aamby in November',
+    text: 'How to set up your bike for Aamby in November',
   },
   {
     type: 'p',
-    text: 'Here is the practical tuning guidance that MotoQuant\'s environmental sweep gives for Aamby Valley in November, applied to three representative bike classes:',
+    text: 'MotoQuant\'s environmental sweep for Aamby Valley in November gives this guidance for three classes of bike.',
   },
   {
     type: 'p',
-    text: 'Litre-class superbike (Hayabusa Gen1, ZX-10R, S 1000 RR): the power penalty is about 10.5%, or 17–22 hp. The simulator puts these bikes 0.08 s (S 1000 RR, 2019) to 0.17 s (ZX-10R, 2021) slower at Aamby in November than at sea level; a stock Hayabusa Gen1 goes from 10.11 s to 10.22 s. Most of the launch is traction-limited, so the main concern is the power cut at high speed. Run the most aggressive launch map the tyre can hold.',
+    text: 'Litre-class superbikes (Hayabusa Gen1, ZX-10R, S 1000 RR) lose about 10.5% of their power, or 17–22 hp. The simulator puts these bikes 0.08 s (S 1000 RR, 2019) to 0.17 s (ZX-10R, 2021) slower at Aamby in November than at sea level; a stock Hayabusa Gen1 goes from 10.11 s to 10.22 s. Most of the launch is traction-limited, so the main concern is the power cut at high speed. Run the most aggressive launch map the tyre can hold.',
   },
   {
     type: 'p',
-    text: 'Mid-class (Kawasaki Ninja 650, Triumph Speed 400, Bajaj Dominar 400): power penalty 4–7 hp. The simulator puts the Ninja 650 0.22 s slower at Aamby than at sea level, and the Dominar 400 and Speed 400 0.34 s and 0.37 s slower. Focus on the launch: a twin or single with an early torque peak spins a cool tyre easily in the morning.',
+    text: 'Mid-class bikes (Kawasaki Ninja 650, Triumph Speed 400, Bajaj Dominar 400) lose 4–7 hp. The simulator puts the Ninja 650 0.22 s slower at Aamby than at sea level, and the Dominar 400 and Speed 400 0.34 s and 0.37 s slower. Focus on the launch: a twin or single with an early torque peak spins a cool tyre easily in the morning.',
   },
   {
     type: 'p',
-    text: 'Small-cc (R15 V3, Pulsar NS200, Duke 390): these bikes lose the most because they are power-limited for the whole run. A 10% power cut on 18 hp is 1.8 hp, and the lower drag barely helps at 115–150 km/h. The simulator puts the Duke 390 (2017) 0.28 s slower at Aamby than at sea level, and the NS200 and R15 V3 0.42 s and 0.43 s slower. Prioritise gearing that keeps the engine in its power band, and tyre temperature.',
+    text: 'Small bikes (R15 V3, Pulsar NS200, Duke 390) lose the most, because they are power-limited for the whole run. A 10% power cut on 18 hp is 1.8 hp, and the lower drag barely helps at 115–150 km/h. The simulator puts the Duke 390 (2017) 0.28 s slower at Aamby than at sea level, and the NS200 and R15 V3 0.42 s and 0.43 s slower. Spend your effort on gearing that keeps the engine in its power band, and on tyre temperature.',
   },
   {
     type: 'callout',
@@ -104,19 +104,19 @@ const CONTENT = [
   },
   {
     type: 'h2',
-    text: 'The Jetting / Fueling Question',
+    text: 'Jetting and fuelling',
   },
   {
     type: 'p',
-    text: 'For carburetted bikes or bikes with open-loop fuel maps: at 1,100 m DA, the air-fuel mixture goes rich because there is less oxygen per unit of air volume. On a bike with a fixed carb jet, this means you are delivering more fuel than the engine can burn. A jet drop (main jet 1–2 sizes smaller) or needle clip change (raise the needle by 1–2 positions for a leaner full-throttle mixture) is warranted if you are chasing tenths.',
+    text: 'At 1,100 m DA a carburetted bike, or one on an open-loop fuel map, runs rich, because each litre of air carries less oxygen. With a fixed carb jet you are delivering more fuel than the engine can burn. If you are chasing tenths, fit a main jet 1–2 sizes smaller or change the needle clip (raise the needle by 1–2 positions for a leaner full-throttle mixture).',
   },
   {
     type: 'p',
-    text: 'Modern EFI bikes (R15 V4, Duke 390, Ninja 400) compensate automatically via the O2 sensor and closed-loop AFR control — no action needed. But bikes with OBD-locked ECUs on open-loop fuel maps (some Dominar variants, older Pulsars) may benefit from an ECU piggyback unit that leans out the map at altitude.',
+    text: 'Modern EFI bikes (R15 V4, Duke 390, Ninja 400) correct for this on their own through the O2 sensor and closed-loop AFR control, so leave them alone. Bikes with OBD-locked ECUs on open-loop fuel maps (some Dominar variants, older Pulsars) may gain from an ECU piggyback unit that leans out the map at altitude.',
   },
   {
     type: 'h2',
-    text: 'Timing Your Runs',
+    text: 'Timing your runs',
   },
   {
     type: 'p',
@@ -124,11 +124,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Wind is a factor. The catalog\'s November normal for Aamby is a light north-easterly averaging 1.2 m/s (about 4 km/h), but gusts on the day can be stronger. In the simulator a steady 10 km/h headwind costs a stock Hayabusa 0.04 s and an R15 V4 0.21 s, because the slower bike spends longer in it with less power to spare. If an event runs several rounds, note the wind for each.',
+    text: 'The catalog\'s November normal for Aamby is a light north-easterly wind averaging 1.2 m/s (about 4 km/h), but gusts on the day can be stronger. In the simulator a steady 10 km/h headwind costs a stock Hayabusa 0.04 s and an R15 V4 0.21 s, because the slower bike spends longer in it with less power to spare. If an event runs several rounds, note the wind for each.',
   },
   {
     type: 'p',
-    text: 'MotoQuant\'s wind model lets you input headwind or tailwind speed directly. If you have a weather app reading at the strip, plug it in and run the simulation before you stage. It is one of those variables that most racers ignore but that consistently separates the analysts from the guessers.',
+    text: 'You can enter headwind or tailwind speed directly in MotoQuant\'s wind model. If a weather app gives you a reading at the strip, enter it and run the simulation before you stage.',
   },
 ];
 
@@ -162,7 +162,7 @@ export default function PostPage() {
             ))}
           </div>
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
-            How to Tune for Aamby Valley in November
+            How to tune for Aamby Valley in November
           </h1>
           <div className="text-sm text-white/60 mb-12">
             24 April 2026 · 6 min read · MotoQuant Blog
@@ -174,7 +174,7 @@ export default function PostPage() {
         <div className="max-w-2xl mx-auto mt-16 glass rounded-xl p-6 border border-brand-orange/25 flex flex-col sm:flex-row items-center gap-4">
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Set Aamby Valley as your venue</div>
-            <div className="text-white/60 text-sm">Select your bike, open the Location Picker, choose Aamby Valley City, and the November conditions load automatically.</div>
+            <div className="text-white/60 text-sm">Pick your bike, open the location picker and choose Aamby Valley City. The November conditions load on their own.</div>
           </div>
           <Link href="/simulator" className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">Open the simulator →</Link>
         </div>

@@ -31,7 +31,7 @@ import { API_URL } from '@/lib/api';
 
 const ACTIONS = [
   { label: 'Quarter-mile simulator', desc: 'See how fast a bike runs the quarter mile', href: '/simulator', kw: 'sim simulate run race et elapsed time calculate calculator', icon: Gauge, group: 'Tools' },
-  { label: 'Upgrades — best parts for your budget', desc: 'We test every compatible part and pick the quickest mix', href: '/optimize', kw: 'optimize optimizer parts budget knapsack roi upgrade build mods', icon: Wrench, group: 'Tools' },
+  { label: 'Upgrades: best parts for your budget', desc: 'We test every compatible part and pick the quickest mix', href: '/optimize', kw: 'optimize optimizer parts budget knapsack roi upgrade build mods', icon: Wrench, group: 'Tools' },
   { label: 'Race-day setup', desc: 'Gearing, launch RPM and tyre pressure for today\'s air', href: '/autotune', kw: 'autotune tune tuning gearing launch rpm tyre tire pressure conditions ecu setup', icon: Zap, group: 'Tools' },
   { label: 'Browse bikes', desc: 'Search every motorcycle you can simulate', href: '/bikes', kw: 'bikes motorcycles catalog database specs', icon: Search, group: 'Tools' },
   { label: 'Leaderboard', desc: 'Every bike ranked by simulated stock time', href: '/leaderboard', kw: 'top fastest quickest board ranking times stock compare', icon: Trophy, group: 'Tools' },
@@ -39,7 +39,7 @@ const ACTIONS = [
   { label: 'Glossary', desc: 'Drag-racing terms in plain English', href: '/docs/glossary', kw: 'terms jargon meaning et trap sixty launch definitions what is', icon: BookOpen, group: 'Learn' },
   { label: 'How the physics works', desc: 'What the simulator calculates, step by step', href: '/docs/physics', kw: 'rk4 submodels engine model documentation physics', icon: BookOpen, group: 'Learn' },
   { label: 'Accuracy', desc: 'How close predictions are to real timeslips', href: '/validation', kw: 'validation benchmarks error trust accurate', icon: BookOpen, group: 'Learn' },
-  { label: 'Blog', desc: 'Guides and deep dives', href: '/blog', kw: 'articles posts guides comparisons', icon: BookOpen, group: 'Learn' },
+  { label: 'Blog', desc: 'Guides and bike comparisons', href: '/blog', kw: 'articles posts guides comparisons', icon: BookOpen, group: 'Learn' },
   { label: 'About MotoQuant', desc: 'Who builds this, and why it is open source', href: '/about', kw: 'story founders contact team', icon: ArrowRight, group: 'Learn' },
   { label: 'Features', desc: 'Everything the simulator can do', href: '/features', kw: 'what can it do capabilities overview', icon: ArrowRight, group: 'Learn' },
   { label: 'Whitepaper', desc: 'The method behind the numbers', href: '/whitepaper', kw: 'paper methodology research physics', icon: BookOpen, group: 'Learn' },

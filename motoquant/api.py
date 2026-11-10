@@ -40,7 +40,7 @@ import threading
 from collections import OrderedDict
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from fastapi import (
     Depends,
@@ -3855,10 +3855,47 @@ def _get_db_facade():
 
 
 def get_llm_client():
-    """FastAPI dependency. Tests override via app.dependency_overrides."""
-    from .llm import get_default_client
+    """FastAPI dependency: a test seam, ``None`` in production.
 
-    return get_default_client()
+    The chat routes build a client per request (the visitor's own key from
+    the X-Anthropic-Key header, or the server key from ANTHROPIC_API_KEY,
+    for the chosen assistant). Tests override this dependency with a fake
+    client, which is then used as given.
+    """
+    return None
+
+
+ANTHROPIC_KEY_HEADER = "x-anthropic-key"
+
+
+def _visitor_key(request: Request) -> tuple[str | None, bool]:
+    """(key, malformed) from the X-Anthropic-Key header.
+
+    An absent or blank header means "use the server key". A value that does
+    not look like an Anthropic key is reported as malformed and never used.
+    The key stays in local variables and a per-request client only.
+    """
+    from .llm.client import looks_like_anthropic_key
+
+    raw = request.headers.get(ANTHROPIC_KEY_HEADER)
+    if raw is None or not raw.strip():
+        return None, False
+    if not looks_like_anthropic_key(raw):
+        return None, True
+    return raw, False
+
+
+def _chat_client(req: "ChatRequest", visitor_key: str | None, override):
+    """The client for this request: the test override, or a fresh client for
+    the chosen assistant on the visitor's key (no env fallback) or on the
+    server key."""
+    if override is not None:
+        return override
+    from .llm.client import LLMClient
+
+    if visitor_key is not None:
+        return LLMClient(req.assistant, api_key=visitor_key, own_key=True)
+    return LLMClient(req.assistant)
 
 
 class ChatMessage(BaseModel):
@@ -3883,8 +3920,17 @@ class ChatRequest(BaseModel):
     run_summary: bool = Field(
         True,
         description=(
-            "If True, Claude writes a 2-4 sentence prose summary. "
-            "Set False to skip the second LLM call (saves tokens / latency)."
+            "Classic mode only. If True, the assistant writes a 2-4 sentence "
+            "summary. Set False to skip the second LLM call."
+        ),
+    )
+    assistant: Literal["mechanic", "doctor"] = Field(
+        "mechanic",
+        description=(
+            "Which assistant answers: 'mechanic' (Claude Sonnet 5.5, default) "
+            "or 'doctor' (Claude Opus 5.5). A visitor may send their own "
+            "Anthropic key in the X-Anthropic-Key header; it is used for this "
+            "request only and never stored."
         ),
     )
     messages: list[ChatMessage] | None = Field(
@@ -3921,11 +3967,15 @@ class ChatResponse(BaseModel):
     Frontends should:
       - if error == "bike_not_found": render bike_suggestions as clickable
         chips so the user can pick a bike and re-run.
-      - if error == "llm_not_configured": show a banner telling the operator
-        to set the provider key (GROQ_API_KEY by default — see LLM_PROVIDER).
+      - if error == "assistant_unavailable" (no server key and no visitor
+        key) or "free_assistant_resting" (the server key's credit is used
+        up): invite the visitor to add their own Anthropic key.
+      - if error == "invalid_key_format" / "key_rejected": the visitor's key
+        is malformed or was refused; ask them to check it.
       - if error == "rate_limited": show a polite retry-in-a-minute note.
+      - if error == "refused": the model declined; suggest rephrasing.
       - if error == "parse_failed" / "sim_failed" / "agent_failed": show
-        error_detail.
+        error_detail (never contains a key).
       - if error == None: render summary text; agent mode additionally
         returns ordered `blocks` ([{type, payload}]) — sim_result /
         top_speed / compare_result / build_result / outlaw_result /
@@ -3936,6 +3986,8 @@ class ChatResponse(BaseModel):
 
     raw_query: str
     mode: str = "classic"
+    assistant: str = "mechanic"
+    own_key: bool = False
     intent_type: str | None = None
     bike_name: str = ""
     bike_id: DbId | None = None
@@ -3971,8 +4023,25 @@ def _get_surrogate_pair():
     return _SURROGATE, _SURROGATE_SOURCE
 
 
-def _chat_impl(req: ChatRequest, client, progress=None, heavy_gate=None) -> dict:
-    """Run one chat turn (agent or classic). Returns a ChatResponse dict."""
+def _chat_impl(
+    req: ChatRequest, client, progress=None, heavy_gate=None, *, own_key=False
+) -> dict:
+    """Run one chat turn (agent or classic). Returns a ChatResponse dict.
+
+    A per-request visitor-key client is closed (and its key dropped) when
+    the turn ends, whatever happens.
+    """
+    try:
+        payload = _chat_turn(req, client, progress, heavy_gate)
+    finally:
+        if own_key and hasattr(client, "close"):
+            client.close()
+    payload["assistant"] = req.assistant
+    payload["own_key"] = bool(own_key)
+    return payload
+
+
+def _chat_turn(req: ChatRequest, client, progress, heavy_gate) -> dict:
     db = _get_db_facade()
     if db is None:
         raise HTTPException(status_code=503, detail="database_unavailable")
@@ -4059,25 +4128,33 @@ def _parse_nonneg_int_env(name: str, default: int) -> int:
     return value
 
 
-# LLM-bill fuse (open-source pivot, 2026-10-23). Every chat turn spends the
-# deployment operator's LLM-provider tokens, and an agent turn is 2-8 LLM
-# calls, so the per-minute `chat` bucket alone (20/60 s) still lets one IP run
-# ~28k turns a day. This caps each client IP at MOTOQUANT_CHAT_DAILY_LIMIT
-# turns per rolling 24 h window, shared by /api/chat and /api/jobs/chat.
-# 0 disables the cap (self-hosters running their own key or a local model).
-# Read at REQUEST time so tests and operators can change it without a reboot.
+# LLM-bill fuse (open-source pivot, 2026-10-23). A turn on the server key
+# spends the operator's Anthropic credit, and an agent turn is several model
+# calls, so the per-minute `chat` bucket alone (20/60 s) still lets one IP
+# run ~28k turns a day. This caps each client IP at MOTOQUANT_CHAT_DAILY_LIMIT
+# units per rolling 24 h window, shared by /api/chat and /api/jobs/chat. A
+# mechanic question costs 1 unit and a doctor question 2 (the doctor's model
+# costs about twice as much). Questions asked with the visitor's own key
+# skip this cap: they spend the visitor's credit, not the operator's. The
+# per-minute bucket and the heavy-op gate still apply to everyone, because
+# the tools run simulations on this server. 0 disables the cap.
 CHAT_DAILY_LIMIT = _parse_nonneg_int_env("MOTOQUANT_CHAT_DAILY_LIMIT", 200)
 CHAT_DAILY_WINDOW_S = 86400.0
 
 
-def _chat_daily_cap(request: Request) -> None:
-    """FastAPI dependency: per-IP daily chat cap (no-op when the limit is 0)."""
+def _chat_daily_cap(request: Request, assistant: str = "mechanic") -> None:
+    """Charge one server-key chat turn against the per-IP daily cap (no-op
+    when the limit is 0). Raises 429 when the cap is used up."""
     from . import ratelimit as _ratelimit
+    from .llm.client import ASSISTANTS
 
     limit = CHAT_DAILY_LIMIT
     if limit <= 0:
         return
-    _ratelimit.enforce(request, "chat_day", limit, CHAT_DAILY_WINDOW_S)
+    spec = ASSISTANTS.get(assistant) or ASSISTANTS["mechanic"]
+    _ratelimit.enforce(
+        request, "chat_day", limit, CHAT_DAILY_WINDOW_S, cost=spec.cap_units
+    )
 
 
 def _enforce_classic_chat_limit(req: ChatRequest, request: Request) -> None:
@@ -4092,13 +4169,98 @@ def _enforce_classic_chat_limit(req: ChatRequest, request: Request) -> None:
         rate_limit("chat_classic", 4, 60.0)(request)
 
 
+def _early_chat_answer(req: ChatRequest, error: str, detail: str) -> dict:
+    """A ChatResponse-shaped answer that needs no model call."""
+    return {
+        "raw_query": req.query,
+        "mode": req.mode,
+        "assistant": req.assistant,
+        "own_key": False,
+        "error": error,
+        "error_detail": detail,
+    }
+
+
+def _prepare_chat(req: ChatRequest, request: Request, override):
+    """Shared front half of both chat routes.
+
+    Returns (client, own_key, early_answer). ``early_answer`` is set when
+    the request can be answered without a model call (malformed key, or no
+    usable server key). The daily cap is charged only for server-key turns,
+    before the classic-mode bucket so a lower daily cap trips first.
+    """
+    from .llm.client import (
+        FREE_ASSISTANT_RESTING_DETAIL,
+        server_key_configured,
+        server_key_resting,
+    )
+
+    visitor_key, malformed = _visitor_key(request)
+    if malformed:
+        return (
+            None,
+            False,
+            _early_chat_answer(
+                req,
+                "invalid_key_format",
+                "That does not look like an Anthropic API key. Keys start with "
+                "sk-ant- and have no spaces.",
+            ),
+        )
+    own_key = visitor_key is not None
+    # Both cases below are known before any model call, so neither charges
+    # the daily cap: the server key would not be used.
+    if not own_key and override is None and not server_key_configured():
+        return (
+            None,
+            False,
+            _early_chat_answer(
+                req,
+                "assistant_unavailable",
+                "No Anthropic key is set on the server (ANTHROPIC_API_KEY). "
+                "Add your own key to ask questions.",
+            ),
+        )
+    if not own_key and override is None and server_key_resting():
+        return (
+            None,
+            False,
+            _early_chat_answer(
+                req, "free_assistant_resting", FREE_ASSISTANT_RESTING_DETAIL
+            ),
+        )
+    if not own_key:
+        _chat_daily_cap(request, req.assistant)
+    _enforce_classic_chat_limit(req, request)
+    return _chat_client(req, visitor_key, override), own_key, None
+
+
+@app.get("/api/assistant")
+def assistant_info() -> dict:
+    """What the chat panel needs before the first question: whether the free
+    (server-key) assistant can answer, the assistants on offer and the daily
+    free limit in units (a doctor question costs 2, a mechanic question 1)."""
+    from .llm.client import ASSISTANT_ORDER, ASSISTANTS, free_assistant_available
+
+    return {
+        "free_available": free_assistant_available(),
+        "assistants": [
+            {
+                "id": ASSISTANTS[a].id,
+                "label": ASSISTANTS[a].label,
+                "model": ASSISTANTS[a].model_label,
+            }
+            for a in ASSISTANT_ORDER
+        ],
+        "default": "mechanic",
+        "daily_free_limit": CHAT_DAILY_LIMIT,
+    }
+
+
 @app.post(
     "/api/chat",
     response_model=ChatResponse,
-    dependencies=[
-        Depends(rate_limit("chat", 20, 60.0)),
-        Depends(_chat_daily_cap),
-    ],
+    dependencies=[Depends(rate_limit("chat", 20, 60.0))],
 )
 def chat(
     req: ChatRequest,
@@ -4109,12 +4271,16 @@ def chat(
     legacy pipeline).
 
     Always returns 200 with `error` populated on failure modes the user
-    can recover from (bike not found, LLM not configured, LLM rate limited).
-    Returns 503 only if the database itself is unreachable; 429 when the
-    caller trips the per-minute, the classic-mode or the daily chat fuse.
+    can recover from (bike not found, no key, key refused, credit used up,
+    Anthropic rate limit, refusal). Returns 503 only if the database itself
+    is unreachable; 429 when the caller trips the per-minute, the
+    classic-mode or the daily chat fuse (the daily fuse applies only to
+    questions answered on the server key).
     """
-    _enforce_classic_chat_limit(req, request)
-    payload = _chat_impl(req, client, heavy_gate=heavy_gate_for(request))
+    llm, own_key, early = _prepare_chat(req, request, client)
+    if early is not None:
+        return ChatResponse(**early)
+    payload = _chat_impl(req, llm, heavy_gate=heavy_gate_for(request), own_key=own_key)
     suggestions = payload.pop("bike_suggestions", None) or []
     return ChatResponse(
         **payload,
@@ -4125,11 +4291,8 @@ def chat(
 @app.post(
     "/api/jobs/chat",
     status_code=202,
-    dependencies=[
-        # Same buckets as /api/chat — the web client uses either route.
-        Depends(rate_limit("chat", 20, 60.0)),
-        Depends(_chat_daily_cap),
-    ],
+    # Same buckets as /api/chat: the web client uses either route.
+    dependencies=[Depends(rate_limit("chat", 20, 60.0))],
 )
 def job_chat(
     req: ChatRequest,
@@ -4141,11 +4304,30 @@ def job_chat(
     Agent turns can run multiple sims / an optimizer pass, which on the
     0.5-CPU prod tier exceeds comfortable request time — same rationale as
     every other /api/jobs/* route. Poll GET /api/jobs/{id}; result is the
-    ChatResponse-shaped dict.
+    ChatResponse-shaped dict. The X-Anthropic-Key header is read here, once;
+    polls never carry it.
     """
-    _enforce_classic_chat_limit(req, request)
+    llm, own_key, early = _prepare_chat(req, request, client)
+    if early is not None:
+        return _start_job("chat", lambda _progress: early)
     gate = heavy_gate_for(request)
-    return _start_job("chat", lambda progress: _chat_impl(req, client, progress, gate))
+
+    def run(progress):
+        try:
+            return _chat_impl(req, llm, progress, gate, own_key=own_key)
+        except HTTPException:
+            raise
+        except Exception as e:  # noqa: BLE001 -- the job keeps a redacted message
+            from .llm.client import redact_secrets
+
+            raise RuntimeError(redact_secrets(f"{type(e).__name__}: {e}")) from None
+
+    try:
+        return _start_job("chat", run)
+    except HTTPException:
+        if own_key and hasattr(llm, "close"):
+            llm.close()  # the job never started: drop the visitor's key now
+        raise
 
 
 # ═══════════════════════════════════════════════════════════════════════════

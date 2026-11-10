@@ -73,7 +73,7 @@ function TimeslipView() {
   const splits = run
     ? [
         { label: 'First 60 ft (launch)', term: 'sixty', value: run.et_60ft_s },
-        { label: 'Halfway — ⅛ mile', term: 'eighth', value: run.et_eighth_s },
+        { label: 'Halfway (⅛ mile)', term: 'eighth', value: run.et_eighth_s },
       ].filter((s) => s.value != null)
     : [];
 

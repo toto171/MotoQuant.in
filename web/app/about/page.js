@@ -66,7 +66,7 @@ export default function AboutPage() {
             <h2 className="mb-2 font-display text-xl font-semibold text-white md:text-2xl">Open source and community-driven</h2>
             <p className="mb-4 max-w-2xl text-base leading-relaxed text-white/80">
               MotoQuant is free and Apache-2.0 licensed, and the public site has no limits. Add a bike that is missing, correct a
-              spec, send us a timeslip or improve the physics. Every bit makes it more accurate for everyone.
+              spec, send us a timeslip or improve the physics.
             </p>
             <div className="flex flex-wrap gap-3">
               <a href="https://github.com/toto171/MotoQuant.in" target="_blank" rel="noopener noreferrer" className="btn-primary">
@@ -78,35 +78,35 @@ export default function AboutPage() {
 
           <section className="mb-14">
             <h2 className="mb-2 font-display text-xl font-semibold text-white md:text-2xl">The team</h2>
-            <p className="mb-8 text-base text-white/70">Engineers first, racers second, building a tool we would use ourselves.</p>
+            <p className="mb-8 text-base text-white/70">Engineers first, racers second. We are building a tool we would use ourselves.</p>
 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <FounderCard initial="A" name="Arya Desai" role="Co-founder & Lead Engineer · Pune, India" email="motoquant@gmail.com">
                 <p>
-                  The engineer who started MotoQuant and leads it — M.Tech from NIT Warangal, B.Tech from Manipal (Automotive System Design). He owns the physics: the vehicle-dynamics model, the calibration against real Dragy traces, and where the engine goes next.
+                  Arya started MotoQuant and leads it. He has an M.Tech from NIT Warangal and a B.Tech from Manipal (Automotive System Design). He owns the physics: the vehicle-dynamics model, its calibration against real Dragy traces, and where the engine goes next.
                 </p>
                 <p>
-                  Depth from both sides of the workshop door — CFD engine-combustion and magnetorheological-suspension research at NIT-W (plus a filed design patent) on one side; 25+ performance cars tuned by hand at Power Solutions Pune — Mercedes-AMG, BMW, Audi, Jaguar Land Rover — on the other. ECU-tuning certified.
+                  At NIT-W he used CFD to study engine combustion, researched magnetorheological suspension and filed a design patent. At Power Solutions Pune he tuned 25+ performance cars by hand (Mercedes-AMG, BMW, Audi, Jaguar Land Rover). He is certified in ECU tuning.
                 </p>
               </FounderCard>
             
                           <FounderCard initial="R" name="Ritwik Singh" role="Co-founder & Advisor · Bengaluru, India" email="motoquant@gmail.com">
                 <p>
-                  Automobile-and-AI engineer — the software and machine-learning instinct behind MotoQuant&apos;s early architecture, from the simulation scaffolding to the first surrogate models and ROI ranker. Now a co-founder and advisor, still close to the technical direction.
+                  Ritwik is an automobile and AI engineer. He shaped MotoQuant&apos;s early software and machine learning, from the simulation scaffolding to the first surrogate models and the ROI ranker. He is now a co-founder and advisor and stays close to the technical direction.
                 </p>
                 <p>
-                  Day to day he&apos;s building Dhisetu, an AI-assisted indie game studio in Bengaluru — a hardcore indie gamer, which is where the instinct comes from. His bet: the next studios won&apos;t be big teams but solo creators with AI co-pilots. Same instinct here.
+                  Day to day he&apos;s building Dhisetu, an AI-assisted indie game studio in Bengaluru. He&apos;s a hardcore indie gamer, and his bet is that the next studios will be solo creators with AI co-pilots rather than big teams.
                 </p>
               </FounderCard>
             
                           <FounderCard initial="S" name="Sahil Shetye" role="Co-founder & CMO · Manipal, India" email="motoquant@gmail.com">
                 <p>
-                  Electrical engineer and our pitchman — finishing his B.Tech in EEE at Manipal. The growth-and-market side of MotoQuant, and the electronics half of the hardware roadmap: PCB design, EV powertrain and battery tech, low-level C.
+                  Sahil is an electrical engineer finishing his B.Tech in EEE at Manipal, and our pitchman. He runs growth and marketing for MotoQuant and the electronics half of the hardware roadmap: PCB design, EV powertrain and battery tech, low-level C.
                 </p>
                 <p>
-                  Communication and market knowledge are the levers he owns, plus real market experience — turning a physics engine into something racers and tuning shops actually hear about, and want to implement.
+                  He brings communication skills and real market experience. His job is to turn a physics engine into something racers and tuning shops hear about and want to use.
                 </p>
                 <p className="border-l-2 border-white/15 pl-4 italic text-white/70">
-                  &ldquo;In my third year, a major bike accident paused my degree. While recovering, I refused to sit idle — I built a social-media audience and finished multiple industry-standard certifications. I don&apos;t just study engineering; I build, optimize, and execute under pressure.&rdquo;
+                  &ldquo;In my third year, a major bike accident paused my degree. While recovering, I refused to sit idle: I built a social-media audience and finished multiple industry-standard certifications. I don&apos;t just study engineering; I build, optimize, and execute under pressure.&rdquo;
                 </p>
               </FounderCard>
                       </div>

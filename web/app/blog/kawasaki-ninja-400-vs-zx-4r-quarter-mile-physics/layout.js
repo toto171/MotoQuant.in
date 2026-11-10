@@ -7,7 +7,7 @@ import StructuredData, { SITE_URL } from "../../StructuredData";
 
 const SLUG = "kawasaki-ninja-400-vs-zx-4r-quarter-mile-physics";
 const TITLE =
-  "Kawasaki Ninja 400 vs ZX-4R: Parallel Twin vs Inline-Four at the Strip";
+  "Kawasaki Ninja 400 vs ZX-4R: parallel twin vs inline-four at the strip";
 
 function breadcrumbs() {
   return {

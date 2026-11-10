@@ -1,18 +1,19 @@
-# Observability — Sentry error tracking (+ opt-in PostHog)
+# Observability: Sentry error tracking and opt-in PostHog
 
-MotoQuant ships an **env-gated** Sentry integration for the FastAPI backend.
-It is wired and ready, but **does nothing until you supply a DSN** — local dev
-and CI run with zero behaviour change and zero network calls.
+The FastAPI backend has a Sentry integration that does nothing until you set
+a DSN in the environment. Local dev and CI run with no change in behaviour
+and no network calls.
 
-- Code: [`motoquant/observability.py`](../motoquant/observability.py) —
+- Code: [`motoquant/observability.py`](../motoquant/observability.py).
   `init_sentry()` is the single entry point.
 - Wiring: called once at API startup in
   [`motoquant/api.py`](../motoquant/api.py) (right after the `FastAPI(...)`
   app is constructed). It is idempotent and safe to call from multiple entry
   points.
 - Dependency: `sentry-sdk[fastapi]>=2.0.0` is already in
-  [`requirements-api.txt`](../requirements-api.txt). If the package is somehow
-  missing, `init_sentry()` logs a warning and no-ops rather than crashing.
+  [`requirements-api.txt`](../requirements-api.txt). If the package is
+  missing, `init_sentry()` logs a warning and does nothing instead of
+  crashing.
 - Tests: [`tests/test_observability.py`](../tests/test_observability.py) pins
   the no-op-without-DSN contract.
 
@@ -26,53 +27,51 @@ and CI run with zero behaviour change and zero network calls.
 
 ## Enabling it in production
 
-Sentry is activated by setting **one** environment variable on whichever
-platform hosts the API. As of this writing the backend runs on **Render**
-(`motoquant-api.onrender.com`); set it there. The frontend (Vercel) is a
-separate concern — see "Frontend" below.
+Set one environment variable on the platform that hosts the API. The
+backend runs on Render (`motoquant-api.onrender.com`), so set it there. The
+frontend (Vercel) is separate; see "Frontend" below.
 
 1. Create a project at <https://sentry.io> (the free tier is plenty at current
-   traffic) and copy its **DSN** (looks like
-   `https://<key>@<org>.ingest.sentry.io/<project>`).
-2. In the **Render dashboard** → service `motoquant-api` → *Environment* → add:
+   traffic) and copy its DSN, which looks like
+   `https://<key>@<org>.ingest.sentry.io/<project>`.
+2. In the Render dashboard → service `motoquant-api` → *Environment*, add:
 
    ```
    SENTRY_DSN = https://<key>@<org>.ingest.sentry.io/<project>
    ```
 
-   Do **not** hardcode the DSN in `render.yaml` or any committed file — each
-   environment (prod / staging / a contributor's laptop) supplies its own, and
-   a committed DSN leaks to anyone who clones the repo.
-3. Save → Render redeploys → the next boot calls `init_sentry()`, sees the DSN,
-   and starts reporting. The log line `Sentry initialised — environment=… release=…`
-   confirms it.
+   Do not hardcode the DSN in `render.yaml` or any committed file. Each
+   environment (prod / staging / a contributor's laptop) supplies its own,
+   and a committed DSN leaks to anyone who clones the repo.
+3. Save. Render redeploys, and on the next boot `init_sentry()` finds the
+   DSN and starts reporting. The log line
+   `Sentry initialised — environment=… release=…` confirms it.
 
-## Optional tuning knobs
+## Optional settings
 
-All optional; sensible defaults apply when unset.
+Each one falls back to the default below when unset.
 
 | Env var | Default | Notes |
 |---|---|---|
 | `SENTRY_ENVIRONMENT` | `production` (when DSN set) | Override with `staging`, etc. to segment events. |
 | `SENTRY_TRACES_SAMPLE_RATE` | `0.05` | Fraction of requests that get full performance traces (0.0–1.0). Lower for high traffic; raise for early debugging. |
 | `SENTRY_RELEASE` | `motoquant-api@<version>` | Tag events with a release for regression tracking. |
-| `SENTRY_SEND_PII` | `false` | Send usernames/IPs only if explicitly `true`. Left off by default to stay on the safe side of DPDP / privacy regs. |
+| `SENTRY_SEND_PII` | `false` | Sends usernames/IPs only when set to `true`. Off by default to stay on the safe side of DPDP and other privacy rules. |
 
 ## Disabling / rolling back
 
-Delete (or blank) the `SENTRY_DSN` env var and redeploy. The integration
-reverts to a no-op — no code change required.
+Delete (or blank) the `SENTRY_DSN` env var and redeploy. Sentry goes back
+to doing nothing; no code change is needed.
 
-## Frontend (Vercel) — not yet wired
+## Frontend (Vercel): not wired yet
 
-This integration covers the **Python API only**. The Next.js frontend on Vercel
-could add browser + edge error tracking later via
-[`@sentry/nextjs`](https://docs.sentry.io/platforms/javascript/guides/nextjs/)
-with its own `SENTRY_DSN` (and `NEXT_PUBLIC_SENTRY_DSN`) set in the **Vercel**
-dashboard. That work lives in `web/` and is out of scope here — flagged so it is
-not forgotten.
+Sentry is wired into the Python API only. The Next.js frontend on Vercel
+could add browser and edge error tracking later with
+[`@sentry/nextjs`](https://docs.sentry.io/platforms/javascript/guides/nextjs/),
+using its own `SENTRY_DSN` (and `NEXT_PUBLIC_SENTRY_DSN`) set in the Vercel
+dashboard. That work belongs in `web/` and is not covered here.
 
-## Usage telemetry — PostHog forwarding is opt-in
+## Usage telemetry: PostHog forwarding is opt-in
 
 The web app sends anonymous usage beacons (`web/lib/telemetry.js`: an event
 label, numeric/categorical props, a per-tab random session id, the path and
@@ -84,7 +83,7 @@ the user agent; no user id, email, IP correlation or free-text input) to
 | unset (default; every self-hosted copy) | Events are written to the API's own log (`TELEMETRY event=…`) **and sent nowhere else.** |
 | set | Each event is also forwarded server-side to PostHog (`POSTHOG_HOST`, default the EU cloud), through a bounded worker pool that drops events under backpressure. The browser never talks to PostHog directly and no cookies are set. |
 
-This is a decision for whoever operates a deployment. MotoQuant itself
+Whoever operates a deployment makes this choice. MotoQuant itself
 collects nothing for anyone else. If you enable it on a public instance, say
 so in your privacy policy.
 

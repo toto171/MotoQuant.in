@@ -7,7 +7,7 @@ import StructuredData, { SITE_URL } from "../../StructuredData";
 
 const SLUG = "triumph-tiger-900-gt-pro-quarter-mile-physics";
 const TITLE =
-  "Triumph Tiger 900 GT Pro Quarter-Mile Physics: 108hp Triple at 12.08s";
+  "Triumph Tiger 900 GT Pro quarter-mile physics: 108hp triple at 12.08s";
 
 function breadcrumbs() {
   return {

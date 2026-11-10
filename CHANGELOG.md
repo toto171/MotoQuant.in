@@ -67,6 +67,44 @@ matched, mean error 12.7 km/h, bias +6.8 km/h.
 - `make native`, `native-test`, `native-parity`, `native-parity-quick`,
   `wasm`, and the `Native core` CI workflow that gates parity.
 
+### Changed — the chat assistant runs on Claude
+- The assistant now uses Anthropic's Claude only. The Groq, Gemini, DeepSeek,
+  OpenRouter and OpenAI-compatible paths are gone, and so is the `openai`
+  package. The Anthropic SDK moves to `anthropic>=2.8.0,<3` (locked at
+  2.8.0); regenerating the lock also moved FastAPI to 0.162.4, Starlette to
+  1.10.0, Uvicorn to 0.54.0 and sentry-sdk to 2.74.0.
+- Two assistants, picked from a menu in the chat panel: "The doctor"
+  (Claude Opus 5.5) and "The mechanic" (Claude Sonnet 5.5, the default).
+  `POST /api/chat` and `POST /api/jobs/chat` take `assistant`
+  (`"mechanic"` or `"doctor"`); `GET /api/assistant` lists both and says
+  whether the free assistant is available.
+- Visitors can use their own Anthropic API key. The site keeps it in the
+  browser (this tab only, unless "Remember on this device" is ticked) and
+  sends it in the `X-Anthropic-Key` header with the question that starts a
+  chat. The server uses it for that request only and never stores, logs or
+  returns it; Sentry events are scrubbed of the header and of any `sk-ant-`
+  string.
+- The daily chat cap now counts units: a mechanic question is 1, a doctor
+  question 2 (`MOTOQUANT_CHAT_DAILY_LIMIT`, default 200). Questions asked
+  with the visitor's own key skip the cap; the per-minute limit still
+  applies.
+- Build planner: give a budget and a goal in plain words ("1.5 lakh, quickest
+  ET") and the assistant runs the parts optimiser and explains each pick,
+  the total, and what to buy next. The chat panel also shows ranked results.
+- New error codes the site explains: `assistant_unavailable`,
+  `free_assistant_resting`, `key_rejected`, `invalid_key_format`,
+  `rate_limited`, `refused`.
+- Fixed: with `SENTRY_DSN` set and `openai` not installed, `init_sentry()`
+  crashed on sentry's `DidNotEnable` while disabling the OpenAI integration.
+
+### Changed — writing
+- `docs/WRITING.md` sets the house style for the site and the docs.
+  `tests/test_site_copy_style.py` fails on an em dash or "MotoQuant Pro" in
+  text a visitor can read and runs in the `web-verify` workflow.
+- Site copy, the README and the contributor docs were edited to that style.
+  No number, link, command or claim changed.
+- Dependabot opens at most one grouped update per ecosystem per month.
+
 ### Changed — physics: the 2026-10/11 accuracy epoch (pins moved)
 A deliberate epoch under [ADR-0002](docs/adr/0002-pinned-reference-baselines.md),
 with the full weighted sweep as evidence (`reports/acc_final_2026_11_05.json`;

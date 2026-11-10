@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'yamaha-xsr900-gp-vs-mt-09-quarter-mile-physics';
-const TITLE = 'Yamaha XSR900 GP vs MT-09: Quarter-Mile Physics';
+const TITLE = 'Yamaha XSR900 GP vs MT-09: quarter-mile physics';
 
 function breadcrumbs() {
   return {

@@ -1,142 +1,284 @@
 """
-LLMClient -- thin provider-agnostic wrapper around chat-completion APIs.
+LLMClient: the MotoQuant chat layer's only door to a language model.
 
-Supported providers (selected via the LLM_PROVIDER env var):
-  - "groq"       -- Groq Llama 3.3 70B (free, fastest; OpenAI-compatible) [default]
-  - "gemini"     -- Google Gemini (free tier, but free-tier eligibility for
-                    individual model IDs varies by project / region)
-  - "anthropic"  -- Anthropic Claude (paid, native SDK)
-  - "deepseek"   -- DeepSeek API (cheap; OpenAI-compatible)
-  - "openrouter" -- OpenRouter (free DeepSeek/Llama via aggregator)
+Claude only. Two assistants, picked per request:
 
-All non-Anthropic providers go through the OpenAI Python SDK pointed at
-the provider's OpenAI-compatible endpoint, so the call shape is identical.
+  - "mechanic" (default): claude-sonnet-5-5, effort "medium"
+  - "doctor":             claude-opus-5-5,   effort "medium"
 
-Each provider reads its own API key env var:
-  - GEMINI_API_KEY     -- get from https://aistudio.google.com/apikey
-  - ANTHROPIC_API_KEY  -- get from https://console.anthropic.com/
-  - DEEPSEEK_API_KEY   -- get from https://platform.deepseek.com/api_keys
-  - GROQ_API_KEY       -- get from https://console.groq.com/keys
-  - OPENROUTER_API_KEY -- get from https://openrouter.ai/keys
+Keys
+----
+The server's own key comes only from the ``ANTHROPIC_API_KEY`` environment
+variable. A visitor may bring their own key (the ``X-Anthropic-Key`` header);
+the API builds a client for that one request with
+``LLMClient(assistant, api_key=key, own_key=True)``. A visitor client takes
+no key, base URL or custom headers from the environment, so it always talks
+to api.anthropic.com directly. It never falls back to the server key and is
+never cached on a module singleton. Every error string this module builds goes
+through :func:`redact_secrets`, so a key cannot leak through an error.
 
-For tests, pass `_call_override`:
-    def fake(kind, kwargs):
+Request shape (every call, agent or classic)
+--------------------------------------------
+``client.beta.messages.create`` with the server-side fallback beta,
+``fallbacks="default"``, adaptive thinking, ``output_config.effort``, a
+system prompt given as blocks (a frozen block carrying ``cache_control``
+plus a small dynamic block), and, on agent turns, top-level
+``cache_control``. Never sent:
+a forced ``tool_choice`` (``any``/``tool``), ``budget_tokens``, disabled
+thinking, sampling parameters or an assistant prefill. Forcing a tool is
+rejected by both models, so the classic parser uses structured outputs
+(``output_config.format``) instead.
+
+For tests, pass ``_call_override``:
+    def fake(kind, kwargs):          # kind: "tool" | "tools" | "text"
         return {"bike_name": "K5"}
     client = LLMClient(_call_override=fake)
+or inject a fake SDK object as ``client._sdk_client`` to assert on the exact
+keyword arguments sent to ``beta.messages.create``.
 """
 
 from __future__ import annotations
 
+import copy
 import json
 import logging
 import os
 import re
+import threading
+import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
-# ─── Provider table ───────────────────────────────────────────────────────
-_PROVIDERS: dict[str, dict[str, str | None]] = {
-    "gemini": {
-        # Free-tier eligibility for specific model IDs varies by project /
-        # region (Google sometimes returns "limit: 0" on a model the docs
-        # claim is free). Override via GEMINI_MODEL env var if needed —
-        # known-good free options: gemini-2.5-flash, gemini-2.5-flash-lite,
-        # gemini-2.0-flash, gemini-2.0-flash-lite.
-        "model": "gemini-2.5-flash",
-        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-        "api_key_env": "GEMINI_API_KEY",
-        "model_env": "GEMINI_MODEL",
-    },
-    "anthropic": {
-        # Override via ANTHROPIC_MODEL (e.g. a Haiku model to cut cost, or an
-        # Opus model for the hardest multi-step tool use).
-        "model": "claude-sonnet-5-5",
-        "base_url": None,
-        "api_key_env": "ANTHROPIC_API_KEY",
-        "model_env": "ANTHROPIC_MODEL",
-    },
-    "deepseek": {
-        "model": "deepseek-chat",
-        "base_url": "https://api.deepseek.com/v1",
-        "api_key_env": "DEEPSEEK_API_KEY",
-    },
-    "groq": {
-        # Llama 3.3 70B Versatile — Groq's flagship free model.
-        # Free tier: 30 RPM, 14,400 RPD on most accounts (much more
-        # generous than Gemini's per-model variability). Override via
-        # GROQ_MODEL env var to use llama-3.1-70b / llama-3.1-8b-instant /
-        # mixtral-8x7b / etc. without redeploying.
-        "model": "llama-3.3-70b-versatile",
-        "base_url": "https://api.groq.com/openai/v1",
-        "api_key_env": "GROQ_API_KEY",
-        "model_env": "GROQ_MODEL",
-    },
-    "openrouter": {
-        "model": "deepseek/deepseek-chat-v3:free",
-        "base_url": "https://openrouter.ai/api/v1",
-        "api_key_env": "OPENROUTER_API_KEY",
-    },
+logger = logging.getLogger(__name__)
+
+# ─── Assistants ───────────────────────────────────────────────────────────
+
+
+@dataclass(frozen=True)
+class AssistantSpec:
+    id: str
+    label: str
+    model: str
+    model_label: str
+    effort: str
+    # Units charged against the per-IP daily cap when the server key answers.
+    cap_units: int
+
+
+ASSISTANTS: dict[str, AssistantSpec] = {
+    "doctor": AssistantSpec(
+        id="doctor",
+        label="The doctor",
+        model="claude-opus-5-5",
+        model_label="Claude Opus 5.5",
+        effort="medium",
+        cap_units=2,
+    ),
+    "mechanic": AssistantSpec(
+        id="mechanic",
+        label="The mechanic",
+        model="claude-sonnet-5-5",
+        model_label="Claude Sonnet 5.5",
+        effort="medium",
+        cap_units=1,
+    ),
 }
+DEFAULT_ASSISTANT = "mechanic"
+ASSISTANT_ORDER = ("doctor", "mechanic")  # dropdown order: 1. doctor, 2. mechanic
 
-DEFAULT_PROVIDER = "groq"
-DEFAULT_MAX_TOKENS = 1024
-DEFAULT_TIMEOUT_S = 30.0
+SERVER_KEY_ENV = "ANTHROPIC_API_KEY"
+FALLBACK_BETA = "server-side-fallback-2026-07-01"
+DEFAULT_MAX_TOKENS = 16_000
+# Calls are not streamed, and thinking plus a 16k-token answer can take
+# several minutes. 600 s is what the SDK itself allows a non-streaming call
+# of this size. The SDK retries connection errors, 429 and 5xx up to
+# MAX_RETRIES times. It also retries a timeout, so the timeout must stay
+# above the slowest normal turn.
+DEFAULT_TIMEOUT_S = 600.0
+MAX_RETRIES = 2
+# Visitor keys always go to Anthropic itself, never to a gateway set for the
+# server key through ANTHROPIC_BASE_URL.
+ANTHROPIC_API_URL = "https://api.anthropic.com"
+DEFAULT_MODEL = ASSISTANTS[DEFAULT_ASSISTANT].model
 
-# Retries for the Groq/Llama 'tool_use_failed' flake (see call_tools).
-_TOOL_FLAKE_RETRIES = 2
+# ─── Key handling ─────────────────────────────────────────────────────────
 
-# Llama's raw function-call syntax as preserved in Groq's failed_generation:
-#   <function=search_bikes{"query": "zx14r"}</function>
-# Variants seen in the wild: optional '>' after the name, optional closing
-# tag, multiple calls concatenated.
-_FAILED_GEN_CALL_RE = re.compile(
-    r"<function=(?P<name>[\w.-]+)>?\s*(?P<args>\{.*?\})?\s*(?:</function>|(?=<function=)|$)",
-    re.DOTALL,
+_KEY_PREFIX = "sk-ant-"
+_KEY_MIN_LEN = 20
+_KEY_MAX_LEN = 300
+# Anything that starts like an Anthropic key, up to the next whitespace,
+# quote or bracket. Used to scrub every error string and Sentry event.
+_SECRET_RE = re.compile(r"sk-ant-[^\s\"'<>\\]*")
+REDACTED = "[redacted]"
+
+
+def looks_like_anthropic_key(value: Any) -> bool:
+    """True for a value shaped like an Anthropic API key: the ``sk-ant-``
+    prefix, 20-300 printable ASCII characters and no whitespace."""
+    if not isinstance(value, str):
+        return False
+    if not (_KEY_MIN_LEN <= len(value) <= _KEY_MAX_LEN):
+        return False
+    if not value.startswith(_KEY_PREFIX):
+        return False
+    return all(33 <= ord(c) <= 126 for c in value)
+
+
+def redact_secrets(text: Any) -> str:
+    """Replace every ``sk-ant-...`` substring with ``[redacted]``."""
+    if text is None:
+        return ""
+    return _SECRET_RE.sub(REDACTED, str(text))
+
+
+def server_key_configured() -> bool:
+    """True when the server has its own key (``ANTHROPIC_API_KEY``)."""
+    return bool(os.environ.get(SERVER_KEY_ENV, "").strip())
+
+
+# When the server key runs out of credit (or hits its spend limit) every
+# keyless request would fail the same way. Remember it for a while so the
+# site can say so up front and invite visitors to use their own key.
+SERVER_REST_S = 600.0
+_SERVER_RESTING_UNTIL = 0.0
+
+
+def note_server_key_resting(now: float | None = None) -> None:
+    global _SERVER_RESTING_UNTIL
+    _SERVER_RESTING_UNTIL = (time.monotonic() if now is None else now) + SERVER_REST_S
+
+
+def server_key_resting(now: float | None = None) -> bool:
+    return (time.monotonic() if now is None else now) < _SERVER_RESTING_UNTIL
+
+
+def reset_server_key_resting() -> None:
+    global _SERVER_RESTING_UNTIL
+    _SERVER_RESTING_UNTIL = 0.0
+
+
+FREE_ASSISTANT_RESTING_DETAIL = (
+    "The free assistant has reached its spending limit for now. Add your own "
+    "Anthropic key to keep asking, or try again later."
 )
 
 
-def _failed_generation_from_error(exc: Exception) -> str | None:
-    """Extract failed_generation from a provider tool_use_failed 400, else None."""
+def free_assistant_available() -> bool:
+    """True when a visitor without a key can ask a question right now."""
+    return server_key_configured() and not server_key_resting()
+
+
+# ─── Errors ───────────────────────────────────────────────────────────────
+
+
+class LLMError(RuntimeError):
+    """Base class. ``code`` is the ChatResponse ``error`` value. The message
+    is redacted on construction, so ``str(err)`` is always safe to return."""
+
+    code = "agent_failed"
+
+    def __init__(self, message: Any = ""):
+        super().__init__(redact_secrets(message))
+
+
+class LLMNotConfiguredError(LLMError):
+    """No usable key: none on the server and none sent by the visitor."""
+
+    code = "assistant_unavailable"
+
+
+class LLMRateLimitError(LLMError):
+    """Anthropic answered 429."""
+
+    code = "rate_limited"
+
+
+class LLMKeyRejectedError(LLMError):
+    """The visitor's own key was refused (401/403, or no credit on it)."""
+
+    code = "key_rejected"
+
+
+class LLMCreditExhaustedError(LLMError):
+    """The server key hit its credit or spend limit."""
+
+    code = "free_assistant_resting"
+
+
+class LLMRefusalError(LLMError):
+    """The model declined (stop_reason "refusal" after server fallbacks)."""
+
+    code = "refused"
+
+
+_CREDIT_RE = re.compile(
+    r"credit balance|billing|spend(?:ing)? limit|usage limit|purchase credits"
+    r"|insufficient (?:funds|credit)|out of credit",
+    re.IGNORECASE,
+)
+
+
+def _error_text(exc: BaseException) -> str:
+    text = getattr(exc, "message", None) or str(exc)
     body = getattr(exc, "body", None)
     if isinstance(body, dict):
         err = body.get("error") if isinstance(body.get("error"), dict) else body
-        if isinstance(err, dict) and err.get("code") == "tool_use_failed":
-            fg = err.get("failed_generation")
-            return fg if isinstance(fg, str) else ""
-    # Fallback: some SDK versions only surface the payload in str(exc).
-    text = str(exc)
-    if "tool_use_failed" not in text:
-        return None
-    m = re.search(r"'failed_generation':\s*'(.*)'\s*\}\s*\}", text, re.DOTALL)
-    return m.group(1) if m else ""
+        if isinstance(err, dict) and isinstance(err.get("message"), str):
+            text = f"{text} {err['message']}"
+    return str(text)
 
 
-def _parse_failed_generation(failed_gen: str) -> list[tuple[str, dict]]:
-    """Parse '<function=name{json}</function>' call(s). Returns [] if unparseable."""
-    out: list[tuple[str, dict]] = []
-    for m in _FAILED_GEN_CALL_RE.finditer(failed_gen or ""):
-        args_raw = m.group("args")
-        try:
-            args = json.loads(args_raw) if args_raw else {}
-        except (TypeError, ValueError):
-            return []  # half-formed JSON — safer to retry than to guess
-        if not isinstance(args, dict):
-            return []
-        out.append((m.group("name"), args))
-    return out
+def _error_type(exc: BaseException) -> str | None:
+    t = getattr(exc, "type", None)
+    if isinstance(t, str):
+        return t
+    body = getattr(exc, "body", None)
+    if isinstance(body, dict):
+        err = body.get("error") if isinstance(body.get("error"), dict) else body
+        if isinstance(err, dict) and isinstance(err.get("type"), str):
+            return err["type"]
+    return None
 
 
-class LLMNotConfiguredError(RuntimeError):
-    """Raised when the LLM client is needed but cannot be built."""
+def _status_of(exc: BaseException) -> int | None:
+    for attr in ("status_code", "status"):
+        v = getattr(exc, attr, None)
+        if isinstance(v, int):
+            return v
+    v = getattr(getattr(exc, "response", None), "status_code", None)
+    return v if isinstance(v, int) else None
 
 
-class LLMRateLimitError(RuntimeError):
-    """Raised when the provider returns a 429 / quota-exceeded error.
+# error.details.error_code values that mean "this organization may not spend
+# more right now". The spend limit comes back as a 429, not a 400.
+_CREDIT_ERROR_CODES = {"enforced_spend_limit_reached"}
 
-    Distinct from generic errors so the chat pipeline can return a typed
-    'rate_limit' marker to the UI instead of bubbling a stack trace.
-    """
+
+def _error_code(exc: BaseException) -> str | None:
+    code = getattr(exc, "error_code", None)
+    if isinstance(code, str):
+        return code
+    body = getattr(exc, "body", None)
+    if isinstance(body, dict):
+        err = body.get("error") if isinstance(body.get("error"), dict) else body
+        details = err.get("details") if isinstance(err, dict) else None
+        if isinstance(details, dict) and isinstance(details.get("error_code"), str):
+            return details["error_code"]
+    return None
+
+
+def _is_credit_error(exc: BaseException, status: int | None) -> bool:
+    if status == 402 or _error_type(exc) == "billing_error":
+        return True
+    if _error_code(exc) in _CREDIT_ERROR_CODES:
+        return True
+    if status in (400, 403) or status is None:
+        return bool(_CREDIT_RE.search(_error_text(exc)))
+    return False
+
+
+# ─── Data types ───────────────────────────────────────────────────────────
 
 
 @dataclass
@@ -159,145 +301,393 @@ class ToolCall:
 class AgentStep:
     """Result of one :meth:`LLMClient.call_tools` round.
 
-    ``tool_calls`` non-empty → execute them and append tool-result messages;
-    empty → ``text`` is the model's final answer for this turn.
+    ``tool_calls`` non-empty: run them and send back the results.
+    ``raw_content`` is the assistant content to echo on the next request
+    (thinking blocks included, already filtered by the fallback rule).
     """
 
     text: str | None = None
     tool_calls: list[ToolCall] = None  # type: ignore[assignment]
     stop_reason: str | None = None
+    raw_content: list[Any] | None = None
 
     def __post_init__(self):
         if self.tool_calls is None:
             self.tool_calls = []
 
 
+def _btype(block: Any) -> str | None:
+    if isinstance(block, dict):
+        return block.get("type")
+    return getattr(block, "type", None)
+
+
+def _battr(block: Any, name: str, default: Any = None) -> Any:
+    if isinstance(block, dict):
+        return block.get(name, default)
+    return getattr(block, name, default)
+
+
+_DROP_BEFORE_FALLBACK = {"thinking", "redacted_thinking", "tool_use"}
+
+
+def echo_blocks(content: list[Any]) -> list[Any]:
+    """Assistant content to send back on the next request.
+
+    Verbatim, except after a mid-output server-side fallback: thinking,
+    redacted_thinking and tool_use blocks that come BEFORE the last
+    ``fallback`` block are dropped. The fallback block itself stays where
+    it appeared, and everything after it is kept.
+    """
+    blocks = list(content or [])
+    last_fb = None
+    for i, b in enumerate(blocks):
+        if _btype(b) == "fallback":
+            last_fb = i
+    if last_fb is None:
+        return blocks
+    return [
+        b
+        for i, b in enumerate(blocks)
+        if i >= last_fb or _btype(b) not in _DROP_BEFORE_FALLBACK
+    ]
+
+
+# ─── JSON schema helpers (strict tools / structured outputs) ──────────────
+
+_UNSUPPORTED_SCHEMA_KEYS = {
+    "default",
+    "minimum",
+    "maximum",
+    "exclusiveMinimum",
+    "exclusiveMaximum",
+    "multipleOf",
+    "minLength",
+    "maxLength",
+    "pattern",
+    "minItems",
+    "maxItems",
+    "uniqueItems",
+}
+
+
+def strict_json_schema(
+    schema: dict[str, Any], *, all_required: bool = False
+) -> dict[str, Any]:
+    """Copy of ``schema`` usable with ``strict: true`` / structured outputs:
+    every object gets ``additionalProperties: false`` and unsupported
+    keywords (defaults, numeric and length limits) are removed. With
+    ``all_required`` every property becomes required (nullable fields stay
+    nullable, so the model can still say "not mentioned")."""
+
+    def walk(node: Any) -> Any:
+        if isinstance(node, list):
+            return [walk(n) for n in node]
+        if not isinstance(node, dict):
+            return node
+        out = {k: walk(v) for k, v in node.items() if k not in _UNSUPPORTED_SCHEMA_KEYS}
+        if out.get("type") == "object":
+            props = out.get("properties") or {}
+            out["properties"] = props
+            out["additionalProperties"] = False
+            if all_required:
+                out["required"] = list(props)
+        return out
+
+    return walk(copy.deepcopy(schema))
+
+
+# ─── Server SDK client cache (server key only, never a visitor key) ──────
+
+_SERVER_SDK: dict[str, Any] = {}
+_SERVER_SDK_LOCK = threading.Lock()
+
+
+def _build_sdk(api_key: str, timeout_s: float, *, visitor: bool = False):
+    try:
+        import anthropic
+    except ImportError as e:  # pragma: no cover - dependency is pinned
+        raise LLMNotConfiguredError(
+            "The anthropic package is not installed: pip install -r requirements-api.txt"
+        ) from e
+    # An explicit api_key stops the SDK from reading any credential from the
+    # environment (ANTHROPIC_API_KEY, profiles, federation). It still reads
+    # ANTHROPIC_BASE_URL and ANTHROPIC_CUSTOM_HEADERS. Those are the
+    # operator's settings for the server key, so a visitor client pins the
+    # Anthropic API and drops the env headers: a visitor key must never reach
+    # a gateway, and the operator's gateway secrets must never ride along.
+    if not visitor:
+        return anthropic.Anthropic(
+            api_key=api_key, timeout=timeout_s, max_retries=MAX_RETRIES
+        )
+    sdk = anthropic.Anthropic(
+        api_key=api_key,
+        base_url=ANTHROPIC_API_URL,
+        timeout=timeout_s,
+        max_retries=MAX_RETRIES,
+    )
+    # The constructor merges ANTHROPIC_CUSTOM_HEADERS into the client's
+    # custom headers and offers no switch to skip them, so clear them here.
+    # We pass no custom headers of our own.
+    sdk._custom_headers = {}
+    return sdk
+
+
 class LLMClient:
+    """One assistant, one key. Cheap to build; build one per request."""
+
     def __init__(
         self,
-        provider: str | None = None,
+        assistant: str | None = None,
+        *,
         api_key: str | None = None,
-        model: str | None = None,
+        own_key: bool = False,
         max_tokens: int = DEFAULT_MAX_TOKENS,
         timeout_s: float = DEFAULT_TIMEOUT_S,
         _call_override: Callable[[str, dict[str, Any]], Any] | None = None,
     ):
-        self._provider = (
-            provider or os.environ.get("LLM_PROVIDER") or DEFAULT_PROVIDER
-        ).lower()
-        if self._provider not in _PROVIDERS:
-            raise LLMNotConfiguredError(
-                f"Unknown LLM_PROVIDER {self._provider!r}. "
-                f"Supported: {sorted(_PROVIDERS.keys())}"
+        name = (assistant or DEFAULT_ASSISTANT).strip().lower()
+        if name not in ASSISTANTS:
+            raise ValueError(
+                f"Unknown assistant {name!r}. Choose one of {sorted(ASSISTANTS)}."
             )
-        cfg = _PROVIDERS[self._provider]
-        self._api_key = api_key or os.environ.get(cfg["api_key_env"])
-        if not self._api_key and self._provider == "anthropic":
-            self._api_key = os.environ.get("ANTHROPIC_API_KEY")
-        # Allow per-provider model override via env var (e.g. GEMINI_MODEL,
-        # ANTHROPIC_MODEL) — handy for swapping on Railway without redeploy.
-        env_model = None
-        model_env_var = cfg.get("model_env")
-        if model_env_var:
-            env_model = os.environ.get(model_env_var)
-        self._model = model or env_model or cfg["model"]
-        self._base_url = cfg["base_url"]
+        self._spec = ASSISTANTS[name]
+        self._own_key = bool(own_key)
+        if self._own_key:
+            # A visitor key is used as given, or not at all: never the env.
+            self._api_key = api_key if looks_like_anthropic_key(api_key) else None
+        else:
+            self._api_key = (
+                api_key or os.environ.get(SERVER_KEY_ENV, "").strip() or None
+            )
         self._max_tokens = max_tokens
         self._timeout_s = timeout_s
         self._call_override = _call_override
         self._sdk_client = None
 
+    def __repr__(self) -> str:  # never show the key
+        return f"LLMClient(assistant={self._spec.id!r}, own_key={self._own_key})"
+
+    # ── properties ────────────────────────────────────────────────────
+
+    @property
+    def assistant(self) -> str:
+        return self._spec.id
+
+    @property
+    def spec(self) -> AssistantSpec:
+        return self._spec
+
     @property
     def model(self) -> str:
-        return self._model
+        return self._spec.model
+
+    @property
+    def effort(self) -> str:
+        return self._spec.effort
+
+    @property
+    def own_key(self) -> bool:
+        return self._own_key
 
     @property
     def provider(self) -> str:
-        return self._provider
+        return "anthropic"
 
     @property
     def is_configured(self) -> bool:
-        if self._call_override is not None:
+        if self._call_override is not None or self._sdk_client is not None:
             return True
         if not self._api_key:
             return False
         try:
-            if self._provider == "anthropic":
-                import anthropic  # noqa: F401
-            else:
-                import openai  # noqa: F401
+            import anthropic  # noqa: F401
         except ImportError:
             return False
         return True
+
+    def close(self) -> None:
+        """Visitor-key clients only: close the per-request SDK client and
+        drop the key. A server-key client is left as it is."""
+        if not self._own_key:
+            return
+        sdk, self._sdk_client, self._api_key = self._sdk_client, None, None
+        if sdk is not None:
+            try:
+                sdk.close()
+            except Exception:  # noqa: BLE001
+                pass
 
     def _get_sdk(self):
         if self._sdk_client is not None:
             return self._sdk_client
         if not self._api_key:
-            cfg = _PROVIDERS[self._provider]
+            if self._own_key:
+                raise LLMKeyRejectedError(
+                    "The Anthropic key sent with this question is not usable."
+                )
             raise LLMNotConfiguredError(
-                f"{cfg['api_key_env']} env var not set. "
-                f"Provider={self._provider!r}. Set {cfg['api_key_env']}=... "
-                f"or set LLM_PROVIDER to a different provider."
+                "No Anthropic key is set on the server (ANTHROPIC_API_KEY). "
+                "Add your own key to ask questions."
             )
-        if self._provider == "anthropic":
-            try:
-                import anthropic
-            except ImportError as e:
-                raise LLMNotConfiguredError(
-                    "anthropic package not installed: pip install anthropic"
-                ) from e
-            self._sdk_client = anthropic.Anthropic(
-                api_key=self._api_key, timeout=self._timeout_s
+        if self._own_key:
+            self._sdk_client = _build_sdk(self._api_key, self._timeout_s, visitor=True)
+            return self._sdk_client
+        with _SERVER_SDK_LOCK:
+            sdk = _SERVER_SDK.get(self._api_key)
+            if sdk is None:
+                _SERVER_SDK.clear()  # the env key changed: drop the old client
+                sdk = _build_sdk(self._api_key, self._timeout_s)
+                _SERVER_SDK[self._api_key] = sdk
+        self._sdk_client = sdk
+        return sdk
+
+    # ── error translation ─────────────────────────────────────────────
+
+    def _translate(self, exc: Exception) -> LLMError:
+        """Map an SDK exception to a typed, redacted LLMError (most specific
+        first: auth, permission, not found, rate limit, bad request, other
+        status, connection)."""
+        if isinstance(exc, LLMError):
+            return exc
+        try:
+            import anthropic
+
+            auth_cls = (anthropic.AuthenticationError, anthropic.PermissionDeniedError)
+            nf_cls = anthropic.NotFoundError
+            rl_cls = anthropic.RateLimitError
+            bad_cls = anthropic.BadRequestError
+            status_cls = anthropic.APIStatusError
+            conn_cls = anthropic.APIConnectionError
+        except ImportError:  # pragma: no cover
+            auth_cls = nf_cls = rl_cls = bad_cls = status_cls = conn_cls = ()
+        status = _status_of(exc)
+        who = "your" if self._own_key else "the server's"
+
+        if (auth_cls and isinstance(exc, auth_cls)) or status in (401, 403):
+            if _is_credit_error(exc, status):
+                return self._credit_error()
+            if self._own_key:
+                return LLMKeyRejectedError(
+                    "Anthropic did not accept your API key. Check it in the "
+                    "Anthropic console and try again."
+                )
+            logger.warning("Anthropic rejected the server key (status %s)", status)
+            return LLMNotConfiguredError(
+                "The server's Anthropic key was not accepted. Add your own key to "
+                "ask questions."
             )
-        else:
-            try:
-                import openai
-            except ImportError as e:
-                raise LLMNotConfiguredError(
-                    "openai package not installed: pip install openai"
-                ) from e
-            self._sdk_client = openai.OpenAI(
-                api_key=self._api_key,
-                base_url=self._base_url,
-                timeout=self._timeout_s,
+        if (nf_cls and isinstance(exc, nf_cls)) or status == 404:
+            return LLMError(
+                f"The model behind this assistant ({self.model}) is not available to "
+                f"{who} Anthropic account."
             )
-        return self._sdk_client
+        if (rl_cls and isinstance(exc, rl_cls)) or status == 429:
+            if _is_credit_error(exc, status):
+                # The organization's spend limit: a 429 that will not clear
+                # in a minute.
+                return self._credit_error()
+            return LLMRateLimitError(
+                "Anthropic is rate limiting requests right now. Try again in a minute."
+            )
+        if (bad_cls and isinstance(exc, bad_cls)) or status == 400:
+            if _is_credit_error(exc, status):
+                return self._credit_error()
+            return LLMError(f"Anthropic rejected the request: {_error_text(exc)[:300]}")
+        if (status_cls and isinstance(exc, status_cls)) or status is not None:
+            if _is_credit_error(exc, status):
+                return self._credit_error()
+            return LLMError(f"Anthropic returned an error (status {status}).")
+        if conn_cls and isinstance(exc, conn_cls):
+            return LLMError("Could not reach Anthropic. Try again shortly.")
+        return LLMError(f"{type(exc).__name__}: {exc}")
 
-    @staticmethod
-    def _is_rate_limit(exc: Exception) -> bool:
-        """Detect a provider 429 / quota-exceeded error in an SDK-agnostic way.
+    def _credit_error(self) -> LLMError:
+        if self._own_key:
+            return LLMKeyRejectedError(
+                "Your Anthropic account has no credit left or reached its spend limit."
+            )
+        note_server_key_resting()
+        logger.warning("The server's Anthropic key hit its credit or spend limit")
+        return LLMCreditExhaustedError(FREE_ASSISTANT_RESTING_DETAIL)
 
-        Both the anthropic and openai SDKs raise a ``RateLimitError`` (status
-        429); other OpenAI-compatible providers surface the same class through
-        the openai SDK. We match on HTTP status (most reliable) and fall back to
-        the exception class name so a minor SDK refactor cannot silently demote
-        a 429 to a generic error.
-        """
-        for attr in ("status_code", "status"):
-            if getattr(exc, attr, None) == 429:
-                return True
-        resp = getattr(exc, "response", None)
-        if getattr(resp, "status_code", None) == 429:
-            return True
-        return type(exc).__name__ == "RateLimitError"
+    def _create(self, **kwargs):
+        """Call ``beta.messages.create`` and translate every failure."""
+        sdk = self._get_sdk()
+        try:
+            return sdk.beta.messages.create(**kwargs)
+        except Exception as e:  # noqa: BLE001 -- translated below
+            raise self._translate(e) from None
 
+    # Kept for callers that pass their own create function (tests, scripts).
     def _sdk_create(self, create_fn, **kwargs):
-        """Invoke an SDK ``*.create(**kwargs)`` call, translating a provider 429
-        into :class:`LLMRateLimitError` so the chat pipeline can return a typed
-        'rate_limit' marker instead of a bare stack trace."""
         try:
             return create_fn(**kwargs)
-        except LLMRateLimitError:
-            raise
-        except Exception as e:  # noqa: BLE001 -- re-raised below
-            if self._is_rate_limit(e):
-                raise LLMRateLimitError(
-                    f"{self._provider} rate limit / quota exceeded: {e}"
-                ) from e
-            raise
+        except Exception as e:  # noqa: BLE001 -- translated below
+            raise self._translate(e) from None
+
+    # ── request shape ─────────────────────────────────────────────────
+
+    @staticmethod
+    def system_blocks(system: str | list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """A plain string becomes one frozen block with cache_control."""
+        if isinstance(system, str):
+            return [
+                {"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}
+            ]
+        return list(system)
+
+    def request_kwargs(
+        self,
+        *,
+        system: str | list[dict[str, Any]],
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]] | None = None,
+        tool_choice: dict[str, Any] | None = None,
+        max_tokens: int | None = None,
+        output_format: dict[str, Any] | None = None,
+        cache_tail: bool = False,
+    ) -> dict[str, Any]:
+        """The exact keyword arguments for ``beta.messages.create``.
+
+        ``cache_tail`` adds top-level (automatic) ``cache_control``, which
+        caches up to the last message. Only the agent loop sets it: its next
+        round re-reads that prefix. A one-shot call ends in content no later
+        request repeats, so it relies on the system block's marker alone and
+        does not pay for a cache write it would never read.
+        """
+        if tool_choice is not None and tool_choice.get("type") not in ("auto", "none"):
+            raise ValueError("forced tool_choice is not supported on these models")
+        output_config: dict[str, Any] = {"effort": self.effort}
+        if output_format is not None:
+            output_config["format"] = output_format
+        kw: dict[str, Any] = {
+            "model": self.model,
+            "max_tokens": max_tokens or self._max_tokens,
+            "betas": [FALLBACK_BETA],
+            "fallbacks": "default",
+            "thinking": {"type": "adaptive"},
+            "output_config": output_config,
+            "system": self.system_blocks(system),
+            "messages": messages,
+        }
+        if cache_tail:
+            kw["cache_control"] = {"type": "ephemeral"}
+        if tools:
+            kw["tools"] = tools
+        if tool_choice is not None:
+            kw["tool_choice"] = tool_choice
+        return kw
+
+    # ── classic parser: structured JSON output ────────────────────────
 
     def call_tool(self, system, user, tool_name, tool_schema):
+        """Extract JSON matching ``tool_schema`` from ``user``.
+
+        The name is historical: forcing a tool call returns a 400 on both
+        assistants' models, so this uses structured outputs
+        (``output_config.format``) and returns the parsed object.
+        """
         if self._call_override is not None:
             result = self._call_override(
                 "tool",
@@ -314,103 +704,77 @@ class LLMClient:
                 return LLMResponse(tool_input=result, stop_reason="tool_use")
             raise TypeError("_call_override for 'tool' must return dict or LLMResponse")
 
-        client = self._get_sdk()
-
-        if self._provider == "anthropic":
-            tools = [
-                {
-                    "name": tool_name,
-                    "description": (
-                        f"Submit the structured parse result. "
-                        f"Always invoke {tool_name}."
-                    ),
-                    "input_schema": tool_schema,
-                }
-            ]
-            msg = self._sdk_create(
-                client.messages.create,
-                model=self._model,
-                max_tokens=self._max_tokens,
-                system=system,
-                tools=tools,
-                tool_choice={"type": "tool", "name": tool_name},
-                messages=[{"role": "user", "content": user}],
+        fmt = {
+            "type": "json_schema",
+            "schema": strict_json_schema(tool_schema, all_required=True),
+        }
+        last_err: str = ""
+        for _attempt in range(2):
+            msg = self._create(
+                **self.request_kwargs(
+                    system=system,
+                    messages=[{"role": "user", "content": user}],
+                    output_format=fmt,
+                )
             )
-            for block in msg.content:
-                if (
-                    getattr(block, "type", None) == "tool_use"
-                    and block.name == tool_name
-                ):
-                    return LLMResponse(
-                        tool_input=dict(block.input), stop_reason=msg.stop_reason
-                    )
-            raise RuntimeError(
-                f"Model did not invoke {tool_name}; stop_reason={msg.stop_reason}"
-            )
-
-        # OpenAI-compatible providers
-        tools = [
-            {
-                "type": "function",
-                "function": {
-                    "name": tool_name,
-                    "description": (
-                        f"Submit the structured parse result. "
-                        f"Always invoke {tool_name}."
-                    ),
-                    "parameters": tool_schema,
-                },
-            }
-        ]
-        msg = self._sdk_create(
-            client.chat.completions.create,
-            model=self._model,
-            max_tokens=self._max_tokens,
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
-            ],
-            tools=tools,
-            tool_choice={"type": "function", "function": {"name": tool_name}},
-        )
-        choice = msg.choices[0]
-        tool_calls = getattr(choice.message, "tool_calls", None) or []
-        for tc in tool_calls:
-            fn = getattr(tc, "function", None)
-            if fn is None or fn.name != tool_name:
-                continue
+            if msg.stop_reason == "refusal":
+                raise LLMRefusalError("The assistant declined to answer this question.")
+            text = "".join(
+                _battr(b, "text", "") for b in msg.content if _btype(b) == "text"
+            ).strip()
             try:
-                args = json.loads(fn.arguments)
-            except (TypeError, ValueError) as e:
-                raise RuntimeError(
-                    f"Provider returned malformed JSON for {tool_name}: {fn.arguments!r}"
-                ) from e
-            return LLMResponse(tool_input=args, stop_reason=choice.finish_reason)
-        raise RuntimeError(
-            f"Model did not invoke {tool_name}; finish_reason={choice.finish_reason}"
-        )
+                data = json.loads(text)
+            except (TypeError, ValueError):
+                last_err = f"stop_reason={msg.stop_reason}"
+                continue
+            if isinstance(data, dict):
+                return LLMResponse(
+                    tool_input=data, raw_text=text, stop_reason=msg.stop_reason
+                )
+            last_err = "not a JSON object"
+        raise RuntimeError(f"Model did not return valid {tool_name} JSON ({last_err})")
 
-    # ── Multi-turn agentic tool use ───────────────────────────────────
+    # ── agent turns ───────────────────────────────────────────────────
     #
-    # Neutral message format (provider-agnostic, used by llm/agent.py):
+    # Neutral message format (used by llm/agent.py and by test overrides):
     #   {"role": "user",      "content": str}
     #   {"role": "assistant", "content": str | None,
-    #    "tool_calls": [{"id": str, "name": str, "arguments": dict}]}   # optional
+    #    "tool_calls": [{"id", "name", "arguments"}],      # optional
+    #    "raw_content": [blocks]}                          # optional, verbatim
     #   {"role": "tool",      "tool_call_id": str, "name": str, "content": str}
-    #
-    # Tools are passed as [{"name", "description", "input_schema"}] and the
-    # model is FREE to pick any tool or answer in plain text (tool_choice
-    # auto) — unlike call_tool, which forces a single named tool.
 
     @staticmethod
     def _neutral_to_anthropic(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        """Convert neutral agent messages to Anthropic messages format."""
+        """Convert neutral agent messages to Messages API format.
+
+        Assistant turns with ``raw_content`` are echoed verbatim (thinking
+        blocks included). Tool results and any user text that follows them
+        merge into ONE user message, tool results first.
+        """
         out: list[dict[str, Any]] = []
+
+        def push_user(blocks: list[dict[str, Any]]) -> None:
+            if out and out[-1]["role"] == "user":
+                prev = out[-1]["content"]
+                if isinstance(prev, str):
+                    prev = [{"type": "text", "text": prev}] if prev else []
+                out[-1]["content"] = prev + blocks
+            else:
+                out.append({"role": "user", "content": blocks})
+
         for m in messages:
             role = m.get("role")
             if role == "user":
-                out.append({"role": "user", "content": m.get("content") or ""})
+                text = m.get("content") or ""
+                if out and out[-1]["role"] == "user":
+                    push_user([{"type": "text", "text": text}])
+                else:
+                    out.append({"role": "user", "content": text})
             elif role == "assistant":
+                raw = m.get("raw_content")
+                if raw:
+                    out.append({"role": "assistant", "content": echo_blocks(raw)})
+                    continue
                 blocks: list[dict[str, Any]] = []
                 if m.get("content"):
                     blocks.append({"type": "text", "text": m["content"]})
@@ -425,226 +789,103 @@ class LLMClient:
                     )
                 out.append({"role": "assistant", "content": blocks or ""})
             elif role == "tool":
-                # Anthropic wants tool results inside a user turn. Merge
-                # consecutive tool results into one user message.
-                block = {
-                    "type": "tool_result",
-                    "tool_use_id": m.get("tool_call_id") or "",
-                    "content": m.get("content") or "",
-                }
-                if (
-                    out
-                    and out[-1]["role"] == "user"
-                    and isinstance(out[-1]["content"], list)
-                    and out[-1]["content"]
-                    and out[-1]["content"][0].get("type") == "tool_result"
-                ):
-                    out[-1]["content"].append(block)
-                else:
-                    out.append({"role": "user", "content": [block]})
-        return out
-
-    @staticmethod
-    def _neutral_to_openai(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        """Convert neutral agent messages to OpenAI chat format."""
-        out: list[dict[str, Any]] = []
-        for m in messages:
-            role = m.get("role")
-            if role == "user":
-                out.append({"role": "user", "content": m.get("content") or ""})
-            elif role == "assistant":
-                entry: dict[str, Any] = {
-                    "role": "assistant",
-                    "content": m.get("content"),
-                }
-                tcs = m.get("tool_calls") or []
-                if tcs:
-                    entry["tool_calls"] = [
+                push_user(
+                    [
                         {
-                            "id": tc["id"],
-                            "type": "function",
-                            "function": {
-                                "name": tc["name"],
-                                "arguments": json.dumps(tc.get("arguments") or {}),
-                            },
+                            "type": "tool_result",
+                            "tool_use_id": m.get("tool_call_id") or "",
+                            "content": m.get("content") or "",
                         }
-                        for tc in tcs
                     ]
-                out.append(entry)
-            elif role == "tool":
-                out.append(
-                    {
-                        "role": "tool",
-                        "tool_call_id": m.get("tool_call_id") or "",
-                        "content": m.get("content") or "",
-                    }
                 )
         return out
 
+    @staticmethod
+    def _api_tools(tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        keys = ("name", "description", "input_schema", "strict")
+        return [{k: t[k] for k in keys if k in t} for t in tools]
+
     def call_tools(
         self,
-        system: str,
+        system: str | list[dict[str, Any]],
         messages: list[dict[str, Any]],
         tools: list[dict[str, Any]],
         *,
         max_tokens: int | None = None,
+        tool_choice: dict[str, Any] | None = None,
     ) -> AgentStep:
-        """One agent step: model sees the transcript + tools, freely answers
-        or requests tool calls (``tool_choice`` auto on every provider).
-
-        ``messages`` uses the neutral format documented above. ``tools`` is
-        [{"name", "description", "input_schema"}].
-        """
+        """One agent step. The model sees the transcript and the tools and
+        either answers or asks for tool calls (``tool_choice`` auto, or
+        ``{"type": "none"}`` for a forced final answer)."""
         if self._call_override is not None:
             result = self._call_override(
                 "tools",
-                {"system": system, "messages": messages, "tools": tools},
+                {
+                    "system": system,
+                    "messages": messages,
+                    "tools": tools,
+                    "tool_choice": tool_choice,
+                },
             )
             if isinstance(result, AgentStep):
                 return result
             if isinstance(result, str):
                 return AgentStep(text=result, stop_reason="end_turn")
             if isinstance(result, dict):
+                calls = [
+                    ToolCall(
+                        id=tc.get("id") or f"call_{i}",
+                        name=tc["name"],
+                        arguments=tc.get("arguments") or {},
+                    )
+                    for i, tc in enumerate(result.get("tool_calls") or [])
+                ]
                 return AgentStep(
                     text=result.get("text"),
-                    tool_calls=[
-                        ToolCall(
-                            id=tc.get("id") or f"call_{i}",
-                            name=tc["name"],
-                            arguments=tc.get("arguments") or {},
-                        )
-                        for i, tc in enumerate(result.get("tool_calls") or [])
-                    ],
-                    stop_reason=result.get("stop_reason"),
+                    tool_calls=calls,
+                    stop_reason=result.get("stop_reason")
+                    or ("tool_use" if calls else "end_turn"),
+                    raw_content=result.get("raw_content"),
                 )
             raise TypeError(
                 "_call_override for 'tools' must return AgentStep, str or dict"
             )
 
-        client = self._get_sdk()
-        max_tok = max_tokens or self._max_tokens
-
-        if self._provider == "anthropic":
-            a_kwargs: dict[str, Any] = {}
-            if tools:
-                # Providers reject an empty tools array — omit entirely when
-                # the caller wants a plain final-answer turn.
-                a_kwargs["tools"] = [
-                    {
-                        "name": t["name"],
-                        "description": t.get("description", ""),
-                        "input_schema": t["input_schema"],
-                    }
-                    for t in tools
-                ]
-            msg = self._sdk_create(
-                client.messages.create,
-                model=self._model,
-                max_tokens=max_tok,
+        msg = self._create(
+            **self.request_kwargs(
                 system=system,
                 messages=self._neutral_to_anthropic(messages),
-                **a_kwargs,
+                tools=self._api_tools(tools) if tools else None,
+                tool_choice=tool_choice,
+                max_tokens=max_tokens,
+                cache_tail=True,
             )
-            text_chunks: list[str] = []
-            calls: list[ToolCall] = []
-            for block in msg.content:
-                btype = getattr(block, "type", None)
-                if btype == "text":
-                    text_chunks.append(block.text)
-                elif btype == "tool_use":
-                    calls.append(
-                        ToolCall(
-                            id=block.id,
-                            name=block.name,
-                            arguments=dict(block.input or {}),
-                        )
+        )
+        content = list(msg.content or [])
+        if msg.stop_reason == "refusal":
+            # Never read or run a refused turn's content.
+            return AgentStep(stop_reason="refusal")
+        kept = echo_blocks(content)
+        text_chunks: list[str] = []
+        calls: list[ToolCall] = []
+        for block in kept:
+            btype = _btype(block)
+            if btype == "text":
+                text_chunks.append(_battr(block, "text", "") or "")
+            elif btype == "tool_use":
+                args = _battr(block, "input", None)
+                calls.append(
+                    ToolCall(
+                        id=_battr(block, "id", ""),
+                        name=_battr(block, "name", ""),
+                        arguments=dict(args) if isinstance(args, dict) else {},
                     )
-            return AgentStep(
-                text="".join(text_chunks).strip() or None,
-                tool_calls=calls,
-                stop_reason=msg.stop_reason,
-            )
-
-        # OpenAI-compatible providers (Groq / Gemini / DeepSeek / OpenRouter)
-        o_kwargs: dict[str, Any] = {}
-        if tools:
-            o_kwargs["tools"] = [
-                {
-                    "type": "function",
-                    "function": {
-                        "name": t["name"],
-                        "description": t.get("description", ""),
-                        "parameters": t["input_schema"],
-                    },
-                }
-                for t in tools
-            ]
-            o_kwargs["tool_choice"] = "auto"
-        o_messages = [{"role": "system", "content": system}]
-        o_messages.extend(self._neutral_to_openai(messages))
-        # Groq/Llama flake mode (Sentry MOTOQUANT-API-1): the model sometimes
-        # emits its raw '<function=name{json}</function>' call syntax instead
-        # of a proper tool_calls block; Groq rejects it with HTTP 400
-        # code=tool_use_failed but preserves the intended call verbatim in the
-        # error body's 'failed_generation'. Salvage that call when parseable,
-        # else retry (the failure is stochastic), else raise.
-        msg = None
-        for attempt in range(_TOOL_FLAKE_RETRIES + 1):
-            try:
-                msg = self._sdk_create(
-                    client.chat.completions.create,
-                    model=self._model,
-                    max_tokens=max_tok,
-                    messages=o_messages,
-                    **o_kwargs,
                 )
-                break
-            except LLMRateLimitError:
-                raise
-            except Exception as e:  # noqa: BLE001 — provider-specific 400s
-                failed_gen = _failed_generation_from_error(e)
-                if failed_gen is None:
-                    raise  # not the tool_use_failed flake — real error
-                salvaged = _parse_failed_generation(failed_gen)
-                if salvaged:
-                    logging.getLogger(__name__).warning(
-                        "salvaged %d tool call(s) from a %s tool_use_failed flake",
-                        len(salvaged),
-                        self._provider,
-                    )
-                    return AgentStep(
-                        text=None,
-                        tool_calls=[
-                            ToolCall(id=f"salvaged_{i}", name=name, arguments=args)
-                            for i, (name, args) in enumerate(salvaged)
-                        ],
-                        stop_reason="tool_use",
-                    )
-                if attempt == _TOOL_FLAKE_RETRIES:
-                    raise
-                logging.getLogger(__name__).warning(
-                    "unsalvageable tool_use_failed flake from %s — retry %d/%d",
-                    self._provider,
-                    attempt + 1,
-                    _TOOL_FLAKE_RETRIES,
-                )
-        choice = msg.choices[0]
-        calls = []
-        for tc in getattr(choice.message, "tool_calls", None) or []:
-            fn = getattr(tc, "function", None)
-            if fn is None:
-                continue
-            try:
-                args = json.loads(fn.arguments) if fn.arguments else {}
-            except (TypeError, ValueError):
-                # Malformed JSON args: surface as an empty call so the agent
-                # loop can report a tool error instead of crashing the turn.
-                args = {"__malformed_json__": fn.arguments}
-            calls.append(ToolCall(id=tc.id, name=fn.name, arguments=args))
         return AgentStep(
-            text=(choice.message.content or "").strip() or None,
+            text="".join(text_chunks).strip() or None,
             tool_calls=calls,
-            stop_reason=choice.finish_reason,
+            stop_reason=msg.stop_reason,
+            raw_content=kept,
         )
 
     def call_text(self, system, user):
@@ -655,39 +896,25 @@ class LLMClient:
             raise TypeError(
                 f"_call_override for 'text' must return str, got {type(result).__name__}"
             )
-
-        client = self._get_sdk()
-
-        if self._provider == "anthropic":
-            msg = self._sdk_create(
-                client.messages.create,
-                model=self._model,
-                max_tokens=self._max_tokens,
-                system=system,
-                messages=[{"role": "user", "content": user}],
+        msg = self._create(
+            **self.request_kwargs(
+                system=system, messages=[{"role": "user", "content": user}]
             )
-            chunks = []
-            for block in msg.content:
-                if getattr(block, "type", None) == "text":
-                    chunks.append(block.text)
-            return "".join(chunks).strip()
-
-        msg = self._sdk_create(
-            client.chat.completions.create,
-            model=self._model,
-            max_tokens=self._max_tokens,
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
-            ],
         )
-        return (msg.choices[0].message.content or "").strip()
+        if msg.stop_reason == "refusal":
+            raise LLMRefusalError("The assistant declined to answer this question.")
+        return "".join(
+            _battr(b, "text", "") or "" for b in msg.content if _btype(b) == "text"
+        ).strip()
 
+
+# ─── Process-wide server client (CLI and library use) ─────────────────────
 
 _DEFAULT_CLIENT: LLMClient | None = None
 
 
 def get_default_client() -> LLMClient:
+    """The server-key mechanic. Never used for a visitor's key."""
     global _DEFAULT_CLIENT
     if _DEFAULT_CLIENT is None:
         _DEFAULT_CLIENT = LLMClient()
@@ -697,6 +924,3 @@ def get_default_client() -> LLMClient:
 def reset_default_client() -> None:
     global _DEFAULT_CLIENT
     _DEFAULT_CLIENT = None
-
-
-DEFAULT_MODEL = _PROVIDERS[DEFAULT_PROVIDER]["model"]

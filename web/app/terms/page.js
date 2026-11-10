@@ -1,7 +1,8 @@
 /**
  * MotoQuant — Terms of Service
  * Last updated: 10 November 2026 — accounts removed; saved runs live in the
- * visitor's browser. (9 November 2026: rewritten for the open-source
+ * visitor's browser. §6 now says chat goes to Anthropic (Claude) and covers a
+ * visitor's own Anthropic key. (9 November 2026: rewritten for the open-source
  * Apache-2.0 release: no plans, payments, refunds or license keys.)
  */
 
@@ -12,7 +13,7 @@ import PageHero from "../../components/PageHero";
 const REPO_URL = "https://github.com/toto171/MotoQuant.in";
 
 export const metadata = {
-  title: "Terms of Service — MotoQuant",
+  title: "Terms of Service | MotoQuant",
   alternates: { canonical: "https://motoquant.in/terms" },
 };
 
@@ -32,10 +33,10 @@ export default function TermsPage() {
       <main id="main" className="pt-10 pb-20 px-4 sm:px-6">
         <div className="mx-auto max-w-3xl">
         <p className="text-white/75 text-base leading-relaxed">
-          MotoQuant (&ldquo;MotoQuant&rdquo;) is free, open-source software for
+          MotoQuant is free, open-source software for
           simulating motorcycle drag-racing quarter-mile times. The site at motoquant.in is a
           free, public instance of that project, run from Pune, India. By using it you agree
-          to these short terms.
+          to these terms.
         </p>
 
         <Section title="1. Open source and free">
@@ -51,10 +52,10 @@ export default function TermsPage() {
 
         <Section title="2. Simulations are estimates, not advice">
           <p>
-            Predicted elapsed times, trap speeds and parts-ROI figures are estimates produced
-            by physical models and publicly available specifications. They are for
+            Predicted elapsed times, trap speeds and parts-ROI figures are estimates from
+            physical models and publicly available specifications. They are for
             informational and analytical purposes only and are not safety, engineering or
-            tuning advice. Real-world performance depends on many factors the model does not
+            tuning advice. Real-world performance also depends on things the model does not
             capture.
           </p>
           <p>
@@ -84,21 +85,24 @@ export default function TermsPage() {
         <Section title="5. Acceptable use">
           <p>Please do not:</p>
           <ul className="text-white/65 list-disc pl-5 space-y-1">
-            <li>Abuse or scrape the hosted service in a way that degrades it for others, or try to circumvent its rate limits</li>
-            <li>Probe for or exploit security vulnerabilities (report them via GitHub instead)</li>
+            <li>Abuse or scrape the hosted service in a way that degrades it for others, or try to get around its rate limits</li>
+            <li>Probe for or exploit security vulnerabilities (report them on GitHub instead)</li>
             <li>Use the service for any unlawful purpose under Indian law or the law of your jurisdiction</li>
           </ul>
           <p>
-            If you need heavy or automated use, run your own copy &mdash; that is what the
-            Apache License 2.0 is for. We may rate-limit or block usage that harms the service.
+            If you need heavy or automated use, run your own copy under the
+            Apache License 2.0. We may rate-limit or block usage that harms the service.
           </p>
         </Section>
 
         <Section title="6. What you send us">
           <p>
             Simulation requests, chat questions and files you upload (Dragy GPS logs, dyno
-            sheets) are used only to produce your result. A timeslip link shows its setup to
-            anyone who has the link. The{" "}
+            sheets) are used only to produce your result. Chat questions are answered by
+            Anthropic&rsquo;s Claude, so they are sent to Anthropic. If you use your own
+            Anthropic API key, it is used only to answer your questions, you are responsible
+            for its use and cost, and Anthropic&rsquo;s terms for your account apply. A timeslip
+            link shows its setup to anyone who has the link. The{" "}
             <a href="/privacy" className="text-accent hover:text-accent-bright transition-colors">privacy page</a>{" "}
             lists what is kept and who else sees it.
           </p>

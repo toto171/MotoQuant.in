@@ -36,7 +36,7 @@ const SWEEP_CSS = `
 
 const COLD_START_AFTER_S = 4;
 const COLD_START_MSG =
-  'Waking the simulation engine — a cold start can take up to a minute';
+  'Waking the simulation engine (a cold start can take up to a minute)';
 
 export default function SimProgress({
   active = false,

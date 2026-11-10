@@ -50,7 +50,7 @@ export function ChartsTab({ sim }) {
 
   return (
     <div className="space-y-4">
-      {task.error && <ErrorTile message={`The full simulation failed — ${task.error}`} onRetry={run} />}
+      {task.error && <ErrorTile message={`The full simulation failed: ${task.error}`} onRetry={run} />}
       <StaleNote sim={sim} />
       {chartData.length > 0 ? (
         <div className="space-y-6">
@@ -88,9 +88,9 @@ export function ChartsTab({ sim }) {
 const SPLITS = [
   ['60ft_s', 'sixty', 'First 60 ft', '18.3 m'],
   ['330ft_s', null, '330 ft', '100.6 m'],
-  ['660ft_s', 'eighth', 'Halfway — ⅛ mile', '201.2 m'],
+  ['660ft_s', 'eighth', 'Halfway (⅛ mile)', '201.2 m'],
   ['1000ft_s', null, '1,000 ft', '304.8 m'],
-  ['1320ft_s', 'et', 'Finish — ¼ mile', '402.3 m'],
+  ['1320ft_s', 'et', 'Finish (¼ mile)', '402.3 m'],
 ];
 
 export function SplitsTab({ sim }) {
@@ -108,7 +108,7 @@ export function SplitsTab({ sim }) {
 
   return (
     <div className="space-y-4">
-      {task.error && <ErrorTile message={`The full simulation failed — ${task.error}`} onRetry={run} />}
+      {task.error && <ErrorTile message={`The full simulation failed: ${task.error}`} onRetry={run} />}
       <StaleNote sim={sim} />
       {hasFull ? (
         <div className="timeslip overflow-x-auto">

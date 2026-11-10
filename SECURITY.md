@@ -1,10 +1,10 @@
-# Security Policy
+# Security policy
 
 ## Supported versions
 
 MotoQuant ships continuously from `main`. The version number (2.0.0, in
 `motoquant/__init__.py`) names the release line; there are no maintained
-release branches. Security fixes land on **`main`** and reach the hosted
+release branches. Security fixes land on `main` and reach the hosted
 instance (<https://www.motoquant.in>) on the next deploy. If you self-host,
 update to the latest `main`.
 
@@ -19,22 +19,22 @@ update to the latest `main`.
 
 Report it privately, by either route:
 
-- **GitHub private reporting.** Open the repository's **Security** tab
+- GitHub private reporting: open the repository's **Security** tab
   (<https://github.com/toto171/MotoQuant.in/security>) and choose **Report a
   vulnerability**, or go straight to
   <https://github.com/toto171/MotoQuant.in/security/advisories/new>.
-- **Email** <motoquant@gmail.com> with the subject "Security report".
+- Email: write to <motoquant@gmail.com> with the subject "Security report".
 
 Describe the issue, how to reproduce it and the impact you expect. A minimal
 proof of concept helps. Please do not include real user data.
 
 What to expect:
 
-- We will acknowledge the report within **7 days**.
+- We will acknowledge the report within 7 days.
 - We will send an assessment and a planned fix timeline after triage.
 - We will credit you in the advisory and the fix commit, unless you prefer
   not to be named.
-- This is a volunteer-run, free project. There is **no bug bounty**.
+- This is a volunteer-run, free project. There is no bug bounty.
 
 Please give us reasonable time to ship a fix before you disclose publicly. We
 aim for 90 days or less.

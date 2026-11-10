@@ -1,15 +1,16 @@
-# Rust physics core — `rust/motoquant-core`
+# Rust physics core: `rust/motoquant-core`
 
 > Written 2026-10-23; updated 2026-10-24 (schema 2, production wiring) and
-> 2026-11-05 (schema 5, the 2026-10/11 accuracy epoch's final physics + knobs).
-> Status: **bit-parity proven on the full catalog; serves every production
-> simulation when installed** (selected by `motoquant/engine_select.py`,
+> 2026-11-05 (schema 5, the final physics and knobs of the 2026-10/11 accuracy
+> epoch).
+> Status: bit-parity proven on the full catalog. When installed, it serves
+> every production simulation (selected by `motoquant/engine_select.py`;
 > decision record [ADR-0007](adr/0007-rust-physics-core.md)).
 > `motoquant/physics.py` remains the **reference implementation**. The Rust
-> core is an accelerator for the server (via PyO3) and an in-browser engine
-> (wasm32) for client-side *full* simulations.
+> core speeds up the server (via PyO3) and runs *full* simulations in the
+> browser (wasm32).
 
-## TL;DR
+## Summary
 
 | | Python reference | Rust native (PyO3) | Rust wasm32 (browser) |
 |---|---|---|---|
@@ -17,7 +18,7 @@
 | Parity vs Python | — | **bit-identical**: every channel, every step, all 541 catalog bikes (fixed + adaptive + top speed) + 327 stress variants, 1,959/1,959 cases (1,936 bit-identical on every channel; the other 23 raise the same exception on both engines) | ET / trap / every split / sample count / loop step count / final dt **identical** on all 59 fixture cases and all 1,082 every-bike catalog runs (2026-11-05, schema 5); position, velocity and rpm channels bit-identical; force-type channels (and, since the round-2 tyre heat balance, `T_tire` on 25 of 1,082 runs) carry 1-ULP noise (see below) |
 | Size | — | 0.96 MB abi3 `.so` | **285 KB raw / 99 KB gzip** (284,637 B / 99,402 B, schema 5) |
 
-Numbers: `make native-parity` (full sweep, 2026-11-05 —
+Numbers: `make native-parity` (full sweep, 2026-11-05:
 `reports/native_parity_2026-11-05.json`; host x86_64, Python 3.13.16, NumPy
 2.4.6, `exp_impl=svml_ha`, `exact=True`) and `node web/scripts/engine-parity.mjs`
 (`make wasm`). Earlier sweeps are kept as `reports/native_parity_2026-10-23.json`
@@ -39,14 +40,14 @@ BikeConfig ──► MotoQuantEngine(cfg)  ──►  native.resolve_engine(eng)
                        extract_splits() — Python's own code
 ```
 
-* **Everything that is policy stays Python:**
+* Everything that is policy stays in Python:
   - category dispatch (`category_profiles.py`) and the profile knobs;
   - defaults and parts application;
   - venue and weather handling, `EnvironmentalModel`;
   - `optimal_shift_rpm`.
 
   A knob or catalog change never needs a Rust change.
-* **Only the integrator is ported:**
+* Only the integrator is ported to Rust:
   - `MotoQuantEngine.run()` itself;
   - the sub-model methods it calls on every step: `EngineModel.torque`,
     `ForcedInductionModel`, `TireModel.friction_coeff/thermal_rate/effective_radius`,
@@ -57,8 +58,8 @@ BikeConfig ──► MotoQuantEngine(cfg)  ──►  native.resolve_engine(eng)
   - the `EngineParams.get_torque` curves, including the curve-less 2-stroke
     and 4-stroke fallbacks;
   - `SimResult.extract_splits`.
-* `motoquant.native.NativeEngine` **subclasses** `MotoQuantEngine` and only
-  overrides `run()`. `run_top_speed()` / `run_distance()` therefore reuse
+* `motoquant.native.NativeEngine` subclasses `MotoQuantEngine` and overrides
+  only `run()`. Because of that, `run_top_speed()` / `run_distance()` reuse
   Python's plateau detection and LSR splits verbatim; nothing is duplicated.
   Like Python, `run()` restores `self.m_total` from the config after every
   run, so a reused engine starts its next run from the same mass in both
@@ -68,8 +69,7 @@ BikeConfig ──► MotoQuantEngine(cfg)  ──►  native.resolve_engine(eng)
 
 `motoquant/engine_select.py` is the only place that decides which integrator
 runs. `make_engine(cfg)` returns a `NativeEngine` or a `MotoQuantEngine`, and
-`run_quarter(cfg, …)` is a convenience wrapper. `MOTOQUANT_ENGINE` is read on
-every call:
+`run_quarter(cfg, …)` wraps it. `MOTOQUANT_ENGINE` is read on every call:
 
 | Value | Behaviour |
 |---|---|
@@ -78,7 +78,7 @@ every call:
 | `native` | Require the Rust core: `RuntimeError` if it is unavailable or stale |
 | anything else | A typo such as `rust`: the Python reference, with a one-time WARNING log. `/api/health` shows `mode: "invalid"` plus the error, and that is what actually runs (simulations keep working; they used to return 500 while health said `ok`) |
 
-Wired into every simulation call site of:
+The selector is wired into every simulation call site of:
 
 - `api.py`: simulate; quick, both the build and its stock baseline; top
   speed; distance; compare; the Dragy overlay;
@@ -127,15 +127,15 @@ the 1 KB gzip floor, and every probe it runs is cached per process.
 
 IEEE-754 `+ - * /` are deterministic, so parity reduces to two things: (1)
 evaluating every expression in Python's order and (2) calling the *same*
-transcendental functions. Concretely:
+transcendental functions.
 
-1. **Evaluation order.**
+1. Every expression is evaluated in Python's order.
    - `a * b * c` is `(a * b) * c`. Nothing is re-associated, fused (Rust never
      contracts to FMA implicitly) or "simplified".
    - Loop invariants come pre-resolved from Python, using the exact
      expressions `run()` uses. `resolve_engine` even re-checks
      `DrivetrainModel.effective_mass` bit for bit at resolve time.
-2. **`x ** 2` is NOT `x * x`.**
+2. `x ** 2` is NOT `x * x`.
    - CPython's `float ** 2` (and NumPy's `float64 ** 2`) call C
      `pow(x, 2.0)`.
    - glibc `pow` is not correctly rounded, and it differs from `x * x` in
@@ -143,7 +143,7 @@ transcendental functions. Concretely:
    - Every `**` in the loop therefore goes through `fmath::pow`.
      `black_box` on the exponent stops LLVM's libcall simplifier from
      rewriting `pow(x, 2.0)` into `x * x`.
-3. **`np.exp` is not `math.exp`.** The tire thermal factor uses `np.exp`.
+3. `np.exp` is not `math.exp`, and the tire thermal factor uses `np.exp`.
    - On an AVX512_SKX CPU with an SVML-linked NumPy (the PyPI wheels),
      `np.exp` dispatches to Intel SVML `__svml_exp8_ha`. That differs from
      glibc `exp` in ~4.6 % of inputs.
@@ -156,27 +156,27 @@ transcendental functions. Concretely:
      engine tracks whatever the local Python reference does.
    - Pinned by 16 captured NumPy bit patterns in `fmath.rs` tests and by
      `test_host_math_is_reproduced`.
-4. **NumPy primitives.** These are ported from the NumPy 2.4.6 C sources and
+4. NumPy primitives are ported from the NumPy 2.4.6 C sources and
    fuzz-tested against NumPy (`test_np_interp_parity_random`):
    - `np.interp`: binary search with guess, the exact-knot and last-knot
      branches, the slope formula, the NaN fallbacks;
    - `np.searchsorted`: NaN-aware `DOUBLE_LT`.
-5. **Python `min`/`max` semantics.** `max(a, b)` returns `a` unless `b > a`.
+5. `min`/`max` follow Python's semantics: `max(a, b)` returns `a` unless `b > a`.
    This matters for NaN (`max(0.0, nan) == 0.0`, which is why NaN is
    laundered while the clutch slips) and for signed zeros. `py_max`/`py_min`
    replicate it.
-6. **JSON transport is exact.** Python writes `repr` round-trip doubles, and
+6. JSON transport is exact. Python writes `repr` round-trip doubles, and
    serde_json runs with `float_roundtrip` (its default parser can be 1 ULP
    off). `test_resolved_config_round_trips_exactly` proves that
    Python → Rust → Python is the identity.
-7. **Live config reads.** Python's loop reads the engine's `self.m_total` on
+7. Config reads are live. Python's loop reads the engine's `self.m_total` on
    step 0. From step 1 on it uses the LIVE `cfg.chassis.total_mass_kg - fuel`,
    and it restores `self.m_total` afterwards. Schema 2 carries both
    (`mass.m_total0`, `mass.m_total_cfg`), so a config edited after
    construction (rider mass, dry mass, fuel burn) and a reused engine both
    stay bit-identical. Before schema 2, native silently ignored such edits
    (reproduced 2026-10-24).
-8. **Error behaviour.** For the same input, the native path raises the
+8. Errors match. For the same input, the native path raises the
    exception class Python raises. The output sizing
    `np.zeros(int(max_time / dt) + 1)` is mirrored exactly:
 
@@ -194,17 +194,20 @@ transcendental functions. Concretely:
 
    Every row raises the same class on both engines (verified 2026-11-05; the
    `max_time` messages differ only in a native suffix naming `max_time` /
-   `dt`), and the parity sweep fails on any mismatch (`EXC_EQUIV` is empty since the 2026-10 epoch made
-   Python reject an empty run with a `ValueError` instead of an accidental
-   `UnboundLocalError`).
+   `dt`), and the parity sweep fails on any mismatch. `EXC_EQUIV` has been
+   empty since the 2026-10 epoch made Python reject an empty run with a
+   `ValueError` instead of an accidental `UnboundLocalError`.
 
-The per-step work is also *de-duplicated without changing a bit*. In a
+Rust also removes duplicate per-step work without changing a bit. In a
 traction-limited step, Python recomputes the tire thermal factor,
 pressure-grip factor, aero lift and rider CoG offset on every one of up to
 three friction / weight-transfer calls, with identical arguments. Rust
 evaluates each once per step: same expression, same inputs, same doubles.
 
 ## Parity results (2026-11-05, schema 5)
+
+Target met: worst |ΔET| = 0 s (≤ 1e-9 required) across 1,959 cases. The
+2026-10-24 sweep on schema 2 had 1,894 cases.
 
 `make native-parity` (= `scripts/check_native_parity.py`, which now defaults
 to the full top-speed sweep; `--topspeed-sample N` subsamples it). Each case
@@ -223,50 +226,49 @@ r_eff. It also compares sample counts, the final `dt` and every split.
 
 The stress variants cover:
 
-- **Forced induction:** turbo (with and without intercooler, near-instant
+- Forced induction: turbo (with and without intercooler, near-instant
   spool), Roots and centrifugal superchargers, and N2O with 1–2 stages
   including a 50 ms ramp. Each runs on a litre bike, a sub-200 cc 4T and a
   2-stroke.
-- **Clutches:** slider (engage 3,000 / 6,500 rpm), multistage, slipper and
+- Clutches: slider (engage 3,000 / 6,500 rpm), multistage, slipper and
   lockup, including heat fade. A slider that never engages stalls to
   `max_time`, which exercises adaptive array growth.
-- **Environment:** all 8 track surfaces plus an unknown string;
+- Environment: all 8 track surfaces plus an unknown string;
   head/tail/cross wind; ram air with and without headwind; ±3 % gradient;
   altitude, heat, humidity and cold; `track_temp_c = None`; VHT / rubber
   prep.
-- **Speed limiters:** 140 km/h engaging inside the quarter, 0 = off, and the
+- Speed limiters: 140 km/h engaging inside the quarter, 0 = off, and the
   catalog limiter bikes in top-speed mode.
-- **Engines:** dyno `is_at_wheel` flipped both ways; the curve-less 4T
+- Engines: dyno `is_at_wheel` flipped both ways; the curve-less 4T
   parabolic; every curve-less 2T band (powervalve, 1-cyl < 200 cc, 1-cyl
   250 cc, twin, triple, `tuned_rpm=None`); counter-rotating crank; parasitic
   deltas; coolant below 70 °C and above 100 °C; heavy fuel burn.
-- **Rider and chassis:** rider 40 / 150 kg; wheelie bar; belly pan, upright
+- Rider and chassis: rider 40 / 150 kg; wheelie bar; belly pan, upright
   and race crouch; chain → shaft; two-step launch; zero tuck time; a
   reversion-prone tire.
-- **Category profiles:** every one of the 13 profiles (and `None`) on two
+- Category profiles: every one of the 13 profiles (and `None`) on two
   bikes; patched profile knobs (`launch_rpm_factor`, over-clutch + launch
   floor on a litre bike).
-- **Integration settings:** dt 0.5 ms / 2 ms; time caps; 60 ft / 1,000 m
+- Integration settings: dt 0.5 ms / 2 ms; time caps; 60 ft / 1,000 m
   distances; custom plateau windows.
-- **New on 2026-10-24:**
+- Added on 2026-10-24:
   - configs edited AFTER engine construction (rider +20 kg, dry −15 kg,
     10× fuel burn), on both the first and a second run of the same engine,
     plus top speed;
   - every error path: `distance = 0`, `max_time` −1 / NaN / inf / −0.0015,
     `dt = 0`.
 
-**Target met: worst |ΔET| = 0 s (≤ 1e-9 required) across 1,959 cases**
-(2026-11-05, schema 5; 2026-10-24 schema 2: 1,894 cases). The 23
-non-bit-identical cases are the ones where both engines raise the same
-class, so there are no channels to compare. There is no residual to
-root-cause on this host.
+The 23 cases that are not bit-identical are the ones where both engines
+raise the same class, so there are no channels to compare. There is no
+residual to root-cause on this host.
 
 ### wasm32 (browser) parity
 
 `make wasm` → `node web/scripts/engine-parity.mjs` runs the real `engine.js`
-against the committed 59-case fixture (53 before the 2026-10 epoch). `scripts/gen_engine_web.py
---full-catalog PATH` writes an every-bike fixture (fixed + adaptive, 1,082
-runs) for the same harness. The harness **fails** on any of these:
+against the committed 59-case fixture (53 before the 2026-10 epoch).
+`scripts/gen_engine_web.py --full-catalog PATH` writes an every-bike fixture
+(fixed + adaptive, 1,082 runs) for the same harness. The harness **fails** on
+any of these:
 
 - ET, trap or split drift beyond 1e-9 s;
 - a different sample count, loop step count, final `dt` or `finished` flag;
@@ -285,19 +287,19 @@ Results:
   r_eff) are bit-identical everywhere. `T_tire` was too until schema 4; the
   round-2 tyre heat balance feeds force-type terms (rolling loss, slip
   power) into the thermal ODE, so on 25 of the 1,082 catalog runs the tyre
-  temperature now carries the same 1-ULP noise (2026-11-05) — the times are
+  temperature now carries the same 1-ULP noise (2026-11-05). The times are
   still identical.
 * The force-type channels (F_drag, F_rr, N_front/N_rear, slip, traction %,
   a, F_drive, power) differ by **1 ULP at a small fraction of steps** (for
   example, 27 of 9,935 F_drag samples on the K5).
-  - **Cause.** wasm has no glibc, so Rust's pure-Rust libm (musl/FreeBSD-msun
+  - The cause: wasm has no glibc, so Rust's pure-Rust libm (musl/FreeBSD-msun
     lineage) supplies `pow` and `sin`. Its `pow(x, 2.0)` rounds differently
     from glibc's in rare cases.
-  - **Why the times don't move.** The integrator absorbs these 1-ULP force
+  - The times don't move because the integrator absorbs these 1-ULP force
     differences. They enter `v` through `dt/6·(k1 + 2k2 + 2k3 + k4)`, scaled
-    by ~1.7e-4 relative to `v` itself — far below one ULP of `v`. The
+    by ~1.7e-4 relative to `v` itself, far below one ULP of `v`. The
     trajectory, and every reported time, is unchanged.
-  - **Residual risk.** A discrete event (a gear-shift threshold, clutch lock)
+  - The remaining risk: a discrete event (a gear-shift threshold, clutch lock)
     could in principle amplify a 1-ULP state difference. None occurred on the
     catalog, and the step-count / dt checks would catch one.
 * The SVML `exp` emulation is pure Rust (`f64::mul_add` → correctly rounded
@@ -331,7 +333,7 @@ About 40 % of the wasm per-step cost is the SVML-exact `exp` (13 software
 FMAs). `exp_impl: "libm"` runs ~2× faster, but it no longer matches an
 AVX-512 NumPy host bit for bit.
 
-## Build & use
+## Build and use
 
 ```bash
 make native               # maturin build --release --locked (abi3 wheel) + pip install
@@ -368,7 +370,7 @@ r.et; r.trapKmh; r.splits; r.channels.v; r.gear;
 // errors: err.kind ∈ 'value' | 'memory' | 'overflow' | 'zero_division'
 ```
 
-**Docker.** The `Dockerfile` builds the wheel in a `python:3.11-slim-bookworm`
+The `Dockerfile` builds the wheel in a `python:3.11-slim-bookworm`
 builder: rustup minimal, toolchain 1.97.0, `maturin build --locked`. The
 runtime image installs it. Both stages run bookworm, so the manylinux tag
 always installs, and the image never uses alpine/musl (parity needs glibc
@@ -403,22 +405,25 @@ A schema mismatch never produces a silently wrong number. The extension
 refuses it (`available()` is False on a mismatch), and so does the wasm
 loader. A stale extension is refused by `auto`.
 
-Schema history: **1** was the initial schema (2026-10-23). **2** added
-`mass.m_total_cfg` (2026-10-24). **3** = the 2026-10 physics epoch (no
-resolved-dict shape change; the run contract gained the `rollout_m` run
-parameter with beam-relative splits — ET = t(D) − t(0.3048 m) by default —
-slip-phase effective mass, soft-cut limiter, continuous slip ratio). **4** =
-epoch round 2 (`chassis` is the combined bike + rider CoG with
-`rider_shift_frac`; `tire.heat_partition` / `tire.conv_area_m2`; drag pitch
-moment; the finish line is `distance`, not `rollout_m + distance`). **5** =
-epoch round 3 (`wheelie.margin` / `wheelie.margin_window_m` —
-`CategoryProfile.wheelie_margin`, held from rest to the 60-ft line; 1.0 is
-a bit-identical no-op). The authoritative history comments live next to
-`SCHEMA_VERSION` in `motoquant/native.py` and `config.rs`.
+Schema history (the authoritative comments live next to `SCHEMA_VERSION` in
+`motoquant/native.py` and `config.rs`):
 
-## Limitations (honest list)
+- Schema 1 (2026-10-23): the initial schema.
+- Schema 2 (2026-10-24): added `mass.m_total_cfg`.
+- Schema 3, the 2026-10 physics epoch: no change to the resolved dict's shape.
+  The run contract gained the `rollout_m` run parameter with beam-relative
+  splits (ET = t(D) − t(0.3048 m) by default); slip-phase effective mass;
+  soft-cut limiter; continuous slip ratio.
+- Schema 4, epoch round 2: `chassis` is the combined bike + rider CoG with
+  `rider_shift_frac`; `tire.heat_partition` / `tire.conv_area_m2`; drag
+  pitch moment; the finish line is `distance`, not `rollout_m + distance`.
+- Schema 5, epoch round 3: `wheelie.margin` / `wheelie.margin_window_m`
+  (`CategoryProfile.wheelie_margin`, held from rest to the 60-ft line; 1.0
+  is a bit-identical no-op).
 
-* **Bit-parity is host-relative.**
+## Limitations
+
+* Bit-parity is relative to the host.
   - Python's own results depend on the host's libm and NumPy dispatch
     (glibc `pow`, SVML vs libm `exp`). The native engine calls the same libm
     and probes the NumPy `exp` path, so it matches the *local* Python bit for
@@ -429,9 +434,9 @@ a bit-identical no-op). The authoritative history comments live next to
   - One known case: a NumPy build that dispatches `np.exp` to something else
     (e.g. NumPy's AVX512F Tang kernel on a non-SVML build). That path is not
     ported yet; the probe makes it visible.
-* **wasm uses Rust's libm**, not glibc. This gives 1-ULP force-channel noise;
+* wasm uses Rust's libm, not glibc. This gives 1-ULP force-channel noise;
   the reported times are identical on the catalog (see above).
-* **Output size is capped.** `MAX_SAMPLES` = 4,194,304 stored samples per
+* Output size is capped. `MAX_SAMPLES` = 4,194,304 stored samples per
   run, about 70 simulated minutes at 1 ms and about 600 MB of channels.
   - Python pre-allocates `np.zeros(int(max_time / dt) + 1)` and raises
     `MemoryError` when that cannot be allocated, which depends on the host.
@@ -444,7 +449,7 @@ a bit-identical no-op). The authoritative history comments live next to
     (reproduced 2026-10-24).
   - The longest legitimate request (API top speed: 120 s adaptive, ≤ 240 k
     samples) is about 17× below the cap.
-* **Non-finite inputs are refused.**
+* Non-finite inputs are refused.
   - The JSON contract is finite doubles. A NaN/inf *config* raises
     `ValueError` on the native path, where Python would propagate it into
     garbage.
@@ -452,15 +457,15 @@ a bit-identical no-op). The authoritative history comments live next to
     test, but finite inputs cannot reach it.
   - Non-finite `max_time` / `distance` *arguments* behave like Python (see
     the error table).
-* **`progress_cb`** is honoured coarsely: 0.0 at the start, 1.0 at the end.
+* `progress_cb` is honoured coarsely: 0.0 at the start, 1.0 at the end.
   A native sim takes milliseconds, so there is nothing to report in between.
   Cooperative job cancellation (`jobs.JobCancelled`) therefore takes effect
   at the end of the sim.
-* **Python-float exceptions in degenerate configs** (`OverflowError` from
+* Python-float exceptions in degenerate configs (`OverflowError` from
   `float ** 2`, `ZeroDivisionError` mid-loop) become IEEE inf/NaN in Rust.
   Only the two divisors that are config constants (wheelbase, CoG height)
   are pre-checked.
-* **Not ported:** `pacejka_force`, `BrakingModel`, `ClutchModel.torque` and
+* Not ported: `pacejka_force`, `BrakingModel`, `ClutchModel.torque` and
   `StagingModel.total_dead_time_s`. `run()` does not call them.
 
 ## Decision record
@@ -471,9 +476,9 @@ also records the evidence and the dual-implementation discipline (the CI
 gate, the schema version, the source fingerprint, fixture freshness and the
 exception-class mirroring).
 
-## Next steps (not done here)
+## Next steps
 
-1. **Remaining Python-only call sites.** Any code that still constructs
+1. Switch the remaining Python-only call sites. Any code that still constructs
    `MotoQuantEngine(...)` directly bypasses the selector and always runs the
    slow Python loop. `grep -rn "MotoQuantEngine(" motoquant/` lists them; the
    only intended ones are `physics.py`, `native.py` and `engine_select.py`.
@@ -481,12 +486,12 @@ exception-class mirroring).
    the CLI (`run.py`), `calibration/calibrator.py`, `llm/estimator.py` and the
    `motoquant/__init__.py` quick-run helper were not yet. Switching them is
    mechanical (`engine_select.make_engine(cfg)`).
-2. **Resolved-config route** (`GET /api/resolve?bike_id=&venue_id=&parts=`),
+2. Add a resolved-config route (`GET /api/resolve?bike_id=&venue_id=&parts=`)
    so the simulator page can run exact full sims client-side with
    `web/lib/engine.js`, labelled "exact — computed on your device". Shared
    timeslips stay server-computed: a timeslip page re-runs its setup through
    the API.
-3. **Sweeps and surrogate data generation** through `summary_native` +
+3. Run sweeps and surrogate data generation through `summary_native` +
    `multiprocessing`: ~50–80× fewer CPU-seconds for `phys_weighted_sweep`,
    `tune_cluster_knobs` and surrogate regeneration. The accuracy epoch
    depends on this.

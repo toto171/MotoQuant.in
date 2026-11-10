@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'aprilia-tuono-660-factory-quarter-mile-physics';
-const TITLE = 'Aprilia Tuono 660 Factory Quarter-Mile Physics: 11.02s on the Strip';
+const TITLE = 'Aprilia Tuono 660 Factory quarter-mile physics: 11.02s on the strip';
 
 function breadcrumbs() {
   return {

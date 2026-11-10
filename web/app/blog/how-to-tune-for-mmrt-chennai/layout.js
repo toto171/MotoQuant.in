@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'how-to-tune-for-mmrt-chennai';
-const TITLE = 'How to Tune for MMRT Chennai: Sea-Level, Humid, Hot Track';
+const TITLE = 'How to tune for MMRT Chennai: sea-level, humid, hot track';
 
 function breadcrumbs() {
   return {

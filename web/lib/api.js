@@ -1,3 +1,5 @@
+import { keyHeaders, normalizeAssistant, parseAssistantInfo } from './assistant';
+
 // Single source of truth for the API base URL.
 //
 // Every place in web/ that needs to reach the backend derives its base URL
@@ -46,10 +48,12 @@ export function serverApiBase(fallback) {
 // non-2xx response try to surface the FastAPI `detail` field (string or
 // JSON) before falling back to the raw body text. Throws Error on failure
 // so callers can `try/catch` and render the message in an error tile.
-async function postJson(path, body, signal) {
+// `headers` adds request headers (the chat uses it for the visitor's own key
+// on the request that starts a chat, and nowhere else).
+async function postJson(path, body, signal, headers) {
   const res = await fetch(`${API_URL}${path}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...(headers || {}), 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
     signal,
   });
@@ -181,8 +185,8 @@ function autotuneEcuBody({
 // sidecar) we degrade gracefully to the synchronous route — same result, just
 // without the live percentage.
 
-export async function startJob(kind, body, signal) {
-  return postJson(`/api/jobs/${kind}`, body, signal);
+export async function startJob(kind, body, signal, headers) {
+  return postJson(`/api/jobs/${kind}`, body, signal, headers);
 }
 
 export async function cancelJob(jobId) {
@@ -213,11 +217,13 @@ function sleepOrWake(ms) {
   });
 }
 
-export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 350, signal } = {}) {
+// `headers` go only on the requests that start the work (the job start, its
+// one re-submit and the synchronous fallback), never on polls or cancels.
+export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 350, signal, headers } = {}) {
   onProgress?.({ status: 'connecting', progress: null, stage: '' });
   let started;
   try {
-    started = await startJob(kind, body, signal);
+    started = await startJob(kind, body, signal, headers);
   } catch (e) {
     if (e?.name === 'AbortError') throw e;
     if (
@@ -225,7 +231,7 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
       (e?.status === 404 || e?.status === 405 || /API error (404|405)/.test(e?.message || ''))
     ) {
       onProgress?.({ status: 'running', progress: null, stage: '' });
-      return postJson(fallbackPath, body, signal);
+      return postJson(fallbackPath, body, signal, headers);
     }
     throw e;
   }
@@ -286,21 +292,21 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
         // loses the job. Self-heal: the sims are pure compute, so re-submit
         // the same work once instead of surfacing an error.
         if (restarts >= 1) {
-          throw new Error('Progress lost (the engine restarted mid-run) — please run again');
+          throw new Error('Progress lost (the engine restarted mid-run). Please run again');
         }
         restarts += 1;
         lostCount = 0;
         onProgress?.({
           status: 'connecting',
           progress: null,
-          stage: 'Engine restarted — running again from the start',
+          stage: 'Engine restarted: running again from the start',
         });
         try {
-          started = await startJob(kind, body, signal);
+          started = await startJob(kind, body, signal, headers);
         } catch (e) {
           if (e?.name === 'AbortError') throw aborted();
           throw new Error(
-            'Progress lost and the engine is not reachable — please run again'
+            'Progress lost and the engine is not reachable. Please run again'
           );
         }
         firstFailAt = null;
@@ -312,7 +318,7 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
     } else if (Date.now() - firstFailAt > 150_000) {
       cancelJob(started.job_id).catch(() => {}); // don't leave a zombie burning CPU
       throw new Error(
-        'Connection lost while the simulation was running — check your network and run again'
+        'Connection lost while the simulation was running. Check your network and run again'
       );
     }
 
@@ -380,17 +386,38 @@ export function compareJob(body, onProgress, signal) {
  * @param {string} query      The user's new message.
  * @param {Array} [messages]  Prior turns [{role:'user'|'assistant', content}],
  *                            oldest first (server caps at 24).
- * @param {object} [opts]     {signal, onProgress}
+ * @param {object} [opts]     {signal, onProgress, assistant, apiKey}
+ *   assistant: 'mechanic' (default) or 'doctor'. The server picks the model.
+ *   apiKey:    the visitor's own Anthropic key, or '' for the free assistant.
+ *              Sent as the X-Anthropic-Key header on the request that starts
+ *              the chat only (never on polls, never in the body).
  * @returns {Promise<object>} ChatResponse dict ({summary, blocks, error, …}).
  */
-export function chatJob(query, messages, { signal, onProgress } = {}) {
-  const body = { query };
+export function chatJob(query, messages, { signal, onProgress, assistant, apiKey } = {}) {
+  const body = { query, assistant: normalizeAssistant(assistant) };
   if (Array.isArray(messages) && messages.length > 0) body.messages = messages;
+  const headers = keyHeaders(apiKey);
   return runJob('chat', body, {
     onProgress,
     signal,
     fallbackPath: '/api/chat',
+    headers: Object.keys(headers).length > 0 ? headers : undefined,
   });
+}
+
+/**
+ * GET /api/assistant: whether the free assistant is available, and the daily
+ * limit. Resolves to the normalised info, or null when the server is older or
+ * unreachable (the chat then works as before and reports errors per question).
+ */
+export async function getAssistantInfo({ signal } = {}) {
+  try {
+    const res = await fetch(`${API_URL}/api/assistant`, { cache: 'no-store', signal });
+    if (!res.ok) return null;
+    return parseAssistantInfo(await res.json());
+  } catch {
+    return null;
+  }
 }
 
 // ── Bike catalog (shared, memoised) ─────────────────────────────────────

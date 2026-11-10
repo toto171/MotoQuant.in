@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'bmw-f-900-gs-quarter-mile-physics';
-const TITLE = 'BMW F 900 GS Quarter-Mile Physics: 105hp Mid-ADV at 12.08s';
+const TITLE = 'BMW F 900 GS quarter-mile physics: 105hp mid-ADV at 12.08s';
 
 function breadcrumbs() {
   return {

@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — optional Rust physics core (accelerator, NOT the reference)
+MotoQuant: optional Rust physics core (accelerator, NOT the reference)
 ===========================================================================
 
 ``motoquant/physics.py`` (``MotoQuantEngine.run``) is the reference

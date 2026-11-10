@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'honda-hornet-2-0-vs-pulsar-ns200-quarter-mile';
-const TITLE = 'Honda Hornet 2.0 vs Pulsar NS200: Quarter-Mile Physics';
+const TITLE = 'Honda Hornet 2.0 vs Pulsar NS200: quarter-mile physics';
 
 function breadcrumbs() {
   return {

@@ -17,9 +17,9 @@ export default function GlossaryPage() {
           Drag-racing terms in plain English
         </h1>
         <p className="text-base leading-relaxed text-white/70">
-          You do not need to be an engineer to use MotoQuant. Every term the
-          simulator uses is explained here. Throughout the site, words with a
-          dotted underline open a short version of these definitions.
+          You do not need to be an engineer to use MotoQuant. This page explains
+          every term the simulator uses. Anywhere on the site, a word with a
+          dotted underline opens a short version of its definition here.
         </p>
       </header>
 

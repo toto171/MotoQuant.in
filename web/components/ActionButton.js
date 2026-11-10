@@ -59,14 +59,14 @@ export default function ActionButton({
     <button
       type="button"
       onClick={stoppable ? task.stop : undefined}
-      aria-label={stoppable ? `Stop — ${verb}` : verb}
+      aria-label={stoppable ? `Stop: ${verb}` : verb}
       className={`btn-running relative overflow-hidden ${className}`}
     >
       <span className="relative z-10 flex items-center gap-2 font-display text-base font-semibold tabular-nums">
         {stoppable && <span aria-hidden="true">■</span>}
         <span>
           {stoppable ? 'Stop' : verb}
-          {pct != null ? ` — ${pct}%` : '…'}
+          {pct != null ? ` (${pct}%)` : '…'}
         </span>
       </span>
       {/* live progress strip pinned to the button's bottom edge */}

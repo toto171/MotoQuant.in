@@ -17,18 +17,36 @@
 //     compare_result / build_result / outlaw_result (tire stage + setup) /
 //     autotune_result / web_citations; lookup blocks (parts / tires /
 //     bike_details / venues) collapse to one-line chips.
-//   • Error branches: llm_not_configured (GROQ_API_KEY / LLM_PROVIDER),
-//     bike_not_found (suggestion chips), rate_limited, and a CATCH-ALL that
-//     surfaces error_detail (previously unknown errors rendered nothing).
+//   • Error branches: assistant_unavailable, free_assistant_resting,
+//     key_rejected, invalid_key_format, rate_limited, refused, agent_failed
+//     (copy in lib/assistant.js), bike_not_found (suggestion chips), and a
+//     catch-all that surfaces error_detail.
+//
+// November 2026, Claude assistants:
+//   • An "Assistant" dropdown (1. The doctor, 2. The mechanic; default the
+//     mechanic), remembered in localStorage. The server maps the id to a
+//     Claude model; the browser never sends a model id.
+//   • "Use your own key": the visitor's Anthropic key stays in this browser
+//     (sessionStorage, or localStorage when "Remember on this device" is
+//     ticked) and goes out as the X-Anthropic-Key header only on the request
+//     that starts a chat. Helpers and tests: lib/assistant.js.
+//   • GET /api/assistant on mount: when the free assistant is off, the key
+//     disclosure opens with a short explanation.
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useId } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
-  AlertCircle, Send, KeyRound, RotateCcw, Timer, Link as LinkIcon,
+  AlertCircle, Send, KeyRound, RotateCcw, Timer, Link as LinkIcon, ChevronDown,
+  ExternalLink,
 } from 'lucide-react';
 import SimProgress from './SimProgress';
-import { chatJob, partLabel } from '../lib/api';
+import { chatJob, getAssistantInfo, partLabel } from '../lib/api';
 import useAsyncTask from '../lib/useAsyncTask';
+import {
+  ASSISTANTS, ASSISTANT_EVENT, CONSOLE_KEYS_URL, assistantInfo, browserStores,
+  chatErrorCopy, describeChatFailure, looksLikeAnthropicKey, maskKey, readAssistant,
+  readKey, removeKey, saveAssistant, saveKey,
+} from '../lib/assistant';
 
 const CHAT_EXAMPLES = [
   'How fast is a Duke 390 at Aamby Valley?',
@@ -248,7 +266,7 @@ function BuildSummary({
             >
               <p className="min-w-0 truncate text-sm text-white/85">{partLabel(p.brand, p.name)}</p>
               <p className="shrink-0 text-sm tabular-nums text-white/70">
-                {fmtINR(p.price_inr)}
+                {fmtINR(p.price_inr ?? p.price)}
                 {p.delta_et_s != null && (
                   /* delta_et_s = with-part − without: negative = quicker. */
                   <span className={`ml-2 ${Number(p.delta_et_s) < 0 ? 'text-signal-go' : 'text-white/60'}`}>
@@ -266,19 +284,140 @@ function BuildSummary({
   );
 }
 
+const SEVERITY_WORDS = { info: 'Note', warning: 'Heads up', critical: 'Important' };
+
+// Warnings arrive as {severity, message} from the optimiser, or as plain
+// strings from the compact summary the agent builds.
+function warningParts(w) {
+  if (typeof w === 'string') return { severity: 'warning', message: w };
+  return { severity: w?.severity || 'warning', message: w?.message || '' };
+}
+
+// next_upgrade: {part:{brand,name,price_inr}, marginal_cost_inr,
+// marginal_et_gain_s (positive = quicker), reason} from the optimiser, or a
+// flat {brand, name, price_inr|price, delta_et_s (negative = quicker), reason}.
+function nextUpgradeParts(nu) {
+  if (!nu || typeof nu !== 'object') return null;
+  const part = nu.part && typeof nu.part === 'object' ? nu.part : nu;
+  const label = partLabel(part.brand, part.name);
+  if (!label) return null;
+  const cost = nu.marginal_cost_inr ?? part.price_inr ?? part.price ?? null;
+  let quicker = null;
+  if (nu.marginal_et_gain_s != null) quicker = Number(nu.marginal_et_gain_s);
+  else if (part.delta_et_s != null) quicker = -Number(part.delta_et_s);
+  return { label, cost, quicker, reason: nu.reason || '' };
+}
+
 function BuildBlock({ payload }) {
   const noLimit =
     payload.budget_unlimited === true || Number(payload.budget_inr) >= 5_000_000;
+  const warnings = (Array.isArray(payload.warnings) ? payload.warnings : [])
+    .map(warningParts)
+    .filter((w) => w.message);
+  const synergies = (Array.isArray(payload.synergies) ? payload.synergies : [])
+    .map((x) => (typeof x === 'string' ? x : x?.description))
+    .filter(Boolean);
+  const next = nextUpgradeParts(payload.next_upgrade);
   return (
-    <BuildSummary
-      title={payload.tier_label || 'Best parts for your budget'}
-      bikeName={payload.bike_name}
-      baseEt={payload.base_et_s}
-      finalEt={payload.optimized_et_s}
-      costInr={payload.total_cost_inr}
-      budgetLabel={noLimit ? 'No limit' : fmtINR(payload.budget_inr)}
-      parts={payload.parts || []}
-    />
+    <div className="space-y-2">
+      <BuildSummary
+        title={payload.tier_label || 'Best parts for your budget'}
+        bikeName={payload.bike_name}
+        baseEt={payload.base_et_s}
+        finalEt={payload.optimized_et_s}
+        costInr={payload.total_cost_inr}
+        budgetLabel={noLimit ? 'No limit' : fmtINR(payload.budget_inr)}
+        parts={payload.parts || []}
+      />
+      {synergies.length > 0 && (
+        <div className="rounded-lg border border-white/10 bg-asphalt-3 p-3">
+          <p className="mb-1 text-sm font-medium text-white/85">Parts that work well together</p>
+          <ul className="space-y-1 text-sm text-white/70">
+            {synergies.map((t, i) => (
+              <li key={i}>{t}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {warnings.length > 0 && (
+        <div className="rounded-lg border border-white/10 bg-asphalt-3 p-3">
+          <p className="mb-1.5 text-sm font-medium text-white/85">Things to check</p>
+          <ul className="space-y-1.5">
+            {warnings.map((w, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm text-white/75">
+                <span className={`chip shrink-0 ${w.severity === 'critical' ? 'chip-foul' : 'chip-stage'}`}>
+                  {SEVERITY_WORDS[w.severity] || 'Note'}
+                </span>
+                <span className="min-w-0">{w.message}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {next && (
+        <div className="rounded-lg border border-white/10 bg-asphalt-3 p-3">
+          <p className="mb-1 text-sm font-medium text-white/85">If you have more to spend</p>
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-sm text-white">{next.label}</p>
+              {next.reason && <p className="mt-0.5 text-sm text-white/65">{next.reason}</p>}
+            </div>
+            <div className="shrink-0 text-right text-sm tabular-nums">
+              {next.cost != null && <p className="text-white/85">+{fmtINR(next.cost)}</p>}
+              {next.quicker != null && next.quicker > 0 && (
+                <p className="text-signal-go">{next.quicker.toFixed(2)} s quicker</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// rank_result: the quickest catalog bikes for a filter, each fully simulated.
+function RankBlock({ payload }) {
+  const rows = Array.isArray(payload.ranking) ? payload.ranking : [];
+  if (rows.length === 0) return null;
+  return (
+    <div className="space-y-2 overflow-x-auto rounded-lg border border-white/10 bg-asphalt-3 p-3">
+      <p className="text-sm font-medium text-white/85">Quickest bikes</p>
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="text-left">
+            <th scope="col" className="pb-1.5 pr-2 font-medium text-white/70">
+              <span className="sr-only">Place</span>
+            </th>
+            <th scope="col" className="pb-1.5 pr-2 font-medium text-white/70">Bike</th>
+            <th scope="col" className="pb-1.5 pr-2 text-right font-medium text-white/70">Quarter mile</th>
+            <th scope="col" className="pb-1.5 text-right font-medium text-white/70">Finish speed</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={r.bike_id ?? i} className="border-t border-white/10">
+              <td className="py-1.5 pr-2 tabular-nums text-white/60">{i + 1}</td>
+              <td className="py-1.5 pr-2 text-white/85">{r.bike_name}</td>
+              <td className={`py-1.5 pr-2 text-right font-mono tabular-nums ${i === 0 ? 'text-accent' : 'text-white'}`}>
+                {r.finished_quarter === false
+                  ? 'Did not finish'
+                  : r.et_quarter_s != null
+                    ? `${fmtNum(r.et_quarter_s)} s`
+                    : ''}
+              </td>
+              <td className="py-1.5 text-right font-mono tabular-nums text-white/80">
+                {r.trap_speed_kmh != null ? `${fmtNum(r.trap_speed_kmh, 0)} km/h` : ''}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {Number(payload.candidates_simulated) > 0 && (
+        <p className="text-xs text-white/55">
+          The {payload.candidates_simulated} best matches by power to weight, each one simulated.
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -436,6 +575,8 @@ function ChatBlock({ block }) {
       return <CompareBlock payload={payload} />;
     case 'build_result':
       return <BuildBlock payload={payload} />;
+    case 'rank_result':
+      return <RankBlock payload={payload} />;
     case 'outlaw_result':
       return <OutlawBlock payload={payload} />;
     case 'autotune_result':
@@ -471,6 +612,189 @@ function ErrorBanner({ tone = 'red', icon: Icon = AlertCircle, children }) {
   );
 }
 
+// ─── assistant choice and the visitor's own key ─────────────────────────────
+const KEY_LINE =
+  'Your key stays in this browser. It is sent with your questions to answer them and is never stored on our server.';
+
+function AssistantSettings({
+  assistant, onAssistant, keyState, onSaveKey, onRemember, onRemoveKey,
+  keyOpen, onToggleKey, notice, dailyFreeLimit, keyInputRef,
+}) {
+  const uid = useId();
+  const selectId = `${uid}-assistant`;
+  const hintId = `${uid}-assistant-hint`;
+  const panelId = `${uid}-key-panel`;
+  const inputId = `${uid}-key`;
+  const errorId = `${uid}-key-error`;
+  const [draft, setDraft] = useState('');
+  const [draftRemember, setDraftRemember] = useState(false);
+  const [keyError, setKeyError] = useState('');
+  const savedKey = keyState.key;
+  const remember = savedKey ? keyState.remember : draftRemember;
+
+  function save() {
+    if (!draft.trim()) return;
+    if (!looksLikeAnthropicKey(draft)) {
+      setKeyError('That does not look like an Anthropic API key. Keys start with sk-ant-.');
+      return;
+    }
+    onSaveKey(draft, draftRemember);
+    setDraft('');
+    setKeyError('');
+  }
+
+  return (
+    <div className="space-y-3 border-t border-white/10 pt-3">
+      <div className="sm:max-w-xs">
+        <label htmlFor={selectId} className="field-label">Assistant</label>
+        <select
+          id={selectId}
+          value={assistant}
+          onChange={(e) => onAssistant(e.target.value)}
+          aria-describedby={hintId}
+          className="input-base h-11"
+        >
+          {ASSISTANTS.map((a) => (
+            <option key={a.id} value={a.id}>{a.label}</option>
+          ))}
+        </select>
+        <p id={hintId} className="field-hint">{assistantInfo(assistant).description}</p>
+      </div>
+
+      <div>
+        <button
+          type="button"
+          onClick={onToggleKey}
+          aria-expanded={keyOpen}
+          aria-controls={panelId}
+          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md text-sm font-semibold text-accent transition-colors hover:text-accent-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/70"
+        >
+          <ChevronDown
+            size={16}
+            aria-hidden="true"
+            className={`transition-transform ${keyOpen ? 'rotate-180' : ''}`}
+          />
+          Use your own key
+          {savedKey && <span className="font-normal text-white/60">(in use)</span>}
+        </button>
+
+        {keyOpen && (
+          <div id={panelId} className="mt-2 space-y-3 rounded-lg border border-white/10 bg-asphalt-3 p-3">
+            {notice && <p className="text-sm text-signal-stage">{notice}</p>}
+
+            {savedKey && (
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm text-white/80">
+                  Using your key <span className="font-mono">{maskKey(savedKey)}</span>
+                </p>
+                <button type="button" onClick={onRemoveKey} className="btn-ghost btn-sm">
+                  Remove key
+                </button>
+              </div>
+            )}
+
+            {/* Not a <form> and not a password field: browsers treat a
+                submitted password form as a login and offer to save the key
+                in their password manager. The text field is masked with CSS
+                instead, and the data-* attributes keep password-manager
+                extensions away from it. */}
+            <div className="space-y-1">
+              <label htmlFor={inputId} className="field-label">
+                {savedKey ? 'Use a different key' : 'Your Anthropic API key'}
+              </label>
+              <div className="flex gap-2">
+                <input
+                  ref={keyInputRef}
+                  id={inputId}
+                  type="text"
+                  name="mq-anthropic-key"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  data-1p-ignore=""
+                  data-lpignore="true"
+                  data-bwignore=""
+                  data-form-type="other"
+                  style={{ WebkitTextSecurity: 'disc' }}
+                  value={draft}
+                  onChange={(e) => {
+                    setDraft(e.target.value);
+                    if (keyError) setKeyError('');
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      save();
+                    }
+                  }}
+                  placeholder="sk-ant-..."
+                  aria-invalid={keyError ? true : undefined}
+                  aria-describedby={keyError ? errorId : undefined}
+                  className="input-base h-11 min-w-0 flex-1 font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={save}
+                  disabled={!draft.trim()}
+                  className="btn-primary btn-sm shrink-0"
+                >
+                  Use key
+                </button>
+              </div>
+              {keyError && (
+                <p id={errorId} role="alert" className="text-sm text-signal-foul">{keyError}</p>
+              )}
+            </div>
+
+            <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-white/85">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) =>
+                  savedKey ? onRemember(e.target.checked) : setDraftRemember(e.target.checked)
+                }
+                className="h-5 w-5 accent-accent"
+              />
+              Remember on this device
+            </label>
+
+            <p className="text-sm text-white/75">{KEY_LINE}</p>
+            <p className="field-hint">
+              {keyState.memoryOnly
+                ? 'This browser would not store the key, so it is kept only until you leave this page.'
+                : remember
+                  ? 'Saved in this browser until you remove it.'
+                  : 'Kept for this tab only and cleared when you close it.'}
+              {dailyFreeLimit
+                ? ` The free assistant allows ${dailyFreeLimit} questions a day, and a question to the doctor counts as two. With your own key that daily limit does not apply.`
+                : ''}
+            </p>
+
+            <a
+              href={CONSOLE_KEYS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-[44px] items-center gap-1.5 text-sm text-accent transition-colors hover:text-accent-bright"
+            >
+              Get a key in the Anthropic Console
+              <ExternalLink size={14} aria-hidden="true" />
+            </a>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function notifyAssistantChange() {
+  try {
+    window.dispatchEvent(new Event(ASSISTANT_EVENT));
+  } catch {
+    /* no window */
+  }
+}
+
 // ─── main component ─────────────────────────────────────────────────────────
 // eslint-disable-next-line no-unused-vars
 export default function ChatPanel({ apiUrl }) {
@@ -478,20 +802,104 @@ export default function ChatPanel({ apiUrl }) {
   // Transcript entries:
   //   {id, role:'user',      content}
   //   {id, role:'assistant', content (summary text), result (ChatResponse)}
-  //   {id, role:'assistant', content:'', failed: <network error message>}
+  //   {id, role:'assistant', content:'', failed: {text, offerKey}}
   const [turns, setTurns] = useState([]);
   const textareaRef = useRef(null);
   const scrollRef = useRef(null);
   const idRef = useRef(0);
   const reduce = useReducedMotion();
 
+  // ChatPanel only renders in the browser (both mounts use ssr:false), so
+  // storage can be read on first render.
+  const [assistant, setAssistant] = useState(() => readAssistant(browserStores().local));
+  const [keyState, setKeyState] = useState(() => readKey(browserStores()));
+  const [keyOpen, setKeyOpen] = useState(false);
+  const [serverInfo, setServerInfo] = useState(null);
+  const keyInputRef = useRef(null);
+  const focusKeyRef = useRef(false);
+
+  // Is the free assistant on? An older or unreachable server gives null, and
+  // the chat then reports problems per question instead.
+  useEffect(() => {
+    const ctrl = new AbortController();
+    getAssistantInfo({ signal: ctrl.signal }).then((info) => {
+      if (ctrl.signal.aborted || !info) return;
+      setServerInfo(info);
+      if (!info.freeAvailable) setKeyOpen(true);
+    });
+    return () => ctrl.abort();
+  }, []);
+
+  // Keep both chat mounts (and other tabs) in step with storage.
+  useEffect(() => {
+    const sync = () => {
+      const stores = browserStores();
+      setAssistant(readAssistant(stores.local));
+      setKeyState((prev) => (prev.memoryOnly ? prev : readKey(stores)));
+    };
+    window.addEventListener(ASSISTANT_EVENT, sync);
+    window.addEventListener('storage', sync);
+    return () => {
+      window.removeEventListener(ASSISTANT_EVENT, sync);
+      window.removeEventListener('storage', sync);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (keyOpen && focusKeyRef.current) {
+      focusKeyRef.current = false;
+      keyInputRef.current?.focus();
+    }
+  }, [keyOpen]);
+
+  function openKeyPanel() {
+    if (keyOpen) {
+      keyInputRef.current?.focus();
+    } else {
+      focusKeyRef.current = true;
+      setKeyOpen(true);
+    }
+  }
+
+  function chooseAssistant(id) {
+    setAssistant(id);
+    saveAssistant(browserStores().local, id);
+    notifyAssistantChange();
+  }
+
+  function handleSaveKey(raw, remember) {
+    const stores = browserStores();
+    if (saveKey(stores, raw, remember)) {
+      setKeyState(readKey(stores));
+      notifyAssistantChange();
+    } else {
+      // Storage is blocked: keep the key for this page only.
+      setKeyState({ key: raw.trim(), remember: false, memoryOnly: true });
+    }
+  }
+
+  function handleRemember(remember) {
+    if (!keyState.key || keyState.memoryOnly) return;
+    const stores = browserStores();
+    if (saveKey(stores, keyState.key, remember)) {
+      setKeyState(readKey(stores));
+      notifyAssistantChange();
+    }
+  }
+
+  function handleRemoveKey() {
+    removeKey(browserStores());
+    setKeyState({ key: '', remember: false });
+    notifyAssistantChange();
+  }
+
   // Job-backed chat turn — useAsyncTask owns AbortController + live progress;
   // chatJob cancels the job server-side when the signal aborts (■ Stop).
   // Results/failures are appended to the transcript inside the task fn so
   // every turn keeps its own reply + blocks.
-  const task = useAsyncTask(async (signal, onProgress, q, history) => {
+  const task = useAsyncTask(async (signal, onProgress, q, history, asst, apiKey) => {
     try {
-      const res = await chatJob(q, history, { signal, onProgress });
+      const res = await chatJob(q, history, { signal, onProgress, assistant: asst, apiKey });
       if (!signal.aborted) {
         setTurns((prev) => [
           ...prev,
@@ -508,7 +916,7 @@ export default function ChatPanel({ apiUrl }) {
             id: idRef.current++,
             role: 'assistant',
             content: '',
-            failed: e?.message || 'Request failed — please try again',
+            failed: describeChatFailure(e),
           },
         ]);
       }
@@ -545,7 +953,7 @@ export default function ChatPanel({ apiUrl }) {
     setQuery('');
     // A new query supersedes an in-flight one (useAsyncTask aborts it,
     // which also cancels the old job server-side).
-    task.run(q, history);
+    task.run(q, history, assistant, keyState.key);
   }
 
   function newChat() {
@@ -564,33 +972,47 @@ export default function ChatPanel({ apiUrl }) {
     }
   }
 
+  function keyAction() {
+    return (
+      <button
+        type="button"
+        onClick={openKeyPanel}
+        className="mt-1 flex min-h-[44px] items-center gap-1.5 font-semibold underline underline-offset-2"
+      >
+        <KeyRound size={14} aria-hidden="true" />
+        {keyState.key ? 'Change your key' : 'Add your own key'}
+      </button>
+    );
+  }
+
   // Renders one assistant turn: error branches → blocks → summary prose.
   function renderAssistant(turn) {
     if (turn.failed) {
-      return <ErrorBanner>{turn.failed}</ErrorBanner>;
+      const f = typeof turn.failed === 'string' ? { text: turn.failed } : turn.failed;
+      return (
+        <ErrorBanner tone={f.offerKey ? 'amber' : 'red'}>
+          {f.text}
+          {f.offerKey && keyAction()}
+        </ErrorBanner>
+      );
     }
     const r = turn.result || {};
     const err = r.error;
 
-    if (err === 'llm_not_configured') {
+    const copy = err
+      ? chatErrorCopy(err, {
+          ownKey: r.own_key === true,
+          // Unknown until GET /api/assistant answers: assume it is on.
+          freeAvailable: serverInfo == null || serverInfo.freeAvailable,
+        })
+      : null;
+    if (copy) {
+      const showDetail = r.error_detail && (err === 'agent_failed' || err === 'key_rejected');
       return (
-        <ErrorBanner tone="amber" icon={KeyRound}>
-          Asking in plain English is switched off on this server right now. The
-          calculator and the other tools still work.
-          {r.error_detail && (
-            <span className="mt-1 block opacity-80">{r.error_detail}</span>
-          )}
-        </ErrorBanner>
-      );
-    }
-
-    if (err === 'rate_limited') {
-      return (
-        <ErrorBanner tone="amber">
-          Too many questions at once. Please try again in a minute.
-          {r.error_detail && (
-            <span className="mt-1 block opacity-80">{r.error_detail}</span>
-          )}
+        <ErrorBanner tone={copy.tone} icon={copy.offerKey ? KeyRound : AlertCircle}>
+          {copy.text}
+          {showDetail && <span className="mt-1 block opacity-80">{r.error_detail}</span>}
+          {copy.offerKey && keyAction()}
         </ErrorBanner>
       );
     }
@@ -625,8 +1047,7 @@ export default function ChatPanel({ apiUrl }) {
     }
 
     if (err) {
-      // Catch-all: parse_failed / sim_failed / agent_failed / anything new.
-      // (The old panel rendered NOTHING for unknown errors — known bug.)
+      // Catch-all: parse_failed / sim_failed / anything new.
       return (
         <ErrorBanner>
           {r.error_detail || `The request could not be completed (${err}).`}
@@ -664,9 +1085,21 @@ export default function ChatPanel({ apiUrl }) {
             ))}
           </div>
         )}
+        {(r.assistant === 'doctor' || r.assistant === 'mechanic') && (
+          <p className="text-xs text-white/55">
+            {assistantInfo(r.assistant).name} answered{r.own_key ? ', using your key' : ''}.
+          </p>
+        )}
       </div>
     );
   }
+
+  const freeOff = serverInfo != null && !serverInfo.freeAvailable;
+  const notice = freeOff
+    ? keyState.key
+      ? 'The free assistant is not available right now, so your questions use your key.'
+      : 'The free assistant is not available right now. Add your own Anthropic key to ask questions.'
+    : '';
 
   return (
     <div className="space-y-4">
@@ -770,6 +1203,20 @@ export default function ChatPanel({ apiUrl }) {
           ))}
         </div>
       )}
+
+      <AssistantSettings
+        assistant={assistant}
+        onAssistant={chooseAssistant}
+        keyState={keyState}
+        onSaveKey={handleSaveKey}
+        onRemember={handleRemember}
+        onRemoveKey={handleRemoveKey}
+        keyOpen={keyOpen}
+        onToggleKey={() => setKeyOpen((o) => !o)}
+        notice={notice}
+        dailyFreeLimit={serverInfo?.freeAvailable ? serverInfo.dailyFreeLimit : null}
+        keyInputRef={keyInputRef}
+      />
     </div>
   );
 }

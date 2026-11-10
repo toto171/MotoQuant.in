@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from "../../StructuredData";
 
 const SLUG = "honda-cb125r-quarter-mile-physics";
-const TITLE = "Honda CB125R Quarter-Mile Physics: 14.7hp Neo Sports Café";
+const TITLE = "Honda CB125R quarter-mile physics: 14.7hp Neo Sports Café";
 
 function breadcrumbs() {
   return {

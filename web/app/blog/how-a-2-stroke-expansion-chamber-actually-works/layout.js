@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from "../../StructuredData";
 
 const SLUG = "how-a-2-stroke-expansion-chamber-actually-works";
-const TITLE = "How a 2-Stroke Expansion Chamber Actually Works";
+const TITLE = "How a 2-stroke expansion chamber actually works";
 
 function breadcrumbs() {
   return {

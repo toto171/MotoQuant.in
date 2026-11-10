@@ -56,7 +56,7 @@ const signed = (n, d = 1) => {
 // What the server uses when no place is chosen (stated before a run, so there
 // is no server block to read yet; after a run the echoed block is used).
 const DEFAULT_CONDITIONS = `the default conditions (${DEFAULT_ALTITUDE_M} m altitude, ${DEFAULT_TEMP_C} °C)`;
-const GUIDANCE_LABEL = 'General guidance — not simulated for this bike';
+const GUIDANCE_LABEL = 'General guidance: not simulated for this bike';
 
 // ─── result pieces ──────────────────────────────────────────────────────────
 function FromTo({ label, from, to, unit }) {
@@ -233,7 +233,7 @@ export default function EcuAutotune() {
         <>
           With this setup your {result.bike_name} should run the quarter mile in about{' '}
           <strong className="font-semibold text-white">{fmtSecs(combined.et_s)} s</strong> instead of{' '}
-          {fmtSecs(result.stock.et_s)} s — {netChange.text}.
+          {fmtSecs(result.stock.et_s)} s, {netChange.text}.
         </>
       ) : (
         <>
@@ -403,7 +403,7 @@ export default function EcuAutotune() {
                 {gearing.adjustable ? (
                   gearing.recommended_rear === gearing.stock_rear ? (
                     <p className="text-sm text-white/80">
-                      Keep your stock {fmtInt(gearing.stock_front)}/{fmtInt(gearing.stock_rear)} sprockets — we
+                      Keep your stock {fmtInt(gearing.stock_front)}/{fmtInt(gearing.stock_rear)} sprockets: we
                       tried bigger and smaller rear sprockets and none was quicker in these conditions.
                     </p>
                   ) : (
@@ -470,8 +470,8 @@ export default function EcuAutotune() {
                 <RecCard icon={Flag} title="Launch RPM" muted badge={GUIDANCE_LABEL}>
                   <p className="text-sm text-white/75">
                     In our simulation, changing the <Term k="launch_rpm">launch RPM</Term> made no difference to
-                    this bike&apos;s time, so we can&apos;t give you a number that is worth a measured
-                    amount.
+                    this bike&apos;s time, so we can&apos;t give you a number with a measured
+                    benefit.
                     {launch.stock_rpm != null && (
                       <>
                         {' '}
@@ -533,7 +533,7 @@ export default function EcuAutotune() {
 
             <p className="px-1 text-xs text-white/60">
               Gearing and launch figures come from the <Term k="full_sim">full simulation</Term> for the
-              conditions above. Tyre pressure and fuel advice are general rules of thumb — confirm them with a
+              conditions above. Tyre pressure and fuel advice are general rules of thumb. Confirm them with a
               test pass or a dyno before a competitive run.
             </p>
 

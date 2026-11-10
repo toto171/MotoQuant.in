@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'pulsar-ns400z-quarter-mile-physics';
-const TITLE = 'Bajaj Pulsar NS400Z Quarter-Mile Physics (and Why an RC 390 Still Wins)';
+const TITLE = 'Bajaj Pulsar NS400Z quarter-mile physics (and why an RC 390 still wins)';
 
 function breadcrumbs() {
   return {

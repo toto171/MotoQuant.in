@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Term from '../../../components/Term';
 
 export const metadata = {
-  title: 'Getting started — your first quarter-mile time in five minutes',
+  title: 'Getting started: your first quarter-mile time in five minutes',
   description:
     'A five-minute walkthrough of MotoQuant: pick one of 534 bikes, read your quarter-mile time, change rider weight and location, add parts, find the best parts for your budget and get a race-day setup. Free and open source.',
   keywords: [
@@ -89,7 +89,7 @@ export default function GettingStartedPage() {
             extra power.
           </li>
           <li>
-            <Term k="eighth">Halfway — ⅛ mile</Term>: the time at the halfway point, which many strips also time.
+            <Term k="eighth">Halfway (⅛ mile)</Term>: the time at the halfway point, which many strips also time.
           </li>
         </ul>
       </Step>
@@ -104,8 +104,8 @@ export default function GettingStartedPage() {
         <p className="rounded-xl border border-white/10 bg-asphalt-2 px-4 py-3 text-sm text-white/75">
           <strong className="text-white">If you do not choose a location</strong>, the simulation uses its default
           conditions: Aamby Valley, 679 m altitude, 22 °C, 40 % humidity. That is not sea level, so a time at
-          the default can differ from one at your local strip. The simulator shows the conditions it used right next
-          to every result, so you always know what a number was calculated for.
+          the default can differ from one at your local strip. Every result shows the conditions it was
+          calculated for, right next to the numbers.
         </p>
       </Step>
 

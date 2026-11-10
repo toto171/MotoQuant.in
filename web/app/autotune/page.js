@@ -14,7 +14,7 @@ export default function AutotunePage() {
 
       <PageHeader
         title="Race-day setup"
-        lede="Pick your bike and where you're racing. Get the gearing, launch RPM and tyre pressure that suit today's air — with how much time each one is worth."
+        lede="Pick your bike and where you're racing. Get the gearing, launch RPM and tyre pressure that suit today's air, with how much time each one is worth."
       />
 
       <main id="main" className="px-4 pb-16 sm:px-6 md:pb-24">

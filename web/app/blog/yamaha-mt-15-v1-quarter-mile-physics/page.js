@@ -6,10 +6,10 @@ import StructuredData, { articleSchema } from '../../StructuredData';
 const SLUG = 'yamaha-mt-15-v1-quarter-mile-physics';
 const TITLE = 'Yamaha MT-15 V1 Quarter-Mile Physics: 155cc Naked Drag';
 const DESCRIPTION =
-  'MotoQuant simulates the Yamaha MT-15 V1 at 17.05s and 125.5 km/h trap. Why the no-VVA naked loses a tenth to the R15 V3 — and where Indian cheap tenths live.';
+  'MotoQuant simulates the Yamaha MT-15 V1 at 17.05s and 125.5 km/h trap. Why the no-VVA naked loses a tenth to the R15 V3, and where to find cheap tenths in India.';
 
 export const metadata = {
-  title: 'Yamaha MT-15 V1 Quarter-Mile Physics — MotoQuant',
+  title: 'Yamaha MT-15 V1 Quarter-Mile Physics | MotoQuant',
   description: DESCRIPTION,
   keywords: [
     'Yamaha MT-15 V1 quarter mile',
@@ -34,27 +34,27 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'MotoQuant simulates the Yamaha MT-15 V1 at 17.05 seconds with a 125.5 km/h trap. The bike makes 18.4 hp at 10,000 rpm and 14.7 Nm at 8,500 rpm out of a 155.09 cc DOHC four-valve single — the same engine that powers the YZF-R15 V3, minus the Variable Valve Actuation that Yamaha reserved for the R15 V3 export and the later MT-15 V2. The 1 hp gap to the R15 V3 looks small on paper. On the strip it is closer to a tenth and a half, and the reason has more to do with aero, gearing intent, and how the V1 ECU manages the powerband than with peak numbers.',
+    text: 'MotoQuant simulates the Yamaha MT-15 V1 at 17.05 seconds with a 125.5 km/h trap. The bike makes 18.4 hp at 10,000 rpm and 14.7 Nm at 8,500 rpm out of a 155.09 cc DOHC four-valve single: the same engine that powers the YZF-R15 V3, minus the Variable Valve Actuation that Yamaha reserved for the R15 V3 export and the later MT-15 V2. The 1 hp gap to the R15 V3 looks small on paper. On the strip it is closer to a tenth and a half, and the reason has more to do with aero, gearing intent and how the V1 ECU manages the powerband than with peak numbers.',
   },
   {
     type: 'h2',
-    text: 'What the MT-15 V1 Actually Is',
+    text: 'What the MT-15 V1 is',
   },
   {
     type: 'p',
-    text: 'The MT-15 V1 launched in India in March 2019 as a naked-bike companion to the YZF-R15 V3. It shares the V3 chassis, suspension, brakes, six-speed gearbox, and 155.09 cc liquid-cooled DOHC engine — bore 58 mm, stroke 58.7 mm, compression 11.6:1, 4-valve head with rocker-arm valve actuation. The single biggest deletion versus the R15 V3 in 2019 was VVA. Yamaha kept VVA on the R15 V3 in markets like Indonesia and India for the faired bike, but the MT-15 V1 sold in India between 2019 and 2020 ran a non-VVA cam profile that gives up a low- and mid-range torque shoulder around 6,000 rpm. The V2 refresh in 2022 added VVA back and bumped the bike to 18.5 hp; the V1 owners stayed at 18.4 hp for the life of the model.',
+    text: 'The MT-15 V1 launched in India in March 2019 as a naked-bike companion to the YZF-R15 V3. It shares the V3 chassis, suspension, brakes, six-speed gearbox, and 155.09 cc liquid-cooled DOHC engine (bore 58 mm, stroke 58.7 mm, compression 11.6:1, 4-valve head with rocker-arm valve actuation). The biggest thing missing against the 2019 R15 V3 was VVA. Yamaha kept VVA on the R15 V3 in markets like Indonesia and India for the faired bike, but the MT-15 V1 sold in India between 2019 and 2020 ran a non-VVA cam profile that gives up a low- and mid-range torque shoulder around 6,000 rpm. The V2 refresh in 2022 added VVA back and bumped the bike to 18.5 hp; V1 bikes stayed at 18.4 hp for the life of the model.',
   },
   {
     type: 'p',
-    text: 'The other deletions matter less but compound: no clip-ons, no full fairing, no rear-set pegs, slightly taller wide handlebar, and an upright riding position. Dry mass is 134 kg versus 139 kg for the R15 V3, which sounds like an advantage but isolated mass changes on a quarter-mile rarely show up the way you expect when the rider position is also changing the aerodynamic profile. The MT-15 V1 is heavier in trap-line drag than the V3 even though it is lighter on the kerb.',
+    text: 'The other changes matter less but add up: no clip-ons, no full fairing, no rear-set pegs, slightly taller wide handlebar, and an upright riding position. Dry mass is 134 kg versus 139 kg for the R15 V3. That sounds like an advantage, but on a quarter-mile a mass change rarely shows up the way you expect when the rider position also changes the aerodynamic profile. At the trap line the MT-15 V1 carries more drag than the V3, even though it is lighter on the kerb.',
   },
   {
     type: 'h2',
-    text: 'Stock-Tune Simulation Numbers',
+    text: 'Stock-tune simulation numbers',
   },
   {
     type: 'p',
-    text: 'Running the MT-15 V1 in MotoQuant under Aamby Valley November conditions (roughly 1,100 m density altitude, 22 °C ambient, dry asphalt, the OEM 140/70-17 MRF Zapper rear at μ_peak around 1.10) and a 78 kg rider on the 134 kg dry bike produces:',
+    text: 'Here is the MT-15 V1 in MotoQuant under Aamby Valley November conditions (roughly 1,100 m density altitude, 22 °C ambient, dry asphalt, the OEM 140/70-17 MRF Zapper rear at μ_peak around 1.10), with a 78 kg rider on the 134 kg dry bike:',
   },
   {
     type: 'table',
@@ -69,19 +69,19 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'There is no published Indian Autos Mag or BikeWale instrumented quarter-mile ET on the MT-15 V1 at the time of writing — only a 0-100 km/h test of around 11.7 seconds and a manufacturer claim of 131 km/h top speed. The simulator carries a documented +0.5 to +1.0 second slow bias on the entry_150_200 cluster, so a competent rider on a warmed bike with sticky rubber is plausibly running closer to 16.3 to 16.7 seconds on a real strip. The bias is honest, not a bug — most published Indian 0-100 numbers in this class come from non-instrumented runs converted into ETs with a 1.6 multiplier, which under-predicts the real timed quarter on small-cc bikes by exactly this margin.',
+    text: 'There is no published Indian Autos Mag or BikeWale instrumented quarter-mile ET on the MT-15 V1 at the time of writing, only a 0-100 km/h test of around 11.7 seconds and a manufacturer claim of 131 km/h top speed. The simulator carries a documented +0.5 to +1.0 second slow bias on the entry_150_200 cluster, so a competent rider on a warmed bike with sticky rubber is plausibly running closer to 16.3 to 16.7 seconds on a real strip. The bias is not a bug. Most published Indian 0-100 numbers in this class come from non-instrumented runs converted into ETs with a 1.6 multiplier, which under-predicts the real timed quarter on small-cc bikes by exactly this margin.',
   },
   {
     type: 'callout',
-    text: 'Why the simulator under-predicts small-cc Indian ETs: the cluster bias is calibrated against the most reliable instrumented sources available, which are mostly litre-bike magazine tests. Indian 150cc-200cc instrumented data is thin, so the model is conservatively biased to the slower end of plausible until instrumented timeslips arrive through the "Submit a timeslip" form.',
+    text: 'Why the simulator under-predicts small-cc Indian ETs: the cluster bias is calibrated against the most reliable instrumented sources available, which are mostly litre-bike magazine tests. Indian 150cc-200cc instrumented data is thin, so the model leans to the slow end of the plausible range until instrumented timeslips come in through the "Submit a timeslip" form.',
   },
   {
     type: 'h2',
-    text: 'MT-15 V1 vs YZF-R15 V3: Same Engine, Different ET',
+    text: 'MT-15 V1 vs YZF-R15 V3: same engine, different ET',
   },
   {
     type: 'p',
-    text: 'The MT-15 V1 and the R15 V3 share an engine block, a service-manual gear cassette, the same 14F/42R sprocket pair, and the same 520-pitch chain. The R15 V3 sold in India in 2019 ran VVA and made 19.04 hp at 10,000 rpm; the MT-15 V1 ran no-VVA and made 18.4 hp at the same 10,000 rpm. So why does the MT-15 V1 sim at 17.05 seconds while the R15 V3 sim runs closer to 16.95 seconds under matched conditions, despite being 5 kg lighter on the kerb?',
+    text: 'The MT-15 V1 and the R15 V3 share an engine block, a service-manual gear cassette, the same 14F/42R sprocket pair, and the same 520-pitch chain. The R15 V3 sold in India in 2019 ran VVA and made 19.04 hp at 10,000 rpm; the MT-15 V1 ran no-VVA and made 18.4 hp at the same 10,000 rpm. So why does the MT-15 V1 sim at 17.05 seconds while the R15 V3 sim runs closer to 16.95 seconds under matched conditions, even though the MT-15 is 5 kg lighter on the kerb?',
   },
   {
     type: 'table',
@@ -100,15 +100,15 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Three things are happening. First, VVA. The R15 V3 cam switches profile above roughly 7,400 rpm and recovers about 0.6 hp at the top end while filling a torque dip the MT-15 V1 has between 6,000 and 7,500 rpm. On a quarter-mile pass the bike spends most of second through fourth gear at 8,500 to 10,500 rpm, which is squarely inside the VVA-on zone. So the MT-15 is not just down on peak — it is down on power right where the run actually lives.',
+    text: 'Three things are happening. First, VVA. The R15 V3 cam switches profile above roughly 7,400 rpm and recovers about 0.6 hp at the top end while filling a torque dip the MT-15 V1 has between 6,000 and 7,500 rpm. On a quarter-mile pass the bike spends most of second through fourth gear at 8,500 to 10,500 rpm, which is squarely inside the VVA-on zone. So the MT-15 is down on power exactly where the run is spent, not only at the peak.',
   },
   {
     type: 'p',
-    text: 'Second, aerodynamics. The R15 V3 fairing plus low clip-ons plus a tucked rider puts the bike at roughly Cd 0.50 with frontal area 0.40 m². The MT-15 V1, with its wide handlebar, upright rider, and exposed engine, sits closer to Cd 0.62 and frontal area 0.43 m². At 125 km/h the aerodynamic drag force on the MT-15 V1 is about 19 percent higher than on the R15 V3, and that drag delta dominates the final 80 metres of the run where engine power and aero force are roughly balanced. The 5 kg mass advantage helps the launch but cannot pay for the drag at trap.',
+    text: 'Second, aerodynamics. With its fairing, low clip-ons and a tucked rider, the R15 V3 sits at roughly Cd 0.50 with frontal area 0.40 m². The MT-15 V1, with its wide handlebar, upright rider, and exposed engine, sits closer to Cd 0.62 and frontal area 0.43 m². At 125 km/h the aerodynamic drag force on the MT-15 V1 is about 19 percent higher than on the R15 V3, and that extra drag dominates the final 80 metres of the run where engine power and aero force are roughly balanced. The 5 kg mass advantage helps the launch but cannot pay for the drag at trap.',
   },
   {
     type: 'p',
-    text: 'Third, the no-VVA cam profile means the MT-15 V1 wants to be shifted slightly earlier than the R15 V3. The simulator log shows the V1 upshifting from third to fourth at around 10,200 rpm, fourth to fifth at 10,000 rpm, and crossing the trap line in fifth at 9,200 rpm. The R15 V3 under matched conditions holds gears a few hundred rpm longer because the VVA-on cam keeps making power past the no-VVA torque peak. A real-world MT-15 V1 rider who short-shifts from feel — which is most of them, since the bike sounds finished above 9,500 — gives back another tenth.',
+    text: 'Third, the no-VVA cam profile means the MT-15 V1 wants to be shifted slightly earlier than the R15 V3. The simulator log shows the V1 upshifting from third to fourth at around 10,200 rpm, fourth to fifth at 10,000 rpm, and crossing the trap line in fifth at 9,200 rpm. The R15 V3 under matched conditions holds gears a few hundred rpm longer because the VVA-on cam keeps making power past the no-VVA torque peak. A real-world MT-15 V1 rider who short-shifts from feel (which is most of them, since the bike sounds finished above 9,500) gives back another tenth.',
   },
   {
     type: 'h2',
@@ -116,7 +116,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The more useful Indian comparison for an MT-15 V1 owner is against the 200cc class one rung up. The MT-15 V1 has the better chassis, better brakes, and a more sophisticated DOHC four-valve top end than either the Pulsar NS200 or the Apache RTR 200 4V — but it concedes 5 hp and roughly 5 Nm to both. On the strip, displacement wins:',
+    text: 'The more useful Indian comparison for an MT-15 V1 owner is against the 200cc class one rung up. The MT-15 V1 has the better chassis, better brakes, and a more sophisticated DOHC four-valve top end than either the Pulsar NS200 or the Apache RTR 200 4V, but it concedes 5 hp and roughly 5 Nm to both. On the strip, displacement wins:',
   },
   {
     type: 'table',
@@ -130,19 +130,19 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The MT-15 V1 sits inside the entry-200-300 cluster on a power-to-weight basis (137 hp per tonne dry) but outside it on absolute trap speed because the bike runs out of fifth gear before it runs out of road. The NS200 finishes the run in sixth at around 10,400 rpm and the Apache 4V in fifth at around 9,200 rpm, both pulling harder at the trap than the MT-15 is capable of from a no-VVA 155cc top end. The Xtreme 200S 4V is the only bike in this cluster the MT-15 V1 beats outright in ET, and the gap is only 0.35 seconds.',
+    text: 'The MT-15 V1 sits inside the entry-200-300 cluster on a power-to-weight basis (137 hp per tonne dry) but outside it on absolute trap speed because the bike runs out of fifth gear before it runs out of road. The NS200 finishes the run in sixth at around 10,400 rpm and the Apache 4V in fifth at around 9,200 rpm, both pulling harder at the trap than a no-VVA 155cc top end can. The Xtreme 200S 4V is the only bike in this cluster the MT-15 V1 beats outright in ET, and the gap is only 0.35 seconds.',
   },
   {
     type: 'p',
-    text: 'For an Indian buyer cross-shopping these four, the drag-strip number is one input among many. The MT-15 V1 is the most expensive of the four on the secondary market (₹1.55 lakh on-road in 2026 for a clean low-kilometre 2019 example versus around ₹1.4 lakh for the NS200 and Apache 4V and ₹1.35 lakh for the Xtreme 4V). The MT-15 V1 also has by far the most sophisticated chassis — Deltabox frame, six-speed close-ratio gearbox, 282 mm front disc with ByBre two-piston caliper, 17-inch wheels with MRF Zapper FYM radials. If you care about handling and brake feel more than ET, the MT-15 V1 is the right answer. If you care only about quarter-mile time, the NS200 wins by 1.25 seconds and costs less.',
+    text: 'If you are cross-shopping these four in India, the drag-strip number is only one input. The MT-15 V1 is the most expensive of the four on the secondary market (₹1.55 lakh on-road in 2026 for a clean low-kilometre 2019 example versus around ₹1.4 lakh for the NS200 and Apache 4V and ₹1.35 lakh for the Xtreme 4V). The MT-15 V1 also has by far the most sophisticated chassis: Deltabox frame, six-speed close-ratio gearbox, 282 mm front disc with ByBre two-piston caliper, 17-inch wheels with MRF Zapper FYM radials. If you care about handling and brake feel more than ET, the MT-15 V1 is the right answer. If you care only about quarter-mile time, the NS200 wins by 1.25 seconds and costs less.',
   },
   {
     type: 'h2',
-    text: 'Where the Cheap Tenths Live on a Stock MT-15 V1',
+    text: 'Where the cheap tenths are on a stock MT-15 V1',
   },
   {
     type: 'p',
-    text: 'Because the bike is no-VVA and revs to 11,000, the cheap tenths cluster around two things: holding peak power longer and reducing the gearing-cap that costs the V1 its trap speed. The MotoQuant parts-ROI engine ranks every catalog mod by ₹ per tenth on this specific bike, and the ranking is unambiguous:',
+    text: 'Because the bike is no-VVA and revs to 11,000, the cheap tenths come from two things: holding peak power longer, and easing the gearing cap that costs the V1 its trap speed. The MotoQuant parts-ROI engine ranks every catalog mod by ₹ per tenth on this bike, and the order is clear:',
   },
   {
     type: 'table',
@@ -157,43 +157,43 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The sprocket and tire combination costs roughly ₹3,850 and shaves close to half a second off the simulator ET. That is the highest-ROI ₹3,850 you can spend on a 155cc Indian bike. The Powertronic flash is the third tenth-buyer if you are willing to give up the OEM warranty (most 2019-2020 MT-15 V1s are out of warranty in 2026 anyway). Beyond those three the cost-per-tenth ramps fast, and the SC-Project slip-on is more about exhaust note than ET on a bike making only 18.4 hp.',
+    text: 'The sprocket and tire combination costs roughly ₹3,850 and shaves close to half a second off the simulator ET. That is the highest-ROI ₹3,850 you can spend on a 155cc Indian bike. The Powertronic flash is the third pick if you are willing to give up the OEM warranty (most 2019-2020 MT-15 V1s are out of warranty in 2026 anyway). After those three the cost per tenth climbs fast, and the SC-Project slip-on is more about exhaust note than ET on a bike making only 18.4 hp.',
   },
   {
     type: 'callout',
-    text: 'Fastest cheap path on the MT-15 V1: 13F front sprocket plus a sport-compound 140/70-17 rear tire. That is roughly ₹3,850 for half a second of ET. Skip the slip-on unless you also want the noise — the gain is real but the cost per tenth is brutal on a bike with sub-25 hp.',
+    text: 'Fastest cheap path on the MT-15 V1: 13F front sprocket plus a sport-compound 140/70-17 rear tire. That is roughly ₹3,850 for half a second of ET. Skip the slip-on unless you also want the noise; the gain is real but the cost per tenth is brutal on a bike with sub-25 hp.',
   },
   {
     type: 'h2',
-    text: 'Why the Gearing Cap Is the Story',
+    text: 'Why the gearing cap is the story',
   },
   {
     type: 'p',
-    text: 'The MT-15 V1 ships from Yamaha India with 14F front, 42R rear sprockets and a 520 chain. The cassette ratios are [2.833, 1.875, 1.429, 1.166, 0.963, 0.840] — close-ratio at the top, sport-bike-style. With a 140/70-17 rear at rolling radius about 296 mm, sixth gear at 10,000 rpm gives a theoretical road speed of around 134 km/h, which lines up almost exactly with the Yamaha-claimed 131 km/h. The bike is gearing-limited in sixth, not power-limited.',
+    text: 'The MT-15 V1 ships from Yamaha India with 14F front, 42R rear sprockets and a 520 chain. The cassette ratios are [2.833, 1.875, 1.429, 1.166, 0.963, 0.840]: close-ratio at the top, sport-bike-style. With a 140/70-17 rear at rolling radius about 296 mm, sixth gear at 10,000 rpm gives a theoretical road speed of around 134 km/h, which lines up almost exactly with the Yamaha-claimed 131 km/h. The bike is gearing-limited in sixth, not power-limited.',
   },
   {
     type: 'p',
-    text: 'The simulator shows the MT-15 V1 crossing the trap line in fifth gear at 9,200 rpm. Sixth never engages on a stock quarter-mile pass — the run is over before the gear is needed. A one-tooth-down front sprocket swap to 13F shortens every gear by about 7 percent, which means the bike now finishes the run in fifth at closer to 9,800 rpm (further inside the powerband) and the trap speed bumps by roughly 1.5 km/h while ET drops by about 0.18 seconds. The trade-off is a 7 percent reduction in top speed, which on a bike that never sees its claimed 131 km/h in normal use is essentially free. This is the same gearing-cap story that runs through every small-cc Indian bike on the simulator — see the Why Your R15 Won&apos;t Hit 14s analysis for the same physics on the faired sibling.',
+    text: 'The simulator shows the MT-15 V1 crossing the trap line in fifth gear at 9,200 rpm. Sixth never engages on a stock quarter-mile pass: the run is over before the gear is needed. A one-tooth-down front sprocket swap to 13F shortens every gear by about 7 percent, so the bike finishes the run in fifth at closer to 9,800 rpm (further inside the powerband), trap speed rises by roughly 1.5 km/h, and ET drops by about 0.18 seconds. The trade-off is a 7 percent reduction in top speed, which on a bike that never sees its claimed 131 km/h in normal use is essentially free. The same gearing cap shows up on every small-cc Indian bike in the simulator. See "Why Your R15 Won\'t Hit 14s" for the same physics on the faired sibling.',
   },
   {
     type: 'h2',
-    text: 'Run Your Own Numbers',
+    text: 'Run your own numbers',
   },
   {
     type: 'p',
-    text: 'If you own an MT-15 V1 (or are deciding between it and an R15 V3, NS200, Apache 4V, or Xtreme 200S 4V), the MotoQuant simulator at motoquant.in lets you sweep rider weight, ambient temperature, density altitude, tire choice, gearing, and parts-catalog mods to see exactly where your tenths come from. The cluster bias is built into the model — when the simulator reports 17.05 seconds, a competent rider on a warmed bike with sport rubber should expect the strip to confirm closer to 16.3 to 16.7 seconds.',
+    text: 'If you own an MT-15 V1, or are deciding between it and an R15 V3, NS200, Apache 4V or Xtreme 200S 4V, try the MotoQuant simulator at motoquant.in. You can sweep rider weight, ambient temperature, density altitude, tire choice, gearing, and parts-catalog mods to see exactly where your tenths come from. The cluster bias is built into the model: when the simulator reports 17.05 seconds, a competent rider on a warmed bike with sport rubber should expect closer to 16.3 to 16.7 seconds at the strip.',
   },
   {
     type: 'p',
-    text: 'More relevant for everyday tuning: the simulator&apos;s parts-ROI engine quantifies cost-per-tenth for every bike in the catalog. On the MT-15 V1 the answer is the same as on the R15 V3 and the Xtreme 4V — sprocket and tire first, exhaust last. Most 155cc owners spend money in the wrong order, which is why most modded MT-15 V1s cost ₹50,000 in upgrades and gain less ET than a ₹3,850 sprocket-and-tire combo would have delivered.',
+    text: 'For everyday tuning, the simulator\'s parts-ROI engine works out the cost per tenth for every bike in the catalog. On the MT-15 V1 the answer is the same as on the R15 V3 and the Xtreme 4V: sprocket and tire first, exhaust last. Most 155cc owners spend money in the wrong order, which is why most modded MT-15 V1s cost ₹50,000 in upgrades and gain less ET than a ₹3,850 sprocket and tire would have.',
   },
   {
     type: 'p',
-    text: 'Two final caveats. First, every number in this post is a stock-tune simulation under specific Aamby Valley November conditions. Change the rider weight, the ambient temperature, the surface, or the launch technique and the absolute ETs shift, but the relative ordering of which mods help most stays stable. Second, the simulator entry_150_200 cluster bias is being actively closed. The May 2026 Hypothesis property tests pin the four load-bearing physics knobs (mass, dyno-curve magnitude, Cd, frontal area) to monotonic invariants, and the small-cc clutch over-clutching rewrite from April 2026 already cut the cluster bias roughly in half. The MT-15 V1 number you see today might tighten by another 0.3 to 0.5 seconds as more Indian small-cc Dragy data lands.',
+    text: 'Two final caveats. First, every number in this post is a stock-tune simulation under specific Aamby Valley November conditions. Change the rider weight, the ambient temperature, the surface, or the launch technique and the absolute ETs shift, but the relative ordering of which mods help most stays stable. Second, we are working to close the entry_150_200 cluster bias. The May 2026 Hypothesis property tests pin the four load-bearing physics knobs (mass, dyno-curve magnitude, Cd, frontal area) to monotonic invariants, and the small-cc clutch over-clutching rewrite from April 2026 already cut the cluster bias roughly in half. The MT-15 V1 number you see today might tighten by another 0.3 to 0.5 seconds as more Indian small-cc Dragy data lands.',
   },
   {
     type: 'p',
-    text: 'If you take one practical thing from this post, take this: the MT-15 V1 is gearing-limited and aero-limited, not power-limited. The R15 V3 shares the engine but wins by a tenth on the strip because the fairing and tuck close almost 20 percent of the aero gap at trap speed. You cannot bolt a fairing onto a naked, but you can drop a sprocket and fit a sticky tire for ₹3,850. That is the entire MT-15 V1 quarter-mile playbook in one sentence.',
+    text: 'In practice, the MT-15 V1 is gearing-limited and aero-limited, not power-limited. The R15 V3 shares the engine but wins by a tenth on the strip because the fairing and tuck close almost 20 percent of the aero gap at trap speed. You cannot bolt a fairing onto a naked, but you can drop a sprocket and fit a sticky tire for ₹3,850.',
   },
 ];
 
@@ -320,8 +320,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Why Your R15 Won&apos;t Hit 14s
-              </Link>{' '}
-              — same 155cc engine block as the MT-15 V1, fairing-on, faster anyway.
+              </Link>:{' '}
+              same 155cc engine block as the MT-15 V1 plus a fairing, and still faster.
             </li>
             <li>
               ·{' '}
@@ -330,8 +330,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Hero Xtreme 200S 4V Quarter-Mile Physics
-              </Link>{' '}
-              — closest 200cc rival on the slow end of the small-cc cluster.
+              </Link>:{' '}
+              closest 200cc rival on the slow end of the small-cc cluster.
             </li>
             <li>
               ·{' '}
@@ -340,8 +340,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Pulsar NS200 vs Apache RTR 200 4V
-              </Link>{' '}
-              — the 200cc class the MT-15 V1 cross-shoppers usually end up in.
+              </Link>:{' '}
+              the 200cc class most MT-15 V1 cross-shoppers end up in.
             </li>
             <li>
               ·{' '}
@@ -350,8 +350,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 How the MotoQuant Physics Engine Works
-              </Link>{' '}
-              — the 15-sub-model architecture behind every ET prediction in this post.
+              </Link>:{' '}
+              the 15-sub-model architecture behind every ET prediction in this post.
             </li>
             <li>
               ·{' '}
@@ -360,15 +360,15 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 How to Tune for Aamby Valley in November
-              </Link>{' '}
-              — the venue conditions used for the simulation in this post.
+              </Link>:{' '}
+              the venue conditions used for the simulation in this post.
             </li>
             <li>
               ·{' '}
               <Link href="/bikes" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Browse the full bike catalog
-              </Link>{' '}
-              — every spec, every gear ratio, every Cd value used by the simulator.
+              </Link>:{' '}
+              the specs, gear ratios and Cd values the simulator uses.
             </li>
           </ul>
         </div>
@@ -378,7 +378,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Run the MT-15 V1 yourself</div>
             <div className="text-white/60 text-sm">
-              Free simulator — pick the Yamaha MT-15 V1, dial in your local conditions and a sport tire, and watch the ET tighten live.
+              The simulator is free. Pick the Yamaha MT-15 V1, set your local conditions and a sport tire, and watch the ET change live.
             </div>
           </div>
           <Link

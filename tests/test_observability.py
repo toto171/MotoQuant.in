@@ -160,13 +160,12 @@ class TestActivationVisibility:
         assert out.count("[observability] Sentry active") == 1
 
     def test_llm_sdk_auto_integrations_are_disabled(self, monkeypatch):
-        """MOTOQUANT-API-1: the OpenAI auto-integration captured a Groq 400
-        (tool_use_failed) as handled:no at the SDK boundary, BEFORE our
-        llm/client.py salvage path ran — benign noise in a 2-issue stream.
-        init_sentry must disable the OpenAI + Anthropic auto-integrations."""
+        """The Anthropic auto-integration would capture provider errors (and
+        request data) before llm/client.py translates and redacts them, so
+        init_sentry must disable it. The OpenAI one is disabled too when it
+        can load at all (openai is no longer a dependency)."""
         pytest.importorskip("sentry_sdk")
         from sentry_sdk.integrations.anthropic import AnthropicIntegration
-        from sentry_sdk.integrations.openai import OpenAIIntegration
 
         monkeypatch.setenv("SENTRY_DSN", "https://key@o0.ingest.sentry.io/1")
         with patch("sentry_sdk.init") as mock_init:
@@ -174,8 +173,33 @@ class TestActivationVisibility:
         disabled = mock_init.call_args.kwargs.get("disabled_integrations")
         assert disabled, "init_sentry no longer passes disabled_integrations"
         disabled_types = {type(i) for i in disabled}
-        assert OpenAIIntegration in disabled_types
         assert AnthropicIntegration in disabled_types
+        try:
+            from sentry_sdk.integrations.openai import OpenAIIntegration
+        except Exception:  # noqa: BLE001 - DidNotEnable without openai
+            return
+        assert OpenAIIntegration in disabled_types
+
+    def test_init_survives_an_integration_that_cannot_load(self, monkeypatch):
+        """Without the openai package, importing sentry's OpenAI integration
+        raises DidNotEnable (not ImportError); init_sentry must still start."""
+        pytest.importorskip("sentry_sdk")
+        import sys
+        import types
+
+        from sentry_sdk.integrations import DidNotEnable
+
+        broken = types.ModuleType("sentry_sdk.integrations.openai")
+
+        def _raise(name):
+            raise DidNotEnable("OpenAI not installed")
+
+        broken.__getattr__ = _raise
+        monkeypatch.setitem(sys.modules, "sentry_sdk.integrations.openai", broken)
+        monkeypatch.setenv("SENTRY_DSN", "https://key@o0.ingest.sentry.io/1")
+        with patch("sentry_sdk.init") as mock_init:
+            assert obs.init_sentry() is True
+        assert mock_init.called
 
 
 @pytest.fixture()
@@ -208,3 +232,77 @@ class TestSentryTestRoute:
         monkeypatch.setenv("MOTOQUANT_SENTRY_SELFTEST", "1")
         res = client.get("/api/debug/sentry-test")
         assert res.status_code == 500
+
+
+# ── Key scrubbing (visitor Anthropic keys must never reach Sentry) ─────────
+
+
+def _key(tag: str = "k") -> str:
+    # Built at runtime: the secret scan flags a literal sk-ant- + 32 chars.
+    return "sk-ant-" + "api03-" + tag * 40
+
+
+class TestScrubEvent:
+    def test_credential_headers_are_removed(self):
+        k = _key()
+        event = {
+            "request": {
+                "headers": {
+                    "X-Anthropic-Key": k,
+                    "x_anthropic_key": k,
+                    "Authorization": "Bearer abc",
+                    "X-Api-Key": "abc",
+                    "Content-Type": "application/json",
+                }
+            }
+        }
+        out = obs.scrub_event(event)
+        assert out["request"]["headers"] == {"Content-Type": "application/json"}
+
+    def test_every_key_substring_is_redacted(self):
+        k1, k2 = _key("a"), _key("b")
+        event = {
+            "message": f"failed with {k1}",
+            "exception": {
+                "values": [
+                    {
+                        "value": f"AuthenticationError: {k2}",
+                        "stacktrace": {
+                            "frames": [{"vars": {"visitor_key": f"'{k1}'"}}]
+                        },
+                    }
+                ]
+            },
+            "breadcrumbs": {"values": [{"message": f"key={k2}"}]},
+            "request": {"data": {"nested": [k1, ("x", k2)]}},
+            "extra": {"headers": [["x-anthropic-key", "anything"], ["accept", "*/*"]]},
+        }
+        out = obs.scrub_event(event)
+        dumped = repr(out)
+        assert k1 not in dumped and k2 not in dumped
+        assert "sk-ant-" not in dumped
+        assert out["extra"]["headers"][0] == ["x-anthropic-key", "[redacted]"]
+        assert out["extra"]["headers"][1] == ["accept", "*/*"]
+
+    def test_before_send_scrubs_and_tags_even_with_send_pii(self, monkeypatch):
+        pytest.importorskip("sentry_sdk")
+        monkeypatch.setenv("SENTRY_DSN", "https://key@o0.ingest.sentry.io/1")
+        monkeypatch.setenv("SENTRY_SEND_PII", "true")
+        with patch("sentry_sdk.init") as mock_init:
+            assert obs.init_sentry() is True
+        kwargs = mock_init.call_args.kwargs
+        assert kwargs["send_default_pii"] is True
+        k = _key()
+        event = {
+            "message": k,
+            "request": {"headers": {"x-anthropic-key": k, "Accept": "*/*"}},
+        }
+        sent = kwargs["before_send"](event, {})
+        assert k not in repr(sent)
+        assert "x-anthropic-key" not in sent["request"]["headers"]
+        assert sent["tags"]["app"] == "motoquant-api"
+        tx = kwargs["before_send_transaction"](
+            {"request": {"headers": {"Authorization": "Bearer x"}}, "message": k}, {}
+        )
+        assert tx["request"]["headers"] == {}
+        assert k not in repr(tx)

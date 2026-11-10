@@ -105,7 +105,7 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
           body: JSON.stringify(body),
         });
         if (!res.ok) {
-          let msg = `Failed (${res.status})`;
+          let msg = `Request failed (${res.status})`;
           try {
             const j = await res.json();
             if (j?.detail)
@@ -118,7 +118,7 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
         const data = await res.json();
         onResolved?.({ ...data, _label: label || data.resolved_name || data.venue_name || query });
       } catch (e) {
-        setError(e.message || 'Failed to resolve location');
+        setError(e.message || 'Could not look up that place.');
       } finally {
         setLoading(false);
       }
@@ -129,7 +129,7 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
   async function handleText(e) {
     e.preventDefault();
     if (!query.trim()) {
-      setError('Please type a place name.');
+      setError('Type a place name first.');
       return;
     }
     await resolve({ location: query.trim() }, query.trim());
@@ -178,9 +178,9 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
       (err) => {
         setLoading(false);
         const map = {
-          1: 'Permission denied. Allow location access in your browser.',
-          2: 'Location unavailable. Check GPS / network and try again.',
-          3: 'Location request timed out.',
+          1: 'Location access is blocked. Allow it in your browser settings.',
+          2: 'Your location is not available. Check GPS or your network and try again.',
+          3: 'Finding your location took too long. Try again.',
         };
         setError(map[err.code] || `Location error: ${err.message}`);
       },

@@ -57,6 +57,14 @@ jobs:
       - name: Unit tests (lib)
         run: node --test scripts/*.test.mjs
 
+      # docs/WRITING.md: no em dashes and no "MotoQuant Pro" in text a
+      # visitor can read (code comments are ignored). Stdlib + pytest only.
+      - name: House style for site text
+        working-directory: .
+        run: |
+          python3 -m pip install --quiet pytest
+          python3 -m pytest tests/test_site_copy_style.py -q
+
       # Step 2 — full install, then real build. Catches every other
       # JSX/TSX issue that the integrity check is too loose to detect.
       - name: Install

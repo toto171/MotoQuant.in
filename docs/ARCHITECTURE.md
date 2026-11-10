@@ -1,15 +1,14 @@
-# MotoQuant — Architecture & Module Map
+# MotoQuant architecture and module map
 
-> **Purpose of this file:** the fastest way for a new human or LLM to answer
-> *"where does X live and how does data flow through the system?"* Pair it with
+> This file shows a new contributor, human or LLM, where each piece of
+> MotoQuant lives and how data moves through it. Read it with
 > [`docs/ONBOARDING.md`](ONBOARDING.md) (the day-one brief) and
 > [`CONTRIBUTING.md`](../CONTRIBUTING.md) (dev workflow).
 
 MotoQuant is a first-principles physics engine that predicts motorcycle
-quarter-mile drag-racing times, plus the product surfaces built on top of it
-(a CLI, a FastAPI backend, a Next.js web app, and an agentic AI chat). It is a
-single Python package (`motoquant/`) with a SQLite catalog (`motoquant.db`)
-baked into the repo.
+quarter-mile drag-racing times. On top of it sit a CLI, a FastAPI backend, a
+Next.js web app and an agentic AI chat. It is one Python package
+(`motoquant/`) with a SQLite catalog (`motoquant.db`) committed to the repo.
 
 ---
 
@@ -66,24 +65,25 @@ flowchart TD
 
 ## 2. The core data flow, in words
 
-1. **A bike starts as a spec.** Every catalog bike is a `BikeSpec` literal in
-   `motoquant/scraper/known_bikes.py` (and the `known_bikes_*.py` sibling
-   modules, split by region only to keep files manageable). Specs carry
-   headline numbers: power, torque, mass, gearing, tire sizes, aero.
+1. A bike starts as a spec. Every catalog bike is a `BikeSpec` literal in
+   `motoquant/scraper/known_bikes.py` or one of the `known_bikes_*.py`
+   sibling modules, which are split by region only to keep each file a
+   manageable size. Specs carry headline numbers: power, torque, mass,
+   gearing, tire sizes, aero.
 
-2. **`spec_to_bike_config()` turns a spec into a `BikeConfig`.**
-   `motoquant/scraper/importer.py` is the single conversion point. It infers
+2. `spec_to_bike_config()` turns a spec into a `BikeConfig`.
+   `motoquant/scraper/importer.py` is the only place this happens. It infers
    physics parameters the spec doesn't state directly (engine inertia,
    parasitic losses, chain pitch, cylinder config, 2-stroke curves), attaches
    real gear cassettes from `gear_ratios.py` and dyno curves from
    `dyno_curves.py`, and derives the `category_tag` (the physics cluster).
 
-3. **`BikeConfig` (in `models.py`) is the universal currency.** Everything
-   downstream — the simulator, the DB round-trip, the analysis layer — speaks
-   `BikeConfig`. The three **reference bikes** (GSX-R 1000 K5, YZF-R1 4C8,
-   Hayabusa Gen1) are hand-curated in `defaults.py`, *not* derived from specs.
+3. Everything downstream uses `BikeConfig` (in `models.py`): the simulator,
+   the DB round-trip and the analysis layer. The three reference bikes
+   (GSX-R 1000 K5, YZF-R1 4C8, Hayabusa Gen1) are hand-curated in
+   `defaults.py`, not derived from specs.
 
-4. **`MotoQuantEngine.run()` (in `physics.py`) simulates the run.** It composes
+4. `MotoQuantEngine.run()` (in `physics.py`) simulates the run. It composes
    the 15 sub-models in `submodels/` and integrates the state vector with
    fixed-step RK4 at 1 ms. Per-cluster tuning knobs come from
    `category_profiles.py`. Output is a `SimResult` (ET, trap speed, splits,
@@ -92,28 +92,28 @@ flowchart TD
    Rust core (`native.NativeEngine`, a `MotoQuantEngine` subclass) when it is
    installed and current, else the Python engine (ADR-0007).
 
-5. **The DB is a cache of specs + configs, not the source of truth.**
-   `database/seed.py` (+ `seed_catalogs/`) writes the catalog into
-   `motoquant.db`. `database/bridge.py` round-trips a `BikeConfig` to/from a DB
-   row. The `*_repo.py` classes are the only code that touches SQL.
-   > ⚠️ **Standing gotcha:** when `spec_to_bike_config` changes, the JSON blobs
-   > stored in `bike_configs` go stale and `/api/simulate?bike_id=N` silently
-   > diverges from the spec path. Re-run
-   > `scripts/reseed_configs_from_specs.py` after any importer/physics change.
+5. The DB is a cache of specs and configs, not the source of truth.
+   `database/seed.py` (with `seed_catalogs/`) writes the catalog into
+   `motoquant.db`. `database/bridge.py` round-trips a `BikeConfig` to and from
+   a DB row. The `*_repo.py` classes are the only code that touches SQL.
+   > Trap: when `spec_to_bike_config` changes, the JSON blobs stored in
+   > `bike_configs` go stale and `/api/simulate?bike_id=N` silently diverges
+   > from the spec path. Re-run `scripts/reseed_configs_from_specs.py` after
+   > any importer or physics change.
 
-6. **`api.py` is the web-facing surface.** FastAPI routes call the engine, the
-   repos, and the analysis/LLM/calibration layers. Long-running work (full
-   sims, the build optimizer, chat) is dispatched through `jobs.py` for real
-   progress bars. `run.py` is the CLI equivalent for the same core.
+6. `api.py` serves the web. FastAPI routes call the engine, the repos, and
+   the analysis, LLM and calibration layers. Long-running work (full sims,
+   the build optimizer, chat) goes through `jobs.py` so the client gets real
+   progress bars. `run.py` is the CLI over the same core.
 
 ---
 
-## 3. Subsystem map — what lives where
+## 3. Subsystem map: what lives where
 
 | Path | Responsibility | Start reading at |
 |---|---|---|
 | `motoquant/physics.py` | RK4 integrator, the simulation loop | `MotoQuantEngine.run()` |
-| `motoquant/submodels/` | 15 independent physics models (engine, tire, aero, clutch, drivetrain, chain, braking, wheelie, weight_transfer, rider_dynamics, staging, environmental, parasitic, rolling_resistance, forced_induction) | any one file — they are small & self-contained |
+| `motoquant/submodels/` | 15 independent physics models (engine, tire, aero, clutch, drivetrain, chain, braking, wheelie, weight_transfer, rider_dynamics, staging, environmental, parasitic, rolling_resistance, forced_induction) | any one file; each is small and self-contained |
 | `motoquant/models.py` | `BikeConfig` + all parameter dataclasses | `BikeConfig` |
 | `motoquant/defaults.py` | The 3 pinned reference bikes + synthetic curves | `gsxr1000_k5()` |
 | `motoquant/category_profiles.py` | Per-cluster physics knobs + `derive_category_tag()` | `CategoryProfile` |
@@ -125,10 +125,9 @@ flowchart TD
 | `motoquant/analysis/` | Parts ROI, Sobol sensitivity, Bayesian/knapsack build optimizer, ECU autotune, the outlaw pipeline, surrogate models | `roi.py`, then `build_optimizer.py` |
 | `motoquant/llm/` | Agentic chat: multi-provider client, tool-calling agent, query parsing, bike estimation, web tools | `agent.py`, `client.py` |
 | `motoquant/parts/compatibility.py` | Which parts fit which bikes (tiered matcher) | `is_compatible()` |
-| `motoquant/config_io.py` | Save/load a `BikeConfig` to/from a file (must round-trip every physics-read field — see KNOWN_TRAPS T15) | `save_config()` |
-<!-- `motoquant/calibration_ml/` removed 2026-08-11: zero production callers (only its own tests imported it). -->
+| `motoquant/config_io.py` | Save/load a `BikeConfig` to/from a file (must round-trip every physics-read field; see KNOWN_TRAPS T15) | `save_config()` |
 | `motoquant/nlp.py` | Keyless regex natural-language query parser (the `nl` CLI; the fallback when no LLM key is set) | `NLQueryParser` |
-| `motoquant/scraper/fetcher.py` | `PoliteFetcher` — dev-only Scrapling-backed scraping (cache → robots.txt → rate limit → tier escalation). Soft-imported; **not** a production dependency | `PoliteFetcher.fetch()` |
+| `motoquant/scraper/fetcher.py` | `PoliteFetcher`: dev-only Scrapling-backed scraping (cache → robots.txt → rate limit → tier escalation). Soft-imported; **not** a production dependency | `PoliteFetcher.fetch()` |
 | `motoquant/api.py` | FastAPI app + all HTTP routes | grep `@app.` |
 | `motoquant/run.py` | CLI (`python -m motoquant.run <subcommand>`) | `main()` |
 | `motoquant/ratelimit.py` | Per-IP fixed-window rate limits on every compute-heavy route + the daily chat cap (abuse/LLM-bill fuses; everything is free, so these replace quotas) | `rate_limit()` |
@@ -136,15 +135,17 @@ flowchart TD
 | `motoquant/observability.py` | Sentry wiring (env-gated, no-op without DSN) | top of file |
 | `motoquant/keepwarm.py` | In-app self-ping that keeps a free-tier host awake during the day | `start_keepwarm()` |
 | `motoquant/mcp_server.py` | Stdlib-only stdio MCP server exposing sims/catalog/what-ifs as tools (`docs/MCP.md`) | `main()` |
-| `motoquant/engine_select.py` | The ONE place that picks the integrator for every production simulation: `make_engine(cfg)` → Rust core or `MotoQuantEngine`, per `MOTOQUANT_ENGINE` (`auto` / `python` kill switch / `native`); reported by `/api/health` | `make_engine()` |
+| `motoquant/engine_select.py` | The only place that picks the integrator for every production simulation: `make_engine(cfg)` → Rust core or `MotoQuantEngine`, per `MOTOQUANT_ENGINE` (`auto` / `python` kill switch / `native`); reported by `/api/health` | `make_engine()` |
 | `motoquant/native.py` + `rust/` | Rust physics core (PyO3 extension + wasm32 browser engine), bit-identical to `physics.py`, which stays the reference. Python resolves the config (`resolve_engine`), Rust integrates; schema-versioned + source-fingerprinted (stale builds are refused). `docs/RUST_CORE.md`, ADR-0007 | `available()`, `resolve_engine()` |
 | `web/` | Next.js frontend (app router). Design system and vocabulary: `web/DESIGN.md`. The simulator is `components/sim/*` (Simple and Advanced modes); `lib/api.js` is the one API client; `lib/instantEstimate.js` decides when the in-browser estimate may answer | `web/app/page.js` |
-| `tests/` | pytest suite (thousands of tests; `make test-fast` for the quick subset). `tests/test_docs_truth_2026_11.py` keeps these docs honest | `conftest.py` |
+| `tests/` | pytest suite (thousands of tests; `make test-fast` for the quick subset). `tests/test_docs_truth_2026_11.py` checks these docs against the repo | `conftest.py` |
 | `scripts/` | Sweeps, reseed, patches, audits, autonomous-ops orchestration | `reseed_configs_from_specs.py` |
+
+<!-- `motoquant/calibration_ml/` removed 2026-08-11: zero production callers (only its own tests imported it). -->
 
 ---
 
-## 4. "I want to change X" — where to go
+## 4. Where to go to change something
 
 | Goal | Files to touch | Don't forget |
 |---|---|---|
@@ -157,9 +158,9 @@ flowchart TD
 
 ---
 
-## 5. The non-negotiable invariant
+## 5. The pinned baselines
 
-The three reference baselines are **pinned bit-identical** and CI-gated:
+The three reference baselines are pinned bit-identical, and CI checks them:
 
 ```
 GSX-R 1000 K5 → 10.0436 s
@@ -167,8 +168,8 @@ YZF-R1 4C8    → 10.1092 s
 Hayabusa Gen1 → 10.1100 s
 ```
 
-Any change that perturbs them is a regression, no matter how correct it looks.
-Verify after every physics/importer/config change:
+Any change that moves them is a regression, however correct it looks.
+Check them after every physics, importer or config change:
 
 ```bash
 python -c "import motoquant as m; \
@@ -181,18 +182,19 @@ print(m.MotoQuantEngine(m.gsxr1000_k5()).run().time_quarter, \
 
 ## 6. Deployment topology (October 2026)
 
-- **API**: FastAPI on **Render** free tier (`motoquant-api.onrender.com`),
+- API: FastAPI on the Render free tier (`motoquant-api.onrender.com`),
   Docker via `render.yaml`. The Dockerfile's first stage compiles the Rust
-  physics core wheel; `/api/health` → `engine` shows which integrator is live. Cold-start-guarded by `keepwarm.py` + a GitHub
-  Actions keep-alive cron. Migration runbook: `docs/RENDER_MIGRATION.md`.
-- **Web**: Next.js on **Vercel** (`motoquant.in`). The browser calls
+  physics core wheel; `/api/health` → `engine` shows which integrator is
+  live. `keepwarm.py` and a GitHub Actions keep-alive cron guard against cold
+  starts. Migration runbook: `docs/RENDER_MIGRATION.md`.
+- Web: Next.js on Vercel (`motoquant.in`). The browser calls
   same-origin `/api/*`, which is rewritten to the API (`web/next.config.js` +
   the root `vercel.json`). `NEXT_PUBLIC_API_URL` is only for local dev
   (`make web-dev`).
-- **DB**: `motoquant.db` is tracked in git and ships inside the Docker image.
+- DB: `motoquant.db` is tracked in git and ships inside the Docker image.
   The website never writes to it (no accounts; saved runs live in the
-  browser), so each deploy simply ships the latest catalog.
-- **Self-hosting**: the same stack runs on any Docker host; see
+  browser), so each deploy ships the latest catalog.
+- Self-hosting: the same stack runs on any Docker host; see
   [SELF_HOSTING.md](SELF_HOSTING.md).
-- **Desktop app**: discontinued (July 2026, ADR-0005); the `desktop/`
+- Desktop app: discontinued (July 2026, ADR-0005); the `desktop/`
   scaffold was deleted 2026-10-23.

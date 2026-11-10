@@ -158,8 +158,8 @@ export default function HomePage() {
                 Know your quarter-mile time before you race.
               </h1>
               <p className="mt-4 max-w-xl text-base leading-relaxed text-white/75 md:text-lg">
-                Pick your bike, see the time it should run, and find out what will
-                actually make it quicker.
+                Pick your bike to see the time it should run and which changes
+                would make it quicker.
               </p>
 
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
@@ -261,7 +261,7 @@ export default function HomePage() {
                 ))}
               </div>
               <p className="mt-4 text-sm leading-relaxed text-white/70">
-                <strong className="font-semibold text-white">The honest limit:</strong> small
+                <strong className="font-semibold text-white">Weaker areas:</strong> small
                 bikes, two-strokes and cruisers are less well covered by published tests, so
                 their results carry a wider margin. Small bikes are the weakest class: their
                 gearing in the catalog is still inferred, and{' '}
@@ -334,7 +334,7 @@ export default function HomePage() {
 
             <div className="mt-6">
               <Link href="/validation" className="btn-ghost">
-                Explore every benchmark
+                See every benchmark
               </Link>
             </div>
           </div>
@@ -345,15 +345,15 @@ export default function HomePage() {
           <div className="mx-auto max-w-6xl">
             <SectionHead
               eyebrow="Open source"
-              title="Free, open, and yours to improve"
-              lede="MotoQuant is released under the Apache License 2.0. The simulator, the bike catalog and the accuracy checks are public, so you can read the maths, correct a number or run your own copy."
+              title="Free, and anyone can improve it"
+              lede="MotoQuant is released under the Apache License 2.0. The simulator, the bike catalog and the accuracy checks are all public: read the maths, correct a number or run your own copy."
             />
 
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 { icon: Github, title: 'Read the code', body: 'Every line of the simulator and the site, on GitHub.', href: REPO_URL, external: true },
                 { icon: PlusCircle, title: 'Suggest a bike', body: 'Missing a model? Send its specifications and a source.', href: SUGGEST_URL, external: true },
-                { icon: Flag, title: 'Submit a timeslip', body: 'A real run, checked and added, makes the numbers better for everyone.', href: TIMESLIP_URL, external: true },
+                { icon: Flag, title: 'Submit a timeslip', body: 'Send a real run. Each one we check and add improves the numbers.', href: TIMESLIP_URL, external: true },
                 { icon: BookOpen, title: 'Read the physics', body: 'How the simulation works, step by step, in plain language.', href: '/docs/physics' },
               ].map(({ icon: Icon, title, body, href, external }) => (
                 <a
@@ -388,7 +388,7 @@ export default function HomePage() {
         {/* ─── FAQ ────────────────────────────────────────────────── */}
         <section className="border-t border-white/10 px-4 py-14 sm:px-6 md:py-20">
           <div className="mx-auto max-w-3xl">
-            <SectionHead eyebrow="Questions" title="Straight answers" />
+            <SectionHead eyebrow="FAQ" title="Common questions" />
             <div className="mt-8 space-y-3">
               {FAQ_ITEMS.map(({ q, a }) => (
                 <details key={q} className="card group px-5 py-2">

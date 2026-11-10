@@ -6,12 +6,12 @@ import CodeComment from '../../../components/CodeComment';
 import ScoreboardDigits from '../../../components/ScoreboardDigits';
 
 export const metadata = {
-  title: 'The Physics of a Perfect Launch — MotoQuant Blog',
-  description: 'How clutch engagement RPM, tire slip ratio, and weight transfer interact in the first 0.4 seconds of a drag run. A first-principles breakdown for Indian drag racers.',
+  title: 'The physics of a perfect launch | MotoQuant Blog',
+  description: 'How clutch engagement RPM, tyre slip ratio and weight transfer interact in the first 0.4 seconds of a drag run, worked from first principles for Indian drag racers.',
   keywords: ['drag racing launch physics', 'motorcycle launch control', 'clutch engagement drag racing', 'tire slip ratio drag'],
   alternates: { canonical: 'https://motoquant.in/blog/the-physics-of-a-perfect-launch' },
   openGraph: {
-    title: 'The Physics of a Perfect Launch',
+    title: 'The physics of a perfect launch',
     description: 'How clutch, tyre, and weight transfer interact in the first 0.4 seconds.',
     url: 'https://motoquant.in/blog/the-physics-of-a-perfect-launch',
     type: 'article',
@@ -22,103 +22,103 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'Clutch engagement RPM, tire slip ratio, and weight transfer work together in the first 0.4 seconds of a drag run. Getting any one of them wrong costs you tenths — sometimes a lot more than tenths. This article breaks down the physics of each variable, how they interact, and what MotoQuant actually simulates when you press Run.',
+    text: 'Three things decide the first 0.4 seconds of a drag run: the RPM at which the clutch engages, how much the rear tyre slips, and how much weight moves onto the rear wheel. Get any one wrong and you lose tenths, sometimes much more. Each one changes the other two, and MotoQuant simulates all three when you press Run.',
   },
   {
     type: 'h2',
-    text: 'Why the First 0.4 Seconds Matter So Much',
+    text: 'Why the first 0.4 seconds matter',
   },
   {
     type: 'p',
-    text: 'In a 10-second run, the first 60 feet typically takes 1.7–2.1 seconds. But the physics that determines your 60-ft time is almost entirely set in the first half-second — from the moment the clutch releases to the moment the rear tyre stops spinning up and the bike commits to a traction-limited acceleration. Miss the launch, and there is no catching up in the top end.',
+    text: 'In a 10-second run, the first 60 feet usually take 1.7–2.1 seconds. Your 60-ft time, though, is almost entirely decided in the first half-second: from clutch release until the rear tyre stops spinning up and the bike settles into traction-limited acceleration. Miss the launch and you cannot catch up at the top end.',
   },
   {
     type: 'p',
-    text: 'A 0.1-second improvement in 60-ft time typically translates to roughly 0.07–0.09 seconds in final ET, depending on the bike class. On a litre-class superbike, that is the difference between winning and losing most heads-up events. On a 155cc street bike, a good launch can overcome 3–4 hp of power deficit.',
+    text: 'A 60-ft time 0.1 seconds quicker gives a final ET roughly 0.07–0.09 seconds quicker, depending on the bike class. On a litre-class superbike, that margin decides most heads-up events. On a 155cc street bike, a good launch can make up for 3–4 hp less power.',
   },
   {
     type: 'h2',
-    text: 'The Clutch: Your First Control Variable',
+    text: 'The clutch is your first control',
   },
   {
     type: 'p',
-    text: 'The clutch does two things at launch. First, it limits the torque transferred to the rear wheel so the tyre does not instantly light up and spin. Second, it allows the engine to stay above idle — ideally at its peak torque RPM — while the bike accelerates from rest.',
+    text: 'The clutch does two jobs at launch. It limits the torque reaching the rear wheel, so the tyre does not light up and spin at once. It also lets the engine stay above idle, ideally at its peak-torque RPM, while the bike pulls away from rest.',
   },
   {
     type: 'p',
-    text: 'The optimal launch RPM is the RPM at which you hold the engine before releasing the clutch. For most 4-stroke bikes this is 2,000–5,000 RPM below the peak power RPM. On a Yamaha R15 V3 (peak torque at ~7,500 RPM), a good launch RPM is around 4,000–5,000 RPM. On a Hayabusa (peak torque at ~7,000 RPM), it is 3,500–5,000 RPM.',
+    text: 'Launch RPM is the engine speed you hold before you release the clutch. For most 4-stroke bikes the best launch RPM is 2,000–5,000 RPM below peak-power RPM. On a Yamaha R15 V3 (peak torque at ~7,500 RPM), a good launch RPM is around 4,000–5,000 RPM. On a Hayabusa (peak torque at ~7,000 RPM), it is 3,500–5,000 RPM.',
   },
   {
     type: 'p',
-    text: 'MotoQuant models clutch dynamics through an engagement rate (Nm/s) and a slip RPM threshold. When the clutch is releasing, torque transfer scales with the engagement rate. Once the rear wheel RPM is within the slip threshold of the engine RPM, the clutch is considered locked. This produces realistic clutch heat and slip duration — you can watch both in the simulation output.',
+    text: 'MotoQuant models the clutch with two numbers: an engagement rate (Nm/s) and a slip RPM threshold. While the clutch is releasing, torque transfer scales with the engagement rate. Once rear-wheel RPM comes within the slip threshold of engine RPM, the clutch counts as locked. That gives realistic clutch heat and slip duration, and you can watch both in the simulation output.',
   },
   {
     type: 'callout',
-    text: 'Rule of thumb: launch RPM should be ≈70–80 % of peak torque RPM for most street-derived 4-stroke engines. Two-stroke engines with narrow power bands need to launch at 85–90 % of tuned RPM or the expansion chamber loses its boost before the bike moves meaningfully.',
+    text: 'Rule of thumb: for most street-derived 4-stroke engines, launch at ≈70–80 % of peak-torque RPM. A two-stroke with a narrow power band needs 85–90 % of its tuned RPM, or the expansion chamber loses its boost before the bike has really moved.',
   },
   {
     type: 'h2',
-    text: 'Tire Slip: The Hidden Variable',
+    text: 'Tyre slip',
   },
   {
     type: 'p',
-    text: 'Slip ratio is the normalized difference between the rear wheel\'s rotational speed and the bike\'s actual ground speed. A slip ratio of zero means the tyre is rolling freely. A slip ratio of 1.0 means the wheel is spinning in place.',
+    text: 'Slip ratio is the normalized difference between the rear wheel\'s rotational speed and the bike\'s actual ground speed. At zero, the tyre rolls freely. At 1.0, the wheel spins in place.',
   },
   {
     type: 'p',
-    text: 'Tyre models such as Pacejka\'s Magic Formula put peak longitudinal force at a slip ratio of roughly 0.07–0.15 for most road tyres. That means a small amount of wheel spin is desirable: the tyre is generating more force than it would if it were locked to ground speed. Too much spin (>0.30) and you are on the slope where traction falls off steeply.',
+    text: 'Tyre models such as Pacejka\'s Magic Formula put peak longitudinal force at a slip ratio of roughly 0.07–0.15 for most road tyres. So a little wheel spin helps: the tyre makes more force than it would if it were locked to ground speed. Above 0.30 you are on the slope where traction falls off steeply.',
   },
   {
     type: 'p',
-    text: 'Temperature adds another layer. A cold tyre has a lower μ_peak than a warmed-up one. MotoQuant\'s thermal model tracks tyre temperature through conductance from the road surface and heat generated by slip. A sticky slick at race temperature (80–90°C) can produce μ_peak of 1.6+. The same tyre cold at 25°C delivers closer to 1.1.',
+    text: 'Temperature matters too. A cold tyre has a lower μ_peak than a warm one. MotoQuant\'s thermal model tracks tyre temperature from conductance with the road surface and from the heat that slip generates. A sticky slick at race temperature (80–90°C) can reach a μ_peak of 1.6+. The same tyre cold, at 25°C, gives closer to 1.1.',
   },
   {
     type: 'h2',
-    text: 'Weight Transfer: The Physics You Cannot Feel',
+    text: 'Weight transfer',
   },
   {
     type: 'p',
-    text: 'When you accelerate, weight shifts from the front axle to the rear. This increases rear tyre load, which increases the friction force the rear can generate — up to a point. But if weight transfer is so extreme that the front wheel lifts, you have a wheelie: the bike\'s angular momentum is working against forward progress.',
+    text: 'When you accelerate, weight shifts from the front axle to the rear. More load on the rear tyre lets it make more friction force, up to a point. If the transfer is so large that the front wheel lifts, you have a wheelie, and the bike\'s angular momentum works against forward progress.',
   },
   {
     type: 'p',
-    text: 'The fraction of weight that shifts is determined by: acceleration force × CoG height / wheelbase. A bike with a high CoG (adventure, cruiser) will wheelie more readily than a low-slung sport bike. A long wheelbase resists weight transfer.',
+    text: 'The share of weight that shifts is set by acceleration force × CoG height / wheelbase. A bike with a high CoG (adventure, cruiser) wheelies more readily than a low-slung sport bike, and a long wheelbase resists weight transfer.',
   },
   {
     type: 'p',
-    text: 'MotoQuant tracks front and rear axle loads at every millisecond. If front load goes to zero, the physics transitions to a wheelie model that trades forward traction for rotational lift. Wheelie bars extend the effective wheelbase to resist this transition — a popular drag-prep mod that shows up clearly in MotoQuant\'s ET delta.',
+    text: 'MotoQuant tracks front and rear axle loads at every millisecond. If front load reaches zero, the simulation switches to a wheelie model that trades forward traction for rotational lift. Wheelie bars extend the effective wheelbase to delay that switch. They are a popular drag-prep mod, and their effect shows up clearly in MotoQuant\'s ET delta.',
   },
   {
     type: 'h2',
-    text: 'How It All Fits Together',
+    text: 'How the three interact',
   },
   {
     type: 'p',
-    text: 'The optimal launch is the combination of clutch engagement RPM, slip ratio, and weight transfer that maximises average acceleration through the 60-ft zone. These three variables are coupled: a higher launch RPM produces more torque and more slip; more slip means more heat and more traction until you hit the μ_peak slope; more traction means more weight transfer and higher wheelie risk.',
+    text: 'The best launch is the mix of clutch engagement RPM, slip ratio and weight transfer that gives the highest average acceleration through the 60-ft zone. Each one moves the others. A higher launch RPM gives more torque and more slip. More slip means more heat and more traction, until you reach the μ_peak slope. More traction means more weight transfer and a higher wheelie risk.',
   },
   {
     type: 'p',
-    text: 'In MotoQuant, you can sweep the launch RPM and power boost sliders and watch the 60-ft time change in real time. The sweet spot is typically visible as a shallow minimum — slightly higher launch RPM gains nothing because the traction limit is already reached.',
+    text: 'In MotoQuant you can sweep the launch RPM and power boost sliders and watch the 60-ft time change in real time. The sweet spot usually shows as a shallow minimum: a slightly higher launch RPM gains nothing because the bike is already at the traction limit.',
   },
   {
     type: 'callout',
-    text: 'Want to test this on your own bike? Run the simulator with your bike selected, set Power boost to 0, then sweep the rider weight slider from 60 kg to 90 kg and watch the ET change. Heavier rider = more rear load = slightly better traction but higher inertia. The crossover is usually around 72–75 kg for most sub-500cc bikes.',
+    text: 'To try this on your own bike, select it in the simulator, set Power boost to 0, then move the rider weight slider from 60 kg to 90 kg and watch the ET. A heavier rider puts more load on the rear, which helps traction slightly but adds inertia. For most sub-500cc bikes the crossover is around 72–75 kg.',
   },
   {
     type: 'h2',
-    text: 'What This Means for Your Setup',
+    text: 'What to change on your bike',
   },
   {
     type: 'p',
-    text: 'If you are running a street bike at a drag strip, the most common launch mistake is holding too high an RPM. The clutch heats up, engagement is erratic, and the tyre spins past its peak-traction slip ratio. Drop the launch RPM by 500–800 RPM and practice a smooth, fast clutch release. Most riders find this is worth 0.2–0.5 seconds in 60-ft time alone.',
+    text: 'On a street bike at the drag strip, the most common launch mistake is holding too much RPM. The clutch heats up, engagement turns erratic, and the tyre spins past its peak-traction slip ratio. Drop launch RPM by 500–800 RPM and practise a smooth, fast clutch release. Most riders find this worth 0.2–0.5 seconds in 60-ft time alone.',
   },
   {
     type: 'p',
-    text: 'If you are on a built drag bike with a slipper clutch, the MotoQuant slipper model allows you to tune the spring preload (Nm), which controls how aggressively the clutch bites. Lower preload = softer engagement = less tyre shock but potentially higher slip duration. Higher preload = harder bite = higher risk of spin but shorter engagement window.',
+    text: 'On a built drag bike with a slipper clutch, MotoQuant\'s slipper model lets you tune the spring preload (Nm), which sets how hard the clutch bites. Lower preload gives softer engagement and less shock to the tyre, but slip can last longer. Higher preload gives a harder bite and a shorter engagement window, with more risk of wheelspin.',
   },
   {
     type: 'p',
-    text: 'The physics does not lie. Run the numbers before you tune. MotoQuant is free — there is no reason to guess.',
+    text: 'Run the numbers before you tune. MotoQuant is free, so you do not have to guess.',
   },
 ];
 
@@ -168,7 +168,7 @@ export default function PostPage() {
           </div>
           <CodeComment className="mb-4">staging lane · the first 0.4 s</CodeComment>
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
-            The Physics of a Perfect Launch
+            The physics of a perfect launch
           </h1>
           <div className="text-sm text-white/60 mb-6">
             24 April 2026 · 8 min read · MotoQuant Blog
@@ -193,7 +193,7 @@ export default function PostPage() {
         <div className="max-w-2xl mx-auto mt-16 glass rounded-xl p-6 border border-brand-orange/25 flex flex-col sm:flex-row items-center gap-4">
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Test your own launch physics</div>
-            <div className="text-white/60 text-sm">Free simulator — pick your bike, adjust rider weight, and watch the 60-ft time change.</div>
+            <div className="text-white/60 text-sm">Free simulator: pick your bike, adjust rider weight, and watch the 60-ft time change.</div>
           </div>
           <Link href="/simulator" className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">
             Open the simulator →

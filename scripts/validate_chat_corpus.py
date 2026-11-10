@@ -3,7 +3,7 @@
 Offline chat-quality validation corpus.
 
 Runs ~50 representative queries through the chat pipeline using a mock LLM
-parser (no Groq quota burn). Verifies:
+parser (no API spend). Verifies:
   - Each query parses to the expected intent
   - Bike name resolves correctly
   - For recommend: build_tier is correct, parts list non-empty, real
@@ -13,7 +13,7 @@ parser (no Groq quota burn). Verifies:
   - For rank: top-N is sorted, candidates_simulated > 0
 
 The mock LLM is keyword-driven — it observes the query text and outputs
-a plausible parsed-tool-input dict that mimics what Groq would return.
+a plausible parsed-tool-input dict that mimics what the model would return.
 This is intentionally simpler than the real model so we can deterministically
 exercise every branch.
 
@@ -209,15 +209,15 @@ CORPUS = [
 
 
 # ─────────────────────────────────────────────────────────────────
-# Mock LLM — keyword-driven router that mimics Groq for the corpus
+# Mock LLM — keyword-driven router that mimics the model for the corpus
 # ─────────────────────────────────────────────────────────────────
 
 
 def _mock_parser(query: str) -> dict[str, Any]:
     """Heuristic intent classifier + field extractor.
 
-    Mimics Groq's output for the 50 corpus queries closely enough that
-    runner.py exercises the real dispatch logic. Real Groq will be
+    Mimics the model's output for the 50 corpus queries closely enough that
+    runner.py exercises the real dispatch logic. The real model will be
     smarter on novel phrasings; this just covers the corpus.
     """
     q = query.lower()
@@ -445,7 +445,7 @@ def _mock_parser(query: str) -> dict[str, Any]:
 
 
 class _MockClient:
-    """Drop-in replacement for LLMClient that bypasses Groq."""
+    """Drop-in replacement for LLMClient that makes no API call."""
 
     def __init__(self):
         self.calls = []

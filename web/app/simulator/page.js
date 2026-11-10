@@ -93,7 +93,7 @@ function SimulatorPageInner() {
           <div className="space-y-5">
             {sim.bikeNotice && (
               <div role="status" className="flex items-center justify-between gap-3 rounded-xl border border-signal-stage/30 bg-signal-stage/[0.07] p-3 text-sm text-white/85">
-                <span>We couldn&apos;t find that bike — pick one below.</span>
+                <span>We couldn&apos;t find that bike. Pick one below.</span>
                 <button type="button" onClick={sim.dismissBikeNotice} className="btn-ghost btn-sm shrink-0">Dismiss</button>
               </div>
             )}

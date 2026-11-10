@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from "../../StructuredData";
 
 const SLUG = "re-continental-gt-650-quarter-mile-physics";
-const TITLE = "Royal Enfield Continental GT 650 Quarter-Mile Physics";
+const TITLE = "Royal Enfield Continental GT 650 quarter-mile physics";
 
 function breadcrumbs() {
   return {

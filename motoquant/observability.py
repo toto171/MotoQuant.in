@@ -22,6 +22,15 @@ Optional knobs:
                                 high-traffic; up for early-stage debugging.
     SENTRY_RELEASE           — defaults to motoquant.__version__.
 
+Key scrubbing
+-------------
+Every event and transaction passes through :func:`scrub_event` before it
+leaves the process, whatever SENTRY_SEND_PII says: the X-Anthropic-Key,
+Authorization and X-Api-Key request headers are removed and any
+``sk-ant-...`` substring anywhere in the event (messages, exception
+values, stack-frame variables, breadcrumbs, request bodies) becomes
+"[redacted]".
+
 Why env-gated?
 --------------
 We don't want to ship a hardcoded DSN — different environments (Railway prod,
@@ -34,6 +43,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 from typing import Any
 
 log = logging.getLogger(__name__)
@@ -86,26 +96,25 @@ def init_sentry(*, app_name: str = "motoquant-api") -> bool:
         except Exception:
             release = None
 
-    # The OpenAI/Anthropic AUTO-integrations capture LLM-provider errors at
-    # the SDK boundary as handled:no BEFORE our llm/client.py except blocks
-    # ever run — e.g. the Groq tool_use_failed 400 (Sentry MOTOQUANT-API-1)
-    # is salvaged correctly by our code, yet still lands in Sentry as an
-    # unhandled error, polluting a near-empty error stream with benign noise.
-    # Our LLM layer owns provider-error handling; keep SDK-boundary capture
-    # off. (`disabled_integrations` needs sentry-sdk >= 2.11 — see the floor
-    # in requirements-api.txt.)
+    # Keep the LLM SDK AUTO-integrations off. The Anthropic one captures
+    # provider errors at the SDK boundary as handled:no BEFORE our
+    # llm/client.py translation runs, and can attach prompts and request
+    # data to events. Our LLM layer owns provider-error handling and
+    # redaction. The OpenAI one stays off too (the chat layer is Claude only;
+    # this guards against a stray install). (`disabled_integrations` needs
+    # sentry-sdk >= 2.11; see the floor in requirements-api.txt.)
     disabled_integrations: list[Any] = []
     try:
         from sentry_sdk.integrations.openai import OpenAIIntegration
 
         disabled_integrations.append(OpenAIIntegration())
-    except ImportError:
+    except Exception:  # noqa: BLE001 - ImportError, or sentry's DidNotEnable when openai is absent
         pass
     try:
         from sentry_sdk.integrations.anthropic import AnthropicIntegration
 
         disabled_integrations.append(AnthropicIntegration())
-    except ImportError:
+    except Exception:  # noqa: BLE001 - ImportError, or sentry's DidNotEnable
         pass
 
     sentry_sdk.init(
@@ -122,8 +131,10 @@ def init_sentry(*, app_name: str = "motoquant-api") -> bool:
             LoggingIntegration(level=logging.INFO, event_level=logging.ERROR),
         ],
         disabled_integrations=disabled_integrations,
-        # Tag every event with the app name so multi-app projects can filter
-        before_send=lambda event, _hint: _tag_app(event, app_name),
+        # Scrub keys out of every event (kept on even with SENTRY_SEND_PII),
+        # then tag it with the app name so multi-app projects can filter.
+        before_send=lambda event, _hint: _before_send(event, app_name),
+        before_send_transaction=lambda event, _hint: scrub_event(event),
     )
     _INITIALISED = True
     # STDOUT on purpose (see the ImportError branch above): only fires when a
@@ -152,6 +163,69 @@ def _safe_float(env_var: str, default: float) -> float:
         return default
 
 
+# Request headers that carry credentials. Compared case-insensitively with
+# "_" and "-" treated alike, because Sentry and ASGI spell them both ways.
+_SECRET_HEADERS = {"x-anthropic-key", "authorization", "x-api-key"}
+_SECRET_RE = re.compile(r"sk-ant-[^\s\"'<>\\]*")
+_REDACTED = "[redacted]"
+
+
+def _is_secret_header(name: Any) -> bool:
+    return isinstance(name, str) and name.strip().lower().replace("_", "-") in (
+        _SECRET_HEADERS
+    )
+
+
+def _scrub(node: Any, depth: int = 0) -> Any:
+    if depth > 50:
+        return node
+    if isinstance(node, str):
+        return _SECRET_RE.sub(_REDACTED, node)
+    if isinstance(node, dict):
+        return {
+            k: (_REDACTED if _is_secret_header(k) else _scrub(v, depth + 1))
+            for k, v in node.items()
+        }
+    if isinstance(node, list):
+        # Header lists arrive as [[name, value], ...] in some integrations.
+        out = []
+        for item in node:
+            if (
+                isinstance(item, (list, tuple))
+                and len(item) == 2
+                and _is_secret_header(item[0])
+            ):
+                out.append([item[0], _REDACTED])
+            else:
+                out.append(_scrub(item, depth + 1))
+        return out
+    if isinstance(node, tuple):
+        return tuple(_scrub(v, depth + 1) for v in node)
+    return node
+
+
+def scrub_event(event: dict[str, Any]) -> dict[str, Any]:
+    """Remove credential headers and redact every ``sk-ant-`` substring.
+
+    Never raises: a scrubber failure drops the event rather than sending it
+    unscrubbed.
+    """
+    try:
+        request = event.get("request")
+        if isinstance(request, dict) and isinstance(request.get("headers"), dict):
+            request["headers"] = {
+                k: v for k, v in request["headers"].items() if not _is_secret_header(k)
+            }
+        return _scrub(event)
+    except Exception:  # noqa: BLE001
+        return None  # type: ignore[return-value]
+
+
+def _before_send(event: dict[str, Any], app_name: str) -> dict[str, Any] | None:
+    scrubbed = scrub_event(event)
+    return None if scrubbed is None else _tag_app(scrubbed, app_name)
+
+
 def _tag_app(event: dict[str, Any], app_name: str) -> dict[str, Any]:
     """Add `app: <app_name>` to the tags of every Sentry event."""
     tags = event.get("tags") or {}
@@ -163,4 +237,4 @@ def _tag_app(event: dict[str, Any], app_name: str) -> dict[str, Any]:
     return event
 
 
-__all__ = ["init_sentry", "is_initialised"]
+__all__ = ["init_sentry", "is_initialised", "scrub_event"]

@@ -82,7 +82,7 @@ const THINGS = [
   {
     icon: MessageSquare,
     q: 'Can I just ask?',
-    body: 'Yes. Type a question in plain English, such as “How fast is a Duke 390 at Aamby Valley?”, and the assistant runs the simulation for you.',
+    body: 'Yes. Type a question in plain English, such as “How fast is a Duke 390 at Aamby Valley?”, and the assistant runs the simulation for you. Give it a budget and a goal and it plans a build. It runs on Claude: pick the mechanic for quick answers or the doctor to dig deeper, and add your own Anthropic key if you want.',
     href: '/simulator',
     cta: 'Ask a question',
   },
@@ -143,11 +143,11 @@ export default function FeaturesPage() {
             </div>
             <div className="card card-pad">
               <h2 className="mb-2 flex items-center gap-2 font-display text-lg font-semibold text-white">
-                <Github size={18} aria-hidden="true" /> Open source, and yours to improve
+                <Github size={18} aria-hidden="true" /> Open source
               </h2>
               <p className="mb-4 text-base leading-relaxed text-white/75">
-                MotoQuant is Apache-2.0 licensed and built in the open. You can add a bike, fix a spec, send us a timeslip or read
-                the code.
+                MotoQuant is open source under the Apache License 2.0. You can add a bike, fix a spec, send us a timeslip or
+                read the code.
               </p>
               <a href={REPO} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-medium text-accent hover:text-accent-bright">
                 Contribute on GitHub <ArrowRight size={14} aria-hidden="true" />

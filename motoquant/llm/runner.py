@@ -28,7 +28,7 @@ from typing_extensions import TypedDict  # py<3.12-safe with pydantic
 
 from ..constants import MS_TO_KMH, MS_TO_MPH
 from ..engine_select import make_engine
-from .client import LLMClient, LLMNotConfiguredError, LLMRateLimitError
+from .client import LLMClient, LLMError, redact_secrets
 from .parse_query import ParsedSimRequest, parse_query
 from .summarize import summarize_result
 
@@ -239,8 +239,10 @@ class ChatResult:
     Sentinel semantics:
       error == None and intent_type / payload populated → success
       error == "bike_not_found"          → use bike_suggestions
-      error == "llm_not_configured"      → API key missing
-      error == "parse_failed"            → LLM refused / bad response
+      error == "assistant_unavailable"   → no Anthropic key available
+      error == "rate_limited" / "key_rejected" / "free_assistant_resting" /
+               "refused"                 → typed Anthropic failures
+      error == "parse_failed"            → LLM returned an unusable response
       error == "sim_failed"              → physics blew up
     """
 
@@ -319,21 +321,41 @@ def run_chat_pipeline(
 
     Sim cost per call is bounded by each path's batch cap (1 for
     simulate/explain, 2 for compare, ≤15 for rank, ≤25 for choose_bike);
-    the API layer rate-limits callers.
+    the API layer rate-limits callers. Every error string and summary on
+    the result is redacted (no ``sk-ant-`` key can come back).
     """
+    result = _run_chat_pipeline(
+        query,
+        db,
+        client=client,
+        run_summary=run_summary,
+        suggestion_limit=suggestion_limit,
+    )
+    if result.error_detail:
+        result.error_detail = redact_secrets(result.error_detail)
+    if result.summary:
+        result.summary = redact_secrets(result.summary)
+    return result
+
+
+def _run_chat_pipeline(
+    query: str,
+    db: MotoQuantDB,
+    *,
+    client: LLMClient | None,
+    run_summary: bool,
+    suggestion_limit: int,
+) -> ChatResult:
     result = ChatResult(raw_query=query)
 
     # ── 1. Parse ────────────────────────────────────────────────────
     try:
         parsed = parse_query(query, db=db, client=client)
-    except LLMNotConfiguredError as e:
-        result.error = "llm_not_configured"
-        result.error_detail = str(e)
-        return result
-    except LLMRateLimitError as e:
-        # Typed 429 so the UI can show a polite retry hint instead of a
-        # generic "query failed" (previously swallowed by the branch below).
-        result.error = "rate_limited"
+    except LLMError as e:
+        # Typed Anthropic failures (no key, 429, key refused, credit used
+        # up, refusal) keep their code so the UI can say what happened. Any
+        # other failure of the parse call is a parse failure.
+        result.error = "parse_failed" if e.code == "agent_failed" else e.code
         result.error_detail = str(e)
         return result
     except Exception as e:  # noqa: BLE001

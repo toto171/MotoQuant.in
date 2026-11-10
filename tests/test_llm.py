@@ -105,38 +105,8 @@ class TestLLMClient(unittest.TestCase):
         client = LLMClient(_call_override=lambda kind, kwargs: "")
         self.assertTrue(client.is_configured)
 
-    def test_is_rate_limit_detects_status_code(self):
-        client = LLMClient(_call_override=lambda kind, kwargs: "")
-        err = RuntimeError("boom")
-        err.status_code = 429
-        self.assertTrue(client._is_rate_limit(err))
-
-    def test_is_rate_limit_detects_response_status(self):
-        client = LLMClient(_call_override=lambda kind, kwargs: "")
-
-        class _Resp:
-            status_code = 429
-
-        err = RuntimeError("boom")
-        err.response = _Resp()
-        self.assertTrue(client._is_rate_limit(err))
-
-    def test_is_rate_limit_detects_class_name(self):
-        client = LLMClient(_call_override=lambda kind, kwargs: "")
-
-        class RateLimitError(Exception):
-            pass
-
-        self.assertTrue(client._is_rate_limit(RateLimitError("quota")))
-
-    def test_is_rate_limit_ignores_other_errors(self):
-        client = LLMClient(_call_override=lambda kind, kwargs: "")
-        err = RuntimeError("some 500")
-        err.status_code = 500
-        self.assertFalse(client._is_rate_limit(err))
-
     def test_sdk_create_translates_429_to_rate_limit_error(self):
-        """A provider 429 from the SDK create() call becomes LLMRateLimitError."""
+        """A 429 from the SDK becomes LLMRateLimitError (code rate_limited)."""
         client = LLMClient(_call_override=lambda kind, kwargs: "")
 
         def boom(**kwargs):
@@ -144,17 +114,24 @@ class TestLLMClient(unittest.TestCase):
             e.status_code = 429
             raise e
 
-        with self.assertRaises(LLMRateLimitError):
+        with self.assertRaises(LLMRateLimitError) as ctx:
             client._sdk_create(boom)
+        self.assertEqual(ctx.exception.code, "rate_limited")
 
-    def test_sdk_create_passes_through_non_rate_limit(self):
+    def test_sdk_create_wraps_other_errors_as_redacted_llm_errors(self):
+        from motoquant.llm.client import LLMError
+
         client = LLMClient(_call_override=lambda kind, kwargs: "")
+        fake_key = "sk-ant-" + "q" * 40
 
         def boom(**kwargs):
-            raise ValueError("not a 429")
+            raise ValueError(f"broken with {fake_key}")
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(LLMError) as ctx:
             client._sdk_create(boom)
+        self.assertEqual(ctx.exception.code, "agent_failed")
+        self.assertNotIn(fake_key, str(ctx.exception))
+        self.assertIn("[redacted]", str(ctx.exception))
 
     def test_sdk_create_returns_value_on_success(self):
         client = LLMClient(_call_override=lambda kind, kwargs: "")

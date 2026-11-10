@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'hayabusa-vs-zx-14r-which-is-faster';
-const TITLE = 'Hayabusa vs ZX-14R: Which Is Faster Off the Line?';
+const TITLE = 'Hayabusa vs ZX-14R: Which is faster off the line?';
 
 function breadcrumbs() {
   return {
