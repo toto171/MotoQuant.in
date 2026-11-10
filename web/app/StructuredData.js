@@ -111,76 +111,49 @@ export function softwareApplicationSchema() {
   };
 }
 
+// Single source for the landing-page FAQ: the visible accordion (app/page.js)
+// and the FAQPage JSON-LD below render the SAME questions and answers.
+export const FAQ_ITEMS = [
+  {
+    q: 'What is MotoQuant?',
+    a: 'MotoQuant is a free simulator that predicts how fast a motorcycle runs the quarter mile. Pick a bike and it shows the time, the speed at the finish line and the splits for 541 bikes, using physics that is checked against real published tests.',
+  },
+  {
+    q: 'How accurate is the quarter-mile prediction?',
+    a: 'Checked against published magazine tests and Dragy runs: the Suzuki GSX-R1000 K5 simulates 9.93 s against a real 9.97 s; the Yamaha YZF-R1 simulates 10.14 s against 10.3 s; the Suzuki Hayabusa simulates 10.36 s (real range 10.1–10.7 s). The August 2026 check covers 250 published benchmarks (276 matched to catalog bikes) with a weighted mean bias of +0.007 s; 138 of 276 land within ±0.20 s of the published time. Small bikes are less well covered by published tests, so expect a wider margin there.',
+  },
+  {
+    q: 'Which bikes are included?',
+    a: 'The catalog covers 541 bikes across 25+ makers: Suzuki, Yamaha, Honda, Kawasaki, BMW, Ducati, Aprilia, KTM, Triumph, Royal Enfield, Bajaj, TVS, Hero, Harley-Davidson, Indian Motorcycle, CFMoto, Benelli, Husqvarna, MV Agusta, Moto Guzzi, Buell and more. That includes Indian 200–400 cc bikes (Pulsar, Apache, R15 V4), South-East Asian underbones, 400 cc four-cylinder bikes, retro flagships and 20 two-stroke drag bikes (RD350, RX100, RGV250, H2 Mach IV). Missing yours? You can ask for it to be added.',
+  },
+  {
+    q: 'Is MotoQuant free?',
+    a: 'Yes. MotoQuant is free and open source under the MIT License. You do not need an account to run simulations; an optional free account just lets you save runs. motoquant.in is a free public copy of the open-source project, and you can also run it yourself from the GitHub repository.',
+  },
+  {
+    q: 'Can I use it for Indian drag strips?',
+    a: 'Yes. MotoQuant was built for the Indian drag racing community. It knows Aamby Valley (Pune), Madras Motor Race Track (Chennai), Buddh International Circuit (Greater Noida), Kari Motor Speedway (Coimbatore) and Hyderabad, plus seven international venues, and adjusts for each place\u2019s altitude and weather. Parts prices are in rupees with GST and import duty already included.',
+  },
+  {
+    q: 'How does it decide which parts are worth buying?',
+    a: 'Each part in the 593-part catalog is tested by running the simulation with and without it. The change in quarter-mile time is divided by the part\u2019s price to get the cost of each tenth of a second. The best-parts tool then picks the combination that gains the most within your budget, respecting compatibility rules and known pairings such as exhaust plus ECU flash.',
+  },
+  {
+    q: 'Can I upload my own Dragy or dyno data?',
+    a: 'Yes. MotoQuant reads Dragy GPS logs (CSV or VBO) and DynoJet or MoTeC dyno sheets, corrects dyno numbers for the day\u2019s air, and lines your real run up against the simulation: finish time, finish-line speed and split-by-split differences for your own bike.',
+  },
+];
+
 export function faqSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
     '@id': `${SITE_URL}/#faq`,
-    mainEntity: [
-      {
-        '@type': 'Question',
-        name: 'What is MotoQuant?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text:
-            'MotoQuant is a physics-based motorcycle quarter-mile drag racing simulator. It predicts ET, trap speed, and split times for 541 production bikes using 15 independent physics sub-models and validated aero, tire, and dyno data.',
-        },
-      },
-      {
-        '@type': 'Question',
-        name: 'How accurate is the quarter-mile prediction?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text:
-            'MotoQuant is validated against published magazine tests and Dragy runs: Suzuki GSX-R1000 K5 simulates 9.93s against a real 9.97s; Yamaha YZF-R1 simulates 10.14s against 10.3s; Suzuki Hayabusa simulates 10.36s (real range 10.1–10.7s). The August 2026 sweep covers 250 source-quality-weighted benchmarks (276 matched to catalog bikes) with a weighted mean bias of +0.007s; 138 of 276 land within ±0.20s of the published timeslip.',
-        },
-      },
-      {
-        '@type': 'Question',
-        name: 'Which bikes are supported?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text:
-            'The catalog covers 541 bikes across 25+ manufacturers: Suzuki, Yamaha, Honda, Kawasaki, BMW, Ducati, Aprilia, KTM, Triumph, Royal Enfield, Bajaj, TVS, Hero, Harley-Davidson, Indian Motorcycle, CFMoto, Benelli, Husqvarna, MV Agusta, Moto Guzzi, Buell, and more. Includes Indian 200–400cc commuters (Pulsar N125, NS200, NS400Z, Apache RTR, R15 V4), SE Asia underbones, 400cc inline-fours (Kawasaki Ninja ZX-4R, ZX-4RR), retro flagships (Yamaha XSR900 GP), and 20 two-stroke drag bikes (RD350, RX100, RGV250, H2 Mach IV).',
-        },
-      },
-      {
-        '@type': 'Question',
-        name: 'Is MotoQuant free?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text:
-            'MotoQuant is free and open source under the MIT License. You do not need an account to run simulations; an optional free account just lets you save runs to a personal garage. motoquant.in is a free public instance of the open-source project, and you can also run it yourself from the GitHub repository.',
-        },
-      },
-      {
-        '@type': 'Question',
-        name: 'Can I use MotoQuant for Indian drag strips?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text:
-            'Yes — MotoQuant was built for the Indian drag racing community. The venue database covers Aamby Valley (Pune), Madras Motor Race Track (Chennai), Buddh International Circuit (Greater Noida), Kari Motor Speedway (Coimbatore — the Coimbatore strip hosted drag events in the late 1990s before the permanent circuit was built), and Hyderabad, plus seven international venues. Parts pricing is in INR with GST and import duty already factored in.',
-        },
-      },
-      {
-        '@type': 'Question',
-        name: 'How does the parts ROI engine work?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text:
-            'Each part in the 593-part catalog is evaluated by running the simulation with and without it. The delta in ET is divided by the part cost in INR to produce a cost-per-tenth metric. A 0/1 knapsack optimizer then picks the best combination under your budget, respecting compatibility rules and known synergy pairs (e.g. exhaust + ECU flash).',
-        },
-      },
-      {
-        '@type': 'Question',
-        name: 'Can I upload my own Dragy or dyno data?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text:
-            'Yes. MotoQuant imports Dragy GPS logs (CSV or VBO) and DynoJet/MoTeC dyno sheets with SAE J1349 atmospheric correction, then overlays your real run against the simulation — ET, trap speed and split-by-split residuals for your specific bike.',
-        },
-      },
-    ],
+    mainEntity: FAQ_ITEMS.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a },
+    })),
   };
 }
 

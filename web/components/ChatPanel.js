@@ -31,25 +31,25 @@ import { chatJob, partLabel } from '../lib/api';
 import useAsyncTask from '../lib/useAsyncTask';
 
 const CHAT_EXAMPLES = [
-  'Best possible outlaw build for a Hayabusa',
-  'Compare ZX-10R vs S1000RR at Aamby Valley',
-  'How fast is a 2025 Kove 450RR?',
+  'How fast is a Duke 390 at Aamby Valley?',
+  'Compare a ZX-10R and an S1000RR',
+  'Best parts for a Hayabusa with no budget limit',
 ];
 
 // How many prior turns ride along with each request (server caps at 24).
 const HISTORY_TURNS = 12;
 
 // ─── formatting helpers ─────────────────────────────────────────────────────
-const fmtNum = (v, d = 3) => (v == null ? '—' : Number(v).toFixed(d));
+const fmtNum = (v, d = 2) => (v == null ? '' : Number(v).toFixed(d));
 const fmtINR = (n) =>
-  n == null ? '—' : `₹${Math.round(n).toLocaleString('en-IN')}`;
+  n == null ? '' : `₹${Math.round(n).toLocaleString('en-IN')}`;
 
 // ─── shared tile ────────────────────────────────────────────────────────────
 function Tile({ label, value, accent = false }) {
   return (
-    <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 text-center">
-      <p className="label-mono mb-1">{label}</p>
-      <p className={`text-xl font-mono font-bold tabular-nums ${accent ? 'text-accent' : 'text-white'}`}>
+    <div className="rounded-lg border border-white/10 bg-asphalt-3 p-3 text-center">
+      <p className="mb-1 text-sm text-white/70">{label}</p>
+      <p className={`font-display text-xl font-bold tabular-nums ${accent ? 'text-accent' : 'text-white'}`}>
         {value}
       </p>
     </div>
@@ -58,7 +58,7 @@ function Tile({ label, value, accent = false }) {
 
 function LookupChip({ label }) {
   return (
-    <span className="chip normal-case tracking-normal text-white/50">
+    <span className="chip text-white/70">
       {label}
     </span>
   );
@@ -81,33 +81,41 @@ function SimTiles({ payload, estimated = false }) {
       {(payload.bike_name || estimated) && (
         <div className="flex items-center gap-2 flex-wrap">
           {payload.bike_name && (
-            <p className="text-xs text-white/50 font-medium">{payload.bike_name}</p>
+            <p className="text-sm font-medium text-white/80">{payload.bike_name}</p>
           )}
           {estimated && (
-            <span className="chip chip-stage font-bold">
-              Estimated{conf != null ? ` — confidence ${conf}%` : ''}
+            <span className="chip chip-stage font-semibold">
+              Estimate, not in our catalog{conf != null ? ` · ${conf}% confident` : ''}
             </span>
           )}
         </div>
       )}
       <div className="grid grid-cols-2 gap-3">
-        <Tile label="Quarter-mile ET" value={payload.et_quarter_s != null ? `${fmtNum(payload.et_quarter_s)} s` : '—'} accent />
-        <Tile label="Trap speed" value={payload.trap_speed_kmh != null ? `${fmtNum(payload.trap_speed_kmh, 1)} km/h` : '—'} />
-        <Tile label="60 ft" value={payload.et_60ft_s != null ? `${fmtNum(payload.et_60ft_s)} s` : '—'} />
-        <Tile label="⅛ mile" value={payload.et_eighth_s != null ? `${fmtNum(payload.et_eighth_s)} s` : '—'} />
+        {payload.et_quarter_s != null && (
+          <Tile label="Quarter-mile time" value={`${fmtNum(payload.et_quarter_s)} s`} accent />
+        )}
+        {payload.trap_speed_kmh != null && (
+          <Tile label="Finish-line speed" value={`${fmtNum(payload.trap_speed_kmh, 0)} km/h`} />
+        )}
+        {payload.et_60ft_s != null && (
+          <Tile label="First 60 ft (launch)" value={`${fmtNum(payload.et_60ft_s)} s`} />
+        )}
+        {payload.et_eighth_s != null && (
+          <Tile label="Halfway (⅛ mile)" value={`${fmtNum(payload.et_eighth_s)} s`} />
+        )}
       </div>
       {estimated && payload.top_speed_kmh != null && (
-        <p className="text-[11px] font-mono text-white/40">
-          Top speed ~{fmtNum(payload.top_speed_kmh, 1)} km/h
+        <p className="text-sm text-white/70">
+          Top speed about {fmtNum(payload.top_speed_kmh, 0)} km/h
         </p>
       )}
       {Array.isArray(payload.modifications) && payload.modifications.length > 0 && (
-        <p className="text-[10px] font-mono text-white/35">
+        <p className="text-sm text-white/60">
           {payload.modifications.join(' · ')}
         </p>
       )}
       {estimated && assumptions.length > 0 && (
-        <ul className="text-[11px] text-white/40 space-y-0.5 list-disc list-inside">
+        <ul className="list-inside list-disc space-y-0.5 text-sm text-white/60">
           {assumptions.map((a, i) => (
             <li key={i}>{a}</li>
           ))}
@@ -121,17 +129,22 @@ function TopSpeedTiles({ payload }) {
   return (
     <div className="space-y-2">
       {payload.bike_name && (
-        <p className="text-xs text-white/50 font-medium">{payload.bike_name}</p>
+        <p className="text-sm font-medium text-white/80">{payload.bike_name}</p>
       )}
       <div className="grid grid-cols-3 gap-3">
-        <Tile label="Top speed" value={payload.top_speed_kmh != null ? `${fmtNum(payload.top_speed_kmh, 1)}` : '—'} accent />
-        <Tile label="Gear" value={payload.terminal_gear ?? '—'} />
-        <Tile label="RPM" value={payload.terminal_rpm != null ? Math.round(payload.terminal_rpm).toLocaleString('en-IN') : '—'} />
+        {payload.top_speed_kmh != null && (
+          <Tile label="Top speed (km/h)" value={fmtNum(payload.top_speed_kmh, 0)} accent />
+        )}
+        {payload.terminal_gear != null && <Tile label="Gear" value={payload.terminal_gear} />}
+        {payload.terminal_rpm != null && (
+          <Tile label="Engine speed (rpm)" value={Math.round(payload.terminal_rpm).toLocaleString('en-IN')} />
+        )}
       </div>
-      <p className="text-[10px] font-mono text-white/35">
-        km/h
-        {payload.reached_plateau === false ? ' · did not plateau within the sim window' : ''}
-      </p>
+      {payload.reached_plateau === false && (
+        <p className="text-sm text-white/60">
+          Still gaining speed slowly when the run ended, so the true top speed may be a little higher.
+        </p>
+      )}
     </div>
   );
 }
@@ -141,22 +154,22 @@ function CompareBlock({ payload }) {
   const b = payload.bike_b || {};
   const delta = payload.delta_et_s;
   const rows = [
-    ['ET', (v) => (v?.et_quarter_s != null ? `${fmtNum(v.et_quarter_s)} s` : '—')],
-    ['Trap', (v) => (v?.trap_speed_kmh != null ? `${fmtNum(v.trap_speed_kmh, 1)} km/h` : '—')],
-    ['60 ft', (v) => (v?.et_60ft_s != null ? `${fmtNum(v.et_60ft_s)} s` : '—')],
-  ];
+    ['Quarter-mile time', (v) => (v?.et_quarter_s != null ? `${fmtNum(v.et_quarter_s)} s` : '')],
+    ['Finish-line speed', (v) => (v?.trap_speed_kmh != null ? `${fmtNum(v.trap_speed_kmh, 0)} km/h` : '')],
+    ['First 60 ft (launch)', (v) => (v?.et_60ft_s != null ? `${fmtNum(v.et_60ft_s)} s` : '')],
+  ].filter(([, get]) => get(a) || get(b));
   const aWins = payload.winner && payload.winner === a.bike_name;
   return (
-    <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 space-y-2 overflow-x-auto">
+    <div className="space-y-2 overflow-x-auto rounded-lg border border-white/10 bg-asphalt-3 p-3">
       {payload.winner && (
-        <p className="text-xs font-mono text-signal-go">
-          {payload.winner} wins{delta != null ? ` by ${Math.abs(delta).toFixed(3)} s` : ''}
+        <p className="text-sm font-medium text-signal-go">
+          {payload.winner} is quicker{delta != null ? ` by ${Math.abs(delta).toFixed(2)} s` : ''}
         </p>
       )}
-      <table className="w-full text-xs">
+      <table className="w-full text-sm">
         <thead>
           <tr className="text-left">
-            <th className="label-mono font-medium pb-1.5 pr-2" scope="col">
+            <th className="pb-1.5 pr-2 font-medium text-white/70" scope="col">
               <span className="sr-only">Metric</span>
             </th>
             <th className={`pb-1.5 pr-2 font-medium ${aWins ? 'text-accent' : 'text-white/70'}`} scope="col">
@@ -169,10 +182,10 @@ function CompareBlock({ payload }) {
         </thead>
         <tbody>
           {rows.map(([label, get]) => (
-            <tr key={label} className="border-t border-white/[0.05]">
-              <td className="label-mono py-1.5 pr-2">{label}</td>
-              <td className="py-1.5 pr-2 font-mono text-white tabular-nums">{get(a)}</td>
-              <td className="py-1.5 font-mono text-white tabular-nums">{get(b)}</td>
+            <tr key={label} className="border-t border-white/10">
+              <td className="py-1.5 pr-2 text-white/70">{label}</td>
+              <td className="py-1.5 pr-2 font-mono tabular-nums text-white">{get(a)}</td>
+              <td className="py-1.5 font-mono tabular-nums text-white">{get(b)}</td>
             </tr>
           ))}
         </tbody>
@@ -190,36 +203,36 @@ function BuildSummary({
 }) {
   const diff = baseEt != null && finalEt != null ? finalEt - baseEt : null;
   return (
-    <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 space-y-3">
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <p className="text-xs font-medium text-white/70">
+    <div className="space-y-3 rounded-lg border border-white/10 bg-asphalt-3 p-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm font-medium text-white/85">
           {title}
-          {bikeName ? <span className="text-white/45"> · {bikeName}</span> : null}
+          {bikeName ? <span className="text-white/60"> · {bikeName}</span> : null}
         </p>
-        <p className="text-[10px] font-mono text-white/40">
-          Budget: <span className="text-white/70">{budgetLabel}</span>
+        <p className="text-sm text-white/60">
+          Budget: <span className="text-white/85">{budgetLabel}</span>
         </p>
       </div>
 
-      <div className="flex items-baseline gap-2 flex-wrap">
-        <span className="font-mono text-white/50 text-sm tabular-nums">{fmtNum(baseEt)} s</span>
-        <span className="text-white/30 text-xs" aria-hidden="true">→</span>
-        <span className="font-mono font-bold text-accent text-xl tabular-nums">{fmtNum(finalEt)} s</span>
-        {diff != null && (
-          <span className={`font-mono text-xs tabular-nums ${diff < 0 ? 'text-signal-go' : diff > 0 ? 'text-signal-foul' : 'text-white/50'}`}>
-            {diff > 0 ? '+' : ''}{diff.toFixed(3)} s
+      <div className="flex flex-wrap items-baseline gap-2">
+        <span className="font-display text-base tabular-nums text-white/60">{fmtNum(baseEt)} s</span>
+        <span className="text-xs text-white/50" aria-hidden="true">→</span>
+        <span className="font-display text-2xl font-bold tabular-nums text-accent">{fmtNum(finalEt)} s</span>
+        {diff != null && diff !== 0 && (
+          <span className={`text-sm font-medium tabular-nums ${diff < 0 ? 'text-signal-go' : 'text-signal-foul'}`}>
+            {Math.abs(diff).toFixed(2)} s {diff < 0 ? 'quicker' : 'slower'}
           </span>
         )}
         {costInr != null && (
-          <span className="font-mono text-xs text-white/50 tabular-nums ml-auto">{fmtINR(costInr)}</span>
+          <span className="ml-auto text-sm tabular-nums text-white/70">{fmtINR(costInr)}</span>
         )}
       </div>
 
       {Array.isArray(extraLines) && extraLines.length > 0 && (
         <div className="space-y-1">
           {extraLines.map((line, i) => (
-            <p key={i} className="text-[11px] text-white/50">
-              <span className="label-mono mr-2">{line.label}</span>
+            <p key={i} className="text-sm text-white/70">
+              <span className="mr-2 font-medium text-white/85">{line.label}</span>
               {line.text}
             </p>
           ))}
@@ -231,16 +244,17 @@ function BuildSummary({
           {parts.map((p, i) => (
             <div
               key={p.part_id ?? i}
-              className="flex items-center justify-between gap-3 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06]"
+              className="flex items-center justify-between gap-3 rounded-lg border border-white/10 px-2.5 py-2"
             >
-              <p className="text-xs text-white/80 truncate min-w-0">{partLabel(p.brand, p.name)}</p>
-              <p className="text-[11px] font-mono text-white/50 tabular-nums shrink-0">
+              <p className="min-w-0 truncate text-sm text-white/85">{partLabel(p.brand, p.name)}</p>
+              <p className="shrink-0 text-sm tabular-nums text-white/70">
                 {fmtINR(p.price_inr)}
                 {p.delta_et_s != null && (
-                  /* delta_et_s = with-part − without (July 6, 2026 unified
-                     convention): negative = faster = highlight. */
-                  <span className={`ml-2 ${Number(p.delta_et_s) < 0 ? 'text-signal-go' : 'text-white/40'}`}>
-                    Δ {fmtNum(p.delta_et_s)} s
+                  /* delta_et_s = with-part − without: negative = quicker. */
+                  <span className={`ml-2 ${Number(p.delta_et_s) < 0 ? 'text-signal-go' : 'text-white/60'}`}>
+                    {Number(p.delta_et_s) < 0
+                      ? `${Math.abs(Number(p.delta_et_s)).toFixed(2)} s quicker`
+                      : `${Number(p.delta_et_s).toFixed(2)} s slower`}
                   </span>
                 )}
               </p>
@@ -257,7 +271,7 @@ function BuildBlock({ payload }) {
     payload.budget_unlimited === true || Number(payload.budget_inr) >= 5_000_000;
   return (
     <BuildSummary
-      title={payload.tier_label || 'Build optimizer'}
+      title={payload.tier_label || 'Best parts for your budget'}
       bikeName={payload.bike_name}
       baseEt={payload.base_et_s}
       finalEt={payload.optimized_et_s}
@@ -275,24 +289,24 @@ function OutlawBlock({ payload }) {
   const extraLines = [];
   if (tire.applied) {
     extraLines.push({
-      label: 'Rubber',
+      label: 'Tyre',
       text: `${tire.tire || 'Drag tire'}${tire.mu_peak != null ? ` (μ ${Number(tire.mu_peak).toFixed(2)})` : ''}`,
     });
   } else if (tire.note) {
-    extraLines.push({ label: 'Rubber', text: tire.note });
+    extraLines.push({ label: 'Tyre', text: tire.note });
   }
   if (setup.gearing?.recommendation) {
     extraLines.push({ label: 'Gearing', text: setup.gearing.recommendation });
   }
   if (setup.launch_rpm?.recommended_rpm != null) {
     extraLines.push({
-      label: 'Launch',
+      label: 'Launch RPM',
       text: `${Math.round(setup.launch_rpm.recommended_rpm).toLocaleString('en-IN')} rpm`,
     });
   }
   return (
     <BuildSummary
-      title={payload.tier_label || 'Outlaw build'}
+      title={payload.tier_label || 'No-limit build'}
       bikeName={build.bike_name}
       baseEt={payload.baseline_et_s}
       finalEt={payload.final_et_s}
@@ -311,40 +325,42 @@ function AutotuneBlock({ payload }) {
   }
   if (payload.launch_rpm?.recommended_rpm != null) {
     rows.push([
-      'Launch',
+      'Launch RPM',
       `${Math.round(payload.launch_rpm.recommended_rpm).toLocaleString('en-IN')} rpm`,
     ]);
   }
   if (payload.tire_pressure?.rear_psi != null) {
     rows.push([
-      'Tires',
-      `rear ${Math.round(payload.tire_pressure.rear_psi)} psi / front ${Math.round(payload.tire_pressure.front_psi ?? 0) || '—'} psi`,
+      'Tyre pressure',
+      payload.tire_pressure.front_psi
+        ? `rear ${Math.round(payload.tire_pressure.rear_psi)} psi, front ${Math.round(payload.tire_pressure.front_psi)} psi`
+        : `rear ${Math.round(payload.tire_pressure.rear_psi)} psi`,
     ]);
   }
   if (payload.fuel_timing?.fuel_trim_pct != null) {
     rows.push([
-      'Fuel',
-      `${payload.fuel_timing.fuel_trim_pct > 0 ? '+' : ''}${payload.fuel_timing.fuel_trim_pct}% trim · +${payload.fuel_timing.timing_advance_deg ?? 0}° timing`,
+      'Fuel and timing',
+      `${payload.fuel_timing.fuel_trim_pct > 0 ? '+' : ''}${payload.fuel_timing.fuel_trim_pct}% fuel, +${payload.fuel_timing.timing_advance_deg ?? 0}° ignition advance`,
     ]);
   }
   const stockEt = payload.stock?.et_s;
   const combEt = payload.combined?.et_s;
   return (
-    <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 space-y-2">
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <p className="text-xs font-medium text-white/70 flex items-center gap-1.5">
-          <Timer size={12} className="text-white/40" aria-hidden="true" /> Setup autotune
+    <div className="space-y-2 rounded-lg border border-white/10 bg-asphalt-3 p-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="flex items-center gap-1.5 text-sm font-medium text-white/85">
+          <Timer size={14} className="text-white/60" aria-hidden="true" /> Race-day setup
         </p>
         {stockEt != null && combEt != null && (
-          <p className="font-mono text-xs tabular-nums text-white/60">
-            {fmtNum(stockEt)} s → <span className="text-accent font-bold">{fmtNum(combEt)} s</span>
+          <p className="text-sm tabular-nums text-white/70">
+            {fmtNum(stockEt)} s → <span className="font-bold text-accent">{fmtNum(combEt)} s</span>
           </p>
         )}
       </div>
       <div className="space-y-1">
         {rows.map(([label, text]) => (
-          <p key={label} className="text-[11px] text-white/50">
-            <span className="label-mono mr-2">{label}</span>
+          <p key={label} className="text-sm text-white/70">
+            <span className="mr-2 font-medium text-white/85">{label}</span>
             {text}
           </p>
         ))}
@@ -372,12 +388,12 @@ function Citations({ payload }) {
   if (results.length === 0) return null;
   return (
     <div className="space-y-1">
-      <p className="label-mono">Sources</p>
+      <p className="text-sm font-medium text-white/70">Sources</p>
       {results.map((r, i) => {
         const href = safeHttpUrl(r.url);
         const label = r.title || r.url || "source";
         const cls =
-          "chip normal-case tracking-normal max-w-full gap-1.5 text-white/60 hover:text-white hover:border-white/30 transition-colors";
+          "chip max-w-full gap-1.5 text-white/70 hover:text-white hover:border-white/30 transition-colors";
         // Unsafe/blocked scheme → render as inert text, never a live link.
         if (!href) {
           return (
@@ -427,14 +443,14 @@ function ChatBlock({ block }) {
     case 'web_citations':
       return <Citations payload={payload} />;
     case 'parts':
-      return <LookupChip label={`${payload.count ?? (payload.parts || []).length} parts looked up`} />;
+      return <LookupChip label={`Looked up ${payload.count ?? (payload.parts || []).length} parts`} />;
     case 'tires':
-      return <LookupChip label={`${payload.count ?? (payload.tires || []).length} tires looked up`} />;
+      return <LookupChip label={`Looked up ${payload.count ?? (payload.tires || []).length} tyres`} />;
     case 'venues':
-      return <LookupChip label={`${(payload.venues || []).length} venues listed`} />;
+      return <LookupChip label={`Listed ${(payload.venues || []).length} venues`} />;
     case 'bike_details': {
       const name = [payload.manufacturer, payload.model].filter(Boolean).join(' ');
-      return <LookupChip label={`Specs: ${name || `bike #${payload.bike_id}`}`} />;
+      return <LookupChip label={`Looked up specs: ${name || `bike #${payload.bike_id}`}`} />;
     }
     default:
       return null;
@@ -448,7 +464,7 @@ function ErrorBanner({ tone = 'red', icon: Icon = AlertCircle, children }) {
       ? 'bg-signal-stage/10 border-signal-stage/30 text-signal-stage'
       : 'bg-signal-foul/10 border-signal-foul/30 text-signal-foul';
   return (
-    <div className={`flex gap-2 items-start p-3 rounded-lg border text-xs ${cls}`}>
+    <div role="alert" className={`flex items-start gap-2 rounded-lg border p-3 text-sm ${cls}`}>
       <Icon size={14} className="shrink-0 mt-0.5" aria-hidden="true" />
       <span className="min-w-0">{children}</span>
     </div>
@@ -559,12 +575,10 @@ export default function ChatPanel({ apiUrl }) {
     if (err === 'llm_not_configured') {
       return (
         <ErrorBanner tone="amber" icon={KeyRound}>
-          Natural-language chat is offline — the server has no LLM provider key
-          configured. Set <code className="font-mono">GROQ_API_KEY</code> (or the
-          key for the provider selected via{' '}
-          <code className="font-mono">LLM_PROVIDER</code>).
+          Asking in plain English is switched off on this server right now. The
+          calculator and the other tools still work.
           {r.error_detail && (
-            <span className="block mt-1 opacity-70 font-mono">{r.error_detail}</span>
+            <span className="mt-1 block opacity-80">{r.error_detail}</span>
           )}
         </ErrorBanner>
       );
@@ -573,9 +587,9 @@ export default function ChatPanel({ apiUrl }) {
     if (err === 'rate_limited') {
       return (
         <ErrorBanner tone="amber">
-          The engine&apos;s AI is rate-limited right now — try again in a minute.
+          Too many questions at once. Please try again in a minute.
           {r.error_detail && (
-            <span className="block mt-1 opacity-70 font-mono">{r.error_detail}</span>
+            <span className="mt-1 block opacity-80">{r.error_detail}</span>
           )}
         </ErrorBanner>
       );
@@ -584,13 +598,13 @@ export default function ChatPanel({ apiUrl }) {
     if (err === 'bike_not_found') {
       return (
         <div className="space-y-2">
-          <p className="text-xs text-white/50">
-            Couldn&apos;t match a bike for &quot;{r.raw_query}&quot;.
+          <p className="text-sm text-white/70">
+            We couldn&apos;t find a bike matching &quot;{r.raw_query}&quot;.
             {r.error_detail ? ` ${r.error_detail}` : ''}
           </p>
           {r.bike_suggestions?.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
-              <p className="w-full text-[11px] text-white/40">Did you mean:</p>
+              <p className="w-full text-sm text-white/60">Did you mean:</p>
               {r.bike_suggestions.map((s, i) => (
                 <button
                   key={s.id ?? i}
@@ -599,7 +613,7 @@ export default function ChatPanel({ apiUrl }) {
                     setQuery([s.manufacturer, s.model, s.year_range].filter(Boolean).join(' '));
                     textareaRef.current?.focus();
                   }}
-                  className="font-mono text-[11px] px-2.5 py-1 rounded bg-white/[0.06] text-white/70 border border-white/10 hover:border-white/30 hover:text-white transition-colors"
+                  className="min-h-[44px] rounded-lg border border-white/10 bg-asphalt-3 px-3 py-1.5 text-left text-sm text-white/80 transition-colors hover:border-white/30 hover:text-white"
                 >
                   {[s.manufacturer, s.model, s.year_range].filter(Boolean).join(' ')}
                 </button>
@@ -636,7 +650,7 @@ export default function ChatPanel({ apiUrl }) {
     return (
       <div className="space-y-3">
         {turn.content && (
-          <p className="text-sm text-white/70 leading-relaxed whitespace-pre-wrap">
+          <p className="whitespace-pre-wrap text-base leading-relaxed text-white/85">
             {turn.content}
           </p>
         )}
@@ -663,12 +677,13 @@ export default function ChatPanel({ apiUrl }) {
           role="log"
           aria-live="polite"
           aria-label="Chat transcript"
-          className="space-y-4 max-h-[30rem] overflow-y-auto pr-1"
+          tabIndex={0}
+          className="max-h-[30rem] space-y-4 overflow-y-auto pr-1"
         >
           {turns.map((turn) =>
             turn.role === 'user' ? (
               <div key={turn.id} className="flex justify-end">
-                <div className="max-w-[85%] rounded-xl rounded-br-sm bg-asphalt-3 border border-white/[0.08] px-3.5 py-2 text-sm text-white/90 whitespace-pre-wrap">
+                <div className="max-w-[85%] whitespace-pre-wrap rounded-xl rounded-br-sm border border-white/10 bg-accent/10 px-3.5 py-2 text-base text-white">
                   {turn.content}
                 </div>
               </div>
@@ -692,46 +707,47 @@ export default function ChatPanel({ apiUrl }) {
           active
           progress={task.progress}
           stage={task.stage}
-          label="Thinking"
+          label="Working on it"
           onStop={task.stop}
         />
       )}
 
       {/* Input — stays enabled while loading so a new query supersedes the old */}
-      <div className="flex gap-2 items-end">
+      <div className="flex items-end gap-2">
+        <label htmlFor="chat-message" className="sr-only">Ask a question</label>
         <textarea
+          id="chat-message"
           ref={textareaRef}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={onKeyDown}
           rows={2}
-          aria-label="Chat message"
-          placeholder='Ask anything — sims, compares, builds… e.g. "Best outlaw build for a Hayabusa"'
-          className="input-base flex-1 h-auto min-h-[2.75rem] resize-none py-2.5 text-sm"
+          placeholder='Ask anything, e.g. "How fast is a Duke 390 at Aamby Valley?"'
+          className="input-base h-auto min-h-[3rem] flex-1 resize-none py-3"
         />
         <motion.button
           onClick={() => send()}
           disabled={!query.trim()}
           whileHover={reduce ? undefined : { scale: 1.05 }}
           whileTap={reduce ? undefined : { scale: 0.95 }}
-          className="btn-primary shrink-0 w-11 px-0 disabled:opacity-40 disabled:cursor-not-allowed"
-          aria-label="Send chat query"
+          className="btn-primary w-12 shrink-0 px-0 disabled:cursor-not-allowed disabled:opacity-40"
+          aria-label="Send question"
         >
           <Send size={18} />
         </motion.button>
       </div>
 
       <div className="flex items-center justify-between gap-3">
-        <p className="font-mono text-[10px] text-white/30">
-          Enter to submit · Shift+Enter for newline
+        <p className="text-sm text-white/60">
+          Press Enter to send, Shift+Enter for a new line.
         </p>
         {turns.length > 0 && (
           <button
             type="button"
             onClick={newChat}
-            className="flex items-center gap-1 font-mono text-[10px] text-white/40 hover:text-white/80 transition-colors"
+            className="flex min-h-[44px] items-center gap-1.5 px-2 text-sm text-white/70 transition-colors hover:text-white"
           >
-            <RotateCcw size={10} aria-hidden="true" /> New chat
+            <RotateCcw size={14} aria-hidden="true" /> New chat
           </button>
         )}
       </div>
@@ -747,7 +763,7 @@ export default function ChatPanel({ apiUrl }) {
                 setQuery(ex);
                 textareaRef.current?.focus();
               }}
-              className="font-mono text-[11px] px-2.5 py-1.5 rounded bg-white/[0.04] text-white/55 border border-white/10 hover:text-white/85 hover:border-white/25 transition-colors"
+              className="min-h-[44px] rounded-lg border border-white/10 bg-asphalt-3 px-3 py-2 text-left text-sm text-white/80 transition-colors hover:border-white/30 hover:text-white"
             >
               {ex}
             </button>
