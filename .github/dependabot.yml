@@ -1,9 +1,7 @@
-# Dependabot — weekly dependency and security updates.
+# Dependabot: one combined dependency-update pull request per ecosystem per
+# month, to keep review (and notification) volume low. Security updates are
+# configured in the repository settings and are not limited by this file.
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
-#
-# Minor and patch bumps are grouped into one PR per ecosystem to keep the
-# queue reviewable; majors arrive one PR each. Security updates are not
-# limited by these settings.
 #
 # Notes for reviewers:
 #   * pip: the Docker image installs requirements-api.lock, not
@@ -18,35 +16,35 @@ updates:
   - package-ecosystem: pip
     directory: "/"
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
+      interval: monthly
+    open-pull-requests-limit: 1
     groups:
-      python-minor-patch:
-        update-types: [minor, patch]
+      python:
+        patterns: ["*"]
 
   - package-ecosystem: npm
     directory: "/web"
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
+      interval: monthly
+    open-pull-requests-limit: 1
     groups:
-      web-minor-patch:
-        update-types: [minor, patch]
+      web:
+        patterns: ["*"]
 
   - package-ecosystem: cargo
     directory: "/rust"
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
+      interval: monthly
+    open-pull-requests-limit: 1
     groups:
-      rust-minor-patch:
-        update-types: [minor, patch]
+      rust:
+        patterns: ["*"]
 
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
+      interval: monthly
+    open-pull-requests-limit: 1
     groups:
-      actions-minor-patch:
-        update-types: [minor, patch]
+      actions:
+        patterns: ["*"]
