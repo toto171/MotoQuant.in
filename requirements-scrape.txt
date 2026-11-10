@@ -19,7 +19,7 @@
 # Stealth-tier setup (OPT-IN, operator machines only): `camoufox fetch`
 # downloads a ~700 MB hardened Firefox. Only justified against hard
 # anti-bot walls; never needed for parsing or tests.
-scrapling[fetchers]>=0.4.11,<0.5
+scrapling[fetchers]>=0.5.1,<0.6
 
 # robots.txt parsing. scrapling already pulls protego in, but the
 # politeness gate is a hard rule (docs/SCRAPING.md) and must not depend on
