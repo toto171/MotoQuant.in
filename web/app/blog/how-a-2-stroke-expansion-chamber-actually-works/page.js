@@ -4,12 +4,12 @@ import SiteFooter from "../../../components/SiteFooter";
 import StructuredData, { articleSchema } from "../../StructuredData";
 
 const SLUG = "how-a-2-stroke-expansion-chamber-actually-works";
-const TITLE = "How a 2-Stroke Expansion Chamber Actually Works";
+const TITLE = "How a 2-stroke expansion chamber actually works";
 const DESCRIPTION =
   "A pressure wave travelling at 500 m/s, a tuned-RPM peak that lasts roughly 1,500 rpm, and a 0.494 s sim bias on the 2T cluster. Plain-English physics for RX100, RD350, RGV250 and the rest.";
 
 export const metadata = {
-  title: "How a 2-Stroke Expansion Chamber Actually Works | MotoQuant",
+  title: "How a 2-stroke expansion chamber actually works | MotoQuant",
   description: DESCRIPTION,
   keywords: [
     "two stroke expansion chamber physics",
@@ -34,43 +34,43 @@ export const metadata = {
 const CONTENT = [
   {
     type: "lead",
-    text: "A 2-stroke expansion chamber is a precision-tuned acoustic instrument that, on a Yamaha RX100, swings peak torque from roughly 35 % of its potential to 100 % across a window only about 1,500 rpm wide. Get the geometry right and the bike makes its rated 11 hp at 7,500 rpm. Get it wrong and the bike pulls like a lawnmower. The physics is simple, the numbers are unforgiving, and the simulator currently runs the 2-stroke cluster at a +0.494 s bias against published benchmarks across five bikes. That is honest data, mostly limited by how few real instrumented timeslips exist for vintage Indian and Japanese 2T machines.",
+    text: "A 2-stroke expansion chamber is a tuned acoustic device. On a Yamaha RX100 it swings peak torque from roughly 35 % of its potential to 100 % across a window only about 1,500 rpm wide. Get the geometry right and the bike makes its rated 11 hp at 7,500 rpm. Get it wrong and the bike pulls like a lawnmower. The simulator currently runs the 2-stroke cluster at a +0.494 s bias against published benchmarks across five bikes. What limits that figure most is how few real instrumented timeslips exist for vintage Indian and Japanese 2T machines.",
   },
   {
     type: "h2",
-    text: "The Problem a 4-Stroke Engineer Does Not Have",
+    text: "The problem a 4-stroke engineer does not have",
   },
   {
     type: "p",
-    text: "A 4-stroke engine has a closed exhaust valve for half of every cycle. Burnt charge cannot leak back, fresh charge cannot leak out. The intake and exhaust events are mechanically separated by camshaft geometry. A 2-stroke has no such luxury. The piston uncovers the exhaust port before the transfer port closes, which means there is a window (typically 30–60 degrees of crank rotation) where fresh charge from the transfer port is being pushed straight out through the open exhaust port. On a piston-port engine like the RX100 there is no reed valve, no rotary valve, nothing to stop it.",
+    text: "A 4-stroke engine has a closed exhaust valve for half of every cycle. Burnt charge cannot leak back, and fresh charge cannot leak out. Camshaft geometry keeps the intake and exhaust events mechanically separate. A 2-stroke has no such luxury. The piston uncovers the exhaust port before the transfer port closes, so for a window of typically 30–60 degrees of crank rotation, fresh charge from the transfer port is pushed straight out through the open exhaust port. On a piston-port engine like the RX100 there is no reed valve, no rotary valve, nothing to stop it.",
   },
   {
     type: "p",
-    text: "Every gram of fresh charge that escapes the cylinder is a gram of fuel that did no work. A typical un-tuned piston-port 2T loses 25–40 % of its fresh charge through this window. That is most of the reason 2-strokes have a reputation for being dirty, smoky, and inefficient. It is also the reason an expansion chamber matters: the chamber is what catches the lost charge and stuffs it back into the cylinder before the exhaust port closes.",
+    text: "Every gram of fresh charge that escapes the cylinder is a gram of fuel that did no work. A typical untuned piston-port 2T loses 25–40 % of its fresh charge through this window. That is most of why 2-strokes are known as dirty, smoky and inefficient. It is also why the expansion chamber matters: it catches the lost charge and stuffs it back into the cylinder before the exhaust port closes.",
   },
   {
     type: "h2",
-    text: "How the Pipe Catches the Charge",
+    text: "How the pipe catches the charge",
   },
   {
     type: "p",
-    text: "When the exhaust port opens, a high-pressure pulse leaves the cylinder and races down the header pipe. The speed of sound in 600 °C exhaust gas is roughly 500 m/s, about 1,800 km/h. The pulse hits the diverging cone (the forward-tapering section of the chamber) and reflects as a low-pressure wave that travels back toward the cylinder. That low-pressure return arrives at the exhaust port and helps suck even more fresh charge out, which is the part that sounds wrong but is actually doing useful work. The fresh charge fills the header pipe.",
+    text: "When the exhaust port opens, a high-pressure pulse leaves the cylinder and races down the header pipe. The speed of sound in 600 °C exhaust gas is roughly 500 m/s, about 1,800 km/h. The pulse hits the diverging cone (the forward-tapering section of the chamber) and reflects as a low-pressure wave that travels back toward the cylinder. That low-pressure return reaches the exhaust port and pulls even more fresh charge out. It sounds wrong, but it does useful work: the fresh charge fills the header pipe.",
   },
   {
     type: "p",
-    text: "Then the pulse hits the converging cone (the rear-tapering section) and reflects again, this time as a high-pressure wave that comes back toward the cylinder. The geometry is timed so this returning high-pressure wave arrives at the exhaust port just before it closes, and stuffs the lost fresh charge back into the cylinder. Net effect: the cylinder gets supercharged on the cheap, fuel that would have escaped is recovered, and torque jumps by a factor of two or more in the band where the timing works.",
+    text: "Then the pulse hits the converging cone (the rear-tapering section) and reflects again, this time as a high-pressure wave heading back toward the cylinder. The geometry is timed so this wave arrives at the exhaust port just before it closes, and stuffs the lost fresh charge back into the cylinder. The cylinder gets supercharged on the cheap, fuel that would have escaped is recovered, and in the band where the timing works, torque jumps by a factor of two or more.",
   },
   {
     type: "callout",
-    text: 'The key insight: an expansion chamber is not a muffler. Mufflers reduce noise. Expansion chambers move charge. The two are different acoustic objects with opposite design priorities, and a "loud expansion chamber" is mostly a side effect of the geometry needed to hit resonance.',
+    text: 'An expansion chamber is not a muffler. A muffler reduces noise; an expansion chamber moves charge. The two are different acoustic objects with opposite design priorities, and the noise of a "loud expansion chamber" is mostly a side effect of the geometry needed to hit resonance.',
   },
   {
     type: "h2",
-    text: "Why the Powerband Is So Narrow",
+    text: "Why the powerband is so narrow",
   },
   {
     type: "p",
-    text: "The pressure-wave round trip (out, reflect off the diverging cone, back, reflect off the converging cone, back to the port) only takes the right amount of time at one engine speed. That speed is the tuned RPM. On the RX100 the chamber is sized for 7,500 rpm. On the Suzuki RGV250 VJ22 it is sized for 10,500 rpm. On the Aprilia RS125 race kit it is sized for 11,000 rpm. The chamber length, cone angles, and belly diameter are all geometric inputs to a single timing equation, and the equation has one root.",
+    text: "The pressure-wave round trip (out, reflect off the diverging cone, back, reflect off the converging cone, back to the port) takes the right amount of time at only one engine speed. That speed is the tuned RPM. On the RX100 the chamber is sized for 7,500 rpm. On the Suzuki RGV250 VJ22 it is sized for 10,500 rpm, and on the Aprilia RS125 race kit for 11,000 rpm. Chamber length, cone angles and belly diameter are all inputs to a single timing equation, and the equation has one root.",
   },
   {
     type: "p",
@@ -78,15 +78,15 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The MotoQuant 2-stroke torque-curve generator, which lives in motoquant/defaults.py and is documented in the physics-engine post, models this with a Gaussian centred on tuned_rpm. The width of the Gaussian is set by two parameters called band_lo (below tuned RPM) and band_hi (above tuned RPM). For a single-cylinder race 2T without a powervalve the defaults are band_lo = 0.25 and band_hi = 0.15, meaning the curve drops to baseline torque (about 25 % of peak) when you fall 25 % of tuned RPM below or 15 % above. On a 7,500-rpm-tuned RX100 that is a usable window from about 5,600 rpm to 8,600 rpm. Three thousand rpm. That is your entire powerband.",
+    text: "The MotoQuant 2-stroke torque-curve generator lives in motoquant/defaults.py and is documented in the physics-engine post. It models this with a Gaussian centred on tuned_rpm. Two parameters set the width of the Gaussian: band_lo (below tuned RPM) and band_hi (above tuned RPM). For a single-cylinder race 2T without a powervalve the defaults are band_lo = 0.25 and band_hi = 0.15, so the curve drops to baseline torque (about 25 % of peak) when you fall 25 % below tuned RPM or rise 15 % above it. On an RX100 tuned for 7,500 rpm, that is a usable window from about 5,600 rpm to 8,600 rpm. Three thousand rpm. That is your entire powerband.",
   },
   {
     type: "h2",
-    text: "Tuned-RPM Geometry: Five Bikes, Five Pipes",
+    text: "Tuned-RPM geometry: five bikes, five pipes",
   },
   {
     type: "p",
-    text: "The catalog currently models 20 two-stroke bikes. Five representative ones, with their tuned RPM, redline, and the resulting usable band the simulator computes from the geometry above:",
+    text: "The catalog currently models 20 two-stroke bikes. Five of them, with tuned RPM, redline and the usable band the simulator computes from the geometry above:",
   },
   {
     type: "table",
@@ -115,19 +115,19 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Two patterns matter for drag racing. First, the smaller and more highly-tuned the engine, the higher the tuned RPM and the narrower the usable band. The RX100 has a usable range only about three thousand rpm wide; the RGV250 has roughly the same absolute width but at much higher rpm where the gear ratios are tighter, so the rider sees fewer dropped revs between shifts. Second, every powervalve in the table widens the band on both sides (typically band_lo from 0.25 to 0.18 and band_hi from 0.15 to 0.12 in the simulator constants) and lifts the off-pipe baseline from 25 % of peak to closer to 30 %. That is what YPVS, RC Valve, KIPS, AETC, and HPP all do. The mechanism varies (rotating exhaust-port shutter on YPVS, sliding sub-port on KIPS), but the outcome is the same: take some of the resonance specificity away from the chamber and recover it through a mechanical valve that retunes the port timing per rpm.",
+    text: "Two patterns matter for drag racing. First, the smaller and more highly tuned the engine, the higher the tuned RPM and the narrower the usable band. The RX100's usable range is only about three thousand rpm wide. The RGV250's is roughly as wide, but at much higher rpm where the gear ratios are closer together, so the rider loses fewer revs between shifts. Second, every powervalve in the table widens the band on both sides (in the simulator constants, typically band_lo from 0.25 to 0.18 and band_hi from 0.15 to 0.12) and lifts the off-pipe baseline from 25 % of peak to closer to 30 %. YPVS, RC Valve, KIPS, AETC and HPP all do this. The mechanism varies (a rotating exhaust-port shutter on YPVS, a sliding sub-port on KIPS), but the outcome is the same: some of the resonance tuning moves from the chamber to a mechanical valve that retunes the port timing with rpm.",
   },
   {
     type: "h2",
-    text: "Why the RX100 Is the Way It Is",
+    text: "Why the RX100 is the way it is",
   },
   {
     type: "p",
-    text: "Indian 2-stroke nostalgia is mostly about the RX100, and the RX100 is mostly about the pipe. Yamaha sized the OEM expansion chamber for 7,500 rpm and a peak torque of 10.5 Nm at 6,500 rpm, with rated 11 hp at the 7,500 rpm tuned point. The 50 mm × 50 mm bore-and-stroke geometry is short-stroke for a piston-port single, which keeps mean piston speed reasonable up to redline. The 4-speed gearbox with a 2.833 first ratio and a 14F/50R 428-pitch chain keeps the engine in the powerband at street speeds: first gear redline is around 32 km/h, second is 53 km/h, third is 73 km/h, fourth is 93 km/h. A drag run barely uses the gearbox; most timeslips are won or lost in third gear.",
+    text: "Indian 2-stroke nostalgia is mostly about the RX100, and the RX100 is mostly about the pipe. Yamaha sized the OEM expansion chamber for 7,500 rpm and a peak torque of 10.5 Nm at 6,500 rpm, with the rated 11 hp at the 7,500 rpm tuned point. The 50 mm × 50 mm bore and stroke is short-stroke for a piston-port single, which keeps mean piston speed reasonable up to redline. The 4-speed gearbox, with a 2.833 first gear and a 14F/50R 428-pitch chain, keeps the engine in the powerband at street speeds: first gear redline is around 32 km/h, second 53 km/h, third 73 km/h and fourth 93 km/h. A drag run barely uses the gearbox; most timeslips are won or lost in third gear.",
   },
   {
     type: "p",
-    text: 'When Indian RX100 owners fit aftermarket pipes, the choice is usually between a "street" pipe and a "race" pipe. A street pipe (what the simulator branch for sub-200 cc piston-port singles models with band_lo = 0.35, band_hi = 0.25, baseline = 0.35) keeps a wide off-pipe shoulder so the bike still pulls cleanly at 4,000 rpm in traffic. A race pipe pushes tuned RPM up to 8,500–9,000, narrows the band to maybe 1,800 rpm wide, and demands the engine never drop below 7,000. The tuned RPM choice is purely a function of the chamber geometry: longer header, smaller belly diameter, sharper cones equal a higher tuned RPM. There is no software, no electronics, and no rider input: the pipe IS the tune.',
+    text: 'When Indian RX100 owners fit an aftermarket pipe, they usually choose between a "street" pipe and a "race" pipe. A street pipe (which the simulator branch for sub-200 cc piston-port singles models with band_lo = 0.35, band_hi = 0.25, baseline = 0.35) keeps a wide off-pipe shoulder, so the bike still pulls cleanly at 4,000 rpm in traffic. A race pipe pushes tuned RPM up to 8,500–9,000, narrows the band to maybe 1,800 rpm, and needs the engine to stay above 7,000. The tuned RPM depends only on the chamber geometry: longer header, smaller belly diameter and sharper cones equal a higher tuned RPM. No software, no electronics, no rider input. The pipe is the tune.',
   },
   {
     type: "callout",
@@ -135,7 +135,7 @@ const CONTENT = [
   },
   {
     type: "h2",
-    text: "Drag-Strip Reality: Why 2T Bikes Are Hard to Predict",
+    text: "Drag-strip reality: why 2T bikes are hard to predict",
   },
   {
     type: "p",
@@ -147,47 +147,47 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "2. Launch-RPM sensitivity. Because the powerband is narrow, the launch RPM matters more on a 2T than on any 4T bike. The MotoQuant staging block uses launch_rpm = max(peak_torque_rpm, tuned_rpm) capped at 0.96 × redline for 2-stroke bikes, a fix added in April 2026 after the original implementation tried to launch a 2T at peak_torque_rpm and ended up below the powerband. A real rider on a real RD350 has to two-step (launch with the throttle held against an RPM limiter) at exactly tuned RPM or the bike bogs straight off the line. A 200 rpm error in launch RPM moves the simulated ET by 0.15–0.25 seconds. A real rider gets it within maybe 500 rpm. The cluster bias absorbs that uncertainty.",
+    text: "2. Launch-RPM sensitivity. With a narrow powerband, launch RPM matters more on a 2T than on any 4T bike. For 2-stroke bikes, the MotoQuant staging block uses launch_rpm = max(peak_torque_rpm, tuned_rpm), capped at 0.96 × redline. That fix went in during April 2026, after the original code tried to launch a 2T at peak_torque_rpm and ended up below the powerband. A real rider on a real RD350 has to two-step (launch with the throttle held against an RPM limiter) at exactly tuned RPM, or the bike bogs straight off the line. A 200 rpm error in launch RPM moves the simulated ET by 0.15–0.25 seconds. A real rider gets within maybe 500 rpm. The cluster bias absorbs that uncertainty.",
   },
   {
     type: "p",
-    text: "3. Modded versus stock. Most published RD350 and RGV250 quarter-mile times are from modified bikes: bigger pipes, ported barrels, jet kits, sometimes a head shave. The simulator runs them stock. So when the simulator sims an RD350 at 14.18 seconds and a Cycle World 1973 magazine test reads 13.9 seconds, the magazine bike was likely running stage-1 mods that nobody bothered to log. The +0.5 second residual is real but mostly a documentation problem, not a physics problem.",
+    text: "3. Modded versus stock. Most published RD350 and RGV250 quarter-mile times come from modified bikes: bigger pipes, ported barrels, jet kits, sometimes a head shave. The simulator runs them stock. So when the simulator puts an RD350 at 14.18 seconds and a Cycle World 1973 magazine test reads 13.9 seconds, the magazine bike was likely running stage-1 mods that nobody bothered to log. The +0.5 second residual is real, but it is mostly a documentation problem rather than a physics one.",
   },
   {
     type: "h2",
-    text: "What an Expansion Chamber Costs in Cost-per-Tenth Terms",
+    text: "What an expansion chamber costs per tenth",
   },
   {
     type: "p",
-    text: "The MotoQuant parts catalog ships 13 dedicated expansion chambers across the 2T fleet (JL, Tyga, Jolly Moto, Arrow, DEP, Higgspeed, Moto Carrera, MAC, FMF) covering RD350, RD400, RD500, RX, RS, GP250, H2, GT750, KTM, CR500, TZR, and Yezdi. A typical aftermarket pipe for an RX100 lists at roughly ₹4,500–₹8,500 in India. For an RD350 with twin expansion chambers, the pair runs ₹15,000–₹28,000. The simulator scores these explicitly per part per bike: a JL Hand-Made expansion chamber on an RX100 moves the simulated ET by roughly 0.5–0.7 seconds at a cost of about ₹6,000, which works out to ₹900–₹1,200 per tenth, among the highest-ROI mods anywhere in the catalog. Compare that with a Powertronic ECU flash on a 4T 200cc bike at ₹14,000 for ~0.25 seconds (₹5,600 per tenth) or an Akrapovic slip-on at ₹35,000 for ~0.15 seconds (₹23,000 per tenth).",
+    text: "The MotoQuant parts catalog has 13 dedicated expansion chambers across the 2T fleet (JL, Tyga, Jolly Moto, Arrow, DEP, Higgspeed, Moto Carrera, MAC, FMF) covering RD350, RD400, RD500, RX, RS, GP250, H2, GT750, KTM, CR500, TZR and Yezdi. A typical aftermarket pipe for an RX100 lists at roughly ₹4,500–₹8,500 in India. For an RD350 with twin expansion chambers, the pair runs ₹15,000–₹28,000. The simulator scores each part on each bike. A JL Hand-Made expansion chamber on an RX100 moves the simulated ET by roughly 0.5–0.7 seconds for about ₹6,000, which works out to ₹900–₹1,200 per tenth, among the highest-ROI mods anywhere in the catalog. Compare that with a Powertronic ECU flash on a 4T 200cc bike at ₹14,000 for ~0.25 seconds (₹5,600 per tenth) or an Akrapovic slip-on at ₹35,000 for ~0.15 seconds (₹23,000 per tenth).",
   },
   {
     type: "p",
-    text: "The reason 2T pipes are such a good ROI is exactly the physics described above. An aftermarket 4T exhaust changes flow restriction by maybe 5–15 %; the engine still has cams, valves, and a closed exhaust event between fresh charge and exhaust gas. A 2T pipe changes the fundamental thermodynamics of the cycle. There is no equivalent leverage on a 4-stroke.",
+    text: "2T pipes pay back this well because of the physics described above. An aftermarket 4T exhaust changes flow restriction by maybe 5–15 %; the engine still has cams, valves and a closed exhaust event between fresh charge and exhaust gas. A 2T pipe changes the thermodynamics of the whole cycle. No single part on a 4-stroke has that much effect.",
   },
   {
     type: "h2",
-    text: "What This Means for the Indian 2T Crowd",
+    text: "What this means for Indian 2T riders",
   },
   {
     type: "p",
-    text: "If you ride a 2-stroke in India in 2026, you are in a small and shrinking community. Most production 2T bikes are gone; KTM 300 EXC and the imported pre-loved Japanese stuff is what is left. Used RX100s in clean condition trade for ₹1.2–₹1.8 lakh in Mumbai and Bangalore. RD350s in Punjab and Tamil Nadu trade for ₹4–8 lakh. The simulator catalog covers 20 of these bikes precisely because they are the heart of the Indian drag-strip and street-ride 2T scene, and because the Indian aftermarket sustains a meaningful supply of pipes, reed valves, and powervalve controllers (Zeeltronic, Nova SAPC) for them.",
+    text: "If you ride a 2-stroke in India in 2026, you are in a small and shrinking community. Most production 2T bikes are gone; the KTM 300 EXC and imported second-hand Japanese bikes are what is left. Used RX100s in clean condition trade for ₹1.2–₹1.8 lakh in Mumbai and Bangalore. RD350s in Punjab and Tamil Nadu trade for ₹4–8 lakh. The simulator catalog covers 20 of these bikes because they are the heart of the Indian 2T drag-strip and street scene, and because the Indian aftermarket still supplies pipes, reed valves and powervalve controllers (Zeeltronic, Nova SAPC) for them.",
   },
   {
     type: "p",
-    text: "For drag racing specifically, the practical advice from the physics is short. First, match your launch RPM to your tuned RPM: not to peak torque RPM, not to peak power RPM, but to the resonance frequency of your specific pipe. Second, do not lean on gearing changes the way 4T riders do; the powerband is narrower than your gear-ratio steps so the bike will fall off the pipe between shifts no matter what you do. Third, prioritise the pipe over everything else. A perfect pipe with a stock barrel beats a tuned barrel with a wrong pipe every single time. Fourth, expect the simulator to be optimistic by roughly half a second on stock 2T bikes. The calibration bias is documented and being closed as more timeslips are submitted by real Indian 2T owners.",
+    text: "For drag racing, the physics gives four pieces of advice. First, match your launch RPM to your tuned RPM, which is the resonance of your own pipe, not the peak torque or peak power RPM. Second, do not lean on gearing changes the way 4T riders do; the powerband is narrower than your gear-ratio steps, so the bike will fall off the pipe between shifts whatever you do. Third, put the pipe ahead of everything else. A perfect pipe with a stock barrel beats a tuned barrel with the wrong pipe every time. Fourth, expect the simulator to be optimistic by roughly half a second on stock 2T bikes. That calibration bias is documented, and it is closing as more real Indian 2T owners submit timeslips.",
   },
   {
     type: "h2",
-    text: "Run the Numbers",
+    text: "Run the numbers",
   },
   {
     type: "p",
-    text: "The simulator at motoquant.in lets you pick any of the 20 catalog 2T bikes and sweep tuned RPM, launch RPM, rider weight, ambient temperature, and pipe choice live. The torque curve plots in real time so you can see the Gaussian narrow when you flip a powervalve flag off, or the off-pipe baseline rise when you change a band_lo parameter. It is the cheapest way in India to feel the physics without committing to a pipe purchase.",
+    text: "The simulator at motoquant.in lets you pick any of the 20 catalog 2T bikes and sweep tuned RPM, launch RPM, rider weight, ambient temperature and pipe choice live. The torque curve redraws as you go, so you can watch the Gaussian narrow when you switch a powervalve flag off, or the off-pipe baseline rise when you change band_lo. It is the cheapest way in India to feel the physics before you buy a pipe.",
   },
   {
     type: "p",
-    text: "The honest takeaway: 2-stroke racing is half engineering and half acoustics. The chamber is doing supercharging without a turbo, charge recovery without a valve, and the whole trick is timed to the speed of sound in the exhaust gas. When you understand the chamber, you understand why every other tuning choice on a 2T bike (gearing, ignition, jetting, port timing) is downstream of getting the pipe right. The pipe is the engine.",
+    text: "The chamber supercharges without a turbo and recovers charge without a valve, and the whole trick is timed to the speed of sound in the exhaust gas. Every other tuning choice on a 2T bike (gearing, ignition, jetting, port timing) comes after getting the pipe right.",
   },
 ];
 
@@ -301,7 +301,7 @@ export default function PostPage() {
             )}
           </div>
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
-            How a 2-Stroke Expansion Chamber Actually Works
+            How a 2-stroke expansion chamber actually works
           </h1>
           <div className="text-sm text-white/60 mb-12">
             8 May 2026 · 11 min read · MotoQuant Blog
@@ -322,7 +322,7 @@ export default function PostPage() {
                 href="/blog/how-the-motoquant-physics-engine-works"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                How the MotoQuant Physics Engine Works
+                How the MotoQuant physics engine works
               </Link>:{" "}
               the 15-sub-model architecture, including the 2T torque-curve
               branch referenced in this post.
@@ -333,7 +333,7 @@ export default function PostPage() {
                 href="/blog/the-physics-of-a-perfect-launch"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                The Physics of a Perfect Launch
+                The physics of a perfect launch
               </Link>:{" "}
               why 2T launch RPM matters more than 4T launch RPM, in
               clutch-and-slip terms.
@@ -344,7 +344,7 @@ export default function PostPage() {
                 href="/blog/why-your-r15-wont-hit-14s"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                Why Your R15 Won&apos;t Hit 14s
+                Why your R15 won&apos;t hit 14s
               </Link>:{" "}
               the 4-stroke counterpart to this post (small-cc gearing and
               traction limits).
@@ -355,7 +355,7 @@ export default function PostPage() {
                 href="/blog/how-to-tune-for-aamby-valley-in-november"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                How to Tune for Aamby Valley in November
+                How to tune for Aamby Valley in November
               </Link>:{" "}
               the venue conditions used for the simulation numbers in this
               post.
@@ -381,8 +381,8 @@ export default function PostPage() {
               Sweep tuned RPM live
             </div>
             <div className="text-white/60 text-sm">
-              Free simulator: pick an RX100, RD350, or RGV250, drag the
-              launch-RPM slider, and watch the Gaussian torque curve and ET
+              Free simulator: pick an RX100, RD350 or RGV250, drag the
+              launch-RPM slider and watch the Gaussian torque curve and ET
               update in real time.
             </div>
           </div>

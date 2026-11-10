@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'ktm-duke-390-vs-rc-390-quarter-mile-physics';
-const TITLE = 'KTM Duke 390 vs RC 390: Quarter-Mile Physics at Aamby Valley';
+const TITLE = 'KTM Duke 390 vs RC 390: quarter-mile physics at Aamby Valley';
 
 function breadcrumbs() {
   return {

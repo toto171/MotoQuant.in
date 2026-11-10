@@ -199,6 +199,19 @@ test('a key is checked the way the server checks it', () => {
   assert.equal(assistant.looksLikeAnthropicKey(fakeKey().slice(0, 12) + ' ' + fakeKey().slice(12)), false);
   assert.equal(assistant.looksLikeAnthropicKey('sk-ant-' + 'a'.repeat(300)), false);
   assert.equal(assistant.looksLikeAnthropicKey(undefined), false);
+  // The server takes printable ASCII only (codes 33 to 126). A zero-width
+  // space from a copy, or a Latin-1 letter, would be saved and then break
+  // every question, so the browser refuses them too.
+  const key = fakeKey();
+  const zwsp = String.fromCharCode(0x200b);
+  assert.equal(assistant.looksLikeAnthropicKey(key.slice(0, 12) + zwsp + key.slice(12)), false);
+  assert.equal(assistant.looksLikeAnthropicKey(key + zwsp), false);
+  assert.equal(assistant.looksLikeAnthropicKey(key.slice(0, -1) + String.fromCharCode(0xe9)), false);
+  assert.equal(assistant.looksLikeAnthropicKey('sk-ant-' + 'a'.repeat(13)), true);
+  assert.equal(assistant.looksLikeAnthropicKey('sk-ant-' + 'a'.repeat(12)), false);
+  assert.equal(assistant.looksLikeAnthropicKey('sk-ant-' + 'a'.repeat(293)), true);
+  assert.equal(assistant.looksLikeAnthropicKey('sk-ant-' + 'a'.repeat(294)), false);
+  assert.equal(assistant.saveKey({ local: memoryStore(), session: memoryStore() }, key + zwsp), false);
 });
 
 test('a key is kept for the session unless "Remember on this device" is ticked', () => {
@@ -281,6 +294,18 @@ test('every chat error code has plain words, and key problems offer a key', () =
   }
   assert.match(assistant.chatErrorCopy('rate_limited', { ownKey: true }).text, /your key/);
   assert.equal(assistant.chatErrorCopy('bike_not_found'), null);
+});
+
+test('a refused key only suggests the free assistant when it is on', () => {
+  assert.match(assistant.chatErrorCopy('key_rejected').text, /free assistant/);
+  assert.match(
+    assistant.chatErrorCopy('key_rejected', { freeAvailable: true }).text,
+    /remove it to use the free assistant/,
+  );
+  const off = assistant.chatErrorCopy('key_rejected', { freeAvailable: false });
+  assert.equal(off.offerKey, true);
+  assert.doesNotMatch(off.text, /free assistant/);
+  assert.match(off.text, /Anthropic Console/);
 });
 
 test('a daily-limit 429 offers the visitor their own key', () => {

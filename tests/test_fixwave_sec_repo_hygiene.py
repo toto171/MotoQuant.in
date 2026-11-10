@@ -120,7 +120,7 @@ def test_keepalive_is_opt_in_per_repository():
 # ── dependabot ────────────────────────────────────────────────────────────
 
 
-def test_dependabot_covers_every_ecosystem_weekly():
+def test_dependabot_covers_every_ecosystem_monthly_in_one_pr():
     cfg = _load_yaml(ROOT / ".github" / "dependabot.yml")
     assert cfg["version"] == 2
     got = {(u["package-ecosystem"], u["directory"]) for u in cfg["updates"]}
@@ -130,7 +130,14 @@ def test_dependabot_covers_every_ecosystem_weekly():
         ("cargo", "/rust"),
         ("github-actions", "/"),
     }
-    assert all(u["schedule"]["interval"] == "weekly" for u in cfg["updates"])
+    # One combined update PR per ecosystem per month keeps review and
+    # notification volume low; security updates are configured separately.
+    for u in cfg["updates"]:
+        assert u["schedule"]["interval"] == "monthly", u["package-ecosystem"]
+        assert u["open-pull-requests-limit"] == 1, u["package-ecosystem"]
+        groups = u.get("groups") or {}
+        assert any(g.get("patterns") == ["*"] for g in groups.values()), u
+
     for _eco, directory in got:
         assert (ROOT / directory.lstrip("/")).is_dir()
 

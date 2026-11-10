@@ -7,7 +7,7 @@ import StructuredData, { SITE_URL } from "../../StructuredData";
 
 const SLUG = "royal-enfield-interceptor-650-quarter-mile-physics";
 const TITLE =
-  "RE Interceptor 650 Quarter-Mile Physics: 14.15s on 47hp";
+  "RE Interceptor 650 quarter-mile physics: 14.15s on 47hp";
 
 function breadcrumbs() {
   return {

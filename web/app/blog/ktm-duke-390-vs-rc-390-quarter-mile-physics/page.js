@@ -4,12 +4,12 @@ import SiteFooter from '../../../components/SiteFooter';
 import StructuredData, { articleSchema } from '../../StructuredData';
 
 const SLUG = 'ktm-duke-390-vs-rc-390-quarter-mile-physics';
-const TITLE = 'KTM Duke 390 vs RC 390: Quarter-Mile Physics at Aamby Valley';
+const TITLE = 'KTM Duke 390 vs RC 390: quarter-mile physics at Aamby Valley';
 const DESCRIPTION =
-  'KTM Duke 390 vs RC 390 quarter-mile physics breakdown. MotoQuant simulates the RC 390 at roughly 13.5s and 166 km/h trap, the Duke 390 at roughly 13.7s and 162 km/h. Same engine, two tenths apart at Aamby Valley. Where the gap actually lives, plus four cost-per-tenth mods under ₹25,000 and a look at the 11.342s Fast Track Racing record.';
+  'KTM Duke 390 vs RC 390 on the quarter mile. MotoQuant simulates the RC 390 at roughly 13.5s and 166 km/h trap, the Duke 390 at roughly 13.7s and 162 km/h. Same engine, two tenths apart at Aamby Valley. Where the gap comes from, four cost-per-tenth mods under ₹25,000, and the 11.342s Fast Track Racing record.';
 
 export const metadata = {
-  title: 'KTM Duke 390 vs RC 390 Quarter Mile | MotoQuant',
+  title: 'KTM Duke 390 vs RC 390 quarter mile | MotoQuant',
   description: DESCRIPTION,
   keywords: [
     'ktm duke 390 quarter mile',
@@ -36,27 +36,27 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'The KTM RC 390 and the KTM Duke 390 share an engine, a frame layout, a gearbox, a sprocket pair, and a parts-bin of brake hardware. They do not share a body, a rider position, or a frontal area. MotoQuant simulates the 2022-onwards RC 390 at roughly 13.5 seconds and 166 km/h trap under matched Aamby Valley November conditions; the matching Duke 390 lands at roughly 13.7 seconds and 162 km/h. Two tenths of ET separate the two bikes on a strip, and almost all of it is aerodynamics. Fast Track Racing India clocked a heavily-modded Duke 390 at 11.342 seconds at the ASEAN Superfast event in 2023, about 2.3 seconds quicker than the stock simulation. That gap is the most interesting thing about this comparison. Here is exactly where the tenths live, and what the cost-per-tenth ladder looks like.',
+    text: 'The KTM RC 390 and the KTM Duke 390 share an engine, a frame layout, a gearbox, a sprocket pair, and a parts-bin of brake hardware. They do not share a body, a rider position, or a frontal area. MotoQuant simulates the 2022-onwards RC 390 at roughly 13.5 seconds and 166 km/h trap under matched Aamby Valley November conditions; the matching Duke 390 lands at roughly 13.7 seconds and 162 km/h. Two tenths of ET separate the two bikes on a strip, and almost all of it is aerodynamics. Fast Track Racing India clocked a heavily-modded Duke 390 at 11.342 seconds at the ASEAN Superfast event in 2023, about 2.3 seconds quicker than the stock simulation.',
   },
   {
     type: 'h2',
-    text: 'Same Engine, Two Bodies',
+    text: 'Same engine, two bodies',
   },
   {
     type: 'p',
-    text: 'The 2022 RC 390 and the post-2017 Duke 390 (the second-generation Duke, before the 2024 GP-inspired third gen) both run the LC4c single: Bajaj-built at Chakan, KTM-engineered. Displacement is 373.3 cc from an 89.0 mm bore and 60.0 mm stroke. Compression sits at 12.5:1, the head is DOHC with four valves, fuel injection is Bosch, cooling is liquid. Both bikes make 43.5 hp at 8,000 rpm and 37 Nm at 6,500 rpm. The 6-speed cassette is identical (ratios [3.230, 2.153, 1.571, 1.272, 1.089, 0.927]), as are the 16-tooth front and 45-tooth rear sprockets running 520 chain. The slipper clutch and the ride-by-wire throttle are shared. Even the front 110/70-17 tire is the same.',
+    text: 'The 2022 RC 390 and the post-2017 Duke 390 (the second-generation Duke, before the 2024 GP-inspired third gen) both run the LC4c single: Bajaj-built at Chakan, KTM-engineered. Displacement is 373.3 cc from an 89.0 mm bore and 60.0 mm stroke. Compression is 12.5:1, the head is DOHC with four valves, fuel injection is Bosch, cooling is liquid. Both bikes make 43.5 hp at 8,000 rpm and 37 Nm at 6,500 rpm. The 6-speed cassette is identical (ratios [3.230, 2.153, 1.571, 1.272, 1.089, 0.927]), as are the 16-tooth front and 45-tooth rear sprockets running 520 chain. The slipper clutch and the ride-by-wire throttle are shared. Even the front 110/70-17 tire is the same.',
   },
   {
     type: 'p',
-    text: 'What differs is everything from the seat up. The RC 390 wears a full sport fairing, low clip-on bars, rear-set pegs, and a 13.7-litre tank shaped to be tucked into. The Duke 390 wears a naked exoskeleton-styled frame cover, wide handlebars, slightly more relaxed pegs, and the rider sits roughly 80 mm taller and significantly more upright. Catalog mass is identical at 149 kg dry. Wheelbase is identical at 1,365 mm. The rear tire on the RC 390 is a 150/60-17, the Duke 390 runs the same. The chassis is functionally the same chassis. The difference is the wind.',
+    text: 'What differs is everything from the seat up. The RC 390 wears a full sport fairing, low clip-on bars, rear-set pegs, and a 13.7-litre tank shaped to be tucked into. The Duke 390 wears a naked exoskeleton-styled frame cover, wide handlebars, slightly more relaxed pegs, and the rider sits roughly 80 mm taller and significantly more upright. Catalog mass is identical at 149 kg dry, wheelbase is identical at 1,365 mm, and both bikes run a 150/60-17 rear tire. Underneath, it is the same chassis. The difference is the wind.',
   },
   {
     type: 'h2',
-    text: 'Stock Sim Numbers at Aamby Valley',
+    text: 'Stock sim numbers at Aamby Valley',
   },
   {
     type: 'p',
-    text: 'Running both bikes through MotoQuant at matched Aamby Valley November conditions (density altitude around 1,100 m, 22°C ambient, dry asphalt with the OEM Metzeler Sportec M5 rear tire at μ_peak ≈ 1.10, 70 kg rider in stock tuck) produces these numbers:',
+    text: 'Running both bikes through MotoQuant at matched Aamby Valley November conditions (density altitude around 1,100 m, 22°C ambient, dry asphalt with the OEM Metzeler Sportec M5 rear tire at μ_peak ≈ 1.10, 70 kg rider in stock tuck) gives these numbers:',
   },
   {
     type: 'table',
@@ -72,15 +72,15 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Both ETs sit inside MotoQuant\'s mid-twin-300-500 cluster bias band of about ±0.4 seconds. The relative gap (two tenths and four km/h) is stable across rider weight, ambient temperature, and density altitude sweeps. The Duke 390 is consistently slower by margins that match what a Cd × A delta predicts: roughly equal off the line where aerodynamics barely matters, then the gap opens as speed climbs. By the 1/8-mile mark the RC 390 is already seven hundredths ahead; by the trap it has pulled clear by two full tenths. Neither bike has a Dragy timeslip in our benchmark set yet, so the absolute numbers carry the cluster band of uncertainty, but the relative ordering is structural.',
+    text: 'Both ETs sit inside MotoQuant\'s mid-twin-300-500 cluster bias band of about ±0.4 seconds. The relative gap (two tenths and four km/h) is stable across rider weight, ambient temperature, and density altitude sweeps. The Duke 390 is always slower, by margins that match a Cd × A delta. The bikes are roughly equal off the line, where aerodynamics barely matters, and the gap opens as speed climbs: the RC 390 is seven hundredths ahead at the 1/8-mile mark and two tenths ahead at the trap. Neither bike has a Dragy timeslip in our benchmark set yet, so the absolute numbers carry the cluster band of uncertainty, but the order of the two bikes is structural.',
   },
   {
     type: 'callout',
-    text: 'A useful sanity check: Autocar India\'s stock GPS-timed runs put the Duke 390 around 13.6–14.0 seconds and the RC 390 around 13.3–13.7 seconds in their March 2022 head-to-head test, with the RC 390 consistently quicker by 0.2–0.4 seconds. Our simulator hits the upper half of both bands and gets the gap right. That is the cluster bias band doing its job.',
+    text: 'As a check, Autocar India\'s stock GPS-timed runs put the Duke 390 around 13.6–14.0 seconds and the RC 390 around 13.3–13.7 seconds in their March 2022 head-to-head test, with the RC 390 consistently quicker by 0.2–0.4 seconds. Our simulator lands in the upper half of both bands and gets the gap right.',
   },
   {
     type: 'h2',
-    text: 'Where the Two Tenths Live',
+    text: 'Where the two tenths come from',
   },
   {
     type: 'p',
@@ -100,35 +100,35 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Cd × A on the Duke 390 is 36 percent higher than on the RC 390. That is the entire ET delta and a little more: the simulator estimates roughly 0.17 seconds of pure-drag penalty, partly offset by the fact that a more upright rider position usually loads the rear tire a few percent harder off the line (microscopic ET benefit, not enough to show in two-decimal numbers). Net result: two tenths of ET and four km/h of trap, all of it aerodynamic.',
+    text: 'Cd × A on the Duke 390 is 36 percent higher than on the RC 390. That accounts for the whole ET delta and a little more. The simulator estimates roughly 0.17 seconds of pure-drag penalty, partly offset because a more upright rider usually loads the rear tire a few percent harder off the line (a tiny ET benefit, too small to show in two-decimal numbers). The net result is two tenths of ET and four km/h of trap, all of it aerodynamic.',
   },
   {
     type: 'p',
-    text: 'This is also why the gap shrinks at lower-altitude, denser-air strips and grows at high-altitude, thinner-air ones. At MMRT (Chennai, near sea level, denser air, μ_peak ≈ 1.05) the drag penalty on the Duke is larger in absolute terms because aerodynamic force scales with air density; the simulator widens the gap to roughly 0.25 seconds at MMRT, with the RC 390 also pulling about 0.3 seconds quicker than its Aamby Valley number because the engine is making peak power in denser air. At a high-altitude venue like Leh at 3,500 m density altitude the gap shrinks below 0.15 seconds: thinner air, less drag penalty, both bikes losing power proportionally. Nobody drag-races at Leh; the simulator just lets you check that the physics behaves the way it should.',
+    text: 'This is also why the gap shrinks at lower-altitude, denser-air strips and grows at high-altitude, thinner-air ones. At MMRT (Chennai, near sea level, denser air, μ_peak ≈ 1.05) the drag penalty on the Duke is larger in absolute terms because aerodynamic force scales with air density; the simulator widens the gap to roughly 0.25 seconds at MMRT, with the RC 390 also pulling about 0.3 seconds quicker than its Aamby Valley number because the engine is making peak power in denser air. At a high-altitude venue like Leh at 3,500 m density altitude the gap shrinks below 0.15 seconds: thinner air, less drag penalty, both bikes losing power proportionally. Nobody drag-races at Leh; the simulator just lets you check that the physics behaves as it should.',
   },
   {
     type: 'h2',
-    text: 'The Fast Track Racing 11.342s Record',
+    text: 'The Fast Track Racing 11.342s record',
   },
   {
     type: 'p',
-    text: 'Fast Track Racing India entered the ASEAN Superfast Drag Challenge in Thailand in 2023 with a heavily-modded KTM 390 and ran an 11.342-second quarter-mile pass. That same team also clocked an 11.732 at Valley Run 2025 Winter at Aamby Valley. Both numbers are real, both are legitimate, both are roughly two and a half seconds quicker than what a stock RC 390 or Duke 390 will run.',
+    text: 'Fast Track Racing India entered the ASEAN Superfast Drag Challenge in Thailand in 2023 with a heavily-modded KTM 390 and ran an 11.342-second quarter-mile pass. That same team also clocked an 11.732 at Valley Run 2025 Winter at Aamby Valley. Both are real, legitimate runs, and both are roughly two and a half seconds quicker than a stock RC 390 or Duke 390 will run.',
   },
   {
     type: 'p',
-    text: 'Where do those tenths come from? A serious Indian drag KTM 390 is not the same machine that rolls off the showroom floor. The mod ladder on a bike that runs an 11.3 typically includes: a free-flow exhaust pulling 2–3 hp at the top end, a full ECU re-flash unlocking another 2–3 hp and sharper throttle response, a custom intake giving back another hp or two, a forward-shifted swingarm with a lengthened wheelbase to fight wheelie, a drag-prep slick or DOT-drag rear tire bumping μ_peak from 1.10 to 1.35, lighter wheels dropping rotational inertia, and a rider trained to launch the bike at the precise clutch-engagement RPM that maximises the slip phase without bogging the engine. Each of those individual mods is worth 0.1 to 0.3 seconds. Stack five or six of them with a properly-prepped rider and the bike drops from the 13.5-second range into the 11.5-12.0 second window. The Fast Track Racing record is the upper edge of that envelope, by a team that has been refining the same chassis for years.',
+    text: 'A serious Indian drag KTM 390 is not the machine that rolls off the showroom floor. A bike that runs an 11.3 typically has a free-flow exhaust pulling 2–3 hp at the top end, a full ECU re-flash adding another 2–3 hp and sharper throttle response, a custom intake giving back another hp or two, a forward-shifted swingarm with a lengthened wheelbase to fight wheelie, a drag-prep slick or DOT-drag rear tire bumping μ_peak from 1.10 to 1.35, lighter wheels dropping rotational inertia, and a rider trained to launch the bike at the precise clutch-engagement RPM that maximises the slip phase without bogging the engine. Each of those mods is worth 0.1 to 0.3 seconds. Stack five or six of them with a well-prepared rider and the bike drops from the 13.5-second range into the 11.5-12.0 second window. The Fast Track Racing record sits at the edge of that range, set by a team that has been refining the same chassis for years.',
   },
   {
     type: 'p',
-    text: 'For a regular owner whose KTM 390 sees a strip twice a year and a commute the other 363 days, the question is not "how do I run 11.3s?" but "how do I get from 13.7s to 13.0s without making the bike unrideable on a Monday morning?" That is a different question, and a much more tractable one.',
+    text: 'For a regular owner whose KTM 390 sees a strip twice a year and a commute the other 363 days, the useful question is how to get from 13.7s to 13.0s without making the bike unrideable on a Monday morning. That one is much easier to answer.',
   },
   {
     type: 'h2',
-    text: 'Cost-per-Tenth: Four Mods Under ₹25,000',
+    text: 'Cost per tenth: four mods under ₹25,000',
   },
   {
     type: 'p',
-    text: 'MotoQuant\'s parts-ROI engine ranks mods by cost-per-tenth at current Indian retail prices. The pricing-refresh pass in May 2026 scraped or formula-priced parts against Store4Riders, RidersPlanet, Performance Racing Store, KustomHub, Powerstroke, and Motodelic. Below are the four most cost-effective mods under ₹25,000 each for the RC 390. The Duke 390 numbers are within ₹500 of these because the parts are physically identical.',
+    text: 'MotoQuant\'s parts-ROI engine ranks mods by cost-per-tenth at current Indian retail prices. The May 2026 price refresh scraped or formula-priced parts from Store4Riders, RidersPlanet, Performance Racing Store, KustomHub, Powerstroke, and Motodelic. These are the four most cost-effective mods under ₹25,000 each for the RC 390. The Duke 390 numbers are within ₹500 of these because the parts are physically identical.',
   },
   {
     type: 'table',
@@ -143,15 +143,15 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The sprocket swap is the cheapest tenth on either bike by an order of magnitude. Dropping one tooth at the front shortens overall gearing by 6.25 percent, which keeps the engine higher in its power band through the first three gears, exactly where the LC4c is making the meaningful part of its torque. Side-effects: roughly 4 percent lower top speed (irrelevant on a strip where you trap at 165–170 km/h anyway, well below the bike\'s ~180 km/h capability), slightly busier highway cruising, slightly higher fuel burn in stop-go traffic. None of those matter for someone who tracks the bike. All in for under a thousand rupees.',
+    text: 'The sprocket swap is the cheapest tenth on either bike by an order of magnitude. Dropping one tooth at the front shortens overall gearing by 6.25 percent, which keeps the engine higher in its power band through the first three gears, where the LC4c makes most of its useful torque. The side effects are roughly 4 percent lower top speed (irrelevant on a strip where you trap at 165–170 km/h anyway, well below the bike\'s ~180 km/h capability), slightly busier highway cruising and slightly higher fuel burn in stop-go traffic. None of those matter if you take the bike to the strip, and the whole job costs under a thousand rupees.',
   },
   {
     type: 'p',
-    text: 'The TVS Eurogrip Protorq Extreme is one of the few Indian-made rear tires that meaningfully outgrips the OEM Metzeler Sportec M5 in dry-pavement launch conditions, particularly on a strip that has not been freshly prepped. It also has the practical advantage of being available at half the price of a comparable Pirelli Rosso III. The Powertronic Stage 1 re-flash is a piggyback ECU that the Indian KTM community has run for several years; it unlocks roughly 1.5 to 2 hp of top-end power and meaningfully sharpens the throttle map. The DNA filter is the cheapest mod on the list with measurable airflow gain, and it does not require any retune.',
+    text: 'The TVS Eurogrip Protorq Extreme is one of the few Indian-made rear tires that clearly outgrips the OEM Metzeler Sportec M5 in dry-pavement launch conditions, particularly on a strip that has not been freshly prepped. It also costs half as much as a comparable Pirelli Rosso III. The Powertronic Stage 1 re-flash is a piggyback ECU that the Indian KTM community has run for several years; it adds roughly 1.5 to 2 hp of top-end power and noticeably sharpens the throttle map. The DNA filter is the cheapest mod on the list with a measurable airflow gain, and it needs no retune.',
   },
   {
     type: 'p',
-    text: 'After all four mods, MotoQuant simulates the RC 390 at roughly 12.95 seconds and 173 km/h trap; the Duke 390 lands at roughly 13.15 seconds and 169 km/h. The gap between them is unchanged at two tenths because all four mods affect engine and traction, not aerodynamics. To close the gap between the bikes you would need to fix the Duke\'s drag, which on a naked is functionally impossible without bolting on a fly-screen, sport bodywork, and adopting an RC-style tuck, at which point you have built an RC 390 the hard way. The honest answer is: if you want the strip number, buy the RC 390; if you want the everyday bike, buy the Duke; the two tenths are the cost of upright comfort.',
+    text: 'After all four mods, MotoQuant simulates the RC 390 at roughly 12.95 seconds and 173 km/h trap; the Duke 390 lands at roughly 13.15 seconds and 169 km/h. The gap stays at two tenths because all four mods work on engine and traction, not aerodynamics. Closing it means fixing the Duke\'s drag, and on a naked that takes a fly-screen, sport bodywork and an RC-style tuck, at which point you have built an RC 390 the hard way. If you want the strip number, buy the RC 390. If you want the everyday bike, buy the Duke; the two tenths are the cost of upright comfort.',
   },
   {
     type: 'callout',
@@ -159,27 +159,27 @@ const CONTENT = [
   },
   {
     type: 'h2',
-    text: 'What About the 2024 Gen 3 Duke 390?',
+    text: 'What about the 2024 Gen 3 Duke 390?',
   },
   {
     type: 'p',
-    text: 'KTM launched a third-generation Duke 390 in 2024 with revised internals: a longer-stroke 399 cc displacement (89.0 × 64.0 mm versus the older 89.0 × 60.0 mm), a higher 45 hp peak power figure, a new TFT cluster, and a slightly heavier dry mass around 161 kg. That bike is not yet in the MotoQuant catalog at the time of this writing (May 2026), and the new RC 390 variant on the Gen 3 chassis has not surfaced at scale either. When both bikes land in the catalog the comparison will shift mildly: the Gen 3 Duke makes more peak power but is also heavier and slightly thirstier; expected stock ET should fall in the 13.4 to 13.7 second range at Aamby Valley, sitting between the 2017–2023 Duke 390 and a stock RC 390. We will rerun this comparison the moment those entries land.',
+    text: 'KTM launched a third-generation Duke 390 in 2024 with revised internals: a longer-stroke 399 cc displacement (89.0 × 64.0 mm versus the older 89.0 × 60.0 mm), a higher 45 hp peak power figure, a new TFT cluster, and a slightly heavier dry mass around 161 kg. That bike is not in the MotoQuant catalog as of this writing (May 2026), and the new RC 390 on the Gen 3 chassis is not widely sold yet either. When both are added, the comparison will shift a little. The Gen 3 Duke makes more peak power but is also heavier and slightly thirstier; we expect its stock ET to fall in the 13.4 to 13.7 second range at Aamby Valley, between the 2017–2023 Duke 390 and a stock RC 390. We will rerun this comparison when those entries land.',
   },
   {
     type: 'p',
-    text: 'In the meantime, the 2017–2023 Duke 390 remains the dominant version on Indian roads, with hundreds of thousands of units sold across the seven model years and a strong used-bike market under ₹2 lakh. The RC 390 in current trim sits at roughly ₹3.18 lakh ex-showroom; the second-gen Duke 390 used market hovers around ₹1.50–₹1.80 lakh depending on year and kilometres. For the value buyer, a used Duke 390 plus the four mods above costs less than a new RC 390 and runs the strip within three tenths of one.',
+    text: 'Until then, the 2017–2023 Duke 390 is still the most common version on Indian roads, with hundreds of thousands of units sold across the seven model years and a strong used-bike market under ₹2 lakh. The RC 390 in current trim sits at roughly ₹3.18 lakh ex-showroom; the second-gen Duke 390 used market hovers around ₹1.50–₹1.80 lakh depending on year and kilometres. For the value buyer, a used Duke 390 plus the four mods above costs less than a new RC 390 and runs the strip within three tenths of one.',
   },
   {
     type: 'h2',
-    text: 'Run Your Own Numbers',
+    text: 'Run your own numbers',
   },
   {
     type: 'p',
-    text: 'The honest summary: the KTM RC 390 and KTM Duke 390 are functionally the same bike with two different bodies. The RC 390 runs two tenths quicker over the quarter-mile because its fairing and tucked rider position trim roughly 36 percent of frontal drag area. Every other lever on either bike (engine, gearbox, sprockets, chassis, tires, mass) is identical. Mods scale roughly equally on both. Picking between them is a choice about riding position, daily comfort, and how many days a year you spend on a strip versus in traffic. Three-quarters of Indian KTM 390 buyers pick the Duke for everyday rideability; one-quarter pick the RC for the body. The strip numbers exist; the daily-ride numbers do too.',
+    text: 'The KTM RC 390 and KTM Duke 390 are the same bike with two different bodies. The RC 390 runs two tenths quicker over the quarter-mile because its fairing and tucked rider position trim roughly 36 percent of frontal drag area. Every other lever on either bike (engine, gearbox, sprockets, chassis, tires, mass) is identical, and mods scale roughly equally on both. So the choice is about riding position, daily comfort, and how many days a year you spend on a strip versus in traffic. Three-quarters of Indian KTM 390 buyers pick the Duke for everyday rideability; one-quarter pick the RC for the body.',
   },
   {
     type: 'p',
-    text: 'The MotoQuant simulator at motoquant.in lets you sweep rider weight, density altitude, ambient temperature, tire compound, and any combination of the 546 parts in the catalog against either bike, side by side. You can answer the practical questions ("for my 75 kg rider weight and my home strip at 600 m DA, will the Duke or RC be faster after a sprocket drop and a re-flash?") without trusting a YouTube comparison or a press release. A real Dragy timeslip from either bike, submitted through the "Submit a timeslip" form, would tighten the prediction. The current ±0.4 second cluster bias band is the honest uncertainty number until that data exists.',
+    text: 'The MotoQuant simulator at motoquant.in lets you sweep rider weight, density altitude, ambient temperature, tire compound, and any combination of the 546 parts in the catalog against either bike, side by side. You can answer the practical questions ("for my 75 kg rider weight and my home strip at 600 m DA, will the Duke or RC be faster after a sprocket drop and a re-flash?") without trusting a YouTube comparison or a press release. A real Dragy timeslip from either bike, submitted through the "Submit a timeslip" form, would tighten the prediction. Until that data exists, the ±0.4 second cluster bias band is the real uncertainty.',
   },
 ];
 
@@ -285,7 +285,7 @@ export default function PostPage() {
             ))}
           </div>
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
-            KTM Duke 390 vs RC 390: Quarter-Mile Physics at Aamby Valley
+            KTM Duke 390 vs RC 390: quarter-mile physics at Aamby Valley
           </h1>
           <div className="text-sm text-white/60 mb-12">
             18 May 2026 · 12 min read · MotoQuant Blog
@@ -298,7 +298,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Simulate the Duke 390 vs RC 390 side by side</div>
             <div className="text-white/60 text-sm">
-              Sweep rider weight, density altitude, sprocket choice, ECU re-flash, and any of the 546 parts in the catalog. See ET delta before you spend a rupee.
+              Sweep rider weight, density altitude, sprocket choice, ECU re-flash, and any of the 546 parts in the catalog. See the ET change before you spend a rupee.
             </div>
           </div>
           <Link
@@ -318,7 +318,7 @@ export default function PostPage() {
                 href="/blog/pulsar-ns400z-quarter-mile-physics"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                Pulsar NS400Z Quarter-Mile Physics (and Why an RC 390 Still Wins)
+                Pulsar NS400Z quarter-mile physics (and why an RC 390 still wins)
               </Link>:{' '}
               the same RC 390 reference, now compared against Bajaj&apos;s first 400cc Pulsar.
             </li>
@@ -328,7 +328,7 @@ export default function PostPage() {
                 href="/blog/pulsar-ns200-vs-apache-rtr-200-quarter-mile-physics"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                Pulsar NS200 vs Apache RTR 200 4V: Which Wins the Quarter Mile?
+                Pulsar NS200 vs Apache RTR 200 4V: which wins the quarter mile?
               </Link>:{' '}
               the same comparison framing one displacement class down.
             </li>
@@ -338,7 +338,7 @@ export default function PostPage() {
                 href="/blog/the-physics-of-a-perfect-launch"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                The Physics of a Perfect Launch
+                The physics of a perfect launch
               </Link>:{' '}
               clutch slip, weight transfer, and the first 60 feet that matter most on a 390-class single.
             </li>
@@ -348,7 +348,7 @@ export default function PostPage() {
                 href="/blog/how-to-tune-for-aamby-valley-in-november"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                How to Tune for Aamby Valley in November
+                How to tune for Aamby Valley in November
               </Link>:{' '}
               the venue conditions used for every sim in this post, plus the DA penalty math.
             </li>
@@ -358,7 +358,7 @@ export default function PostPage() {
                 href="/blog/how-the-motoquant-physics-engine-works"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                How the MotoQuant Physics Engine Works
+                How the MotoQuant physics engine works
               </Link>:{' '}
               what is inside the simulator that produced these numbers, and what the cluster bias bands mean.
             </li>

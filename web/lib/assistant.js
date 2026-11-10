@@ -98,15 +98,13 @@ export function cleanKey(raw) {
 }
 
 // The same rule the server applies: starts with sk-ant-, 20 to 300
-// characters, no whitespace inside.
+// characters, every one printable ASCII (codes 33 to 126). That also rules
+// out invisible characters a copy can pick up, such as a zero-width space,
+// which the browser could not send in a header.
+const KEY_RE = /^sk-ant-[\x21-\x7e]{13,293}$/;
+
 export function looksLikeAnthropicKey(raw) {
-  const key = cleanKey(raw);
-  return (
-    key.startsWith('sk-ant-') &&
-    key.length >= 20 &&
-    key.length <= 300 &&
-    !/\s/.test(key)
-  );
+  return KEY_RE.test(cleanKey(raw));
 }
 
 // {key, remember}: a key in localStorage was saved with "Remember on this
@@ -166,8 +164,9 @@ export function parseAssistantInfo(json) {
 }
 
 // Plain words for each error code the chat can return. `offerKey` means the
-// banner offers to add (or change) the visitor's own key.
-export function chatErrorCopy(code, { ownKey = false } = {}) {
+// banner offers to add (or change) the visitor's own key. `freeAvailable` is
+// false when GET /api/assistant said the free assistant is off or resting.
+export function chatErrorCopy(code, { ownKey = false, freeAvailable = true } = {}) {
   switch (code) {
     case 'assistant_unavailable':
     case 'llm_not_configured':
@@ -186,7 +185,9 @@ export function chatErrorCopy(code, { ownKey = false } = {}) {
       return {
         tone: 'red',
         offerKey: true,
-        text: 'Anthropic did not accept your key. Check it in the Anthropic Console, or remove it to use the free assistant.',
+        text: freeAvailable
+          ? 'Anthropic did not accept your key. Check it in the Anthropic Console, or remove it to use the free assistant.'
+          : 'Anthropic did not accept your key. Check it in the Anthropic Console.',
       };
     case 'invalid_key_format':
       return {

@@ -412,9 +412,9 @@ function RankBlock({ payload }) {
           ))}
         </tbody>
       </table>
-      {payload.candidates_considered != null && (
+      {Number(payload.candidates_simulated) > 0 && (
         <p className="text-xs text-white/55">
-          Shortlisted from {payload.candidates_considered} catalog bikes by power to weight, then each one simulated.
+          The {payload.candidates_simulated} best matches by power to weight, each one simulated.
         </p>
       )}
     </div>
@@ -632,8 +632,8 @@ function AssistantSettings({
   const savedKey = keyState.key;
   const remember = savedKey ? keyState.remember : draftRemember;
 
-  function submit(e) {
-    e.preventDefault();
+  function save() {
+    if (!draft.trim()) return;
     if (!looksLikeAnthropicKey(draft)) {
       setKeyError('That does not look like an Anthropic API key. Keys start with sk-ant-.');
       return;
@@ -693,7 +693,12 @@ function AssistantSettings({
               </div>
             )}
 
-            <form onSubmit={submit} className="space-y-1">
+            {/* Not a <form> and not a password field: browsers treat a
+                submitted password form as a login and offer to save the key
+                in their password manager. The text field is masked with CSS
+                instead, and the data-* attributes keep password-manager
+                extensions away from it. */}
+            <div className="space-y-1">
               <label htmlFor={inputId} className="field-label">
                 {savedKey ? 'Use a different key' : 'Your Anthropic API key'}
               </label>
@@ -701,28 +706,46 @@ function AssistantSettings({
                 <input
                   ref={keyInputRef}
                   id={inputId}
-                  type="password"
+                  type="text"
+                  name="mq-anthropic-key"
                   autoComplete="off"
+                  autoCorrect="off"
                   autoCapitalize="off"
                   spellCheck={false}
+                  data-1p-ignore=""
+                  data-lpignore="true"
+                  data-bwignore=""
+                  data-form-type="other"
+                  style={{ WebkitTextSecurity: 'disc' }}
                   value={draft}
                   onChange={(e) => {
                     setDraft(e.target.value);
                     if (keyError) setKeyError('');
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      save();
+                    }
                   }}
                   placeholder="sk-ant-..."
                   aria-invalid={keyError ? true : undefined}
                   aria-describedby={keyError ? errorId : undefined}
                   className="input-base h-11 min-w-0 flex-1 font-mono"
                 />
-                <button type="submit" disabled={!draft.trim()} className="btn-primary btn-sm shrink-0">
+                <button
+                  type="button"
+                  onClick={save}
+                  disabled={!draft.trim()}
+                  className="btn-primary btn-sm shrink-0"
+                >
                   Use key
                 </button>
               </div>
               {keyError && (
                 <p id={errorId} role="alert" className="text-sm text-signal-foul">{keyError}</p>
               )}
-            </form>
+            </div>
 
             <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-white/85">
               <input
@@ -976,7 +999,13 @@ export default function ChatPanel({ apiUrl }) {
     const r = turn.result || {};
     const err = r.error;
 
-    const copy = err ? chatErrorCopy(err, { ownKey: r.own_key === true }) : null;
+    const copy = err
+      ? chatErrorCopy(err, {
+          ownKey: r.own_key === true,
+          // Unknown until GET /api/assistant answers: assume it is on.
+          freeAvailable: serverInfo == null || serverInfo.freeAvailable,
+        })
+      : null;
     if (copy) {
       const showDetail = r.error_detail && (err === 'agent_failed' || err === 'key_rejected');
       return (

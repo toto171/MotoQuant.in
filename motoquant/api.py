@@ -4189,7 +4189,11 @@ def _prepare_chat(req: ChatRequest, request: Request, override):
     usable server key). The daily cap is charged only for server-key turns,
     before the classic-mode bucket so a lower daily cap trips first.
     """
-    from .llm.client import server_key_resting
+    from .llm.client import (
+        FREE_ASSISTANT_RESTING_DETAIL,
+        server_key_configured,
+        server_key_resting,
+    )
 
     visitor_key, malformed = _visitor_key(request)
     if malformed:
@@ -4204,16 +4208,25 @@ def _prepare_chat(req: ChatRequest, request: Request, override):
             ),
         )
     own_key = visitor_key is not None
-    if not own_key and override is None and server_key_resting():
-        # Known before any model call: do not charge the daily cap for it.
+    # Both cases below are known before any model call, so neither charges
+    # the daily cap: the server key would not be used.
+    if not own_key and override is None and not server_key_configured():
         return (
             None,
             False,
             _early_chat_answer(
                 req,
-                "free_assistant_resting",
-                "The free assistant is resting: today's credit is used up. Add "
-                "your own Anthropic key to keep asking.",
+                "assistant_unavailable",
+                "No Anthropic key is set on the server (ANTHROPIC_API_KEY). "
+                "Add your own key to ask questions.",
+            ),
+        )
+    if not own_key and override is None and server_key_resting():
+        return (
+            None,
+            False,
+            _early_chat_answer(
+                req, "free_assistant_resting", FREE_ASSISTANT_RESTING_DETAIL
             ),
         )
     if not own_key:

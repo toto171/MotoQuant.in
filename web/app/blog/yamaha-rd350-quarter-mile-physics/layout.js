@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from "../../StructuredData";
 
 const SLUG = "yamaha-rd350-quarter-mile-physics";
-const TITLE = "Yamaha RD350 Quarter-Mile Physics: Why a 1973 2-Stroke Still Runs 14.7s";
+const TITLE = "Yamaha RD350 quarter-mile physics: why a 1973 2-stroke still runs 14.7s";
 
 function breadcrumbs() {
   return {

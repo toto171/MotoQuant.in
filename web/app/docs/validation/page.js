@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Validation Data',
+  title: 'Validation data',
   description: 'MotoQuant accuracy report: 250 published tests (263 matched) from Cycle World, Sport Rider, MotoStatz, MCN and BikeWale. Weighted bias +0.023s, weighted mean absolute error 0.25s, top-10 mean error ±0.006s. Per-cluster bias across the cylinder-aware 12-cluster taxonomy, and the open gaps for small bikes and two-strokes. Reference bikes, held to four decimals by CI: K5 10.0436s, R1 10.1092s, Hayabusa 10.1100s.',
   alternates: { canonical: 'https://motoquant.in/docs/validation' },
   keywords: [
@@ -80,7 +80,7 @@ export default function ValidationPage() {
 
       {/* Headline stats */}
       <section className="mb-14">
-        <h2 className="font-display font-bold text-2xl text-white mb-6">Aggregate metrics (263 matched benchmarks)</h2>
+        <h2 className="font-display font-bold text-2xl text-white mb-6">Overall results (263 matched benchmarks)</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
           {[
             { num: '0.25s', label: 'Weighted |Δ|' },
@@ -147,9 +147,9 @@ export default function ValidationPage() {
       <section className="mb-14">
         <h2 className="font-display font-bold text-2xl text-white mb-4">Top 10 most accurate bikes</h2>
         <p className="text-white/60 text-sm mb-6">
-          The 10 smallest residuals among published (non-derived) benchmarks: top-10 mean absolute error ±0.006s.
-          Sources: Cycle World, Sport Rider, MotoStatz and motorcyclespecs.com. DERIVED estimates are excluded.
-          Conditions: race fuel, professional rider, ideal strip.
+          The 10 smallest errors among published (non-derived) benchmarks: top-10 mean absolute error ±0.006s.
+          Sources: Cycle World, Sport Rider, MotoStatz and motorcyclespecs.com. Conditions: race fuel,
+          professional rider, ideal strip.
         </p>
         <div className="card border-brand-orange/20 overflow-hidden">
           <div className="hidden md:grid grid-cols-[36px_1fr_100px_100px_90px_130px] gap-3 px-5 py-3 border-b border-brand-orange/20 bg-white/[0.02] text-xs font-medium text-white/60">
@@ -235,9 +235,9 @@ export default function ValidationPage() {
         <div className="space-y-4 text-white/75 text-base leading-relaxed">
           <p>
             <strong className="text-white">Benchmark sources:</strong> Published magazine timeslips from Cycle World,
-            Sport Rider, MCN, Motorcyclist, and BikeWale. Indian community strip records from MotoStatz, Facebook
-            drag groups, and drag event published results. All benchmarks use professional rider / race fuel / ideal
-            strip conditions unless explicitly noted.
+            Sport Rider, MCN, Motorcyclist and BikeWale, and Indian community strip records from MotoStatz, Facebook
+            drag groups and published drag event results. All benchmarks assume a professional rider, race fuel and
+            an ideal strip unless noted otherwise.
           </p>
           <p>
             <strong className="text-white">Simulation conditions:</strong> Every benchmark is simulated at sea level
@@ -246,8 +246,8 @@ export default function ValidationPage() {
             configuration from the seeded database, with no per-bike tuning of Cd or μ.
           </p>
           <p>
-            <strong className="text-white">Matching:</strong> Benchmark-to-bike matching uses word-boundary regex
-            to prevent false positives (YZF-R1 ≠ YZF-R15). Year ranges are respected: a 2009 benchmark does not
+            <strong className="text-white">Matching:</strong> Benchmarks are matched to bikes with a word-boundary
+            regex to prevent false positives (YZF-R1 ≠ YZF-R15). Year ranges are respected: a 2009 benchmark does not
             match a 2015 model that shares a name but has different internals.
           </p>
           <p>

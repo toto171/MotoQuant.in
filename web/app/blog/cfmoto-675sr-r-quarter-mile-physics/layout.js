@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'cfmoto-675sr-r-quarter-mile-physics';
-const TITLE = 'CFMoto 675SR-R Quarter-Mile Physics: The 95hp Daytona 660 Rival';
+const TITLE = 'CFMoto 675SR-R quarter-mile physics: the 95hp Daytona 660 rival';
 
 function breadcrumbs() {
   return {

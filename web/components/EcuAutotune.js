@@ -470,8 +470,8 @@ export default function EcuAutotune() {
                 <RecCard icon={Flag} title="Launch RPM" muted badge={GUIDANCE_LABEL}>
                   <p className="text-sm text-white/75">
                     In our simulation, changing the <Term k="launch_rpm">launch RPM</Term> made no difference to
-                    this bike&apos;s time, so we can&apos;t give you a number that is worth a measured
-                    amount.
+                    this bike&apos;s time, so we can&apos;t give you a number with a measured
+                    benefit.
                     {launch.stock_rpm != null && (
                       <>
                         {' '}

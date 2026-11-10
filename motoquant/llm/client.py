@@ -11,9 +11,10 @@ Keys
 The server's own key comes only from the ``ANTHROPIC_API_KEY`` environment
 variable. A visitor may bring their own key (the ``X-Anthropic-Key`` header);
 the API builds a client for that one request with
-``LLMClient(assistant, api_key=key, own_key=True)``. A visitor client never
-reads the environment, never falls back to the server key and is never
-cached on a module singleton. Every error string this module builds goes
+``LLMClient(assistant, api_key=key, own_key=True)``. A visitor client takes
+no key, base URL or custom headers from the environment, so it always talks
+to api.anthropic.com directly. It never falls back to the server key and is
+never cached on a module singleton. Every error string this module builds goes
 through :func:`redact_secrets`, so a key cannot leak through an error.
 
 Request shape (every call, agent or classic)
@@ -21,7 +22,8 @@ Request shape (every call, agent or classic)
 ``client.beta.messages.create`` with the server-side fallback beta,
 ``fallbacks="default"``, adaptive thinking, ``output_config.effort``, a
 system prompt given as blocks (a frozen block carrying ``cache_control``
-plus a small dynamic block), and top-level ``cache_control``. Never sent:
+plus a small dynamic block), and, on agent turns, top-level
+``cache_control``. Never sent:
 a forced ``tool_choice`` (``any``/``tool``), ``budget_tokens``, disabled
 thinking, sampling parameters or an assistant prefill. Forcing a tool is
 rejected by both models, so the classic parser uses structured outputs
@@ -88,9 +90,16 @@ ASSISTANT_ORDER = ("doctor", "mechanic")  # dropdown order: 1. doctor, 2. mechan
 SERVER_KEY_ENV = "ANTHROPIC_API_KEY"
 FALLBACK_BETA = "server-side-fallback-2026-07-01"
 DEFAULT_MAX_TOKENS = 16_000
-# Thinking plus a 16k-token answer can take well over the old 30 s. The SDK
-# still retries connection errors, 429 and 5xx (max_retries=2).
-DEFAULT_TIMEOUT_S = 180.0
+# Calls are not streamed, and thinking plus a 16k-token answer can take
+# several minutes. 600 s is what the SDK itself allows a non-streaming call
+# of this size. The SDK retries connection errors, 429 and 5xx up to
+# MAX_RETRIES times. It also retries a timeout, so the timeout must stay
+# above the slowest normal turn.
+DEFAULT_TIMEOUT_S = 600.0
+MAX_RETRIES = 2
+# Visitor keys always go to Anthropic itself, never to a gateway set for the
+# server key through ANTHROPIC_BASE_URL.
+ANTHROPIC_API_URL = "https://api.anthropic.com"
 DEFAULT_MODEL = ASSISTANTS[DEFAULT_ASSISTANT].model
 
 # ─── Key handling ─────────────────────────────────────────────────────────
@@ -147,6 +156,12 @@ def server_key_resting(now: float | None = None) -> bool:
 def reset_server_key_resting() -> None:
     global _SERVER_RESTING_UNTIL
     _SERVER_RESTING_UNTIL = 0.0
+
+
+FREE_ASSISTANT_RESTING_DETAIL = (
+    "The free assistant has reached its spending limit for now. Add your own "
+    "Anthropic key to keep asking, or try again later."
+)
 
 
 def free_assistant_available() -> bool:
@@ -235,8 +250,28 @@ def _status_of(exc: BaseException) -> int | None:
     return v if isinstance(v, int) else None
 
 
+# error.details.error_code values that mean "this organization may not spend
+# more right now". The spend limit comes back as a 429, not a 400.
+_CREDIT_ERROR_CODES = {"enforced_spend_limit_reached"}
+
+
+def _error_code(exc: BaseException) -> str | None:
+    code = getattr(exc, "error_code", None)
+    if isinstance(code, str):
+        return code
+    body = getattr(exc, "body", None)
+    if isinstance(body, dict):
+        err = body.get("error") if isinstance(body.get("error"), dict) else body
+        details = err.get("details") if isinstance(err, dict) else None
+        if isinstance(details, dict) and isinstance(details.get("error_code"), str):
+            return details["error_code"]
+    return None
+
+
 def _is_credit_error(exc: BaseException, status: int | None) -> bool:
     if status == 402 or _error_type(exc) == "billing_error":
+        return True
+    if _error_code(exc) in _CREDIT_ERROR_CODES:
         return True
     if status in (400, 403) or status is None:
         return bool(_CREDIT_RE.search(_error_text(exc)))
@@ -368,7 +403,7 @@ _SERVER_SDK: dict[str, Any] = {}
 _SERVER_SDK_LOCK = threading.Lock()
 
 
-def _build_sdk(api_key: str, timeout_s: float):
+def _build_sdk(api_key: str, timeout_s: float, *, visitor: bool = False):
     try:
         import anthropic
     except ImportError as e:  # pragma: no cover - dependency is pinned
@@ -376,8 +411,26 @@ def _build_sdk(api_key: str, timeout_s: float):
             "The anthropic package is not installed: pip install -r requirements-api.txt"
         ) from e
     # An explicit api_key stops the SDK from reading any credential from the
-    # environment (ANTHROPIC_API_KEY, profiles, federation).
-    return anthropic.Anthropic(api_key=api_key, timeout=timeout_s, max_retries=2)
+    # environment (ANTHROPIC_API_KEY, profiles, federation). It still reads
+    # ANTHROPIC_BASE_URL and ANTHROPIC_CUSTOM_HEADERS. Those are the
+    # operator's settings for the server key, so a visitor client pins the
+    # Anthropic API and drops the env headers: a visitor key must never reach
+    # a gateway, and the operator's gateway secrets must never ride along.
+    if not visitor:
+        return anthropic.Anthropic(
+            api_key=api_key, timeout=timeout_s, max_retries=MAX_RETRIES
+        )
+    sdk = anthropic.Anthropic(
+        api_key=api_key,
+        base_url=ANTHROPIC_API_URL,
+        timeout=timeout_s,
+        max_retries=MAX_RETRIES,
+    )
+    # The constructor merges ANTHROPIC_CUSTOM_HEADERS into the client's
+    # custom headers and offers no switch to skip them, so clear them here.
+    # We pass no custom headers of our own.
+    sdk._custom_headers = {}
+    return sdk
 
 
 class LLMClient:
@@ -478,7 +531,7 @@ class LLMClient:
                 "Add your own key to ask questions."
             )
         if self._own_key:
-            self._sdk_client = _build_sdk(self._api_key, self._timeout_s)
+            self._sdk_client = _build_sdk(self._api_key, self._timeout_s, visitor=True)
             return self._sdk_client
         with _SERVER_SDK_LOCK:
             sdk = _SERVER_SDK.get(self._api_key)
@@ -530,6 +583,10 @@ class LLMClient:
                 f"{who} Anthropic account."
             )
         if (rl_cls and isinstance(exc, rl_cls)) or status == 429:
+            if _is_credit_error(exc, status):
+                # The organization's spend limit: a 429 that will not clear
+                # in a minute.
+                return self._credit_error()
             return LLMRateLimitError(
                 "Anthropic is rate limiting requests right now. Try again in a minute."
             )
@@ -552,10 +609,7 @@ class LLMClient:
             )
         note_server_key_resting()
         logger.warning("The server's Anthropic key hit its credit or spend limit")
-        return LLMCreditExhaustedError(
-            "The free assistant is resting: today's credit is used up. Add your own "
-            "Anthropic key to keep asking."
-        )
+        return LLMCreditExhaustedError(FREE_ASSISTANT_RESTING_DETAIL)
 
     def _create(self, **kwargs):
         """Call ``beta.messages.create`` and translate every failure."""
@@ -592,8 +646,16 @@ class LLMClient:
         tool_choice: dict[str, Any] | None = None,
         max_tokens: int | None = None,
         output_format: dict[str, Any] | None = None,
+        cache_tail: bool = False,
     ) -> dict[str, Any]:
-        """The exact keyword arguments for ``beta.messages.create``."""
+        """The exact keyword arguments for ``beta.messages.create``.
+
+        ``cache_tail`` adds top-level (automatic) ``cache_control``, which
+        caches up to the last message. Only the agent loop sets it: its next
+        round re-reads that prefix. A one-shot call ends in content no later
+        request repeats, so it relies on the system block's marker alone and
+        does not pay for a cache write it would never read.
+        """
         if tool_choice is not None and tool_choice.get("type") not in ("auto", "none"):
             raise ValueError("forced tool_choice is not supported on these models")
         output_config: dict[str, Any] = {"effort": self.effort}
@@ -608,8 +670,9 @@ class LLMClient:
             "output_config": output_config,
             "system": self.system_blocks(system),
             "messages": messages,
-            "cache_control": {"type": "ephemeral"},
         }
+        if cache_tail:
+            kw["cache_control"] = {"type": "ephemeral"}
         if tools:
             kw["tools"] = tools
         if tool_choice is not None:
@@ -795,6 +858,7 @@ class LLMClient:
                 tools=self._api_tools(tools) if tools else None,
                 tool_choice=tool_choice,
                 max_tokens=max_tokens,
+                cache_tail=True,
             )
         )
         content = list(msg.content or [])

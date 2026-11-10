@@ -1284,7 +1284,10 @@ def _exec_rank_bikes(ctx: AgentContext, args: dict) -> dict:
     ranked.sort(key=lambda r: r["et_quarter_s"])
     payload = {
         "method": f"top {n_sim} power-to-weight candidates fully simulated",
+        # The shortlist query stops at 12 rows, so this is a lower bound on
+        # the bikes that match the filter, not their count.
         "candidates_considered": len(rows),
+        "candidates_simulated": n_sim,
         "ranking": ranked[:top_n],
     }
     ctx.add_block("rank_result", payload)

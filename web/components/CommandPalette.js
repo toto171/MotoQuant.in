@@ -39,7 +39,7 @@ const ACTIONS = [
   { label: 'Glossary', desc: 'Drag-racing terms in plain English', href: '/docs/glossary', kw: 'terms jargon meaning et trap sixty launch definitions what is', icon: BookOpen, group: 'Learn' },
   { label: 'How the physics works', desc: 'What the simulator calculates, step by step', href: '/docs/physics', kw: 'rk4 submodels engine model documentation physics', icon: BookOpen, group: 'Learn' },
   { label: 'Accuracy', desc: 'How close predictions are to real timeslips', href: '/validation', kw: 'validation benchmarks error trust accurate', icon: BookOpen, group: 'Learn' },
-  { label: 'Blog', desc: 'Guides and deep dives', href: '/blog', kw: 'articles posts guides comparisons', icon: BookOpen, group: 'Learn' },
+  { label: 'Blog', desc: 'Guides and bike comparisons', href: '/blog', kw: 'articles posts guides comparisons', icon: BookOpen, group: 'Learn' },
   { label: 'About MotoQuant', desc: 'Who builds this, and why it is open source', href: '/about', kw: 'story founders contact team', icon: ArrowRight, group: 'Learn' },
   { label: 'Features', desc: 'Everything the simulator can do', href: '/features', kw: 'what can it do capabilities overview', icon: ArrowRight, group: 'Learn' },
   { label: 'Whitepaper', desc: 'The method behind the numbers', href: '/whitepaper', kw: 'paper methodology research physics', icon: BookOpen, group: 'Learn' },

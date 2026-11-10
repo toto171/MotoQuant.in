@@ -4,12 +4,12 @@ import SiteFooter from "../../../components/SiteFooter";
 import StructuredData, { articleSchema } from "../../StructuredData";
 
 const SLUG = "aprilia-tuono-457-vs-rs-457-quarter-mile-physics";
-const TITLE = "Aprilia Tuono 457 vs RS 457: Same Engine, 0.41s Different ET";
+const TITLE = "Aprilia Tuono 457 vs RS 457: same engine, 0.41s different ET";
 const DESCRIPTION =
-  "MotoQuant sims the Aprilia Tuono 457 at 13.681s and 162.2 km/h trap, 0.41s behind the RS 457 on identical engine, gearbox, and mass. Where the gap lives, India price math.";
+  "MotoQuant simulates the Aprilia Tuono 457 at 13.681s and a 162.2 km/h trap, 0.41s behind the RS 457 with the same engine, gearbox and mass. Where the gap comes from, and the Indian price math.";
 
 export const metadata = {
-  title: "Aprilia Tuono 457 vs RS 457 Quarter-Mile Physics | MotoQuant",
+  title: "Aprilia Tuono 457 vs RS 457 quarter-mile physics | MotoQuant",
   description: DESCRIPTION,
   keywords: [
     "aprilia tuono 457 quarter mile",
@@ -40,31 +40,31 @@ export const metadata = {
 const CONTENT = [
   {
     type: "lead",
-    text: "MotoQuant simulates the Aprilia Tuono 457 at 13.681 seconds and a 162.2 km/h trap at Aamby Valley in November conditions. The RS 457 (same engine, same gearbox, same 175 kg dry mass) clocks 13.275 seconds and 175.9 km/h trap on the same simulator under matched conditions. That is 0.406 seconds and 13.7 km/h on two bikes that share every internal part down to the gear ratios. The entire delta sits in two numbers: a coefficient of drag that climbs from 0.58 on the faired RS to 0.74 on the naked Tuono, and a frontal area that grows from 0.48 square metres to 0.52. There is no engine difference worth measuring. There is no gearbox difference. The Tuono 457 is an RS 457 with the fairing surgically removed, and the simulator can tell you exactly what that fairing was worth in tenths.",
+    text: "MotoQuant simulates the Aprilia Tuono 457 at 13.681 seconds and a 162.2 km/h trap at Aamby Valley in November conditions. The RS 457 (same engine, same gearbox, same 175 kg dry mass) runs 13.275 seconds and a 175.9 km/h trap in the same simulator under matched conditions. That is 0.406 seconds and 13.7 km/h between two bikes that share every internal part down to the gear ratios. The whole gap comes from two numbers. The drag coefficient climbs from 0.58 on the faired RS to 0.74 on the naked Tuono, and frontal area grows from 0.48 square metres to 0.52. The engines and gearboxes do not differ. The Tuono 457 is an RS 457 without its fairing, and the simulator shows what that fairing is worth in tenths.",
   },
   {
     type: "h2",
-    text: "What Aprilia Actually Changed",
+    text: "What Aprilia changed",
   },
   {
     type: "p",
-    text: "Aprilia launched the RS 457 at EICMA 2023 and started Indian deliveries in early 2024 through Piaggio Vehicles Private Limited. The Tuono 457 followed in late 2024 as the naked sibling. Both bikes are built at the Piaggio plant in Baramati, Maharashtra alongside the locally-assembled Vespa scooters, which is why the Aprilia 457 platform sits at a price point that imported Aprilias have never managed in India.",
+    text: "Aprilia launched the RS 457 at EICMA 2023 and started Indian deliveries in early 2024 through Piaggio Vehicles Private Limited. The Tuono 457 followed in late 2024 as the naked sibling. Both bikes are built at the Piaggio plant in Baramati, Maharashtra, next to the locally assembled Vespa scooters. That is why the Aprilia 457 platform sells at a price that imported Aprilias have never reached in India.",
   },
   {
     type: "p",
-    text: "The published spec sheets confirm the platform-twin nature of the two bikes. Both use the same 457 cc parallel twin (69 mm bore, 61.1 mm stroke, 13.1:1 compression), the same six-speed cassette gearbox (2.750 / 1.938 / 1.478 / 1.182 / 0.960 / 0.821), the same 14-tooth front and 42-tooth rear sprocket on a 520-pitch chain, and the same 175 kg dry mass. Aprilia quotes 47.6 hp for the RS 457 and 47.0 hp for the Tuono 457. The 0.6 hp difference is a stated-figures rounding artifact rather than a real tuning change, because both bikes share the same ECU map (Aprilia part number CM287101) and the same airbox geometry. The dyno reads identical on both bikes at every rpm.",
+    text: "The published spec sheets show that the two bikes are twins under the skin. Both use the same 457 cc parallel twin (69 mm bore, 61.1 mm stroke, 13.1:1 compression), the same six-speed cassette gearbox (2.750 / 1.938 / 1.478 / 1.182 / 0.960 / 0.821), the same 14-tooth front and 42-tooth rear sprocket on a 520-pitch chain, and the same 175 kg dry mass. Aprilia quotes 47.6 hp for the RS 457 and 47.0 hp for the Tuono 457. The 0.6 hp difference is rounding in the stated figures, not a tuning change. Both bikes share the same ECU map (Aprilia part number CM287101) and the same airbox geometry, and the dyno reads the same on both at every rpm.",
   },
   {
     type: "p",
-    text: "What changed is the bodywork. The RS 457 carries a full fairing with a steeply-raked windscreen, clip-on bars that push the rider into a roughly 25-degree torso angle, and a stamped bellypan that closes the bottom of the engine. The Tuono 457 swaps in a tall handlebar that raises the rider to about 8 degrees from vertical, drops the headlight cowl in place of the full fairing, and leaves the lower engine area open. The chassis underneath is identical down to the swingarm pivot location.",
+    text: "What changed is the bodywork. The RS 457 carries a full fairing with a steeply raked windscreen, clip-on bars that push the rider into a roughly 25-degree torso angle, and a stamped bellypan that closes the bottom of the engine. The Tuono 457 swaps in a tall handlebar that raises the rider to about 8 degrees from vertical, drops the headlight cowl in place of the full fairing, and leaves the lower engine area open. The chassis underneath is identical down to the swingarm pivot location.",
   },
   {
     type: "h2",
-    text: "Stock-Tune Simulation Numbers",
+    text: "Stock-tune simulation numbers",
   },
   {
     type: "p",
-    text: "Running both bikes in MotoQuant with a 78 kg rider, OEM TVS Eurogrip Protorq Extreme tires, dry asphalt, 22 degrees Celsius ambient, and density altitude approximately 1100 m (Aamby Valley in November), the stock-tune numbers come out as follows:",
+    text: "With a 78 kg rider, OEM TVS Eurogrip Protorq Extreme tires, dry asphalt, 22 degrees Celsius ambient and density altitude approximately 1100 m (Aamby Valley in November), MotoQuant gives these stock-tune numbers:",
   },
   {
     type: "table",
@@ -85,19 +85,19 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The instrumented reference data for the platform is thin because both bikes are recent India launches and the magazine community is still working through them. Autocar India published a 0-100 km/h figure of 6.1 seconds on the RS 457 in February 2024 and 6.4 seconds on the Tuono 457 in November 2024, a 0.3 second gap on the 0-100 metric that scales reasonably to the 0.41 second gap on the quarter-mile in the simulator. ZigWheels GPS-timed an Indian-market RS 457 to 13.2 seconds at the strip in March 2024; no comparable timeslip exists for the Tuono 457 yet. The simulator predicts 13.275 s for the RS 457, which matches ZigWheels within 0.075 s, well inside the entry_300_500 cluster bias band documented in the May 7 weighted-benchmark sweep.",
+    text: "There is little instrumented test data for the platform yet, because both bikes are recent India launches and magazines are still testing them. Autocar India published a 0-100 km/h figure of 6.1 seconds on the RS 457 in February 2024 and 6.4 seconds on the Tuono 457 in November 2024. That 0.3 second gap at 0-100 fits the simulator's 0.41 second gap over the quarter mile. ZigWheels GPS-timed an Indian-market RS 457 to 13.2 seconds at the strip in March 2024; no comparable timeslip exists for the Tuono 457 yet. The simulator predicts 13.275 s for the RS 457, which matches ZigWheels within 0.075 s, well inside the entry_300_500 cluster bias band documented in the May 7 weighted-benchmark sweep.",
   },
   {
     type: "callout",
-    text: "Why the 60-foot is faster on the Tuono despite the ET being slower: aerodynamic drag is negligible below 80 km/h, so the first 60 feet are pure mass-and-traction physics. The two bikes are identical in mass and traction. The Tuono's tiny 0.013 s advantage at 60 feet comes from its slightly more upright rider posture, which loads the rear tire marginally more during launch. The fairing's advantage only kicks in after the bike crosses about 90 km/h, where drag force overtakes rolling-resistance plus parasitic losses as the dominant retarding term.",
+    text: "Why is the Tuono quicker to 60 feet when its ET is slower? Aerodynamic drag is negligible below 80 km/h, so the first 60 feet come down to mass and traction, and the two bikes are identical in both. The Tuono's tiny 0.013 s advantage at 60 feet comes from its slightly more upright rider posture, which loads the rear tire a little more at launch. The fairing only starts to pay once the bike passes about 90 km/h, where drag overtakes rolling resistance plus parasitic losses as the main force slowing it.",
   },
   {
     type: "h2",
-    text: "Where the 0.41 Seconds Actually Lives",
+    text: "Where the 0.41 seconds come from",
   },
   {
     type: "p",
-    text: "Splitting the simulated delta across the two contributing factors (and there are only two, because the engine and the gearbox and the mass are identical):",
+    text: "The simulated gap splits across two factors. There are only two because the engine, the gearbox and the mass are identical:",
   },
   {
     type: "table",
@@ -110,19 +110,19 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The simulator confirms what intuition suggests: at trap speed roughly 175 km/h on the RS 457, aerodynamic drag is the dominant retarding force on the bike. Above 130 km/h, drag force exceeds engine wheel torque by enough that the bike can no longer accelerate hard in any gear. The fairing on the RS 457 reduces drag force by 28 percent at every velocity above 100 km/h, which is why the trap-speed gap is large (13.7 km/h) while the 60-foot gap is invisibly small (0.013 s).",
+    text: "At the RS 457's trap speed of roughly 175 km/h, aerodynamic drag is the largest force slowing the bike. Above 130 km/h, drag force exceeds engine wheel torque by enough that the bike can no longer accelerate hard in any gear. The fairing on the RS 457 reduces drag force by 28 percent at every velocity above 100 km/h, which is why the trap-speed gap is large (13.7 km/h) and the 60-foot gap is tiny (0.013 s).",
   },
   {
     type: "p",
-    text: "The 13.7 km/h trap-speed gap is the clearest demonstration in the catalog of how much a fairing is worth on a 47-horsepower platform. On a Hayabusa with 197 hp the same Cd delta would still produce a similar percentage trap reduction, but the absolute numbers would be larger (200+ km/h trap on the stock Hayabusa Gen 1 versus ~175 on the RS 457). On a 20 hp Pulsar 150 a fairing would buy almost nothing at the strip because peak speed sits at 115 km/h where the drag-versus-torque crossover has not yet happened. The 457 platform lives at exactly the speed range where a fairing first starts mattering, which is why the same fairing delta produces a much larger ET delta on the Aprilia than on either a smaller or a much larger displacement bike.",
+    text: "The 13.7 km/h trap-speed gap is the clearest case in the catalog of what a fairing is worth on a 47-horsepower platform. On a Hayabusa with 197 hp the same Cd delta would still produce a similar percentage trap reduction, but the absolute numbers would be larger (200+ km/h trap on the stock Hayabusa Gen 1 versus ~175 on the RS 457). On a 20 hp Pulsar 150 a fairing would buy almost nothing at the strip because peak speed sits at 115 km/h where the drag-versus-torque crossover has not yet happened. The 457 platform runs in exactly the speed range where a fairing starts to matter, so the same fairing delta produces a much larger ET delta on the Aprilia than on either a smaller or a much larger displacement bike.",
   },
   {
     type: "h2",
-    text: "Indian Price Math: When the Tuono Is the Right Answer",
+    text: "Indian price math: when the Tuono is the right answer",
   },
   {
     type: "p",
-    text: "Aprilia India lists the RS 457 at approximately ₹4.20 lakh ex-showroom Mumbai (mid-2026 dealer pricing, post the early-2026 ₹15,000 reduction) and the Tuono 457 at approximately ₹3.95 lakh ex-showroom. The Tuono saves the buyer ₹25,000 by deleting the fairing, a discount of about 6 percent on the ex-showroom price. On-road pricing in Maharashtra adds roughly ₹50,000 of taxes, insurance, and registration to both, so the practical out-the-door numbers land near ₹4.70 lakh for the RS and ₹4.45 lakh for the Tuono.",
+    text: "Aprilia India lists the RS 457 at approximately ₹4.20 lakh ex-showroom Mumbai (mid-2026 dealer pricing, post the early-2026 ₹15,000 reduction) and the Tuono 457 at approximately ₹3.95 lakh ex-showroom. Dropping the fairing saves the Tuono buyer ₹25,000, about 6 percent of the ex-showroom price. On-road pricing in Maharashtra adds roughly ₹50,000 of taxes, insurance, and registration to both, so the practical out-the-door numbers land near ₹4.70 lakh for the RS and ₹4.45 lakh for the Tuono.",
   },
   {
     type: "table",
@@ -138,19 +138,19 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "On a pure cost-per-second-of-ET metric the Tuono is marginally worse value: the RS 457 buys quarter-mile time more efficiently because the ₹25,000 fairing premium pays back in 0.41 seconds of ET reduction. But that calculation only matters if quarter-mile time is the buyer's primary use case. For a rider who values upright commuting posture, easier head-checks in city traffic, wider handlebar leverage at parking-lot speeds, and the ability to fit a tank bag without fairing clearance issues, the ₹25,000 Tuono discount is genuine money saved on a bike that loses 0.41 seconds at a venue the buyer might visit zero times per year.",
+    text: "On cost per second of ET the Tuono is slightly worse value: the RS 457 buys quarter-mile time more efficiently, because its ₹25,000 fairing premium pays back in 0.41 seconds of ET. That only matters if quarter-mile time is what the buyer mainly wants. For a rider who wants an upright commuting posture, easier head-checks in city traffic, wider handlebar leverage at parking-lot speeds and room for a tank bag without fairing clearance issues, the ₹25,000 Tuono discount is real money saved. The bike loses 0.41 seconds at a venue that buyer may never visit.",
   },
   {
     type: "p",
-    text: "The competitive comparison inside the Indian entry-naked twin segment is interesting. The Tuono 457 at ₹3.95 lakh and 47 hp directly competes with the KTM 390 Duke (₹3.30 lakh, 45 hp, 165 kg), the Bajaj Pulsar NS400Z (₹1.92 lakh, 39 hp, 174 kg), and the Triumph Speed 400 (₹2.40 lakh, 39.5 hp, 170 kg). On simulated quarter-mile ET against the catalog, the Tuono 457 at 13.68 s sits behind the 390 Duke (13.42 s, lighter and shorter gearing) but ahead of the NS400Z (13.95 s, heavier and less peaky) and the Speed 400 (14.12 s, single-cylinder torque-curve disadvantage). The Tuono is the slowest premium-twin in its price band on raw ET but offers the most refined twin-cylinder character of the four: relevant for street riding, irrelevant at the strip.",
+    text: "In the Indian entry-naked segment, the Tuono 457 at ₹3.95 lakh and 47 hp competes directly with the KTM 390 Duke (₹3.30 lakh, 45 hp, 165 kg), the Bajaj Pulsar NS400Z (₹1.92 lakh, 39 hp, 174 kg), and the Triumph Speed 400 (₹2.40 lakh, 39.5 hp, 170 kg). On simulated quarter-mile ET, the Tuono 457 at 13.68 s sits behind the 390 Duke (13.42 s, lighter and shorter gearing) but ahead of the NS400Z (13.95 s, heavier and less peaky) and the Speed 400 (14.12 s, single-cylinder torque-curve disadvantage). The Tuono is the slowest premium twin in its price band on raw ET, but it has the most refined twin-cylinder character of the four. That counts on the street and not at all at the strip.",
   },
   {
     type: "h2",
-    text: "Cost-Per-Tenth Mods for the Tuono 457",
+    text: "Cost-per-tenth mods for the Tuono 457",
   },
   {
     type: "p",
-    text: "If a Tuono 457 owner wants to close the ET gap to the RS 457 (or just go faster generally), the cost-per-tenth ladder looks like this. All prices are Indian retail estimates (INR landed) from established dealers as of May 2026; actual quotes will vary by city and dealer:",
+    text: "For a Tuono 457 owner who wants to close the ET gap to the RS 457, or just go faster, this is the cost-per-tenth ladder. All prices are Indian retail estimates (INR landed) from established dealers as of May 2026; quotes vary by city and dealer:",
   },
   {
     type: "table",
@@ -171,27 +171,27 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The DNA Stage 2 air filter at ₹4,200 is the best general-purpose mod on the platform because it works synergistically with the Aprilia Performance ECU remap. The filter alone produces a marginal 0.04 second gain; the remap alone produces 0.08 seconds. Stacked together they produce about 0.13 seconds because the remap can open the fuel-trim cells that the filter unlocked. This is the only mod stack where the synergy effect is measurable in the simulator on this platform; most other stacks (exhaust plus filter, exhaust plus remap) show roughly additive behaviour rather than multiplicative.",
+    text: "The DNA Stage 2 air filter at ₹4,200 is the best general-purpose mod on the platform because it works with the Aprilia Performance ECU remap. The filter alone gives a small 0.04 second gain and the remap alone gives 0.08 seconds. Together they give about 0.13 seconds, because the remap can open the fuel-trim cells that the filter freed up. On this platform it is the only stack where the simulator shows a measurable gain beyond the sum of the parts; most other stacks (exhaust plus filter, exhaust plus remap) roughly add up.",
   },
   {
     type: "p",
-    text: "The most expensive tenth on the platform is the SC-Project S1 slip-on at ₹68,000, and the simulator predicts only 0.10 seconds of ET gain, which works out to ₹6.8 lakh per second of ET. For a buyer chasing visible performance gains rather than acoustic character, the slip-on is the wrong purchase. For a buyer who wants the bike to sound like a proper twin, the slip-on is the right purchase at the wrong cost-per-tenth; those two goals do not need to align.",
+    text: "The most expensive tenth on the platform is the SC-Project S1 slip-on at ₹68,000, and the simulator predicts only 0.10 seconds of ET gain, which works out to ₹6.8 lakh per second of ET. If you want ET, the slip-on is the wrong purchase. If you want the bike to sound like a proper twin, it is the right purchase at the wrong cost per tenth; those two goals do not have to agree.",
   },
   {
     type: "h2",
-    text: "What the Tuono 457 Cannot Do",
+    text: "What the Tuono 457 cannot do",
   },
   {
     type: "p",
-    text: "Two limits worth understanding on the platform. First, peak power on the 457 twin lives at 9400 rpm and the redline sits at 10,500 rpm. The rev range above peak power is only 1100 rpm wide, which means the engine runs out of usable power before the rev limiter intervenes. Aprilia's published gearbox ratios push the bike to roughly 13,000 rpm in top gear at indicated top speed (around 170 km/h on the RS 457, around 156 km/h on the Tuono 457). The simulator confirms both bikes hit the rev limiter in fifth gear and never reach sixth at all during a quarter-mile run. Sixth is a fuel-economy gear, not a performance gear, and the 0.821 ratio is too tall to be useful at any speed below 175 km/h on the Tuono. This is a tuning-fork constraint baked into the platform; no software remap can change it without raising the rev limit.",
+    text: "The platform has two limits. First, peak power on the 457 twin lives at 9400 rpm and the redline sits at 10,500 rpm. The rev range above peak power is only 1100 rpm wide, so the engine runs out of usable power before the rev limiter cuts in. Aprilia's published gearbox ratios push the bike to roughly 13,000 rpm in top gear at indicated top speed (around 170 km/h on the RS 457, around 156 km/h on the Tuono 457). The simulator confirms both bikes hit the rev limiter in fifth gear and never reach sixth at all during a quarter-mile run. Sixth is a fuel-economy gear, not a performance gear, and the 0.821 ratio is too tall to be useful at any speed below 175 km/h on the Tuono. This is built into the platform; no software remap can change it without raising the rev limit.",
   },
   {
     type: "p",
-    text: "Second, the platform is launch-traction limited at Aamby Valley density altitude. The simulator launches both bikes with a 5400 rpm clutch drop and 0.91 g initial acceleration; pushing launch rpm higher than 5800 produces wheelspin in the slip phase rather than additional forward thrust. The 175 kg dry mass and the 1365 mm wheelbase are not enough to plant the rear tire harder than that under 47 horsepower, even with sticky aftermarket tires. The traction ceiling effectively caps the 60-foot time at about 2.45 seconds regardless of rider technique or aftermarket part choice. A drag-prepped Tuono 457 with sticky tires, weight added to the rear, and a wheelie bar could probably reach 2.30 seconds at the 60-foot, but for an unmodified bike on a street-tire setup, 2.45 is the floor.",
+    text: "Second, the platform is launch-traction limited at Aamby Valley density altitude. The simulator launches both bikes with a 5400 rpm clutch drop and 0.91 g initial acceleration; pushing launch rpm higher than 5800 produces wheelspin in the slip phase rather than additional forward thrust. The 175 kg dry mass and the 1365 mm wheelbase are not enough to plant the rear tire harder than that under 47 horsepower, even with sticky aftermarket tires. The traction ceiling caps the 60-foot time at about 2.45 seconds regardless of rider technique or aftermarket part choice. A drag-prepped Tuono 457 with sticky tires, weight added to the rear, and a wheelie bar could probably reach 2.30 seconds at the 60-foot, but for an unmodified bike on a street-tire setup, 2.45 is the floor.",
   },
   {
     type: "h2",
-    text: "Compared to the Bigger Aprilias",
+    text: "Compared to the bigger Aprilias",
   },
   {
     type: "p",
@@ -209,35 +209,35 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The Tuono 457 is 2.35 seconds slower than the Tuono 660 and 3.84 seconds slower than the Tuono V4 1100, despite costing roughly one-quarter and one-sixth as much. The performance-per-rupee curve flattens dramatically above the 660: the V4 1100 is 1.17 seconds quicker than the Factory for an extra ₹7.31 lakh. The 457 is the entry into the Aprilia naked range and deliberately undersized for the segment; anyone wanting to actually race a Tuono platform should look at the 660 Factory.",
+    text: "The Tuono 457 is 2.35 seconds slower than the Tuono 660 and 3.84 seconds slower than the Tuono V4 1100, despite costing roughly one-quarter and one-sixth as much. The performance-per-rupee curve flattens sharply above the 660: the V4 1100 is 1.17 seconds quicker than the Factory for an extra ₹7.31 lakh. The 457 is the entry into the Aprilia naked range and deliberately undersized for the segment. If you want to race a Tuono, look at the 660 Factory.",
   },
   {
     type: "p",
-    text: "What the 457 does offer is the cheapest path into ownership of any Aprilia engine in the Indian market. The 457 platform is the only Aprilia priced below ₹5 lakh ex-showroom; the next-cheapest is the Tuono 660 at ₹13.95 lakh, which sits in a different income bracket entirely. For a buyer who wants Aprilia chassis design, Brembo brakes (the 457 carries radial-mount calipers as standard), and a parallel-twin character at a price point that competes with single-cylinder commuter bikes, the Tuono 457 is the only option in the entire Indian motorcycle market.",
+    text: "What the 457 does offer is the cheapest way to own an Aprilia engine in the Indian market. The 457 platform is the only Aprilia priced below ₹5 lakh ex-showroom; the next-cheapest is the Tuono 660 at ₹13.95 lakh, which is a different income bracket. For a buyer who wants Aprilia chassis design, Brembo brakes (the 457 carries radial-mount calipers as standard), and a parallel-twin character at a price point that competes with single-cylinder commuter bikes, the Tuono 457 is the only option in the Indian motorcycle market.",
   },
   {
     type: "h2",
-    text: "The Honest Take",
+    text: "The verdict",
   },
   {
     type: "p",
-    text: "The Aprilia Tuono 457 at 13.68 seconds simulated is the slowest premium twin in the Indian sub-₹4-lakh segment, slightly behind the KTM 390 Duke (13.42 s) and well behind the RS 457 platform sibling (13.27 s). For a strip-focused buyer the Tuono 457 is the wrong choice: the RS 457 is 0.41 seconds quicker and costs only ₹25,000 more, which works out to ₹61,000 per second of ET. There is no version of that math where the Tuono wins on dragstrip economics.",
+    text: "The Aprilia Tuono 457 at 13.68 seconds simulated is the slowest premium twin in the Indian sub-₹4-lakh segment, slightly behind the KTM 390 Duke (13.42 s) and well behind the RS 457 platform sibling (13.27 s). For a strip-focused buyer the Tuono 457 is the wrong choice: the RS 457 is 0.41 seconds quicker and costs only ₹25,000 more, which works out to ₹61,000 per second of ET. On dragstrip economics the Tuono does not win.",
   },
   {
     type: "p",
-    text: "For a street-focused buyer the math flips. The Tuono saves ₹25,000 at the dealer, offers a more comfortable riding posture for daily commuting and longer rides, and gives up performance only at speeds the rider rarely sees. The 13.7 km/h trap-speed gap is meaningful at a dragstrip and effectively invisible on Mumbai-Pune Expressway commuting. For Indian Tuono 457 ownership the comparison is not Tuono-vs-RS; it is Tuono-vs-Duke-390 and Tuono-vs-NS400Z, where the parallel-twin character, the Brembo brake hardware, and the Piaggio dealer network make the Tuono competitive even at its higher price point.",
+    text: "For a street-focused buyer the math flips. The Tuono saves ₹25,000 at the dealer, offers a more comfortable riding posture for daily commuting and longer rides, and gives up performance only at speeds the rider rarely sees. The 13.7 km/h trap-speed gap matters at a dragstrip and goes unnoticed on a Mumbai-Pune Expressway commute. For an Indian Tuono 457 buyer the real comparison is with the Duke 390 and the NS400Z, where the parallel-twin character, the Brembo brake hardware and the Piaggio dealer network make the Tuono competitive even at its higher price.",
   },
   {
     type: "p",
-    text: "The simulator runs the Tuono 457 in the entry_300_500 cluster (bias on that band is approximately +0.18 s; sim runs slightly slow versus magazine numbers) so real-world Aamby Valley ET in skilled hands probably lands between 13.45 and 13.55 seconds. The 457 platform is not the fastest bike in its price band, but the Tuono 457 is a genuinely interesting entry point into premium Indian motorcycling for a buyer willing to accept that the fairing was doing real work.",
+    text: "The simulator runs the Tuono 457 in the entry_300_500 cluster (bias on that band is approximately +0.18 s; sim runs slightly slow versus magazine numbers) so real-world Aamby Valley ET in skilled hands probably lands between 13.45 and 13.55 seconds. The 457 platform is not the fastest in its price band. The Tuono 457 is an interesting way into premium motorcycling in India, for a buyer who accepts that the fairing was doing real work.",
   },
   {
     type: "h2",
-    text: "Run Your Own Numbers",
+    text: "Run your own numbers",
   },
   {
     type: "p",
-    text: "The simulator at motoquant.in lets you sweep rider weight, density altitude, ambient temperature, and parts-catalog mods to see exactly where the tenths come from on a Tuono 457 in your conditions. Load the bike with your actual rider weight (the 78 kg simulated default is heavy for a typical Indian rider; most riders save 0.05 to 0.10 seconds just by entering their real number), set the venue to MMRT Chennai if you race there (78 metres altitude, denser air, approximately 0.12 s quicker than Aamby Valley November), and watch the ET prediction update live. The parts catalog inside the simulator carries every entry from the cost-per-tenth table above, with real Indian-retail prices that update on every dealer-data refresh.",
+    text: "In the simulator at motoquant.in you can sweep rider weight, density altitude, ambient temperature and parts-catalog mods to see where the tenths come from on a Tuono 457 in your conditions. Enter your actual rider weight: the 78 kg simulated default is heavy for a typical Indian rider, and most riders save 0.05 to 0.10 seconds just by entering their real number. If you race at MMRT Chennai, set the venue there (78 metres altitude, denser air, approximately 0.12 s quicker than Aamby Valley November) and watch the ET prediction update live. The parts catalog in the simulator carries every entry from the cost-per-tenth table above, with real Indian-retail prices that update on every dealer-data refresh.",
   },
 ];
 
@@ -344,7 +344,7 @@ export default function PostPage() {
             ))}
           </div>
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
-            Aprilia Tuono 457 vs RS 457: Same Engine, 0.41s Different ET
+            Aprilia Tuono 457 vs RS 457: same engine, 0.41s different ET
           </h1>
           <div className="text-sm text-white/60 mb-12">
             31 May 2026 · 13 min read · MotoQuant Blog
@@ -363,9 +363,9 @@ export default function PostPage() {
                 href="/blog/aprilia-tuono-660-factory-quarter-mile-physics"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                Aprilia Tuono 660 Factory Quarter-Mile Physics: 11.02s on the Strip
+                Aprilia Tuono 660 Factory quarter-mile physics: 11.02s on the strip
               </Link>:{" "}
-              the next rung up the Aprilia naked ladder, with a 0.31s fairing-free gap to the RS 660 platform-mate.
+              the next rung up the Aprilia naked ladder, with a 0.31s naked-vs-faired gap to the RS 660 platform-mate.
             </li>
             <li>
               ·{" "}
@@ -373,9 +373,9 @@ export default function PostPage() {
                 href="/blog/ktm-duke-390-vs-rc-390-quarter-mile-physics"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                KTM Duke 390 vs RC 390: Quarter-Mile Physics
+                KTM Duke 390 vs RC 390: quarter-mile physics
               </Link>:{" "}
-              the direct rival to the Tuono 457 in the Indian entry-naked segment, with the same naked-vs-faired physics tradeoff.
+              the Tuono 457's direct rival in the Indian entry-naked segment, with the same naked-vs-faired trade-off.
             </li>
             <li>
               ·{" "}
@@ -383,9 +383,9 @@ export default function PostPage() {
                 href="/blog/pulsar-ns400z-quarter-mile-physics"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                Pulsar NS400Z Quarter-Mile Physics
+                Pulsar NS400Z quarter-mile physics
               </Link>:{" "}
-              the Indian sub-₹2-lakh single-cylinder alternative that the Tuono 457 has to justify its price premium against.
+              the sub-₹2-lakh single-cylinder alternative the Tuono 457 has to justify its price against.
             </li>
             <li>
               ·{" "}
@@ -393,16 +393,16 @@ export default function PostPage() {
                 href="/blog/how-to-tune-for-mmrt-chennai"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                How to Tune for MMRT Chennai
+                How to tune for MMRT Chennai
               </Link>:{" "}
-              sea-level venue tuning math used for the alternate-venue numbers in this post.
+              the sea-level venue math behind this post's alternate-venue numbers.
             </li>
             <li>
               ·{" "}
               <Link href="/bikes" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Browse the full bike catalog
               </Link>:{" "}
-              including the Tuono 457, RS 457, and every Aprilia 457 platform variant with full published specs.
+              including the Tuono 457, the RS 457 and every Aprilia 457 platform variant, with full published specs.
             </li>
           </ul>
         </div>
@@ -412,7 +412,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Run the Tuono 457 yourself</div>
             <div className="text-white/60 text-sm">
-              Free simulator: dial in your weight, your venue, your mods, and watch the ET update live.
+              Free simulator: set your weight, venue and mods, and watch the ET update live.
             </div>
           </div>
           <Link

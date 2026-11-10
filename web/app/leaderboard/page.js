@@ -25,7 +25,7 @@ export default function LeaderboardPage() {
       <SiteNav />
       <PageHeader
         title="Leaderboard"
-        lede={`Every bike in the catalog, stock, with a ${data.rider_kg} kg rider, in the same air: ${conditions}. These are simulated times, so the order is the physics talking, not a race result.`}
+        lede={`Every bike in the catalog, stock, with a ${data.rider_kg} kg rider, in the same air: ${conditions}. These are simulated times, not race results.`}
         maxWidth="max-w-5xl"
       />
       <section className="px-4 pb-16 sm:px-6 md:pb-24">

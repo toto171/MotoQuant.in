@@ -286,6 +286,10 @@ class TestRequestShape(unittest.TestCase):
         self.assertEqual(kw["betas"], [FALLBACK_BETA])
         self.assertEqual(kw["fallbacks"], "default")
         self.assertEqual(kw["thinking"], {"type": "adaptive"})
+        # A one-shot call: the system block is cached, the query tail is not
+        # (a top-level marker would pay for a cache write never read back).
+        self.assertEqual(kw["system"][0]["cache_control"], {"type": "ephemeral"})
+        self.assertNotIn("cache_control", kw)
 
     def test_classic_parse_retries_once_on_unusable_json_then_fails(self):
         c, sdk = make_client([msg([text("{not json")], "max_tokens")])
@@ -304,6 +308,7 @@ class TestRequestShape(unittest.TestCase):
         kw = sdk.calls[0]
         self.assertEqual(kw["thinking"], {"type": "adaptive"})
         self.assertEqual(kw["system"][0]["cache_control"], {"type": "ephemeral"})
+        self.assertNotIn("cache_control", kw)
         self.assertNotIn("tool_choice", kw)
 
     def test_forced_tool_choice_is_refused_by_the_builder(self):
@@ -463,6 +468,22 @@ class TestAgentLoop(unittest.TestCase):
         self.assertEqual([b["type"] for b in last["content"]], ["tool_result", "text"])
         self.assertTrue(_no_repeated_roles(final["messages"]))
 
+    def test_rank_result_says_how_many_bikes_were_simulated(self):
+        def respond(kw):
+            if len(kw["messages"]) == 1:
+                return msg([tool_use("r1", "rank_bikes", {"top_n": 3})], "tool_use")
+            return msg([text("ranked")], "end_turn")
+
+        c, _ = make_client([respond])
+        res = run_agent_chat("quickest bikes", _db(), client=c)
+        self.assertIsNone(res.error, res.error_detail)
+        payload = res.last_block("rank_result")
+        # top_n 3 simulates max(3 + 2, 5) = 5 bikes from a shortlist of 12.
+        self.assertEqual(payload["candidates_simulated"], 5)
+        self.assertEqual(payload["candidates_considered"], 12)
+        self.assertIn("top 5", payload["method"])
+        self.assertEqual(len(payload["ranking"]), 3)
+
     def test_unconfigured_client_is_assistant_unavailable(self):
         c = LLMClient(own_key=True, api_key=None)
         res = run_agent_chat("q", _db(), client=c)
@@ -616,7 +637,9 @@ class TestKeysAndErrors(unittest.TestCase):
             self.assertFalse(bad.is_configured)
             built = []
             with mock.patch.object(
-                client_mod, "_build_sdk", lambda k, t: built.append(k) or FakeSDK([])
+                client_mod,
+                "_build_sdk",
+                lambda k, t, **_: built.append(k) or FakeSDK([]),
             ):
                 visitor = fake_key("v")
                 LLMClient(own_key=True, api_key=visitor)._get_sdk()
@@ -625,6 +648,46 @@ class TestKeysAndErrors(unittest.TestCase):
             self.assertNotIn(visitor, client_mod._SERVER_SDK)
             self.assertIn(server, built)
         client_mod._SERVER_SDK.clear()
+
+    def test_visitor_client_ignores_the_operators_gateway_settings(self):
+        env = {
+            "ANTHROPIC_API_KEY": fake_key("s"),
+            "ANTHROPIC_BASE_URL": "https://gateway.example.test",
+            "ANTHROPIC_CUSTOM_HEADERS": "X-Gw-Auth: opsecret\nX-Other: 1",
+        }
+        client_mod._SERVER_SDK.clear()
+        try:
+            with mock.patch.dict(os.environ, env):
+                visitor = fake_key("v")
+                vc = LLMClient("mechanic", api_key=visitor, own_key=True)
+                sdk = vc._get_sdk()
+                self.assertEqual(
+                    str(sdk.base_url).rstrip("/"), client_mod.ANTHROPIC_API_URL
+                )
+                headers = {k.lower(): v for k, v in sdk.default_headers.items()}
+                self.assertNotIn("x-gw-auth", headers)
+                self.assertNotIn("x-other", headers)
+                self.assertNotIn("opsecret", json.dumps(headers, default=str))
+                # The visitor's own key is what authenticates the request.
+                self.assertTrue(any(visitor in str(v) for v in headers.values()))
+                vc.close()
+                # The server key keeps the operator's settings.
+                server = LLMClient("mechanic")._get_sdk()
+                self.assertIn("gateway.example.test", str(server.base_url))
+                server_headers = {k.lower() for k in server.default_headers}
+                self.assertIn("x-gw-auth", server_headers)
+        finally:
+            client_mod._SERVER_SDK.clear()
+
+    def test_timeout_fits_a_full_non_streaming_turn(self):
+        sdk = client_mod._build_sdk(
+            fake_key(), client_mod.DEFAULT_TIMEOUT_S, visitor=True
+        )
+        # 600 s is the SDK's own allowance for a non-streaming 16k-token call.
+        self.assertGreaterEqual(client_mod.DEFAULT_TIMEOUT_S, 600.0)
+        self.assertEqual(sdk.timeout, client_mod.DEFAULT_TIMEOUT_S)
+        self.assertEqual(sdk.max_retries, client_mod.MAX_RETRIES)
+        sdk.close()
 
     def test_repr_and_close_drop_the_key(self):
         k = fake_key()
@@ -685,6 +748,42 @@ class TestKeysAndErrors(unittest.TestCase):
             self.assertEqual(
                 self._err_result(e, own_key=False).error, "free_assistant_resting"
             )
+
+    def _spend_limit_429(self):
+        return api_error(
+            anthropic.RateLimitError,
+            429,
+            "You have reached your specified API usage limits.",
+            body={
+                "type": "error",
+                "error": {
+                    "type": "rate_limit_error",
+                    "message": "You have reached your specified API usage limits.",
+                    "details": {"error_code": "enforced_spend_limit_reached"},
+                },
+            },
+        )
+
+    def test_spend_limit_429_on_the_server_key_is_resting(self):
+        with mock.patch.dict(os.environ, {"ANTHROPIC_API_KEY": fake_key("s")}):
+            client_mod.reset_server_key_resting()
+            res = self._err_result(self._spend_limit_429(), own_key=False)
+            self.assertEqual(res.error, "free_assistant_resting")
+            self.assertTrue(client_mod.server_key_resting())
+            self.assertFalse(client_mod.free_assistant_available())
+            self.assertNotIn("today", res.error_detail)
+        client_mod.reset_server_key_resting()
+
+    def test_spend_limit_429_on_a_visitor_key_is_key_rejected(self):
+        client_mod.reset_server_key_resting()
+        res = self._err_result(self._spend_limit_429(), own_key=True)
+        self.assertEqual(res.error, "key_rejected")
+        self.assertFalse(client_mod.server_key_resting())
+
+    def test_spend_limit_code_is_read_from_the_attribute_too(self):
+        e = api_error(anthropic.RateLimitError, 429, "slow down")
+        e.error_code = "enforced_spend_limit_reached"
+        self.assertEqual(self._err_result(e).error, "key_rejected")
 
     def test_visitor_credit_exhausted_is_key_rejected_not_resting(self):
         e = api_error(anthropic.BadRequestError, 400, "Your credit balance is too low")

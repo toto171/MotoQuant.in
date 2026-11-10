@@ -6,7 +6,7 @@
 import StructuredData, { SITE_URL } from '../../StructuredData';
 
 const SLUG = 'best-mods-for-ktm-rc-390-budget-vs-cost-per-tenth';
-const TITLE = 'Best Mods for KTM RC 390 in India: A Cost-Per-Tenth Ladder';
+const TITLE = 'Best mods for KTM RC 390 in India: a cost-per-tenth ladder';
 
 function breadcrumbs() {
   return {

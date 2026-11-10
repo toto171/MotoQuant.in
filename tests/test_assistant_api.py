@@ -118,7 +118,10 @@ class _ApiTest(unittest.TestCase):
         self._env = mock.patch.dict(os.environ, {"ANTHROPIC_API_KEY": self.SERVER_KEY})
         self._env.start()
 
-        def build(key, _timeout):
+        self.visitor_flags: list[bool] = []
+
+        def build(key, _timeout, *, visitor=False):
+            self.visitor_flags.append(visitor)
             sdk = _FakeSDK(key, self.calls, lambda kw: self.reply)
             self.built.append(sdk)
             return sdk
@@ -199,6 +202,8 @@ class TestVisitorKey(_ApiTest):
         self.assertEqual(d["assistant"], "doctor")
         self.assertEqual([c["key"] for c in self.calls], [self.VISITOR_KEY])
         self.assertEqual(self.calls[0]["kwargs"]["model"], "claude-opus-5-5")
+        # Built as a visitor client: api.anthropic.com, no env headers.
+        self.assertEqual(self.visitor_flags, [True])
         # Never cached, closed after the turn, never echoed back.
         self.assertNotIn(self.VISITOR_KEY, client_mod._SERVER_SDK)
         self.assertTrue(self.built[0].closed)
@@ -212,6 +217,7 @@ class TestVisitorKey(_ApiTest):
         self.assertEqual(d["assistant"], "mechanic")
         self.assertEqual([c["key"] for c in self.calls], [self.SERVER_KEY])
         self.assertEqual(self.calls[0]["kwargs"]["model"], "claude-sonnet-5-5")
+        self.assertEqual(self.visitor_flags, [False])
 
     def test_visitor_key_never_falls_back_to_the_server_key(self):
         self.reply = anthropic.AuthenticationError(
@@ -277,9 +283,32 @@ class TestVisitorKey(_ApiTest):
         d = self.chat().json()
         self.assertEqual(d["error"], "free_assistant_resting")
         self.assertEqual(self.calls, [])
+        # The rest lasts minutes, not the day.
+        self.assertNotIn("today", d["error_detail"])
+        self.assertIn("for now", d["error_detail"])
         # ...but a visitor key still works.
         d = self.chat(key=self.VISITOR_KEY).json()
         self.assertIsNone(d["error"], d)
+
+    def test_server_spend_limit_429_marks_the_free_assistant_resting(self):
+        self.reply = anthropic.RateLimitError(
+            "You have reached your specified API usage limits.",
+            response=_http_response(429),
+            body={
+                "type": "error",
+                "error": {
+                    "type": "rate_limit_error",
+                    "message": "You have reached your specified API usage limits.",
+                    "details": {"error_code": "enforced_spend_limit_reached"},
+                },
+            },
+        )
+        self.assertEqual(self.chat().json()["error"], "free_assistant_resting")
+        self.assertFalse(self.client.get("/api/assistant").json()["free_available"])
+        n = len(self.calls)
+        # The next keyless question is answered without a model call.
+        self.assertEqual(self.chat().json()["error"], "free_assistant_resting")
+        self.assertEqual(len(self.calls), n)
 
     def test_server_credit_error_marks_the_free_assistant_resting(self):
         self.reply = anthropic.BadRequestError(
@@ -317,6 +346,21 @@ class TestDailyCap(_ApiTest):
         r = self.chat({"query": "x"}, key=self.VISITOR_KEY, path="/api/jobs/chat")
         self.assertEqual(r.status_code, 202)
         # The server key still has its whole allowance.
+        self.assertEqual(self.chat({"query": "x"}).status_code, 200)
+        self._assert_daily_429(self.chat({"query": "x"}))
+
+    def test_no_server_key_does_not_spend_the_cap(self):
+        self.api.CHAT_DAILY_LIMIT = 1
+        with mock.patch.dict(os.environ, {"ANTHROPIC_API_KEY": ""}):
+            for path in ("/api/chat", "/api/jobs/chat", "/api/chat"):
+                r = self.chat({"query": "x", "assistant": "doctor"}, path=path)
+                self.assertIn(r.status_code, (200, 202), r.text[:300])
+                d = r.json() if r.status_code == 200 else None
+                if d is None:
+                    d = self.wait_job(r.json()["job_id"])["result"]
+                self.assertEqual(d["error"], "assistant_unavailable")
+        self.assertEqual(self.calls, [])
+        # The whole allowance is still there once the server has a key.
         self.assertEqual(self.chat({"query": "x"}).status_code, 200)
         self._assert_daily_429(self.chat({"query": "x"}))
 

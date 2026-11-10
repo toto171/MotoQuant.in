@@ -7,7 +7,7 @@ const REPO = 'https://github.com/toto171/MotoQuant.in';
 const SLUG = 'motoquant-2-0-is-open-source';
 
 export const metadata = {
-  title: 'MotoQuant 2.0 Is Open Source, Including Where It Is Wrong | MotoQuant Blog',
+  title: 'MotoQuant 2.0 is open source, including where it is wrong | MotoQuant Blog',
   description:
     'MotoQuant 2.0 is free and open source under Apache-2.0, with no accounts and no paid plans. What it gets right, where it is still wrong, and how a timeslip from you makes it better.',
   keywords: [
@@ -29,7 +29,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'MotoQuant 2.0 is out, and the whole thing is now free and open source under the Apache License 2.0: the physics engine, the catalog of 534 bikes, the website and the test suite. There are no accounts and no paid plans. Before you trust a number from it, though, you should know where it is wrong, so most of this post is about that.',
+    text: 'MotoQuant 2.0 is out, and the whole thing is now free and open source under the Apache License 2.0: the physics engine, the catalog of 534 bikes, the website and the test suite. There are no accounts and no paid plans. Before you trust a number from it, you should know where it is wrong, so most of this post is about that.',
   },
   { type: 'h2', text: 'Where it is good' },
   {
@@ -69,7 +69,7 @@ const CONTENT = [
   { type: 'h2', text: 'How you can make it better' },
   {
     type: 'p',
-    text: 'The single most useful thing is a real run. If you have a Dragy, a VBOX or a timeslip from a drag strip, especially for a bike under 400 cc, send it with the "Submit a timeslip" form on GitHub. A maintainer checks each one before it joins the benchmark set, and every accepted run tightens the numbers for everyone who rides that kind of bike.',
+    text: 'The most useful thing you can send is a real run. If you have a Dragy, a VBOX or a timeslip from a drag strip, especially for a bike under 400 cc, send it with the "Submit a timeslip" form on GitHub. A maintainer checks each one before it joins the benchmark set, and every accepted run tightens the numbers for everyone who rides that kind of bike.',
   },
   {
     type: 'p',
