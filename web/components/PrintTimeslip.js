@@ -19,9 +19,9 @@ export default function PrintTimeslip({ run, id }) {
   const bikeName = [run.manufacturer, run.model].filter(Boolean).join(' ') || 'Motorcycle';
   const et = Number(run.et_quarter_s).toFixed(3);
   const splits = [
-    { label: '60 ft', value: run.time_60ft_s },
+    { label: 'First 60 ft (launch)', value: run.time_60ft_s },
     { label: '330 ft', value: run.time_330ft_s },
-    { label: '1/8 mile', value: run.et_eighth_s },
+    { label: 'Halfway — ⅛ mile', value: run.et_eighth_s },
     { label: '1000 ft', value: run.time_1000ft_s },
   ].filter((s) => s.value != null);
 
@@ -33,12 +33,10 @@ export default function PrintTimeslip({ run, id }) {
           <p className="font-display font-bold text-2xl tracking-tight">
             Moto<span className="text-accent">Quant</span>
           </p>
-          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500">
-            motoquant.in
-          </p>
+          <p className="text-xs text-neutral-500">motoquant.in</p>
         </div>
-        <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500">
-          Motoquant timing assoc · official timeslip · run #{id || '—'}
+        <p className="mt-1 text-xs text-neutral-500">
+          MotoQuant simulated timeslip · run #{id || '—'}
         </p>
       </header>
 
@@ -49,23 +47,21 @@ export default function PrintTimeslip({ run, id }) {
         {bikeName}
         {run.year ? <span className="text-neutral-500"> · {run.year}</span> : null}
       </h1>
-      <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-600">
-        {run.venue || 'venue —'}
+      <p className="mt-1 text-sm text-neutral-600">
+        {run.venue ? `Conditions: ${run.venue}` : 'Venue not recorded'}
         {run.created_at ? ` · ${String(run.created_at).slice(0, 10)}` : ''}
       </p>
 
       {/* headline ET + trap */}
       <div className="mt-8 text-center">
-        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500">
-          Quarter-mile ET
-        </p>
+        <p className="text-sm text-neutral-500">Quarter-mile time</p>
         <p className="mt-2 font-mono font-bold text-6xl leading-none tabular-nums">
           {et}
           <span className="text-2xl font-semibold text-neutral-500"> s</span>
         </p>
         {run.trap_speed_kmh ? (
           <p className="mt-3 font-mono text-sm text-neutral-600 tabular-nums">
-            Trap speed {Number(run.trap_speed_kmh).toFixed(1)} km/h
+            Finish-line speed {Number(run.trap_speed_kmh).toFixed(1)} km/h
           </p>
         ) : null}
       </div>
@@ -77,19 +73,19 @@ export default function PrintTimeslip({ run, id }) {
             key={s.label}
             className="flex items-baseline justify-between border-b border-dashed border-neutral-300 py-2 font-mono text-sm tabular-nums"
           >
-            <span className="uppercase tracking-[0.15em] text-xs text-neutral-500">{s.label}</span>
+            <span className="text-sm text-neutral-600">{s.label}</span>
             <span className="font-semibold">{Number(s.value).toFixed(3)}s</span>
           </div>
         ))}
         <div className="flex items-baseline justify-between py-2 font-mono text-sm tabular-nums">
-          <span className="uppercase tracking-[0.15em] text-xs font-semibold">1/4 mile</span>
+          <span className="text-sm font-semibold">Quarter mile</span>
           <span className="font-bold">{et}s</span>
         </div>
       </div>
 
       {/* honest footer */}
-      <div className="mt-10 flex items-baseline justify-between gap-4 border-t border-dashed border-neutral-400 pt-3 font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-500">
-        <span>Simulated on the MotoQuant physics engine</span>
+      <div className="mt-10 flex items-baseline justify-between gap-4 border-t border-dashed border-neutral-400 pt-3 text-xs text-neutral-500">
+        <span>Simulated by MotoQuant. Not a stopwatch time.</span>
         <span>motoquant.in/r/{id || ''}</span>
       </div>
     </div>

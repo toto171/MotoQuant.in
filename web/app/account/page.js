@@ -7,10 +7,10 @@
  * optional and exist only to save runs — there are no tiers or plans.
  * Requires authentication — redirects to /login if not signed in.
  *
- * IGNITION v5 (July 2026): PageHero ("Your garage") + stacked `.card`
- * sections — Profile, Garage (bike names in display face, ETs mono,
- * venue chips, rows link to /r/[id]), Security. ActionButton + useAsyncTask
- * on every submit so the button itself is the progress bar.
+ * v6 (CLARITY): PageHeader ("Your saved runs"), then compact `.card`
+ * sections — account, saved runs (rows link to /r/[id]) and password.
+ * ActionButton + useAsyncTask on every submit so the button is the
+ * progress bar.
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -18,8 +18,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../../components/AuthProvider";
 import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
-import PageHero from "../../components/PageHero";
-import { Reveal } from "../../components/Reveal";
+import PageHeader from "../../components/PageHeader";
+import Link from "next/link";
 import ActionButton from "../../components/ActionButton";
 import { SkeletonCard, SkeletonTable } from "../../components/Skeleton";
 import useAsyncTask from "../../lib/useAsyncTask";
@@ -69,7 +69,7 @@ export default function AccountPage() {
   const pwTask = useAsyncTask(async (signal) => {
     setPwMsg(null);
     if (pwNew.length < 8) {
-      throw new Error("New password must be at least 8 characters.");
+      throw new Error("Choose a new password with at least 8 characters.");
     }
     const res = await fetch(`${API_BASE}/api/auth/password/change`, {
       method: "POST",
@@ -86,10 +86,10 @@ export default function AccountPage() {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       throw new Error(
-        typeof data.detail === "string" ? data.detail : "Could not update password."
+        typeof data.detail === "string" ? data.detail : "We couldn't update your password. Check your current password and try again."
       );
     }
-    setPwMsg({ tone: "ok", text: "Password updated." });
+    setPwMsg({ tone: "ok", text: "Your password has been updated." });
     setPwCurrent("");
     setPwNew("");
     refetchUser();
@@ -100,7 +100,7 @@ export default function AccountPage() {
     return (
       <div className="min-h-screen bg-asphalt-0 text-white">
         <SiteNav />
-        <main id="main" className="pt-32 pb-20 px-4 sm:px-6">
+        <main id="main" className="pt-28 pb-20 px-4 sm:px-6">
           <div
             className="mx-auto max-w-3xl space-y-6"
             aria-busy="true"
@@ -121,21 +121,19 @@ export default function AccountPage() {
   return (
     <div className="min-h-screen bg-asphalt-0 text-white">
       <SiteNav />
-      <PageHero
-        align="center"
-        kicker="account"
-        title={<>Your <span className="text-accent">garage</span></>}
-        sub="Saved runs and security for your optional MotoQuant account."
+      <PageHeader
+        title="Your saved runs"
+        lede="Runs you save while signed in appear here. Each one has a page you can share."
+        maxWidth="max-w-3xl"
       />
       <main id="main" className="pb-20 px-4 sm:px-6">
         <div className="mx-auto max-w-3xl space-y-6">
           {/* ── Profile ─────────────────────────────────────────────────── */}
-          <Reveal y={18}>
-          <section className="card p-6 sm:p-8">
+                    <section className="card p-6 sm:p-8">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <h2 className={sectionTitle}>Profile</h2>
-                <p className="mt-3 font-medium text-white">{user.email}</p>
+                <h2 className={sectionTitle}>Your account</h2>
+                <p className="mt-2 text-base text-white/80">{user.email}</p>
               </div>
               <div className="flex items-center gap-3">
                 <button onClick={logout} className="btn-ghost btn-sm">
@@ -145,38 +143,33 @@ export default function AccountPage() {
             </div>
 
           </section>
-          </Reveal>
-
+          
           {/* ── Garage — saved runs ────────────────────────────────────── */}
-          <Reveal y={18}>
-          <section className="card p-6 sm:p-8">
+                    <section className="card p-6 sm:p-8">
             <div className="mb-5 flex items-center justify-between">
-              <h2 className={sectionTitle}>Garage</h2>
-              <a
-                href="/simulator"
-                className="font-mono text-xs text-accent hover:text-accent-bright transition-colors"
-              >
-                + New sim →
-              </a>
+              <h2 className={sectionTitle}>Saved runs</h2>
+              <Link href="/simulator" className="btn-ghost btn-sm">
+                Open the simulator
+              </Link>
             </div>
             {runsLoading && (
               <SkeletonTable rows={4} cols={4} aria-label="Loading your saved runs" />
             )}
             {!runsLoading && runs.length === 0 && (
               <p className="text-sm text-white/65">
-                No saved runs yet. Run a simulation and hit{" "}
-                <strong className="text-white">Save this run</strong> while signed
-                in — it lands here.
+                You haven&apos;t saved any runs yet. Calculate a time in the simulator
+                and choose <strong className="text-white">Save this run</strong> while
+                you&apos;re signed in. It will show up here.
               </p>
             )}
             {!runsLoading && runs.length > 0 && (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-white/10 text-left label-mono">
+                    <tr className="border-b border-white/10 text-left text-white/60">
                       <th className="py-2 pr-4 font-medium">Bike</th>
-                      <th className="py-2 pr-4 text-right font-medium">¼-mile</th>
-                      <th className="py-2 pr-4 text-right font-medium">Trap</th>
+                      <th className="py-2 pr-4 text-right font-medium">Quarter-mile time</th>
+                      <th className="py-2 pr-4 text-right font-medium">Finish-line speed</th>
                       <th className="hidden py-2 pr-4 font-medium sm:table-cell">Venue</th>
                       <th className="hidden py-2 font-medium sm:table-cell">Date</th>
                     </tr>
@@ -185,28 +178,24 @@ export default function AccountPage() {
                     {runs.map((r) => (
                       <tr key={r.id} className="border-b border-white/5">
                         <td className="py-2.5 pr-4">
-                          <a
+                          <Link
                             href={`/r/${r.id}`}
                             className="font-display font-semibold text-white/90 hover:text-white transition-colors"
                           >
                             {r.manufacturer ? `${r.manufacturer} ${r.model}` : `Run #${r.id}`}
-                          </a>
+                          </Link>
                         </td>
                         <td className="py-2.5 pr-4 text-right font-mono tabular-nums font-medium text-white">
-                          {r.et_quarter_s != null ? `${r.et_quarter_s.toFixed(3)}s` : "—"}
+                          {r.et_quarter_s != null ? `${r.et_quarter_s.toFixed(3)} s` : ""}
                         </td>
                         <td className="py-2.5 pr-4 text-right font-mono tabular-nums text-white/70">
-                          {r.trap_speed_kmh != null ? `${r.trap_speed_kmh.toFixed(1)} km/h` : "—"}
+                          {r.trap_speed_kmh != null ? `${r.trap_speed_kmh.toFixed(1)} km/h` : ""}
                         </td>
                         <td className="hidden py-2.5 pr-4 sm:table-cell">
-                          {r.venue ? (
-                            <span className="chip">{r.venue}</span>
-                          ) : (
-                            <span className="text-white/40">—</span>
-                          )}
+                          {r.venue ? <span className="chip">{r.venue}</span> : null}
                         </td>
-                        <td className="hidden py-2.5 font-mono text-xs text-white/45 sm:table-cell">
-                          {r.created_at ? new Date(r.created_at).toLocaleDateString() : "—"}
+                        <td className="hidden py-2.5 text-sm text-white/60 sm:table-cell">
+                          {r.created_at ? new Date(r.created_at).toLocaleDateString() : ""}
                         </td>
                       </tr>
                     ))}
@@ -215,23 +204,21 @@ export default function AccountPage() {
               </div>
             )}
           </section>
-          </Reveal>
-
+          
           {/* ── Security — password ────────────────────────────────────── */}
-          <Reveal y={18}>
-          <section className="card p-6 sm:p-8">
-            <h2 className={`${sectionTitle} mb-4`}>Security</h2>
+                    <section className="card p-6 sm:p-8">
+            <h2 className={`${sectionTitle} mb-4`}>Password</h2>
             {!user.has_password && (
               <p className="mb-4 text-sm text-white/65">
-                You currently sign in via magic link. Add a password to sign in
-                directly — the magic-link option stays available either way.
+                You currently sign in with an emailed link. Add a password if you&apos;d
+                rather sign in directly. The emailed link still works either way.
               </p>
             )}
             {pwMsg && (
-              <p className="mb-3 text-sm text-signal-go">{pwMsg.text}</p>
+              <p role="status" className="mb-3 text-sm text-signal-go">{pwMsg.text}</p>
             )}
             {pwTask.error && (
-              <p className="mb-3 text-sm text-signal-foul">{pwTask.error}</p>
+              <p role="alert" className="mb-3 text-sm text-signal-foul">{pwTask.error}</p>
             )}
             <form
               ref={pwFormRef}
@@ -242,26 +229,33 @@ export default function AccountPage() {
               className="max-w-sm space-y-3"
             >
               {user.has_password && (
-                <input
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  value={pwCurrent}
-                  onChange={(e) => setPwCurrent(e.target.value)}
-                  placeholder="Current password"
-                  className="input-base font-mono"
-                />
+                <div>
+                  <label htmlFor="pw-current" className="field-label">Current password</label>
+                  <input
+                    id="pw-current"
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                    value={pwCurrent}
+                    onChange={(e) => setPwCurrent(e.target.value)}
+                    className="input-base"
+                  />
+                </div>
               )}
-              <input
-                type="password"
-                autoComplete="new-password"
-                required
-                minLength={8}
-                value={pwNew}
-                onChange={(e) => setPwNew(e.target.value)}
-                placeholder="New password (8+ characters)"
-                className="input-base font-mono"
-              />
+              <div>
+                <label htmlFor="pw-new" className="field-label">New password</label>
+                <input
+                  id="pw-new"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  minLength={8}
+                  value={pwNew}
+                  onChange={(e) => setPwNew(e.target.value)}
+                  className="input-base"
+                />
+                <p className="field-hint">At least 8 characters.</p>
+              </div>
               {/* hidden submit keeps Enter-to-submit working (ActionButton is type=button) */}
               <input type="submit" hidden />
               <ActionButton
@@ -274,8 +268,7 @@ export default function AccountPage() {
               />
             </form>
           </section>
-          </Reveal>
-        </div>
+                  </div>
       </main>
       <SiteFooter />
     </div>

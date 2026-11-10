@@ -60,6 +60,10 @@ export function AuthProvider({ children }) {
     }, delay);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const refreshRetryRef = useRef(0);
+  const userRef = useRef(null);
+  userRef.current = user;
+
   const _silentRefresh = useCallback(async () => {
     const refreshToken = sessionStorage.getItem("mq_refresh");
     if (!refreshToken) {
@@ -67,23 +71,42 @@ export function AuthProvider({ children }) {
       setIsLoading(false);
       return;
     }
+    let stillLoading = false;
     try {
       const res = await fetch(`${API_BASE}/api/auth/refresh`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refresh_token: refreshToken }),
       });
-      if (!res.ok) {
+      if (res.status === 401 || res.status === 403) {
+        // The server says this refresh token is no longer valid — the only
+        // case where we sign the person out.
         _clearAuth();
         setIsLoading(false);
         return;
       }
+      if (!res.ok) throw new Error(`refresh ${res.status}`);
       const data = await res.json();
+      refreshRetryRef.current = 0;
       _applyTokens(data);
+      // Stay in the loading state until the profile arrives (fetchMe clears
+      // it), so account pages never bounce to /login in the gap.
+      stillLoading = true;
     } catch {
-      _clearAuth();
+      // Network error or 5xx (the free-tier backend sleeps and answers 502
+      // while it wakes). Keep the refresh token and retry with backoff
+      // instead of logging the person out.
+      const n = refreshRetryRef.current++;
+      // While the first few retries are pending (a server waking up), stay in
+      // the loading state so account pages do not bounce to the login screen.
+      stillLoading = n < 3 && !userRef.current;
+      const delay = Math.min(5_000 * 2 ** n, 120_000);
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = setTimeout(() => {
+        _silentRefresh();
+      }, delay);
     } finally {
-      setIsLoading(false);
+      if (!stillLoading) setIsLoading(false);
     }
   }, [_clearAuth]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -117,6 +140,8 @@ export function AuthProvider({ children }) {
         setUser(me);
       } catch {
         /* silently ignore — user stays null */
+      } finally {
+        setIsLoading(false);
       }
     },
     []

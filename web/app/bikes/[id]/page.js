@@ -1,35 +1,33 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, Gauge, Zap, Wind, Cog, CircleDot, AlertCircle, Wrench, SearchX } from 'lucide-react';
+import { ChevronLeft, Zap, Wind, Cog, CircleDot, AlertCircle, SearchX } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { API_URL } from '../../../lib/api';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import CodeComment from '../../../components/CodeComment';
-import StageDots from '../../../components/StageDots';
-import { Reveal, Stagger, StaggerItem } from '../../../components/Reveal';
-import { ScoreboardCounter } from '../../../components/ScoreboardDigits';
+import Term from '../../../components/Term';
 import { Skeleton, SkeletonCard } from '../../../components/Skeleton';
 import TimeslipCTA from '../../../components/TimeslipCTA';
-import TopCtaVariant from './TopCtaVariant';
+import BikePredictedTime from '../../../components/catalog/BikePredictedTime';
 
-function formatCell(value, suffix = '', decimals = null) {
-  if (value === null || value === undefined || value === '') return '—';
+function fmt(value, suffix = '', decimals = null) {
+  if (value === null || value === undefined || value === '') return null;
   if (typeof value === 'number') {
-    if (decimals !== null) return `${value.toFixed(decimals)}${suffix}`;
-    return `${value}${suffix}`;
+    if (!Number.isFinite(value)) return null;
+    return `${decimals !== null ? value.toFixed(decimals) : value}${suffix}`;
   }
   return String(value);
 }
 
-/** Ruled mono key-value row — the timeslip voice (DESIGN.md §3). */
-function SpecRow({ label, value }) {
+/** One spec row: label left, value right. Rows with no value are hidden. */
+function SpecRow({ label, term, value }) {
+  if (value === null || value === undefined || value === '') return null;
   return (
-    <div className="timeslip-row gap-3">
-      <span className="label-mono">{label}</span>
-      <span className="text-white text-right">{value}</span>
+    <div className="stat-row">
+      <span>{term ? <Term k={term}>{label}</Term> : label}</span>
+      <span>{value}</span>
     </div>
   );
 }
@@ -37,10 +35,10 @@ function SpecRow({ label, value }) {
 function SpecBlock({ icon: Icon, title, children }) {
   return (
     <div className="card h-full p-5">
-      <h3 className="flex items-center gap-2 font-display font-semibold text-white text-base mb-3">
-        <Icon size={16} className="text-white/40" aria-hidden="true" />
+      <h2 className="flex items-center gap-2 font-display font-semibold text-white text-lg mb-3">
+        <Icon size={16} className="text-white/55" aria-hidden="true" />
         {title}
-      </h3>
+      </h2>
       <div>{children}</div>
     </div>
   );
@@ -71,13 +69,9 @@ function DetailSkeleton() {
       </div>
 
       {/* four headline stat tiles */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        {[0, 1, 2, 3].map(i => (
-          <div key={i} className="card p-5 text-center">
-            <Skeleton className="h-3 w-20 mx-auto mb-4" />
-            <Skeleton className="h-8 w-16 mx-auto" />
-          </div>
-        ))}
+      <div className="card card-pad mb-4">
+        <Skeleton className="h-4 w-48 mb-4" />
+        <Skeleton className="h-14 w-40" />
       </div>
 
       {/* two spec cards */}
@@ -132,9 +126,9 @@ export default function BikeDetailPage() {
         <div className="max-w-6xl mx-auto">
           <Link
             href="/bikes"
-            className="inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.2em] text-white/55 hover:text-white transition-colors mb-6"
+            className="inline-flex min-h-[44px] items-center gap-1 text-sm font-medium text-white/65 hover:text-white transition-colors mb-2"
           >
-            <ChevronLeft size={16} /> All bikes
+            <ChevronLeft size={16} aria-hidden="true" /> All bikes
           </Link>
 
           {loading && <DetailSkeleton />}
@@ -142,218 +136,126 @@ export default function BikeDetailPage() {
           {!loading && error && (
             notFound ? (
               <div className="card p-8 md:p-12 text-center">
-                <SearchX size={28} className="mx-auto text-signal-stage mb-4" />
-                <div className="flex items-center justify-center gap-2.5 mb-3" aria-hidden="true">
-                  <StageDots foul />
-                  <span className="label-mono">err 404 · no spec sheet at this id</span>
-                </div>
+                <SearchX size={28} className="mx-auto text-signal-stage mb-4" aria-hidden="true" />
                 <p className="font-display font-semibold text-white text-xl md:text-2xl">
                   This bike isn&apos;t in the catalog
                 </p>
                 <p className="text-sm text-white/65 mt-3 max-w-md mx-auto">
-                  It may have been re-numbered in a catalog update, or it hasn&apos;t
-                  been modelled yet. Browse the full catalog or suggest it from there.
+                  It may have been renumbered in a catalog update, or it hasn&apos;t
+                  been added yet. Browse all bikes, or suggest it from there.
                 </p>
                 <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-                  <Link href="/bikes" className="btn-primary">
-                    Browse the catalog
-                  </Link>
-                  <Link href="/simulator" className="btn-ghost">
-                    Open the simulator
-                  </Link>
+                  <Link href="/bikes" className="btn-primary">Browse all bikes</Link>
+                  <Link href="/simulator" className="btn-ghost">Open the simulator</Link>
                 </div>
               </div>
             ) : (
               <div className="card p-8 md:p-12 text-center">
-                <AlertCircle size={28} className="mx-auto text-signal-foul mb-4" />
+                <AlertCircle size={28} className="mx-auto text-signal-foul mb-4" aria-hidden="true" />
                 <p className="font-display font-semibold text-white text-xl md:text-2xl">
                   Couldn&apos;t load this bike
                 </p>
                 <p className="text-sm text-white/65 mt-3 max-w-md mx-auto">
-                  The engine may be waking up — retry in a moment.
+                  The server may be waking up. Try again in a few seconds.
                 </p>
                 <div className="mt-8">
-                  <button onClick={load} className="btn-primary">
-                    Retry
-                  </button>
+                  <button type="button" onClick={load} className="btn-primary">Try again</button>
                 </div>
               </div>
             )
           )}
 
           {!loading && !error && bike && (
-            <Reveal y={12} duration={0.4}>
-              {/* Kicker — plain label voice */}
-              <CodeComment className="mb-4">
-                {`Spec sheet · ${bike.tire_fitments?.length ?? 0} tire fitments`}
-              </CodeComment>
-
-              {/* Header */}
-              <div className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6">
-                <div>
-                  <p className="label-mono mb-2">
-                    {bike.manufacturer}
-                  </p>
-                  <h1 className="font-display font-bold text-4xl sm:text-6xl tracking-tight text-white">
-                    {bike.model}
-                  </h1>
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    {bike.year && (
-                      <span className="chip tabular-nums">{bike.year}</span>
-                    )}
-                    {bike.category && (
-                      <span className="chip">{bike.category}</span>
-                    )}
-                    {bike.data_quality && (
-                      <span className="chip">Data · {bike.data_quality}</span>
-                    )}
-                  </div>
+            <div>
+              <div className="mb-6">
+                <p className="text-sm font-medium text-white/60">{bike.manufacturer}</p>
+                <h1 className="font-display font-bold text-3xl sm:text-5xl tracking-tight text-white">
+                  {bike.model}
+                </h1>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {bike.year && <span className="chip tabular-nums">{bike.year}</span>}
+                  {bike.category && <span className="chip">{bike.category}</span>}
+                  {bike.displacement_cc != null && (
+                    <span className="chip tabular-nums">{Math.round(bike.displacement_cc)} cc</span>
+                  )}
+                  {bike.peak_power_hp != null && (
+                    <span className="chip tabular-nums">{Math.round(bike.peak_power_hp)} hp</span>
+                  )}
+                  {bike.dry_mass_kg != null && (
+                    <span className="chip tabular-nums">{Math.round(bike.dry_mass_kg)} kg dry</span>
+                  )}
                 </div>
-                {/* Prominent simulate CTA beside the title — EXP-011 variant-aware */}
-                <TopCtaVariant bikeId={bike.id} />
               </div>
 
-              {/* Headline stats — mono tiles */}
-              <Stagger className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8" stagger={0.07}>
-                {[
-                  {
-                    label: 'Displacement',
-                    seg: bike.displacement_cc != null ? Math.round(bike.displacement_cc) : null,
-                    unit: 'cc',
-                  },
-                  {
-                    label: 'Peak Power',
-                    seg: bike.peak_power_hp != null ? Math.round(bike.peak_power_hp) : null,
-                    unit: 'hp',
-                  },
-                  { label: 'Dry Mass', value: formatCell(bike.dry_mass_kg, ' kg', 0) },
-                  { label: 'Year', value: formatCell(bike.year) },
-                ].map((s, i) => (
-                  <StaggerItem key={i} className="h-full">
-                    <div className="card h-full p-5 text-center">
-                      <p className="label-mono">
-                        {s.label}
-                      </p>
-                      {'seg' in s ? (
-                        s.seg != null ? (
-                          <div className="mt-3 flex items-end justify-center gap-1.5">
-                            <ScoreboardCounter value={s.seg} h={24} />
-                            <span className="label-mono pb-0.5">
-                              {s.unit}
-                            </span>
-                          </div>
-                        ) : (
-                          <p className="font-mono font-bold text-2xl md:text-3xl text-white/40 mt-2">—</p>
-                        )
-                      ) : (
-                        <p className="font-mono font-bold text-2xl md:text-3xl tabular-nums text-white mt-2">
-                          {s.value}
-                        </p>
-                      )}
-                    </div>
-                  </StaggerItem>
-                ))}
-              </Stagger>
+              <BikePredictedTime bike={bike} />
 
-              {/* Detail blocks — ruled mono spec tables */}
-              <Reveal y={20} className="grid md:grid-cols-2 gap-4 mb-4">
+              <div className="grid md:grid-cols-2 gap-4 mt-4 mb-4">
                 <SpecBlock icon={Zap} title="Engine">
-                  <SpecRow label="Cylinders" value={formatCell(bike.cylinder_count)} />
-                  <SpecRow label="Config" value={formatCell(bike.cylinder_config)} />
-                  <SpecRow label="Bore" value={formatCell(bike.bore_mm, ' mm', 1)} />
-                  <SpecRow label="Stroke" value={formatCell(bike.stroke_mm, ' mm', 1)} />
-                  <SpecRow label="Compression" value={formatCell(bike.compression_ratio, ':1', 1)} />
-                  <SpecRow label="Peak Torque" value={formatCell(bike.peak_torque_nm, ' Nm', 0)} />
-                  <SpecRow label="Peak Power RPM" value={formatCell(bike.peak_power_rpm, ' rpm', 0)} />
-                  <SpecRow label="Redline" value={formatCell(bike.redline_rpm, ' rpm', 0)} />
+                  <SpecRow label="Cylinders" value={fmt(bike.cylinder_count)} />
+                  <SpecRow label="Layout" value={fmt(bike.cylinder_config)} />
+                  <SpecRow label="Bore" value={fmt(bike.bore_mm, ' mm', 1)} />
+                  <SpecRow label="Stroke" value={fmt(bike.stroke_mm, ' mm', 1)} />
+                  <SpecRow label="Compression ratio" value={fmt(bike.compression_ratio, ':1', 1)} />
+                  <SpecRow label="Peak torque" value={fmt(bike.peak_torque_nm, ' Nm', 0)} />
+                  <SpecRow label="Peak power at" value={fmt(bike.peak_power_rpm, ' rpm', 0)} />
+                  <SpecRow label="Redline" term="redline" value={fmt(bike.redline_rpm, ' rpm', 0)} />
                 </SpecBlock>
 
                 <div className="grid gap-4 content-start">
-                  <SpecBlock icon={Wind} title="Chassis & aero">
-                    <SpecRow label="Cd" value={formatCell(bike.cd, '', 2)} />
-                    <SpecRow label="Frontal Area" value={formatCell(bike.frontal_area_m2, ' m²', 2)} />
-                    <SpecRow label="Wheelbase" value={formatCell(bike.wheelbase_m, ' m', 3)} />
+                  <SpecBlock icon={Wind} title="Weight and shape">
+                    <SpecRow label="Air resistance (Cd)" term="cd_a" value={fmt(bike.cd, '', 2)} />
+                    <SpecRow label="Frontal area" value={fmt(bike.frontal_area_m2, ' m²', 2)} />
+                    <SpecRow label="Wheelbase" value={fmt(bike.wheelbase_m, ' m', 3)} />
                     <SpecRow
-                      label="CoG Height"
+                      label="Centre-of-gravity height"
                       value={
                         bike.cog_height_mm != null
                           ? `${Number(bike.cog_height_mm).toFixed(0)} mm`
-                          : formatCell(bike.cog_height_m, ' m', 2)
+                          : fmt(bike.cog_height_m, ' m', 2)
                       }
                     />
                     <SpecRow
-                      label={bike.wet_mass_derived ? 'Wet Mass (est.)' : 'Wet Mass'}
-                      value={formatCell(bike.wet_mass_kg, ' kg', 0)}
+                      label={bike.wet_mass_derived ? 'Weight with fluids (estimated)' : 'Weight with fluids'}
+                      value={fmt(bike.wet_mass_kg, ' kg', 0)}
                     />
                   </SpecBlock>
 
-                  <SpecBlock icon={Cog} title="Drivetrain">
-                    <SpecRow label="Chain Pitch" value={formatCell(bike.chain_pitch)} />
-                    <SpecRow label="Front Sprocket" value={formatCell(bike.front_sprocket)} />
-                    <SpecRow label="Rear Sprocket" value={formatCell(bike.rear_sprocket)} />
+                  <SpecBlock icon={Cog} title="Gearing">
+                    <SpecRow label="Chain size" value={fmt(bike.chain_pitch)} />
+                    <SpecRow label="Front sprocket" term="sprockets" value={fmt(bike.front_sprocket)} />
+                    <SpecRow label="Rear sprocket" value={fmt(bike.rear_sprocket)} />
                   </SpecBlock>
                 </div>
-              </Reveal>
+              </div>
 
-              {/* Tire fitments */}
               {bike.tire_fitments && bike.tire_fitments.length > 0 && (
-                <Reveal y={20}>
-                  <SpecBlock icon={CircleDot} title={`OEM & recommended tires (${bike.tire_fitments.length})`}>
-                    <div className="grid gap-2 mt-1">
-                      {bike.tire_fitments.map((f, i) => (
-                        <div
-                          key={i}
-                          className="grid grid-cols-[72px_1fr_auto] gap-3 items-baseline py-2 border-b border-dashed border-white/10 last:border-0"
-                        >
-                          <span className="label-mono">
-                            {f.position}
-                          </span>
-                          <div>
-                            <p className="text-sm font-semibold text-white">{f.manufacturer} {f.model}</p>
-                            <p className="text-xs font-mono text-white/50 tabular-nums">{f.size_designation} · {f.compound_type}</p>
-                          </div>
-                          <span className={`chip ${
-                            f.fitment_type === 'oem'
-                              ? 'border-white/25 text-white/85'
-                              : ''
-                          }`}>
-                            {f.fitment_type}
-                          </span>
+                <SpecBlock icon={CircleDot} title={`Tyres that fit (${bike.tire_fitments.length})`}>
+                  <div className="grid gap-2 mt-1">
+                    {bike.tire_fitments.map((f, i) => (
+                      <div
+                        key={i}
+                        className="grid grid-cols-[64px_1fr_auto] gap-3 items-baseline py-2 border-b border-white/10 last:border-0"
+                      >
+                        <span className="text-sm text-white/60 capitalize">{f.position}</span>
+                        <div>
+                          <p className="text-sm font-semibold text-white">{f.manufacturer} {f.model}</p>
+                          <p className="text-xs font-mono text-white/60 tabular-nums">
+                            {f.size_designation} · {f.compound_type}
+                          </p>
                         </div>
-                      ))}
-                    </div>
-                  </SpecBlock>
-                </Reveal>
+                        <span className={`chip ${f.fitment_type === 'oem' ? 'border-white/25 text-white/85' : ''}`}>
+                          {f.fitment_type === 'oem' ? 'Factory fit' : f.fitment_type === 'drag_prep' ? 'Drag prep' : f.fitment_type === 'recommended' ? 'Recommended' : f.fitment_type}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </SpecBlock>
               )}
 
-              {/* Dragy timeslip ask — real instrumented runs are the accuracy
-                  lever for this bike (A3-20). Sits between the spec tables and
-                  the bottom CTA pair so it reads as part of the data story,
-                  not as a third competing simulate button. */}
-              <Reveal y={16} className="mt-4">
+              <div className="mt-4">
                 <TimeslipCTA bikeId={bike.id} />
-              </Reveal>
-
-              {/* Bottom CTA — differentiated from the top EXP-011 CTA:
-                  primary names the concrete run, ghost routes to the
-                  build optimizer instead of repeating "Simulate this bike". */}
-              <Reveal y={16}>
-                <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
-                  <Link
-                    href={`/simulator?bike_id=${bike.id}`}
-                    className="btn-primary"
-                  >
-                    <Gauge size={16} /> Run the quarter-mile →
-                  </Link>
-                  <Link
-                    href={`/optimize?bike_id=${bike.id}`}
-                    className="btn-ghost"
-                  >
-                    <Wrench size={16} /> Build &amp; optimize
-                  </Link>
-                </div>
-              </Reveal>
-            </Reveal>
+              </div>
+            </div>
           )}
         </div>
       </main>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
 import { motion } from 'framer-motion';
 import { X, Check, AlertCircle, Info } from 'lucide-react';
 import { API_URL } from '../lib/api';
@@ -112,6 +112,9 @@ export default function SuggestBikeForm({ onClose }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="suggest-bike-title"
       className="fixed inset-0 bg-asphalt-0/85 backdrop-blur-sm z-[100] flex items-start justify-center p-4 overflow-y-auto"
     >
       <motion.div
@@ -124,11 +127,11 @@ export default function SuggestBikeForm({ onClose }) {
       >
         <div className="flex items-start justify-between mb-5">
           <div>
-            <h2 className="font-display font-bold tracking-tight text-2xl text-white">
+            <h2 id="suggest-bike-title" className="font-display font-bold tracking-tight text-2xl text-white">
               Suggest a bike
             </h2>
             <p className="text-sm text-white/65 mt-2">
-              Don&apos;t see your bike? Tell us what to add next. Required fields marked *.
+              Don&apos;t see your bike? Tell us what to add next. Only make and model are required.
             </p>
           </div>
           <button
@@ -146,15 +149,15 @@ export default function SuggestBikeForm({ onClose }) {
               <Check className="text-signal-go shrink-0 mt-0.5" size={20} />
               <div>
                 <p className="font-semibold text-signal-go">
-                  Submission <span className="font-mono tabular-nums">#{result.id}</span> received.
+                  Thanks, suggestion <span className="font-mono tabular-nums">#{result.id}</span> received.
                 </p>
                 <p className="text-sm text-white/65 mt-1">
-                  Thanks — we&apos;ll review and add it to the catalog soon.
+                  We will review it and add the bike soon.
                 </p>
                 {result.flagged_out_of_bounds && result.issues?.length > 0 && (
-                  <div className="card border-signal-stage/30 bg-signal-stage/[0.08] mt-3 p-3 text-xs font-mono text-signal-stage">
+                  <div className="card border-signal-stage/30 bg-signal-stage/[0.08] mt-3 p-3 text-sm text-signal-stage">
                     <p className="flex items-center gap-1 mb-1 font-semibold">
-                      <Info size={14} /> Flagged for manual review
+                      <Info size={14} /> We will check these figures by hand
                     </p>
                     <ul className="list-disc list-inside space-y-0.5 text-signal-stage/80">
                       {result.issues.map((msg, i) => <li key={i}>{msg}</li>)}
@@ -170,7 +173,7 @@ export default function SuggestBikeForm({ onClose }) {
                 onClick={() => { submitTask.reset(); setForm(EMPTY_FORM); }}
                 className="btn-ghost"
               >
-                Submit another
+                Suggest another
               </button>
               <button
                 type="button"
@@ -185,7 +188,7 @@ export default function SuggestBikeForm({ onClose }) {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <Field
-                label="Make *"
+                label="Make (required)"
                 value={form.make}
                 onChange={v => update('make', v)}
                 placeholder="e.g. Suzuki"
@@ -193,7 +196,7 @@ export default function SuggestBikeForm({ onClose }) {
                 maxLength={60}
               />
               <Field
-                label="Model *"
+                label="Model (required)"
                 value={form.model}
                 onChange={v => update('model', v)}
                 placeholder="e.g. GSX-R 1000 K9"
@@ -209,7 +212,7 @@ export default function SuggestBikeForm({ onClose }) {
                 min={1960} max={2099}
               />
               <Field
-                label="Displacement (cc)"
+                label="Engine size (cc)"
                 value={form.displacement_cc}
                 onChange={v => update('displacement_cc', v)}
                 placeholder="e.g. 999"
@@ -218,7 +221,7 @@ export default function SuggestBikeForm({ onClose }) {
                 min={0}
               />
               <Field
-                label="Peak Power (hp)"
+                label="Peak power (hp)"
                 value={form.peak_power_hp}
                 onChange={v => update('peak_power_hp', v)}
                 placeholder="e.g. 185"
@@ -227,7 +230,7 @@ export default function SuggestBikeForm({ onClose }) {
                 min={0}
               />
               <Field
-                label="Dry Mass (kg)"
+                label="Dry weight (kg)"
                 value={form.dry_mass_kg}
                 onChange={v => update('dry_mass_kg', v)}
                 placeholder="e.g. 172"
@@ -238,10 +241,10 @@ export default function SuggestBikeForm({ onClose }) {
             </div>
 
             <Field
-              label="Category"
+              label="Type of bike"
               value={form.category}
               onChange={v => update('category', v)}
-              placeholder="sport, naked, cruiser, adventure…"
+              placeholder="Sport, naked, cruiser, adventure…"
               maxLength={40}
             />
 
@@ -295,8 +298,8 @@ export default function SuggestBikeForm({ onClose }) {
               <ActionButton
                 task={submitTask}
                 onRun={handleSubmit}
-                label="Submit suggestion"
-                runningLabel="Submitting"
+                label="Send suggestion"
+                runningLabel="Sending"
               />
             </div>
           </form>
@@ -308,18 +311,20 @@ export default function SuggestBikeForm({ onClose }) {
 
 function Field({ label, value, onChange, as = 'input', rows = 3, ...rest }) {
   const Common = as === 'textarea' ? 'textarea' : 'input';
+  const id = useId();
   return (
-    <label className="block">
-      <span className="label-mono block mb-1.5">
+    <div>
+      <label htmlFor={id} className="field-label">
         {label}
-      </span>
+      </label>
       <Common
+        id={id}
         value={value}
         onChange={e => onChange(e.target.value)}
         {...(as === 'textarea' ? { rows } : {})}
-        className={`input-base font-mono ${as === 'textarea' ? 'h-auto py-2.5' : ''}`}
+        className={`input-base ${as === 'textarea' ? 'h-auto py-2.5' : ''}`}
         {...rest}
       />
-    </label>
+    </div>
   );
 }

@@ -36,15 +36,13 @@ export default function TimeslipCTA({ bikeId }) {
   return (
     <div className="card p-5 flex flex-col sm:flex-row sm:items-center gap-4 border-dashed">
       <div className="flex-1 min-w-0">
-        <p className="label-mono mb-2">Own one? · Help calibrate it</p>
         <p className="font-display font-semibold text-white text-base">
-          Ran this bike? Submit your Dragy timeslip
+          Ran this bike? Send us your timeslip
         </p>
         <p className="text-sm text-white/65 mt-1.5">
-          Real GPS runs feed the calibration corpus directly — every verified
-          timeslip tightens the published accuracy for this exact bike. The
-          link opens the simulator with this bike preselected; drop your Dragy
-          CSV in the <span className="text-white/85">Upload</span> tab.
+          Real GPS runs make the predictions for this exact bike more accurate. The link
+          opens the simulator with this bike selected. Switch to Advanced and drop your
+          Dragy file in the <span className="text-white/85">My data</span> tab.
         </p>
       </div>
       <Link
@@ -54,7 +52,7 @@ export default function TimeslipCTA({ bikeId }) {
         data-bike-id={bikeId ?? ''}
         className="btn-ghost shrink-0"
       >
-        <Upload size={16} /> Upload a timeslip →
+        <Upload size={16} aria-hidden="true" /> Send a timeslip
       </Link>
     </div>
   );

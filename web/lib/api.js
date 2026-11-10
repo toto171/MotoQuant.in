@@ -76,7 +76,9 @@ async function postJson(path, body, signal) {
         /* keep the status-only message */
       }
     }
-    throw new Error(msg);
+    const err = new Error(msg);
+    err.status = res.status;
+    throw err;
   }
   return res.json();
 }
@@ -178,6 +180,28 @@ export async function cancelJob(jobId) {
   return postJson(`/api/jobs/${jobId}/cancel`);
 }
 
+// Sleep for `ms`, but resolve early when the tab becomes visible again or the
+// network comes back, so a resumed job is re-polled immediately.
+function sleepOrWake(ms) {
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', onVis);
+      if (typeof window !== 'undefined') window.removeEventListener('online', finish);
+      resolve();
+    };
+    const onVis = () => {
+      if (document.visibilityState === 'visible') finish();
+    };
+    const timer = setTimeout(finish, ms);
+    if (typeof document !== 'undefined') document.addEventListener('visibilitychange', onVis);
+    if (typeof window !== 'undefined') window.addEventListener('online', finish);
+  });
+}
+
 export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 350, signal } = {}) {
   onProgress?.({ status: 'connecting', progress: null, stage: '' });
   let started;
@@ -185,7 +209,10 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
     started = await startJob(kind, body, signal);
   } catch (e) {
     if (e?.name === 'AbortError') throw e;
-    if (fallbackPath && /API error (404|405)/.test(e.message || '')) {
+    if (
+      fallbackPath &&
+      (e?.status === 404 || e?.status === 405 || /API error (404|405)/.test(e?.message || ''))
+    ) {
       onProgress?.({ status: 'running', progress: null, stage: '' });
       return postJson(fallbackPath, body, signal);
     }
@@ -208,7 +235,10 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
   //  - 404: in-memory registry lost the job (restart) — confirm 3× in a row
   //  - interval backs off 350 ms → 800 ms → 1.5 s as the job ages
   let t0 = Date.now();
-  let lastSuccessAt = Date.now();
+  // Tolerance window runs from the FIRST failure of the current streak (reset
+  // on any successful poll) so a laptop sleep / backgrounded tab does not
+  // cancel a healthy job on the first failed poll after waking.
+  let firstFailAt = null;
   let lostCount = 0;
   let restarts = 0;
   for (;;) {
@@ -231,7 +261,7 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
     }
 
     if (j != null) {
-      lastSuccessAt = Date.now();
+      firstFailAt = null;
       lostCount = 0;
       if (signal?.aborted) throw aborted();
       if (j.status === 'cancelled') throw new DOMException('Aborted', 'AbortError');
@@ -262,11 +292,13 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
             'Progress lost and the engine is not reachable — please run again'
           );
         }
-        lastSuccessAt = Date.now();
+        firstFailAt = null;
         t0 = Date.now(); // restart the poll-interval backoff for the new job
         continue;
       }
-    } else if (Date.now() - lastSuccessAt > 150_000) {
+    } else if (firstFailAt == null) {
+      firstFailAt = Date.now();
+    } else if (Date.now() - firstFailAt > 150_000) {
       cancelJob(started.job_id).catch(() => {}); // don't leave a zombie burning CPU
       throw new Error(
         'Connection lost while the simulation was running — check your network and run again'
@@ -275,7 +307,7 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
 
     const age = Date.now() - t0;
     const interval = age > 60_000 ? 1500 : age > 10_000 ? 800 : pollMs;
-    await new Promise((r) => setTimeout(r, interval));
+    await sleepOrWake(interval);
     if (signal?.aborted) throw aborted();
   }
 }
@@ -379,9 +411,33 @@ export async function saveRun(body, accessToken = null, signal) {
     } catch {
       /* keep the status-only message */
     }
-    throw new Error(msg);
+    const err = new Error(msg);
+    err.status = res.status;
+    throw err;
   }
   return res.json();
+}
+
+// ── Bike catalog (shared, memoised) ─────────────────────────────────────
+// One in-flight promise for the full catalog (limit=2000). Cached for the
+// page lifetime; a failure clears the cache so the next call retries.
+let _catalogPromise = null;
+export function getBikeCatalog() {
+  if (_catalogPromise) return _catalogPromise;
+  _catalogPromise = (async () => {
+    const res = await fetch(`${API_URL}/api/bikes?limit=2000`);
+    if (!res.ok) {
+      const err = new Error(`API error ${res.status}`);
+      err.status = res.status;
+      throw err;
+    }
+    const data = await res.json();
+    return Array.isArray(data) ? data : data.bikes || data.items || [];
+  })();
+  _catalogPromise.catch(() => {
+    _catalogPromise = null;
+  });
+  return _catalogPromise;
 }
 
 // ── Part display label ──────────────────────────────────────────────────

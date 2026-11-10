@@ -4,13 +4,11 @@
  * MotoQuant — Signup Page
  * ============================
  * Signup = login (register tab opens via ?signup=1).
- * Redirect stub only — the interim frame renders the IGNITION v5 label
- * voice via the shared CodeComment primitive (StageDots + mono label).
+ * Redirect stub only.
  */
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import CodeComment from "../../components/CodeComment";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -22,7 +20,7 @@ export default function SignupPage() {
 
   return (
     <main id="main" className="flex min-h-screen items-center justify-center bg-asphalt-0">
-      <CodeComment center>redirecting to /login…</CodeComment>
+      <p className="text-base text-white/70">Taking you to the sign-up form…</p>
     </main>
   );
 }

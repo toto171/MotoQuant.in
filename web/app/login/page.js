@@ -12,21 +12,20 @@
  * Arriving with ?signup=1 opens register mode.
  * ?next=/path is honoured after auth (same-origin paths only).
  *
- * IGNITION v5 (July 2026): single centered `.card` on asphalt, mode tabs as
- * `.chip` toggles (accent orange when active), `.input-base` fields,
- * `.label-mono` labels, magic-link sent state on `.chip-go`. The submit
- * stays an ActionButton + useAsyncTask (staged progress, cold-start caption
- * for free) and the ?token= verification shows a staged SimProgress bar.
- * Auth flows + EXP-007 unchanged.
+ * v6 (CLARITY): one clear primary form (email + password) with two quiet
+ * secondary choices — "Create an account" and "Email me a sign-in link
+ * instead". All flows still hit the same endpoints; submit stays an
+ * ActionButton + useAsyncTask, ?token= verification shows a staged
+ * SimProgress bar.
  */
 
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { AlertCircle } from "lucide-react";
 import { useAuth } from "../../components/AuthProvider";
 import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
-import CodeComment from "../../components/CodeComment";
 import SimProgress from "../../components/SimProgress";
 import ActionButton from "../../components/ActionButton";
 import { SkeletonCard } from "../../components/Skeleton";
@@ -54,10 +53,7 @@ function LoginPageInner() {
   const [errorMsg, setErrorMsg] = useState("");
   const [devToken, setDevToken] = useState("");
 
-  // GROWTH_EXP_007: A/B variant — see data/growth_experiments.json
-  const ctaVariant = params?.get("variant") === "B" ? "B" : "A";
-  const sendButtonLabel =
-    ctaVariant === "B" ? "Start free · email me the link" : "Send sign-in link";
+  const sendButtonLabel = "Email me a sign-in link";
 
   // Same-origin ?next= redirect (defends against open-redirect abuse).
   // Must be a clean absolute path: starts with a single "/", and no "//" or
@@ -92,7 +88,9 @@ function LoginPageInner() {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || "Invalid or expired sign-in link.");
+        throw new Error(
+          typeof err.detail === "string" ? err.detail : "That sign-in link is invalid or has expired. Request a new one."
+        );
       }
       const data = await res.json();
       applyLoginTokens(data);
@@ -106,6 +104,7 @@ function LoginPageInner() {
   // One task for the whole three-mode form — only one mode is visible at a
   // time, so a single active flag maps 1:1 onto the single submit button.
   const submitTask = useAsyncTask(async (signal) => {
+   try {
     setErrorMsg("");
     if (mode === "magic") {
       const res = await fetch(`${API_BASE}/api/auth/magic-link`, {
@@ -114,15 +113,15 @@ function LoginPageInner() {
         body: JSON.stringify({ email: email.trim() }),
         signal,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Failed to send sign-in link.");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(typeof data.detail === "string" ? data.detail : "We couldn't send the sign-in link. Check the email address and try again.");
       setStatus("sent");
       if (data.dev_token) setDevToken(data.dev_token);
       return data;
     }
     if (mode === "register") {
       if (password.length < 8) {
-        throw new Error("Password must be at least 8 characters.");
+        throw new Error("Choose a password with at least 8 characters.");
       }
       if (password !== password2) {
         throw new Error("Passwords don't match.");
@@ -140,8 +139,10 @@ function LoginPageInner() {
       const detail =
         typeof data.detail === "string"
           ? data.detail
-          : data.detail?.[0]?.msg || "Sign-in failed. Please try again.";
-      throw new Error(detail);
+          : data.detail?.[0]?.msg || "We couldn't sign you in. Please try again.";
+      throw new Error(
+        res.status === 401 ? "That email and password don't match. Check them and try again." : detail
+      );
     }
     applyLoginTokens(data);
     if (mode === "register") {
@@ -149,6 +150,13 @@ function LoginPageInner() {
     }
     router.replace(nextPath);
     return data;
+   } catch (e) {
+    if (e?.name === "AbortError") throw e;
+    if (e instanceof TypeError) {
+      throw new Error("We couldn't reach the server. It may be waking up, so try again in a few seconds.");
+    }
+    throw e;
+   }
   });
 
   function handleSubmit(e) {
@@ -166,50 +174,35 @@ function LoginPageInner() {
   }
 
   const headings = {
-    signin: ["Sign in to the strip", "Welcome back — pick up where you left off."],
-    register: ["Create your account", "Optional — an account only lets you save runs to your garage."],
-    magic: ["Magic-link sign-in", "No password needed — we’ll email you a sign-in link."],
+    signin: ["Sign in", "Sign in to save your runs. You don't need an account to use the simulator."],
+    register: ["Create an account", "An account only lets you save your runs and find them again later."],
+    magic: ["Email me a sign-in link", "No password needed. We'll email you a link that signs you in."],
   };
   const [heading, subheading] = headings[mode];
   const formError = (status === "error" ? errorMsg : "") || submitTask.error;
 
-  const tabClass = (m) =>
-    [
-      "chip h-10 flex-1 justify-center whitespace-nowrap transition-colors",
-      mode === m
-        ? "chip-volt"
-        : "border-transparent text-white/45 hover:text-white",
-    ].join(" ");
-
   const quietLink =
-    "text-white/60 underline decoration-white/25 underline-offset-2 hover:text-white transition-colors";
+    "inline-flex min-h-[44px] items-center text-left text-white/70 underline decoration-white/30 underline-offset-2 hover:text-white transition-colors";
 
   return (
     <div className="min-h-screen bg-asphalt-0 text-white">
       <SiteNav />
       <main
         id="main"
-        className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 pt-24 pb-16"
+        className="flex min-h-[calc(100vh-4rem)] items-start justify-center px-4 pt-28 pb-16 sm:items-center"
       >
         <div className="w-full max-w-md space-y-6">
-          <div className="text-center space-y-3">
-            <CodeComment center>account access</CodeComment>
-            <p className="font-display font-bold text-2xl tracking-tight text-white">
-              The physics of <span className="text-accent">faster</span>
-            </p>
-          </div>
-
           <div className="card p-6 sm:p-8">
             {status === "verifying" && (
               <div className="py-4 text-center">
-                <span className="chip chip-stage">Verifying</span>
-                <p className="mt-4 mb-4 font-display font-semibold text-lg md:text-xl text-white">
-                  Verifying your sign-in link
+                
+                <p className="mb-4 font-display font-semibold text-lg md:text-xl text-white">
+                  Checking your sign-in link
                 </p>
                 <SimProgress
                   active
                   progress={null}
-                  label="Verifying your sign-in link"
+                  label="Checking your sign-in link"
                   className="text-left"
                 />
               </div>
@@ -217,66 +210,56 @@ function LoginPageInner() {
 
             {status === "sent" && (
               <div className="text-center">
-                <span className="chip chip-go">Link sent</span>
-                <h2 className="mt-4 font-display font-bold text-2xl tracking-tight text-white">
-                  Check your inbox
+                
+                <h2 className="font-display font-bold text-2xl tracking-tight text-white">
+                  Check your email
                 </h2>
                 <p className="mt-3 text-sm text-white/65">
                   We sent a sign-in link to{" "}
                   <strong className="font-medium text-white">{email}</strong>.
-                  It expires in 10 minutes.
+                  The link works for 10 minutes. Check your spam folder if it doesn't arrive.
                 </p>
                 {devToken && (
                   <div className="mt-5 rounded-lg border border-signal-stage/30 bg-signal-stage/10 p-3 text-left">
-                    <p className="label-mono text-signal-stage">Dev token</p>
+                    <p className="text-sm font-medium text-signal-stage">Developer sign-in token</p>
                     <p className="mt-1 break-all font-mono text-xs text-signal-stage/80">{devToken}</p>
                     <button
+                      type="button"
                       onClick={() => verifyToken(devToken)}
-                      className="mt-2 rounded bg-signal-stage px-3 py-1 text-xs font-semibold text-asphalt-0 hover:bg-signal-stage/85 transition-colors"
+                      className="btn-ghost btn-sm mt-2"
                     >
-                      Auto-verify (dev only)
+                      Sign in with this token
                     </button>
                   </div>
                 )}
                 <button
+                  type="button"
                   onClick={() => { setStatus("idle"); setDevToken(""); submitTask.reset(); }}
-                  className={`mt-6 text-sm ${quietLink}`}
+                  className={`mt-4 text-sm ${quietLink}`}
                 >
-                  Try a different email
+                  Use a different email
                 </button>
               </div>
             )}
 
             {(status === "idle" || status === "error") && (
               <>
-                <div className="mb-6 flex gap-1.5" role="tablist" aria-label="Sign-in method">
-                  <button onClick={() => switchMode("signin")} className={tabClass("signin")}>
-                    Sign in
-                  </button>
-                  <button onClick={() => switchMode("register")} className={tabClass("register")}>
-                    Register
-                  </button>
-                  <button onClick={() => switchMode("magic")} className={tabClass("magic")}>
-                    Magic link
-                  </button>
-                </div>
-
                 <h2 className="font-display font-bold text-2xl tracking-tight text-white">
                   {heading}
                 </h2>
                 <p className="mt-2 text-sm text-white/65">{subheading}</p>
 
                 {formError && (
-                  <div className="mt-5 flex items-start gap-2 rounded-lg border border-signal-foul/40 bg-signal-foul/10 px-4 py-3 text-sm text-signal-foul">
-                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <div role="alert" className="mt-5 flex items-start gap-2 rounded-lg border border-signal-foul/40 bg-signal-foul/10 px-4 py-3 text-sm text-signal-foul">
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                     <span>{formError}</span>
                   </div>
                 )}
 
                 <form ref={formRef} onSubmit={handleSubmit} className="mt-6 space-y-4">
                   <div>
-                    <label htmlFor="email" className="mb-2 block label-mono">
-                      Email address
+                    <label htmlFor="email" className="field-label">
+                      Email
                     </label>
                     <input
                       id="email"
@@ -286,13 +269,13 @@ function LoginPageInner() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@example.com"
-                      className="input-base font-mono"
+                      className="input-base"
                     />
                   </div>
 
                   {mode !== "magic" && (
                     <div>
-                      <label htmlFor="password" className="mb-2 block label-mono">
+                      <label htmlFor="password" className="field-label">
                         Password
                       </label>
                       <input
@@ -304,14 +287,14 @@ function LoginPageInner() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder={mode === "register" ? "At least 8 characters" : "Your password"}
-                        className="input-base font-mono"
+                        className="input-base"
                       />
                     </div>
                   )}
 
                   {mode === "register" && (
                     <div>
-                      <label htmlFor="password2" className="mb-2 block label-mono">
+                      <label htmlFor="password2" className="field-label">
                         Confirm password
                       </label>
                       <input
@@ -323,17 +306,14 @@ function LoginPageInner() {
                         value={password2}
                         onChange={(e) => setPassword2(e.target.value)}
                         placeholder="Same password again"
-                        className="input-base font-mono"
+                        className="input-base"
                       />
                     </div>
                   )}
 
                   {/* hidden submit keeps Enter-to-submit working (ActionButton is type=button) */}
                   <input type="submit" hidden />
-                  <div
-                    data-exp={mode === "magic" ? "EXP-007" : undefined}
-                    data-variant={mode === "magic" ? ctaVariant : undefined}
-                  >
+                  <div>
                     <ActionButton
                       task={submitTask}
                       onRun={() => formRef.current?.requestSubmit()}
@@ -341,7 +321,7 @@ function LoginPageInner() {
                         mode === "magic"
                           ? sendButtonLabel
                           : mode === "register"
-                            ? "Create free account"
+                            ? "Create account"
                             : "Sign in"
                       }
                       runningLabel={
@@ -356,42 +336,34 @@ function LoginPageInner() {
                   </div>
                 </form>
 
-                {mode === "signin" && (
-                  <button
-                    onClick={() => switchMode("magic")}
-                    className={`mt-4 text-xs ${quietLink}`}
-                  >
-                    Forgot password? Sign in with a magic link instead →
-                  </button>
-                )}
+                <div className="mt-3 flex flex-col items-start text-sm">
+                  {mode !== "register" && (
+                    <button type="button" onClick={() => switchMode("register")} className={quietLink}>
+                      Create an account
+                    </button>
+                  )}
+                  {mode !== "signin" && (
+                    <button type="button" onClick={() => switchMode("signin")} className={quietLink}>
+                      Sign in with a password
+                    </button>
+                  )}
+                  {mode !== "magic" && (
+                    <button type="button" onClick={() => switchMode("magic")} className={quietLink}>
+                      {mode === "signin" ? "Forgot your password? Email me a sign-in link instead" : "Email me a sign-in link instead"}
+                    </button>
+                  )}
+                </div>
 
-                <p className="mt-6 text-center text-xs text-white/40">
+                <p className="mt-5 text-sm text-white/60">
                   By signing in you agree to our{" "}
-                  <a href="/terms" className={quietLink}>Terms</a>{" "}
+                  <Link href="/terms" className={quietLink}>Terms</Link>{" "}
                   and{" "}
-                  <a href="/privacy" className={quietLink}>Privacy Policy</a>.
+                  <Link href="/privacy" className={quietLink}>Privacy Policy</Link>.
                 </p>
               </>
             )}
           </div>
 
-          <p className="text-center text-xs text-white/45">
-            {mode === "register" ? (
-              <>
-                Already racing with us?{" "}
-                <button onClick={() => switchMode("signin")} className={quietLink}>
-                  Sign in →
-                </button>
-              </>
-            ) : (
-              <>
-                New to MotoQuant?{" "}
-                <button onClick={() => switchMode("register")} className={quietLink}>
-                  Create a free account →
-                </button>
-              </>
-            )}
-          </p>
         </div>
       </main>
       <SiteFooter />
