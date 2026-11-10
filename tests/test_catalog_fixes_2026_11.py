@@ -347,3 +347,231 @@ def test_patch_leaves_physics_blobs_untouched(patched_copy):
     q = "SELECT bike_model_id, version, engine_params, chassis_params, drivetrain_params FROM bike_configs ORDER BY id"
     assert [tuple(r) for r in conn.execute(q)] == orig.execute(q).fetchall()
     orig.close()
+
+
+# ── 7. Remaining generated placeholder parts (2026-11-10, final sync lane) ──────
+
+# Real brand names stamped onto invented products by seed.py template loops.
+_SYNTHETIC_NAME = re.compile(
+    r"(Performance Air Filter V\d+|Performance Filter Pro \d+|Advanced Fuel System \d+"
+    r"|(Caliper|pad|rotor) V\d+$|Fairing V\d+$)"
+)
+_SYNTHETIC_PN = re.compile(
+    r"^(AF-PERF-V\d+|AF-PRO-\d+|FS-ADV-\d+|BRK-[A-Z]{3}-\d+|BW-[A-Z]{3}-\d+)$"
+)
+
+_REMOVED_KEYS = [
+    ("K&N", "AF-PERF-V2"), ("HiFlow", "AF-PRO-11"), ("Brembo", "BRK-BRE-4"),
+    ("SBS", "BRK-SBS-9"), ("Catalyst", "BW-CAT-3"), ("Hotbodies", "BW-HOT-6"),
+    ("Holley", "FS-ADV-5"), ("Translogic", "QS-TRA-5"), ("Shift Assist", "QS-SHI-9"),
+    ("Enersys", "BATT-ENE-6"), ("Interstate", "BATT-INT-8"),
+]  # fmt: skip
+
+
+def _fresh_seed_parts():
+    db = MotoQuantDB(":memory:")
+    db.connect()
+    db.initialize()
+    seed_all(db)
+    rows = [
+        tuple(r)
+        for r in db._conn.execute("SELECT brand, part_number, model_name FROM parts")
+    ]
+    db.close()
+    return rows
+
+
+def test_fresh_seed_has_no_template_stamped_parts():
+    rows = _fresh_seed_parts()
+    bad = [
+        r
+        for r in rows
+        if _SYNTHETIC_PN.match(r[1] or "") or _SYNTHETIC_NAME.search(r[2] or "")
+    ]
+    # the real 'Panigale V4' / 'V85 TT' style model names must not trip the guard
+    assert bad == []
+    keys = {(r[0], r[1]) for r in rows}
+    for k in _REMOVED_KEYS + [tuple(x) for x in _patch_module().SYNTHETIC_PARTS]:
+        assert tuple(k) not in keys, k
+
+
+def _patch_module():
+    path = ROOT / "scripts" / "patch_2026_11_10_catalog_fixes.py"
+    spec = importlib.util.spec_from_file_location("patch_2026_11_10_b", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_shipped_db_has_no_template_stamped_parts():
+    src = ROOT / "motoquant.db"
+    if not src.exists():
+        pytest.skip("no motoquant.db")
+    conn = sqlite3.connect(f"file:{src}?mode=ro", uri=True)
+    rows = conn.execute("SELECT brand, part_number, model_name FROM parts").fetchall()
+    conn.close()
+    bad = [
+        r
+        for r in rows
+        if _SYNTHETIC_PN.match(r[1] or "") or _SYNTHETIC_NAME.search(r[2] or "")
+    ]
+    assert bad == []
+    keys = {(r[0], r[1]) for r in rows}
+    for k in _patch_module().SYNTHETIC_PARTS:
+        assert tuple(k) not in keys, k
+
+
+def test_shipped_db_parts_equal_fresh_seed_parts():
+    """`db init` + `db seed` yields exactly the parts set the shipped DB carries."""
+    src = ROOT / "motoquant.db"
+    if not src.exists():
+        pytest.skip("no motoquant.db")
+    conn = sqlite3.connect(f"file:{src}?mode=ro", uri=True)
+    shipped = {
+        (r[0], r[1]) for r in conn.execute("SELECT brand, part_number FROM parts")
+    }
+    conn.close()
+    fresh = {(r[0], r[1]) for r in _fresh_seed_parts()}
+    assert shipped == fresh, (
+        f"only in shipped: {sorted(shipped - fresh)[:10]}; "
+        f"only in fresh seed: {sorted(fresh - shipped)[:10]}"
+    )
+
+
+def _scratch_copy_of_shipped_db():
+    src = ROOT / "motoquant.db"
+    if not src.exists():
+        pytest.skip("no motoquant.db")
+    tmpdir = Path(tempfile.mkdtemp())
+    tmp = tmpdir / "t.db"
+    shutil.copy(src, tmp)
+    return tmpdir, tmp
+
+
+def test_patch_removes_synthetic_parts_and_their_prices():
+    """Re-insert the synthetic rows (with a price row each) into a copy of the
+    shipped DB, then prove the patch deletes them. The shipped DB is already
+    clean, so without the re-insert this test could not fail."""
+    mod = _patch_module()
+    keys = [tuple(k) for k in mod.SYNTHETIC_PARTS]
+    assert keys
+    tmpdir, tmp = _scratch_copy_of_shipped_db()
+    try:
+        conn = sqlite3.connect(tmp)
+        cat = conn.execute("SELECT id FROM parts_categories LIMIT 1").fetchone()[0]
+        for brand, pn in keys:
+            cur = conn.execute(
+                "INSERT INTO parts (category_id, brand, model_name, part_number, "
+                "specifications) VALUES (?, ?, 'synthetic test row', ?, '{}')",
+                (cat, brand, pn),
+            )
+            conn.execute(
+                "INSERT INTO part_prices (part_id, retailer, source_url, price_inr) "
+                "VALUES (?, 'synthetic-test', 'https://example.invalid', 1.0)",
+                (cur.lastrowid,),
+            )
+        conn.commit()
+        conn.close()
+        first = mod.apply(str(tmp), verbose=False)
+        second = mod.apply(str(tmp), verbose=False)
+        assert first["parts"]["parts_removed"] == len(keys)
+        assert second["parts"]["parts_removed"] == 0
+        assert mod.total_changes(second) == 0
+        conn = sqlite3.connect(tmp)
+        for brand, pn in keys:
+            assert (
+                conn.execute(
+                    "SELECT COUNT(*) FROM parts WHERE brand=? AND part_number=?",
+                    (brand, pn),
+                ).fetchone()[0]
+                == 0
+            )
+        assert (
+            conn.execute(
+                "SELECT COUNT(*) FROM part_prices WHERE retailer = 'synthetic-test'"
+            ).fetchone()[0]
+            == 0
+        )
+        assert (
+            conn.execute(
+                "SELECT COUNT(*) FROM part_prices "
+                "WHERE part_id NOT IN (SELECT id FROM parts)"
+            ).fetchone()[0]
+            == 0
+        )
+        conn.close()
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+
+
+_WHEELIE_BAR_NUMBERS = ("WB-8IN", "WB-10IN", "WB-12IN")
+
+
+def _wheelie_bar_brands(conn):
+    q = "SELECT part_number, brand FROM parts WHERE part_number IN (?, ?, ?)"
+    return sorted((r[0], r[1]) for r in conn.execute(q, _WHEELIE_BAR_NUMBERS))
+
+
+def test_unbranded_wheelie_bars_are_labelled_generic():
+    """The three fabricated bars carry no invented maker name, in the shipped
+    DB and in a fresh seed, and exist exactly once each."""
+    expected = sorted((pn, "Generic") for pn in _WHEELIE_BAR_NUMBERS)
+    src = ROOT / "motoquant.db"
+    if src.exists():
+        conn = sqlite3.connect(f"file:{src}?mode=ro", uri=True)
+        assert _wheelie_bar_brands(conn) == expected
+        conn.close()
+    fresh = sorted(
+        (r[1], r[0]) for r in _fresh_seed_parts() if r[1] in _WHEELIE_BAR_NUMBERS
+    )
+    assert fresh == expected
+
+
+def test_patch_relabels_old_wheelie_bar_brands():
+    """Put the old brand names back on a copy of the shipped DB and prove the
+    patch relabels them; then prove it removes an old-brand duplicate when the
+    Generic row already exists (a seed run on an unpatched DB)."""
+    mod = _patch_module()
+    old = {pn: brand for brand, pn in mod.GENERIC_RELABEL}
+    assert sorted(old) == sorted(_WHEELIE_BAR_NUMBERS)
+    tmpdir, tmp = _scratch_copy_of_shipped_db()
+    try:
+        conn = sqlite3.connect(tmp)
+        for pn, brand in old.items():
+            conn.execute(
+                "UPDATE parts SET brand = ? WHERE brand = 'Generic' AND part_number = ?",
+                (brand, pn),
+            )
+        conn.commit()
+        n_before = conn.execute("SELECT COUNT(*) FROM parts").fetchone()[0]
+        conn.close()
+        first = mod.apply(str(tmp), verbose=False)
+        second = mod.apply(str(tmp), verbose=False)
+        assert first["relabel"]["parts_relabelled"] == 3
+        assert mod.total_changes(second) == 0
+        conn = sqlite3.connect(tmp)
+        assert _wheelie_bar_brands(conn) == sorted(
+            (pn, "Generic") for pn in _WHEELIE_BAR_NUMBERS
+        )
+        assert conn.execute("SELECT COUNT(*) FROM parts").fetchone()[0] == n_before
+        # duplicate case: an old-brand copy beside the Generic row
+        cat = conn.execute(
+            "SELECT category_id FROM parts WHERE part_number = 'WB-8IN'"
+        ).fetchone()[0]
+        conn.execute(
+            "INSERT INTO parts (category_id, brand, model_name, part_number, "
+            "specifications) VALUES (?, ?, 'dup', 'WB-8IN', '{}')",
+            (cat, old["WB-8IN"]),
+        )
+        conn.commit()
+        conn.close()
+        third = mod.apply(str(tmp), verbose=False)
+        assert third["relabel"]["parts_relabelled"] == 1
+        conn = sqlite3.connect(tmp)
+        assert _wheelie_bar_brands(conn) == sorted(
+            (pn, "Generic") for pn in _WHEELIE_BAR_NUMBERS
+        )
+        assert conn.execute("SELECT COUNT(*) FROM parts").fetchone()[0] == n_before
+        conn.close()
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)

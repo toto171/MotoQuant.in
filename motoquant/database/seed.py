@@ -6832,26 +6832,10 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
         },
     ]
 
-    # Additional Air Filters (15 more)
-    for i in range(5):
-        parts.append(
-            {
-                "category": "air_filter",
-                "brand": ["K&N", "BMC", "DNA", "Sprint", "HiFlow"][i],
-                "model_name": f"Performance Air Filter V{i + 2}",
-                "part_number": f"AF-PERF-V{i + 2}",
-                "specs": {"type": "drop_in"},
-                "param_deltas": {"engine.peak_power_hp": 0.8 + i * 0.3},
-                "fitment_rules": {
-                    "tier": "family",
-                    "match": {"displacement_min_cc": 200 + i * 100},
-                    "description": f"Performance air filter for {200 + i * 100}cc+ bikes",
-                },
-                "price_inr": 5000 + i * 2000,
-                "availability": "in_stock",
-                "retailer": "MotoParts India",
-            }
-        )
+    # 2026-11-10: the five template-stamped 'Performance Air Filter V2..V6'
+    # rows (K&N/BMC/DNA/Sprint/HiFlow; AF-PERF-Vn; 5000+2000i) were invented
+    # products wearing real brand names and were removed. Real air filters
+    # live in the literal lists above and in seed_catalogs/.
 
     # Additional Clutch Kits (8 more)
     clutch_brands = [
@@ -7129,74 +7113,20 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
         },
     ]
 
-    # Additional Brakes (7 more)
-    for i, (brand, model) in enumerate(
-        [
-            ("Brembo", "M4 Caliper"),
-            ("Brembo", "P34 Caliper"),
-            ("Brembo", "Gold pad"),
-            ("EBC", "Organic pad"),
-            ("Galfer", "G-Plate rotor"),
-            ("SBS", "Carbon pad"),
-            ("Endless", "Sintered pad"),
-        ]
-    ):
-        parts.append(
-            {
-                "category": "brakes",
-                "brand": brand,
-                "model_name": f"{brand} {model} V{i + 4}",
-                "part_number": f"BRK-{brand[:3].upper()}-{i + 4}",
-                "specs": {"type": "brake_component"},
-                "param_deltas": {"chassis.dry_mass_kg": -0.2 * i},
-                "fitment_rules": {
-                    "tier": "family",
-                    "match": {"displacement_min_cc": 250 + i * 100},
-                    "description": f"{brand} {model} for 250cc+ bikes",
-                },
-                "price_inr": 8000 + i * 8000,
-                "availability": "in_stock",
-                "retailer": f"{brand} India",
-            }
-        )
+    # 2026-11-10: the loop-stamped brake rows ('Brembo M4 Caliper V4' ...
+    # BRK-xxx-n) and bodywork rows ('Catalyst Carbon Fairing V3' ... BW-xxx-n)
+    # were invented SKUs (template names, arithmetic prices) and were removed.
 
-    # Additional Bodywork (4 more)
-    for i, (brand, material) in enumerate(
-        [
-            ("Catalyst", "carbon"),
-            ("Armour", "fiberglass"),
-            ("Attack", "carbon"),
-            ("Hotbodies", "fiberglass"),
-        ]
-    ):
-        parts.append(
-            {
-                "category": "bodywork",
-                "brand": brand,
-                "model_name": f"{brand} {material.title()} Fairing V{i + 3}",
-                "part_number": f"BW-{brand[:3].upper()}-{i + 3}",
-                "specs": {"material": material},
-                "param_deltas": {"chassis.dry_mass_kg": -2.0 * (i + 1)},
-                "fitment_rules": {
-                    "tier": "family",
-                    "match": {
-                        "categories": ["sport"],
-                        "displacement_min_cc": 500 + i * 200,
-                    },
-                    "description": f"{brand} {material} fairing for sport bikes",
-                },
-                "price_inr": 40000 + i * 20000,
-                "availability": ["in_stock", "order", "import_only"][i % 3],
-                "retailer": f"{brand} India",
-            }
-        )
-
-    # Additional Wheelie Bars (3 more)
+    # Additional Wheelie Bars (3 more). Sold as fabricated, unbranded bars:
+    # the brand names these rows used to carry ('Precision', 'Schnitzer',
+    # 'Voodoo') resolved to no maker of these products in the 2026-07-10 parts
+    # scrape, so since 2026-11-10 they are labelled 'Generic', like the
+    # generic clutch kits.
     for i, length in enumerate([8, 10, 12]):
         parts.append(
             {
                 "category": "wheelie_bar",
-                "brand": ["Precision", "Schnitzer", "Voodoo"][i],
+                "brand": "Generic",
                 "model_name": f'{length}" Wheelie Bar',
                 "part_number": f"WB-{length}IN",
                 "specs": {"extension_mm": length * 25.4},
@@ -7694,31 +7624,23 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
     # Chosen conservatively — see the per-part rationale in the third tuple
     # slot; where a brand has no functional sibling to anchor on, the value
     # falls back to the 60 ms band midpoint rather than the fastest claim.
-    for i, (brand, model, price, shift_ms) in enumerate(
-        [
-            # HM's own Super Lite (HM-QS-SLT) is the 60 ms top-tier unit in
-            # this line; the Mid-Range sits a rung below it.
-            ("HM", "HM QS Mid-Range", 24000, 70.0),
-            # QS Pro V2 is the generation preceding the QS Pro III
-            # Bidirectional (TL-QS3-BD, 50 ms) / IntelliShift Sport (55 ms).
-            ("Translogic", "QS Pro V2", 42000, 60.0),
-            # Same product line and same street price as DJ-PCQS, which is
-            # already seeded at 55 ms — mirror it exactly.
-            ("Dynojet", "Power Commander QS", 30000, 55.0),
-            # No functional sibling for these four brands -> 60 ms band
-            # midpoint (= HM Super Lite / RapidBike QS4, and the value the
-            # Healtech -40 ms delta sibling implies off the 100 ms stock).
-            ("GPR", "Gear Box QS", 35000, 60.0),
-            ("Helix", "Helix QS Universal", 28000, 60.0),
-            ("Shift Assist", "Shift Assist Pro", 25000, 60.0),
-            ("Bonamici", "Racing Quick Shifter", 26000, 60.0),
-        ]
-    ):
+    #
+    # 2026-11-10: five of the original seven were invented SKUs and were
+    # removed (Translogic 'QS Pro V2', Dynojet 'Power Commander QS' - a
+    # duplicate of the real DJ-PCQS row above, GPR 'Gear Box QS', 'Helix QS
+    # Universal', 'Shift Assist Pro' - no such brand). The two survivors keep
+    # the slot index of the original loop so part numbers, displacement bands
+    # and availability are unchanged.
+    for i, brand, model, price, shift_ms in [
+        # HM's own Super Lite (HM-QS-SLT) is the 60 ms top-tier unit in
+        # this line; the Mid-Range sits a rung below it.
+        (0, "HM", "HM QS Mid-Range", 24000, 70.0),
+        # Bonamici Racing makes a quickshifter; no functional sibling for the
+        # brand -> 60 ms band midpoint. (Kept as 'unsure', see the 2026-11-10
+        # catalog audit.)
+        (6, "Bonamici", "Racing Quick Shifter", 26000, 60.0),
+    ]:
         qs_match = {"displacement_min_cc": 300 + i * 150}
-        if model == "Power Commander QS":
-            # stroke gate (2026-07-06): the PC QS is a 4T EFI-era product;
-            # its displacement floor caught 2T big-bores (GT750/H2 Mach IV).
-            qs_match["stroke_type"] = 4
         parts.append(
             {
                 "category": "quickshifter",
@@ -7743,13 +7665,14 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             }
         )
 
-    # Additional Batteries (4 more)
+    # Additional Batteries
+    # 2026-11-10: EnerSys 'NexSys Lithium', Yuasa 'YTX Lithium' and Interstate
+    # 'IL-2600U Li-Ion' were invented motorcycle SKUs and were removed; the
+    # Motobatt MBTX20UHD is a real part number and stays (slot 0 of the
+    # original loop, so its part number BATT-MOT-5 is unchanged).
     for i, (brand, model, price) in enumerate(
         [
             ("Motobatt", "MBTX20UHD Hybrid", 8000),
-            ("Enersys", "NexSys Lithium", 16000),
-            ("Yuasa", "YTX Lithium", 9000),
-            ("Interstate", "IL-2600U Li-Ion", 13000),
         ]
     ):
         parts.append(
@@ -7802,48 +7725,10 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 }
             )
 
-    # Additional air filters (10 more to reach 20)
-    for i in range(10):
-        misc_parts.append(
-            {
-                "category": "air_filter",
-                "brand": ["HiFlow", "Pipercross", "Green", "Simota", "AEM"][i % 5],
-                "model_name": f"Performance Filter Pro {i + 6}",
-                "part_number": f"AF-PRO-{i + 6}",
-                "specs": {"type": "drop_in"},
-                "param_deltas": {"engine.peak_power_hp": 0.6 + i * 0.2},
-                "fitment_rules": {
-                    "tier": "family",
-                    "match": {"displacement_min_cc": 200 + i * 50},
-                    "description": f"Pro air filter for {200 + i * 50}cc+ bikes",
-                },
-                "price_inr": 4500 + i * 1500,
-                "availability": ["in_stock", "order"][i % 2],
-                "retailer": "Air Filter Pro",
-            }
-        )
-
-    # Additional fuel systems (4 more to reach 12)
-    for i in range(4):
-        misc_parts.append(
-            {
-                "category": "fuel_system",
-                "brand": ["Holley", "Carburetors", "Quantum", "Fuel Tech"][i],
-                "model_name": f"Advanced Fuel System {i + 5}",
-                "part_number": f"FS-ADV-{i + 5}",
-                "specs": {"type": "fuel_management"},
-                "param_deltas": {"engine.peak_power_hp": 1.0 + i * 0.5},
-                "fitment_rules": {
-                    "tier": "family",
-                    "match": {"displacement_min_cc": 400 + i * 200},
-                    "description": "Advanced fuel system for bikes 400cc+",
-                },
-                "price_inr": 18000 + i * 8000,
-                "availability": "order",
-                "retailer": "Fuel Systems Pro",
-                "delivery_days": 14 + i * 3,
-            }
-        )
+    # 2026-11-10: the ten 'Performance Filter Pro 6..15' air filters and the
+    # four 'Advanced Fuel System 5..8' rows were template-stamped (brand cycled
+    # through a list, arithmetic prices, AF-PRO-n / FS-ADV-n) with no real
+    # product behind them and were removed.
 
     # Additional chains (3 more to reach 15)
     for i, (brand, pitch) in enumerate(

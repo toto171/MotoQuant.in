@@ -58,7 +58,9 @@ NESTED_CONSTRAINT_KEYS = {
 # fine (the floor still holds); a drop means parts silently vanished.
 # 594 -> 593 on 2026-07-06: the duplicate Walbro 450 LPH Fuel Pump row
 # (seed.py + drag_specific.py both seeded one) was merged into a single part.
-MIN_CATALOG_PARTS = 584
+# 584 -> 546 on 2026-11-10: 38 template-stamped placeholder parts removed
+# (patch_2026_11_10_catalog_fixes.SYNTHETIC_PARTS).
+MIN_CATALOG_PARTS = 546
 
 
 @pytest.fixture(scope="module")

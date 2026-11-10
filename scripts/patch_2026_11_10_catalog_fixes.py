@@ -22,6 +22,13 @@ speed can move:
    (K-Tech Damper V4 ... FGRT Cartridge V12) were stamped out by a loop in
    seed.py with synthetic names, round prices and no modifier; the loop is
    removed from the seed and the rows deleted here (with their price history).
+   The same applies to the other template-stamped rows listed in
+   ``SYNTHETIC_PARTS`` (air filters, brakes, bodywork, fuel systems, five
+   quickshifters, three batteries): real brand names on invented products.
+4. UNBRANDED WHEELIE BARS.  Three fabricated wheelie bars carried brand names
+   ('Precision', 'Schnitzer', 'Voodoo') that match no maker of such a product;
+   they are relabelled brand 'Generic' (``GENERIC_RELABEL``), as the seed now
+   writes them.  The part itself -- a plain 8/10/12-inch bar -- is kept.
 
 Usage:
     MOTOQUANT_DB=<db> python scripts/patch_2026_11_10_catalog_fixes.py [--dry-run]
@@ -57,6 +64,64 @@ PLACEHOLDER_PARTS = [
     ("Fox", "SUSP-FOX-10"),
     ("Fox", "SUSP-FOX-11"),
     ("FGRT", "SUSP-FGR-12"),
+]
+
+# (brand, part_number) of the remaining template-stamped parts: real brand names
+# attached to invented products (``f"{brand} ... V{i}"`` / ``AF-PRO-{i}`` series
+# with arithmetic prices) from loops in seed.py. Removed from the seed and here.
+SYNTHETIC_PARTS = [
+    # air filters: "Performance Air Filter V2..V6", "Performance Filter Pro 6..15"
+    ("K&N", "AF-PERF-V2"),
+    ("BMC", "AF-PERF-V3"),
+    ("DNA", "AF-PERF-V4"),
+    ("Sprint", "AF-PERF-V5"),
+    ("HiFlow", "AF-PERF-V6"),
+    ("HiFlow", "AF-PRO-6"),
+    ("Pipercross", "AF-PRO-7"),
+    ("Green", "AF-PRO-8"),
+    ("Simota", "AF-PRO-9"),
+    ("AEM", "AF-PRO-10"),
+    ("HiFlow", "AF-PRO-11"),
+    ("Pipercross", "AF-PRO-12"),
+    ("Green", "AF-PRO-13"),
+    ("Simota", "AF-PRO-14"),
+    ("AEM", "AF-PRO-15"),
+    # brakes: "<brand> <component> V4..V10"
+    ("Brembo", "BRK-BRE-4"),
+    ("Brembo", "BRK-BRE-5"),
+    ("Brembo", "BRK-BRE-6"),
+    ("EBC", "BRK-EBC-7"),
+    ("Galfer", "BRK-GAL-8"),
+    ("SBS", "BRK-SBS-9"),
+    ("Endless", "BRK-END-10"),
+    # bodywork: "<brand> <material> Fairing V3..V6"
+    ("Catalyst", "BW-CAT-3"),
+    ("Armour", "BW-ARM-4"),
+    ("Attack", "BW-ATT-5"),
+    ("Hotbodies", "BW-HOT-6"),
+    # fuel systems: "Advanced Fuel System 5..8"
+    ("Holley", "FS-ADV-5"),
+    ("Carburetors", "FS-ADV-6"),
+    ("Quantum", "FS-ADV-7"),
+    ("Fuel Tech", "FS-ADV-8"),
+    # quickshifters: invented SKUs (QS-<brand>-n); QS-HM-4 / QS-BON-10 kept
+    ("Translogic", "QS-TRA-5"),
+    ("Dynojet", "QS-DYN-6"),  # duplicate of the real DJ-PCQS row
+    ("GPR", "QS-GPR-7"),
+    ("Helix", "QS-HEL-8"),
+    ("Shift Assist", "QS-SHI-9"),
+    # batteries: invented motorcycle SKUs; Motobatt MBTX20UHD kept
+    ("Enersys", "BATT-ENE-6"),
+    ("Yuasa", "BATT-YUA-7"),
+    ("Interstate", "BATT-INT-8"),
+]
+
+# (old brand, part_number) -> brand 'Generic'. The brand names resolved to no
+# maker of these products in reports/scrape_2026_07_10 (found=false).
+GENERIC_RELABEL = [
+    ("Precision", "WB-8IN"),
+    ("Schnitzer", "WB-10IN"),
+    ("Voodoo", "WB-12IN"),
 ]
 
 _SIZE_IN_NOTE = re.compile(r"(\d{2,3})/(\d{2})")
@@ -172,7 +237,7 @@ def fix_fitment_positions(conn, log) -> dict:
 
 def remove_placeholder_parts(conn, log) -> dict:
     removed = 0
-    for brand, part_number in PLACEHOLDER_PARTS:
+    for brand, part_number in PLACEHOLDER_PARTS + SYNTHETIC_PARTS:
         row = conn.execute(
             "SELECT id, model_name FROM parts WHERE brand = ? AND part_number = ?",
             (brand, part_number),
@@ -184,6 +249,36 @@ def remove_placeholder_parts(conn, log) -> dict:
         removed += 1
         log(f"part {row['id']} {brand} {row['model_name']} ({part_number}): removed")
     return {"parts_removed": removed}
+
+
+def relabel_generic_parts(conn, log) -> dict:
+    relabelled = 0
+    for brand, part_number in GENERIC_RELABEL:
+        row = conn.execute(
+            "SELECT id, model_name FROM parts WHERE brand = ? AND part_number = ?",
+            (brand, part_number),
+        ).fetchone()
+        if row is None:
+            continue
+        already = conn.execute(
+            "SELECT id FROM parts WHERE brand = 'Generic' AND part_number = ?",
+            (part_number,),
+        ).fetchone()
+        if already is not None:
+            # A seed run after the relabel landed wrote the Generic row beside
+            # the old one; drop the old-brand duplicate instead of making two.
+            conn.execute("DELETE FROM part_prices WHERE part_id = ?", (row["id"],))
+            conn.execute("DELETE FROM parts WHERE id = ?", (row["id"],))
+            log(
+                f"part {row['id']} {brand} {part_number}: duplicate of Generic row, removed"
+            )
+        else:
+            conn.execute(
+                "UPDATE parts SET brand = 'Generic' WHERE id = ?", (row["id"],)
+            )
+            log(f"part {row['id']} {brand} {row['model_name']}: brand -> Generic")
+        relabelled += 1
+    return {"parts_relabelled": relabelled}
 
 
 def apply(db_path: str, dry_run: bool = False, verbose: bool = True) -> dict:
@@ -199,6 +294,7 @@ def apply(db_path: str, dry_run: bool = False, verbose: bool = True) -> dict:
         "headline": fix_headline_specs(conn, log),
         "fitments": fix_fitment_positions(conn, log),
         "parts": remove_placeholder_parts(conn, log),
+        "relabel": relabel_generic_parts(conn, log),
     }
     if dry_run:
         conn.rollback()
@@ -210,7 +306,13 @@ def apply(db_path: str, dry_run: bool = False, verbose: bool = True) -> dict:
 
 def total_changes(result: dict) -> int:
     h, f, p = result["headline"], result["fitments"], result["parts"]
-    return h["bikes_changed"] + f["relinked"] + f["deleted"] + p["parts_removed"]
+    return (
+        h["bikes_changed"]
+        + f["relinked"]
+        + f["deleted"]
+        + p["parts_removed"]
+        + result["relabel"]["parts_relabelled"]
+    )
 
 
 def main() -> None:
@@ -221,7 +323,7 @@ def main() -> None:
         + (" (dry run)" if dry_run else "")
     )
     result = apply(db_path, dry_run=dry_run)
-    for name in ("headline", "fitments", "parts"):
+    for name in ("headline", "fitments", "parts", "relabel"):
         print(name, {k: v for k, v in result[name].items() if not k.startswith("_")})
     for line in result["headline"]["_inconsistent"]:
         print("  bore/stroke inconsistent with displacement -> NULL:", line)
