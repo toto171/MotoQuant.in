@@ -201,9 +201,21 @@ def test_ecu_mph_log_trap_speed(k5_sim):
 # ── Calibrator presets ───────────────────────────────────────────────────
 
 
+def _v_rod_muscle():
+    """The catalog bike these tests were written against (crank-referenced
+    curve, no cluster grip override). Looked up by name: a list index moves
+    whenever a bike is added or removed, and on 2026-11-10 index 100 silently
+    became a different motorcycle."""
+    return next(
+        s
+        for s in ALL_KNOWN_BIKES
+        if s.manufacturer == "Harley-Davidson" and s.model_name == "V-Rod Muscle"
+    )
+
+
 @pytest.fixture(scope="module")
 def chain_cfg():
-    cfg = spec_to_bike_config(ALL_KNOWN_BIKES[100])
+    cfg = spec_to_bike_config(_v_rod_muscle())
     assert not cfg.engine.dyno_curve.is_at_wheel
     return cfg
 
@@ -259,7 +271,7 @@ def _run_from_cfg(cfg, hz=10.0):
 
 
 def test_multi_run_simulates_once_per_evaluation(monkeypatch):
-    truth = spec_to_bike_config(ALL_KNOWN_BIKES[100])
+    truth = spec_to_bike_config(_v_rod_muscle())
     runs = []
     for i, dcd in enumerate((-0.01, 0.0, 0.01)):
         c = copy.deepcopy(truth)

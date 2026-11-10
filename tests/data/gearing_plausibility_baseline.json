@@ -61,10 +61,6 @@
    211.949,
    5
   ],
-  "Aprilia|Tuono 457|2024-2026": [
-   191.194,
-   4
-  ],
   "Aprilia|Tuono 660 Factory|2022-2026": [
    265.168,
    5
@@ -713,12 +709,12 @@
    246.888,
    6
   ],
-  "Honda|CBR1000RR-R Fireblade SP|2020-2024": [
+  "Honda|CBR1000RR-R Fireblade SP|2020-2023": [
    299.014,
    5
   ],
   "Honda|CBR1000RR-R Fireblade SP|2024-2025": [
-   405.855,
+   406.399,
    6
   ],
   "Honda|CBR1000RR|2008-2012": [
@@ -813,12 +809,8 @@
    133.887,
    4
   ],
-  "Honda|Hornet 2.0|2020-2024": [
-   135.036,
-   3
-  ],
-  "Honda|Hornet 2.0|2024-2025": [
-   150.015,
+  "Honda|Hornet 2.0|2020-2026": [
+   136.038,
    3
   ],
   "Honda|Monkey 125|2022-2026": [
@@ -1454,12 +1446,8 @@
    6
   ],
   "Royal Enfield|Continental GT 650|2018-2024": [
-   184.816,
+   185.347,
    5
-  ],
-  "Royal Enfield|Continental GT 650|2020-2024": [
-   210.265,
-   6
   ],
   "Royal Enfield|Goan Classic 350|2024-2025": [
    145.804,
@@ -1482,12 +1470,8 @@
    4
   ],
   "Royal Enfield|Interceptor 650|2018-2024": [
-   182.598,
+   183.137,
    5
-  ],
-  "Royal Enfield|Interceptor 650|2020-2024": [
-   198.119,
-   6
   ],
   "Royal Enfield|Meteor 350|2020-2026": [
    130.275,
@@ -1505,12 +1489,8 @@
    179.931,
    4
   ],
-  "Royal Enfield|Super Meteor 650|2023-2024": [
-   188.285,
-   6
-  ],
   "Royal Enfield|Super Meteor 650|2023-2026": [
-   187.743,
+   188.086,
    4
   ],
   "Royal Enfield|Thunderbird 350|2012-2019": [
@@ -1689,10 +1669,6 @@
    219.227,
    6
   ],
-  "Suzuki|V-Strom SX 250|2022-2024": [
-   160.828,
-   4
-  ],
   "Suzuki|V-Strom SX 250|2022-2026": [
    150.373,
    3
@@ -1734,11 +1710,7 @@
    2
   ],
   "TVS|Raider 125|2021-2026": [
-   124.151,
-   3
-  ],
-  "TVS|Raider 125|2022-2024": [
-   131.973,
+   123.465,
    3
   ],
   "TVS|Ronin 225|2022-2025": [
@@ -2165,12 +2137,6 @@
    "criteria": "ab",
    "bucket": "generic-primary"
   },
-  "Aprilia|Tuono 457|2024-2026": {
-   "apk": 1.244,
-   "gear_gap": 2,
-   "criteria": "b",
-   "bucket": "generic-primary"
-  },
   "BMW|F 900 GS (2024-2026)|2024-2026": {
    "apk": 1.256,
    "gear_gap": 1,
@@ -2591,16 +2557,10 @@
    "criteria": "ab",
    "bucket": "generic-primary"
   },
-  "Honda|Hornet 2.0|2020-2024": {
-   "apk": 1.841,
+  "Honda|Hornet 2.0|2020-2026": {
+   "apk": 1.827,
    "gear_gap": 2,
    "criteria": "ab",
-   "bucket": "tier1-unverified"
-  },
-  "Honda|Hornet 2.0|2024-2025": {
-   "apk": 1.236,
-   "gear_gap": 2,
-   "criteria": "b",
    "bucket": "tier1-unverified"
   },
   "Honda|Monkey 125|2022-2026": {
@@ -2814,7 +2774,7 @@
    "bucket": "tier1-unverified"
   },
   "Royal Enfield|Super Meteor 650|2023-2026": {
-   "apk": 1.082,
+   "apk": 1.081,
    "gear_gap": 2,
    "criteria": "b",
    "bucket": "tier1-unverified"
@@ -2860,12 +2820,6 @@
    "gear_gap": 2,
    "criteria": "b",
    "bucket": "tall-by-design"
-  },
-  "Suzuki|V-Strom SX 250|2022-2024": {
-   "apk": 1.226,
-   "gear_gap": 2,
-   "criteria": "b",
-   "bucket": "generic-primary"
   },
   "Suzuki|V-Strom SX 250|2022-2026": {
    "apk": 1.311,
@@ -2922,13 +2876,7 @@
    "bucket": "generic-primary"
   },
   "TVS|Raider 125|2021-2026": {
-   "apk": 1.451,
-   "gear_gap": 2,
-   "criteria": "ab",
-   "bucket": "generic-primary"
-  },
-  "TVS|Raider 125|2022-2024": {
-   "apk": 1.275,
+   "apk": 1.509,
    "gear_gap": 2,
    "criteria": "ab",
    "bucket": "generic-primary"

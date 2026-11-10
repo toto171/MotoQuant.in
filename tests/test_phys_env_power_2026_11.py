@@ -130,9 +130,21 @@ def test_supercharger_ratio_uses_ambient_pressure(bt):
 # ── 3. Venue-level track prep ────────────────────────────────────────────
 
 
+def _v_rod_muscle():
+    """The catalog bike these tests were written against (crank-referenced
+    curve, no cluster grip override). Looked up by name: a list index moves
+    whenever a bike is added or removed, and on 2026-11-10 index 100 silently
+    became a different motorcycle."""
+    return next(
+        s
+        for s in ALL_KNOWN_BIKES
+        if s.manufacturer == "Harley-Davidson" and s.model_name == "V-Rod Muscle"
+    )
+
+
 @pytest.fixture(scope="module")
 def cat_cfg():
-    return spec_to_bike_config(ALL_KNOWN_BIKES[100])
+    return spec_to_bike_config(_v_rod_muscle())
 
 
 def _et(cfg):

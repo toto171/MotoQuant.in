@@ -4,18 +4,61 @@
 
 | Name                                | What it is                                          | Size    |
 |-------------------------------------|-----------------------------------------------------|---------|
-| `surrogate_numpy.npz`               | **v2.6 SHIPPED MODEL** — numpy MLP served in prod   | 54 KB   |
+| `surrogate_numpy.npz`               | **v2.7 SHIPPED MODEL** — numpy MLP served in prod   | 54 KB   |
+| `motoquant_surrogate_v2_7.npz`      | v2.7 training dataset (9,034 rows × 26 features)    | 649 KB  |
+| `surrogate_numpy_v2_6.npz.bak`      | v2.6 numpy MLP — rollback copy                      | 54 KB   |
 | `motoquant_surrogate_v2_6.npz`      | v2.6 training dataset (9,124 rows × 26 features)    | 660 KB  |
-| `surrogate_numpy_v2_5.npz.bak`      | v2.5 numpy MLP — rollback copy                      | 87 KB   |
-| `motoquant_surrogate_v2_5.npz`      | v2.5 training dataset (9,124 rows × 26 features)    | 660 KB  |
 | `motoquant_surrogate_v1_1k5.npz`    | v1 training dataset (K5 Sobol, 1.5k samples — the historically cited original K5 envelope) | 128 KB  |
 
+> **Pruned 2026-11-10:** the v2.5 dataset (`motoquant_surrogate_v2_5.npz`) and
+> rollback copy (`surrogate_numpy_v2_5.npz.bak`) were deleted when v2.7
+> shipped — rollback depth stays at one version (now v2.6).
+>
 > **Pruned 2026-08-11:** the v2.1–v2.4 training datasets
 > (`motoquant_surrogate_v2_8k5.npz`, `_v2_2.npz`, `_v2_3.npz`, `_v2_4.npz`)
 > and the v1/v2.1–v2.4 model rollback copies (`surrogate_numpy_v1.npz.bak`,
 > `_v2_1` … `_v2_4.npz.bak`) were deleted — ~3 MB of superseded artifacts
 > with zero code references. Rollback depth is one version (v2.5); anything
 > older is regenerable from the recipe notes below.
+
+## v2.7 (November 10, 2026) — duplicate-bike epoch + SAE correction regen
+
+Regen trigger: the 2026-11-10 epoch (seven duplicate bikes removed, the
+Fireblade SP generations made disjoint, kerb-as-dry masses corrected on six
+rows; full reseed — catalog 541 → 534 bikes) and, in the same session, a
+physics change that affects NON-default conditions slightly: the hot-air power
+correction is now SAE-form and anchored at the reference day. Default-condition
+ETs are unchanged by the latter (the pinned baselines and the regression
+snapshot did not move), but the training set samples altitude, so a regen is
+what brings the surrogate back in line with it. Standing contract unchanged:
+**a surrogate is a cache of the physics — regenerate after any
+reseed/retune, in the same session.**
+
+The gearing change evaluated in the same epoch (inferred primaries for small
+bikes) was NOT shipped — see `reports/session_2026_11_10_epoch.md` — so this
+surrogate describes the same gearing as v2.6.
+
+FULL regeneration, same recipe as v2.6 (534 bikes → 9,035 tasks,
+cluster-stratified: 509 stock + 25 stock_eval + 25 mod_eval + 8,476 perturb;
+9,034 valid rows; hidden 128,64 · epochs 600 · restarts 3 · split seed 42):
+
+| Metric (ET)            | v2.6                  | v2.7                   |
+|------------------------|-----------------------|------------------------|
+| Holdout MAE            | 110.5 ms (n=1,361)    | **108.8 ms** (n=1,347) |
+| Holdout RMSE           | 174.9 ms              | **211.4 ms**           |
+| Holdout R²             | 0.9962                | **0.9944**             |
+| trap MAE               | 1.67 km/h             | **1.69 km/h**          |
+| Envelope at stock      | 541/541               | **534/534**            |
+
+Honest reading: MAE is flat (−1.7 ms) and RMSE is WORSE (+36.5 ms, R² −0.0018).
+Nothing in this epoch should make the catalog harder to fit, and the holdout
+split is drawn from a different task list (the plan is re-stratified over 534
+bikes), so the two RMSE figures are not the same rows; the tail of the error
+distribution is what moved. No retraining tricks were applied to chase the
+v2.6 number. Reference sanity (surrogate − physics): K5 +0.117 / R1 +0.078 /
+Busa +0.037 s — the K5 residual is larger than v2.6's (−0.016); the optimizer's
+full-sim verify loop covers it as before. Rollback:
+`cp surrogate_numpy_v2_6.npz.bak surrogate_numpy.npz` (then `make surrogate-web`).
 
 ## v2.6 (August 8, 2026) — crank-semantics epoch regen
 

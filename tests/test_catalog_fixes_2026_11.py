@@ -227,8 +227,16 @@ def test_fresh_seed_has_no_loop_generated_suspension_placeholders():
 # bike -> the Tier-1 key it resolves to today (None = no Tier-1 hit). The gearing
 # verifier found each of these resolves to a DIFFERENT model's entry (substring
 # match) or misses its own entry on a year range. Changing the resolution moves
-# catalog ETs, so it is deliberately deferred; when the epoch lane fixes the
-# matcher these expectations change and the diff makes that visible.
+# catalog ETs, so it is not a free fix.
+#
+# 2026-11-10 epoch: a whole-token matcher that fixes these was built and measured
+# together with the inferred-primary gearing rules it only makes sense with, and
+# the package FAILED its accuracy gate (it made the sub-400 cc high-confidence
+# benchmarks worse and no physically plausible retune recovered them), so it was
+# not shipped. Evidence, the gate table and the prototype diff are in
+# reports/session_2026_11_10_epoch.md. These pins therefore still describe
+# today's (known-wrong) behaviour; when a later epoch fixes the matcher the
+# expectations change and the diff makes that visible.
 KNOWN_MISMATCHES = {
     ("Kawasaki", "Ninja ZX-10RR", 2021): ("kawasaki", "zx-10r"),
     ("Honda", "CBR250RR (Indonesia)", 2017): ("honda", "cbr 250r"),

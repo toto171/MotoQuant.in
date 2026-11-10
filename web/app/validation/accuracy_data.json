@@ -1,23 +1,23 @@
 {
- "generated": "2026-07-04",
+ "generated": "2026-11-10",
  "references": {
   "K5": 9.9331,
   "R1": 10.1436,
   "Hayabusa": 10.3633
  },
- "n_matched": 276,
+ "n_matched": 273,
  "overall": {
-  "n": 276,
-  "w_mean_abs": 0.2629,
-  "w_bias": 0.0073,
+  "n": 273,
+  "w_mean_abs": 0.262,
+  "w_bias": 0.0087,
   "raw_mean_abs": 0.3724
  },
  "distribution": {
   "within_0_05": 42,
-  "within_0_10": 75,
-  "within_0_20": 138,
-  "within_0_50": 224,
-  "within_1_00": 256
+  "within_0_10": 74,
+  "within_0_20": 137,
+  "within_0_50": 222,
+  "within_1_00": 253
  },
  "clusters": {
   "litre-sport-600-1000": {
@@ -28,10 +28,10 @@
    "label": "600-1000 sport (I4/triple)"
   },
   "sport-twin-600-1300": {
-   "n": 48,
-   "w_mean_abs": 0.2459,
-   "w_bias": 0.0063,
-   "raw_mean_abs": 0.266,
+   "n": 46,
+   "w_mean_abs": 0.2413,
+   "w_bias": 0.0134,
+   "raw_mean_abs": 0.2544,
    "label": "Sport twins (600-1300cc)"
   },
   "other": {
@@ -43,16 +43,16 @@
   },
   "litre-sport-195+": {
    "n": 30,
-   "w_mean_abs": 0.1465,
-   "w_bias": 0.0271,
-   "raw_mean_abs": 0.1451,
+   "w_mean_abs": 0.1453,
+   "w_bias": 0.0283,
+   "raw_mean_abs": 0.1437,
    "label": "Litre hyper-sport (195 hp+)"
   },
   "mid-twin-500-700": {
-   "n": 17,
-   "w_mean_abs": 0.1451,
-   "w_bias": 0.001,
-   "raw_mean_abs": 0.1404,
+   "n": 16,
+   "w_mean_abs": 0.1462,
+   "w_bias": -0.0008,
+   "raw_mean_abs": 0.149,
    "label": "Mid twins (500-700cc)"
   },
   "single-300-500": {
@@ -156,6 +156,23 @@
    "source": "Cycle World 2015",
    "weight": 0.7,
    "quality": "magazine"
+  },
+  {
+   "make": "Royal Enfield",
+   "model": "Interceptor 650",
+   "year": 2018,
+   "disp_cc": 648,
+   "real_et": 13.8,
+   "sim_et": 13.7948,
+   "delta": -0.0052,
+   "abs_delta": 0.0052,
+   "real_trap": 150,
+   "sim_trap": 159.7,
+   "cluster": "sport-twin-600-1300",
+   "cluster_label": "Sport twins (600-1300cc)",
+   "source": "DERIVED (0-100 5.92s x1.6 stock, IndianAutosBlog; 648cc twin)",
+   "weight": 0.1,
+   "quality": "derived"
   },
   {
    "make": "Triumph",
@@ -530,23 +547,6 @@
    "source": "Cycle World 2021",
    "weight": 0.7,
    "quality": "magazine"
-  },
-  {
-   "make": "Royal Enfield",
-   "model": "Continental GT 650",
-   "year": 2018,
-   "disp_cc": 648,
-   "real_et": 13.9,
-   "sim_et": 13.9281,
-   "delta": 0.0281,
-   "abs_delta": 0.0281,
-   "real_trap": 155,
-   "sim_trap": 158.0,
-   "cluster": "sport-twin-600-1300",
-   "cluster_label": "Sport twins (600-1300cc)",
-   "source": "FastestLaps + Mantra Racing (verified)",
-   "weight": 0.5,
-   "quality": "aggregator"
   },
   {
    "make": "KTM",
@@ -1144,23 +1144,6 @@
    "quality": "instrumented"
   },
   {
-   "make": "Royal Enfield",
-   "model": "Super Meteor 650",
-   "year": 2023,
-   "disp_cc": 648.0,
-   "real_et": 13.9,
-   "sim_et": 13.8226,
-   "delta": -0.0774,
-   "abs_delta": 0.0774,
-   "real_trap": 150,
-   "sim_trap": 156.7,
-   "cluster": "mid-twin-500-700",
-   "cluster_label": "Mid twins (500-700cc)",
-   "source": "DERIVED (648 twin cruiser, 0-100 ~6s x1.6; Bennetts/BikeDekho)",
-   "weight": 0.1,
-   "quality": "derived"
-  },
-  {
    "make": "Yamaha",
    "model": "MT-09 Y-AMT (2024-2026)",
    "year": 2024,
@@ -1484,6 +1467,23 @@
    "quality": "instrumented"
   },
   {
+   "make": "Honda",
+   "model": "CBR1000RR-R Fireblade SP",
+   "year": 2024,
+   "disp_cc": 999,
+   "real_et": 9.95,
+   "sim_et": 9.8371,
+   "delta": -0.1129,
+   "abs_delta": 0.1129,
+   "real_trap": 240,
+   "sim_trap": 269.6,
+   "cluster": "litre-sport-195+",
+   "cluster_label": "Litre hyper-sport (195 hp+)",
+   "source": "Cycle World 2020",
+   "weight": 0.7,
+   "quality": "magazine"
+  },
+  {
    "make": "Yamaha",
    "model": "MT-10",
    "year": 2016,
@@ -1535,23 +1535,6 @@
    "quality": "instrumented"
   },
   {
-   "make": "Royal Enfield",
-   "model": "Super Meteor 650",
-   "year": 2023,
-   "disp_cc": 648,
-   "real_et": 13.9,
-   "sim_et": 14.0174,
-   "delta": 0.1174,
-   "abs_delta": 0.1174,
-   "real_trap": 150,
-   "sim_trap": 157.2,
-   "cluster": "mid-twin-500-700",
-   "cluster_label": "Mid twins (500-700cc)",
-   "source": "DERIVED (648 twin cruiser, 0-100 ~6s x1.6; Bennetts/BikeDekho)",
-   "weight": 0.1,
-   "quality": "derived"
-  },
-  {
    "make": "Yamaha",
    "model": "YZF-R1",
    "year": 2002,
@@ -1601,6 +1584,23 @@
    "source": "Cycle World 1997",
    "weight": 0.7,
    "quality": "magazine"
+  },
+  {
+   "make": "Royal Enfield",
+   "model": "Continental GT 650",
+   "year": 2018,
+   "disp_cc": 648,
+   "real_et": 13.9,
+   "sim_et": 13.7773,
+   "delta": -0.1227,
+   "abs_delta": 0.1227,
+   "real_trap": 155,
+   "sim_trap": 160.3,
+   "cluster": "sport-twin-600-1300",
+   "cluster_label": "Sport twins (600-1300cc)",
+   "source": "FastestLaps + Mantra Racing (verified)",
+   "weight": 0.5,
+   "quality": "aggregator"
   },
   {
    "make": "Honda",
@@ -1924,40 +1924,6 @@
    "source": "Motorcycle Consumer News 2012",
    "weight": 1.0,
    "quality": "instrumented"
-  },
-  {
-   "make": "Royal Enfield",
-   "model": "Interceptor 650",
-   "year": 2018,
-   "disp_cc": 648,
-   "real_et": 13.8,
-   "sim_et": 13.9512,
-   "delta": 0.1512,
-   "abs_delta": 0.1512,
-   "real_trap": 150,
-   "sim_trap": 157.3,
-   "cluster": "sport-twin-600-1300",
-   "cluster_label": "Sport twins (600-1300cc)",
-   "source": "DERIVED (0-100 5.92s x1.6 stock, IndianAutosBlog; 648cc twin)",
-   "weight": 0.1,
-   "quality": "derived"
-  },
-  {
-   "make": "Honda",
-   "model": "CBR1000RR-R Fireblade SP",
-   "year": 2024,
-   "disp_cc": 999,
-   "real_et": 9.95,
-   "sim_et": 9.7961,
-   "delta": -0.1539,
-   "abs_delta": 0.1539,
-   "real_trap": 240,
-   "sim_trap": 265.2,
-   "cluster": "litre-sport-195+",
-   "cluster_label": "Litre hyper-sport (195 hp+)",
-   "source": "Cycle World 2020",
-   "weight": 0.7,
-   "quality": "magazine"
   },
   {
    "make": "Yamaha",
@@ -2315,6 +2281,23 @@
    "source": "Cycle World 2004 (Sport Rider sportbike-performance-numbers, timing-strip 2004)",
    "weight": 1.0,
    "quality": "instrumented"
+  },
+  {
+   "make": "Royal Enfield",
+   "model": "Super Meteor 650",
+   "year": 2023,
+   "disp_cc": 648.0,
+   "real_et": 13.9,
+   "sim_et": 13.7083,
+   "delta": -0.1917,
+   "abs_delta": 0.1917,
+   "real_trap": 150,
+   "sim_trap": 158.3,
+   "cluster": "mid-twin-500-700",
+   "cluster_label": "Mid twins (500-700cc)",
+   "source": "DERIVED (648 twin cruiser, 0-100 ~6s x1.6; Bennetts/BikeDekho)",
+   "weight": 0.1,
+   "quality": "derived"
   },
   {
    "make": "Honda",
@@ -3592,23 +3575,6 @@
    "quality": "magazine"
   },
   {
-   "make": "Royal Enfield",
-   "model": "Interceptor 650",
-   "year": 2020,
-   "disp_cc": 648,
-   "real_et": 13.8,
-   "sim_et": 13.426,
-   "delta": -0.374,
-   "abs_delta": 0.374,
-   "real_trap": 150,
-   "sim_trap": 164.5,
-   "cluster": "sport-twin-600-1300",
-   "cluster_label": "Sport twins (600-1300cc)",
-   "source": "DERIVED (0-100 5.92s x1.6 stock, IndianAutosBlog; 648cc twin)",
-   "weight": 0.1,
-   "quality": "derived"
-  },
-  {
    "make": "Honda",
    "model": "CBR300R",
    "year": 2014,
@@ -4151,23 +4117,6 @@
    "source": "Rider Magazine 2/2009 (instrumented, Infineon dragstrip timed runs)",
    "weight": 1.0,
    "quality": "instrumented"
-  },
-  {
-   "make": "Royal Enfield",
-   "model": "Continental GT 650",
-   "year": 2020,
-   "disp_cc": 648,
-   "real_et": 13.9,
-   "sim_et": 13.2607,
-   "delta": -0.6393,
-   "abs_delta": 0.6393,
-   "real_trap": 156.1,
-   "sim_trap": 167.7,
-   "cluster": "sport-twin-600-1300",
-   "cluster_label": "Sport twins (600-1300cc)",
-   "source": "FastestLaps 2020",
-   "weight": 0.5,
-   "quality": "aggregator"
   },
   {
    "make": "Honda",

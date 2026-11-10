@@ -1126,7 +1126,7 @@
       "trap_kmh": 250.9466,
       "trap_ms": 69.7074
     },
-    "CBR1000RR-R Fireblade SP (2020-2024)|2020": {
+    "CBR1000RR-R Fireblade SP (2020-2023)|2020": {
       "eighth_s": 7.094617,
       "et_s": 10.191322,
       "finished": true,
@@ -1135,12 +1135,12 @@
       "trap_ms": 72.894007
     },
     "CBR1000RR-R Fireblade SP (2024-2025)|2024": {
-      "eighth_s": 6.778315,
-      "et_s": 9.867425,
+      "eighth_s": 6.851496,
+      "et_s": 9.903863,
       "finished": true,
-      "sixty_ft_s": 2.072043,
-      "trap_kmh": 260.5815,
-      "trap_ms": 72.383763
+      "sixty_ft_s": 2.099728,
+      "trap_kmh": 264.8868,
+      "trap_ms": 73.57966
     },
     "CBR1100XX Super Blackbird (1997-1998)|1997": {
       "eighth_s": 6.891032,
@@ -1375,20 +1375,12 @@
       "trap_ms": 47.958318
     },
     "Continental GT 650 (2018-2024)|2018": {
-      "eighth_s": 9.134724,
-      "et_s": 14.162708,
+      "eighth_s": 9.04385,
+      "et_s": 13.995642,
       "finished": true,
-      "sixty_ft_s": 2.423737,
-      "trap_kmh": 155.2085,
-      "trap_ms": 43.113458
-    },
-    "Continental GT 650 (2020-2024)|2020": {
-      "eighth_s": 8.768342,
-      "et_s": 13.543109,
-      "finished": true,
-      "sixty_ft_s": 2.317775,
-      "trap_kmh": 164.6042,
-      "trap_ms": 45.723387
+      "sixty_ft_s": 2.439748,
+      "trap_kmh": 157.5672,
+      "trap_ms": 43.768668
     },
     "Daytona 660 (2024-2025)|2024": {
       "eighth_s": 7.846919,
@@ -2070,21 +2062,13 @@
       "trap_kmh": 143.2355,
       "trap_ms": 39.78765
     },
-    "Hornet 2.0 (2020-2024)|2020": {
-      "eighth_s": 11.842637,
-      "et_s": 18.41572,
+    "Hornet 2.0 (2020-2026)|2020": {
+      "eighth_s": 11.386929,
+      "et_s": 17.779586,
       "finished": true,
-      "sixty_ft_s": 3.126822,
-      "trap_kmh": 118.5344,
-      "trap_ms": 32.926228
-    },
-    "Hornet 2.0 (2024-2025)|2024": {
-      "eighth_s": 11.915522,
-      "et_s": 18.326822,
-      "finished": true,
-      "sixty_ft_s": 3.26777,
-      "trap_kmh": 121.9187,
-      "trap_ms": 33.866311
+      "sixty_ft_s": 2.97781,
+      "trap_kmh": 120.4472,
+      "trap_ms": 33.457564
     },
     "Hunk 160R (2022-2026)|2022": {
       "eighth_s": 13.097365,
@@ -2127,20 +2111,12 @@
       "trap_ms": 32.236833
     },
     "Interceptor 650 (2018-2024)|2018": {
-      "eighth_s": 9.141843,
-      "et_s": 14.184725,
+      "eighth_s": 9.047345,
+      "et_s": 14.010966,
       "finished": true,
-      "sixty_ft_s": 2.423932,
-      "trap_kmh": 154.5633,
-      "trap_ms": 42.934246
-    },
-    "Interceptor 650 (2020-2024)|2020": {
-      "eighth_s": 8.818707,
-      "et_s": 13.663194,
-      "finished": true,
-      "sixty_ft_s": 2.334848,
-      "trap_kmh": 161.5751,
-      "trap_ms": 44.881985
+      "sixty_ft_s": 2.441182,
+      "trap_kmh": 156.9914,
+      "trap_ms": 43.608726
     },
     "Intruder 250 (2018-2022)|2018": {
       "eighth_s": 10.816099,
@@ -3279,20 +3255,12 @@
       "trap_ms": 43.661015
     },
     "Raider 125 (2021-2026)|2021": {
-      "eighth_s": 12.440191,
-      "et_s": 19.720348,
+      "eighth_s": 12.478212,
+      "et_s": 19.765926,
       "finished": true,
-      "sixty_ft_s": 3.08252,
-      "trap_kmh": 106.4531,
-      "trap_ms": 29.570297
-    },
-    "Raider 125 (2022-2024)|2022": {
-      "eighth_s": 12.528381,
-      "et_s": 19.774914,
-      "finished": true,
-      "sixty_ft_s": 3.118384,
-      "trap_kmh": 107.159,
-      "trap_ms": 29.766388
+      "sixty_ft_s": 3.123096,
+      "trap_kmh": 106.7038,
+      "trap_ms": 29.639958
     },
     "Raider R150 Fi (2017-2026)|2017": {
       "eighth_s": 10.406364,
@@ -3726,21 +3694,13 @@
       "trap_kmh": 242.5637,
       "trap_ms": 67.378814
     },
-    "Super Meteor 650 (2023-2024)|2023": {
-      "eighth_s": 9.205026,
-      "et_s": 14.266639,
-      "finished": true,
-      "sixty_ft_s": 2.422577,
-      "trap_kmh": 154.4861,
-      "trap_ms": 42.912794
-    },
     "Super Meteor 650 (2023-2026)|2023": {
-      "eighth_s": 8.990252,
-      "et_s": 14.096339,
+      "eighth_s": 8.892903,
+      "et_s": 13.944119,
       "finished": true,
-      "sixty_ft_s": 2.265294,
-      "trap_kmh": 153.7968,
-      "trap_ms": 42.721344
+      "sixty_ft_s": 2.249738,
+      "trap_kmh": 155.3929,
+      "trap_ms": 43.164703
     },
     "Super Tenere XT1200Z (2014-2021)|2014": {
       "eighth_s": 8.005286,
@@ -3958,14 +3918,6 @@
       "trap_kmh": 214.5841,
       "trap_ms": 59.606694
     },
-    "Tuono 457 (2024-2026)|2024": {
-      "eighth_s": 8.631909,
-      "et_s": 13.50079,
-      "finished": true,
-      "sixty_ft_s": 2.240719,
-      "trap_kmh": 160.6528,
-      "trap_ms": 44.625784
-    },
     "Tuono 457 (2025-2026)|2025": {
       "eighth_s": 8.551176,
       "et_s": 13.274143,
@@ -4037,14 +3989,6 @@
       "sixty_ft_s": 2.33275,
       "trap_kmh": 181.8552,
       "trap_ms": 50.515335
-    },
-    "V-Strom SX 250 (2022-2024)|2022": {
-      "eighth_s": 10.780944,
-      "et_s": 16.600304,
-      "finished": true,
-      "sixty_ft_s": 2.981395,
-      "trap_kmh": 133.9418,
-      "trap_ms": 37.206069
     },
     "V-Strom SX 250 (2022-2026)|2022": {
       "eighth_s": 10.65878,

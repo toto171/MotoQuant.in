@@ -4493,7 +4493,7 @@ TVS_RAIDER_125_2021 = spec_from_dict(
         "dry_mass_kg": 115.0,  # 123 kg kerb - ~8 kg fuel (10 L tank)
         "wheelbase_mm": 1326.0,
         "front_tire_size": "80/100-17",
-        "rear_tire_size": "100/80-17",  # bias-ply Indian notation
+        "rear_tire_size": "100/90-17",  # TVS specification (was 100/80-17)
         "cd": 0.78,  # sporty-commuter posture, slight forward lean
         "frontal_area_m2": 0.42,
     },
@@ -8189,9 +8189,8 @@ SUZUKI_V_STROM_SX_250_2022 = spec_from_dict(
         # factually wrong — the Gixxer 250 / SG250 oil-cooled engine is a
         # 6-speed (confirmed ZigWheels/BikeWale; the catalogue Gixxer 250 entry
         # is 6-speed), so the V-Strom SX 250 (same engine) is 6-speed too.
-        # NOTE FOR ORCHESTRATOR: this is a DUPLICATE of SUZUKI_V_STROM_SX_250_2022
-        # in known_bikes.py (model_code=None, already 6-speed) — same bike, both
-        # land in ALL_KNOWN_BIKES. Dedup is out of gear-audit scope; flagging it.
+        # (The duplicate 2022-2024 entry in known_bikes.py was removed on
+        # 2026-11-10; this is the single V-Strom SX 250 row.)
         # Internal cassette ratios = catalogue Gixxer 250 (shared engine/box);
         # F14/R44 final drive kept (Suzuki India spec, taller R-sprocket for ADV).
         # Source: zigwheels.com/suzuki-bikes/gixxer-250/specifications (6-speed).
@@ -9495,9 +9494,11 @@ ROYAL_ENFIELD_SUPER_METEOR_650_2023 = spec_from_dict(
         # Cycle World Apr 2023 review confirmed
         "rear_sprocket": 40,
         "chain_pitch": "525",  # 525 pitch — RE 650 platform standard
-        "dry_mass_kg": 230.0,  # 230 kg dry (241 kg kerb minus ~11 kg
-        # fluids — 15.7L fuel + oil + coolant)
-        # RE press spec sheet Jan 2023
+        # EPOCH 2026-11-10: was "dry_mass_kg": 230.0 (241 kg kerb minus ~11 kg).
+        # The importer adds fluids AND fuel to a dry figure, so 230 double-
+        # counted; the published 241 kg kerb weight is recorded as wet
+        # (importer: dry = wet - 25).
+        "wet_mass_kg": 241.0,
         "wheelbase_mm": 1500.0,  # 1500 mm — RE spec (long cruiser
         # wheelbase, INT650 is 1398 mm)
         "front_tire_size": "100/90-19",  # 19-inch front cruiser tire
