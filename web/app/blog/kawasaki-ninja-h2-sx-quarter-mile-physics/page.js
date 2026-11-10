@@ -90,7 +90,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The Indian gray-market drag scene has three obvious flagships in the litre-plus class: the Suzuki Hayabusa (Gen 1 reference pinned in the simulator at 10.3633 s), the Kawasaki ZX-14R, and now the Ninja H2 SX. They are not the same bike. The Hayabusa is naturally aspirated, 197 hp, 220 kg dry. The ZX-14R is naturally aspirated, 197 hp, 218 kg dry. The H2 SX is supercharged, 200 hp, 238 kg dry. The interesting question is what each of those decisions costs at the strip.',
+    text: 'The Indian gray-market drag scene has three obvious flagships in the litre-plus class: the Suzuki Hayabusa (Gen 1 reference pinned in the simulator at 10.1100 s), the Kawasaki ZX-14R, and now the Ninja H2 SX. They are not the same bike. The Hayabusa is naturally aspirated, 197 hp, 220 kg dry. The ZX-14R is naturally aspirated, 197 hp, 218 kg dry. The H2 SX is supercharged, 200 hp, 238 kg dry. The interesting question is what each of those decisions costs at the strip.',
   },
   {
     type: 'table',

@@ -27,7 +27,7 @@ Everything here (engine, catalog, web app, chat agent) is free under the
   pure Python + NumPy. An optional [Rust core](docs/RUST_CORE.md) is
   bit-identical to the Python reference and can run the same simulation
   natively or in the browser via WebAssembly.
-- **Catalog**: 541 bikes, 254 tires, 593 parts, 20 venues, and
+- **Catalog**: 534 bikes, 254 tires, 546 parts, 20 venues, and
   1,783 bike-tire fitments in a seeded SQLite file (`motoquant.db`), with a
   compatibility engine so a part only shows up for the bikes it fits.
 - **Analysis**: parts ROI (ET gained per rupee), a budget-constrained build

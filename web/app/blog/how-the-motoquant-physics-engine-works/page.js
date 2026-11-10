@@ -146,7 +146,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Three reference baselines are protected absolutely: GSX-R 1000 K5 (9.9331 s), YZF-R1 4C8 (10.1436 s), and Hayabusa Gen1 (10.3633 s). Every code change must preserve these to four decimals. They are the regression test that catches "improvements" that secretly broke the engine.',
+    text: 'Three reference baselines are protected absolutely: GSX-R 1000 K5 (10.0436 s), YZF-R1 4C8 (10.1092 s), and Hayabusa Gen1 (10.1100 s). Every code change must preserve these to four decimals. They are the regression test that catches "improvements" that secretly broke the engine.',
   },
   {
     type: 'p',

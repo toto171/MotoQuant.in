@@ -199,7 +199,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The Hayabusa numbers are anchored to a baseline that was re-pinned on July 13, 2026 as part of a physics-recalibration epoch — 10.3633 s at Aamby Valley November conditions. The K5 GSX-R 1000 holds 9.9331 s at the same reference. The R1 4C8 holds 10.1436 s. These are not predictions, they are validation pins; the simulator is required to produce them to four decimal places on every code change, and the regression suite fails if they drift by more than a millisecond. Re-running each of them across the other four Indian venues changes only the environment block, which means the venue-deltas in the tables above are first-principles outputs of the environmental sub-model rather than fitted offsets.',
+    text: 'The Hayabusa numbers are anchored to a baseline that was re-pinned on July 13, 2026 as part of a physics-recalibration epoch — 10.3633 s at Aamby Valley November conditions. The K5 GSX-R 1000 holds 10.0436 s at the same reference. The R1 4C8 holds 10.1092 s. These are not predictions, they are validation pins; the simulator is required to produce them to four decimal places on every code change, and the regression suite fails if they drift by more than a millisecond. Re-running each of them across the other four Indian venues changes only the environment block, which means the venue-deltas in the tables above are first-principles outputs of the environmental sub-model rather than fitted offsets.',
   },
   {
     type: 'p',

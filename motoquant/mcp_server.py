@@ -920,7 +920,7 @@ TOOLS: list[dict[str, Any]] = [
     {
         "name": "search_bikes",
         "description": (
-            "Search the 541-bike catalog by free text, manufacturer or category. "
+            "Search the 534-bike catalog by free text, manufacturer or category. "
             "Returns catalog ids to feed the simulation tools. Always start here "
             "when the user names a bike."
         ),
@@ -1027,7 +1027,7 @@ TOOLS: list[dict[str, Any]] = [
     {
         "name": "search_parts",
         "description": (
-            "Search the 593-part catalog. Pass bike_id to return ONLY parts that "
+            "Search the 546-part catalog. Pass bike_id to return ONLY parts that "
             "actually fit that bike (chain pitch, engine layout, displacement, "
             "stroke type are all checked)."
         ),

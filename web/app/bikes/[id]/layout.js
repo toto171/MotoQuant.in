@@ -1,5 +1,5 @@
 // Dynamic per-bike metadata. This is the single highest-leverage SEO change
-// in the project: every one of the 541 bike detail pages now gets a unique
+// in the project: every one of the 534 bike detail pages now gets a unique
 // title, description, keyword set, Open Graph, and rich-result-eligible
 // Vehicle/Product schema — so search queries like "Hayabusa quarter mile
 // time" or "Pulsar NS200 drag simulator" can land directly on the right
