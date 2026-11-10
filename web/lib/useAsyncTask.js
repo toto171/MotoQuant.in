@@ -86,7 +86,7 @@ export default function useAsyncTask(fn) {
     } catch (e) {
       if (e?.name === 'AbortError') return undefined; // user pressed Stop
       if (mountedRef.current) {
-        setError(e?.message || 'Something went wrong — please try again');
+        setError(e?.message || 'Something went wrong. Please try again');
       }
       return undefined;
     } finally {

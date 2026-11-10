@@ -86,12 +86,12 @@ export default function PhysicsPage() {
           <div className="label-mono text-brand-accent mb-2">State vector</div>
           <code className="block overflow-x-auto text-sm font-mono text-white/80">[x, v, ω_e, T_tyre, T_clutch, gear]</code>
           <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-mono text-white/60">
-            <span>x — position (m)</span>
-            <span>v — velocity (m/s)</span>
-            <span>ω_e — engine RPM (rad/s)</span>
-            <span>T_tyre — tyre temp (°C)</span>
-            <span>T_clutch — clutch temp (°C)</span>
-            <span>gear — gear index (1–6)</span>
+            <span>x: position (m)</span>
+            <span>v: velocity (m/s)</span>
+            <span>ω_e: engine RPM (rad/s)</span>
+            <span>T_tyre: tyre temp (°C)</span>
+            <span>T_clutch: clutch temp (°C)</span>
+            <span>gear: gear index (1–6)</span>
           </div>
         </div>
         <div className="card p-5 border-brand-orange/20">
@@ -108,7 +108,7 @@ export default function PhysicsPage() {
       <section className="mb-14">
         <h2 className="font-display font-bold text-2xl text-white mb-4">Numerical integrator</h2>
         <p className="text-white/75 text-base leading-relaxed mb-4">
-          The fixed-step RK4 integrator runs at dt = 1 ms. For most bikes, this gives adequate accuracy — the maximum
+          The fixed-step RK4 integrator runs at dt = 1 ms. For most bikes, this gives adequate accuracy: the maximum
           position error per step is O(dt⁵) ≈ 10⁻¹⁵ m, well within measurement noise.
         </p>
         <p className="text-white/75 text-base leading-relaxed mb-4">
@@ -129,7 +129,7 @@ export default function PhysicsPage() {
         <h2 className="font-display font-bold text-2xl text-white mb-2">The 15 sub-models</h2>
         <p className="text-white/60 text-sm mb-6">
           Each sub-model is an independent Python module in <code className="font-mono text-brand-accent break-words">motoquant/submodels/</code>.
-          They communicate only through the BikeConfig dataclass and the current state vector — no global state.
+          They communicate only through the BikeConfig dataclass and the current state vector, with no global state.
         </p>
         <div className="card px-5 border-brand-orange/20 divide-y divide-white/[0.05]">
           {SUBMODELS.map(m => <SubModelRow key={m.n} model={m} />)}
@@ -140,7 +140,7 @@ export default function PhysicsPage() {
       <section className="mb-14">
         <h2 className="font-display font-bold text-2xl text-white mb-4">BikeConfig: the parameter container</h2>
         <p className="text-white/75 text-base leading-relaxed mb-4">
-          Every simulation takes a <code className="font-mono text-brand-accent break-words">BikeConfig</code> object — a nested Pydantic/dataclass
+          Every simulation takes a <code className="font-mono text-brand-accent break-words">BikeConfig</code> object, a nested Pydantic/dataclass
           structure with 13 parameter sections: EngineParams, ForcedInductionParams, DrivetrainParams, ClutchParams,
           ChainParams, TireParams, AeroParams, ChassisParams, WheelieParams, RiderParams, StagingParams,
           EnvironmentParams, ParasiticParams.

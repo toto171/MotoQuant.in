@@ -27,7 +27,7 @@ export const GLOSSARY = {
     long: 'Every extra 0.1 s lost here is roughly 0.07 to 0.1 s lost over the whole quarter mile. A strong launch on a sport bike is about 1.6 to 1.9 seconds.',
   },
   eighth: {
-    label: 'Halfway — ⅛ mile',
+    label: 'Halfway (⅛ mile)',
     short: 'The time and speed at the halfway point of the run: one eighth of a mile (201 metres).',
     long: 'Many strips run eighth-mile races. The quarter-mile time is usually about 1.5 to 1.6 times the eighth-mile time.',
   },

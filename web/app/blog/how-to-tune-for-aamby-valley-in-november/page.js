@@ -3,7 +3,7 @@ import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 
 export const metadata = {
-  title: 'How to Tune for Aamby Valley in November — MotoQuant Blog',
+  title: 'How to Tune for Aamby Valley in November | MotoQuant Blog',
   description: 'November at Aamby Valley means 679 m of elevation, about 22°C and a density altitude near 1,100 m on an asphalt strip. What that costs each class of bike, and how to tune for it.',
   keywords: [
     'Aamby Valley drag racing',
@@ -112,7 +112,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Modern EFI bikes (R15 V4, Duke 390, Ninja 400) compensate automatically via the O2 sensor and closed-loop AFR control — no action needed. But bikes with OBD-locked ECUs on open-loop fuel maps (some Dominar variants, older Pulsars) may benefit from an ECU piggyback unit that leans out the map at altitude.',
+    text: 'Modern EFI bikes (R15 V4, Duke 390, Ninja 400) compensate automatically via the O2 sensor and closed-loop AFR control, so no action is needed. But bikes with OBD-locked ECUs on open-loop fuel maps (some Dominar variants, older Pulsars) may benefit from an ECU piggyback unit that leans out the map at altitude.',
   },
   {
     type: 'h2',

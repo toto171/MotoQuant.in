@@ -7,7 +7,7 @@
 
 import StructuredData, { SITE_URL } from '../StructuredData';
 
-const TITLE = 'Race-day setup for your motorcycle — gearing, launch RPM and tyre pressure';
+const TITLE = 'Race-day setup for your motorcycle: gearing, launch RPM and tyre pressure';
 const DESCRIPTION =
   'Free race-day setup tool for Indian drag strips. Pick your bike and where you are racing, and MotoQuant works out how the air and altitude change your power, then suggests gearing (sprockets), launch RPM, tyre pressure and fuel/timing guidance. Gearing and launch advice come with the simulated quarter-mile time change; tyre and fuel advice are general guidance. Works for Aamby Valley, MMRT, BIC, Kari and more.';
 
@@ -48,7 +48,7 @@ export const metadata = {
         url: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'MotoQuant race-day setup — gearing, launch RPM and tyre pressure',
+        alt: 'MotoQuant race-day setup: gearing, launch RPM and tyre pressure',
       },
     ],
   },

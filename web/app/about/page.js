@@ -82,31 +82,31 @@ export default function AboutPage() {
 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <FounderCard initial="A" name="Arya Desai" role="Co-founder & Lead Engineer · Pune, India" email="motoquant@gmail.com">
                 <p>
-                  The engineer who started MotoQuant and leads it — M.Tech from NIT Warangal, B.Tech from Manipal (Automotive System Design). He owns the physics: the vehicle-dynamics model, the calibration against real Dragy traces, and where the engine goes next.
+                  The engineer who started MotoQuant and leads it. M.Tech from NIT Warangal, B.Tech from Manipal (Automotive System Design). He owns the physics: the vehicle-dynamics model, the calibration against real Dragy traces, and where the engine goes next.
                 </p>
                 <p>
-                  Depth from both sides of the workshop door — CFD engine-combustion and magnetorheological-suspension research at NIT-W (plus a filed design patent) on one side; 25+ performance cars tuned by hand at Power Solutions Pune — Mercedes-AMG, BMW, Audi, Jaguar Land Rover — on the other. ECU-tuning certified.
+                  Depth from both sides of the workshop door: CFD engine-combustion and magnetorheological-suspension research at NIT-W (plus a filed design patent) on one side; 25+ performance cars tuned by hand at Power Solutions Pune (Mercedes-AMG, BMW, Audi, Jaguar Land Rover) on the other. ECU-tuning certified.
                 </p>
               </FounderCard>
             
                           <FounderCard initial="R" name="Ritwik Singh" role="Co-founder & Advisor · Bengaluru, India" email="motoquant@gmail.com">
                 <p>
-                  Automobile-and-AI engineer — the software and machine-learning instinct behind MotoQuant&apos;s early architecture, from the simulation scaffolding to the first surrogate models and ROI ranker. Now a co-founder and advisor, still close to the technical direction.
+                  Automobile-and-AI engineer, the software and machine-learning instinct behind MotoQuant&apos;s early architecture, from the simulation scaffolding to the first surrogate models and ROI ranker. Now a co-founder and advisor, still close to the technical direction.
                 </p>
                 <p>
-                  Day to day he&apos;s building Dhisetu, an AI-assisted indie game studio in Bengaluru — a hardcore indie gamer, which is where the instinct comes from. His bet: the next studios won&apos;t be big teams but solo creators with AI co-pilots. Same instinct here.
+                  Day to day he&apos;s building Dhisetu, an AI-assisted indie game studio in Bengaluru. He&apos;s a hardcore indie gamer, which is where the instinct comes from. His bet: the next studios won&apos;t be big teams but solo creators with AI co-pilots. Same instinct here.
                 </p>
               </FounderCard>
             
                           <FounderCard initial="S" name="Sahil Shetye" role="Co-founder & CMO · Manipal, India" email="motoquant@gmail.com">
                 <p>
-                  Electrical engineer and our pitchman — finishing his B.Tech in EEE at Manipal. The growth-and-market side of MotoQuant, and the electronics half of the hardware roadmap: PCB design, EV powertrain and battery tech, low-level C.
+                  Electrical engineer and our pitchman, finishing his B.Tech in EEE at Manipal. The growth-and-market side of MotoQuant, and the electronics half of the hardware roadmap: PCB design, EV powertrain and battery tech, low-level C.
                 </p>
                 <p>
-                  Communication and market knowledge are the levers he owns, plus real market experience — turning a physics engine into something racers and tuning shops actually hear about, and want to implement.
+                  Communication and market knowledge are the levers he owns, plus real market experience: turning a physics engine into something racers and tuning shops actually hear about, and want to implement.
                 </p>
                 <p className="border-l-2 border-white/15 pl-4 italic text-white/70">
-                  &ldquo;In my third year, a major bike accident paused my degree. While recovering, I refused to sit idle — I built a social-media audience and finished multiple industry-standard certifications. I don&apos;t just study engineering; I build, optimize, and execute under pressure.&rdquo;
+                  &ldquo;In my third year, a major bike accident paused my degree. While recovering, I refused to sit idle: I built a social-media audience and finished multiple industry-standard certifications. I don&apos;t just study engineering; I build, optimize, and execute under pressure.&rdquo;
                 </p>
               </FounderCard>
                       </div>

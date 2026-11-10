@@ -6,7 +6,7 @@ The landing page includes a CSS-animated cinematic hero scene. To upgrade it wit
 
 1. **Choose a video clip** from the recommendations below (or use your own 1920x1080, 10–30 seconds, H.264 codec)
 2. **Download and save** as `reel.mp4` in this folder (`web/public/hero/reel.mp4`)
-3. **Deploy** — the page will auto-fade in the video over the CSS hero scene
+3. **Deploy**: the page will auto-fade in the video over the CSS hero scene
 
 The video will:
 - Auto-play, mute, and loop
@@ -75,7 +75,7 @@ ffmpeg -i input.mp4 -t 20 -c:v libx264 -crf 23 -c:a aac reel.mp4
 ## Size & Performance Notes
 
 - **Target file size:** 5–15 MB (1080p, 20–30 second clip, H.264)
-- **Codec:** H.264 (mp4 container) — required for broad browser support
+- **Codec:** H.264 (mp4 container), required for broad browser support
 - **Bitrate:** 5000–8000 kbps
 - **Frame rate:** 24–30 fps
 

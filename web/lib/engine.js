@@ -62,7 +62,7 @@ async function instantiate(url) {
   const exports = result.instance.exports;
   const schema = exports.schema_version();
   if (schema !== ENGINE_SCHEMA) {
-    throw new Error(`engine: wasm schema ${schema} != engine.js schema ${ENGINE_SCHEMA} — rebuild with \`make wasm\``);
+    throw new Error(`engine: wasm schema ${schema} != engine.js schema ${ENGINE_SCHEMA}; rebuild with \`make wasm\``);
   }
   return { exports, url };
 }

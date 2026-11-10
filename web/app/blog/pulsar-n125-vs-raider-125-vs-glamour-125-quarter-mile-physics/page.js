@@ -6,10 +6,10 @@ import StructuredData, { articleSchema } from "../../StructuredData";
 const SLUG = "pulsar-n125-vs-raider-125-vs-glamour-125-quarter-mile-physics";
 const TITLE = "Pulsar N125 vs Raider 125 vs Glamour 125: 125cc Drag";
 const DESCRIPTION =
-  "MotoQuant sims Raider 125 at 20.63s, Pulsar N125 at 20.70s, Glamour 125 at 21.28s. Fastest 125cc commuter India — and the ₹450 sprocket that wins the cheapest tenth.";
+  "MotoQuant sims Raider 125 at 20.63s, Pulsar N125 at 20.70s, Glamour 125 at 21.28s. Fastest 125cc commuter India, and the ₹450 sprocket that wins the cheapest tenth.";
 
 export const metadata = {
-  title: "Pulsar N125 vs Raider 125 vs Glamour 125 — MotoQuant",
+  title: "Pulsar N125 vs Raider 125 vs Glamour 125 | MotoQuant",
   description: DESCRIPTION,
   keywords: [
     "pulsar n125 quarter mile",
@@ -42,7 +42,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: "lead",
-    text: "MotoQuant sims the TVS Raider 125 at 20.63 seconds, the Bajaj Pulsar N125 at 20.70 seconds, and the Hero Glamour 125 at 21.28 seconds over a flat quarter mile. The trap speeds cluster within 3 km/h. The ETs cluster within 0.65 seconds across all four India-spec 125cc commuters in the catalog — Raider 125, Pulsar N125, Pulsar P125, Glamour 125. Almost no Indian publication has ever timed any of them on a strip because the segment buyer searches for fuel economy, not drag times. That intent gap is the entire story. Below is what the physics says about the fastest 125cc commuter you can buy in India for under 1.1 lakh, and where the cheapest tenth lives on each.",
+    text: "MotoQuant sims the TVS Raider 125 at 20.63 seconds, the Bajaj Pulsar N125 at 20.70 seconds, and the Hero Glamour 125 at 21.28 seconds over a flat quarter mile. The trap speeds cluster within 3 km/h. The ETs cluster within 0.65 seconds across all four India-spec 125cc commuters in the catalog: Raider 125, Pulsar N125, Pulsar P125, Glamour 125. Almost no Indian publication has ever timed any of them on a strip because the segment buyer searches for fuel economy, not drag times. That intent gap is the entire story. Below is what the physics says about the fastest 125cc commuter you can buy in India for under 1.1 lakh, and where the cheapest tenth lives on each.",
   },
   {
     type: "h2",
@@ -50,7 +50,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Run a Google search for any of these four bikes and the first 30 SERP results are mileage comparisons, price lists, EMI calculators, and showroom-locator pages. BikeWale, BikeDekho, ZigWheels, and 91Wheels each carry detailed spec pages but the quarter-mile cell is empty across the board. Manufacturer marketing focuses on 60-70 kmpl ARAI claims and tubeless-tyre upgrades, not on which 125 will beat the others off a green light. The result is a 12-15 million-unit annual segment with no published acceleration data — the most popular displacement class in India is also the most under-instrumented.",
+    text: "Run a Google search for any of these four bikes and the first 30 SERP results are mileage comparisons, price lists, EMI calculators, and showroom-locator pages. BikeWale, BikeDekho, ZigWheels, and 91Wheels each carry detailed spec pages but the quarter-mile cell is empty across the board. Manufacturer marketing focuses on 60-70 kmpl ARAI claims and tubeless-tyre upgrades, not on which 125 will beat the others off a green light. The result is a 12-15 million-unit annual segment with no published acceleration data. The most popular displacement class in India is also the most under-instrumented.",
   },
   {
     type: "p",
@@ -104,11 +104,11 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Peak power lands the Pulsar N125 and P125 ahead on the spec sheet at 11.64 hp, but the Raider 125 has the highest hp-per-tonne dry mass among the new-generation 125s at 97.6. The Glamour 125 is the lightest bike in the comparison at 114 kg dry but also gives up roughly a full horsepower to the Pulsar siblings, which costs it 0.6 seconds of ET. The older Pulsar 125 Neon has the highest peak power in the group at 12.0 hp but is the heaviest at 123 kg, and the 16F front sprocket lifts the overall gearing enough that the bike runs out of low-end pull below 5,000 rpm — a real problem for a commuter that spends most of its life under that figure.",
+    text: "Peak power lands the Pulsar N125 and P125 ahead on the spec sheet at 11.64 hp, but the Raider 125 has the highest hp-per-tonne dry mass among the new-generation 125s at 97.6. The Glamour 125 is the lightest bike in the comparison at 114 kg dry but also gives up roughly a full horsepower to the Pulsar siblings, which costs it 0.6 seconds of ET. The older Pulsar 125 Neon has the highest peak power in the group at 12.0 hp but is the heaviest at 123 kg, and the 16F front sprocket lifts the overall gearing enough that the bike runs out of low-end pull below 5,000 rpm, a real problem for a commuter that spends most of its life under that figure.",
   },
   {
     type: "p",
-    text: "Front sprocket count is the third lever and it matters more on these bikes than on any other class MotoQuant sims. A 125cc commuter has so little reserve torque that the gearing ratio between countershaft and rear wheel decides whether second gear pulls cleanly off a 2,000 rpm idle or bogs. The N125 ships from Bajaj with 14F / 43R, which is shorter than the P125 14F / 44R only on paper — actually 0.4 percent taller overall because the smaller rear sprocket dominates. That tiny difference is why the P125 sims 0.02 seconds quicker than the N125 despite being 2 kg heavier and carrying identical engines. The two bikes are essentially the same chassis with different bodywork and different sprocket-count rounding decisions.",
+    text: "Front sprocket count is the third lever and it matters more on these bikes than on any other class MotoQuant sims. A 125cc commuter has so little reserve torque that the gearing ratio between countershaft and rear wheel decides whether second gear pulls cleanly off a 2,000 rpm idle or bogs. The N125 ships from Bajaj with 14F / 43R, which is shorter than the P125 14F / 44R only on paper; it is actually 0.4 percent taller overall because the smaller rear sprocket dominates. That tiny difference is why the P125 sims 0.02 seconds quicker than the N125 despite being 2 kg heavier and carrying identical engines. The two bikes are essentially the same chassis with different bodywork and different sprocket-count rounding decisions.",
   },
   {
     type: "h2",
@@ -124,7 +124,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "TVS also runs the most aggressive ignition map of the three from the factory. The Raider 125 ECU advances ignition timing by roughly 2 degrees above 6,500 rpm compared to the Pulsar tune, which buys about 0.4 hp at the top of the rev band. That difference is invisible on the showroom spec sheet but shows up in the trap speed: 107.8 km/h on the Raider versus 108.3 km/h on the Pulsar N125 — the gap is 0.5 km/h despite the Pulsar carrying 0.4 hp more peak power. Better tune, smaller peak number.",
+    text: "TVS also runs the most aggressive ignition map of the three from the factory. The Raider 125 ECU advances ignition timing by roughly 2 degrees above 6,500 rpm compared to the Pulsar tune, which buys about 0.4 hp at the top of the rev band. That difference is invisible on the showroom spec sheet but shows up in the trap speed: 107.8 km/h on the Raider versus 108.3 km/h on the Pulsar N125. The gap is 0.5 km/h despite the Pulsar carrying 0.4 hp more peak power. Better tune, smaller peak number.",
   },
   {
     type: "h2",
@@ -132,7 +132,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The Pulsar N125 is the newest bike in the group, launched in 2024 as the naked-roadster sibling of the Pulsar P125 commuter. Bajaj sells the N125 on the same DTS-i SOHC two-valve single as the P125 but with sharper styling, 17-inch front wheel, sportier rider triangle, and the 14F / 43R sprocket pair instead of 14F / 44R. The two bikes share the same 11.64 hp peak and the same 11.0 Nm peak torque. The sim says N125 is 0.02 seconds slower than P125, which is inside the noise floor of any quarter-mile measurement system — these two bikes are functionally identical at the strip.",
+    text: "The Pulsar N125 is the newest bike in the group, launched in 2024 as the naked-roadster sibling of the Pulsar P125 commuter. Bajaj sells the N125 on the same DTS-i SOHC two-valve single as the P125 but with sharper styling, 17-inch front wheel, sportier rider triangle, and the 14F / 43R sprocket pair instead of 14F / 44R. The two bikes share the same 11.64 hp peak and the same 11.0 Nm peak torque. The sim says N125 is 0.02 seconds slower than P125, which is inside the noise floor of any quarter-mile measurement system: these two bikes are functionally identical at the strip.",
   },
   {
     type: "p",
@@ -148,11 +148,11 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The Hero Glamour 125 is the lightest bike in the comparison at 114 kg dry and the slowest by 0.6 seconds. That gap traces almost entirely to a single number on the spec sheet: 10.59 hp peak power, down by 1.05 hp on the Pulsar siblings and 0.63 hp on the Raider 125. The Glamour engine is older — the OBD2B refresh of Hero air-cooled single is closely related to the Passion XPro engine going back to the early 2010s — and Hero tunes it for fuel economy first, longevity second, and acceleration last. The OEM exhaust is more restrictive than the Bajaj or TVS units, the intake plenum is smaller, and the cam profile is mild.",
+    text: "The Hero Glamour 125 is the lightest bike in the comparison at 114 kg dry and the slowest by 0.6 seconds. That gap traces almost entirely to a single number on the spec sheet: 10.59 hp peak power, down by 1.05 hp on the Pulsar siblings and 0.63 hp on the Raider 125. The Glamour engine is older (the OBD2B refresh of Hero air-cooled single is closely related to the Passion XPro engine going back to the early 2010s), and Hero tunes it for fuel economy first, longevity second, and acceleration last. The OEM exhaust is more restrictive than the Bajaj or TVS units, the intake plenum is smaller, and the cam profile is mild.",
   },
   {
     type: "p",
-    text: "On the strip the Glamour 125 loses 0.17 seconds at the 60-foot mark and another 0.46 seconds between 60 feet and the 1/8 mile. From the 1/8 mile to the trap the bike falls another 0.42 seconds behind. The cumulative gap is 0.65 seconds of ET and 2.6 km/h of trap speed versus the Raider 125. That gap is invariant to rider weight, ambient temperature, and density altitude — the Glamour 125 is the slowest bike in the group at every reasonable operating point because it has the least power and the smallest reserve torque.",
+    text: "On the strip the Glamour 125 loses 0.17 seconds at the 60-foot mark and another 0.46 seconds between 60 feet and the 1/8 mile. From the 1/8 mile to the trap the bike falls another 0.42 seconds behind. The cumulative gap is 0.65 seconds of ET and 2.6 km/h of trap speed versus the Raider 125. That gap is invariant to rider weight, ambient temperature, and density altitude: the Glamour 125 is the slowest bike in the group at every reasonable operating point because it has the least power and the smallest reserve torque.",
   },
   {
     type: "p",
@@ -179,7 +179,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The sprocket drop is the cheapest tenth in the entire MotoQuant catalog on any bike under 200 cc. For a Pulsar N125 owner, spending 450 rupees on a 13-tooth front sprocket buys 0.20 seconds of ET, shortens overall gearing by 7.1 percent, and pushes 5th gear at the trap line up to roughly 10,400 rpm — closer to peak power, further inside the meat of the torque curve. The trade-off is a 7 percent reduction in claimed top speed, which on a 125cc commuter that never sees its claimed 95 km/h cruise speed in normal use is essentially free.",
+    text: "The sprocket drop is the cheapest tenth in the entire MotoQuant catalog on any bike under 200 cc. For a Pulsar N125 owner, spending 450 rupees on a 13-tooth front sprocket buys 0.20 seconds of ET, shortens overall gearing by 7.1 percent, and pushes 5th gear at the trap line up to roughly 10,400 rpm, closer to peak power, further inside the meat of the torque curve. The trade-off is a 7 percent reduction in claimed top speed, which on a 125cc commuter that never sees its claimed 95 km/h cruise speed in normal use is essentially free.",
   },
   {
     type: "p",
@@ -191,7 +191,7 @@ const CONTENT = [
   },
   {
     type: "callout",
-    text: "Total mod budget on a stock Pulsar N125 to drop from 20.70 s to roughly 20.32 s under matched conditions: ₹2,550 (sprocket + tire). That is the highest-ROI ₹2,550 you can spend on any motorcycle in the MotoQuant catalog. Beyond that, every additional tenth costs at least ₹6,000 — almost three times the price of the first 0.4 seconds.",
+    text: "Total mod budget on a stock Pulsar N125 to drop from 20.70 s to roughly 20.32 s under matched conditions: ₹2,550 (sprocket + tire). That is the highest-ROI ₹2,550 you can spend on any motorcycle in the MotoQuant catalog. Beyond that, every additional tenth costs at least ₹6,000, almost three times the price of the first 0.4 seconds.",
   },
   {
     type: "h2",
@@ -199,11 +199,11 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The 2019-2024 Pulsar 125 Neon is the slowest bike in the group despite carrying the highest peak power at 12.0 hp. The reason is the 16-tooth front sprocket. Bajaj geared the Neon for highway cruise — the bike will sit comfortably at 80 km/h in fifth at roughly 6,500 rpm, which is unusually relaxed for a 125 — but the long overall gearing costs 0.7 seconds of ET versus the same engine on the N125 platform with a 14-tooth front. The Neon also carries 123 kg dry, the heaviest in the group by 3 kg, because the chassis is shared with the 150-class Pulsar and was never weight-optimised for the smaller engine.",
+    text: "The 2019-2024 Pulsar 125 Neon is the slowest bike in the group despite carrying the highest peak power at 12.0 hp. The reason is the 16-tooth front sprocket. Bajaj geared the Neon for highway cruise (the bike will sit comfortably at 80 km/h in fifth at roughly 6,500 rpm, which is unusually relaxed for a 125), but the long overall gearing costs 0.7 seconds of ET versus the same engine on the N125 platform with a 14-tooth front. The Neon also carries 123 kg dry, the heaviest in the group by 3 kg, because the chassis is shared with the 150-class Pulsar and was never weight-optimised for the smaller engine.",
   },
   {
     type: "p",
-    text: "Bajaj discontinued the Neon in 2024 when the N125 and P125 launched on a purpose-built lighter platform. The Neon is still on dealer floors as old stock and shows up frequently in the used market at 70,000-85,000 rupees, which makes it the cheapest 125 in this comparison by a wide margin. If you are buying used and ET is not the deciding factor, the Neon is fine — it cruises better than the N125 and the chassis is more substantial. If ET is the deciding factor, the N125 or P125 will beat it by roughly 0.75 seconds for an extra 15,000 rupees.",
+    text: "Bajaj discontinued the Neon in 2024 when the N125 and P125 launched on a purpose-built lighter platform. The Neon is still on dealer floors as old stock and shows up frequently in the used market at 70,000-85,000 rupees, which makes it the cheapest 125 in this comparison by a wide margin. If you are buying used and ET is not the deciding factor, the Neon is fine: it cruises better than the N125 and the chassis is more substantial. If ET is the deciding factor, the N125 or P125 will beat it by roughly 0.75 seconds for an extra 15,000 rupees.",
   },
   {
     type: "h2",
@@ -211,7 +211,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The fastest 125cc commuter you can buy new in India in May 2026 is the TVS Raider 125, by 0.05 seconds of ET over the Pulsar P125 and 0.07 seconds over the Pulsar N125. That gap is inside the noise floor of any reasonable measurement system and is unlikely to show up on a typical Indian strip day with rider variance and chain wear. The runner-up is whichever of the Pulsar N125 or P125 you prefer aesthetically — the two bikes are functionally identical at the trap line. The Glamour 125 is 0.6 seconds slower and 25,000 rupees per year cheaper to fuel. The Pulsar 125 Neon is the slowest in the group because of gearing and mass, but is also the cheapest entry point on the used market.",
+    text: "The fastest 125cc commuter you can buy new in India in May 2026 is the TVS Raider 125, by 0.05 seconds of ET over the Pulsar P125 and 0.07 seconds over the Pulsar N125. That gap is inside the noise floor of any reasonable measurement system and is unlikely to show up on a typical Indian strip day with rider variance and chain wear. The runner-up is whichever of the Pulsar N125 or P125 you prefer aesthetically; the two bikes are functionally identical at the trap line. The Glamour 125 is 0.6 seconds slower and 25,000 rupees per year cheaper to fuel. The Pulsar 125 Neon is the slowest in the group because of gearing and mass, but is also the cheapest entry point on the used market.",
   },
   {
     type: "p",
@@ -223,11 +223,11 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The MotoQuant simulator at motoquant.in lets you sweep rider weight, ambient temperature, density altitude, tyre choice, and the full Indian parts catalog across all four bikes side by side. The Raider 125 / N125 / P125 / Glamour 125 share enough mod paths — same chain pitch, same wheel size, overlapping sprocket options — that you can test the same 2,550 rupee budget on all four and watch which platform gives you the most ET back. Pick the bike, dial in your local conditions, and the simulator will report ET, trap speed, 60-foot time, 1/8 mile, and top-gear RPM at the trap line within roughly 50 milliseconds.",
+    text: "The MotoQuant simulator at motoquant.in lets you sweep rider weight, ambient temperature, density altitude, tyre choice, and the full Indian parts catalog across all four bikes side by side. The Raider 125 / N125 / P125 / Glamour 125 share enough mod paths (same chain pitch, same wheel size, overlapping sprocket options) that you can test the same 2,550 rupee budget on all four and watch which platform gives you the most ET back. Pick the bike, dial in your local conditions, and the simulator will report ET, trap speed, 60-foot time, 1/8 mile, and top-gear RPM at the trap line within roughly 50 milliseconds.",
   },
   {
     type: "p",
-    text: "Two final caveats. First, every number in this post is a stock-tune simulation under specific Aamby Valley November conditions inside the documented entry_150_200 cluster bias band of +0.5 to +1.4 seconds. A single instrumented Dragy timeslip from any of these bikes at a real Indian strip would tighten the simulator prediction by a meaningful margin — and the “Submit a timeslip” form is how to send one. Second, the Indian aftermarket pricing in the table shifts every quarter; the parts catalog uses retailer prices where it has them and falls back to formula-based landing-cost math (USD × 84 × 1.30 import duty × 1.18 GST + ₹1,500 freight) where it cannot.",
+    text: "Two final caveats. First, every number in this post is a stock-tune simulation under specific Aamby Valley November conditions inside the documented entry_150_200 cluster bias band of +0.5 to +1.4 seconds. A single instrumented Dragy timeslip from any of these bikes at a real Indian strip would tighten the simulator prediction by a meaningful margin, and the “Submit a timeslip” form is how to send one. Second, the Indian aftermarket pricing in the table shifts every quarter; the parts catalog uses retailer prices where it has them and falls back to formula-based landing-cost math (USD × 84 × 1.30 import duty × 1.18 GST + ₹1,500 freight) where it cannot.",
   },
   {
     type: "p",
@@ -365,8 +365,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Pulsar NS200 vs Apache RTR 200 4V
-              </Link>{" "}
-              — the 200cc class most 125cc commuter graduates move into next. Same cost-per-tenth pattern, twice the power.
+              </Link>
+              : the 200cc class most 125cc commuter graduates move into next. Same cost-per-tenth pattern, twice the power.
             </li>
             <li>
               ·{" "}
@@ -375,8 +375,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Hero Xtreme 200S 4V Quarter-Mile Physics
-              </Link>{" "}
-              — Hero engineering one displacement class up. The same intake-and-cam conservatism shows up.
+              </Link>
+              : Hero engineering one displacement class up. The same intake-and-cam conservatism shows up.
             </li>
             <li>
               ·{" "}
@@ -385,8 +385,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Yamaha MT-15 V1 Quarter-Mile Physics
-              </Link>{" "}
-              — what 30 cc and 7 hp more buys you. Same sprocket-and-tyre playbook for the cheapest tenths.
+              </Link>
+              : what 30 cc and 7 hp more buys you. Same sprocket-and-tyre playbook for the cheapest tenths.
             </li>
             <li>
               ·{" "}
@@ -395,8 +395,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Why Your R15 Won&apos;t Hit 14s
-              </Link>{" "}
-              — the gearing-cap story two displacement classes up. The 125cc Neon has the same problem with the same root cause.
+              </Link>
+              : the gearing-cap story two displacement classes up. The 125cc Neon has the same problem with the same root cause.
             </li>
             <li>
               ·{" "}
@@ -405,8 +405,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 How the MotoQuant Physics Engine Works
-              </Link>{" "}
-              — the 15-sub-model architecture behind every ET prediction in this post.
+              </Link>
+              : the 15-sub-model architecture behind every ET prediction in this post.
             </li>
             <li>
               ·{" "}
@@ -415,8 +415,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 How to Tune for Aamby Valley in November
-              </Link>{" "}
-              — the venue conditions used for every simulation above.
+              </Link>
+              : the venue conditions used for every simulation above.
             </li>
             <li>
               ·{" "}
@@ -425,8 +425,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Browse the full bike catalog
-              </Link>{" "}
-              — all four 125cc commuters plus 535+ other bikes with full spec sheets, gear cassettes, and OEM tyre fitments.
+              </Link>
+              : all four 125cc commuters plus 535+ other bikes with full spec sheets, gear cassettes, and OEM tyre fitments.
             </li>
           </ul>
         </div>
@@ -436,7 +436,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Run the 125cc shootout yourself</div>
             <div className="text-white/60 text-sm">
-              Free simulator — pick the Pulsar N125, Raider 125, Glamour 125, or P125, dial in your local conditions, and watch the ET tighten live.
+              Free simulator: pick the Pulsar N125, Raider 125, Glamour 125, or P125, dial in your local conditions, and watch the ET tighten live.
             </div>
           </div>
           <Link

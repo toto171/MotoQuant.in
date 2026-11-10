@@ -65,7 +65,7 @@ export async function generateMetadata({ params }) {
     // Google re-crawls periodically and will pick up the full metadata
     // once the API is responsive again.
     const fallbackTitle =
-      'Motorcycle Quarter-Mile Drag Simulator — MotoQuant';
+      'Motorcycle Quarter-Mile Drag Simulator | MotoQuant';
     const fallbackDesc =
       'Physics-based quarter-mile drag-racing simulator for this motorcycle. 534 bikes in the catalog. Free and in-browser.';
     return {
@@ -93,15 +93,15 @@ export async function generateMetadata({ params }) {
   //   "<bike name> quarter mile time"
   //   "<bike name> drag simulator"
   //   "<bike name> specs"
-  const title = `${name} — Quarter-Mile ET, Drag Simulator & Full Specs`;
+  const title = `${name}: Quarter-Mile ET, Drag Simulator & Full Specs`;
 
   const descParts = [
     `Simulate ${name} quarter-mile drag times with MotoQuant.`,
     disp && power && mass
       ? `${disp} · ${power} · ${mass} dry.`
       : [disp, power, mass].filter(Boolean).join(' · '),
-    `Full physics-based ET prediction, individual aero (Cd ${bike.cd?.toFixed?.(2) || '—'}, frontal area ${bike.frontal_area_m2?.toFixed?.(2) || '—'} m²), gear ratios, and OEM tire fitments.`,
-    'Free and in-browser — no signup.',
+    `Full physics-based ET prediction, individual aero (Cd ${bike.cd?.toFixed?.(2) || '–'}, frontal area ${bike.frontal_area_m2?.toFixed?.(2) || '–'} m²), gear ratios, and OEM tire fitments.`,
+    'Free and in-browser, no signup.',
   ]
     .filter(Boolean)
     .join(' ');
@@ -137,7 +137,7 @@ export async function generateMetadata({ params }) {
     alternates: { canonical },
     keywords,
     openGraph: {
-      title: `${name} — Quarter-Mile Drag Simulator & Specs`,
+      title: `${name}: Quarter-Mile Drag Simulator & Specs`,
       description: descParts,
       url: `${SITE_URL}${canonical}`,
       type: 'website',
@@ -146,13 +146,13 @@ export async function generateMetadata({ params }) {
           url: `${SITE_URL}/og-image.png`,
           width: 1200,
           height: 630,
-          alt: `${name} — quarter-mile drag simulation data on MotoQuant`,
+          alt: `${name}: quarter-mile drag simulation data on MotoQuant`,
         },
       ],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${name} — Quarter-Mile Drag Simulator`,
+      title: `${name}: Quarter-Mile Drag Simulator`,
       description: descParts,
     },
     robots: {

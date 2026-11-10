@@ -6,7 +6,7 @@ import StructuredData, { articleSchema } from '../../StructuredData';
 const SLUG = 'yamaha-xsr900-gp-vs-mt-09-quarter-mile-physics';
 const TITLE = 'Yamaha XSR900 GP vs MT-09: Quarter-Mile Physics';
 const DESCRIPTION =
-  'MotoQuant simulates the Yamaha XSR900 GP at 10.98s and the MT-09 at 10.86s — same 890cc CP3 triple, same 6-speed cassette, 0.12s apart. Spec-by-spec physics breakdown of the heritage tax: where the mass lives, why the fairing pays it back, and the Indian CBU pricing math.';
+  'MotoQuant simulates the Yamaha XSR900 GP at 10.98s and the MT-09 at 10.86s: same 890cc CP3 triple, same 6-speed cassette, 0.12s apart. Spec-by-spec physics breakdown of the heritage tax: where the mass lives, why the fairing pays it back, and the Indian CBU pricing math.';
 
 export const metadata = {
   title: 'Yamaha XSR900 GP vs MT-09: Quarter-Mile Physics Breakdown',
@@ -35,7 +35,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'MotoQuant simulates the Yamaha XSR900 GP at 10.980 seconds and 222.3 km/h trap. The mechanically-identical MT-09 runs 10.858 seconds at 224.7 km/h on the same physics engine. The two bikes share their 890 cc CP3 triple, their 6-speed cassette, their chain pitch, even their throttle bodies and ECU map. They are 0.12 seconds apart at the quarter mile — and the gap is paid entirely in mass and rear sprocket.',
+    text: 'MotoQuant simulates the Yamaha XSR900 GP at 10.980 seconds and 222.3 km/h trap. The mechanically-identical MT-09 runs 10.858 seconds at 224.7 km/h on the same physics engine. The two bikes share their 890 cc CP3 triple, their 6-speed cassette, their chain pitch, even their throttle bodies and ECU map. They are 0.12 seconds apart at the quarter mile, and the gap is paid entirely in mass and rear sprocket.',
   },
   {
     type: 'h2',
@@ -43,11 +43,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The 2024 XSR900 GP is the third bodywork on the CP3 platform. The MT-09 is the original naked, the XSR900 (without GP) is the neo-retro variant, the Tracer 9 GT is the sport-tourer, and the new GP adds a half-fairing, clip-on bars, and rear-set pegs to chase a 1980s Grand Prix aesthetic. Yamaha service bulletin XSR900-GP-001 (January 2024) confirms the gearbox cassette is unchanged from the MT-09 — same internal ratios, same primary reduction, same clutch. The only powertrain change is the rear sprocket: 43 teeth on the GP, 45 on the MT-09, both running a 16-tooth front and 525 chain.',
+    text: 'The 2024 XSR900 GP is the third bodywork on the CP3 platform. The MT-09 is the original naked, the XSR900 (without GP) is the neo-retro variant, the Tracer 9 GT is the sport-tourer, and the new GP adds a half-fairing, clip-on bars, and rear-set pegs to chase a 1980s Grand Prix aesthetic. Yamaha service bulletin XSR900-GP-001 (January 2024) confirms the gearbox cassette is unchanged from the MT-09: same internal ratios, same primary reduction, same clutch. The only powertrain change is the rear sprocket: 43 teeth on the GP, 45 on the MT-09, both running a 16-tooth front and 525 chain.',
   },
   {
     type: 'p',
-    text: 'That alone tells you a lot about who Yamaha thinks buys the GP. The taller R43 final drive sacrifices 0-100 km/h acceleration for higher cruise rpm in 6th and a higher geared top speed — the kind of trade you make when you imagine your bike being ridden on a long arc, not a Bangalore Outer Ring Road stoplight drag. It is also, mechanically, the only meaningful gearing decision Yamaha left on the table for the GP. Everything else is the same.',
+    text: 'That alone tells you a lot about who Yamaha thinks buys the GP. The taller R43 final drive sacrifices 0-100 km/h acceleration for higher cruise rpm in 6th and a higher geared top speed, the kind of trade you make when you imagine your bike being ridden on a long arc, not a Bangalore Outer Ring Road stoplight drag. It is also, mechanically, the only meaningful gearing decision Yamaha left on the table for the GP. Everything else is the same.',
   },
   {
     type: 'p',
@@ -74,7 +74,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Two columns that look almost identical. Three numbers actually differ: rear sprocket (43 vs 45), dry mass (200 vs 193 kg), and the aero profile (Cd × frontal area = 0.236 on the GP vs 0.426 on the MT-09 — almost half). The bike is the same. The body around it is not.',
+    text: 'Two columns that look almost identical. Three numbers actually differ: rear sprocket (43 vs 45), dry mass (200 vs 193 kg), and the aero profile (Cd × frontal area = 0.236 on the GP vs 0.426 on the MT-09, almost half). The bike is the same. The body around it is not.',
   },
   {
     type: 'h2',
@@ -82,7 +82,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running both bikes under matched Aamby Valley November conditions — about 1,100 m density altitude, 22°C ambient, dry asphalt with stock OEM Bridgestone Battlax tires at μ_peak around 1.18, 75 kg rider, two-step launch from peak-torque rpm — produces the following:',
+    text: 'Running both bikes under matched Aamby Valley November conditions (about 1,100 m density altitude, 22°C ambient, dry asphalt with stock OEM Bridgestone Battlax tires at μ_peak around 1.18, 75 kg rider, two-step launch from peak-torque rpm) produces the following:',
   },
   {
     type: 'table',
@@ -93,7 +93,7 @@ const CONTENT = [
       ['60-foot time', '~1.79 s', '~1.76 s', '+0.03 s'],
       ['1/8-mile ET', '~7.05 s', '~6.97 s', '+0.08 s'],
       ['Top gear at trap', '4th, ~9,400 rpm', '4th, ~9,800 rpm', 'GP runs taller'],
-      ['Cluster bias band', '±0.15 s mid-twin/triple', '±0.15 s mid-twin/triple', '—'],
+      ['Cluster bias band', '±0.15 s mid-twin/triple', '±0.15 s mid-twin/triple', '–'],
     ],
   },
   {
@@ -102,7 +102,7 @@ const CONTENT = [
   },
   {
     type: 'callout',
-    text: 'These are stock-tune simulations. A modded MT-09 with sticky tires, a Power Tuner map, an Akrapovic full system, and a 14F/47R sprocket combination will run mid-10s territory. The MT-09 is one of the easiest bikes in the catalog to wake up — it is a triple-cylinder hooligan with no fairing to redesign and a strong aftermarket. The GP responds to the same mods but the fairing complicates exhaust routing and the rear-set pegs make the bike less forgiving on launch.',
+    text: 'These are stock-tune simulations. A modded MT-09 with sticky tires, a Power Tuner map, an Akrapovic full system, and a 14F/47R sprocket combination will run mid-10s territory. The MT-09 is one of the easiest bikes in the catalog to wake up: it is a triple-cylinder hooligan with no fairing to redesign and a strong aftermarket. The GP responds to the same mods but the fairing complicates exhaust routing and the rear-set pegs make the bike less forgiving on launch.',
   },
   {
     type: 'h2',
@@ -110,15 +110,15 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The GP is 7 kg heavier dry. With 75 kg rider it carries 275 kg total mass against the MT-09 at 268 kg — a 2.6 percent mass disadvantage. The MotoQuant physics engine treats mass as a near-linear penalty on acceleration in the launch phase and a quadratic penalty on rolling resistance work. Across the full 402 m of the quarter, the 7 kg costs the GP roughly 0.07 seconds — most of the gap.',
+    text: 'The GP is 7 kg heavier dry. With 75 kg rider it carries 275 kg total mass against the MT-09 at 268 kg, a 2.6 percent mass disadvantage. The MotoQuant physics engine treats mass as a near-linear penalty on acceleration in the launch phase and a quadratic penalty on rolling resistance work. Across the full 402 m of the quarter, the 7 kg costs the GP roughly 0.07 seconds, most of the gap.',
   },
   {
     type: 'p',
-    text: 'The rear sprocket is the rest of it. The MT-09 at R45 turns its rear wheel 4.5 percent faster per crankshaft revolution than the GP at R43. In every gear, the MT-09 accelerates harder and its top-speed in each gear lands lower. On the quarter mile this means the MT-09 shifts later in 4th and arrives at the trap with about 400 more rpm of usable headroom — which converts directly into a slightly higher trap speed. The math here is exact: a 45/43 = 1.047 ratio change applied to the trap rpm of 9400 gives 9842, very close to the simulator output of 9800.',
+    text: 'The rear sprocket is the rest of it. The MT-09 at R45 turns its rear wheel 4.5 percent faster per crankshaft revolution than the GP at R43. In every gear, the MT-09 accelerates harder and its top-speed in each gear lands lower. On the quarter mile this means the MT-09 shifts later in 4th and arrives at the trap with about 400 more rpm of usable headroom, which converts directly into a slightly higher trap speed. The math here is exact: a 45/43 = 1.047 ratio change applied to the trap rpm of 9400 gives 9842, very close to the simulator output of 9800.',
   },
   {
     type: 'p',
-    text: 'For an Indian rider commuting through Pune or Bangalore traffic, the R45 of the MT-09 also means snappier roll-on response in 3rd and 4th gear at 60-80 km/h — a real-world advantage that does not show up in a quarter-mile timeslip but is felt every time you overtake a Tata Magic on the highway.',
+    text: 'For an Indian rider commuting through Pune or Bangalore traffic, the R45 of the MT-09 also means snappier roll-on response in 3rd and 4th gear at 60-80 km/h, a real-world advantage that does not show up in a quarter-mile timeslip but is felt every time you overtake a Tata Magic on the highway.',
   },
   {
     type: 'h2',
@@ -126,7 +126,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The GP fairing cuts aerodynamic drag almost in half. Cd × frontal area drops from 0.426 on the MT-09 to 0.236 on the GP — a number that approaches sport-bike territory and is meaningfully better than even most adventure-tourers. The MT-09 is a naked bike with a 75 kg rider sitting upright behind a tiny headlight cowl; the GP rider tucks behind a half-fairing with clip-ons that mimic a 1980s GP riding position.',
+    text: 'The GP fairing cuts aerodynamic drag almost in half. Cd × frontal area drops from 0.426 on the MT-09 to 0.236 on the GP, a number that approaches sport-bike territory and is meaningfully better than even most adventure-tourers. The MT-09 is a naked bike with a 75 kg rider sitting upright behind a tiny headlight cowl; the GP rider tucks behind a half-fairing with clip-ons that mimic a 1980s GP riding position.',
   },
   {
     type: 'p',
@@ -134,7 +134,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'In the quarter mile this advantage only partially materializes. The trap is at 402 m and the bikes are running around 220 km/h — fast enough that aero drag matters, but not fast enough for the GP to fully exploit its fairing. If you ran a half-mile dragstrip (805 m) instead, the gap would close to zero and likely flip in the GP\'s favour by the trap. On a one-mile top-speed shoot, the GP wins by a 15-20 km/h margin.',
+    text: 'In the quarter mile this advantage only partially materializes. The trap is at 402 m and the bikes are running around 220 km/h: fast enough that aero drag matters, but not fast enough for the GP to fully exploit its fairing. If you ran a half-mile dragstrip (805 m) instead, the gap would close to zero and likely flip in the GP\'s favour by the trap. On a one-mile top-speed shoot, the GP wins by a 15-20 km/h margin.',
   },
   {
     type: 'h2',
@@ -142,7 +142,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The CP3 platform is a well-instrumented test bed. Cycle World benchmarked the 2024 XSR900 GP at 11.0-11.4 seconds with ~205 km/h trap in their instrumented test (March 2024 issue), and MCN clocked the 2024 MT-09 at 10.8-11.0 seconds with ~210 km/h trap (April 2024 first-ride). MotoQuant\'s simulator output sits just at the fast end of both bands. The reason is the venue: published magazine tests are usually run at sea-level with high humidity and tire temperatures that are not always optimal. The Aamby Valley simulation above runs at about 1,100 m density altitude with low humidity — the bikes lose about 10 percent of their power to the thin air and get some of it back in the aero portion of the run, where lower air density means less drag.',
+    text: 'The CP3 platform is a well-instrumented test bed. Cycle World benchmarked the 2024 XSR900 GP at 11.0-11.4 seconds with ~205 km/h trap in their instrumented test (March 2024 issue), and MCN clocked the 2024 MT-09 at 10.8-11.0 seconds with ~210 km/h trap (April 2024 first-ride). MotoQuant\'s simulator output sits just at the fast end of both bands. The reason is the venue: published magazine tests are usually run at sea-level with high humidity and tire temperatures that are not always optimal. The Aamby Valley simulation above runs at about 1,100 m density altitude with low humidity. The bikes lose about 10 percent of their power to the thin air and get some of it back in the aero portion of the run, where lower air density means less drag.',
   },
   {
     type: 'p',
@@ -150,7 +150,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'See the broader methodology in the post on how the MotoQuant physics engine works — it covers the 15-sub-model RK4 architecture, the tyre grip model, the clutch slip dynamics, and the validation gates that lock the Suzuki GSX-R 1000 K5 baseline at 10.0436 seconds across every commit.',
+    text: 'See the broader methodology in the post on how the MotoQuant physics engine works. It covers the 15-sub-model RK4 architecture, the tyre grip model, the clutch slip dynamics, and the validation gates that lock the Suzuki GSX-R 1000 K5 baseline at 10.0436 seconds across every commit.',
   },
   {
     type: 'h2',
@@ -158,11 +158,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Neither bike is officially sold in India through a domestic CKD or assembled line — both are CBU (Completely Built Unit) imports through Yamaha Motor India\'s sport-heritage import channel. The MT-09 in India sits at roughly ₹10.8 lakh on-road in 2026 spec. The XSR900 GP, when imported, lands at approximately ₹14 lakh on-road — a premium of ₹3.2 lakh, which buys you the fairing, the rear-set pegs, the clip-on bars, the GP livery, and 7 kg of extra mass.',
+    text: 'Neither bike is officially sold in India through a domestic CKD or assembled line; both are CBU (Completely Built Unit) imports through Yamaha Motor India\'s sport-heritage import channel. The MT-09 in India sits at roughly ₹10.8 lakh on-road in 2026 spec. The XSR900 GP, when imported, lands at approximately ₹14 lakh on-road, a premium of ₹3.2 lakh, which buys you the fairing, the rear-set pegs, the clip-on bars, the GP livery, and 7 kg of extra mass.',
   },
   {
     type: 'p',
-    text: 'For a buyer choosing between the two purely on quarter-mile capability, the MT-09 is the better bike by every measurable margin: 0.12 seconds quicker, 2.4 km/h faster trap, 7 kg lighter on the front and rear tires, and ₹3.2 lakh cheaper. For a buyer choosing on top-speed capability or long-arc highway cruising at 200+ km/h, the GP makes sense — that ₹3.2 lakh premium roughly matches what you would spend on a full sport-touring upgrade kit (fairing, screen, rear-sets, frame plug) for the MT-09 after the fact.',
+    text: 'For a buyer choosing between the two purely on quarter-mile capability, the MT-09 is the better bike by every measurable margin: 0.12 seconds quicker, 2.4 km/h faster trap, 7 kg lighter on the front and rear tires, and ₹3.2 lakh cheaper. For a buyer choosing on top-speed capability or long-arc highway cruising at 200+ km/h, the GP makes sense: that ₹3.2 lakh premium roughly matches what you would spend on a full sport-touring upgrade kit (fairing, screen, rear-sets, frame plug) for the MT-09 after the fact.',
   },
   {
     type: 'p',
@@ -185,12 +185,12 @@ const CONTENT = [
       ['Akrapovic Racing slip-on (Indian retail)', '~0.16 s', '~₹68,000', '~₹42,500'],
       ['K&N drop-in air filter', '~0.04 s', '~₹4,300', '~₹10,750'],
       ['Yamaha Power Tuner ECU flash', '~0.20 s', '~₹32,000', '~₹16,000'],
-      ['Driveline-Pro QS quickshifter (MT-09 only — pre-installed on GP)', '~0.08 s', '~₹18,000', '~₹22,500'],
+      ['Driveline-Pro QS quickshifter (MT-09 only; pre-installed on GP)', '~0.08 s', '~₹18,000', '~₹22,500'],
     ],
   },
   {
     type: 'p',
-    text: 'Two cheap mods stand out. The 15F sprocket at ₹2,000 returns a tenth — best cost-per-tenth in the catalog for either bike. The Power Tuner flash at ₹32,000 returns two tenths and is the single biggest stage-1 gain available before you start touching the exhaust. Combined the two mods together cost under ₹35,000 and shift the bike from a high-10 / low-11 into the mid-10 band.',
+    text: 'Two cheap mods stand out. The 15F sprocket at ₹2,000 returns a tenth, the best cost-per-tenth in the catalog for either bike. The Power Tuner flash at ₹32,000 returns two tenths and is the single biggest stage-1 gain available before you start touching the exhaust. Combined the two mods together cost under ₹35,000 and shift the bike from a high-10 / low-11 into the mid-10 band.',
   },
   {
     type: 'p',
@@ -210,11 +210,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Two final caveats. First, every number in this post is a stock-tune simulation under specific conditions. Change rider weight by 15 kg, change ambient temperature by 10°C, change the track surface from asphalt to a prepped strip, and the absolute ETs shift on both bikes — but the relative ordering (MT-09 wins the quarter, GP wins the top-speed run) stays stable. Second, the Indian CBU pricing reflects 2026 retailer data and shifts every quarter; the parts catalog uses retailer prices where it has them and falls back to formula-based landing-cost math (USD × 84 × 1.30 import duty × 1.18 GST + ₹1500 freight) where it cannot.',
+    text: 'Two final caveats. First, every number in this post is a stock-tune simulation under specific conditions. Change rider weight by 15 kg, change ambient temperature by 10°C, change the track surface from asphalt to a prepped strip, and the absolute ETs shift on both bikes, but the relative ordering (MT-09 wins the quarter, GP wins the top-speed run) stays stable. Second, the Indian CBU pricing reflects 2026 retailer data and shifts every quarter; the parts catalog uses retailer prices where it has them and falls back to formula-based landing-cost math (USD × 84 × 1.30 import duty × 1.18 GST + ₹1500 freight) where it cannot.',
   },
   {
     type: 'p',
-    text: 'One practical takeaway: if you are walking into a Yamaha showroom in Pune and the salesman tells you the GP is faster than the MT-09 because of the fairing, the answer is that he is half-right. The GP IS faster at 240 km/h. He just forgot to mention the part where you have to be on an empty stretch of road most Indians do not have access to before that advantage shows up. On the quarter mile — which is the only metric most buyers actually use to compare bikes — the MT-09 wins on every count.',
+    text: 'One practical takeaway: if you are walking into a Yamaha showroom in Pune and the salesman tells you the GP is faster than the MT-09 because of the fairing, the answer is that he is half-right. The GP IS faster at 240 km/h. He just forgot to mention the part where you have to be on an empty stretch of road most Indians do not have access to before that advantage shows up. On the quarter mile (which is the only metric most buyers actually use to compare bikes), the MT-09 wins on every count.',
   },
 ];
 
@@ -338,36 +338,36 @@ export default function PostPage() {
               ·{' '}
               <Link href="/blog/yamaha-mt-125-xsr125-platform-physics" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Yamaha MT-125 vs XSR125: Same Engine, 0.10s Apart
-              </Link>{' '}
-              — the smaller-displacement sibling of this comparison. Same platform-pair story at 125 cc instead of 890.
+              </Link>
+              : the smaller-displacement sibling of this comparison. Same platform-pair story at 125 cc instead of 890.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/how-the-motoquant-physics-engine-works" className="text-brand-accent hover:text-brand-orange transition-colors">
                 How the MotoQuant Physics Engine Works
-              </Link>{' '}
-              — the 15-sub-model RK4 architecture that produces the deterministic 0.12s gap between these two bikes.
+              </Link>
+              : the 15-sub-model RK4 architecture that produces the deterministic 0.12s gap between these two bikes.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/hayabusa-vs-zx-14r-which-is-faster" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Hayabusa vs ZX-14R: Which Is Faster Off the Line?
-              </Link>{' '}
-              — a similar tight-margin comparison at the litre-plus end of the spectrum.
+              </Link>
+              : a similar tight-margin comparison at the litre-plus end of the spectrum.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/how-to-tune-for-aamby-valley-in-november" className="text-brand-accent hover:text-brand-orange transition-colors">
                 How to Tune for Aamby Valley in November
-              </Link>{' '}
-              — the venue conditions used for the simulation in this post.
+              </Link>
+              : the venue conditions used for the simulation in this post.
             </li>
             <li>
               ·{' '}
               <Link href="/bikes" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Browse the full bike catalog
-              </Link>{' '}
-              — MT-09, XSR900, XSR900 GP, Tracer 9 GT, and 340+ other bikes with full spec sheets.
+              </Link>
+              : MT-09, XSR900, XSR900 GP, Tracer 9 GT, and 340+ other bikes with full spec sheets.
             </li>
           </ul>
         </div>
@@ -377,7 +377,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Run your own XSR900 GP vs MT-09</div>
             <div className="text-white/60 text-sm">
-              Free simulator — pick either bike, dial in your local conditions and rider weight, then re-run with the other to see exactly where the tenths move.
+              Free simulator: pick either bike, dial in your local conditions and rider weight, then re-run with the other to see exactly where the tenths move.
             </div>
           </div>
           <Link

@@ -9,7 +9,7 @@ const DESCRIPTION =
   'MMRT Chennai sits at 78 m with 80% humidity in November: denser air than Aamby Valley but hotter, wetter intake air. MotoQuant simulates a stock Hayabusa 0.07 s quicker at MMRT in November, and small bikes 0.17–0.28 s quicker. Here is the venue-specific tuning math.';
 
 export const metadata = {
-  title: 'How to Tune for MMRT Chennai — MotoQuant',
+  title: 'How to Tune for MMRT Chennai | MotoQuant',
   description: DESCRIPTION,
   keywords: [
     'mmrt chennai drag racing motorcycle',
@@ -47,7 +47,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Madras Motor Race Track is in Sriperumbudur, 40 km west of Chennai city centre, on the highway out toward Kanchipuram. The site was developed in the early 1990s and the permanent 3.7 km road circuit opened in 2002, but the front straight has hosted FMSCI-sanctioned quarter-mile drag events long before and after that — the same surface that anchors the Indian National Road Racing Championship. The straight measures roughly 600 m end to end with a usable braking area, comfortably long enough for a 402 m quarter-mile from a standing start. The surface is conventional bitumen with a slightly polished texture from years of road racing rubber, and the timing system is a fixed FMSCI-grade beam setup operated by the track. Coordinates: 12.93° N, 79.98° E; altitude per MotoQuant venue data: 78 m. The track itself is in a flat agricultural belt with scrub and palmyra trees on three sides and the Chennai-Bengaluru NH48 corridor on the fourth, which matters for crosswind sheltering as you will see further down.',
+    text: 'Madras Motor Race Track is in Sriperumbudur, 40 km west of Chennai city centre, on the highway out toward Kanchipuram. The site was developed in the early 1990s and the permanent 3.7 km road circuit opened in 2002, but the front straight has hosted FMSCI-sanctioned quarter-mile drag events long before and after that, the same surface that anchors the Indian National Road Racing Championship. The straight measures roughly 600 m end to end with a usable braking area, comfortably long enough for a 402 m quarter-mile from a standing start. The surface is conventional bitumen with a slightly polished texture from years of road racing rubber, and the timing system is a fixed FMSCI-grade beam setup operated by the track. Coordinates: 12.93° N, 79.98° E; altitude per MotoQuant venue data: 78 m. The track itself is in a flat agricultural belt with scrub and palmyra trees on three sides and the Chennai-Bengaluru NH48 corridor on the fourth, which matters for crosswind sheltering as you will see further down.',
   },
   {
     type: 'h2',
@@ -55,7 +55,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'MotoQuant\'s venue database tracks twelve months of seasonal weather for every Indian drag strip. The two most-searched venues, MMRT and Aamby Valley, look almost nothing alike at the same calendar month. Here are the November numbers — Valley Run Winter season and the most common time to ship a bike out for either venue:',
+    text: 'MotoQuant\'s venue database tracks twelve months of seasonal weather for every Indian drag strip. The two most-searched venues, MMRT and Aamby Valley, look almost nothing alike at the same calendar month. Here are the November numbers (Valley Run Winter season and the most common time to ship a bike out for either venue):',
   },
   {
     type: 'table',
@@ -118,7 +118,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The most important change is launch RPM. At Aamby Valley with a cool track and a fresh tire, a Hayabusa-class bike can launch at peak torque plus 500 rpm (roughly 7,500 rpm on a Gen1) and the rear tire will accept the slip. At MMRT with a 30 to 48°C track surface, that same launch RPM produces a smoky, wasteful first quarter-second. Drop the launch RPM to peak torque plus 200 rpm — roughly 7,200 rpm — and the bike hooks up cleaner with about 0.03 seconds back in the 60-foot. This is the cheapest tenth at MMRT and most stock-tune riders ignore it.',
+    text: 'The most important change is launch RPM. At Aamby Valley with a cool track and a fresh tire, a Hayabusa-class bike can launch at peak torque plus 500 rpm (roughly 7,500 rpm on a Gen1) and the rear tire will accept the slip. At MMRT with a 30 to 48°C track surface, that same launch RPM produces a smoky, wasteful first quarter-second. Drop the launch RPM to peak torque plus 200 rpm (roughly 7,200 rpm) and the bike hooks up cleaner with about 0.03 seconds back in the 60-foot. This is the cheapest tenth at MMRT and most stock-tune riders ignore it.',
   },
   {
     type: 'p',
@@ -320,8 +320,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 How to Tune for Aamby Valley in November
-              </Link>{' '}
-              — the high-altitude counterpart to this venue piece, used as the reference baseline throughout.
+              </Link>
+              : the high-altitude counterpart to this venue piece, used as the reference baseline throughout.
             </li>
             <li>
               ·{' '}
@@ -330,8 +330,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Hayabusa vs ZX-14R: Which Is Faster Off the Line?
-              </Link>{' '}
-              — the same Hayabusa reference bike used for the MMRT vs Aamby Valley delta tables here.
+              </Link>
+              : the same Hayabusa reference bike used for the MMRT vs Aamby Valley delta tables here.
             </li>
             <li>
               ·{' '}
@@ -340,8 +340,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 The Physics of a Perfect Launch
-              </Link>{' '}
-              — the underlying physics of the launch-RPM and clutch-ramp adjustments recommended above.
+              </Link>
+              : the underlying physics of the launch-RPM and clutch-ramp adjustments recommended above.
             </li>
             <li>
               ·{' '}
@@ -350,8 +350,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 KTM Duke 390 vs RC 390: Quarter-Mile Physics at Aamby Valley
-              </Link>{' '}
-              — the same venue framing applied to a 400-class single, including a quick MMRT delta estimate.
+              </Link>
+              : the same venue framing applied to a 400-class single, including a quick MMRT delta estimate.
             </li>
             <li>
               ·{' '}
@@ -360,15 +360,15 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 How the MotoQuant Physics Engine Works
-              </Link>{' '}
-              — what is inside the simulator that produced these numbers, and what the cluster bias bands mean.
+              </Link>
+              : what is inside the simulator that produced these numbers, and what the cluster bias bands mean.
             </li>
             <li>
               ·{' '}
               <Link href="/bikes" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Browse the full bike catalog
-              </Link>{' '}
-              — 534 bikes with full spec sheets, OEM tire fitments, and venue-aware quarter-mile predictions for every Indian drag strip in the database.
+              </Link>
+              : 534 bikes with full spec sheets, OEM tire fitments, and venue-aware quarter-mile predictions for every Indian drag strip in the database.
             </li>
           </ul>
         </div>

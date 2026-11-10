@@ -4,7 +4,7 @@
 
 import StructuredData, { SITE_URL } from '../StructuredData';
 
-const TITLE = "Whitepaper — The Physics Behind MotoQuant";
+const TITLE = "Whitepaper: The Physics Behind MotoQuant";
 const DESCRIPTION = "Complete technical whitepaper for the MotoQuant motorcycle drag simulator: RK4 integrator at 1 ms step, rear-tyre grip with load sensitivity and thermal evolution, SAE J1349 dyno correction, validation against 250 published tests weighted by source quality, 15 sub-model architecture, and the K5/R1/Hayabusa reference baselines. Read this before you trust the predicted quarter-mile numbers.";
 
 export const metadata = {

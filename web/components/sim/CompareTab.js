@@ -43,20 +43,20 @@ export default function CompareTab({ sim }) {
       ? `Build B is ${Math.abs(delta.et_s).toFixed(3)} s quicker than Build A`
       : delta?.faster === 'A'
         ? `Build A is ${Math.abs(delta.et_s).toFixed(3)} s quicker than Build B`
-        : 'Dead heat — both builds run the same time';
+        : 'Dead heat: both builds run the same time';
 
   return (
     <div className="space-y-4">
       <div className="grid items-start gap-3 sm:grid-cols-2">
         <div className="rounded-xl border border-accent/30 bg-accent/[0.05] p-4">
-          <h3 className="font-display text-base font-semibold text-accent">Build A — your current setup</h3>
+          <h3 className="font-display text-base font-semibold text-accent">Build A: your current setup</h3>
           <p className="mt-1 text-sm text-white/75">
             {bikeName(bike)} · {powerBoost !== 0 ? `${powerBoost > 0 ? '+' : ''}${powerBoost} % power` : 'stock power'} ·{' '}
             {selectedParts.length} {selectedParts.length === 1 ? 'part' : 'parts'}
           </p>
         </div>
         <div className="rounded-xl border border-signal-go/30 bg-signal-go/[0.05] p-4">
-          <h3 className="font-display text-base font-semibold text-signal-go">Build B — compare against</h3>
+          <h3 className="font-display text-base font-semibold text-signal-go">Build B: compare against</h3>
           <div className="mt-3 space-y-4">
             <BikePicker value={compareBike || bike} onSelect={setCompareBike} label="Bike B" />
             <SimSlider label="Engine power change" value={comparePower} onChange={setComparePower} min={-20} max={50} unit=" %" signed good="up" />
@@ -67,7 +67,7 @@ export default function CompareTab({ sim }) {
 
       <ActionButton task={task} onRun={startCompare} label="Compare the two bikes" runningLabel="Comparing" disabled={!bike} className="w-full" />
       {task.active && <SimProgress active progress={task.progress} stage={task.stage} label="Running both builds" onStop={task.stop} />}
-      {task.error && !task.active && <ErrorTile message={`The comparison failed — ${task.error}`} onRetry={startCompare} />}
+      {task.error && !task.active && <ErrorTile message={`The comparison failed: ${task.error}`} onRetry={startCompare} />}
 
       {r && delta && (
         <div className="space-y-4">

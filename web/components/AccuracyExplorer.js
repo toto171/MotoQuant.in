@@ -52,7 +52,7 @@ const signed = (n, d = 3) => (n > 0 ? '+' : n < 0 ? '−' : '±') + Math.abs(n).
 
 // Short, human source label for the tooltip / table.
 function shortSource(src) {
-  if (!src) return '—';
+  if (!src) return '–';
   const cut = src.split('(')[0].trim();
   return cut.length > 30 ? cut.slice(0, 29) + '…' : cut;
 }
@@ -225,7 +225,7 @@ function Scatter({ bikes }) {
 
           {/* axis titles */}
           <text x={M.l + S / 2} y={H - 4} fill={FG} opacity="0.75" fontSize="11" fontFamily="monospace" textAnchor="middle">
-            REAL ET (s) — published timeslip
+            REAL ET (s): published timeslip
           </text>
           <text
             x={14}
@@ -258,7 +258,7 @@ function Scatter({ bikes }) {
                 onMouseLeave={() => setHover(null)}
                 style={{ cursor: 'pointer' }}
               >
-                <title>{`${b.make} ${b.model} (${b.year}) — real ${b.real_et}s / sim ${b.sim_et}s / Δ ${signed(b.delta)}s`}</title>
+                <title>{`${b.make} ${b.model} (${b.year}): real ${b.real_et}s / sim ${b.sim_et}s / Δ ${signed(b.delta)}s`}</title>
               </circle>
             );
           })}
@@ -457,7 +457,7 @@ function Histogram({ bikes, bias }) {
               onMouseLeave={() => setHover(null)}
               style={{ cursor: 'pointer' }}
             >
-              <title>{`Δ ${center(i).toFixed(2)}±0.05s — ${c} bike${c > 1 ? 's' : ''}`}</title>
+              <title>{`Δ ${center(i).toFixed(2)}±0.05s: ${c} bike${c > 1 ? 's' : ''}`}</title>
             </rect>
           );
         })}
@@ -678,7 +678,7 @@ export default function AccuracyExplorer({ data }) {
       <Section
         kicker="By segment"
         title={<>Litre classes are <span className="text-accent">tight</span>; small bikes are the weakest</>}
-        sub="Weighted mean absolute error per cluster, on the cylinder-aware 12-cluster taxonomy (twins, singles, and small-cc I4s are split out from same-displacement I4 buckets). The litre and 500–700cc mid-twin clusters — the ones with the most instrumented timeslips — sit under 0.20s, and sport twins sit just above it. The wide clusters are the small-cc and two-stroke bikes: their benchmarks are mostly DERIVED estimates, and small bikes are also where the model is weakest."
+        sub="Weighted mean absolute error per cluster, on the cylinder-aware 12-cluster taxonomy (twins, singles, and small-cc I4s are split out from same-displacement I4 buckets). The litre and 500–700cc mid-twin clusters (the ones with the most instrumented timeslips) sit under 0.20s, and sport twins sit just above it. The wide clusters are the small-cc and two-stroke bikes: their benchmarks are mostly DERIVED estimates, and small bikes are also where the model is weakest."
       >
         <ClusterBreakdown clusters={clusters} />
       </Section>
@@ -686,7 +686,7 @@ export default function AccuracyExplorer({ data }) {
       <Section
         kicker="Cleanest predictions"
         title={<>Ten runs, ten <span className="text-accent">real</span> timeslips</>}
-        sub="The ten smallest residuals among fully published (non-derived) benchmarks — Cycle World, Sport Rider, MCN, MotoStatz, FastestLaps. Race fuel, professional rider, ideal strip."
+        sub="The ten smallest residuals among fully published (non-derived) benchmarks: Cycle World, Sport Rider, MCN, MotoStatz, FastestLaps. Race fuel, professional rider, ideal strip."
       >
         <BestPredictions bikes={bikes} />
         {/* honest callout */}
@@ -695,7 +695,7 @@ export default function AccuracyExplorer({ data }) {
           <p className="text-white/75 text-base leading-relaxed">
             The <span className="text-white font-semibold">entry 150–200cc</span> and{' '}
             <span className="text-white font-semibold">two-stroke</span> clusters carry large |Δ| because most of their
-            benchmarks are <span className="text-signal-stage font-mono">DERIVED</span> — 0-100 km/h times multiplied by 1.6,
+            benchmarks are <span className="text-signal-stage font-mono">DERIVED</span>: 0-100 km/h times multiplied by 1.6,
             with a declared ±0.7s uncertainty, so part of the spread is a benchmark-data limit. Small bikes are also the
             weakest class of the simulator: many of them still carry a known gearing limitation, documented in{' '}
             <a
@@ -709,7 +709,7 @@ export default function AccuracyExplorer({ data }) {
             <Link href="/simulator" className="text-accent hover:text-accent-bright underline underline-offset-2 transition-colors">
               simulate it
             </Link>{' '}
-            and send us your slip — measured data goes straight into the corpus.
+            and send us your slip. Measured data goes straight into the corpus.
           </p>
         </div>
       </Section>

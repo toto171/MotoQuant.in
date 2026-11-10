@@ -4,7 +4,7 @@
 
 import StructuredData, { SITE_URL } from '../StructuredData';
 
-const TITLE = "MotoQuant Blog — Motorcycle Drag Racing Physics, Tuning & Bike Breakdowns";
+const TITLE = "MotoQuant Blog: Motorcycle Drag Racing Physics, Tuning & Bike Breakdowns";
 // ≤160 chars — long-tail terms live on the individual post pages.
 const DESCRIPTION = "Long-form deep dives on motorcycle drag racing physics, India-specific venue tuning, and bike-by-bike quarter-mile breakdowns from the MotoQuant engine.";
 

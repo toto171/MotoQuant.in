@@ -31,7 +31,7 @@ import { API_URL } from '@/lib/api';
 
 const ACTIONS = [
   { label: 'Quarter-mile simulator', desc: 'See how fast a bike runs the quarter mile', href: '/simulator', kw: 'sim simulate run race et elapsed time calculate calculator', icon: Gauge, group: 'Tools' },
-  { label: 'Upgrades — best parts for your budget', desc: 'We test every compatible part and pick the quickest mix', href: '/optimize', kw: 'optimize optimizer parts budget knapsack roi upgrade build mods', icon: Wrench, group: 'Tools' },
+  { label: 'Upgrades: best parts for your budget', desc: 'We test every compatible part and pick the quickest mix', href: '/optimize', kw: 'optimize optimizer parts budget knapsack roi upgrade build mods', icon: Wrench, group: 'Tools' },
   { label: 'Race-day setup', desc: 'Gearing, launch RPM and tyre pressure for today\'s air', href: '/autotune', kw: 'autotune tune tuning gearing launch rpm tyre tire pressure conditions ecu setup', icon: Zap, group: 'Tools' },
   { label: 'Browse bikes', desc: 'Search every motorcycle you can simulate', href: '/bikes', kw: 'bikes motorcycles catalog database specs', icon: Search, group: 'Tools' },
   { label: 'Leaderboard', desc: 'Every bike ranked by simulated stock time', href: '/leaderboard', kw: 'top fastest quickest board ranking times stock compare', icon: Trophy, group: 'Tools' },

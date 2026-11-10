@@ -6,9 +6,9 @@
 import StructuredData, { SITE_URL } from '../StructuredData';
 
 const TITLE =
-  'Motorcycle Quarter-Mile Calculator — Physics-Based ET Predictor for 534 Bikes';
+  'Motorcycle Quarter-Mile Calculator: Physics-Based ET Predictor for 534 Bikes';
 const DESCRIPTION =
-  'Free physics-based motorcycle quarter-mile calculator — not a power-to-weight formula. Predict ET, trap speed, and 60-ft split for 534 bikes at Aamby Valley, MMRT, BIC, and 17 more venues. Tweak rider weight, power delta, mass, and conditions live. Validated to ±0.2s on GSX-R K5, YZF-R1, and Hayabusa.';
+  'Free physics-based motorcycle quarter-mile calculator, not a power-to-weight formula. Predict ET, trap speed, and 60-ft split for 534 bikes at Aamby Valley, MMRT, BIC, and 17 more venues. Tweak rider weight, power delta, mass, and conditions live. Validated to ±0.2s on GSX-R K5, YZF-R1, and Hayabusa.';
 
 export const metadata = {
   title: TITLE,
@@ -87,7 +87,7 @@ export const metadata = {
         url: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'MotoQuant Simulator — live quarter-mile drag simulation for 534 motorcycles',
+        alt: 'MotoQuant Simulator: live quarter-mile drag simulation for 534 motorcycles',
       },
     ],
   },

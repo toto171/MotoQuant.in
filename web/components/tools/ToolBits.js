@@ -54,7 +54,7 @@ export function friendlyError(message) {
     return "We couldn't reach the simulation server. Check your connection and try again.";
   }
   if (/429|too many|rate/i.test(m)) {
-    return "You're going a little fast — wait a few seconds and try again.";
+    return "You're going a little fast. Wait a few seconds and try again.";
   }
   return m || 'Something went wrong. Please try again.';
 }

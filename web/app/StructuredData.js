@@ -57,7 +57,7 @@ export function websiteSchema() {
     url: SITE_URL,
     name: 'MotoQuant',
     description:
-      'Motorcycle drag racing quarter-mile simulator — ET prediction, build optimization, parts ROI.',
+      'Motorcycle drag racing quarter-mile simulator: ET prediction, build optimization, parts ROI.',
     inLanguage: 'en-IN',
     publisher: { '@id': `${SITE_URL}/#organization` },
     potentialAction: {

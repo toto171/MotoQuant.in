@@ -122,7 +122,7 @@ export default function StockBoard({ bikes }) {
                     </Link>
                   </td>
                   <td className="hidden px-3 py-3 text-white/60 sm:table-cell">
-                    {b.displacement_cc ? `${Math.round(b.displacement_cc)} cc` : '—'}
+                    {b.displacement_cc ? `${Math.round(b.displacement_cc)} cc` : '–'}
                     <span className="text-white/40"> · {String(b.category || '').replace(/_/g, ' ')}</span>
                   </td>
                   <td className="px-3 py-3 text-right font-mono font-semibold tabular-nums text-white">

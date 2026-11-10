@@ -65,12 +65,12 @@ export const viewport = {
 // internal linking. This file handles the first three.
 
 const DESCRIPTION =
-  'Free physics-based motorcycle quarter-mile drag racing simulator — not a power-to-weight formula. Predict ET, trap speed, 60-ft split for 534 bikes including Hayabusa, ZX-14R, R15 V4, KTM Duke 390, Pulsar NS200. Compare builds, quantify parts ROI in INR, overlay Dragy runs against the sim. Built for the Indian drag racing community — Aamby Valley, MMRT, BIC, Kari.';
+  'Free physics-based motorcycle quarter-mile drag racing simulator, not a power-to-weight formula. Predict ET, trap speed, 60-ft split for 534 bikes including Hayabusa, ZX-14R, R15 V4, KTM Duke 390, Pulsar NS200. Compare builds, quantify parts ROI in INR, overlay Dragy runs against the sim. Built for the Indian drag racing community: Aamby Valley, MMRT, BIC, Kari.';
 
 export const metadata = {
   title: {
     default:
-      'MotoQuant — Motorcycle Quarter-Mile Drag Racing Simulator | ET Predictor & Build Optimizer',
+      'MotoQuant: Motorcycle Quarter-Mile Drag Racing Simulator | ET Predictor & Build Optimizer',
     template: '%s · MotoQuant',
   },
   description: DESCRIPTION,
@@ -87,7 +87,7 @@ export const metadata = {
   },
   openGraph: {
     title:
-      'MotoQuant — Motorcycle Quarter-Mile Drag Racing Simulator',
+      'MotoQuant: Motorcycle Quarter-Mile Drag Racing Simulator',
     description: DESCRIPTION,
     url: SITE_URL,
     siteName: 'MotoQuant',
@@ -97,7 +97,7 @@ export const metadata = {
         secureUrl: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'MotoQuant — quarter-mile drag racing simulator covering 534 motorcycles, 546 parts, 254 tires, 20 venues',
+        alt: 'MotoQuant: quarter-mile drag racing simulator covering 534 motorcycles, 546 parts, 254 tires, 20 venues',
         type: 'image/png',
       },
     ],
@@ -108,12 +108,12 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title:
-      'MotoQuant — Motorcycle Quarter-Mile Drag Racing Simulator',
+      'MotoQuant: Motorcycle Quarter-Mile Drag Racing Simulator',
     description: DESCRIPTION,
     images: [
       {
         url: `${SITE_URL}/og-image.png`,
-        alt: 'MotoQuant — quarter-mile drag racing simulator covering 534 motorcycles, 546 parts, 254 tires, 20 venues',
+        alt: 'MotoQuant: quarter-mile drag racing simulator covering 534 motorcycles, 546 parts, 254 tires, 20 venues',
       },
     ],
     site: '@motoquant',

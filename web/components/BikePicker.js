@@ -31,7 +31,7 @@ import { ChevronDown, Search } from 'lucide-react';
 import { API_URL, getBikeCatalog } from '@/lib/api';
 import { popularChips } from '@/lib/popularBikes';
 
-const DEFAULT_PLACEHOLDER = 'Search bikes — e.g. Duke 390';
+const DEFAULT_PLACEHOLDER = 'Search bikes, e.g. Duke 390';
 
 export default function BikePicker({
   value,

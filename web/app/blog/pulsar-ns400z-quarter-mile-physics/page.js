@@ -6,10 +6,10 @@ import StructuredData, { articleSchema } from '../../StructuredData';
 const SLUG = 'pulsar-ns400z-quarter-mile-physics';
 const TITLE = 'Bajaj Pulsar NS400Z Quarter-Mile Physics (and Why an RC 390 Still Wins)';
 const DESCRIPTION =
-  'Bajaj Pulsar NS400Z quarter-mile time and 0-100 in India: MotoQuant simulates the NS400Z at roughly 13.8s ET and 158 km/h trap at Aamby Valley, lining up against the BikeWale-tested 6.4s 0-100. A stock KTM RC 390 still beats it by 0.3s. Physics-based explanation of the 23 kg, the gearing, and the Cd the press release ignored — plus three cost-per-tenth mods under ₹20,000.';
+  'Bajaj Pulsar NS400Z quarter-mile time and 0-100 in India: MotoQuant simulates the NS400Z at roughly 13.8s ET and 158 km/h trap at Aamby Valley, lining up against the BikeWale-tested 6.4s 0-100. A stock KTM RC 390 still beats it by 0.3s. Physics-based explanation of the 23 kg, the gearing, and the Cd the press release ignored, plus three cost-per-tenth mods under ₹20,000.';
 
 export const metadata = {
-  title: 'Pulsar NS400Z Quarter Mile & 0-100 (India) vs RC 390 — MotoQuant',
+  title: 'Pulsar NS400Z Quarter Mile & 0-100 (India) vs RC 390 | MotoQuant',
   description: DESCRIPTION,
   keywords: [
     'pulsar ns400z quarter mile',
@@ -36,7 +36,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'The Bajaj Pulsar NS400Z is the first ever 400cc Pulsar and the first Indian-made 400 single in this price bracket. The press kit makes a lot of the 40 hp, the slipper clutch, and the ride-by-wire throttle. MotoQuant simulates the NS400Z at roughly 13.8 seconds and 158 km/h trap under matched Aamby Valley conditions. The KTM RC 390 — same 89 × 60 mm bore and stroke, same 12.5:1 compression, same Bajaj-built engine architecture — runs about 13.5 seconds in the simulator at the same venue. The NS400Z is a 50,000-rupee cheaper bike with a slipper clutch and more torque on tap, but on a strip, a stock RC 390 still beats it by three tenths. Here is exactly where those tenths go.',
+    text: 'The Bajaj Pulsar NS400Z is the first ever 400cc Pulsar and the first Indian-made 400 single in this price bracket. The press kit makes a lot of the 40 hp, the slipper clutch, and the ride-by-wire throttle. MotoQuant simulates the NS400Z at roughly 13.8 seconds and 158 km/h trap under matched Aamby Valley conditions. The KTM RC 390 (same 89 × 60 mm bore and stroke, same 12.5:1 compression, same Bajaj-built engine architecture) runs about 13.5 seconds in the simulator at the same venue. The NS400Z is a 50,000-rupee cheaper bike with a slipper clutch and more torque on tap, but on a strip, a stock RC 390 still beats it by three tenths. Here is exactly where those tenths go.',
   },
   {
     type: 'h2',
@@ -44,11 +44,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The Pulsar NS400Z launched in May 2024 at an ex-showroom price of ₹1.85 lakh. It uses the same 373.3 cc liquid-cooled DOHC 4-valve single that powers the KTM 390 family — the engine is built at Bajaj\'s Chakan plant for both brands. Bore is 89.0 mm, stroke is 60.0 mm, compression is 12.5:1. Bajaj tunes the engine to 40 hp at 8,800 rpm and 35 Nm at 6,500 rpm — about 3.5 hp and 2 Nm down on the RC 390\'s 43.5 hp / 37 Nm spec, but with a flatter mid-range and a longer service interval target.',
+    text: 'The Pulsar NS400Z launched in May 2024 at an ex-showroom price of ₹1.85 lakh. It uses the same 373.3 cc liquid-cooled DOHC 4-valve single that powers the KTM 390 family: the engine is built at Bajaj\'s Chakan plant for both brands. Bore is 89.0 mm, stroke is 60.0 mm, compression is 12.5:1. Bajaj tunes the engine to 40 hp at 8,800 rpm and 35 Nm at 6,500 rpm, about 3.5 hp and 2 Nm down on the RC 390\'s 43.5 hp / 37 Nm spec, but with a flatter mid-range and a longer service interval target.',
   },
   {
     type: 'p',
-    text: 'The bike sits on a perimeter steel frame derived from the NS200, gets USD forks at the front, a monoshock at the rear, and a 320 mm petal disc with a Bybre radial caliper. Ride modes (Road, Rain, Off-Road, Sport), a slipper clutch, an assist clutch, dual-channel ABS, and Bluetooth-connected instrumentation come standard. Kerb mass is 174 kg, dry mass is 172 kg per MotoQuant\'s catalog entry. The bike runs a 110/70-17 front and 140/70-17 rear on cast alloy wheels — slightly skinnier than the RC 390\'s 110/70-17 and 150/60-17 fitment.',
+    text: 'The bike sits on a perimeter steel frame derived from the NS200, gets USD forks at the front, a monoshock at the rear, and a 320 mm petal disc with a Bybre radial caliper. Ride modes (Road, Rain, Off-Road, Sport), a slipper clutch, an assist clutch, dual-channel ABS, and Bluetooth-connected instrumentation come standard. Kerb mass is 174 kg, dry mass is 172 kg per MotoQuant\'s catalog entry. The bike runs a 110/70-17 front and 140/70-17 rear on cast alloy wheels, slightly skinnier than the RC 390\'s 110/70-17 and 150/60-17 fitment.',
   },
   {
     type: 'h2',
@@ -56,7 +56,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running the NS400Z through the simulator at matched Aamby Valley November conditions — density altitude near 1,100 m, 22°C ambient, dry asphalt with the OEM MRF rear tire at μ_peak ≈ 1.08, 70 kg rider in stock upright tuck — produces these numbers:',
+    text: 'Running the NS400Z through the simulator at matched Aamby Valley November conditions (density altitude near 1,100 m, 22°C ambient, dry asphalt with the OEM MRF rear tire at μ_peak ≈ 1.08, 70 kg rider in stock upright tuck) produces these numbers:',
   },
   {
     type: 'table',
@@ -99,7 +99,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The mass gap is the biggest single contributor. 23 kg of dry mass plus a rider puts the NS400Z at roughly 244 kg total system mass versus the RC 390\'s 219 kg. Power-to-weight is 165 hp/tonne on the NS400Z and 198 hp/tonne on the RC 390 — a 17 percent advantage to the KTM that maps onto roughly 0.15 seconds of ET in the simulator. That gap is largest in the first 60 feet where the engine is fighting inertia, and shrinks but does not disappear by the trap.',
+    text: 'The mass gap is the biggest single contributor. 23 kg of dry mass plus a rider puts the NS400Z at roughly 244 kg total system mass versus the RC 390\'s 219 kg. Power-to-weight is 165 hp/tonne on the NS400Z and 198 hp/tonne on the RC 390, a 17 percent advantage to the KTM that maps onto roughly 0.15 seconds of ET in the simulator. That gap is largest in the first 60 feet where the engine is fighting inertia, and shrinks but does not disappear by the trap.',
   },
   {
     type: 'p',
@@ -107,7 +107,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Gearing is the most interesting one. The NS400Z has a taller first gear (2.714 vs the RC 390\'s 3.230) and a shorter final-drive ratio (15/40 = 2.67 vs the RC 390\'s 16/45 = 2.81). The net first-gear overall reduction is 19.3:1 on the NS400Z versus 24.2:1 on the RC 390 — meaning the RC 390 multiplies engine torque 25 percent more aggressively off the line. Bajaj likely tuned the NS400Z for highway cruising and clutch life rather than strip launches; the RC 390 is geared to make the most of every newton-metre.',
+    text: 'Gearing is the most interesting one. The NS400Z has a taller first gear (2.714 vs the RC 390\'s 3.230) and a shorter final-drive ratio (15/40 = 2.67 vs the RC 390\'s 16/45 = 2.81). The net first-gear overall reduction is 19.3:1 on the NS400Z versus 24.2:1 on the RC 390, meaning the RC 390 multiplies engine torque 25 percent more aggressively off the line. Bajaj likely tuned the NS400Z for highway cruising and clutch life rather than strip launches; the RC 390 is geared to make the most of every newton-metre.',
   },
   {
     type: 'h2',
@@ -115,11 +115,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The simulator is brutal but the NS400Z is not a bad bike. On metrics the strip does not measure, it walks away from the RC 390. The slipper clutch is meaningfully better at preventing rear-wheel chatter on aggressive downshifts. The torque curve is broader and flatter — the NS400Z makes 95 percent of peak torque from 4,500 to 7,500 rpm, where the RC 390 has a steeper curve that peaks harder but tapers earlier. The riding position is daily-commute-friendly in a way that no clip-on sport bike will ever be. The cluster is wider, the seat is bigger, the suspension is softer.',
+    text: 'The simulator is brutal but the NS400Z is not a bad bike. On metrics the strip does not measure, it walks away from the RC 390. The slipper clutch is meaningfully better at preventing rear-wheel chatter on aggressive downshifts. The torque curve is broader and flatter: the NS400Z makes 95 percent of peak torque from 4,500 to 7,500 rpm, where the RC 390 has a steeper curve that peaks harder but tapers earlier. The riding position is daily-commute-friendly in a way that no clip-on sport bike will ever be. The cluster is wider, the seat is bigger, the suspension is softer.',
   },
   {
     type: 'p',
-    text: 'At ₹1.85 lakh ex-showroom, the NS400Z is also roughly ₹1.30 lakh cheaper than the RC 390\'s ₹3.18 lakh sticker. For a buyer choosing between the two, the NS400Z gives up three tenths of quarter-mile ET in exchange for keeping 1.3 lakh in the bank. The "first Indian 400" headline is also genuine — Bajaj is shipping a 400cc DOHC liquid-cooled single at a price point no global brand can hit in this market. That matters for the segment, even if it does not matter at the strip.',
+    text: 'At ₹1.85 lakh ex-showroom, the NS400Z is also roughly ₹1.30 lakh cheaper than the RC 390\'s ₹3.18 lakh sticker. For a buyer choosing between the two, the NS400Z gives up three tenths of quarter-mile ET in exchange for keeping 1.3 lakh in the bank. The "first Indian 400" headline is also genuine: Bajaj is shipping a 400cc DOHC liquid-cooled single at a price point no global brand can hit in this market. That matters for the segment, even if it does not matter at the strip.',
   },
   {
     type: 'h2',
@@ -136,20 +136,20 @@ const CONTENT = [
       ['Front sprocket drop (15F → 14F)', '~0.18 s', '+2 km/h', '₹900', '~₹500'],
       ['Sticky rear tire (TVS Eurogrip Protorq Extreme)', '~0.15 s', '+1 km/h', '₹6,200', '~₹4,100'],
       ['Powertronic Stage 1 ECU re-flash', '~0.20 s', '+3 km/h', '₹14,500', '~₹7,250'],
-      ['Total (sprocket + tire + ECU)', '~0.50 s', '+6 km/h', '₹21,600', '—'],
+      ['Total (sprocket + tire + ECU)', '~0.50 s', '+6 km/h', '₹21,600', '–'],
     ],
   },
   {
     type: 'p',
-    text: 'The sprocket swap is the cheapest tenth on the bike by an order of magnitude. Dropping one tooth at the front shortens overall gearing by roughly 6.7 percent, which keeps the engine higher in its power band through the first three gears — exactly where the NS400Z is currently giving up time to the RC 390. The Eurogrip Protorq Extreme is a step up from the OEM MRF rear in compound stickiness; on a tight Indian strip with patchy asphalt it buys back most of the launch-grip gap the NS400Z has against an RC 390 on Metzeler Sportec M5 rubber. The Powertronic Stage 1 re-flash unlocks an additional 1.5–2 hp at the top of the rev band by relaxing Bajaj\'s conservative OEM map; you also get sharper throttle response that matters at the strip but matters even more on commute days.',
+    text: 'The sprocket swap is the cheapest tenth on the bike by an order of magnitude. Dropping one tooth at the front shortens overall gearing by roughly 6.7 percent, which keeps the engine higher in its power band through the first three gears, exactly where the NS400Z is currently giving up time to the RC 390. The Eurogrip Protorq Extreme is a step up from the OEM MRF rear in compound stickiness; on a tight Indian strip with patchy asphalt it buys back most of the launch-grip gap the NS400Z has against an RC 390 on Metzeler Sportec M5 rubber. The Powertronic Stage 1 re-flash unlocks an additional 1.5–2 hp at the top of the rev band by relaxing Bajaj\'s conservative OEM map; you also get sharper throttle response that matters at the strip but matters even more on commute days.',
   },
   {
     type: 'p',
-    text: 'After all three mods, MotoQuant simulates the NS400Z at roughly 13.3 seconds and 164 km/h trap — quicker than a stock RC 390 by 0.2 seconds. Total spend is ₹21,600 against an RC 390 retail premium of ₹1.30 lakh. That is the actual value calculation: a modded NS400Z runs the RC 390 down for 17 percent of the price gap. Add another ₹35,000 of mods to the RC 390 (Akrapovic slip-on, K&N filter, sprocket drop) and it pulls back ahead; both bikes scale roughly together past that point.',
+    text: 'After all three mods, MotoQuant simulates the NS400Z at roughly 13.3 seconds and 164 km/h trap, quicker than a stock RC 390 by 0.2 seconds. Total spend is ₹21,600 against an RC 390 retail premium of ₹1.30 lakh. That is the actual value calculation: a modded NS400Z runs the RC 390 down for 17 percent of the price gap. Add another ₹35,000 of mods to the RC 390 (Akrapovic slip-on, K&N filter, sprocket drop) and it pulls back ahead; both bikes scale roughly together past that point.',
   },
   {
     type: 'callout',
-    text: 'Three caveats. First, every simulator number in this post sits inside the mid-twin-300-500 cluster bias band of ±0.4 seconds. A real Dragy timeslip would tighten the prediction. Second, Indian aftermarket pricing shifts every quarter — the parts catalog uses retailer prices where it has them and falls back to formula-based landing-cost math (USD × 84 × 1.30 import duty × 1.18 GST + ₹1,500 freight) where it cannot. Third, the NS400Z launched in May 2024; service-history data and long-term durability comparisons against the RC 390 are still being written.',
+    text: 'Three caveats. First, every simulator number in this post sits inside the mid-twin-300-500 cluster bias band of ±0.4 seconds. A real Dragy timeslip would tighten the prediction. Second, Indian aftermarket pricing shifts every quarter: the parts catalog uses retailer prices where it has them and falls back to formula-based landing-cost math (USD × 84 × 1.30 import duty × 1.18 GST + ₹1,500 freight) where it cannot. Third, the NS400Z launched in May 2024; service-history data and long-term durability comparisons against the RC 390 are still being written.',
   },
   {
     type: 'h2',
@@ -157,11 +157,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The numbers above are for Aamby Valley in November — roughly 1,100 m density altitude, 22°C ambient, dry asphalt with a μ_peak of about 1.08. At lower-altitude strips the picture sharpens for the NS400Z. At MMRT (Chennai, sea level, 30°C, μ_peak ≈ 1.05 on the better days) the simulator drops the NS400Z to roughly 13.5 seconds and 161 km/h trap — gaining about 0.3 s of ET because the engine is making peak power again without the 1,100 m density-altitude penalty. The RC 390 also gains, but slightly less in relative terms because its tighter gearing was already extracting more from the available power.',
+    text: 'The numbers above are for Aamby Valley in November: roughly 1,100 m density altitude, 22°C ambient, dry asphalt with a μ_peak of about 1.08. At lower-altitude strips the picture sharpens for the NS400Z. At MMRT (Chennai, sea level, 30°C, μ_peak ≈ 1.05 on the better days) the simulator drops the NS400Z to roughly 13.5 seconds and 161 km/h trap, gaining about 0.3 s of ET because the engine is making peak power again without the 1,100 m density-altitude penalty. The RC 390 also gains, but slightly less in relative terms because its tighter gearing was already extracting more from the available power.',
   },
   {
     type: 'p',
-    text: 'At a high-altitude venue — for example Leh at 3,500 m DA — the gap between the two bikes shrinks because both are losing power at roughly the same percentage and the lighter RC 390\'s mass advantage matters less when both bikes are making 25 percent less power. Aerodynamic drag is also lower (thinner air), which disproportionately helps the draggier NS400Z. The simulator predicts the gap shrinks to about 0.15 seconds at Leh. Nobody runs drag races at Leh, but it is a useful sanity check on the physics.',
+    text: 'At a high-altitude venue (for example Leh at 3,500 m DA), the gap between the two bikes shrinks because both are losing power at roughly the same percentage and the lighter RC 390\'s mass advantage matters less when both bikes are making 25 percent less power. Aerodynamic drag is also lower (thinner air), which disproportionately helps the draggier NS400Z. The simulator predicts the gap shrinks to about 0.15 seconds at Leh. Nobody runs drag races at Leh, but it is a useful sanity check on the physics.',
   },
   {
     type: 'h2',
@@ -173,7 +173,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The MotoQuant simulator at motoquant.in lets you side-by-side the NS400Z and the RC 390, swap rider weight, density altitude, ambient temperature, tire compound, and any of the 546 parts in the catalog. You can answer the actual question a buyer cares about — "for my budget of X and my home strip Y, which of these two bikes runs faster, and what do I need to do to get there" — without trusting a YouTube comparison video or a press release.',
+    text: 'The MotoQuant simulator at motoquant.in lets you side-by-side the NS400Z and the RC 390, swap rider weight, density altitude, ambient temperature, tire compound, and any of the 546 parts in the catalog. You can answer the actual question a buyer cares about ("for my budget of X and my home strip Y, which of these two bikes runs faster, and what do I need to do to get there") without trusting a YouTube comparison video or a press release.',
   },
   {
     type: 'p',
@@ -307,36 +307,36 @@ export default function PostPage() {
               ·{' '}
               <Link href="/blog/pulsar-ns200-vs-apache-rtr-200-quarter-mile-physics" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Pulsar NS200 vs Apache RTR 200 4V: Which Wins the Quarter Mile?
-              </Link>{' '}
-              — the same physics one displacement class down, with the same Bajaj-vs-rival framing.
+              </Link>:{' '}
+              the same physics one displacement class down, with the same Bajaj-vs-rival framing.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/why-your-r15-wont-hit-14s" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Why Your R15 Won&apos;t Hit 14s (And What Will Actually Help)
-              </Link>{' '}
-              — gearing, traction, and the small-cc traps the press release never mentions.
+              </Link>:{' '}
+              gearing, traction, and the small-cc traps the press release never mentions.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/how-to-tune-for-aamby-valley-in-november" className="text-brand-accent hover:text-brand-orange transition-colors">
                 How to Tune for Aamby Valley in November
-              </Link>{' '}
-              — the venue conditions used for the simulation in this post, plus the DA penalty math.
+              </Link>:{' '}
+              the venue conditions used for the simulation in this post, plus the DA penalty math.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/how-the-motoquant-physics-engine-works" className="text-brand-accent hover:text-brand-orange transition-colors">
                 How the MotoQuant Physics Engine Works
-              </Link>{' '}
-              — what is inside the simulator that produced these numbers and what the cluster bias bands mean.
+              </Link>:{' '}
+              what is inside the simulator that produced these numbers and what the cluster bias bands mean.
             </li>
             <li>
               ·{' '}
               <Link href="/bikes" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Browse the full bike catalog
-              </Link>{' '}
-              — NS400Z, RC 390, Duke 390, Dominar 400, Apache RR 310, and 390+ other bikes with full spec sheets and OEM tire fitments.
+              </Link>:{' '}
+              NS400Z, RC 390, Duke 390, Dominar 400, Apache RR 310, and 390+ other bikes with full spec sheets and OEM tire fitments.
             </li>
           </ul>
         </div>

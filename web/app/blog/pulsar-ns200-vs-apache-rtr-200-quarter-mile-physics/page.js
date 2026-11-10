@@ -9,7 +9,7 @@ const DESCRIPTION =
   'Bajaj Pulsar NS200 vs TVS Apache RTR 200 4V quarter-mile comparison. MotoQuant simulates the NS200 at ~15.9s and the RTR 200 4V at ~16.4s under matched Indian strip conditions. Spec-by-spec physics breakdown plus cost-per-tenth on the top three mods for each.';
 
 export const metadata = {
-  title: 'Pulsar NS200 vs Apache RTR 200 4V Quarter-Mile (India) — MotoQuant',
+  title: 'Pulsar NS200 vs Apache RTR 200 4V Quarter-Mile (India) | MotoQuant',
   description: DESCRIPTION,
   keywords: [
     'pulsar ns200 vs apache rtr 200',
@@ -35,7 +35,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'The Bajaj Pulsar NS200 and the TVS Apache RTR 200 4V are the two bikes the 200cc Indian drag conversation refuses to stop arguing about. MotoQuant simulates the 2017+ NS200 at roughly 15.9 seconds and the 2016+ Apache RTR 200 4V at roughly 16.4 seconds under matched Aamby Valley November conditions — a half-second gap that maps almost exactly onto the 4 hp and 18 kg the bikes do not share. Here is where each one wins, where the simulator says the gap actually lives, and which three mods buy the most ET on each platform for under ₹15,000.',
+    text: 'The Bajaj Pulsar NS200 and the TVS Apache RTR 200 4V are the two bikes the 200cc Indian drag conversation refuses to stop arguing about. MotoQuant simulates the 2017+ NS200 at roughly 15.9 seconds and the 2016+ Apache RTR 200 4V at roughly 16.4 seconds under matched Aamby Valley November conditions, a half-second gap that maps almost exactly onto the 4 hp and 18 kg the bikes do not share. Here is where each one wins, where the simulator says the gap actually lives, and which three mods buy the most ET on each platform for under ₹15,000.',
   },
   {
     type: 'h2',
@@ -67,7 +67,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Two numbers in that table do most of the work. The NS200 has 4 hp more peak power and the Apache is 18 kg lighter. Power-to-weight on the NS200 is roughly 24.2 hp / 230 kg total (160 kg dry plus 70 kg rider) = 105 hp/tonne. On the Apache it is 20.2 hp / 212 kg = 95 hp/tonne. A naive power-to-weight calculation predicts the NS200 wins by about 0.4–0.5 seconds at the strip. That is roughly what the physics says too — but for different reasons than the spec sheet suggests.',
+    text: 'Two numbers in that table do most of the work. The NS200 has 4 hp more peak power and the Apache is 18 kg lighter. Power-to-weight on the NS200 is roughly 24.2 hp / 230 kg total (160 kg dry plus 70 kg rider) = 105 hp/tonne. On the Apache it is 20.2 hp / 212 kg = 95 hp/tonne. A naive power-to-weight calculation predicts the NS200 wins by about 0.4–0.5 seconds at the strip. That is roughly what the physics says too, but for different reasons than the spec sheet suggests.',
   },
   {
     type: 'h2',
@@ -75,7 +75,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running both bikes through the simulator at matched Aamby Valley November conditions — density altitude near 1,100 m, 22°C ambient, dry asphalt with stock MRF Nylogrip Zapper at μ_peak ≈ 1.05, 70 kg rider in stock tuck — produces the following stock-tune output:',
+    text: 'Running both bikes through the simulator at matched Aamby Valley November conditions (density altitude near 1,100 m, 22°C ambient, dry asphalt with stock MRF Nylogrip Zapper at μ_peak ≈ 1.05, 70 kg rider in stock tuck) produces the following stock-tune output:',
   },
   {
     type: 'table',
@@ -91,7 +91,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Both ETs sit inside the entry-200-300cc cluster bias band of about ±0.5 seconds — large enough that a single dragy timeslip from either bike could move the predicted number a tenth either way. The simulator is honest about that band. The relative ordering (NS200 ahead by roughly 0.5 s, trap speed ahead by 5 km/h) is stable across rider weight, ambient temperature, and density altitude sweeps. Real-world community-reported times for stock NS200s on Indian strips cluster around 15.5–16.2 s; stock RTR 200 4V times cluster around 16.0–16.8 s. The simulator lands inside both bands.',
+    text: 'Both ETs sit inside the entry-200-300cc cluster bias band of about ±0.5 seconds, large enough that a single dragy timeslip from either bike could move the predicted number a tenth either way. The simulator is honest about that band. The relative ordering (NS200 ahead by roughly 0.5 s, trap speed ahead by 5 km/h) is stable across rider weight, ambient temperature, and density altitude sweeps. Real-world community-reported times for stock NS200s on Indian strips cluster around 15.5–16.2 s; stock RTR 200 4V times cluster around 16.0–16.8 s. The simulator lands inside both bands.',
   },
   {
     type: 'callout',
@@ -107,7 +107,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'In the simulator log, the gap opens up after the 1/8-mile mark. Through the first 60 feet both bikes are clutch-limited and within 0.1 s of each other — the Apache\'s 18 kg weight advantage actually puts it slightly ahead in the first 30 metres. From 60 feet to the 1/8-mile, the bikes run nearly even. From the 1/8-mile to the trap, the NS200 pulls roughly 0.4 s clear, mostly because its short-stroke 72 mm bore is happier above 7,500 rpm than the Apache\'s 55.4 mm stroke is.',
+    text: 'In the simulator log, the gap opens up after the 1/8-mile mark. Through the first 60 feet both bikes are clutch-limited and within 0.1 s of each other; the Apache\'s 18 kg weight advantage actually puts it slightly ahead in the first 30 metres. From 60 feet to the 1/8-mile, the bikes run nearly even. From the 1/8-mile to the trap, the NS200 pulls roughly 0.4 s clear, mostly because its short-stroke 72 mm bore is happier above 7,500 rpm than the Apache\'s 55.4 mm stroke is.',
   },
   {
     type: 'p',
@@ -119,11 +119,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The Apache RTR 200 4V is 18 kg lighter dry — roughly an 11 percent system-mass advantage when you add a 70 kg rider. That weight matters most in the first 60 feet, where the engine is fighting inertia and not yet making peak power. The simulator confirms this: at the 60-foot mark, the Apache is consistently a tenth ahead of the NS200 regardless of launch RPM.',
+    text: 'The Apache RTR 200 4V is 18 kg lighter dry, roughly an 11 percent system-mass advantage when you add a 70 kg rider. That weight matters most in the first 60 feet, where the engine is fighting inertia and not yet making peak power. The simulator confirms this: at the 60-foot mark, the Apache is consistently a tenth ahead of the NS200 regardless of launch RPM.',
   },
   {
     type: 'p',
-    text: 'TVS also added a slipper clutch to the RTR 200 4V starting with the 2018 BS-IV refresh — useful for downshift stability on a road bike, and a small but real consistency advantage at the strip because it lets a less-experienced rider launch closer to the engine\'s capability without bogging on engagement. The NS200 still uses a conventional multi-plate wet clutch in 2026 spec, and Bajaj has never offered a slipper option from the factory on the NS variant.',
+    text: 'TVS also added a slipper clutch to the RTR 200 4V starting with the 2018 BS-IV refresh, useful for downshift stability on a road bike, and a small but real consistency advantage at the strip because it lets a less-experienced rider launch closer to the engine\'s capability without bogging on engagement. The NS200 still uses a conventional multi-plate wet clutch in 2026 spec, and Bajaj has never offered a slipper option from the factory on the NS variant.',
   },
   {
     type: 'p',
@@ -150,11 +150,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Two patterns stand out. First, the sprocket swap is the cheapest tenth on both bikes by a wide margin — under ₹1,000 for around 0.2 seconds of ET. On the NS200, dropping from 16F to 15F shortens overall gearing by 6.25 percent, which keeps the engine higher in the powerband through the 1st-to-3rd shift sequence. On the Apache, the same change buys slightly more ET because the bike\'s longer-stroke single is more torque-limited than power-limited in the lower gears. Second, the tire upgrade is the second-best buy on both platforms — Indian factory rubber is the limiting factor in launch traction, not engine power.',
+    text: 'Two patterns stand out. First, the sprocket swap is the cheapest tenth on both bikes by a wide margin: under ₹1,000 for around 0.2 seconds of ET. On the NS200, dropping from 16F to 15F shortens overall gearing by 6.25 percent, which keeps the engine higher in the powerband through the 1st-to-3rd shift sequence. On the Apache, the same change buys slightly more ET because the bike\'s longer-stroke single is more torque-limited than power-limited in the lower gears. Second, the tire upgrade is the second-best buy on both platforms: Indian factory rubber is the limiting factor in launch traction, not engine power.',
   },
   {
     type: 'p',
-    text: 'Third, the ECU re-flash buys more ET on the NS200 than on the Apache because the NS200\'s OEM map is more conservative at the top of the rev band. The Powertronic Stage 1 map for the NS200 unlocks roughly 1.5 hp at 8,500 rpm that the stock map deliberately tapers off. On the Apache the same flash buys closer to 1.0 hp because TVS already runs a more aggressive top-end map from the factory. The exhaust mod buys nearly identical gains on both bikes — both engines are restricted at the OEM end-can, both respond well to a free-flow slip-on.',
+    text: 'Third, the ECU re-flash buys more ET on the NS200 than on the Apache because the NS200\'s OEM map is more conservative at the top of the rev band. The Powertronic Stage 1 map for the NS200 unlocks roughly 1.5 hp at 8,500 rpm that the stock map deliberately tapers off. On the Apache the same flash buys closer to 1.0 hp because TVS already runs a more aggressive top-end map from the factory. The exhaust mod buys nearly identical gains on both bikes: both engines are restricted at the OEM end-can, both respond well to a free-flow slip-on.',
   },
   {
     type: 'callout',
@@ -166,7 +166,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'A half-second is meaningful at the bench and at a real Indian strip with a Dragy on the tank. It is also small enough to be inside the run-to-run variance of either bike across a five-run session. The simulator predicts a 0.5 s gap; the standard deviation of stock-NS200 strip times across a typical Pune meet is roughly 0.3 s, and the standard deviation of stock-Apache times is similar. That means on any given day, a well-launched Apache will beat a poorly-launched NS200 — and the spec-sheet gap will look smaller than the simulator predicts.',
+    text: 'A half-second is meaningful at the bench and at a real Indian strip with a Dragy on the tank. It is also small enough to be inside the run-to-run variance of either bike across a five-run session. The simulator predicts a 0.5 s gap; the standard deviation of stock-NS200 strip times across a typical Pune meet is roughly 0.3 s, and the standard deviation of stock-Apache times is similar. That means on any given day, a well-launched Apache will beat a poorly-launched NS200, and the spec-sheet gap will look smaller than the simulator predicts.',
   },
   {
     type: 'p',
@@ -178,11 +178,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The NS200 has been on sale in India for fourteen years and the aftermarket reflects that. Powertronic, KustomHub, Red Rooster, and Big Bird all stock NS200-specific exhaust, ECU, and clutch parts at every price point from ₹2,000 commuter slip-ons up to ₹85,000 full-system Akrapovic kits. The Apache RTR 200 4V has been on sale for ten years and the aftermarket is narrower but deeper at the race-prep end — TVS Racing\'s own one-make Apache cup runs a parallel parts ecosystem from teams like Sparks Racing and Race Concepts that is genuinely competitive at the strip.',
+    text: 'The NS200 has been on sale in India for fourteen years and the aftermarket reflects that. Powertronic, KustomHub, Red Rooster, and Big Bird all stock NS200-specific exhaust, ECU, and clutch parts at every price point from ₹2,000 commuter slip-ons up to ₹85,000 full-system Akrapovic kits. The Apache RTR 200 4V has been on sale for ten years and the aftermarket is narrower but deeper at the race-prep end: TVS Racing\'s own one-make Apache cup runs a parallel parts ecosystem from teams like Sparks Racing and Race Concepts that is genuinely competitive at the strip.',
   },
   {
     type: 'p',
-    text: 'For a first-time buyer choosing between the two in 2026, ex-showroom pricing puts the NS200 at roughly ₹1.61 lakh and the Apache RTR 200 4V at roughly ₹1.49 lakh — the Apache is the cheaper bike by about ₹12,000. Service intervals are similar at 4,000-6,000 km on both. Fuel economy in normal use is roughly 35–40 km/l on the NS200 and 38–42 km/l on the Apache. Neither bike is set up for serious drag-strip duty out of the box; both reward the same first ₹15,000 of mod spend in the same way.',
+    text: 'For a first-time buyer choosing between the two in 2026, ex-showroom pricing puts the NS200 at roughly ₹1.61 lakh and the Apache RTR 200 4V at roughly ₹1.49 lakh, so the Apache is the cheaper bike by about ₹12,000. Service intervals are similar at 4,000-6,000 km on both. Fuel economy in normal use is roughly 35–40 km/l on the NS200 and 38–42 km/l on the Apache. Neither bike is set up for serious drag-strip duty out of the box; both reward the same first ₹15,000 of mod spend in the same way.',
   },
   {
     type: 'h2',
@@ -198,7 +198,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Two final caveats. First, every number in this post is a stock-tune simulation under specific conditions inside the entry-200-300cc cluster bias band of ±0.5 s. A single instrumented Dragy timeslip from either bike at a real Indian strip would tighten the simulator\'s prediction by a meaningful margin — and the "Submit a timeslip" form is how to send one. Second, the Indian aftermarket pricing shifts every quarter; the parts catalog uses retailer prices where it has them and falls back to formula-based landing-cost math (USD × 84 × 1.30 import duty × 1.18 GST + ₹1,500 freight) where it cannot.',
+    text: 'Two final caveats. First, every number in this post is a stock-tune simulation under specific conditions inside the entry-200-300cc cluster bias band of ±0.5 s. A single instrumented Dragy timeslip from either bike at a real Indian strip would tighten the simulator\'s prediction by a meaningful margin, and the "Submit a timeslip" form is how to send one. Second, the Indian aftermarket pricing shifts every quarter; the parts catalog uses retailer prices where it has them and falls back to formula-based landing-cost math (USD × 84 × 1.30 import duty × 1.18 GST + ₹1,500 freight) where it cannot.',
   },
 ];
 
@@ -328,36 +328,36 @@ export default function PostPage() {
               ·{' '}
               <Link href="/blog/why-your-r15-wont-hit-14s" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Why Your R15 Won&apos;t Hit 14s
-              </Link>{' '}
-              — the same gearing-and-traction problem one displacement class down. Most of the lessons port across.
+              </Link>:{' '}
+              the same gearing-and-traction problem one displacement class down. Most of the lessons port across.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/hero-xtreme-200s-4v-quarter-mile-physics" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Hero Xtreme 200S 4V Quarter-Mile Physics
-              </Link>{' '}
-              — the third 200cc Indian commuter-sport, and why it sits further behind the NS200 and Apache than its spec sheet predicts.
+              </Link>:{' '}
+              the third 200cc Indian commuter-sport, and why it sits further behind the NS200 and Apache than its spec sheet predicts.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/the-physics-of-a-perfect-launch" className="text-brand-accent hover:text-brand-orange transition-colors">
                 The Physics of a Perfect Launch
-              </Link>{' '}
-              — clutch slip, weight transfer, and the first 60 feet where the Apache often beats the NS200.
+              </Link>:{' '}
+              clutch slip, weight transfer, and the first 60 feet where the Apache often beats the NS200.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/how-to-tune-for-aamby-valley-in-november" className="text-brand-accent hover:text-brand-orange transition-colors">
                 How to Tune for Aamby Valley in November
-              </Link>{' '}
-              — the venue conditions used for the simulation in this post.
+              </Link>:{' '}
+              the venue conditions used for the simulation in this post.
             </li>
             <li>
               ·{' '}
               <Link href="/bikes" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Browse the full bike catalog
-              </Link>{' '}
-              — NS200, RS200, RTR 200 4V, RTR 160 4V, and 330+ other bikes with full spec sheets and OEM tire fitments.
+              </Link>:{' '}
+              NS200, RS200, RTR 200 4V, RTR 160 4V, and 330+ other bikes with full spec sheets and OEM tire fitments.
             </li>
           </ul>
         </div>

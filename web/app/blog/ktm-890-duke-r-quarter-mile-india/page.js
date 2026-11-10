@@ -6,10 +6,10 @@ import StructuredData, { articleSchema } from '../../StructuredData';
 const SLUG = 'ktm-890-duke-r-quarter-mile-india';
 const TITLE = 'KTM 890 Duke R Quarter-Mile in India: 11.07s on the Grey Market';
 const DESCRIPTION =
-  'MotoQuant simulates the KTM 890 Duke R at 11.07s and 202 km/h trap at Aamby Valley — 0.35s quicker than the standard 890 Duke. Why the R variant is the one most Indian buyers actually get, and what closes the gap to a stock Hayabusa for under ₹50,000.';
+  'MotoQuant simulates the KTM 890 Duke R at 11.07s and 202 km/h trap at Aamby Valley, 0.35s quicker than the standard 890 Duke. Why the R variant is the one most Indian buyers actually get, and what closes the gap to a stock Hayabusa for under ₹50,000.';
 
 export const metadata = {
-  title: 'KTM 890 Duke R Quarter-Mile India — MotoQuant',
+  title: 'KTM 890 Duke R Quarter-Mile India | MotoQuant',
   description: DESCRIPTION,
   keywords: [
     'KTM 890 Duke quarter mile india',
@@ -36,7 +36,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'MotoQuant simulates the KTM 890 Duke R at 11.07 seconds and a 202 km/h trap at Aamby Valley in November conditions — 0.35 seconds quicker than the standard 890 Duke we covered in the GSX-S750 comparison post. Almost every 890 Duke that actually rolls into India is the R variant, which makes the standard-variant comparison academic. Here is what the R actually does on a drag strip, why it does it, and where the cost-per-tenth tenths live for an Indian owner who paid ₹11.5 lakh for the privilege.',
+    text: 'MotoQuant simulates the KTM 890 Duke R at 11.07 seconds and a 202 km/h trap at Aamby Valley in November conditions, 0.35 seconds quicker than the standard 890 Duke we covered in the GSX-S750 comparison post. Almost every 890 Duke that actually rolls into India is the R variant, which makes the standard-variant comparison academic. Here is what the R actually does on a drag strip, why it does it, and where the cost-per-tenth tenths live for an Indian owner who paid ₹11.5 lakh for the privilege.',
   },
   {
     type: 'h2',
@@ -44,7 +44,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "KTM never officially homologated the standard 890 Duke for the Indian market. The 790 Duke had a brief CKD run in 2019. The 890 Duke arrived as a CBU import in 2020 — same engine platform, more capacity, more electronics — and was quietly withdrawn from the official India price list inside eighteen months. The two routes that kept the bike alive in India were the Nepal grey market (Kathmandu-registered CBU units crossing through Sunauli or Raxaul) and Dubai re-exports through Mumbai. Both routes preferentially carry the R variant. The standard 890 Duke and the R share a price floor in their export markets, but the R has the visual differentiation — the orange-frame paint, the WP Apex suspension, the Brembo Stylema brakes — that makes a grey-market customer feel they are getting the higher-trim variant for the same buy-in.",
+    text: "KTM never officially homologated the standard 890 Duke for the Indian market. The 790 Duke had a brief CKD run in 2019. The 890 Duke arrived as a CBU import in 2020 (same engine platform, more capacity, more electronics) and was quietly withdrawn from the official India price list inside eighteen months. The two routes that kept the bike alive in India were the Nepal grey market (Kathmandu-registered CBU units crossing through Sunauli or Raxaul) and Dubai re-exports through Mumbai. Both routes preferentially carry the R variant. The standard 890 Duke and the R share a price floor in their export markets, but the R has the visual differentiation (the orange-frame paint, the WP Apex suspension, the Brembo Stylema brakes) that makes a grey-market customer feel they are getting the higher-trim variant for the same buy-in.",
   },
   {
     type: 'p',
@@ -76,7 +76,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "The 16-tooth front sprocket on the R against the 15-tooth on the standard is the spec-sheet detail that most India-side reviews miss. KTM lengthened the final drive on the R because the higher-rpm power peak meant the bike was pulling further into each gear before needing the next shift; the 15F/42R combo would have left it bouncing into the limiter in 1st and 2nd. The result is that the R's effective gearing is taller than the standard's despite producing more power — which is part of why the trap-speed delta between the two bikes is larger than the ET delta.",
+    text: "The 16-tooth front sprocket on the R against the 15-tooth on the standard is the spec-sheet detail that most India-side reviews miss. KTM lengthened the final drive on the R because the higher-rpm power peak meant the bike was pulling further into each gear before needing the next shift; the 15F/42R combo would have left it bouncing into the limiter in 1st and 2nd. The result is that the R's effective gearing is taller than the standard's despite producing more power, which is part of why the trap-speed delta between the two bikes is larger than the ET delta.",
   },
   {
     type: 'h2',
@@ -84,7 +84,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "Running the 890 Duke R through MotoQuant under matched Aamby Valley November conditions — density altitude approximately 1,100 m, 22°C ambient, dry asphalt, 78 kg rider, OEM Michelin Power Cup 2 rear — produces these numbers, alongside the standard 890 Duke baseline from the GSX-S750 comparison piece:",
+    text: "Running the 890 Duke R through MotoQuant under matched Aamby Valley November conditions (density altitude approximately 1,100 m, 22°C ambient, dry asphalt, 78 kg rider, OEM Michelin Power Cup 2 rear) produces these numbers, alongside the standard 890 Duke baseline from the GSX-S750 comparison piece:",
   },
   {
     type: 'table',
@@ -100,11 +100,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The documented +0.18s cluster bias applies to both bikes equally because they sit in the same litre_sport_600_1000 validation cluster (MotoQuant uses an 800-cc-and-up grouping for any bike with peak power between 100 and 150 hp). The bias is calibrated against the magazine drag tests in our 90-benchmark validation set; it reflects the gap between a 50th-percentile launch and a trained-journalist launch. Subtract the bias from both rows and the R sits closer to 10.89 seconds, the standard closer to 11.24 seconds — both consistent with the published MCN figures for the respective bikes.',
+    text: 'The documented +0.18s cluster bias applies to both bikes equally because they sit in the same litre_sport_600_1000 validation cluster (MotoQuant uses an 800-cc-and-up grouping for any bike with peak power between 100 and 150 hp). The bias is calibrated against the magazine drag tests in our 90-benchmark validation set; it reflects the gap between a 50th-percentile launch and a trained-journalist launch. Subtract the bias from both rows and the R sits closer to 10.89 seconds, the standard closer to 11.24 seconds, both consistent with the published MCN figures for the respective bikes.',
   },
   {
     type: 'callout',
-    text: 'MCN measured a stock 890 Duke R at 10.78 seconds in their 2020 launch review at Bruntingthorpe. Bruntingthorpe sits at 137 m altitude with sea-level-ish density altitude — much denser air than Aamby Valley November. Correcting for the ≈1 km altitude difference brings the MCN number to about 10.92s at Aamby Valley, which lines up with the simulator output after the cluster bias is subtracted. The simulator is doing what it claims to do.',
+    text: 'MCN measured a stock 890 Duke R at 10.78 seconds in their 2020 launch review at Bruntingthorpe. Bruntingthorpe sits at 137 m altitude with sea-level-ish density altitude, much denser air than Aamby Valley November. Correcting for the ≈1 km altitude difference brings the MCN number to about 10.92s at Aamby Valley, which lines up with the simulator output after the cluster bias is subtracted. The simulator is doing what it claims to do.',
   },
   {
     type: 'h2',
@@ -116,7 +116,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "The R's 9,250 rpm power peak with a 16-tooth front sprocket means the bike is geared to use its powerband at full extension. When the simulator runs the launch, the R is pulling 1st gear to approximately 8,900 rpm before the upshift to 2nd, while the standard 890 Duke at 105 hp / 8,000 rpm is shifting at roughly 7,800 rpm. That extra 1,000 rpm of pull in gear 1 — at peak-power RPM, against the stiffer cam profile — is where the second-quickest 0.07 seconds of the gap lives. It is also why the trap-speed gap is 6 km/h instead of the 3 km/h you would expect from power-to-weight alone.",
+    text: "The R's 9,250 rpm power peak with a 16-tooth front sprocket means the bike is geared to use its powerband at full extension. When the simulator runs the launch, the R is pulling 1st gear to approximately 8,900 rpm before the upshift to 2nd, while the standard 890 Duke at 105 hp / 8,000 rpm is shifting at roughly 7,800 rpm. That extra 1,000 rpm of pull in gear 1 (at peak-power RPM, against the stiffer cam profile) is where the second-quickest 0.07 seconds of the gap lives. It is also why the trap-speed gap is 6 km/h instead of the 3 km/h you would expect from power-to-weight alone.",
   },
   {
     type: 'h2',
@@ -140,7 +140,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "The 890 Duke R is quicker than the GSX-S750 and the CFMoto 800NK at the strip, slightly slower than the MT-09 and the XSR900 GP, and meaningfully quicker than the Trident 660. Note that the MT-09 wins this segment outright on paper. The grey-market 890 Duke R commands a premium on chassis credibility and Brembo Stylema brakes more than on drag-strip performance — if the goal is the quickest mid-cc naked you can buy in India, the official-import MT-09 at ₹10.85 lakh is the answer.",
+    text: "The 890 Duke R is quicker than the GSX-S750 and the CFMoto 800NK at the strip, slightly slower than the MT-09 and the XSR900 GP, and meaningfully quicker than the Trident 660. Note that the MT-09 wins this segment outright on paper. The grey-market 890 Duke R commands a premium on chassis credibility and Brembo Stylema brakes more than on drag-strip performance. If the goal is the quickest mid-cc naked you can buy in India, the official-import MT-09 at ₹10.85 lakh is the answer.",
   },
   {
     type: 'p',
@@ -168,11 +168,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "The full Tier-1 stack at ₹46,400 takes the 890 Duke R sim ET from 11.07s to 10.88s — which slides under the GSX-S750's stock ET by half a second and starts approaching MT-09 territory without touching the exhaust. The ECU flash is the single highest-impact item per rupee on the bike because the R's stock ECU runs deliberately conservative timing maps for EU Euro 5 noise compliance, and Powertronic's R-specific map unwinds about 4 hp at the top end plus a much cleaner mid-range pull.",
+    text: "The full Tier-1 stack at ₹46,400 takes the 890 Duke R sim ET from 11.07s to 10.88s, which slides under the GSX-S750's stock ET by half a second and starts approaching MT-09 territory without touching the exhaust. The ECU flash is the single highest-impact item per rupee on the bike because the R's stock ECU runs deliberately conservative timing maps for EU Euro 5 noise compliance, and Powertronic's R-specific map unwinds about 4 hp at the top end plus a much cleaner mid-range pull.",
   },
   {
     type: 'callout',
-    text: "Important caveat for India: Powertronic and Rapid Bike both honor warranty on their plug-and-play modules, but the bike's KTM warranty does not — the dealer reads the ECU at service. If you are running a grey-market 890 Duke R you have no India warranty anyway, which removes the only constraint that normally makes Indian customers hesitate on an ECU flash. Pune-based and Mumbai-based tuning shops both stock the 890 R Powertronic harness; budget a full day at the shop for the install plus dyno baseline run.",
+    text: "Important caveat for India: Powertronic and Rapid Bike both honor warranty on their plug-and-play modules, but the bike's KTM warranty does not: the dealer reads the ECU at service. If you are running a grey-market 890 Duke R you have no India warranty anyway, which removes the only constraint that normally makes Indian customers hesitate on an ECU flash. Pune-based and Mumbai-based tuning shops both stock the 890 R Powertronic harness; budget a full day at the shop for the install plus dyno baseline run.",
   },
   {
     type: 'h2',
@@ -180,7 +180,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "Conversations with two Pune-based tuning operators and one Mumbai shop (all of which service 890 Duke R units quarterly) yield a consistent practical picture. First, the OEM Michelin Power Cup 2 rear lasts 4,000-5,000 km of road use — significantly shorter than the Bridgestone S21 on the standard 890 Duke, which is the price the R pays for the grip advantage. Replacement tire costs run ₹18,000-22,000 for the rear alone. Most India-side R owners drop to a Pirelli Rosso IV or Diablo Rosso III after the first tire wears out, which costs the bike about 0.05 seconds on the strip but doubles tire life.",
+    text: "Conversations with two Pune-based tuning operators and one Mumbai shop (all of which service 890 Duke R units quarterly) yield a consistent practical picture. First, the OEM Michelin Power Cup 2 rear lasts 4,000-5,000 km of road use, significantly shorter than the Bridgestone S21 on the standard 890 Duke, which is the price the R pays for the grip advantage. Replacement tire costs run ₹18,000-22,000 for the rear alone. Most India-side R owners drop to a Pirelli Rosso IV or Diablo Rosso III after the first tire wears out, which costs the bike about 0.05 seconds on the strip but doubles tire life.",
   },
   {
     type: 'p',
@@ -188,7 +188,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "Third — and this is the practical-operations note — the 890 Duke R chain is sized for 121 hp but the OEM rear sprocket aluminum option (KTM Power Parts SKU) is rated for the standard 890 Duke power output. The aftermarket steel sprocket from JT is correctly rated and is the upgrade most India tuners recommend day-one. The OEM-to-JT swap is cosmetically invisible and runs ₹3,400 with chain re-tensioning labor.",
+    text: "Third (and this is the practical-operations note), the 890 Duke R chain is sized for 121 hp but the OEM rear sprocket aluminum option (KTM Power Parts SKU) is rated for the standard 890 Duke power output. The aftermarket steel sprocket from JT is correctly rated and is the upgrade most India tuners recommend day-one. The OEM-to-JT swap is cosmetically invisible and runs ₹3,400 with chain re-tensioning labor.",
   },
   {
     type: 'h2',
@@ -196,7 +196,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "Both the standard 890 Duke and the 890 Duke R are in the MotoQuant catalog now with service-manual-accurate gearing, validated Cd values, and the correct OEM tire mu_peak coefficients. The simulator lets you swap rider weight, ambient temperature, and venue conditions before running — if you are riding to MMRT in March or Aamby Valley in September, the conditions are meaningfully different from the November baseline used here, and the ET will move ±0.2 seconds accordingly.",
+    text: "Both the standard 890 Duke and the 890 Duke R are in the MotoQuant catalog now with service-manual-accurate gearing, validated Cd values, and the correct OEM tire mu_peak coefficients. The simulator lets you swap rider weight, ambient temperature, and venue conditions before running: if you are riding to MMRT in March or Aamby Valley in September, the conditions are meaningfully different from the November baseline used here, and the ET will move ±0.2 seconds accordingly.",
   },
   {
     type: 'p',
@@ -212,7 +212,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "If your decision tree is \"quickest mid-cc naked under ₹15 lakh,\" the math says MT-09. If your decision tree is \"quickest mid-cc naked that I will modify and ride hard,\" the 890 Duke R is the better starting point — the R's stock components leave less performance on the table after a Tier-1 mod stack, and Powertronic's India presence makes the tuning ecosystem materially better than it is for the official MT-09 import. The strip times converge around 10.85s for a modded 890 Duke R against 10.86s for a stock MT-09; after that point it is rider and chassis, not engine.",
+    text: "If your decision tree is \"quickest mid-cc naked under ₹15 lakh,\" the math says MT-09. If your decision tree is \"quickest mid-cc naked that I will modify and ride hard,\" the 890 Duke R is the better starting point: the R's stock components leave less performance on the table after a Tier-1 mod stack, and Powertronic's India presence makes the tuning ecosystem materially better than it is for the official MT-09 import. The strip times converge around 10.85s for a modded 890 Duke R against 10.86s for a stock MT-09; after that point it is rider and chassis, not engine.",
   },
 ];
 
@@ -339,8 +339,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Suzuki GSX-S750 vs KTM 890 Duke: Quarter-Mile Physics
-              </Link>{' '}
-              — the standard-variant comparison this post extends.
+              </Link>:{' '}
+              the standard-variant comparison this post extends.
             </li>
             <li>
               ·{' '}
@@ -349,8 +349,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Yamaha XSR900 GP vs MT-09: Where the Heritage Tax Is Paid
-              </Link>{' '}
-              — the closest segment rivals to the 890 Duke R in India.
+              </Link>:{' '}
+              the closest segment rivals to the 890 Duke R in India.
             </li>
             <li>
               ·{' '}
@@ -359,8 +359,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 CFMoto 800NK Quarter-Mile Physics: A KTM 790 Duke in Disguise
-              </Link>{' '}
-              — the other LC8c-derived parallel twin in the Indian market.
+              </Link>:{' '}
+              the other LC8c-derived parallel twin in the Indian market.
             </li>
             <li>
               ·{' '}
@@ -369,8 +369,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 How to Tune for Aamby Valley in November
-              </Link>{' '}
-              — the venue conditions used for every simulation in this post.
+              </Link>:{' '}
+              the venue conditions used for every simulation in this post.
             </li>
             <li>
               ·{' '}
@@ -379,8 +379,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 KTM 1390 Super Duke R EVO Quarter-Mile Physics
-              </Link>{' '}
-              — the litre-class big brother and how it stacks against the 890 R.
+              </Link>:{' '}
+              the litre-class big brother and how it stacks against the 890 R.
             </li>
             <li>
               ·{' '}
@@ -389,8 +389,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Browse the full bike catalog
-              </Link>{' '}
-              — 890 Duke, 890 Duke R, MT-09, XSR900 GP, and 400+ other bikes with
+              </Link>:{' '}
+              890 Duke, 890 Duke R, MT-09, XSR900 GP, and 400+ other bikes with
               service-manual gear ratios.
             </li>
           </ul>
@@ -401,7 +401,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Run the 890 Duke R yourself</div>
             <div className="text-white/60 text-sm">
-              Free simulator — pick the KTM 890 Duke R, dial in your local conditions
+              Free simulator: pick the KTM 890 Duke R, dial in your local conditions
               and rider weight, and see the cost-per-tenth math for your specific build.
             </div>
           </div>

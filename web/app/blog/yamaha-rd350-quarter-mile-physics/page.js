@@ -6,10 +6,10 @@ import StructuredData, { articleSchema } from '../../StructuredData';
 const SLUG = 'yamaha-rd350-quarter-mile-physics';
 const TITLE = 'Yamaha RD350 Quarter-Mile Physics: Why a 1973 2-Stroke Still Runs 14.7s';
 const DESCRIPTION =
-  'MotoQuant sims the 1973 Yamaha RD350 at 14.707s and 145 km/h trap under Aamby Valley November conditions — quicker than a stock Pulsar NS200, Pulsar 220F, or Hunter 350 in 2026. Cycle World 1973 clocked the real bike at 14.000s. Where the 0.7s sim residual lives, what the Indian Rajdoot RD350 HT actually delivered, and why a 39hp piston-port twin still embarrasses modern 200cc commuters.';
+  'MotoQuant sims the 1973 Yamaha RD350 at 14.707s and 145 km/h trap under Aamby Valley November conditions, quicker than a stock Pulsar NS200, Pulsar 220F, or Hunter 350 in 2026. Cycle World 1973 clocked the real bike at 14.000s. Where the 0.7s sim residual lives, what the Indian Rajdoot RD350 HT actually delivered, and why a 39hp piston-port twin still embarrasses modern 200cc commuters.';
 
 export const metadata = {
-  title: 'Yamaha RD350 Quarter-Mile Time (1973) — MotoQuant',
+  title: 'Yamaha RD350 Quarter-Mile Time (1973) | MotoQuant',
   description: DESCRIPTION,
   keywords: [
     'yamaha rd350 quarter mile',
@@ -72,11 +72,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The sim sits 0.707 s slow of the Cycle World benchmark. That gap is real, it is documented, and it shrank by 0.347 s in the calibration that shipped today — before this session the same configuration was running 15.054 s. The cluster mean absolute delta on 2-stroke benchmarks across all five validated bikes in the catalog (RD350, RD400, NSR250R, RG500 Gamma, RS250) is currently 0.630 s with a +0.169 s bias. The cluster is biased optimistic-slow against magazine instrumented benchmarks, which is the honest framing for any sim residual under one second on a 53-year-old air-cooled 2-stroke.',
+    text: 'The sim sits 0.707 s slow of the Cycle World benchmark. That gap is real, it is documented, and it shrank by 0.347 s in the calibration that shipped today; before this session the same configuration was running 15.054 s. The cluster mean absolute delta on 2-stroke benchmarks across all five validated bikes in the catalog (RD350, RD400, NSR250R, RG500 Gamma, RS250) is currently 0.630 s with a +0.169 s bias. The cluster is biased optimistic-slow against magazine instrumented benchmarks, which is the honest framing for any sim residual under one second on a 53-year-old air-cooled 2-stroke.',
   },
   {
     type: 'callout',
-    text: 'Why the residual is non-zero: 2-stroke crank deceleration during clutch engagement does not have a clean closed-form physics model. MotoQuant caps the rate at max_engine_decel_rads2 = 1500 rad/s² (raised today from 800) which matches the Honda HRC NSR250 service-manual citation of ~10000 rpm/s peak transient. Real-world drag launches use rider technique — clutch slip duration, throttle modulation, body position — that the simulator approximates with a parametric model. Cycle World tested with a trained drag tester on prepped Goodyear DT slicks; the sim uses OEM-class tire μ. Both numbers are useful; neither is wrong.',
+    text: 'Why the residual is non-zero: 2-stroke crank deceleration during clutch engagement does not have a clean closed-form physics model. MotoQuant caps the rate at max_engine_decel_rads2 = 1500 rad/s² (raised today from 800) which matches the Honda HRC NSR250 service-manual citation of ~10000 rpm/s peak transient. Real-world drag launches use rider technique (clutch slip duration, throttle modulation, body position) that the simulator approximates with a parametric model. Cycle World tested with a trained drag tester on prepped Goodyear DT slicks; the sim uses OEM-class tire μ. Both numbers are useful; neither is wrong.',
   },
   {
     type: 'h2',
@@ -84,11 +84,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'A 2026 Bajaj Pulsar NS200 makes 24.5 hp at 9750 rpm from a 199.5 cc liquid-cooled DOHC single. A 2026 Honda Hornet 2.0 makes 17.3 hp from a 184 cc air-cooled single. A 2026 Yamaha R15 V4 makes 18.4 hp from a 155 cc liquid-cooled VVA single. The Royal Enfield Hunter 350 makes 20.2 hp from a 349 cc air-cooled SOHC single. The RD350 makes 39 hp from a 347 cc air-cooled piston-port twin — roughly 60 percent more power than the quickest of those moderns, on similar mass, with a far smaller frontal area than any RE 350.',
+    text: 'A 2026 Bajaj Pulsar NS200 makes 24.5 hp at 9750 rpm from a 199.5 cc liquid-cooled DOHC single. A 2026 Honda Hornet 2.0 makes 17.3 hp from a 184 cc air-cooled single. A 2026 Yamaha R15 V4 makes 18.4 hp from a 155 cc liquid-cooled VVA single. The Royal Enfield Hunter 350 makes 20.2 hp from a 349 cc air-cooled SOHC single. The RD350 makes 39 hp from a 347 cc air-cooled piston-port twin: roughly 60 percent more power than the quickest of those moderns, on similar mass, with a far smaller frontal area than any RE 350.',
   },
   {
     type: 'p',
-    text: 'The specific power output number is what reveals the engineering gap. The RD350 makes 112 hp per litre. The Pulsar NS200 makes 123 hp per litre. The R15 V4 makes 119 hp per litre. None of the modern commuters massively outpace the 1973 piston-port twin on that metric — the RD350 was already at the specific-output ceiling of what mass-production naturally-aspirated 2-strokes could deliver in 1973 with carburettors and a fixed expansion chamber. The 4-stroke commuter class caught up to that specific output around 2010 with the first generation of liquid-cooled DOHC singles. The RD350 was just there fifty years earlier.',
+    text: 'The specific power output number is what reveals the engineering gap. The RD350 makes 112 hp per litre. The Pulsar NS200 makes 123 hp per litre. The R15 V4 makes 119 hp per litre. None of the modern commuters massively outpace the 1973 piston-port twin on that metric. The RD350 was already at the specific-output ceiling of what mass-production naturally-aspirated 2-strokes could deliver in 1973 with carburettors and a fixed expansion chamber. The 4-stroke commuter class caught up to that specific output around 2010 with the first generation of liquid-cooled DOHC singles. The RD350 was just there fifty years earlier.',
   },
   {
     type: 'table',
@@ -120,7 +120,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'This is the version that built the bike\'s reputation in India. The Bombay-to-Pune Expressway timeslips that pass around old Indian Yamaha forums — sub-30-minute runs on a stock Rajdoot RD350 HT through traffic in 1986 — implicitly map to the sim\'s 135 km/h trap-speed number. A bike that traps at 135 km/h on a quarter-mile run will easily cruise at 140 km/h on an open expressway. The Splendor of the same era trapped at about 95 km/h. The gap was a generation in delivered performance.',
+    text: 'This is the version that built the bike\'s reputation in India. The Bombay-to-Pune Expressway timeslips that pass around old Indian Yamaha forums (sub-30-minute runs on a stock Rajdoot RD350 HT through traffic in 1986) implicitly map to the sim\'s 135 km/h trap-speed number. A bike that traps at 135 km/h on a quarter-mile run will easily cruise at 140 km/h on an open expressway. The Splendor of the same era trapped at about 95 km/h. The gap was a generation in delivered performance.',
   },
   {
     type: 'h2',
@@ -128,23 +128,23 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'A 4-stroke single during clutch slip has a measurable rotational inertia. The crank, the flywheel, the valves, the cam, the connecting rod — all of these store kinetic energy that the clutch has to bleed off as the rear wheel comes up to engine speed. The slip phase on a typical 4-stroke litre superbike like a GSX-R 1000 K5 transfers roughly 1.6 kJ of energy at the friction surface, dissipated as heat over about 1.2 seconds of launch.',
+    text: 'A 4-stroke single during clutch slip has a measurable rotational inertia. The crank, the flywheel, the valves, the cam, the connecting rod: all of these store kinetic energy that the clutch has to bleed off as the rear wheel comes up to engine speed. The slip phase on a typical 4-stroke litre superbike like a GSX-R 1000 K5 transfers roughly 1.6 kJ of energy at the friction surface, dissipated as heat over about 1.2 seconds of launch.',
   },
   {
     type: 'p',
-    text: 'A 2-stroke is different. There are no valves, no camshaft, no separate oil pump (most premix), and the flywheel is sized for crank balance rather than slip-bleed capacity. The rotational inertia of an RD350 crank-and-piston assembly is roughly 0.0035 kg·m² — about 60 percent of a comparable 4-stroke 350. During clutch engagement the crank can decelerate substantially faster, which means the clutch has less work to do to bleed RPM and the bike accelerates harder out of the hole.',
+    text: 'A 2-stroke is different. There are no valves, no camshaft, no separate oil pump (most premix), and the flywheel is sized for crank balance rather than slip-bleed capacity. The rotational inertia of an RD350 crank-and-piston assembly is roughly 0.0035 kg·m², about 60 percent of a comparable 4-stroke 350. During clutch engagement the crank can decelerate substantially faster, which means the clutch has less work to do to bleed RPM and the bike accelerates harder out of the hole.',
   },
   {
     type: 'p',
-    text: 'MotoQuant\'s 2-stroke category profile (cluster tag two_stroke) carries a separate max_engine_decel_rads2 parameter from the 4-stroke clusters. Before May 31 2026 that parameter was capped at 800 rad/s² — a conservative number sourced from generic 4-stroke literature. After the calibration that shipped today it is 1500 rad/s², which aligns with the Honda HRC NSR250 service-manual citation of ~10000 rpm/s peak transient (≈1050 rad/s² steady, with chamber-on transition peaks higher). The change shaved 347 ms off the RD350 sim ET directly, and 120 ms off the NSR250R MC21 sim. The May 31 physics calibration report documents the full sweep table.',
+    text: 'MotoQuant\'s 2-stroke category profile (cluster tag two_stroke) carries a separate max_engine_decel_rads2 parameter from the 4-stroke clusters. Before May 31 2026 that parameter was capped at 800 rad/s², a conservative number sourced from generic 4-stroke literature. After the calibration that shipped today it is 1500 rad/s², which aligns with the Honda HRC NSR250 service-manual citation of ~10000 rpm/s peak transient (≈1050 rad/s² steady, with chamber-on transition peaks higher). The change shaved 347 ms off the RD350 sim ET directly, and 120 ms off the NSR250R MC21 sim. The May 31 physics calibration report documents the full sweep table.',
   },
   {
     type: 'p',
-    text: 'The practical takeaway for an RD350 owner at the strip is simple. A 2-stroke launch wants more aggressive clutch slip than a 4-stroke of equivalent power. The 2T crank can take it. The expansion chamber needs RPM in the tuned band (around 7500 rpm for the stock RD350 chamber) to actually make the rated power, and a soft launch that drops the engine below 5500 rpm during clutch engagement falls off the pipe — the chamber stops doing its charge-stuffing job and the bike accelerates as if it had 22 hp instead of 39. A short, hard clutch slip with the engine pinned at 7000-7500 rpm and the bike launched on the first hint of front-wheel lift produces the 14-second result. A street-style soft launch produces a 16-second result on the same hardware.',
+    text: 'The practical takeaway for an RD350 owner at the strip is simple. A 2-stroke launch wants more aggressive clutch slip than a 4-stroke of equivalent power. The 2T crank can take it. The expansion chamber needs RPM in the tuned band (around 7500 rpm for the stock RD350 chamber) to actually make the rated power, and a soft launch that drops the engine below 5500 rpm during clutch engagement falls off the pipe: the chamber stops doing its charge-stuffing job and the bike accelerates as if it had 22 hp instead of 39. A short, hard clutch slip with the engine pinned at 7000-7500 rpm and the bike launched on the first hint of front-wheel lift produces the 14-second result. A street-style soft launch produces a 16-second result on the same hardware.',
   },
   {
     type: 'callout',
-    text: 'This is the central two-stroke launch insight: you are not launching from idle. You are launching from tuned RPM. The clutch is doing the work of bridging the gap between zero road speed and the pipe-resonant engine speed, and the slip duration has to be short enough that the engine never drops out of the tuned band. The 4-stroke launch model — modulate throttle to control front-wheel lift — does not work on a 2-stroke. The 2-stroke launch is binary: on the pipe, or off it.',
+    text: 'This is the central two-stroke launch insight: you are not launching from idle. You are launching from tuned RPM. The clutch is doing the work of bridging the gap between zero road speed and the pipe-resonant engine speed, and the slip duration has to be short enough that the engine never drops out of the tuned band. The 4-stroke launch model (modulate throttle to control front-wheel lift) does not work on a 2-stroke. The 2-stroke launch is binary: on the pipe, or off it.',
   },
   {
     type: 'h2',
@@ -168,11 +168,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The trap speed in the simulation is ~145 km/h, which puts the bike in fifth gear at about 7000 rpm — squarely in the tuned-RPM band. The 6th gear is purely for highway cruising; on the strip it is never reached. The first-to-second shift happens at about 52 km/h and 7500 rpm, dropping the engine to about 4700 rpm in second. That is below the tuned band, which means there is a brief lull while the chamber catches up. The second-to-third shift at 83 km/h drops the engine to 6400 rpm — well within the band. By third gear and above the engine stays on the pipe for the rest of the run.',
+    text: 'The trap speed in the simulation is ~145 km/h, which puts the bike in fifth gear at about 7000 rpm, squarely in the tuned-RPM band. The 6th gear is purely for highway cruising; on the strip it is never reached. The first-to-second shift happens at about 52 km/h and 7500 rpm, dropping the engine to about 4700 rpm in second. That is below the tuned band, which means there is a brief lull while the chamber catches up. The second-to-third shift at 83 km/h drops the engine to 6400 rpm, well within the band. By third gear and above the engine stays on the pipe for the rest of the run.',
   },
   {
     type: 'p',
-    text: 'A 1-tooth larger front sprocket (17/37 instead of 16/37) shortens overall final drive by 6.25 percent. The simulator shows roughly 0.18 s of ET gain at Aamby Valley November conditions on a stock RD350 — the change tightens up the first-to-second shift point and keeps the engine higher in the tuned band through second gear. Cost: about ₹450 for a JT Sprockets unit from any Indian motorcycle parts retailer. This is the cheapest quarter-mile tenth available on the bike, and it is a known mod in Indian RD350 restoration circles. The 16/37 OEM combination was chosen for highway durability and chain longevity, not strip ET.',
+    text: 'A 1-tooth larger front sprocket (17/37 instead of 16/37) shortens overall final drive by 6.25 percent. The simulator shows roughly 0.18 s of ET gain at Aamby Valley November conditions on a stock RD350: the change tightens up the first-to-second shift point and keeps the engine higher in the tuned band through second gear. Cost: about ₹450 for a JT Sprockets unit from any Indian motorcycle parts retailer. This is the cheapest quarter-mile tenth available on the bike, and it is a known mod in Indian RD350 restoration circles. The 16/37 OEM combination was chosen for highway durability and chain longevity, not strip ET.',
   },
   {
     type: 'h2',
@@ -184,7 +184,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'For a properly-restored RD350 — crank seals replaced, expansion chamber checked or replaced with a Yamaha service replica, clutch overhauled with new friction plates, carburettors rebuilt with the original 240 main jets — the simulator suggests an Aamby Valley November ET of approximately 14.2 to 14.5 seconds with a competent launch. That is bracketed by the Cycle World 1973 benchmark on the optimistic side and the modelled cluster bias on the conservative side. The trap speed band is 142 to 148 km/h.',
+    text: 'For a properly-restored RD350 (crank seals replaced, expansion chamber checked or replaced with a Yamaha service replica, clutch overhauled with new friction plates, carburettors rebuilt with the original 240 main jets), the simulator suggests an Aamby Valley November ET of approximately 14.2 to 14.5 seconds with a competent launch. That is bracketed by the Cycle World 1973 benchmark on the optimistic side and the modelled cluster bias on the conservative side. The trap speed band is 142 to 148 km/h.',
   },
   {
     type: 'p',
@@ -200,7 +200,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The simulator also runs the RD400 Daytona, the RGV250 Gamma VJ22, the Yamaha RX100, and the Aprilia RS125 — every other Indian-market 2-stroke that left meaningful drag-strip data behind. The catalog at motoquant.in/bikes is filterable by stroke type, so the 2-stroke set sits as a self-contained list. The honest sim residual on each one is documented inline so a buyer evaluating a restoration project can see exactly what to expect on a strip.',
+    text: 'The simulator also runs the RD400 Daytona, the RGV250 Gamma VJ22, the Yamaha RX100, and the Aprilia RS125: every other Indian-market 2-stroke that left meaningful drag-strip data behind. The catalog at motoquant.in/bikes is filterable by stroke type, so the 2-stroke set sits as a self-contained list. The honest sim residual on each one is documented inline so a buyer evaluating a restoration project can see exactly what to expect on a strip.',
   },
 ];
 
@@ -340,8 +340,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 How a 2-Stroke Expansion Chamber Actually Works
-              </Link>{' '}
-              — the pressure-wave physics that makes the RD350 chamber stuff fresh charge back into the cylinder at 7500 rpm.
+              </Link>:{' '}
+              the pressure-wave physics that makes the RD350 chamber stuff fresh charge back into the cylinder at 7500 rpm.
             </li>
             <li>
               ·{' '}
@@ -350,8 +350,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Yezdi Roadster Quarter-Mile Physics
-              </Link>{' '}
-              — the other 2-stroke twin that built a following in India, in the same chassis class.
+              </Link>:{' '}
+              the other 2-stroke twin that built a following in India, in the same chassis class.
             </li>
             <li>
               ·{' '}
@@ -360,8 +360,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 The Physics of a Perfect Launch
-              </Link>{' '}
-              — why 2-stroke launch is binary (on the pipe or off it) and how that differs from a 4-stroke launch.
+              </Link>:{' '}
+              why 2-stroke launch is binary (on the pipe or off it) and how that differs from a 4-stroke launch.
             </li>
             <li>
               ·{' '}
@@ -370,8 +370,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 How to Tune for Aamby Valley in November
-              </Link>{' '}
-              — the venue, the conditions, and the density-altitude math used in every sim in this post.
+              </Link>:{' '}
+              the venue, the conditions, and the density-altitude math used in every sim in this post.
             </li>
             <li>
               ·{' '}
@@ -380,15 +380,15 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Royal Enfield Hunter 350 Quarter-Mile Physics
-              </Link>{' '}
-              — the 2025 350cc commuter that the 1973 RD350 still beats by over two seconds.
+              </Link>:{' '}
+              the 2025 350cc commuter that the 1973 RD350 still beats by over two seconds.
             </li>
             <li>
               ·{' '}
               <Link href="/bikes" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Browse the full bike catalog
-              </Link>{' '}
-              — every 2-stroke in MotoQuant alongside the modern 200-400cc class for direct comparison.
+              </Link>:{' '}
+              every 2-stroke in MotoQuant alongside the modern 200-400cc class for direct comparison.
             </li>
           </ul>
         </div>

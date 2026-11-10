@@ -147,7 +147,7 @@ export default function ValidationPage() {
       <section className="mb-14">
         <h2 className="font-display font-bold text-2xl text-white mb-4">Top 10 most accurate bikes</h2>
         <p className="text-white/60 text-sm mb-6">
-          The 10 smallest residuals among published (non-derived) benchmarks — top-10 mean absolute error ±0.006s.
+          The 10 smallest residuals among published (non-derived) benchmarks: top-10 mean absolute error ±0.006s.
           Sources: Cycle World, Sport Rider, MotoStatz and motorcyclespecs.com. DERIVED estimates are excluded.
           Conditions: race fuel, professional rider, ideal strip.
         </p>
@@ -247,7 +247,7 @@ export default function ValidationPage() {
           </p>
           <p>
             <strong className="text-white">Matching:</strong> Benchmark-to-bike matching uses word-boundary regex
-            to prevent false positives (YZF-R1 ≠ YZF-R15). Year ranges are respected — a 2009 benchmark does not
+            to prevent false positives (YZF-R1 ≠ YZF-R15). Year ranges are respected: a 2009 benchmark does not
             match a 2015 model that shares a name but has different internals.
           </p>
           <p>

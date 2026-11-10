@@ -63,7 +63,7 @@ export default function ResultCard({ sim, advanced = false }) {
   const rows = headline
     ? [
         ['sixty', 'First 60 ft (launch)', fmt(headline.et_60ft_s, 2) && `${fmt(headline.et_60ft_s, 2)} s`],
-        ['eighth', 'Halfway — ⅛ mile', fmt(headline.et_eighth_s, 2) && `${fmt(headline.et_eighth_s, 2)} s`],
+        ['eighth', 'Halfway (⅛ mile)', fmt(headline.et_eighth_s, 2) && `${fmt(headline.et_eighth_s, 2)} s`],
         ['trap', 'Finish-line speed', fmt(headline.trap_speed_kmh, 0) && `${fmt(headline.trap_speed_kmh, 0)} km/h`],
         [null, 'Power', fmt(headline.peak_power_hp, 0) && `${fmt(headline.peak_power_hp, 0)} hp`],
         [null, 'Total weight with rider', fmt(headline.total_mass_kg, 0) && `${fmt(headline.total_mass_kg, 0)} kg`],
@@ -264,7 +264,7 @@ export default function ResultCard({ sim, advanced = false }) {
           />
         )}
         {fullSimTask.error && !fullSimTask.active && (
-          <ErrorTile message={`The full simulation failed — ${fullSimTask.error}`} onRetry={runFull} />
+          <ErrorTile message={`The full simulation failed: ${fullSimTask.error}`} onRetry={runFull} />
         )}
       </div>
     </section>

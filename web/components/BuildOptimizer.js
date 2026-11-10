@@ -556,7 +556,7 @@ export default function BuildOptimizer() {
               </h2>
               <p className="mt-1 text-sm text-white/65">
                 Best value first. Value is measured as rupees per tenth of a second (
-                <Term k="cost_per_tenth">cost per tenth</Term>) — lower is better.
+                <Term k="cost_per_tenth">cost per tenth</Term>). Lower is better.
               </p>
               <ul className="mt-3 divide-y divide-white/[0.08]">
                 {parts.map((p) => {
@@ -585,7 +585,7 @@ export default function BuildOptimizer() {
                         </p>
                         {p.is_compatible === false && (
                           <p className="mt-1 text-xs font-medium text-signal-stage">
-                            May not fit this bike — check before buying.
+                            May not fit this bike. Check before buying.
                           </p>
                         )}
                       </div>
@@ -737,7 +737,7 @@ export default function BuildOptimizer() {
             <p className="flex items-start gap-2 px-1 text-xs text-white/60">
               <Gauge size={14} className="mt-0.5 shrink-0" aria-hidden="true" />
               <span>
-                {scoringNote(result)} These are predictions from a physics model, not a guarantee — real
+                {scoringNote(result)} These are predictions from a physics model, not a guarantee. Real
                 results depend on tuning, tyres and the day.
               </span>
             </p>

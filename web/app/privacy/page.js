@@ -13,7 +13,7 @@ import SiteFooter from '../../components/SiteFooter';
 import PageHero from '../../components/PageHero';
 
 export const metadata = {
-  title: 'Privacy — MotoQuant',
+  title: 'Privacy | MotoQuant',
   description:
     'MotoQuant has no accounts and sets no cookies. What leaves your browser, where it goes, and what we keep.',
   alternates: { canonical: 'https://motoquant.in/privacy' },

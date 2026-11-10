@@ -9,7 +9,7 @@ const DESCRIPTION =
   "MotoQuant simulates the RE Continental GT 650 at ~14.1s and 158 km/h trap. Where the 47 hp air/oil-cooled twin loses tenths to its 650cc peers at Aamby Valley.";
 
 export const metadata = {
-  title: "RE Continental GT 650 Quarter-Mile Physics — MotoQuant",
+  title: "RE Continental GT 650 Quarter-Mile Physics | MotoQuant",
   description: DESCRIPTION,
   keywords: [
     "Continental GT 650 quarter mile",
@@ -35,7 +35,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: "lead",
-    text: "MotoQuant simulates the Royal Enfield Continental GT 650 at roughly 14.1 seconds and 158 km/h trap under Aamby Valley November conditions. The 648 cc air/oil-cooled parallel twin makes 47 hp at 7,150 rpm and 52 Nm at 5,250 rpm out of an 78 mm bore and 67.8 mm stroke — a deliberately under-stressed engine that runs the same internals as the Interceptor 650 but wears a clip-on cafe-racer body. On a strip, the spec sheet is only half the story; the chassis, the gearing, and a 182 kg dry mass do most of the talking.",
+    text: "MotoQuant simulates the Royal Enfield Continental GT 650 at roughly 14.1 seconds and 158 km/h trap under Aamby Valley November conditions. The 648 cc air/oil-cooled parallel twin makes 47 hp at 7,150 rpm and 52 Nm at 5,250 rpm out of an 78 mm bore and 67.8 mm stroke, a deliberately under-stressed engine that runs the same internals as the Interceptor 650 but wears a clip-on cafe-racer body. On a strip, the spec sheet is only half the story; the chassis, the gearing, and a 182 kg dry mass do most of the talking.",
   },
   {
     type: "h2",
@@ -43,11 +43,11 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The Continental GT 650 launched in 2018 alongside the Interceptor 650 on a shared Harris-designed steel-tube cradle frame. Both bikes use the same SOHC, 4-valve-per-cylinder, 270-degree-crank parallel twin — same 78 mm bore, same 67.8 mm stroke, same 9.5:1 compression, same 47 hp at 7,150 rpm, same 52 Nm at 5,250 rpm. The differences are cosmetic and ergonomic: clip-on bars and rearsets on the GT, an upright bar and mid-controls on the Interceptor. Royal Enfield rates both at 198 kg kerb mass; MotoQuant uses 182 kg dry as the comparable number.",
+    text: "The Continental GT 650 launched in 2018 alongside the Interceptor 650 on a shared Harris-designed steel-tube cradle frame. Both bikes use the same SOHC, 4-valve-per-cylinder, 270-degree-crank parallel twin: same 78 mm bore, same 67.8 mm stroke, same 9.5:1 compression, same 47 hp at 7,150 rpm, same 52 Nm at 5,250 rpm. The differences are cosmetic and ergonomic: clip-on bars and rearsets on the GT, an upright bar and mid-controls on the Interceptor. Royal Enfield rates both at 198 kg kerb mass; MotoQuant uses 182 kg dry as the comparable number.",
   },
   {
     type: "p",
-    text: "For drag analysis the GT 650 is interesting precisely because it is not a sport bike pretending to be a cafe racer — it is an unstressed twin built to deliver torque at low rpm and survive 50,000 km of badly maintained Indian-highway riding. Peak power lives at 7,150 rpm, redline sits around 7,500, and the meaty part of the torque curve is from about 3,000 to 6,500 rpm. The simulator treats the GT 650 as a mid-twin-500-700 cluster bike — same class as the Kawasaki Ninja 650, Yamaha MT-07, and Aprilia RS 660 — and the cluster bias band is +0.16 seconds, well within tolerance.",
+    text: "For drag analysis the GT 650 is interesting precisely because it is not a sport bike pretending to be a cafe racer; it is an unstressed twin built to deliver torque at low rpm and survive 50,000 km of badly maintained Indian-highway riding. Peak power lives at 7,150 rpm, redline sits around 7,500, and the meaty part of the torque curve is from about 3,000 to 6,500 rpm. The simulator treats the GT 650 as a mid-twin-500-700 cluster bike (same class as the Kawasaki Ninja 650, Yamaha MT-07, and Aprilia RS 660), and the cluster bias band is +0.16 seconds, well within tolerance.",
   },
   {
     type: "h2",
@@ -70,7 +70,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The mid-twin-500-700 cluster is one of the better-calibrated bands in the simulator — N=17 matched benchmarks with a source-quality-weighted mean absolute error of 0.145 seconds and a near-zero bias of +0.001 seconds (centred). The GT 650 result is sim-only as of this writing; no published Indian Autos Mag or Sport Rider instrumented quarter-mile has surfaced for the bike. MCN ran an Interceptor 650 in 2018 and clocked roughly 14.2 seconds at 162 km/h with a competent UK rider on a warmed bike, which lines up almost exactly with the simulator output once you account for the difference in rider weight and density altitude.",
+    text: "The mid-twin-500-700 cluster is one of the better-calibrated bands in the simulator: N=17 matched benchmarks with a source-quality-weighted mean absolute error of 0.145 seconds and a near-zero bias of +0.001 seconds (centred). The GT 650 result is sim-only as of this writing; no published Indian Autos Mag or Sport Rider instrumented quarter-mile has surfaced for the bike. MCN ran an Interceptor 650 in 2018 and clocked roughly 14.2 seconds at 162 km/h with a competent UK rider on a warmed bike, which lines up almost exactly with the simulator output once you account for the difference in rider weight and density altitude.",
   },
   {
     type: "callout",
@@ -94,7 +94,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "3. Gearing. The GT 650 runs gear ratios [3.071, 2.056, 1.583, 1.292, 1.125, 1.000] with 16F/43R sprockets on a 520 chain, and a rear tire rolling radius of about 305 mm. With those numbers, sixth gear at 7,150 rpm gives roughly 165 km/h — almost exactly the manufacturer-claimed top speed. The bike is gearing-limited rather than power-limited at the top end, which is intentional: Royal Enfield ships the GT 650 with a single 6th gear ratio of 1.000 (a non-overdriven top gear, unlike most 650 twins) precisely because the engine cannot hold redline against drag past 165 km/h on stock gearing. The simulator log shows the GT crossing the trap line in fifth gear at about 6,400 rpm.",
+    text: "3. Gearing. The GT 650 runs gear ratios [3.071, 2.056, 1.583, 1.292, 1.125, 1.000] with 16F/43R sprockets on a 520 chain, and a rear tire rolling radius of about 305 mm. With those numbers, sixth gear at 7,150 rpm gives roughly 165 km/h, almost exactly the manufacturer-claimed top speed. The bike is gearing-limited rather than power-limited at the top end, which is intentional: Royal Enfield ships the GT 650 with a single 6th gear ratio of 1.000 (a non-overdriven top gear, unlike most 650 twins) precisely because the engine cannot hold redline against drag past 165 km/h on stock gearing. The simulator log shows the GT crossing the trap line in fifth gear at about 6,400 rpm.",
   },
   {
     type: "h2",
@@ -106,11 +106,11 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "1. Aerodynamics. The clip-on bars give a forward-leaning rider position, which is genuinely better than the Interceptor's upright posture for trap speed. The simulator uses a Cd of 0.68 and a frontal area of 0.46 m² for the GT versus 0.72 and 0.50 m² for the Interceptor. From 80 km/h upward, aero drag is the dominant resistive force on a sub-50 hp twin — at 150 km/h the GT is burning roughly 28 kW just pushing air. A serious cafe-racer fairing (a quarter-fairing in fibreglass, ~₹8,000) drops Cd to about 0.62 and shaves 0.10-0.15 seconds off ET. Most owners never bother because the bike is bought for the look, not the strip time.",
+    text: "1. Aerodynamics. The clip-on bars give a forward-leaning rider position, which is genuinely better than the Interceptor's upright posture for trap speed. The simulator uses a Cd of 0.68 and a frontal area of 0.46 m² for the GT versus 0.72 and 0.50 m² for the Interceptor. From 80 km/h upward, aero drag is the dominant resistive force on a sub-50 hp twin: at 150 km/h the GT is burning roughly 28 kW just pushing air. A serious cafe-racer fairing (a quarter-fairing in fibreglass, ~₹8,000) drops Cd to about 0.62 and shaves 0.10-0.15 seconds off ET. Most owners never bother because the bike is bought for the look, not the strip time.",
   },
   {
     type: "p",
-    text: "2. Launch and clutch. With 52 Nm at 5,250 rpm and a healthy slipper clutch, the GT 650 has an easy launch window. Drop the clutch around 4,000 rpm and the engine pulls cleanly without bogging; bring it above 6,000 and the rear tire — on stock Pirelli Phantoms at μ_peak 1.20 — does not break traction even on warm Indian asphalt. The mid-twin-500-700 cluster fix from May 2026 raised the over-clutching factor for this band, which means the simulator now lets the GT launch closer to its peak-torque rpm without snatching. The launch is not where the GT loses time; the launch is one of the things it does well.",
+    text: "2. Launch and clutch. With 52 Nm at 5,250 rpm and a healthy slipper clutch, the GT 650 has an easy launch window. Drop the clutch around 4,000 rpm and the engine pulls cleanly without bogging; bring it above 6,000 and the rear tire (on stock Pirelli Phantoms at μ_peak 1.20) does not break traction even on warm Indian asphalt. The mid-twin-500-700 cluster fix from May 2026 raised the over-clutching factor for this band, which means the simulator now lets the GT launch closer to its peak-torque rpm without snatching. The launch is not where the GT loses time; the launch is one of the things it does well.",
   },
   {
     type: "p",
@@ -165,7 +165,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Two patterns stand out. First, the gap from the GT 650 to the Ninja 650 is 1.1 seconds, larger than the 20-hp gap alone would predict, because the Ninja also has 11 fewer kilograms of mass and 850 more rpm of usable headroom. Second, the gap from the GT 650 to the Aprilia RS 660 is nearly 2.7 seconds — that is a different category of bike at a different price point, and the comparison is mostly there to anchor expectations rather than to suggest the GT should compete.",
+    text: "Two patterns stand out. First, the gap from the GT 650 to the Ninja 650 is 1.1 seconds, larger than the 20-hp gap alone would predict, because the Ninja also has 11 fewer kilograms of mass and 850 more rpm of usable headroom. Second, the gap from the GT 650 to the Aprilia RS 660 is nearly 2.7 seconds. That is a different category of bike at a different price point, and the comparison is mostly there to anchor expectations rather than to suggest the GT should compete.",
   },
   {
     type: "p",
@@ -177,7 +177,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The GT 650 has a respectable Indian aftermarket centred around the shared 650-twin platform — S&S Cycle full systems, K&N replacement filters, Power Commander V piggyback ECUs, and a handful of cafe-racer-specific seats, clip-ons, and tail kits. The simulator quantifies cost-per-tenth cleanly:",
+    text: "The GT 650 has a respectable Indian aftermarket centred around the shared 650-twin platform: S&S Cycle full systems, K&N replacement filters, Power Commander V piggyback ECUs, and a handful of cafe-racer-specific seats, clip-ons, and tail kits. The simulator quantifies cost-per-tenth cleanly:",
   },
   {
     type: "table",
@@ -193,11 +193,11 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The cheapest tenth on the bike is a 15-tooth front sprocket — drop one tooth, shorten every gear, accept a small top-speed reduction, and gain about 0.12 seconds for under ₹600. The sport tire and the air filter together cost ~₹13,700 and shave roughly 0.23 seconds, which is the realistic budget-tune sweet spot. Beyond that, the full-system exhaust and the ECU flash together push another half-second for ₹130,000 — a 45% increase in build cost on a ₹2.95 lakh bike for a 4% ET improvement. Most GT owners stop at sprocket-and-tire and reserve the rest of the budget for track-day fees or a quarter-fairing.",
+    text: "The cheapest tenth on the bike is a 15-tooth front sprocket: drop one tooth, shorten every gear, accept a small top-speed reduction, and gain about 0.12 seconds for under ₹600. The sport tire and the air filter together cost ~₹13,700 and shave roughly 0.23 seconds, which is the realistic budget-tune sweet spot. Beyond that, the full-system exhaust and the ECU flash together push another half-second for ₹130,000, a 45% increase in build cost on a ₹2.95 lakh bike for a 4% ET improvement. Most GT owners stop at sprocket-and-tire and reserve the rest of the budget for track-day fees or a quarter-fairing.",
   },
   {
     type: "callout",
-    text: "Fastest cheap path on the GT 650: 15F front sprocket plus a sport-compound rear tire. That is ~₹7,800 for roughly 0.27 seconds. Skip the full system unless you also want the noise — the gain is real, but the cost-per-tenth on a sub-50 hp twin is brutal.",
+    text: "Fastest cheap path on the GT 650: 15F front sprocket plus a sport-compound rear tire. That is ~₹7,800 for roughly 0.27 seconds. Skip the full system unless you also want the noise. The gain is real, but the cost-per-tenth on a sub-50 hp twin is brutal.",
   },
   {
     type: "h2",
@@ -205,7 +205,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The mid-twin-500-700 cluster sits at a weighted mean absolute error of 0.145 seconds with a bias of +0.001 seconds across 17 matched benchmarks. The entry-200-300 cluster (Pulsar NS200, Apache RTR 200 4V, Hero Xtreme 200S 4V) sits at a weighted mean absolute error of 0.231 seconds and a bias of -0.018 seconds across 14 matched benchmarks. The mid-twin band is more accurate because the underlying benchmark data is denser and more reliable — Sport Rider, Cycle World, and MCN all run mid-twin parallel twins regularly, the published quarter-mile times are real instrumented runs rather than 0-100 km/h numbers multiplied by 1.6, and the bikes are popular enough that multiple independent magazine tests agree to within ~0.2 seconds.",
+    text: "The mid-twin-500-700 cluster sits at a weighted mean absolute error of 0.145 seconds with a bias of +0.001 seconds across 17 matched benchmarks. The entry-200-300 cluster (Pulsar NS200, Apache RTR 200 4V, Hero Xtreme 200S 4V) sits at a weighted mean absolute error of 0.231 seconds and a bias of -0.018 seconds across 14 matched benchmarks. The mid-twin band is more accurate because the underlying benchmark data is denser and more reliable: Sport Rider, Cycle World, and MCN all run mid-twin parallel twins regularly, the published quarter-mile times are real instrumented runs rather than 0-100 km/h numbers multiplied by 1.6, and the bikes are popular enough that multiple independent magazine tests agree to within ~0.2 seconds.",
   },
   {
     type: "p",
@@ -221,11 +221,11 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "More relevant for everyday tuning: the parts-ROI engine ranks every catalog modification by cost-per-tenth for your specific bike. On a GT 650 the answer is loud and clear — front sprocket and sport tire first, slip-on or full system later if you also want the noise. Most owners spend money in the wrong order, which is why most modded 650 twins cost ₹1 lakh in upgrades and gain less ET than a ₹7,800 sprocket-and-tire combo would have delivered.",
+    text: "More relevant for everyday tuning: the parts-ROI engine ranks every catalog modification by cost-per-tenth for your specific bike. On a GT 650 the answer is loud and clear: front sprocket and sport tire first, slip-on or full system later if you also want the noise. Most owners spend money in the wrong order, which is why most modded 650 twins cost ₹1 lakh in upgrades and gain less ET than a ₹7,800 sprocket-and-tire combo would have delivered.",
   },
   {
     type: "p",
-    text: "Two final caveats. First, every number in this post is a stock-tune simulation under specific conditions. Change the rider weight, the ambient temperature, the surface, or the launch technique and the absolute ETs shift, but the relative ordering of which mods help most stays stable. Second, the mid-twin-500-700 cluster bias has been actively closed over the past three months — the May 2026 clutch over-clutching rewrite cut the cluster mean absolute error from 1.07 to 0.62 seconds, and continued Dragy submissions from Indian GT 650 owners will tighten that further. The GT number you see today is the most honest the simulator has ever been on this bike, and it will only get more accurate.",
+    text: "Two final caveats. First, every number in this post is a stock-tune simulation under specific conditions. Change the rider weight, the ambient temperature, the surface, or the launch technique and the absolute ETs shift, but the relative ordering of which mods help most stays stable. Second, the mid-twin-500-700 cluster bias has been actively closed over the past three months: the May 2026 clutch over-clutching rewrite cut the cluster mean absolute error from 1.07 to 0.62 seconds, and continued Dragy submissions from Indian GT 650 owners will tighten that further. The GT number you see today is the most honest the simulator has ever been on this bike, and it will only get more accurate.",
   },
   {
     type: "p",
@@ -368,8 +368,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Pulsar NS200 vs Apache RTR 200 4V
-              </Link>{" "}
-              — smaller-cluster comparison post with the same cost-per-tenth
+              </Link>:{" "}
+              smaller-cluster comparison post with the same cost-per-tenth
               methodology.
             </li>
             <li>
@@ -379,8 +379,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Hayabusa vs ZX-14R: Which Is Faster Off the Line?
-              </Link>{" "}
-              — top-of-stack flagship hyper-bike comparison at the other end of
+              </Link>:{" "}
+              top-of-stack flagship hyper-bike comparison at the other end of
               the catalog.
             </li>
             <li>
@@ -390,8 +390,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 How the MotoQuant Physics Engine Works
-              </Link>{" "}
-              — the 15-sub-model architecture behind every ET prediction in this
+              </Link>:{" "}
+              the 15-sub-model architecture behind every ET prediction in this
               post.
             </li>
             <li>
@@ -401,8 +401,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 How to Tune for Aamby Valley in November
-              </Link>{" "}
-              — the venue conditions used for the simulation in this post.
+              </Link>:{" "}
+              the venue conditions used for the simulation in this post.
             </li>
             <li>
               ·{" "}
@@ -411,8 +411,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Browse the full bike catalog
-              </Link>{" "}
-              — every spec, every gear ratio, every Cd value used by the
+              </Link>:{" "}
+              every spec, every gear ratio, every Cd value used by the
               simulator.
             </li>
           </ul>
@@ -425,7 +425,7 @@ export default function PostPage() {
               Run the Continental GT 650 yourself
             </div>
             <div className="text-white/60 text-sm">
-              Free simulator — pick the RE Continental GT 650, dial in your
+              Free simulator: pick the RE Continental GT 650, dial in your
               local conditions and a sport tire, and watch the ET tighten live.
             </div>
           </div>

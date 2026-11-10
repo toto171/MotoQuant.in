@@ -74,7 +74,7 @@ async function loadAssets() {
       if (pair.model.npz_sha256 !== pair.bikes.npz_sha256) {
         pair = await fetchPair(true);
         if (!pair || pair.model.npz_sha256 !== pair.bikes.npz_sha256) {
-          console.warn('surrogate: model/bikes fingerprint mismatch — falling back to server');
+          console.warn('surrogate: model/bikes fingerprint mismatch, falling back to server');
           return null;
         }
       }
@@ -101,7 +101,7 @@ async function loadAssets() {
       _failedAt = 0;
       return _assets;
     } catch (e) {
-      console.warn('surrogate: asset load failed — falling back to server', e);
+      console.warn('surrogate: asset load failed, falling back to server', e);
       return null;
     } finally {
       if (!_assets) _failedAt = Date.now();

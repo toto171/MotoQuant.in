@@ -9,7 +9,7 @@ const DESCRIPTION =
   'MotoQuant sims the 2018-2023 Ninja H2 SX at 10.20 s and a 232.8 km/h trap at Aamby Valley in November, level with a stock Hayabusa Gen 1. Why a 238 kg supercharged tourer runs a Hayabusa-class quarter in India, and where it loses to the ZX-14R.';
 
 export const metadata = {
-  title: 'Kawasaki Ninja H2 SX Quarter-Mile Physics India — MotoQuant',
+  title: 'Kawasaki Ninja H2 SX Quarter-Mile Physics India | MotoQuant',
   description: DESCRIPTION,
   keywords: [
     'kawasaki ninja h2 sx quarter mile',
@@ -50,7 +50,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The H2 SX launched at EICMA 2017 as the touring-spec sibling to the track-only Ninja H2R and the road-legal Ninja H2. Kawasaki took the same 998 cc inline-four with the centrifugal supercharger spinning at up to 9.2 times crank speed, retuned the impeller and intake mapping for low-end driveability, and dropped the whole package into a sport-touring chassis with a longer wheelbase, a windshield, hard luggage mounts, cruise control, and a 19-litre tank. The result is 200 hp at 11,000 rpm and 137 Nm at 9,500 rpm — same headline numbers as the SE and SE+ variants, but the base 2018-2023 model is 14 kg lighter wet because it skips the Öhlins electronic forks, the cornering lights, the TFT colour dash, and the heated grips.',
+    text: 'The H2 SX launched at EICMA 2017 as the touring-spec sibling to the track-only Ninja H2R and the road-legal Ninja H2. Kawasaki took the same 998 cc inline-four with the centrifugal supercharger spinning at up to 9.2 times crank speed, retuned the impeller and intake mapping for low-end driveability, and dropped the whole package into a sport-touring chassis with a longer wheelbase, a windshield, hard luggage mounts, cruise control, and a 19-litre tank. The result is 200 hp at 11,000 rpm and 137 Nm at 9,500 rpm, same headline numbers as the SE and SE+ variants, but the base 2018-2023 model is 14 kg lighter wet because it skips the Öhlins electronic forks, the cornering lights, the TFT colour dash, and the heated grips.',
   },
   {
     type: 'p',
@@ -121,7 +121,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The H2 SX is 238 kg dry, which is 24 kg more than a Ninja H2 and 18 kg more than a Hayabusa. None of that extra mass is in the engine — the supercharged 998 cc inline-four weighs almost exactly the same as the naturally-aspirated equivalent. The mass is in the touring spec. Specifically:',
+    text: 'The H2 SX is 238 kg dry, which is 24 kg more than a Ninja H2 and 18 kg more than a Hayabusa. None of that extra mass is in the engine: the supercharged 998 cc inline-four weighs almost exactly the same as the naturally-aspirated equivalent. The mass is in the touring spec. Specifically:',
   },
   {
     type: 'table',
@@ -135,7 +135,7 @@ const CONTENT = [
       ['Heavier kickstand + centerstand provision', '~2', 'No', 'Yes'],
       ['Longer subframe + tail section', '~5', 'No', 'Yes'],
       ['Stainless brake lines + larger reservoir', '~1', 'No', 'Yes'],
-      ['Sum of touring-spec additions', '~20 kg', '—', '—'],
+      ['Sum of touring-spec additions', '~20 kg', '–', '–'],
     ],
   },
   {
@@ -164,7 +164,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The first row is the punchline. A 2018-2023 H2 SX with the touring kit unbolted runs roughly a tenth faster than the same bike with the panniers fitted, for zero rupees of parts spend. That alone is the best ROI in the entire MotoQuant catalog for any bike at any price point — strip-week mods that cost nothing and gain real ET because the OEM spec ships with quarter-mile-irrelevant mass. Beyond that the cost-per-tenth ramps fast. A full Akrapovic system is ₹95,000 per tenth on the H2 SX, which is normal for a bike already in the 200 hp tier but four times the cost-per-tenth of an exhaust on a 600 cc bike, where percentage power gains matter more.',
+    text: 'The first row is the punchline. A 2018-2023 H2 SX with the touring kit unbolted runs roughly a tenth faster than the same bike with the panniers fitted, for zero rupees of parts spend. That alone is the best ROI in the entire MotoQuant catalog for any bike at any price point: strip-week mods that cost nothing and gain real ET because the OEM spec ships with quarter-mile-irrelevant mass. Beyond that the cost-per-tenth ramps fast. A full Akrapovic system is ₹95,000 per tenth on the H2 SX, which is normal for a bike already in the 200 hp tier but four times the cost-per-tenth of an exhaust on a 600 cc bike, where percentage power gains matter more.',
   },
   {
     type: 'callout',
@@ -180,7 +180,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'For comparison, a Kawasaki Z H2 in India runs roughly ₹22-24 lakh, the ZX-14R (when in stock, which is rarely now) sat at ₹19-21 lakh, and the Hayabusa Gen 3 in 2026 retails at ₹17.7 lakh ex-showroom Pune. The H2 SX is the most expensive of these by a wide margin, and the supercharger-related service costs — impeller bearing replacement at 40,000 km, supercharger oil intervals at 6,000 km — push lifetime running cost above any naturally-aspirated alternative. The bike is bought by people who want a supercharger and are willing to pay the tax. For everyone else, the Hayabusa Gen 3 at less than half the price delivers a quarter-mile run within 0.18 seconds and a higher reliability ceiling.',
+    text: 'For comparison, a Kawasaki Z H2 in India runs roughly ₹22-24 lakh, the ZX-14R (when in stock, which is rarely now) sat at ₹19-21 lakh, and the Hayabusa Gen 3 in 2026 retails at ₹17.7 lakh ex-showroom Pune. The H2 SX is the most expensive of these by a wide margin, and the supercharger-related service costs (impeller bearing replacement at 40,000 km, supercharger oil intervals at 6,000 km) push lifetime running cost above any naturally-aspirated alternative. The bike is bought by people who want a supercharger and are willing to pay the tax. For everyone else, the Hayabusa Gen 3 at less than half the price delivers a quarter-mile run within 0.18 seconds and a higher reliability ceiling.',
   },
   {
     type: 'h2',
@@ -188,11 +188,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'MotoQuant treats the H2 SX as a member of the litre_sport_195p cluster — the highest-tier bucket in the validation taxonomy. That cluster ran a 2026-05-25 sweep across 28 matched benchmarks at mean|Δ| = 0.171 s and bias = −0.015 s, near-zero. The 200 hp bracket of the cluster is the most heavily benchmarked: K5 GSX-R 1000 (10.0334 s, matched exactly), YZF-R1 4C8 (10.2859 s, exact), Hayabusa Gen 1 (10.4712 s, exact) — figures as of that dated sweep; the July 2026 epoch re-based the pins, 2021 ZX-10R (+0.011 s, matched within Sport Rider sample variance), Aprilia RSV4 1100 Factory (matched to instrumented), Panigale V4R (matched to MCN). The H2 SX is the first supercharged sport-touring bike to enter this cluster — every other member is naturally-aspirated and full-fairing. So while the cluster-average accuracy is best in class, the H2 SX prediction itself is interpolation, not validation. A Dragy run from a stock H2 SX, submitted through the "Submit a timeslip" form, would test it.', // [historical baselines]
+    text: 'MotoQuant treats the H2 SX as a member of the litre_sport_195p cluster, the highest-tier bucket in the validation taxonomy. That cluster ran a 2026-05-25 sweep across 28 matched benchmarks at mean|Δ| = 0.171 s and bias = −0.015 s, near-zero. The 200 hp bracket of the cluster is the most heavily benchmarked: K5 GSX-R 1000 (10.0334 s, matched exactly), YZF-R1 4C8 (10.2859 s, exact), Hayabusa Gen 1 (10.4712 s, exact) [figures as of that dated sweep; the July 2026 epoch re-based the pins], 2021 ZX-10R (+0.011 s, matched within Sport Rider sample variance), Aprilia RSV4 1100 Factory (matched to instrumented), Panigale V4R (matched to MCN). The H2 SX is the first supercharged sport-touring bike to enter this cluster; every other member is naturally-aspirated and full-fairing. So while the cluster-average accuracy is best in class, the H2 SX prediction itself is interpolation, not validation. A Dragy run from a stock H2 SX, submitted through the "Submit a timeslip" form, would test it.', // [historical baselines]
   },
   {
     type: 'p',
-    text: 'If you own one and run a Dragy timeslip with measured conditions, submit it through the "Submit a timeslip" form; a reviewed run joins the benchmark set. That is the long-term plan for closing the cluster bias on every flagship bike in the catalog — the bench number is the starting point, the timeslips are the ground truth.',
+    text: 'If you own one and run a Dragy timeslip with measured conditions, submit it through the "Submit a timeslip" form; a reviewed run joins the benchmark set. That is the long-term plan for closing the cluster bias on every flagship bike in the catalog: the bench number is the starting point, the timeslips are the ground truth.',
   },
   {
     type: 'h2',
@@ -204,7 +204,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Two practical observations to close on. First, the H2 SX is the only bike in the simulator catalog where the touring spec costs more ET than the engine modifications can buy back — strip the panniers and you have done 80 percent of the optimization work. Second, the supercharger’s power band is wide enough that the H2 SX is forgiving of a slightly-late shift in a way that a 600 cc supersport is not; the consequence is that an average rider runs much closer to the simulated number on this bike than on a screamer. The H2 SX rewards a measured, brake-torque launch and a clean second-to-third upshift more than it rewards rev-matched perfection in higher gears.',
+    text: 'Two practical observations to close on. First, the H2 SX is the only bike in the simulator catalog where the touring spec costs more ET than the engine modifications can buy back: strip the panniers and you have done 80 percent of the optimization work. Second, the supercharger’s power band is wide enough that the H2 SX is forgiving of a slightly-late shift in a way that a 600 cc supersport is not; the consequence is that an average rider runs much closer to the simulated number on this bike than on a screamer. The H2 SX rewards a measured, brake-torque launch and a clean second-to-third upshift more than it rewards rev-matched perfection in higher gears.',
   },
   {
     type: 'p',
@@ -335,8 +335,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Hayabusa vs ZX-14R: Which Is Faster?
-              </Link>{' '}
-              — the two naturally-aspirated litre-plus rivals the H2 SX measures itself against.
+              </Link>:{' '}
+              the two naturally-aspirated litre-plus rivals the H2 SX measures itself against.
             </li>
             <li>
               ·{' '}
@@ -345,8 +345,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Hayabusa Quarter-Mile Physics: What Limits 9.6 Seconds
-              </Link>{' '}
-              — the physics ceiling on a 197 hp NA litre-plus bike, for comparison with the H2 SX boost story.
+              </Link>:{' '}
+              the physics ceiling on a 197 hp NA litre-plus bike, for comparison with the H2 SX boost story.
             </li>
             <li>
               ·{' '}
@@ -355,8 +355,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 How the MotoQuant Physics Engine Works
-              </Link>{' '}
-              — the 15-sub-model architecture behind every ET prediction in this post, including the forced-induction sub-model that handles the H2 SX supercharger.
+              </Link>:{' '}
+              the 15-sub-model architecture behind every ET prediction in this post, including the forced-induction sub-model that handles the H2 SX supercharger.
             </li>
             <li>
               ·{' '}
@@ -365,15 +365,15 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 How to Tune for Aamby Valley in November
-              </Link>{' '}
-              — the venue and conditions used for every ET number in this post.
+              </Link>:{' '}
+              the venue and conditions used for every ET number in this post.
             </li>
             <li>
               ·{' '}
               <Link href="/bikes" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Browse the full bike catalog
-              </Link>{' '}
-              — every spec, every gear ratio, every Cd value used by the simulator across 340+ bikes.
+              </Link>:{' '}
+              every spec, every gear ratio, every Cd value used by the simulator across 340+ bikes.
             </li>
           </ul>
         </div>
@@ -383,7 +383,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Run the Ninja H2 SX yourself</div>
             <div className="text-white/60 text-sm">
-              Free simulator — pick the Kawasaki Ninja H2 SX, dial in Aamby Valley November or your local conditions, strip the luggage mounts, and watch the ET drop toward Ninja H2 territory.
+              Free simulator: pick the Kawasaki Ninja H2 SX, dial in Aamby Valley November or your local conditions, strip the luggage mounts, and watch the ET drop toward Ninja H2 territory.
             </div>
           </div>
           <Link

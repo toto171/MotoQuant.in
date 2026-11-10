@@ -4,7 +4,7 @@
 
 import StructuredData, { SITE_URL } from '../StructuredData';
 
-const TITLE = 'Accuracy — Real vs Simulated Quarter-Mile ET (263 Matched Benchmarks)';
+const TITLE = 'Accuracy: Real vs Simulated Quarter-Mile ET (263 Matched Benchmarks)';
 const DESCRIPTION =
   "MotoQuant's accuracy report: every simulated quarter-mile ET plotted against its published timeslip. 250 published tests weighted by source quality (263 matched), weighted mean absolute error 0.25s, bias +0.023s, top-10 cleanest ±0.006s, 130/263 within 0.20s. Interactive scatter, residual histogram and per-cluster breakdown against Cycle World, Sport Rider, MCN and MotoStatz data. Reference bikes, held to four decimals by CI: K5 10.0436s, R1 10.1092s, Hayabusa 10.1100s.";
 
