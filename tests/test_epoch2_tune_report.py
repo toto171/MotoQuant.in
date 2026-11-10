@@ -19,8 +19,13 @@ the checks below now do (``_round2_profiles``).
   reference fit is the report's reference theta;
 * the references simulate to the report's pinned ETs and the gate recorded
   zero inversions;
-* (native engine, or MOTOQUANT_SLOW_TESTS=1) a full re-measure reproduces the
-  report's ET / trap / top-speed headline and the gate exactly.
+
+The report is a record of its day. The catalog changed after it (duplicate
+bikes merged and data fixes ported onto the combined 2.0 base: 266 matched
+benchmarks became 263), so a full re-measure of round-2 knobs on today's
+catalog has no stored answer to match. Reproducibility of the published
+numbers is pinned against the newest reports/acc_final_*.json in
+tests/test_epoch3_tune_report.py instead.
 """
 
 from __future__ import annotations
@@ -29,7 +34,6 @@ import contextlib
 import dataclasses
 import importlib.util
 import json
-import os
 from pathlib import Path
 
 import pytest
@@ -184,27 +188,3 @@ def test_constrained_selection_is_recorded(report):
     key = f"{rec['point'][0]:.2f}|{rec['point'][1]}"
     assert key in rec["feasible"]["points"]
     assert rec["feasible"]["points"][key]["min_margin_s"] >= 0.0
-
-
-@pytest.mark.skipif(
-    not engine_select.native_active() and os.environ.get("MOTOQUANT_SLOW_TESTS") != "1",
-    reason="full re-measure needs the Rust core (seconds) or MOTOQUANT_SLOW_TESTS=1",
-)
-def test_full_remeasure_reproduces_the_report(report):
-    te2 = _tuner()
-    te2.TE.setup_root(None)
-    head_dump = None  # (c) needs the HEAD corpus dump — compare (a) and (b)
-    with _round2_profiles(report):
-        res = te2.measure(
-            {k: v for k, v in te2.SCORINGS.items() if v[0] == "current"},
-            procs=1,
-            head=head_dump,
-            topspeed=True,
-            gate=True,
-        )
-    for name in ("a_epoch_current_row", "a_epoch_current_1ft", "b_legacy_current_row"):
-        h = report["headline"][name]
-        assert res["scorings"][name]["overall"] == h["overall"], name
-        assert res["scorings"][name]["trap_overall"] == h["trap"], name
-    assert res["topspeed"]["summary"] == report["topspeed"]
-    assert res["mass_gate"]["catalog"]["inversions"] == 0

@@ -18,8 +18,11 @@ code that is checked in.
   accepted dry-mass inversions (HP4 Race, Panigale V4R) and no litre bike
   traction-limited above 2nd gear; the tuner's own gate-escape selection
   is preserved as a record;
-* (native engine, or MOTOQUANT_SLOW_TESTS=1) a full re-measure reproduces
-  the report's (a) / (b) headline, top speed and the dry-mass gate exactly.
+* (native engine, or MOTOQUANT_SLOW_TESTS=1) a full re-measure of the
+  shipped code reproduces the newest published reports/acc_final_*.json
+  (ET headline under all three scorings, trap, top speed) and the accepted
+  dry-mass inversions. This report's own headline predates later catalog
+  changes and is history.
 """
 
 from __future__ import annotations
@@ -185,7 +188,15 @@ def test_gate_constrained_clusters_are_recorded(report):
     not engine_select.native_active() and os.environ.get("MOTOQUANT_SLOW_TESTS") != "1",
     reason="full re-measure needs the Rust core (seconds) or MOTOQUANT_SLOW_TESTS=1",
 )
-def test_full_remeasure_reproduces_the_report(report):
+def test_full_remeasure_reproduces_the_published_report():
+    """A full re-measure of the shipped code reproduces the newest
+    reports/acc_final_*.json, the report every public accuracy figure is
+    taken from. (This report, acc_epoch3, is a record of its day: the
+    catalog changed after it, so its own headline is no longer reproducible
+    and is not compared.)"""
+    final = json.loads(
+        sorted((ROOT / "reports").glob("acc_final_*.json"))[-1].read_text()
+    )
     t3 = _tuner()
     t3.TE.setup_root(None)
     res = t3.T2.measure(
@@ -195,11 +206,25 @@ def test_full_remeasure_reproduces_the_report(report):
         topspeed=True,
         gate=True,
     )
-    for name in ("a_epoch_current_row", "a_epoch_current_1ft", "b_legacy_current_row"):
-        h = report["headline"][name]
-        assert res["scorings"][name]["overall"] == h["overall"], name
-        assert res["scorings"][name]["trap_overall"] == h["trap"], name
-    assert res["topspeed"]["summary"] == report["topspeed"]
+    published = {
+        "a_epoch_current_row": final,
+        "a_epoch_current_1ft": final["timing_uniform_1ft"],
+        "b_legacy_current_row": final["by_rules"]["legacy"],
+    }
+    for name, rec in published.items():
+        got = res["scorings"][name]
+        assert got["overall"] == rec["overall"], name
+        trap = rec["trap_overall"]
+        for key in ("n", "w_mean_abs_kmh", "w_bias_kmh"):
+            assert got["trap_overall"][key] == trap[key], (name, key)
+        # the sweep and the tuner round the unweighted trap mean separately
+        assert (
+            abs(got["trap_overall"]["raw_mean_abs_kmh"] - trap["raw_mean_abs_kmh"])
+            <= 0.011
+        )
+    # plateau_count counts different populations in the two tools
+    ts = {k: v for k, v in res["topspeed"]["summary"].items() if k != "plateau_count"}
+    assert ts == {k: v for k, v in final["topspeed"].items() if k != "plateau_count"}
     assert {x["name"] for x in res["mass_gate"]["catalog"]["inverted"]} == (
         ACCEPTED_INVERSIONS
     )

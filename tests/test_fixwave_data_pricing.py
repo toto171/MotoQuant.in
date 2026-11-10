@@ -8,8 +8,9 @@ October 2026 core-audit fix wave — live-price freshness cache.
 'Superbike Store'), so the cache never hit: three non-forced calls made three
 network fetches. A fetched price now also stamps ``parts.last_price_check``
 (the only honest moment to move it), and a cache hit returns the stored price
-instead of None, so a repeated non-forced POST /api/pricing/refresh reports the
-price rather than 'fetch_failed'. The retailer adapter is mocked — no HTTP.
+instead of None. (The public refresh route was removed in 2.0.0; prices are
+refreshed by maintainers with ``motoquant pricing refresh``.) The retailer
+adapter is mocked — no HTTP.
 """
 
 from __future__ import annotations
@@ -69,7 +70,7 @@ def test_fresh_price_is_not_refetched(db):
     assert first is not None
     assert fetch.call_count == 1  # second and third served from the fresh cache
     # A cache hit is a success: it returns the stored price, not None (None
-    # made POST /api/pricing/refresh report 'fetch_failed' with a null price).
+    # used to make a refresh report 'fetch_failed' with a null price).
     for hit in (second, third):
         assert hit is not None
         assert hit.price_inr == first.price_inr
@@ -107,33 +108,3 @@ def test_a_real_fetch_stamps_the_check_date(db):
         "SELECT last_price_check FROM parts WHERE id = ?", (pid,)
     ).fetchone()[0]
     assert stamp == dt.datetime.now(dt.timezone.utc).date().isoformat()
-
-
-def test_repeated_refresh_route_serves_the_cached_price(db, monkeypatch):
-    """Production path: two non-forced POST /api/pricing/refresh calls.
-
-    Before the cache-hit fix the second call (served from the fresh cache)
-    returned status 'fetch_failed' with price_inr None, although a fresh price
-    had just been stored.
-    """
-    pytest.importorskip("fastapi")
-    from fastapi.testclient import TestClient
-
-    import motoquant.api as api_mod
-
-    d, pid = db
-    monkeypatch.setattr(api_mod, "_get_db", lambda: d.conn)
-    client = TestClient(api_mod.app)
-    with mock.patch(
-        "motoquant.database.retail_adapters.fetch_price", return_value=_result()
-    ) as fetch:
-        first = client.post(f"/api/pricing/refresh/{pid}")
-        second = client.post(f"/api/pricing/refresh/{pid}")
-    assert first.status_code == 200, first.text
-    assert second.status_code == 200, second.text
-    assert fetch.call_count == 1  # the second call did not hit the retailer
-    a, b = first.json(), second.json()
-    assert a["status"] == "refreshed" and a["price_inr"] == 88000.0
-    assert b["status"] != "fetch_failed", b
-    assert b["price_inr"] == 88000.0
-    assert b["fetched_at"] == a["fetched_at"]
