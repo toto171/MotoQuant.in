@@ -5,6 +5,13 @@ the "pro-gated" rows of [CLIENT_COMPUTE.md](../CLIENT_COMPUTE.md))
 **Date:** 2026-10-23
 **Deciders:** Hritwik Mudhai (operator decision)
 
+> **Update 2026-11-10:** accounts went the same way in release 2.0.0. The
+> magic-link sign-in, the users table, `JWT_SECRET` and server-side saved
+> runs were removed (`scripts/patch_2026_11_10_remove_accounts.py`); saved
+> runs now live in the browser. `docs/archive/`, mentioned below, was removed
+> from the tree when the repository went public and survives only in git
+> history.
+
 ## Context
 
 From June to August 2026 MotoQuant was built as a freemium SaaS. The plan was
@@ -136,5 +143,5 @@ never fails. Local dev keeps the documented dev default. See
 
 `LICENSE` · `NOTICE` · [SELF_HOSTING.md](../SELF_HOSTING.md) ·
 `scripts/patch_2026_10_23_drop_monetization.py` ·
-`tests/test_open_source_pivot.py` · `CHANGELOG.md` (2026-10-23 entry) ·
-`docs/archive/` (payments runbook, commercial-launch plan).
+`tests/test_open_source_pivot.py` · `CHANGELOG.md` (2026-10-23 and 2.0.0
+entries).

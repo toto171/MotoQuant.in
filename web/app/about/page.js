@@ -89,7 +89,7 @@ export default function AboutPage() {
                 </p>
               </FounderCard>
             
-                          <FounderCard initial="R" name="Ritwik Singh" role="Co-founder & Advisor · Bengaluru, India" email="dhisetu@gmail.com">
+                          <FounderCard initial="R" name="Ritwik Singh" role="Co-founder & Advisor · Bengaluru, India" email="motoquant@gmail.com">
                 <p>
                   Automobile-and-AI engineer — the software and machine-learning instinct behind MotoQuant&apos;s early architecture, from the simulation scaffolding to the first surrogate models and ROI ranker. Now a co-founder and advisor, still close to the technical direction.
                 </p>

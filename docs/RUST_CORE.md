@@ -483,8 +483,9 @@ exception-class mirroring).
    mechanical (`engine_select.make_engine(cfg)`).
 2. **Resolved-config route** (`GET /api/resolve?bike_id=&venue_id=&parts=`),
    so the simulator page can run exact full sims client-side with
-   `web/lib/engine.js`, labelled "exact — computed on your device". Keep
-   leaderboard saves server-authoritative (recompute on save).
+   `web/lib/engine.js`, labelled "exact — computed on your device". Shared
+   timeslips stay server-computed: a timeslip page re-runs its setup through
+   the API.
 3. **Sweeps and surrogate data generation** through `summary_native` +
    `multiprocessing`: ~50–80× fewer CPU-seconds for `phys_weighted_sweep`,
    `tune_cluster_knobs` and surrogate regeneration. The accuracy epoch

@@ -2,15 +2,13 @@ import Link from 'next/link';
 
 export const metadata = {
   title: 'Physics Whitepaper',
-  description: 'First-principles physics behind MotoQuant: 15 sub-models, RK4 integrator at 1 ms step, Pacejka magic-formula tire model with thermal evolution, Willans friction, 2T expansion-chamber Gaussian curve, weight transfer, weighted-benchmark validation. The complete methodology document for the motorcycle quarter-mile simulator.',
+  description: 'First-principles physics behind MotoQuant: 15 sub-models, RK4 integrator at 1 ms step, a rear-tyre grip model with load sensitivity and thermal evolution, Willans friction, 2T expansion-chamber Gaussian curve, weight transfer, weighted-benchmark validation. The complete methodology document for the motorcycle quarter-mile simulator.',
   alternates: { canonical: 'https://motoquant.in/docs/physics' },
   keywords: [
-    'pacejka tire model motorcycle',
     'rk4 motorcycle simulator',
     'first principles motorcycle drag simulation',
     'motorcycle physics simulator methodology',
     'two stroke expansion chamber model',
-    'magic formula tire india',
     'willans friction motorcycle',
     'motorcycle quarter mile physics whitepaper',
     'physics based bike ET predictor',
@@ -21,19 +19,19 @@ export const metadata = {
 const SUBMODELS = [
   { n: '01', name: 'Engine torque model', desc: 'Peak power + torque from spec; dyno curve injection if available. Willans mean-effective-pressure friction model for mechanical losses. 2T expansion-chamber Gaussian curve with powervalve width modulation.', file: 'submodels/engine.py' },
   { n: '02', name: 'Forced induction', desc: 'Turbocharger (boost curve, compressor map, lag), supercharger (mechanical drive loss, constant boost), nitrous (injection window, jetting-mass-flow). Boost type is a per-part parameter.', file: 'submodels/forced_induction.py' },
-  { n: '03', name: 'Drivetrain', desc: 'Gear ratio lookup from 150+ Tier-1 service-manual-accurate families. Chain drive efficiency (0.93–0.97 depending on pitch and maintenance state). Quickshifter model (zero-torque cut window, shift time).', file: 'submodels/drivetrain.py' },
+  { n: '03', name: 'Drivetrain', desc: 'Gear ratio lookup from 150+ Tier-1 service-manual-accurate families. Chain drive efficiency (0.95–0.97 across the catalog). Quickshifter model (zero-torque cut window, shift time).', file: 'submodels/drivetrain.py' },
   { n: '04', name: 'Clutch dynamics', desc: 'Wet multi-plate clutch with engagement rate (Nm/s) and slip RPM threshold. Slipper clutch branch: overrun torque reversal → spring-preload backstop. Clutch heat accumulation during engagement.', file: 'submodels/clutch.py' },
   { n: '05', name: 'Chain & sprocket', desc: 'Sprocket ratio applied to rear-wheel torque. Chain stretch factor (efficiency reduction over service interval). Verification that sprocket tooth counts are physically valid.', file: 'submodels/chain.py' },
-  { n: '06', name: 'Pacejka tire model', desc: 'Magic Formula for longitudinal slip force: F_x = D·sin(C·arctan(B·κ − E·(B·κ − arctan(B·κ)))). Thermal evolution: heat generation from slip, conduction to road surface, Nusselt-number convection.', file: 'submodels/tire.py' },
-  { n: '07', name: 'Aerodynamics', desc: 'F_drag = ½·ρ·Cd·A·v². Per-bike Cd (0.308–0.68) and frontal area (0.35–0.68 m²). Rider tuck transition: Cd interpolates from upright to tuck posture above a speed threshold. Wind vector support.', file: 'submodels/aero.py' },
+  { n: '06', name: 'Tyre grip', desc: 'Traction limit μ × F_z,rear, where μ starts from the tyre\'s peak friction coefficient and is adjusted for load sensitivity, tread temperature, pressure rise with temperature and track preparation. Thermal evolution: heat from slip, conduction to the road surface and convection to the air. A Pacejka Magic Formula slip curve is implemented but not yet used by the integrator.', file: 'submodels/tire.py' },
+  { n: '07', name: 'Aerodynamics', desc: 'F_drag = ½·ρ·Cd·A·v². Per-bike Cd (0.42–0.92 across the catalog) and frontal area (0.35–0.78 m²). Rider tuck transition: Cd interpolates from upright to tuck posture above a speed threshold. Wind vector support.', file: 'submodels/aero.py' },
   { n: '08', name: 'Weight transfer', desc: 'Longitudinal weight transfer: ΔF_z = m·a_x·h_cog / L_wb. Front axle load approaches zero at wheelie threshold. Rear axle load added to tire normal force for traction calculation.', file: 'submodels/weight_transfer.py' },
   { n: '09', name: 'Rider dynamics', desc: 'Rider CoG height and longitudinal position; rider mass distributed across total system. Tuck factor: rider frontal area reduction at high speed. Separately tunable for different rider postures (sport tuck vs upright naked).', file: 'submodels/rider_dynamics.py' },
   { n: '10', name: 'Staging & launch', desc: 'Rollout distance, reaction time (added post-tree), two-step launch control RPM. For 2T engines, launch RPM defaults to tuned_rpm × 0.92. For 4T, configurable launch_rpm field in BikeConfig.', file: 'submodels/staging.py' },
   { n: '11', name: 'Environmental', desc: 'Air density from ISA model: ρ = P/(R_specific·T). Power correction factor: (P_std/P) × √(T_std/T). Density altitude calculation. Surface grip multiplier (asphalt, concrete, salt flat, dry lake). Wind resistance add-in.', file: 'submodels/environmental.py' },
   { n: '12', name: 'Braking', desc: 'Used for top-speed and calibration passes. max_decel = μ_front × front_load + μ_rear × rear_load, with brake balance split. Braking from trap speed to rest for multi-run simulation.', file: 'submodels/braking.py' },
   { n: '13', name: 'Wheelie model', desc: 'When front axle load → 0: system transitions to rotational dynamics. Wheelie bar extends effective wheelbase, resisting the transition. Wheelie contributes angular momentum competing with forward acceleration.', file: 'submodels/wheelie.py' },
-  { n: '14', name: 'Parasitic losses', desc: 'Alternator (60–150 W), oil pump (60–500 W), water pump (0 or 40 W electric), valvetrain (0 for 2T, 40–250 W for 4T). All modelled as constant power drains from the crankshaft.', file: 'submodels/parasitic.py' },
-  { n: '15', name: 'Rolling resistance', desc: 'F_rr = Crr × m × g × cos(slope). Crr: 0.010–0.014 depending on bike class and tyre type. Slope term allows banked or inclined strip modelling.', file: 'submodels/rolling_resistance.py' },
+  { n: '14', name: 'Parasitic losses', desc: 'Alternator (60–150 W), oil pump, water pump and valvetrain drag (none for a two-stroke), each set per bike and modelled as a power drain from the crankshaft.', file: 'submodels/parasitic.py' },
+  { n: '15', name: 'Rolling resistance', desc: 'F_rr = Crr × m × g, with Crr = Crr_base + k_v × v², reduced as the tyre warms and raised on soft surfaces such as salt or a dry lake bed.', file: 'submodels/rolling_resistance.py' },
 ];
 
 function SubModelRow({ model }) {
@@ -101,7 +99,7 @@ export default function PhysicsPage() {
           <code className="block overflow-x-auto whitespace-pre text-sm font-mono text-white/80 leading-relaxed">
             F_net = F_traction − F_aero − F_rolling_resistance − F_grade<br />
             a = F_net / m_total<br />
-            F_traction = min(T_wheel / R_tyre, μ_peak × F_z_rear × Pacejka(κ))
+            F_traction = min(T_wheel / R_tyre, μ(F_z_rear, T_tyre) × F_z_rear)
           </code>
         </div>
       </section>

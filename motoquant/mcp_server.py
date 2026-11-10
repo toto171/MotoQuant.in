@@ -75,7 +75,7 @@ INSTRUCTIONS = (
     "it was computed for (venue or default, altitude, air, surface) — quote "
     "them with the number; parts_skipped lists requested part ids that were "
     "not fitted. Published "
-    "accuracy: weighted mean |error| ~0.25 s across 266 matched real-world "
+    "accuracy: weighted mean |error| ~0.25 s across 263 matched real-world "
     "benchmarks — good for ranking builds and what-ifs, not for claiming a "
     "specific bike will run an exact ET."
 )

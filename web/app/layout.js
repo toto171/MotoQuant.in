@@ -53,7 +53,7 @@ export const viewport = {
 // SEO strategy
 // ──────────────────────────────────────────────────────────────────────────
 // Targets grouped by intent:
-//   - Brand: "motoquant", "moto quant pro"
+//   - Brand: "motoquant", "moto quant"
 //   - Product category: "motorcycle drag simulator", "quarter mile calculator"
 //   - Bike-specific long tail: "hayabusa quarter mile time", "zx-10r 1/4 mile"
 //   - Geographic: "drag racing india", "aamby valley drag strip", "kari speedway"
@@ -178,7 +178,6 @@ export const metadata = {
     // Physics / academic
     'motorcycle physics simulation',
     'first principles drag racing physics',
-    'pacejka tire motorcycle',
     'motorcycle dyno simulator',
     'aerodynamic drag motorcycle',
     'tire slip ratio simulation',

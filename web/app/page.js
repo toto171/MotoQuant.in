@@ -26,7 +26,8 @@ import SimulatorWidget from '../components/SimulatorWidget';
 import { FAQ_ITEMS } from './StructuredData';
 
 const REPO_URL = 'https://github.com/toto171/MotoQuant.in';
-const ISSUES_URL = `${REPO_URL}/issues/new/choose`;
+const SUGGEST_URL = `${REPO_URL}/issues/new?template=suggest-bike.yml`;
+const TIMESLIP_URL = `${REPO_URL}/issues/new?template=submit-timeslip.yml`;
 
 // ─── Accuracy: the clusters where published data is good ──────────────
 // Per the 10 November 2026 weighted sweep (reports/acc_final_2026_11_10.json).
@@ -34,26 +35,26 @@ const ISSUES_URL = `${REPO_URL}/issues/new/choose`;
 // of published tests and, for small bikes, by a known gearing limitation
 // (reports/session_2026_11_10_epoch.md); shown in full on /docs/validation.
 const HONEST_CLUSTERS = [
-  { name: 'Litre sport bikes, 195 hp and up', bias: 0.0283, mae: 0.1453, n: 30 },
-  { name: 'Litre sport bikes, 600–1000 cc', bias: -0.0090, mae: 0.1755, n: 72 },
-  { name: 'Sport twins, 600–1300 cc', bias: 0.0134, mae: 0.2413, n: 46 },
-  { name: 'All bikes, weighted overall', bias: 0.0087, mae: 0.2620, n: 273 },
+  { name: 'Litre sport bikes, 195 hp and up', bias: -0.0106, mae: 0.1712, n: 29 },
+  { name: 'Sport bikes, 600–1000 cc', bias: -0.0163, mae: 0.1462, n: 76 },
+  { name: 'Sport twins, 600–1300 cc', bias: -0.0008, mae: 0.2083, n: 44 },
+  { name: 'All bikes, weighted overall', bias: 0.0226, mae: 0.2495, n: 263 },
 ];
 
 // MUST equal the docs/validation TOP10 (10 November 2026 sweep — the 10 smallest
-// differences among non-derived benchmarks, mean ±0.007 s; DERIVED estimates
+// differences among non-derived benchmarks, mean ±0.006 s; DERIVED estimates
 // are excluded). Sync both together.
 const TOP10 = [
-  { rank: 1,  name: 'Kawasaki ZRX1200R',             year: 2001, cc: '1164cc I4', target: 10.85, sim: 10.8487, delta: -0.001, source: 'Cycle World 2001' },
-  { rank: 2,  name: 'Honda CBR650R E-Clutch',        year: 2024, cc: '649cc I4',  target: 11.45, sim: 11.4521, delta:  0.002, source: 'MotoStatz (instrumented)' },
-  { rank: 3,  name: 'BMW S 1000 RR',                 year: 2015, cc: '999cc I4',  target: 9.90,  sim: 9.9038,  delta:  0.004, source: 'Cycle World 2015' },
-  { rank: 4,  name: 'Triumph Rocket 3 Storm R',      year: 2024, cc: '2458cc I3', target: 10.56, sim: 10.5541, delta: -0.006, source: 'Cycle World (tuned pass)' },
-  { rank: 5,  name: 'Honda CBR250RR (Indonesia)',    year: 2017, cc: '250cc I2',  target: 14.60, sim: 14.6060, delta:  0.006, source: 'VBox 2017 (instrumented)' },
-  { rank: 6,  name: 'MV Agusta Brutale 1000 RR Assen', year: 2024, cc: '998cc I4', target: 10.15, sim: 10.1430, delta: -0.007, source: 'Cycle World' },
-  { rank: 7,  name: 'Yamaha MT-10 SP',               year: 2022, cc: '998cc I4',  target: 10.35, sim: 10.3405, delta: -0.010, source: 'Cycle World' },
-  { rank: 8,  name: 'Ducati 1098',                   year: 2007, cc: '1099cc V2', target: 10.40, sim: 10.4100, delta:  0.010, source: 'Cycle World 2007' },
-  { rank: 9,  name: 'Kawasaki Z H2 SE',              year: 2024, cc: '998cc I4',  target: 9.95,  sim: 9.9631,  delta:  0.013, source: 'Cycle World' },
-  { rank: 10, name: 'Kawasaki Ninja ZX-10R',         year: 2011, cc: '998cc I4',  target: 10.08, sim: 10.0933, delta:  0.013, source: 'Sport Rider 7/11' },
+  { rank: 1,  name: 'Kawasaki Ninja ZX-10R',     year: 2011, cc: '998 cc',  target: 10.08, sim: 10.0786, delta: -0.001, source: 'Sport Rider, July 2011' },
+  { rank: 2,  name: 'Aprilia RS 660 Factory',    year: 2025, cc: '659 cc',  target: 11.24, sim: 11.2439, delta:  0.004, source: 'MotoStatz (Dragy)' },
+  { rank: 3,  name: 'Yamaha FZ6 Fazer',          year: 2004, cc: '600 cc',  target: 11.53, sim: 11.5347, delta:  0.005, source: 'Cycle World 2004' },
+  { rank: 4,  name: 'BMW M 1000 RR',             year: 2021, cc: '999 cc',  target: 9.80,  sim: 9.8051,  delta:  0.005, source: 'Cycle World 2021' },
+  { rank: 5,  name: 'BMW S 1000 RR',             year: 2019, cc: '999 cc',  target: 9.85,  sim: 9.8446,  delta: -0.005, source: 'Cycle World 2019' },
+  { rank: 6,  name: 'Yamaha RD350',              year: 1973, cc: '347 cc',  target: 14.30, sim: 14.3058, delta:  0.006, source: 'Cycle World (period test)' },
+  { rank: 7,  name: 'Yamaha VMAX 1700',          year: 2009, cc: '1679 cc', target: 10.30, sim: 10.3063, delta:  0.006, source: 'Cycle World 2009' },
+  { rank: 8,  name: 'Suzuki SV650X',             year: 2018, cc: '645 cc',  target: 12.10, sim: 12.1075, delta:  0.007, source: 'motorcyclespecs.com' },
+  { rank: 9,  name: 'Triumph Speed Triple 1050', year: 2005, cc: '1050 cc', target: 11.01, sim: 11.0190, delta:  0.009, source: 'Sport Rider 2005' },
+  { rank: 10, name: 'Yamaha MT-10',              year: 2016, cc: '998 cc',  target: 10.35, sim: 10.3610, delta:  0.011, source: 'Cycle World 2016' },
 ];
 
 // What the catalog holds (synced to motoquant.db by audit_headline_stats.py).
@@ -68,9 +69,9 @@ const STAT_WORDS = { BIKES: 'bikes', PARTS: 'parts', TIRES: 'tyres', VENUES: 've
 // Aggregate accuracy tiles (10 November 2026 sweep).
 const ACCURACY_TILES = [
   { num: '250',     label: 'published tests checked' },
-  { num: '74',      label: 'within 0.10 s' },
-  { num: '137',     label: 'within 0.20 s' },
-  { num: '±0.007 s', label: 'average error, 10 best' },
+  { num: '72',      label: 'within 0.10 s' },
+  { num: '130',     label: 'within 0.20 s' },
+  { num: '±0.006 s', label: 'average error, 10 best' },
 ];
 
 const TASKS = [
@@ -157,8 +158,8 @@ export default function HomePage() {
                 Know your quarter-mile time before you race.
               </h1>
               <p className="mt-4 max-w-xl text-base leading-relaxed text-white/75 md:text-lg">
-                Pick your bike, see how fast it should run, and find out what actually
-                makes it quicker. Free and open source.
+                Pick your bike, see the time it should run, and find out what will
+                actually make it quicker.
               </p>
 
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
@@ -228,7 +229,7 @@ export default function HomePage() {
             <SectionHead
               eyebrow="Accuracy"
               title="Can I trust the numbers?"
-              lede="For most bikes, yes. We compare MotoQuant with 250 benchmarks from published tests by Cycle World, Sport Rider, MCN and Motorcyclist, and publish every miss. On the 10 closest bikes the simulator is within 0.01 s of the magazine time on average."
+              lede="For sport bikes, yes. Across 263 matches with published tests (Cycle World, Sport Rider, MotoStatz Dragy runs and others), the simulator is off by 0.25 s on average, and by less on sport bikes. Every miss is published."
             />
 
             <dl className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -262,14 +263,14 @@ export default function HomePage() {
               <p className="mt-4 text-sm leading-relaxed text-white/70">
                 <strong className="font-semibold text-white">The honest limit:</strong> small
                 bikes, two-strokes and cruisers are less well covered by published tests, so
-                their results carry a wider margin. Small bikes are the weakest class, and many of
-                them still carry a known gearing limitation, documented in{' '}
+                their results carry a wider margin. Small bikes are the weakest class: their
+                gearing in the catalog is still inferred, and{' '}
                 <a
-                  href="https://github.com/toto171/MotoQuant.in/blob/main/reports/session_2026_11_10_epoch.md"
+                  href="https://github.com/toto171/MotoQuant.in/blob/main/reports/gearing_experiment_2026_11_10.md"
                   className="text-accent underline underline-offset-2 hover:text-accent-bright"
                   rel="noopener"
                 >
-                  the repository
+                  fixing it needs a re-tune
                 </a>
                 .{' '}
                 <Link
@@ -345,14 +346,14 @@ export default function HomePage() {
             <SectionHead
               eyebrow="Open source"
               title="Free, open, and yours to improve"
-              lede="MotoQuant is released under the Apache License 2.0. The simulator, the bike catalog and the accuracy checks are all public, so anyone can read the maths, fix a number or run their own copy."
+              lede="MotoQuant is released under the Apache License 2.0. The simulator, the bike catalog and the accuracy checks are public, so you can read the maths, correct a number or run your own copy."
             />
 
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
-                { icon: Github, title: 'View on GitHub', body: 'Read the code, report a bug or star the project.', href: REPO_URL, external: true },
-                { icon: PlusCircle, title: 'Add your bike', body: 'Missing a model? Tell us the specs and we will add it.', href: ISSUES_URL, external: true },
-                { icon: Flag, title: 'Send us your timeslip', body: 'Real runs make the numbers better. Share yours.', href: ISSUES_URL, external: true },
+                { icon: Github, title: 'Read the code', body: 'Every line of the simulator and the site, on GitHub.', href: REPO_URL, external: true },
+                { icon: PlusCircle, title: 'Suggest a bike', body: 'Missing a model? Send its specifications and a source.', href: SUGGEST_URL, external: true },
+                { icon: Flag, title: 'Submit a timeslip', body: 'A real run, checked and added, makes the numbers better for everyone.', href: TIMESLIP_URL, external: true },
                 { icon: BookOpen, title: 'Read the physics', body: 'How the simulation works, step by step, in plain language.', href: '/docs/physics' },
               ].map(({ icon: Icon, title, body, href, external }) => (
                 <a

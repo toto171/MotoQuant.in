@@ -25,7 +25,7 @@
 | Exact quarter-mile (splits, timeseries) | **Server** (RK4) | The authoritative number; the Run button |
 | Full sims in-browser (future) | **Browser** — the Rust wasm32 core (`web/lib/engine.js`); parity proven, UI not wired yet | See "Tier 2" below |
 | Build Optimizer / Autotune / Outlaw | **Server, free for everyone** (no tier gate since 2026-10-23) | They orchestrate hundreds of sims plus the knapsack/ROI machinery, so they stay server-side for practical reasons. They are now *candidates* for client-side execution like everything else; there is no paid product to protect |
-| Leaderboard saves | **Server only** | Estimated results can never be saved (enforced in the simulator page) |
+| Saved runs and timeslips | **Browser store; server re-run** | Only exact results can be saved (enforced in the simulator page); a shared timeslip re-runs its setup through the API |
 
 ## Tier 1 — the in-browser surrogate (SHIPPED)
 

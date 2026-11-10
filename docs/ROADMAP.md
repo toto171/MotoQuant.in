@@ -1,185 +1,104 @@
 # Engineering roadmap
 
-> Honest, prioritized, and tied to real blockers. This is the "what to do next
-> and why" for whoever is at the keyboard, whether that is a model, a human
-> contributor or the maintainer. Re-rank it as reality changes; don't let it
-> rot. Last substantive revision: 2026-11-10 (release 2.0.0: open-source
-> pivot [ADR-0006](adr/0006-open-source-pivot.md), Rust core
-> [ADR-0007](adr/0007-rust-physics-core.md), accuracy epoch, site redesign).
+What to work on next, and why, ranked by what most improves accuracy or
+keeps the site up. Re-rank it when the facts change. Last revised
+2026-11-10, for release 2.0.0 (open source
+[ADR-0006](adr/0006-open-source-pivot.md), Rust core
+[ADR-0007](adr/0007-rust-physics-core.md), the accuracy epoch and the site
+redesign). Finished work is recorded in [CHANGELOG.md](../CHANGELOG.md);
+check it before picking up an item, because several old backlog entries
+were done long before they were removed from here.
 
-## North star
+## Where the project stands
 
-MotoQuant is **free and open source** (Apache-2.0). Success means:
+MotoQuant is free and open source under Apache-2.0. The engine is checked
+against 263 published runs, the site is live at motoquant.in, and the test
+suite is large. Code is no longer the main limit. In order, the limits are:
 
-- **Accuracy you can audit.** A growing, source-labelled corpus of
-  *instrumented* benchmarks (Dragy/VBOX/Racelogic runs, magazine timing
-  gear), a weighted sweep anyone can rerun, and residuals published on
-  `/validation`.
-- **Contributors.** Riders, tuners and developers can add a bike, a
-  benchmark, a dyno sheet or a fix without asking permission, because the
-  contract (AGENTS.md), the gates (`make check`) and the invariants are
-  written down and enforced.
-- **Self-hostable.** Anyone can run the whole stack from this repo
-  ([SELF_HOSTING.md](SELF_HOSTING.md)), and the hosted instance at
-  motoquant.in stays up and correct under real load.
+1. Data. Small bikes are the weakest class. Few instrumented timeslips exist
+   for them, and many run a generic primary gear ratio because nobody has
+   sourced the real one (see "Accuracy" below).
+2. Contributor logistics: private security reporting, Discussions, triaged
+   issue templates and CI that runs on forks.
+3. One engineering blocker to scaling: the shared SQLite connection.
 
-## The honest reality
+## P0: launch and stability
 
-The **code is not the bottleneck.** The engine is validated, the product is
-live (`motoquant.in` on Vercel, API on Render), and the test suite is deep.
-What limits MotoQuant now, in order:
-
-1. **Data.** Small bikes are the weakest class. Part of that is benchmark
-   data (it needs real instrumented timeslips, which means community
-   contributions and data partnerships with tuning shops and dyno owners) and
-   part is catalog data (many small bikes run a generic primary gear ratio;
-   see "Accuracy" below).
-2. **Openness logistics.** The repo has to be public and easy to contribute
-   to: visibility flipped, private security reporting on, issue templates
-   triaged, CI working for forks.
-3. **One real engineering scaling blocker**: the shared SQLite connection.
-
-Everything below is ranked by *what unblocks contributors and accuracy or
-prevents an outage*, not by what's fun to build.
-
-## P0 — Open-source launch and stability
-
-| # | Item | Owner | Why | Success metric |
+| # | Item | Owner | Why | Done when |
 |---|---|---|---|---|
-| P0-1 | **Flip the repository public** and turn on GitHub private vulnerability reporting + Discussions | Maintainer | `SECURITY.md`, `CODE_OF_CONDUCT.md` and the `/contact` page point at them. | Repo public; "Report a vulnerability" works; Discussions enabled. |
-| P0-2 | ~~User-data durability on the hosted instance~~ | — | Resolved 2026-11-10 by removing accounts and server-side saved runs: the site stores no visitor data, so a deploy loses nothing. | — |
-| P0-3 | **Fix the shared SQLite connection before multi-worker** (per-thread / pooled conn, or the Postgres migration) | Engineering | KNOWN_TRAPS T14 / ADR-0004: one `check_same_thread=False` connection is shared across request + job threads; concurrent writes can interleave. Fine at 1 worker, corrupts under scale. | 2+ workers pass a concurrent read/write stress test with no interleave/errors. |
-| P0-4 | **Rotate any credentials that ever touched the history before going public**, and keep the secret-scan gate | Maintainer + Eng | Tokens have historically been pasted into chats and notes. A public repo exposes its entire history. CI blocks token-shaped strings in new commits; anything already in history must be rotated or the history scrubbed. | `make health` secret scan clean; every historical PAT/API key revoked. |
-| P0-5 | **Fork-friendly CI** | Engineering | Workflows must pass on PRs from forks without secrets (deploy jobs are already gated). | A PR from a fork runs `ci.yml` and `web-verify.yml` green. |
+| P0-1 | Turn on private vulnerability reporting and Discussions, and protect `main` | Maintainer | `SECURITY.md`, `CODE_OF_CONDUCT.md` and `/contact` point at them. Branch protection with code-owner review is what keeps an outside pull request from reaching the site. | "Report a vulnerability" works; Discussions are on; `main` requires a reviewed pull request and green checks. |
+| P0-2 | ~~Durability of user data on the hosted copy~~ | | Resolved on 2026-11-10 by removing accounts. The site stores no visitor data, so a redeploy loses nothing. | |
+| P0-3 | Fix the shared SQLite connection before running more than one worker | Engineering | KNOWN_TRAPS T14 and ADR-0004: one `check_same_thread=False` connection is shared by request and job threads, so concurrent writes can interleave. Safe at one worker. | Two or more workers pass a concurrent read/write stress test. |
+| P0-4 | Keep the secret-scan gate | Maintainer and engineering | A full-history scan before the repository went public found no live credentials. CI blocks token-shaped strings in new commits; a credential that does land must be revoked, not just deleted. | `make health` secret scan stays clean. |
+| P0-5 | CI that works for forks | Engineering | A pull request from a fork must run the checks without secrets. Deploy jobs already run only on pushes to this repository's `main`. | A fork's pull request runs `ci.yml` and `web-verify.yml` green. |
 
-## P1 — Correctness & hardening
+## P1: accuracy
 
-**Fixed in PR #100** (was deferred): magic-link token echo in prod (account
-takeover), `consume_magic_link` double-consume race, `get_or_create_user` race,
-`simulate_distance` empty-array 500, `ratelimit` overflow now evicts oldest-first
-(no longer wipes everyone), a `busy_timeout` on the DB connection, the chat
-citation XSS, the login `?next=` backslash open-redirect, and least-privilege
-`permissions` on the read-only CI workflows.
-
-**Landed in PR #114 (2026-07-17) — do NOT re-scope these.** Every item that
-used to sit in this "still deferred" block is done and verified in the tree
-(re-verified in the 2026-07-25 audit). Recorded here because sessions have
-repeatedly re-scoped completed work from stale backlog text:
-
-- ~~`python-jose` unmaintained~~ — migrated to `PyJWT`; algorithms pinned, no
-  alg-confusion path, and the unsigned `dev.` branch stays gated on the
-  library-absent case.
-- ~~Dockerfile runs as root~~ — non-root `USER app`, verified against a real
-  Docker build.
-- ~~`bike_repo`/`venue_repo` `lastrowid==0` misread~~ — both use `rowcount`.
-- ~~Dead `CategoryProfile` knobs~~ — the six inert knobs were deleted and the
-  live-knob inventory is pinned as an exact set in `tests/test_profile_knobs.py`.
-  *(Caveat found 2026-07-25: `parasitic_mult` was listed as live but bypassed
-  for the whole catalog. RESOLVED 2026-08-08: synthetic catalog curves now
-  declare crank semantics, so the parasitic + chain-efficiency paths — and
-  the 29 previously-inert priced SKUs behind them — are live; see
-  reports/session_2026_08_08_full_night_run.md.)*
-- *Also already resolved — do NOT re-implement:* the auth **timing-safe
-  compare + bounded fail-tracker** hardening (July-3 inventory item A1-6).
-  Sessions kept re-scoping it from the stale `reports/ROADMAP_2026_07_03.md`
-  inventory; treat that file as history only. (The license-key and Razorpay
-  hardening that used to be listed here was deleted with monetization on
-  2026-10-23; see ADR-0006.)
-
-## P1 — Accuracy
-
-- **Small-cc / 2-stroke ET** is limited mostly by benchmark *data quality*.
-  The lever is **instrumented Dragy/VBox timeslips** from real Indian /
-  SE-Asia stock bikes (Aamby Valley, MMRT). This is a community/partnership
-  play, not a code change. Every added instrumented benchmark tightens the
-  weighted sweep and the public accuracy story.
-- **Small-bike gearing needs sourced primary ratios.** Many small bikes fall
-  back to a litre-bike primary ratio and are geared implausibly tall. An
-  *inferred* primary rule was built and measured in November 2026: it made
-  the weighted fit worse, no plausible retune recovered it, and it was
-  reverted (`reports/session_2026_11_10_epoch.md`, measured on the
-  pre-rollout model). Do not re-apply an inferred rule; add service-manual
-  primaries bike by bike and re-run the sweep.
+- Instrumented timeslips for small bikes and two-strokes. Their error is
+  limited mostly by the benchmarks themselves: magazine tests rarely cover
+  them. Real Dragy or VBOX runs from stock bikes at Aamby Valley or MMRT are
+  the fix, and the "Submit a timeslip" form exists for them. This is a
+  community job, not a code change.
+- Sourced primary ratios for small bikes. Many fall back to a litre-bike
+  primary ratio and are geared too tall. In November 2026, 32 sourced
+  gearing entries covering 53 bikes were applied as an experiment. The
+  weighted error went from 0.2495 s to 0.2525 s and the affected bikes got
+  worse (0.411 s to 0.447 s), because the current tuning compensates for the
+  wrong gearing. The data was kept and not applied
+  ([reports/gearing_experiment_2026_11_10.md](../reports/gearing_experiment_2026_11_10.md)).
+  Applying it needs a re-tune of the small-bike launch and drivetrain
+  losses in the same change. Do not re-apply an inferred rule;
   `scripts/check_gearing_plausibility.py` keeps the flagged list from
   growing.
-- **The 2026-10/11 accuracy epoch landed** (rollout timing from the 1-ft
-  beam, combined bike + rider centre of mass in the wheelie limit, aero pitch
-  moment, tyre heat balance, `wheelie_margin`; pins 10.0436 / 10.1092 /
-  10.1100; see `CHANGELOG.md` and `reports/session_2026_11_05_handoff.md`).
-  Its documented residuals are the next levers, in the handoff's order: a
-  launch model calibrated on measured 60-ft rows; per-source rollout
-  evidence; the two-stroke curve ladder; measured CoG / weight-distribution
-  data in place of the 52 %-front and 810 mm seat defaults.
-- **Epoch-gated physics still open** (Pacejka slip force, 4-branch clutch
-  dispatch, staging dead time) — do NOT wire casually; they move the pinned
-  baselines (ADR-0002). Only behind a deliberate, sweep-justified accuracy
-  pass.
-- **One default-conditions convention.** Catalog bikes simulate at their
-  stored default venue conditions while the three reference presets run at
-  sea level. Every result now states its conditions, but one default would be
-  simpler to explain.
-- **Factory speed-limiter model** — *shipped in PR #114*: `speed_limiter_kmh`
-  is a validated spec field, plumbed through the bridge and config_io
-  round-trip, clamped at all four RK4 stage velocities, with a green test
-  module. The blocker found in the 2026-07-25 audit (four annotated heavies
-  whose catalog top gear was too short to reach their own limiter) was fixed
-  on 2026-08-08 with service-manual gearboxes, and more bikes were annotated
-  then. **What remains is a broader annotation pass**; top speed is still
-  weaker than ET (figures in the newest `reports/acc_final_*.json`).
+- The next levers from the accuracy epoch (rollout timing, combined centre
+  of mass in the wheelie limit, aero pitch moment, tyre heat balance; pins
+  10.0436 / 10.1092 / 10.1100). In the order of
+  [reports/session_2026_11_05_handoff.md](../reports/session_2026_11_05_handoff.md):
+  a launch model fitted to measured 60-ft times, per-source rollout
+  evidence, the two-stroke power-curve ladder, and measured centre-of-mass
+  data in place of the 52 % front and 810 mm seat-height defaults.
+- Physics that would move the pins (Pacejka slip force, four-branch clutch
+  dispatch, staging dead time) waits for a deliberate accuracy pass with a
+  full sweep as evidence (ADR-0002).
+- A wider speed-limiter annotation pass. The limiter model works; top speed
+  is still weaker than ET, at about +6.8 km/h on average (newest
+  `reports/acc_final_*.json`).
 
-## P1 — Community data
+## P1: community data
 
-- **Benchmark contributions.** Make it trivial to submit an instrumented run:
-  the `calibration_data` issue template, the `/validation` page CTA, and a
-  documented source-labelling rule (instrumented / magazine / aggregator /
-  forum / DERIVED weights). Every accepted instrumented row tightens the
-  weighted sweep.
-- **Data partnerships, not sales.** Tuning shops and dyno owners in
-  Pune/Narhe, Bangalore and Hyderabad are asked for runs and dyno sheets, not
-  sold seats (`scripts/agents/partnership-outreach.md`; the old B2B pitches
-  are in `docs/archive/outreach/`).
+- Benchmarks. The "Submit a timeslip" form, the `/validation` page and the
+  source weights (instrumented, magazine, aggregator, forum, derived) make a
+  submission easy to review. Every accepted instrumented run tightens the
+  sweep.
+- Data from tuning shops and dyno owners. The project asks for runs and dyno
+  sheets, not money; the "Dyno sheet or ECU log" form takes them.
 
-## P2 — Open-source ecosystem
+## P2: open-source ecosystem
 
-- **Good-first-issue pipeline.** Label scoped issues (catalog passes,
-  resolver tokenization, chat streaming, small UI polish) so new
-  contributors have an obvious entry point.
-- **Rust core** (bit-identical to the Python reference, which stays the
-  reference): it already serves every server simulation when installed
-  (`motoquant/engine_select.py`) and runs the sweeps. Remaining: wire exact
-  client-side full sims in the browser to the committed wasm engine
-  (`web/lib/engine.js`; parity is proven, the UI is not wired). See
-  [RUST_CORE.md](RUST_CORE.md).
-- **Saved runs do not store their conditions.** `/r/[id]` timeslips show the
-  result but not the venue/weather it was computed for; store and show them.
-- **Observability.** Sentry is wired (env-gated). Server-side PostHog
-  forwarding is opt-in and off unless the operator sets `POSTHOG_API_KEY`.
-  Funnel events (sim → save → share → signup) help the hosted instance, but a
+- A steady supply of good first issues: catalog fixes, resolver
+  tokenisation, chat streaming, small interface work.
+- Exact simulations in the browser. The Rust core is bit-identical to the
+  Python reference and already serves every server simulation when
+  installed (`motoquant/engine_select.py`). The committed wasm build passes
+  the same parity checks but the interface does not call it yet
+  (`web/lib/engine.js`; see [RUST_CORE.md](RUST_CORE.md)).
+- Export and import of saved runs. Runs live in the browser's storage, so
+  clearing it loses them; a JSON export would let people move them between
+  devices.
+- Observability. Sentry is wired and off unless configured. Server-side
+  PostHog forwarding is off unless the operator sets `POSTHOG_API_KEY`; a
   self-hosted copy sends nothing anywhere.
-- **Content.** The accuracy/validation story is the differentiator: blog
-  posts, the `/validation` explorer and honest benchmark tables.
-- **Distribution channels**: ~~an **MCP server** wrapping the existing `/api/*`
-  surface ("ask your AI what 16/45 does to your 60-foot") and a **MotoQuant
-  skill**~~ — **SHIPPED 2026-08-08**: `motoquant/mcp_server.py` (stdlib-only
-  stdio MCP, 9 tools, HTTP + local backends, `docs/MCP.md`) and
-  `skills/motoquant/`. Remaining: announce it (blog post, a 30-second demo
-  clip of the sprocket what-if).
-- **Test-coverage signal → gate**: CI already emits coverage XML
-  (non-blocking). Ratchet a floor on the physics and other critical modules.
+- The MCP server (`motoquant/mcp_server.py`, [MCP.md](MCP.md)) and the
+  `skills/motoquant/` skill shipped in August 2026 and have not been
+  announced.
+- Coverage. CI publishes coverage without enforcing it; a floor on the
+  physics modules would catch untested changes.
 
-## The durability thesis (why this repo can be handed off)
+## Why the project survives a change of hands
 
-This project has been maintained largely by AI sessions with occasional human
-input, and is now open to every contributor. It survives model/contributor
-switches because the knowledge is **externalized and enforced**, not held in
-one head:
-
-- **AGENTS.md** — the contract every contributor reads first.
-- **docs/INVARIANTS.md** + `scripts/check_baselines.py` + CI — what must never
-  break, enforced automatically.
-- **docs/KNOWN_TRAPS.md** — the "don't step here" map of recurring bugs.
-- **docs/adr/** — why settled decisions are settled (don't relitigate).
-- **`make health` / `make check`** — one command to know the state / to gate a PR.
-
-Keep these current and the codebase keeps improving no matter who — or what — is
-at the keyboard. That is the actual moat behind the physics.
+The knowledge lives in files that CI enforces, not in one person's head:
+[AGENTS.md](../AGENTS.md) for the working rules,
+[INVARIANTS.md](INVARIANTS.md) and `scripts/check_baselines.py` for what must
+never break, [KNOWN_TRAPS.md](KNOWN_TRAPS.md) for bugs that recur, the
+[ADRs](adr/) for settled decisions, and `make health` and `make check` to
+learn the state of the tree and gate a change. Keep them current.

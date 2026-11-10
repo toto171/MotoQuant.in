@@ -5,8 +5,8 @@ times) and cost real debugging time. Read this before a large change; it is
 cheaper than rediscovering these. New contributor — model or human — this is
 the "don't step here" map.
 
-> Rule of thumb from `CLAUDE.md`: *"Fix the same mistake twice, and it is a
-> rule. Fix it three times, and it is a section in the docs."*
+> Rule of thumb: *"Fix the same mistake twice, and it is a rule. Fix it three
+> times, and it is a section in the docs."*
 
 ---
 
@@ -61,12 +61,11 @@ After any large write, `wc -l` the file and eyeball the last lines. If truncated
 rewrite via `cat > file <<'EOF'` (no size limit) or restore from
 `git show HEAD:path`.
 
-### T8 — `CLAUDE.md` is a fragile single-paragraph changelog
-Line ~3 holds the entire nested session history in one paragraph. A `Write` that
-"cleans it up" loses the trailing evergreen sections. **Prepend one line;** never
-regenerate. Substantive write-ups go in `reports/`. (This repo is intentionally
-migrating the durable knowledge *out* of CLAUDE.md into AGENTS.md / INVARIANTS.md
-/ ARCHITECTURE.md / this file.)
+### T8 — Durable knowledge belongs in the docs, not in a session log
+`CLAUDE.md` once held a nested, ever-growing session history, and every
+"clean-up" lost part of it. It is now a short pointer to `AGENTS.md`. Put rules
+in `AGENTS.md` / `INVARIANTS.md`, recurring bugs here, history in
+`CHANGELOG.md`, and investigation write-ups in `reports/`.
 
 ### T9 — Vercel rejects unknown committer emails
 A deploy fails with "commit author email is not valid" if the author email
@@ -111,8 +110,8 @@ in the July-17 run. Kept as a trap because the misreading is easy to reintroduce
 ### T14 — One shared SQLite connection across request + job threads
 `api.py` keeps a module-level `sqlite3` connection (`check_same_thread=False`)
 reused by FastAPI request threads *and* `jobs.py` daemon workers. Reads are fine
-on the single-worker Render deploy, but concurrent **writes** (save-run, suggest,
-auth session, magic-link consume) can interleave. This is the
+on the single-worker Render deploy, but concurrent **writes** (the chat
+assistant's bike-estimate log, any future write route) can interleave. This is the
 #1 thing to fix before scaling to multiple workers — a per-thread/pooled
 connection. (Deferred; documented in the roadmap.)
 
@@ -142,8 +141,8 @@ idempotent — but NOT appended to the documented reseed chain, so a fresh
 reseed would silently drop all of it (real data loss, invisible until a
 price/tire diff). Same shape as the seed-source resurrection closed July 4
 (A3-15) and the July-6 patch trio. The rule: the session that lands a
-`scripts/patch_*.py` also updates the reseed chain in `CLAUDE.md` CURRENT
-STATE (and anywhere else the chain is written out). The gate: re-prove the
+`scripts/patch_*.py` also appends it to `RESEED_CHAIN` in the `Makefile`
+(`make reseed` is the one written-out chain). The gate: re-prove the
 FULL chain idempotent (×2) whenever a script is added.
 
 ### T18 — A catalog bike and a reference preset do not run in the same air

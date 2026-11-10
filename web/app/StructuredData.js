@@ -98,12 +98,12 @@ export function softwareApplicationSchema() {
       url: `${SITE_URL}/simulator`,
     },
     featureList: [
-      'Quarter-mile ET prediction to ±0.2s',
-      '534 motorcycles with individual aero + dyno curves',
+      'Quarter-mile time, finish-line speed and top speed for 534 motorcycles',
+      'Each bike with its own gearing, weight, aerodynamics and power curve',
       '546-part catalog with cost-per-tenth ROI analysis',
       '15 independent physics sub-models',
       'Dragy GPS + dyno import with sim overlay',
-      'Calibrated surrogate model for instant iteration',
+      'Instant estimates computed in the browser',
       'Budget-aware build optimization',
       'Natural-language tuning queries',
     ],
@@ -120,11 +120,11 @@ export const FAQ_ITEMS = [
   },
   {
     q: 'How accurate is the quarter-mile prediction?',
-    a: 'Checked against published magazine tests and Dragy runs: the Suzuki GSX-R1000 K5 simulates 9.93 s against a real 9.97 s; the Yamaha YZF-R1 simulates 10.14 s against 10.3 s; the Suzuki Hayabusa simulates 10.36 s (real range 10.1–10.7 s). The November 2026 check covers 250 published benchmarks (273 matched to catalog bikes) with a weighted mean bias of +0.009 s; 137 of 273 land within ±0.20 s of the published time. Small bikes are less well covered by published tests, so expect a wider margin there.',
+    a: 'Across 263 matches with published magazine tests and Dragy runs, the simulated time is off by 0.25 s on average (weighted by how trustworthy each source is), and 130 land within 0.20 s of the published time. Sport bikes do best; small bikes are less well covered by published tests and carry a wider margin. The three reference bikes, simulated at sea level: Suzuki GSX-R1000 K5 10.04 s against 9.97 s in Cycle World; Yamaha YZF-R1 10.11 s against 10.30 s in Sport Rider; Suzuki Hayabusa 10.11 s against 10.40 s in Cycle World.',
   },
   {
     q: 'Which bikes are included?',
-    a: 'The catalog covers 534 bikes across 25+ makers: Suzuki, Yamaha, Honda, Kawasaki, BMW, Ducati, Aprilia, KTM, Triumph, Royal Enfield, Bajaj, TVS, Hero, Harley-Davidson, Indian Motorcycle, CFMoto, Benelli, Husqvarna, MV Agusta, Moto Guzzi, Buell and more. That includes Indian 200–400 cc bikes (Pulsar, Apache, R15 V4), South-East Asian underbones, 400 cc four-cylinder bikes, retro flagships and 20 two-stroke drag bikes (RD350, RX100, RGV250, H2 Mach IV). Missing yours? You can ask for it to be added.',
+    a: 'The catalog covers 534 bikes from 33 makers: Suzuki, Yamaha, Honda, Kawasaki, BMW, Ducati, Aprilia, KTM, Triumph, Royal Enfield, Bajaj, TVS, Hero, Harley-Davidson, Indian, CFMoto, Benelli, Husqvarna, MV Agusta, Moto Guzzi, Buell and more. That includes Indian 200–400 cc bikes (Pulsar, Apache, R15 V4), South-East Asian underbones, 400 cc four-cylinder bikes, retro flagships and 21 two-strokes (RD350, RX100, RGV250, H2 Mach IV). Missing yours? Suggest it from the bike list.',
   },
   {
     q: 'Is MotoQuant free?',
@@ -132,7 +132,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: 'Can I use it for Indian drag strips?',
-    a: 'Yes. MotoQuant was built for the Indian drag racing community. It knows Aamby Valley (Pune), Madras Motor Race Track (Chennai), Buddh International Circuit (Greater Noida), Kari Motor Speedway (Coimbatore) and Hyderabad, plus seven international venues, and adjusts for each place\u2019s altitude and weather. Parts prices are in rupees with GST and import duty already included.',
+    a: 'Yes. MotoQuant was built for the Indian drag racing community. It knows Aamby Valley (Pune), Madras Motor Race Track (Chennai), Buddh International Circuit (Greater Noida), Kari Motor Speedway (Coimbatore) and Hyderabad, plus 15 venues abroad, and adjusts for each place\u2019s altitude and weather. Parts prices are in rupees with GST and import duty already included.',
   },
   {
     q: 'How does it decide which parts are worth buying?',
@@ -140,7 +140,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: 'Can I upload my own Dragy or dyno data?',
-    a: 'Yes. MotoQuant reads Dragy GPS logs (CSV or VBO) and DynoJet or MoTeC dyno sheets, corrects dyno numbers for the day\u2019s air, and lines your real run up against the simulation: finish time, finish-line speed and split-by-split differences for your own bike.',
+    a: 'Yes. MotoQuant reads Dragy GPS logs (CSV or VBO) and DynoJet or MoTeC dyno sheets, corrects dyno numbers for the day\u2019s air, and lines your real run up against the simulation: finish time, finish-line speed and split-by-split differences for your own bike. The file is read, compared and deleted; nothing is kept.',
   },
 ];
 

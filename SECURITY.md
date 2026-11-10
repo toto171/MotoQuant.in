@@ -26,10 +26,10 @@ Report it privately with **GitHub Security Advisories**:
 3. Describe the issue, how to reproduce it, and the impact you expect. A
    minimal proof of concept helps. Please do not include real user data.
 
-If private reporting is unavailable (for example while the repository is
-still private), open a GitHub issue that says only *"security report — please
-contact me"*, with no details, and a maintainer will arrange a private
-channel.
+If private reporting is unavailable, email <motoquant@gmail.com> with the
+subject "Security report", or open a GitHub issue that says only *"security
+report: please contact me"*, with no details, and a maintainer will arrange a
+private channel.
 
 What to expect:
 

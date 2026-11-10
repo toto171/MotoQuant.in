@@ -1,8 +1,7 @@
 # MotoQuant — Architecture & Module Map
 
 > **Purpose of this file:** the fastest way for a new human or LLM to answer
-> *"where does X live and how does data flow through the system?"* without
-> reading the 800-line `CLAUDE.md` changelog. Pair it with
+> *"where does X live and how does data flow through the system?"* Pair it with
 > [`docs/ONBOARDING.md`](ONBOARDING.md) (the day-one brief) and
 > [`CONTRIBUTING.md`](../CONTRIBUTING.md) (dev workflow).
 

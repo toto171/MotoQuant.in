@@ -244,7 +244,7 @@ def render_og_image(path: Path) -> None:
         ("534", "bikes"),
         ("546", "parts"),
         ("20", "venues"),
-        ("4800+", "tests"),
+        ("6200+", "tests"),
     ]
     stat_x = 110
     stat_y = 420

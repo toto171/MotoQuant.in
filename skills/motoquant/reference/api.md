@@ -176,8 +176,7 @@ MOTOQUANT_MCP_LOCAL=1 python -m motoquant.mcp_server
 
 ## Repo conventions worth knowing
 
-- **`AGENTS.md` first**, then `docs/ARCHITECTURE.md`. `CLAUDE.md` is a long
-  session changelog — skim only its top entry.
+- **`AGENTS.md` first**, then `docs/ARCHITECTURE.md`.
 - **The three pinned baselines are load-bearing.** K5 10.0436 / R1 10.1092 /
   Hayabusa 10.1100, bit-identical. After touching `physics.py`,
   `submodels/*`, `defaults.py`, `category_profiles.py` or

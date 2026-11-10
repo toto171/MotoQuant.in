@@ -60,7 +60,7 @@ const THINGS = [
     q: 'What will the weather do to my time?',
     body: (
       <>
-        Choose one of 20 drag strips, or any place, and the result adjusts for altitude, temperature and humidity (
+        Choose one of 20 venues, or any place, and the result adjusts for altitude, temperature and humidity (
         <Term k="da">air and altitude</Term>). Hot, thin air costs real tenths.
       </>
     ),

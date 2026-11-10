@@ -6,11 +6,9 @@ Welcome to the project. MotoQuant is free and open source (Apache-2.0); anyone c
 0. `AGENTS.md`: the one-page working contract (5 min).
 1. This file (10 min).
 2. `docs/ARCHITECTURE.md` — the module map + data-flow diagram. Answers "where does X live, and how does a bike spec become a simulated ET?" before you open any code (10 min).
-3. `CHANGELOG.md`: the milestone history (read the top few entries). *(`CLAUDE.md` is the AI maintainers' long session-by-session log. Optional: if you open it, read only the top entry.)*
+3. `CHANGELOG.md`: the milestone history (read the top few entries).
 4. `CONTRIBUTING.md` — dev workflow, branch conventions, Kaizen rule (10 min).
-5. `docs/ROADMAP.md` — the live prioritized backlog + the maintainer-only actions (10 min).
-   *(`reports/ROADMAP_2026_07_03.md` is a dated snapshot, kept as history only —
-   sessions have repeatedly re-scoped already-finished work out of it.)*
+5. `docs/ROADMAP.md` — the prioritized backlog (10 min).
 6. Skim `motoquant/physics.py`, one sub-model like `motoquant/submodels/tire.py`, and `docs/CHAT_AGENT.md` to get a feel for the code style and the newest subsystem (15 min).
 
 After that, get the test suite green locally (see `CONTRIBUTING.md` §2) and you're ready to open your first PR.
@@ -29,7 +27,7 @@ A first-principles physics engine for predicting and optimising motorcycle quart
 
 | Metric | Value |
 |---|---|
-| Status | Free & open source (Apache-2.0) since 2026-10-23. Monetization scrapped; optional accounts kept |
+| Status | Free & open source (Apache-2.0) since 2026-10-23. No paid tiers and no accounts |
 | Tests | full pytest suite green (runs ~25–35 min; focused subsets in `CONTRIBUTING.md` §4) |
 | Catalog | Bikes across 30+ manufacturers (India, SE Asia, US, EU, JP, CN), tires incl. drag radials/slicks, parts across 19 categories, 20 venues. Current counts: the README (kept in sync by `make audit`) |
 | Benchmarks | Published ET and top-speed rows, each with a source label and a weight; the weighted sweep result is the newest `reports/acc_final_*.json` |
@@ -47,14 +45,13 @@ The code is not the bottleneck. The main limits are data (instrumented Dragy tim
 
 ### Live and working
 - CLI (`python -m motoquant.run --help`) — db/bikes/sim/venues/tires/parts/weather/import/analysis/chat and more.
-- FastAPI backend: sims (quick/full/top-speed/compare), jobs API with real progress + cancel, build optimizer (surrogate-accelerated knapsack), ECU autotune, the composed outlaw pipeline, agentic chat (`/api/chat`, `/api/jobs/chat`), optional accounts (magic link + password; saved-run garage), Dragy/dyno/ECU calibration uploads, leaderboard, shareable timeslips. Everything is free and anonymous-capable; per-IP rate limits protect the compute-heavy routes.
+- FastAPI backend: sims (quick/full/top-speed/compare), jobs API with real progress + cancel, build optimizer (surrogate-accelerated knapsack), ECU autotune, the composed outlaw pipeline, agentic chat (`/api/chat`, `/api/jobs/chat`), Dragy/dyno/ECU calibration uploads. There are no accounts: saved runs live in the browser, timeslips re-simulate the setup in their link, and the leaderboard is generated from the physics. Per-IP rate limits protect the compute-heavy routes.
 - Next.js web app (design system v6, `web/DESIGN.md`): light and dark themes, a landing page built around a ten-second calculator, a simulator with Simple and Advanced modes, step-by-step Upgrades (the build optimizer) and Race-day setup (autotune) tools, the chat UI, a glossary, and docs/blog/validation explorer. Fonts are self-hosted (`web/app/fonts/`), so the build needs no network.
 - (The Tauri desktop app was discontinued in July 2026 and its scaffold deleted in October; see ADR-0005.)
 - Physics: 15 sub-models, fixed and adaptive RK4, ET timed from the 1-ft stage beam, calibration pipeline, and a numpy surrogate (the instant-estimate model; regenerate after ANY physics/DB reseed — standing contract and current version in `artifacts/surrogate/README.md`).
 
 ### Pending / known gaps (the honest list)
-- Hosted-instance DB durability: SQLite is baked into the Docker image, so every deploy wipes optional accounts and saved runs until a persistent disk is mounted (`docs/SELF_HOSTING.md` §3d).
-- Small bikes are the weakest class. Partly data: it needs real Dragy timeslips. Partly catalog: many small bikes run a generic primary gear ratio; an inferred correction was measured, made the fit worse and was not shipped (`reports/session_2026_11_10_epoch.md`) — it needs sourced primaries.
+- Small bikes are the weakest class. Partly data: it needs real Dragy timeslips. Partly catalog: many small bikes run a generic primary gear ratio. Manufacturer gearing for 53 of them is sourced and measured, but applying it needs a re-tune of the small-bike classes first (`reports/gearing_experiment_2026_11_10.md`).
 - Class bias remains on entry 200–300 cc, 300–500 cc singles and two-strokes; the three reference bikes' spread is compressed; two litre bikes carry millisecond-level dry-mass inversions. All documented in `reports/session_2026_11_05_handoff.md`.
 - Top speed is weaker than ET.
 - Catalog bikes simulate at their stored default venue conditions while the three reference presets run at sea level; every result states its conditions, but the two defaults differ.
@@ -95,7 +92,7 @@ These will cause a PR to be rejected even if the code works.
 3. **CLI tests call handlers directly, not subprocesses.** See `tests/test_cli.py`.
 4. **Scraper is stdlib-only.** No BeautifulSoup/lxml.
 5. **Physics baselines are pinned bit-identical**: K5 10.0436 / R1 10.1092 / Hayabusa 10.1100. If you touch `physics.py`, `submodels/*`, `defaults.py`, or the importer, run the baseline check + `tests/test_regression_snapshot.py` and put the deltas in your PR (template has the table). "±0.0000 at 4 decimals" is the expectation; anything else needs a full weighted-sweep justification.
-6. **After any `spec_to_bike_config` change, reseed the DB** (`scripts/reseed_configs_from_specs.py`) — otherwise `/api/simulate?bike_id=N` silently diverges from the spec path. Then regenerate the surrogate (standing contract).
+6. **After any `spec_to_bike_config` change, reseed the DB** (`make reseed`) — otherwise `/api/simulate?bike_id=N` silently diverges from the spec path. Then regenerate the surrogate (standing contract).
 7. **After any catalog change, run `python scripts/audit_headline_stats.py --fix`** — the site's stat tiles/OG cards must match the DB.
 8. **Never `git add -A`.** Stage explicit file lists; the tree often carries unrelated WIP.
 9. **No fabricated data.** Honest gaps beat apparent completeness — this is written into multiple session postmortems.
@@ -131,7 +128,7 @@ maintainers and are never committed. To run your own instance, see
 
 ## 8. How to ask for help
 
-1. `docs/ARCHITECTURE.md` and `docs/README.md` (the docs index). For "is this implemented?", `grep -i <keyword> CHANGELOG.md CLAUDE.md` usually answers it.
+1. `docs/ARCHITECTURE.md` and `docs/README.md` (the docs index). For "is this implemented?", `grep -i <keyword> CHANGELOG.md` usually answers it.
 2. `python -m motoquant.run --help`, then `<subcommand> --help`.
 3. Read the test file for the module you're touching. Tests are the executable spec.
 4. Open a GitHub Issue. Issues are searchable later, so prefer them to private messages.

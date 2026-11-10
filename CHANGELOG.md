@@ -1,10 +1,9 @@
 # Changelog
 
-Notable changes, newest first. This is the human-readable milestone history;
-the exhaustive session-by-session log lives in `CLAUDE.md` (top entry = latest)
-and `reports/`. Format loosely follows [Keep a Changelog](https://keepachangelog.com).
+Notable changes, newest first. Investigation write-ups that entries cite are
+in `reports/`. Format loosely follows [Keep a Changelog](https://keepachangelog.com).
 
-## [2.0.0] — 2026-11-10 — Open source, Rust core, accuracy epoch, plain-language site
+## [2.0.0] — 2026-11-10 — Open source, no accounts, Rust core, accuracy epoch, plain-language site
 
 MotoQuant 2.0 is the first release as free, open-source software under the
 **Apache License 2.0** ([LICENSE](LICENSE), [NOTICE](NOTICE),
@@ -19,14 +18,12 @@ fixes) and PR #127 (site redesign, a second audit, catalog clean-up). Their
 write-ups are `reports/session_2026_11_05_handoff.md`,
 `reports/session_2026_11_10_v2.md` and `reports/session_2026_11_10_epoch.md`.
 
-> **Numbers.** Catalog counts and measured accuracy are regenerated on the
-> merged tree, so this entry does not repeat them. The authoritative figures
-> are the newest `reports/acc_final_*.json`, `make audit` and
-> [motoquant.in/validation](https://www.motoquant.in/validation).
-> Release headline: TODO-NUMBERS(accuracy: matched runs, weighted mean |ΔET|,
-> bias, trap bias, top-speed mean |Δ| — from the post-merge sweep);
-> TODO-NUMBERS(catalog: bikes, parts, tires, fitments, venues — from the
-> post-merge `motoquant.db`).
+**Numbers on the released tree.** Catalog: 534 bikes, 546 parts, 254 tyres,
+1,765 tyre fitments, 20 venues. Accuracy (`reports/acc_final_2026_11_10.json`):
+250 published benchmarks and 263 bike-to-benchmark matches, weighted mean error
+0.2495 s, bias +0.0226 s, 72 within 0.10 s and 130 within 0.20 s; trap-speed
+bias +3.5 km/h. Top speed (`reports/sweep_topspeed_2026-11-10.json`): 83
+matched, mean error 12.7 km/h, bias +6.8 km/h.
 
 ### Added — open source
 - `LICENSE` (Apache-2.0, unmodified), `NOTICE` (copyright; third-party
@@ -35,10 +32,9 @@ write-ups are `reports/session_2026_11_05_handoff.md`,
   (private reporting via GitHub Security Advisories), an open-source README
   and CONTRIBUTING (inbound = outbound, no CLA; the honest-data rule), issue
   and PR templates.
-- `docs/SELF_HOSTING.md`: run the API + web locally, on Render/Vercel or any
-  Docker host. Covers `JWT_SECRET`, `MOTOQUANT_DB` on a persistent disk, the
-  magic-link email transport, LLM keys for chat, backups, and optional
-  Sentry/PostHog.
+- `docs/SELF_HOSTING.md`: run the API and the site locally, on Render and
+  Vercel or on any Docker host, with the optional keys for chat, live
+  weather, Sentry and PostHog.
 - One version number, `motoquant.__version__` (2.0.0), read by
   `pyproject.toml`. `pip install -e ".[dev]"` installs the package with its
   runtime dependencies (`requirements-api.txt`) and the developer tools
@@ -101,12 +97,14 @@ tuning record `reports/acc_epoch3_2026_11_03.json`).
   formula, anchored so the reference day is bit-identical: it changes results
   only away from the reference conditions (tens of milliseconds on a very hot
   day), and the pins did not move.
-- **Measured and not shipped:** an inferred-primary gearing rule for small
-  bikes. The audit confirmed that many small bikes carry implausibly tall
-  gearing (a litre-bike primary ratio as fallback); the corrected rule made
-  measured accuracy worse and no plausible retune recovered it, so it was
-  reverted (`reports/session_2026_11_10_epoch.md`). A plausibility baseline
-  stops the list growing. Small bikes need sourced primary ratios.
+- **Measured and not shipped:** corrected gearing for small bikes. Many
+  small bikes fall back to a litre-bike primary ratio. An inferred rule made
+  measured accuracy worse (`reports/session_2026_11_10_epoch.md`), and so did
+  manufacturer-documented gearing for 53 bikes (weighted error 0.2495 →
+  0.2525 s), because the small-bike class settings were tuned against the
+  tall gearing. The sourced figures are recorded with the experiment in
+  `reports/gearing_experiment_2026_11_10.md`; applying them needs a re-tune
+  of those classes. A plausibility baseline stops the list growing.
 
 ### Changed — the site (design system v6, `web/DESIGN.md`)
 - Light and dark themes; one plain vocabulary ("quarter-mile time",
@@ -133,10 +131,11 @@ tuning record `reports/acc_epoch3_2026_11_03.json`).
 - Catalog responses are cached and invalidated by a database change token;
   background job results are stored compressed under a memory budget; a
   stock-run cache removes the second simulation from part comparisons.
-- JWT secret policy re-keyed off billing: a deployed host (`RENDER` /
-  `RENDER_EXTERNAL_URL` / `MOTOQUANT_DEPLOYED=1`) with no `JWT_SECRET` signs
-  with an ephemeral per-process random secret and warns loudly (sessions reset
-  on restart). It never uses the public default and never refuses to boot.
+- Parts apply in one canonical order, so the same parts give the same time
+  in any order and the simulator agrees with the upgrade planner; a tyre for
+  the wrong wheel is refused; an air temperature without a track temperature
+  sets the track 7 °C warmer; a venue named by text keeps its own surface;
+  weather lookups are cached for ten minutes.
 - Rate limits key on the client IP for the trusted proxy hops only
   (`MOTOQUANT_TRUSTED_PROXY_HOPS`), never the spoofable leftmost
   `X-Forwarded-For` hop; each bucket expires on its own window, so a 60 s
@@ -159,14 +158,23 @@ tuning record `reports/acc_epoch3_2026_11_03.json`).
 - **Plain-English parser**: a model number or a year is never read as a
   budget; when it cannot tell, it says so instead of guessing.
 - **Security**: the chat agent's web fetch re-checks the SSRF guard on every
-  redirect hop and covers shared/carrier-grade NAT ranges; a deployed host
-  never echoes sign-in tokens; anonymous write endpoints are rate-limited.
+  redirect hop and covers shared/carrier-grade NAT ranges.
 - **Chat**: tool-argument hygiene (ported from PRs #117 and #119).
 - **Data**: `scripts/patch_2026_11_05_reference_rows.py` refreshes the three
   reference bikes' DB rows (ids 1–3) from `defaults.py`, so `db seed` no
   longer mints a new config version for each of them.
 - `make db` printed its summary through an unterminated shell quote and
   exited 2 after building the database; fixed.
+- **Documentation and site copy**: the whitepaper, the accuracy pages and
+  the blog quoted the July accuracy figures and the old reference times;
+  they now match the November sweep. The whitepaper, the physics page and
+  the FAQ described a Pacejka slip-force tyre model; the engine uses the
+  peak friction coefficient (with load, temperature, pressure and track
+  preparation), and the slip curve is coded but not called, so the copy now
+  says that. Aero, chain and parasitic-loss ranges on the physics page are
+  taken from the catalog. The accuracy page's methodology gave the
+  benchmark conditions as ISA 15 °C and 0 % humidity; the sweep runs at sea
+  level, 25 °C and 50 %.
 
 ### Changed — catalog
 - Invented placeholder parts that carried real brand names are removed, and
@@ -197,10 +205,33 @@ tuning record `reports/acc_epoch3_2026_11_03.json`).
   surfaces, docs, API titles and CLI help. Historical entries below are left
   as written.
 
+### Removed — accounts and anonymous writes
+- Sign-in (magic link and password), sessions, the account page and the
+  server-side saved-run store, with their tables
+  (`scripts/patch_2026_11_10_remove_accounts.py`). The old save route
+  trusted the time a browser sent and published free-text notes.
+- Public routes that stored visitor input: bike suggestions, spec
+  corrections and price refresh. Every POST route is now on a tested
+  allow-list, and no route accepts PUT, PATCH or DELETE.
+
+### Added — runs, timeslips and contributions without accounts
+- Saved runs live in the browser (`/runs`). A timeslip link carries the
+  setup and the exact conditions, and `/timeslip` re-runs it through the
+  physics, so a shared time cannot be typed in; every change from stock is
+  printed on the slip.
+- The leaderboard ranks every catalog bike by its simulated stock time
+  (`scripts/gen_stock_leaderboard.py`, checked by a staleness test).
+- Issue forms for submitting a timeslip, suggesting a bike and sending a
+  dyno sheet; the bike page and the simulator's Dragy comparison open them
+  prefilled.
+- `make reseed` (the catalog chain, in order) and `make regen` (everything
+  that caches the physics).
+- A launch post, "MotoQuant 2.0 is open source, including where it is
+  wrong", and a contact page that links the data forms and the private
+  security route.
+
 ### Kept (not monetization)
-Optional accounts (magic link + password, sessions, `/api/me/runs` garage,
-run attribution), the leaderboard and rate-limited anonymous saves, per-IP
-rate limiting, part INR prices and ROI cost-per-tenth, `budget_inr`, chat
+Part INR prices and cost-per-tenth, `budget_inr`, per-IP rate limiting, chat
 per-turn budgets, build stages, and env-gated Sentry.
 
 ### Known residuals (documented, not fixed)
@@ -217,15 +248,15 @@ Details and figures: `reports/session_2026_11_05_handoff.md`.
 ### Regenerated
 `motoquant.db` re-seed chain, the regression golden (fast and full-catalog
 tiers), the surrogate and its web export, the wasm engine fixtures, the
-`/validation` data, sitewide accuracy copy and the OG card.
-TODO-NUMBERS(surrogate: version label, rows, holdout ET MAE / RMSE / R² — from
-the post-merge regeneration; see `artifacts/surrogate/README.md`).
+`/validation` data, the stock leaderboard, sitewide accuracy copy and the OG
+card. Instant-estimate model v2.8: 9,035 rows, holdout ET mean error 76.6 ms,
+RMSE 117.1 ms, R² 0.9985 (`artifacts/surrogate/README.md`).
 
 ### Moved
 - The repository is now <https://github.com/toto171/MotoQuant.in>.
-- Archived to `docs/archive/`: the payments runbook, commercial-launch plan,
-  team-scaling plan, SEO growth plan, unsent B2B outreach drafts, desktop
-  install/release docs, and old root hand-off notes.
+- Removed from the tree when the repository went public (still in the git
+  history): internal planning documents, maintenance automation, session
+  write-ups not cited by code or docs, and the brand kit.
 
 ## [PR #116] — 2026-07-19 — Scrapling dev-side scraping toolkit
 

@@ -9,9 +9,10 @@ amended by [ADR-0006](0006-open-source-pivot.md)
 > with the retired desktop `release.yml` workflow, as part of the open-source
 > pivot ([ADR-0006](0006-open-source-pivot.md)). The scaffold called the
 > license-key endpoints, which no longer exist. `docs/INSTALL.md` and
-> `docs/RELEASE.md` moved to `docs/archive/`. The "license keys survive"
-> clause below is superseded: MotoQuant is free, with no license keys. The
-> scaffold is still in git history if a native client is ever revived.
+> `docs/RELEASE.md` moved to `docs/archive/`, which was itself removed from
+> the tree on 2026-11-10. The "license keys survive" clause below is
+> superseded: MotoQuant is free, with no license keys. The scaffold and the
+> archived docs are still in git history if a native client is ever revived.
 
 ## Context
 

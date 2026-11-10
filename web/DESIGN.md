@@ -327,7 +327,7 @@ the light theme.
 | Your saved runs | Garage | — |
 | Calculate my time | Run, Run sim | — |
 
-Engineering depth (RK4, 1 ms timestep, 15 sub-models, Pacejka, SAE J1349)
+Engineering depth (RK4, 1 ms timestep, 15 sub-models, SAE J1349)
 belongs on `/docs/physics`, `/whitepaper`, `/validation` and in tooltips —
 not in control labels.
 

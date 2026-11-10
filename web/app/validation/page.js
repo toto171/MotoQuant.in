@@ -38,7 +38,7 @@ export default function ValidationPage() {
             two-strokes, where good timeslips are scarce, and we mark them clearly. Small bikes are the weakest class, and many
             still carry a known gearing limitation, documented in{' '}
             <a
-              href="https://github.com/toto171/MotoQuant.in/blob/main/reports/session_2026_11_10_epoch.md"
+              href="https://github.com/toto171/MotoQuant.in/blob/main/reports/gearing_experiment_2026_11_10.md"
               className="text-accent underline underline-offset-2 hover:text-accent-bright"
               rel="noopener"
             >
@@ -54,7 +54,7 @@ export default function ValidationPage() {
               </div>
             ))}
             <div className="flex flex-col gap-1">
-              <p className="font-display text-3xl font-bold tabular-nums text-accent">±0.007 s</p>
+              <p className="font-display text-3xl font-bold tabular-nums text-accent">±0.006 s</p>
               <p className="text-sm text-white/65">Top-10 mean error</p>
             </div>
           </div>

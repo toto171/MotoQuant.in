@@ -49,7 +49,6 @@ export const metadata = {
     'indian motorcycle database',
     'indian bike specifications',
     'valley run bikes',
-    'pacejka tire model motorcycle',
     'harley nightster rh975 quarter mile',
     'harley davidson nightster drag time',
     'nightster rh975 vs sportster s drag',
@@ -66,7 +65,6 @@ export const metadata = {
     'triumph street triple 765 rs quarter mile india',
     'street triple 765 rs vs 765 r',
     'hayabusa 2026 launch control 2.6 seconds',
-    'pacejka motorcycle tire model calculator',
   ],
   openGraph: {
     title: TITLE,

@@ -239,7 +239,7 @@ and will happily over-claim on your behalf.
 
 ## Honest limits
 
-* Accuracy is **weighted mean |error| ≈ 0.25 s over 266 matched benchmarks**
+* Accuracy is **weighted mean |error| ≈ 0.25 s over 263 matched benchmarks**
   (`reports/acc_final_2026_11_05.json`). Good for ranking builds and answering
   what-ifs; not a promise that a given bike will run an exact ET.
 * Top-speed predictions are weaker than ET: over 83 matched top-speed

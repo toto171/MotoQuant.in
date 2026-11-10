@@ -234,28 +234,13 @@ ACCURACY_PATTERNS = [
         "top-10 mean (whitepaper/blog)",
     ),
     (
-        r"10 cleanest validated runs agree within\s+about \u00b1(0\.\d{3}) s",
-        "acc_top10",
-        "top-10 mean (README)",
-    ),
-    (
         r"tabular-nums text-accent\">\u00b1(0\.\d{3}) s</p>",
         "acc_top10",
         "top-10 mean (validation hero)",
     ),
     # overall weighted mean |d| (cluster-level figures are deliberately NOT matched)
     (
-        r"[Oo]verall[^.\n]{0,60}?(?:mean absolute error|\|\u0394\|) (?:is )?(?:about )?(0\.\d{2,4})",
-        "acc_w_mean",
-        "overall weighted mean |d|",
-    ),
-    (
         r"weighted mean absolute error is (0\.\d{2,4})",
-        "acc_w_mean",
-        "overall weighted mean |d|",
-    ),
-    (
-        r"weighted mean \|\u0394\| (?:is )?(0\.\d{2,4})",
         "acc_w_mean",
         "overall weighted mean |d|",
     ),
@@ -263,11 +248,6 @@ ACCURACY_PATTERNS = [
         r"weighted mean \\\|error\\\| (0\.\d{2,4})",
         "acc_w_mean",
         "overall weighted mean |d| (glossary)",
-    ),
-    (
-        r"matched, \|\u0394\| (0\.\d{2,4})",
-        "acc_w_mean",
-        "overall weighted mean |d| (table)",
     ),
     (
         r"\u2248 (0\.\d{2,4}) s over",
@@ -285,7 +265,7 @@ ACCURACY_PATTERNS = [
         "overall weighted mean |d| (MCP)",
     ),
     (
-        r"num: '(0\.\d{3})s', label: 'Weighted \|\u0394\|'",
+        r"num: '(0\.\d{2,3})s', label: 'Weighted \|\u0394\|'",
         "acc_w_mean",
         "weighted |d| tile",
     ),
@@ -295,7 +275,7 @@ ACCURACY_PATTERNS = [
         "landing overall MAE row",
     ),
     (
-        r"'All clusters \u00b7 weighted',\s*'\d+',\s*'[^']*',\s*'(0\.\d{3}) s'",
+        r"'All clusters \u00b7 weighted',\s*'\d+',\s*'[^']*',\s*'(0\.\d{2,3}) s'",
         "acc_w_mean",
         "whitepaper overall MAE cell",
     ),

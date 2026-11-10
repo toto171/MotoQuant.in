@@ -13,12 +13,11 @@ const DOC_PAGES = [
 
 export const metadata = {
   title:    { template: '%s — MotoQuant Docs', default: 'MotoQuant Docs — Motorcycle Drag Racing Physics Documentation' },
-  description: 'Documentation for the MotoQuant motorcycle quarter-mile simulator — getting started, physics whitepaper (RK4 integrator + Pacejka tire model + SAE J1349 dyno correction), and validation data covering 250 published benchmarks. Indian drag racing reference for Aamby Valley, MMRT, BIC, and Kari.',
+  description: 'Documentation for the MotoQuant motorcycle quarter-mile simulator — getting started, physics whitepaper (RK4 integrator, tyre grip and thermal model, SAE J1349 dyno correction), and validation data covering 250 published benchmarks. Indian drag racing reference for Aamby Valley, MMRT, BIC, and Kari.',
   keywords: [
     'motoquant docs',
     'motorcycle drag racing documentation',
     'motorcycle physics simulator guide',
-    'pacejka tire model documentation',
     'rk4 motorcycle simulator docs',
     'motorcycle quarter mile physics reference',
     'drag racing simulator validation',

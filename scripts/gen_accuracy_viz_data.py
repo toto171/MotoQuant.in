@@ -34,6 +34,7 @@ import argparse
 import json
 import statistics as st
 import sys
+from datetime import date
 from pathlib import Path
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -134,7 +135,9 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--state-dir", default="/tmp/mq_sweep")
     ap.add_argument("--out", default="web/app/validation/accuracy_data.json")
-    ap.add_argument("--stamp", default="2026-07-04", help="dataset date label")
+    ap.add_argument(
+        "--stamp", default=date.today().isoformat(), help="dataset date label"
+    )
     ap.add_argument(
         "--rules",
         default=HEADLINE_RULES,

@@ -8,7 +8,7 @@ license: Apache-2.0
 
 MotoQuant simulates motorcycle quarter-mile drag runs from **first
 principles** — an RK4 integration over 15 physics sub-models (engine torque,
-clutch slip and heat, tire Pacejka grip and temperature, aero, weight
+clutch slip and heat, tire grip and temperature, aero, weight
 transfer, wheelie limit, drivetrain losses, atmospherics) — not a lookup
 table and not a regression on published numbers. Catalog: 534 bikes,
 546 parts, 254 tires, 20 venues.
@@ -161,7 +161,7 @@ mean something.
    530-pitch sprocket for a 428-chain commuter. The fitment engine checks
    chain pitch, engine layout, displacement and stroke type — use it.
 5. **State the accuracy honestly.** Weighted mean error is about **0.25 s
-   across 266 matched real-world benchmarks** (bias ≈ +0.02 s, so it is not
+   across 263 matched real-world benchmarks** (bias ≈ +0.02 s, so it is not
    systematically optimistic; some small classes — entry 200-300cc,
    two-strokes, 300-500cc singles — still carry ±0.2-0.27 s of class bias). That is good enough to rank builds and answer
    what-ifs, and *not* good enough to promise a given bike will run a given

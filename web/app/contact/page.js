@@ -51,10 +51,39 @@ export default function ContactPage() {
             </p>
           </Section>
 
+          <Section title="Timeslips, bikes and dyno sheets">
+            <p>
+              Each has a short form on GitHub, so a maintainer can check the
+              source before it goes into the catalog or the benchmark set.
+            </p>
+            <p className="flex flex-wrap gap-x-5 gap-y-2">
+              <a href={`${REPO_URL}/issues/new?template=submit-timeslip.yml`} target="_blank" rel="noopener noreferrer" className="text-accent hover:text-accent-bright transition-colors">
+                Submit a timeslip
+              </a>
+              <a href={`${REPO_URL}/issues/new?template=suggest-bike.yml`} target="_blank" rel="noopener noreferrer" className="text-accent hover:text-accent-bright transition-colors">
+                Suggest a bike
+              </a>
+              <a href={`${REPO_URL}/issues/new?template=calibration_data.yml`} target="_blank" rel="noopener noreferrer" className="text-accent hover:text-accent-bright transition-colors">
+                Send a dyno sheet or ECU log
+              </a>
+            </p>
+          </Section>
+
+          <Section title="Security problems">
+            <p>
+              Please do not open a public issue. Report it privately through
+              GitHub&apos;s{' '}
+              <a href={`${REPO_URL}/security/advisories/new`} target="_blank" rel="noopener noreferrer" className="text-accent hover:text-accent-bright transition-colors">
+                Report a vulnerability
+              </a>{' '}
+              page, or email us with the subject &ldquo;Security report&rdquo;.
+            </p>
+          </Section>
+
           <Section title="Email">
             <p>
-              For anything that does not fit an issue — questions, data
-              corrections, collaboration — email the maintainers.
+              For anything that does not fit an issue, such as questions or
+              collaboration, email the maintainers.
             </p>
             <p>
               <a

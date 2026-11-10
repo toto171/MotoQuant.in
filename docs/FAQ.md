@@ -3,7 +3,7 @@
 ## General Questions
 
 ### What is MotoQuant?
-MotoQuant is a free, open-source, physics-based quarter-mile drag racing simulator for motorcycles. It uses first-principles aerodynamics, tire physics (Pacejka slip characteristics), drivetrain dynamics, and engine modeling to predict your bike's quarter-mile ET (elapsed time) and trap speed. The simulator lets you test modifications—power increases, gear ratios, tire swaps, weight reduction—and see their impact on performance *before* spending money at the tuner or parts shop.
+MotoQuant is a free, open-source, physics-based quarter-mile drag racing simulator for motorcycles. It uses first-principles aerodynamics, tyre grip and temperature, drivetrain dynamics, and engine modeling to predict your bike's quarter-mile ET (elapsed time) and trap speed. The simulator lets you test modifications—power increases, gear ratios, tire swaps, weight reduction—and see their impact on performance *before* spending money at the tuner or parts shop.
 
 ### Is it free? Is it open source?
 Yes to both. Everything (the simulator, parts ROI, build optimizer, autotune, Dragy/dyno calibration, chat) is free, with no paid tiers, no quotas and no license keys. The code is open source under the **Apache License 2.0**: <https://github.com/toto171/MotoQuant.in>. You can use the hosted site at motoquant.in or run your own copy ([SELF_HOSTING.md](SELF_HOSTING.md)). An account is optional and only keeps your saved runs in a personal garage.
@@ -103,7 +103,7 @@ A dyno (dynamometer) measurement of **real, actual power** at the wheels. You ca
 Drag force = 0.5 × ρ × Cd × A × v². Each bike has a **drag coefficient (Cd)** and **frontal area (A)** based on design. Sport bikes (Cd ≈ 0.65) are more slippery than naked bikes (Cd ≈ 0.80). In a quarter-mile, aero is ~5–10 % of your total power loss.
 
 ### What about tire physics?
-The simulator uses the **Pacejka slip model** — a real-world formula that predicts grip as a function of slip ratio (wheel speed vs. ground speed). Your slip ratio changes dynamically during the run. We also model tire temperature rise, which affects grip and rolling resistance.
+The rear tyre's grip limit is its peak friction coefficient times the load on the rear wheel. The coefficient drops slightly as load rises, and it changes with tread temperature, tyre pressure (which rises as the tyre warms) and track preparation. The tread heats from wheel slip and loses heat to the road and the air, so grip changes during the run. The model also includes a Pacejka slip curve, but the simulation does not use it yet.
 
 ### How does weight affect acceleration?
 Weight affects acceleration in two ways:
@@ -158,7 +158,7 @@ You can add your bike via `--spec-json` (CLI), or request it on our forum.
 The comparison shows you exactly what each modification is worth.
 
 ### Can I compare two completely different bikes?
-Yes — run Bike A, save it, then search for Bike B and run that. The **Leaderboard** view shows all your saved runs ranked by ET. Use this to settle debates ("Is my R1 faster than my mate's Hayabusa?").
+Yes. Open the simulator, switch to Advanced and choose **Compare**: pick a second bike and both run in the same conditions. The **Leaderboard** ranks every catalog bike by its simulated stock time, if you just want to know which is quicker.
 
 ### How do I know if a modification is worth the money?
 The **cost ROI** shows you $/hp and $/ET-second. A turbo kit that costs ₹2,00,000 and gains 80 hp might be ₹2,500/hp — compare that against a ₹50,000 ECU flash that gains 20 hp (₹2,500/hp). Same cost efficiency, but the ECU flash is less risky and faster to install.
@@ -280,13 +280,13 @@ Security problems should be reported privately instead; see [SECURITY.md](../SEC
 Yes. Open a GitHub issue with the **bike data** template and include the make, model, year and any available specs (power, weight, dimensions, OEM tire fitment), with sources. Better still, add it yourself in a PR (see [CONTRIBUTING.md](../CONTRIBUTING.md)). Indian-market bikes and popular international models are prioritized. Every spec needs a citable source; we never fabricate data.
 
 ### Can I contribute a real timeslip or dyno sheet?
-Please do. Instrumented runs (Dragy, VBOX, Racelogic, timeslips with conditions) are the single most valuable contribution, because small-cc accuracy is limited by data rather than by the model. Use the **calibration data** issue template.
+Please do. Instrumented runs (Dragy, VBOX, Racelogic, timeslips with conditions) are the single most valuable contribution, because small-cc accuracy is limited by data rather than by the model. Use the **Submit a timeslip** issue form; the simulator's Dragy comparison can fill it in for you.
 
 ### Is there a community or forum?
 GitHub is the community hub: [issues](https://github.com/toto171/MotoQuant.in/issues) for bugs and data corrections, and [discussions](https://github.com/toto171/MotoQuant.in/discussions) for questions and ideas. Please follow the [Code of Conduct](../CODE_OF_CONDUCT.md).
 
 ### What's your roadmap?
-- **Done:** physics engine, catalog, calibration pipeline, public leaderboard, AI build optimization and chat, MCP server.
+- **Done:** physics engine, catalog, calibration pipeline, stock leaderboard, shareable timeslips, AI build optimization and chat, MCP server.
 - **Discontinued:** the desktop app (July 2026). The web app is the product.
 - **Now:** open-source launch, community benchmark contributions, the optional Rust core (exact sims in the browser), accuracy work on small-cc bikes.
 - **Later:** OBD-II live telemetry.
@@ -304,18 +304,12 @@ No. This is a **predictive tool**, not ground truth. Real quarter-mile results v
 Yes. The code is licensed under the **Apache License 2.0**, which permits commercial use, modification and redistribution as long as you keep the license and the `NOTICE` file and mark modified files. Attribution such as "Simulated with MotoQuant" is appreciated. Benchmark figures are cited facts from their original publishers, and bike and parts names are trademarks of their owners (see `NOTICE`). For heavy automated use, please self-host rather than hammering the public instance, which is rate-limited.
 
 ### What data do you collect?
-- Simulation runs (anonymized: bike ID, mods, results — no personal info)
-- Dragy/dyno imports you choose to upload
-- Leaderboard submissions (you can opt out)
-- Optional account data (email, saved runs) only if you sign in
-- Anonymous usage events (no user id or IP correlation); third-party analytics forwarding is opt-in per deployment and off unless the operator enables it
-
-See our Privacy Policy at motoquant.in/privacy.
+Almost none. There are no accounts and no cookies. Simulation requests and uploaded files are used to produce your result and not kept; saved runs stay in your browser. Anonymous usage events (a label, the page and a random per-page id) go to the server log. The full list, including which outside services see what, is at [motoquant.in/privacy](https://www.motoquant.in/privacy).
 
 ### Is my data private?
-Yes — simulation runs are your own unless you explicitly submit to the public leaderboard. Leaderboard submissions show your time and bike, not your name or contact info (unless you choose to add it).
+Yes. Nothing you simulate is published. A timeslip link shows its setup to whoever you send it to, and nothing else.
 
 ---
 
-**Last updated:** October 2026  
+**Last updated:** November 2026  
 **Questions?** Open a [GitHub discussion](https://github.com/toto171/MotoQuant.in/discussions) or visit motoquant.in

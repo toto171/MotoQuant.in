@@ -9,8 +9,8 @@ This guide gets you from a fresh clone to a green test suite in under 10 minutes
 
 Read **[AGENTS.md](AGENTS.md)** first. It is the one-page working contract
 (the prime directive and the non-negotiable rules), and it applies to humans
-and AI tools alike. Then read [docs/ONBOARDING.md](docs/ONBOARDING.md) for the
-current project state and a list of good first issues. Please follow the
+and AI tools alike. Then read [docs/ONBOARDING.md](docs/ONBOARDING.md) for a
+tour of the code, and look for issues labelled `good first issue`. Please follow the
 [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## 0. Licensing of contributions
@@ -34,10 +34,11 @@ You do not need to touch the physics to help. In rough order of value:
 1. **Instrumented timeslips and benchmarks.** Dragy / VBox / Racelogic runs of
    *stock* bikes, with a source (magazine test, video, timeslip photo, Dragy
    export). Small-displacement and two-stroke accuracy is limited mostly by
-   data. Open a "bike / benchmark data" issue or a PR.
-2. **Bike, part and tire data.** New bikes (`motoquant/scraper/known_bikes*.py`),
-   corrections to existing specs, gear cassettes and primary ratios from
-   service manuals, OEM tire fitments, parts and fitment rules.
+   data. Use the "Submit a timeslip" issue form; no code needed.
+2. **Bike, part and tire data.** Riders can use the "Suggest a bike" form.
+   With code: new bikes (`motoquant/scraper/known_bikes*.py`), corrections to
+   existing specs, gear cassettes and primary ratios from service manuals,
+   OEM tire fitments, parts and fitment rules (the "Catalog data" form).
 3. **Bug reports and fixes.** Use the bug-report issue template; include the
    bike, venue, inputs and the number you expected.
 4. **Docs, tests, tooling, web UI.** Anything that makes the above easier.
@@ -56,7 +57,7 @@ without sources will be closed.
 ## 1. Repository
 
 - **GitHub:** https://github.com/toto171/MotoQuant.in
-- **Package name:** `motoquant` (formerly `dragsim` — do not reintroduce that string anywhere)
+- **Package name:** `motoquant`
 - **Python:** 3.10 or newer (tested on 3.10, 3.11, 3.12)
 - **Primary DB:** SQLite (`motoquant.db`). It stays until a real scaling trigger ([ADR-0004](docs/adr/0004-sqlite-until-scale.md)).
 
@@ -105,20 +106,19 @@ python -m motoquant.run --db /tmp/motoquant-dev.db import --known-bikes   # opti
 python -m pytest tests/test_validation.py tests/test_scraper.py \
     tests/test_database.py tests/test_agent.py -q
 
-# The FULL suite is ~3k tests and takes 25-35 minutes; run it before any PR:
+# The FULL suite is about 6,200 tests and takes 25-35 minutes; run it before any PR:
 python -m pytest tests/ -q
 ```
 
 If those are green, you're set.
 
 A scratch database is **not** the shipped catalog, so its counts and some ETs
-will not match the published ones. The shipped `motoquant.db` is produced by
-maintainers: `import --known-bikes` on top of a seeded DB, then the idempotent
-re-seed chain (`scripts/reseed_configs_from_specs.py` followed by the dated
-`scripts/patch_*.py` scripts, in the order written out under "Re-seed chain"
-in `CLAUDE.md`; see [docs/KNOWN_TRAPS.md](docs/KNOWN_TRAPS.md) T3 and T17),
-then regenerating the regression snapshot and the surrogate. Run that chain only if you are changing
-physics or importer behaviour.
+will not match the published ones. The shipped `motoquant.db` is rebuilt with
+`make reseed`, which runs `scripts/reseed_configs_from_specs.py` and then the
+dated `scripts/patch_*.py` scripts in order (all idempotent; see
+[docs/KNOWN_TRAPS.md](docs/KNOWN_TRAPS.md) T3 and T17). You need it only when
+you change physics, the importer or catalog data; section 4a lists what to
+regenerate afterwards.
 
 The committed `motoquant.db` in the repo root is the production seeded DB. Do not run migrations against it during dev — always use a `/tmp/` path like above, or `:memory:` for tests.
 
@@ -184,8 +184,21 @@ python -m pytest tests/test_validation.py::TestQuarterMileValidation::test_k5_qu
 2. Tests must use `:memory:` or `/tmp/` SQLite paths — never the production `motoquant.db`.
 3. CLI tests import command handlers directly via `redirect_stdout` + `unittest.mock.patch` — do not spawn subprocesses (WAL journal mode fails on the mounted dev filesystem).
 4. Physics regressions: the three reference baselines are pinned to 4 decimals — K5 **10.0436**, R1 **10.1092**, Hayabusa **10.1100** — and the expectation for refactors is **bit-identical** (Δ +0.0000). If you touch `motoquant/physics.py`, any `submodels/*.py`, `defaults.py`, or `motoquant/scraper/importer.py`: run the baseline check, `tests/test_regression_snapshot.py`, and put the delta table in your PR. A deliberate accuracy change needs the full weighted sweep (`scripts/phys_weighted_sweep.py`) as justification.
-5. After changing `spec_to_bike_config` (importer physics, gear ratios, aero rules): run `MOTOQUANT_DB=motoquant.db python scripts/reseed_configs_from_specs.py`, then regenerate the surrogate (`artifacts/surrogate/README.md` — standing contract).
+5. After changing `spec_to_bike_config` (importer physics, gear ratios, aero rules): run `make reseed`, then regenerate the caches in section 4a.
 6. After any catalog/count change: `python scripts/audit_headline_stats.py --fix` so the site's stat tiles stay truthful.
+
+### 4a. Regenerating what caches the physics
+
+Several committed files are caches of the simulator. When a change moves
+simulated times, regenerate them in the same pull request:
+
+| What | Command | Checked by |
+|---|---|---|
+| Catalog bike configs | `make reseed` | `tests/test_regression_snapshot.py` |
+| Regression snapshot, stock leaderboard, browser surrogate export | `make regen` | `tests/test_regression_snapshot.py`, `tests/test_stock_leaderboard.py`, `tests/test_surrogate_web_export.py` |
+| Instant-estimate model | the recipe in `artifacts/surrogate/README.md` | `tests/test_surrogate_numpy_artifact.py` |
+| Browser physics engine (Rust → wasm) | `make wasm` | `node web/scripts/engine-parity.mjs` |
+| Accuracy report and the `/validation` data | `scripts/phys_weighted_sweep.py`, then `scripts/gen_accuracy_viz_data.py` | `make audit` |
 
 ---
 
@@ -239,11 +252,10 @@ PR template (it has the baseline-delta table for physics-adjacent changes).
 - Tests pass locally (`python -m pytest tests/ -q`).
 - Ruff clean (`ruff check . && ruff format --check .`).
 - CI workflow green on the PR (pytest + ruff + baseline gate; the Next.js build for `web/` changes).
-- **At least one approving review** from someone other than the PR author.
-- For files owned via `.github/CODEOWNERS` (physics, schema, calibration, API, infra): the listed **CODEOWNER's approval is required** — GitHub will auto-request it.
+- **An approving review from the maintainer** (`.github/CODEOWNERS`; GitHub
+  requests it automatically).
 - For physics changes: include the benchmark ET deltas in the PR description (template has a table for this).
 - For schema changes: include the migration path. Existing DBs must keep working; ship an idempotent `scripts/patch_*.py` for the shipped `motoquant.db`. Update `docs/ARCHITECTURE.md` if the data model's shape changed.
-- **No self-merge.** Even maintainers go through review on anything touching a CODEOWNER-protected path.
 - `main` is protected: no direct pushes, no force-push, no deletion.
 - Once merged, a successful CI run on `main` triggers the Vercel production deploy (`.github/workflows/deploy.yml`). A red CI never reaches Vercel.
 
@@ -275,7 +287,7 @@ This is not optional. The current clean state of the codebase is the result of a
 - Commit secrets, API keys, or `.env` files.
 - Run `git add -A` / `git add .` — **ever**. Stage explicit file lists; the working tree routinely carries unrelated WIP and generated artifacts.
 - Force-push to `main`. Use `feature/*` branches and PRs.
-- Rename the package away from `motoquant`. The 2026 rename from `dragsim` is final.
+- Rename the package away from `motoquant`.
 - Replace SQLite with PostgreSQL without a real scaling trigger ([ADR-0004](docs/adr/0004-sqlite-until-scale.md)). The WAL-fallback code is load-bearing on Windows / mounted FS.
 - Reintroduce paywalls, tier gates, usage quotas or licence keys. MotoQuant is free ([ADR-0006](docs/adr/0006-open-source-pivot.md)). Protect expensive routes with per-IP rate limits instead (`motoquant/ratelimit.py`).
 - Add BeautifulSoup / lxml to the scraper — `motoquant/scraper/bikez.py` is stdlib-only by design.
@@ -288,7 +300,7 @@ This is not optional. The current clean state of the codebase is the result of a
 - GitHub Issues for bugs, data corrections and scoped work (they leave a trail).
 - GitHub Discussions for questions and ideas.
 - [docs/ONBOARDING.md](docs/ONBOARDING.md) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) first: most "where does X live?" questions are answered there.
-- Before asking "is X done yet?", check `CHANGELOG.md` and `docs/ROADMAP.md`. (`CLAUDE.md` holds the exhaustive session log if you need to dig.)
+- Before asking "is X done yet?", check `CHANGELOG.md` and `docs/ROADMAP.md`.
 - Security issues: report privately, see [SECURITY.md](SECURITY.md).
 
 ---
