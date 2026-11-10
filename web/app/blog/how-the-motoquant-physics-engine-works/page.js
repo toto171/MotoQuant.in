@@ -5,8 +5,8 @@ import CodeComment from '../../../components/CodeComment';
 import ScoreboardDigits from '../../../components/ScoreboardDigits';
 
 export const metadata = {
-  title: 'How the MotoQuant Physics Engine Works — MotoQuant Blog',
-  description: 'A first-principles tour of the 15-sub-model RK4 physics engine that powers MotoQuant. From engine torque curves to tyre grip and temperature to launch slip dynamics — what we simulate, what we validate against, and what the residual error actually means.',
+  title: 'How the MotoQuant Physics Engine Works | MotoQuant Blog',
+  description: 'A first-principles tour of the 15-sub-model RK4 physics engine that powers MotoQuant. From engine torque curves to tyre grip and temperature to launch slip dynamics: what we simulate, what we validate against, and what the residual error actually means.',
   keywords: [
     'motorcycle physics simulation',
     'drag racing simulator',
@@ -29,7 +29,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'MotoQuant is a first-principles physics simulator for motorcycle quarter-mile drag racing. It is built around 15 independent sub-models — engine, clutch, drivetrain, chain, tires, aero, weight transfer, rider dynamics, staging, environmental, parasitic losses, rolling resistance, braking, wheelie, forced induction — coupled by a fixed-step RK4 integrator running at one-millisecond resolution. This post is a tour of what each sub-model does, what we validate against, and where the simulator is honest about its limits.',
+    text: 'MotoQuant is a first-principles physics simulator for motorcycle quarter-mile drag racing. It is built around 15 independent sub-models (engine, clutch, drivetrain, chain, tires, aero, weight transfer, rider dynamics, staging, environmental, parasitic losses, rolling resistance, braking, wheelie, forced induction) coupled by a fixed-step RK4 integrator running at one-millisecond resolution. This post is a tour of what each sub-model does, what we validate against, and where the simulator is honest about its limits.',
   },
   {
     type: 'h2',
@@ -37,11 +37,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The state vector is six-dimensional: position, velocity, engine angular velocity, tire temperature, clutch temperature, and current gear. Every millisecond, the integrator advances this state by computing forces and torques from each sub-model and combining them into a net acceleration. RK4 with aero midpoint re-evaluation gets us numerical stability across the full speed range — from 0 m/s at the staging beam to the 200+ km/h trap.',
+    text: 'The state vector is six-dimensional: position, velocity, engine angular velocity, tire temperature, clutch temperature, and current gear. Every millisecond, the integrator advances this state by computing forces and torques from each sub-model and combining them into a net acceleration. RK4 with aero midpoint re-evaluation gets us numerical stability across the full speed range, from 0 m/s at the staging beam to the 200+ km/h trap.',
   },
   {
     type: 'p',
-    text: 'Why fixed-step RK4 instead of an adaptive solver? Two reasons. First, drag races are short — 10 to 20 seconds — and a 1 ms timestep gives 10,000–20,000 integration points, which is more than enough resolution to capture the launch slip phase, gear changes, and the high-frequency dynamics of clutch engagement. Second, fixed-step is reproducible bit-for-bit across runs, which matters when you are debugging a 0.05-second discrepancy. We also expose an adaptive variant (use_adaptive_dt=True) for users who want faster simulation at the cost of reproducibility.',
+    text: 'Why fixed-step RK4 instead of an adaptive solver? Two reasons. First, drag races are short (10 to 20 seconds), and a 1 ms timestep gives 10,000–20,000 integration points, which is more than enough resolution to capture the launch slip phase, gear changes, and the high-frequency dynamics of clutch engagement. Second, fixed-step is reproducible bit-for-bit across runs, which matters when you are debugging a 0.05-second discrepancy. We also expose an adaptive variant (use_adaptive_dt=True) for users who want faster simulation at the cost of reproducibility.',
   },
   {
     type: 'h2',
@@ -49,15 +49,15 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The engine sub-model takes RPM and time and returns crank torque. There are two paths. For the 21 most popular drag bikes (Hayabusa, R1, GSX-R 1000, ZX-10R, S1000RR, Panigale V4, RSV4, etc.) we ship measured dyno curves — RPM-vs-torque arrays sourced from Cycle World, Sport Rider, and Dynojet published tests. For everything else we synthesize a curve from the manufacturer-published peak power, peak torque, and the RPMs at which they occur.',
+    text: 'The engine sub-model takes RPM and time and returns crank torque. There are two paths. For the 21 most popular drag bikes (Hayabusa, R1, GSX-R 1000, ZX-10R, S1000RR, Panigale V4, RSV4, etc.) we ship measured dyno curves: RPM-vs-torque arrays sourced from Cycle World, Sport Rider, and Dynojet published tests. For everything else we synthesize a curve from the manufacturer-published peak power, peak torque, and the RPMs at which they occur.',
   },
   {
     type: 'p',
-    text: 'The synthesized curve is an asymmetric Gaussian: a gentle ramp from idle to peak torque, then a shaped falloff to redline calibrated so the torque at peak power RPM produces exactly the rated horsepower. The shape parameters (sigma below peak, redline factor above peak) are calibrated by class — modern litre superbikes get sigma=2.2 and a steep 0.48 redline factor for that "pulls hard then signs off" character; mid-range 600-800cc 4-cyl get a plateau-like 0.88 redline factor that matches dyno tests showing flat torque to redline; small-cc commuters get a broader sigma=1.20 because real R15 and Pulsar dynos show flatter curves than the default Gaussian assumes.',
+    text: 'The synthesized curve is an asymmetric Gaussian: a gentle ramp from idle to peak torque, then a shaped falloff to redline calibrated so the torque at peak power RPM produces exactly the rated horsepower. The shape parameters (sigma below peak, redline factor above peak) are calibrated by class: modern litre superbikes get sigma=2.2 and a steep 0.48 redline factor for that "pulls hard then signs off" character; mid-range 600-800cc 4-cyl get a plateau-like 0.88 redline factor that matches dyno tests showing flat torque to redline; small-cc commuters get a broader sigma=1.20 because real R15 and Pulsar dynos show flatter curves than the default Gaussian assumes.',
   },
   {
     type: 'p',
-    text: 'Two-stroke engines get a different model entirely. Their torque curves are dominated by expansion chamber resonance — a sharp peak at the tuned RPM with very little off-pipe torque. We synthesize a Gaussian-like band around the tuned RPM with width parameters that vary by configuration: piston-port singles (RX100, RD350) get a narrow band; YPVS-equipped powervalves (NSR250R, RGV250) get a wider band with stronger off-pipe torque; vintage triples (GT750, H2 Mach IV) get an overlapping multi-cylinder band that approaches 4-stroke smoothness.',
+    text: 'Two-stroke engines get a different model entirely. Their torque curves are dominated by expansion chamber resonance: a sharp peak at the tuned RPM with very little off-pipe torque. We synthesize a Gaussian-like band around the tuned RPM with width parameters that vary by configuration: piston-port singles (RX100, RD350) get a narrow band; YPVS-equipped powervalves (NSR250R, RGV250) get a wider band with stronger off-pipe torque; vintage triples (GT750, H2 Mach IV) get an overlapping multi-cylinder band that approaches 4-stroke smoothness.',
   },
   {
     type: 'h2',
@@ -69,15 +69,15 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'During launch, the clutch is in the slip phase: engine RPM is held above the wheel-equivalent RPM, and friction transmits torque between the two. The amount of torque transmitted depends on the friction coefficient, the clamping force from the springs, the plate count, and the mean friction radius — these come from the clutch sub-config (which has real geometry from service manuals where available).',
+    text: 'During launch, the clutch is in the slip phase: engine RPM is held above the wheel-equivalent RPM, and friction transmits torque between the two. The amount of torque transmitted depends on the friction coefficient, the clamping force from the springs, the plate count, and the mean friction radius. These come from the clutch sub-config (which has real geometry from service manuals where available).',
   },
   {
     type: 'p',
-    text: 'A subtle bug we fixed in late April 2026 — the original slip model used T_transmitted = min(T_engine, T_clutch_max), which kept engine RPM pinned at the launch RPM during the entire slip phase. That is fine for big litre bikes where T_clutch_max is close to T_engine. For small-cc bikes where T_clutch_max is much larger than T_engine (clutch sized for safety, not engine output), it caused the simulation to under-predict launch acceleration by 30–40 % because the engine never had a chance to transfer kinetic energy through the clutch into wheel acceleration. The fix: rate-limited over-clutching where T_transmitted can briefly exceed T_engine by up to (max_decel × engine_inertia) torque, simulating the real-world rider technique of feathering the clutch while bogging the engine briefly.',
+    text: 'A subtle bug we fixed in late April 2026: the original slip model used T_transmitted = min(T_engine, T_clutch_max), which kept engine RPM pinned at the launch RPM during the entire slip phase. That is fine for big litre bikes where T_clutch_max is close to T_engine. For small-cc bikes where T_clutch_max is much larger than T_engine (clutch sized for safety, not engine output), it caused the simulation to under-predict launch acceleration by 30–40 % because the engine never had a chance to transfer kinetic energy through the clutch into wheel acceleration. The fix: rate-limited over-clutching where T_transmitted can briefly exceed T_engine by up to (max_decel × engine_inertia) torque, simulating the real-world rider technique of feathering the clutch while bogging the engine briefly.',
   },
   {
     type: 'callout',
-    text: 'The slip phase typically resolves into lockup when the engine and wheel-equivalent RPMs come within ~10 RPM of each other. After that, the clutch is treated as a rigid coupling and the bike accelerates on engine torque alone — until the next gear change.',
+    text: 'The slip phase typically resolves into lockup when the engine and wheel-equivalent RPMs come within ~10 RPM of each other. After that, the clutch is treated as a rigid coupling and the bike accelerates on engine torque alone, until the next gear change.',
   },
   {
     type: 'h2',
@@ -89,11 +89,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'In practice, getting the right gear ratios for 534 different bikes was its own multi-month effort. We maintain a Tier-1 lookup table with 150+ named-model entries derived from service manuals (R15 V4: 14F/48R, primary 2.83, gears 2.833 / 1.875 / 1.429 / 1.16 / 0.963 / 0.84 — those numbers come from the YZF-R15 service manual, not from a forum). Bikes without a Tier-1 entry fall back to category-based defaults (sport-1000, naked-mid, cruiser-big, etc.) which are still better than generic numbers but lose the per-model flavor.',
+    text: 'In practice, getting the right gear ratios for 534 different bikes was its own multi-month effort. We maintain a Tier-1 lookup table with 150+ named-model entries derived from service manuals (R15 V4: 14F/48R, primary 2.83, gears 2.833 / 1.875 / 1.429 / 1.16 / 0.963 / 0.84; those numbers come from the YZF-R15 service manual, not from a forum). Bikes without a Tier-1 entry fall back to category-based defaults (sport-1000, naked-mid, cruiser-big, etc.) which are still better than generic numbers but lose the per-model flavor.',
   },
   {
     type: 'p',
-    text: 'Shift dynamics matter too. Each gear change costs simulation time equal to the shift_time_ms parameter (typically 50–80 ms with a quickshifter, 150–300 ms manual). During the shift, drive force is zero — the bike coasts. A poorly-calibrated shift point can cost 0.05–0.15 seconds in ET if the engine drops below peak power on the next gear, so getting the shift_rpms array right per bike is part of the gear-cassette work.',
+    text: 'Shift dynamics matter too. Each gear change costs simulation time equal to the shift_time_ms parameter (typically 50–80 ms with a quickshifter, 150–300 ms manual). During the shift, drive force is zero: the bike coasts. A poorly-calibrated shift point can cost 0.05–0.15 seconds in ET if the engine drops below peak power on the next gear, so getting the shift_rpms array right per bike is part of the gear-cassette work.',
   },
   {
     type: 'h2',
@@ -117,15 +117,15 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Aero is straightforward: F_drag = 0.5 × rho × v² × Cd × A. The interesting part is that Cd × A is time-varying. The rider transitions from an upright staging stance to a tucked aerodynamic position over roughly 2 seconds after launch, dropping Cd × A by 30–40 %. We model this transition with a sigmoid curve — at 0 seconds, the rider is upright (Cd × A = ~0.55); at 2 seconds, fully tucked (Cd × A = ~0.32). Cd and frontal area come from per-bike values; we measured or estimated each one of the 534 bikes individually after discovering that 71 % of the catalog had inherited a generic 0.32 Cd that is closer to a passenger car than a motorcycle.',
+    text: 'Aero is straightforward: F_drag = 0.5 × rho × v² × Cd × A. The interesting part is that Cd × A is time-varying. The rider transitions from an upright staging stance to a tucked aerodynamic position over roughly 2 seconds after launch, dropping Cd × A by 30–40 %. We model this transition with a sigmoid curve: at 0 seconds, the rider is upright (Cd × A = ~0.55); at 2 seconds, fully tucked (Cd × A = ~0.32). Cd and frontal area come from per-bike values; we measured or estimated each one of the 534 bikes individually after discovering that 71 % of the catalog had inherited a generic 0.32 Cd that is closer to a passenger car than a motorcycle.',
   },
   {
     type: 'p',
-    text: 'Weight transfer reduces front axle load and increases rear axle load proportionally to acceleration × CoG_height / wheelbase. More rear load = more available traction (good). Past a critical point, front goes light enough that the bike wheelies — a separate sub-model that limits available drive force to whatever keeps the front wheel a few millimeters off the ground. A liter-class superbike on a hard launch typically wheelies in gear 1 around 0.7–1.0 g; the wheelie limit is what caps acceleration in that window, not engine power or tire grip.',
+    text: 'Weight transfer reduces front axle load and increases rear axle load proportionally to acceleration × CoG_height / wheelbase. More rear load = more available traction (good). Past a critical point, front goes light enough that the bike wheelies, a separate sub-model that limits available drive force to whatever keeps the front wheel a few millimeters off the ground. A liter-class superbike on a hard launch typically wheelies in gear 1 around 0.7–1.0 g; the wheelie limit is what caps acceleration in that window, not engine power or tire grip.',
   },
   {
     type: 'p',
-    text: 'Rider dynamics also includes a longitudinal CoG shift — the rider scoots back at launch (pulling weight rearward, helping traction) and tucks forward at speed (reducing aero drag). Both shifts are tracked in the sub-model and feed into weight transfer and aero respectively.',
+    text: 'Rider dynamics also includes a longitudinal CoG shift: the rider scoots back at launch (pulling weight rearward, helping traction) and tucks forward at speed (reducing aero drag). Both shifts are tracked in the sub-model and feed into weight transfer and aero respectively.',
   },
   {
     type: 'h2',
@@ -141,7 +141,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'We maintain a list of 250 published drag-strip benchmarks (263 matched to a catalog bike) — sourced from Cycle World, Sport Rider, MCN, Motorcycle Consumer News, MotorcycleDaily, MotoStatz, FastestLaps, and Indian Autos Mag where the magazine published the actual instrumented timeslip. For each benchmark, we run the simulator at the test-day environmental conditions and compare predicted ET against measured ET. Each source is weighted by quality (instrumented timeslip 1.0, magazine 0.7, aggregator 0.5, derived 0.1) and the delta gets bucketed by class on a cylinder-aware 12-cluster taxonomy (litre-sport-195+, litre-sport-600-1000, sport-twin-600-1300, singles-300-500, entry-150-200, two-stroke, etc.) so we can see where the physics is honest and where it has systematic bias.',
+    text: 'We maintain a list of 250 published drag-strip benchmarks (263 matched to a catalog bike), sourced from Cycle World, Sport Rider, MCN, Motorcycle Consumer News, MotorcycleDaily, MotoStatz, FastestLaps, and Indian Autos Mag where the magazine published the actual instrumented timeslip. For each benchmark, we run the simulator at the test-day environmental conditions and compare predicted ET against measured ET. Each source is weighted by quality (instrumented timeslip 1.0, magazine 0.7, aggregator 0.5, derived 0.1) and the delta gets bucketed by class on a cylinder-aware 12-cluster taxonomy (litre-sport-195+, litre-sport-600-1000, sport-twin-600-1300, singles-300-500, entry-150-200, two-stroke, etc.) so we can see where the physics is honest and where it has systematic bias.',
   },
   {
     type: 'p',
@@ -157,7 +157,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'A 0.26-second weighted mean error sounds large. In context, it is comparable to magazine-test variance — Cycle World publishing a 10.20-second ET for a CBR1000RR is rounding from a real run that might have been 10.18 to 10.23 depending on staging, weight transfer technique, and rider weight. Our 0.15-second weighted mean on the litre-class is close to the published-test noise floor.',
+    text: 'A 0.26-second weighted mean error sounds large. In context, it is comparable to magazine-test variance. Cycle World publishing a 10.20-second ET for a CBR1000RR is rounding from a real run that might have been 10.18 to 10.23 depending on staging, weight transfer technique, and rider weight. Our 0.15-second weighted mean on the litre-class is close to the published-test noise floor.',
   },
   {
     type: 'p',
@@ -185,11 +185,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'For a tuner, the simulator is a what-if explorer. Try a power commander map, an exhaust, a sprocket change — see the predicted ET delta and trap-speed delta and cost-per-tenth-of-a-second before spending money. For a racer prepping for Aamby Valley in November, plug in the venue conditions, your bike, and your current tune; iterate launch RPM and gear-shift points until the predicted ET converges. For a beginner, it is a way to learn what physics actually limits a drag run on your specific bike — most people overestimate the importance of peak power and underestimate the importance of mass, gearing, and traction.',
+    text: 'For a tuner, the simulator is a what-if explorer. Try a power commander map, an exhaust, a sprocket change, and see the predicted ET delta and trap-speed delta and cost-per-tenth-of-a-second before spending money. For a racer prepping for Aamby Valley in November, plug in the venue conditions, your bike, and your current tune; iterate launch RPM and gear-shift points until the predicted ET converges. For a beginner, it is a way to learn what physics actually limits a drag run on your specific bike. Most people overestimate the importance of peak power and underestimate the importance of mass, gearing, and traction.',
   },
   {
     type: 'p',
-    text: 'For us, it is a tool we keep building because there was nothing else like it for the Indian and SE Asia drag scene. Most existing simulators target US litre superbikes on prepped concrete with VHT. We started there too — the K5 reference baseline came from US drag-strip data — and built outward to cover the bikes and conditions that matter to riders running R15s at Narhe and Pulsars at Aamby Valley. The physics is universal; the calibration data is what makes a simulator useful for a specific community.',
+    text: 'For us, it is a tool we keep building because there was nothing else like it for the Indian and SE Asia drag scene. Most existing simulators target US litre superbikes on prepped concrete with VHT. We started there too (the K5 reference baseline came from US drag-strip data) and built outward to cover the bikes and conditions that matter to riders running R15s at Narhe and Pulsars at Aamby Valley. The physics is universal; the calibration data is what makes a simulator useful for a specific community.',
   },
 ];
 
@@ -273,7 +273,7 @@ export default function Page() {
             <Link href="/" className="text-brand-orange hover:text-brand-accent transition-colors">
               Run a simulation
             </Link>{' '}
-            on the home page — pick a bike, set your conditions, and see the physics in action.
+            on the home page: pick a bike, set your conditions, and see the physics in action.
           </p>
           {/* Reference baselines — timing-board panel */}
           <div className="relative overflow-hidden rounded-xl border border-brand-orange/20 bg-ink-1/60 p-5 mt-6">

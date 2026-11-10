@@ -346,7 +346,7 @@ export default function useSimulatorState(searchParams) {
           const detail = await readDetail(res);
           const err = new Error(
             res.status === 429
-              ? detail || 'You are calculating very quickly — live updates are paused for a few seconds.'
+              ? detail || 'You are calculating very quickly. Live updates are paused for a few seconds.'
               : detail || `The simulator returned an error (${res.status}). Please try again.`,
           );
           err.status = res.status;
@@ -737,7 +737,7 @@ export default function useSimulatorState(searchParams) {
   }, []);
 
   const shareBuild = useCallback(async () => {
-    const ok = await copyOrShare(buildShareUrl(), `MotoQuant — ${bikeName(bike)}`);
+    const ok = await copyOrShare(buildShareUrl(), `MotoQuant | ${bikeName(bike)}`);
     if (ok) track('share_build', { bike_id: bike?.id });
   }, [buildShareUrl, copyOrShare, bike]);
 
@@ -752,7 +752,7 @@ export default function useSimulatorState(searchParams) {
     }
     const resp = await saveTask.run(src);
     if (resp?.query) {
-      await copyOrShare(`${window.location.origin}/timeslip?${resp.query}`, `MotoQuant — ${bikeName(bike)}`);
+      await copyOrShare(`${window.location.origin}/timeslip?${resp.query}`, `MotoQuant | ${bikeName(bike)}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startFullSim, saveTask.run, copyOrShare, bike]);

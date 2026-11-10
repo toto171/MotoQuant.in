@@ -9,7 +9,7 @@ const DESCRIPTION =
   'Five Indian drag strips on November weather: a stock Hayabusa loses 0.09 s between BIC and Aamby Valley, an R15 V4 loses 0.36 s. MotoQuant shows why small bikes pay more.';
 
 export const metadata = {
-  title: 'Indian Drag Strips Ranked by Elevation — MotoQuant',
+  title: 'Indian Drag Strips Ranked by Elevation | MotoQuant',
   description: DESCRIPTION,
   keywords: [
     'indian drag strips ranked',
@@ -283,8 +283,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 How to Tune for Aamby Valley in November
-              </Link>{' '}
-              — venue-specific deep dive on the highest of the five Indian strips.
+              </Link>
+              : venue-specific deep dive on the highest of the five Indian strips.
             </li>
             <li>
               ·{' '}
@@ -293,8 +293,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 How to Tune for MMRT Chennai
-              </Link>{' '}
-              — the sea-level counterpart at the other end of the venue table.
+              </Link>
+              : the sea-level counterpart at the other end of the venue table.
             </li>
             <li>
               ·{' '}
@@ -303,8 +303,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Hayabusa Quarter-Mile Physics: What Limits 9.6 Seconds
-              </Link>{' '}
-              — the bike used as the anchor in this post, with a breakdown of what limits a stock litre-plus bike.
+              </Link>
+              : the bike used as the anchor in this post, with a breakdown of what limits a stock litre-plus bike.
             </li>
             <li>
               ·{' '}
@@ -313,8 +313,8 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 Why Your R15 Won&apos;t Hit 14s
-              </Link>{' '}
-              — the small-cc side of the altitude story; why a 18 hp R15 V4 cannot make up the venue penalty with parts.
+              </Link>
+              : the small-cc side of the altitude story; why a 18 hp R15 V4 cannot make up the venue penalty with parts.
             </li>
             <li>
               ·{' '}
@@ -323,15 +323,15 @@ export default function PostPage() {
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
                 How the MotoQuant Physics Engine Works
-              </Link>{' '}
-              — the 15-sub-model architecture, including the environmental sub-model that does the DA correction for every venue in this post.
+              </Link>
+              : the 15-sub-model architecture, including the environmental sub-model that does the DA correction for every venue in this post.
             </li>
             <li>
               ·{' '}
               <Link href="/bikes" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Browse the full bike catalog
-              </Link>{' '}
-              — every spec used in the venue sweep above, across 340+ bikes.
+              </Link>
+              : every spec used in the venue sweep above, across 340+ bikes.
             </li>
           </ul>
         </div>
@@ -341,7 +341,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Sweep your bike across all five Indian venues</div>
             <div className="text-white/60 text-sm">
-              Free simulator — pick any bike, pick MMRT or Aamby Valley or BIC, watch the ET and trap shift in real time. Find the venue your bike actually wants.
+              Free simulator: pick any bike, pick MMRT or Aamby Valley or BIC, watch the ET and trap shift in real time. Find the venue your bike actually wants.
             </div>
           </div>
           <Link

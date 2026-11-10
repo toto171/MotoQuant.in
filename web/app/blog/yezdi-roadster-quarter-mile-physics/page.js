@@ -6,10 +6,10 @@ import StructuredData, { articleSchema } from '../../StructuredData';
 const SLUG = 'yezdi-roadster-quarter-mile-physics';
 const TITLE = 'Yezdi Roadster Quarter-Mile Physics: 334cc Neo-Retro at the Strip';
 const DESCRIPTION =
-  'MotoQuant simulates the Yezdi Roadster 334 at 15.42s and 138 km/h trap at Aamby Valley. 28.6 hp, 175 kg dry, BG6 platform — and the ₹6,500 sprocket swap that closes 0.18 s.';
+  'MotoQuant simulates the Yezdi Roadster 334 at 15.42s and 138 km/h trap at Aamby Valley. 28.6 hp, 175 kg dry, BG6 platform, and the ₹6,500 sprocket swap that closes 0.18 s.';
 
 export const metadata = {
-  title: 'Yezdi Roadster Quarter-Mile Physics — MotoQuant',
+  title: 'Yezdi Roadster Quarter-Mile Physics | MotoQuant',
   description: DESCRIPTION,
   keywords: [
     'yezdi roadster quarter mile',
@@ -36,7 +36,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'MotoQuant simulates the Yezdi Roadster 334 at 15.42 seconds and a 138.4 km/h trap under Aamby Valley November conditions. 28.6 hp at 7300 rpm, 29 Nm at 6500 rpm, 175 kg dry. That puts the Roadster a half-second quicker than a stock Royal Enfield Classic 350, a full second behind a KTM Duke 390, and squarely in the price-and-displacement gap that Classic Legends built the BG6 platform to occupy. The question worth answering is not whether the Yezdi is faster than the bike it was built to fight — it is. The question is what the 334 cc liquid-cooled platform actually buys you when neither bike is, by any honest measure, fast.',
+    text: 'MotoQuant simulates the Yezdi Roadster 334 at 15.42 seconds and a 138.4 km/h trap under Aamby Valley November conditions. 28.6 hp at 7300 rpm, 29 Nm at 6500 rpm, 175 kg dry. That puts the Roadster a half-second quicker than a stock Royal Enfield Classic 350, a full second behind a KTM Duke 390, and squarely in the price-and-displacement gap that Classic Legends built the BG6 platform to occupy. The question worth answering is not whether the Yezdi is faster than the bike it was built to fight: it is. The question is what the 334 cc liquid-cooled platform actually buys you when neither bike is, by any honest measure, fast.',
   },
   {
     type: 'h2',
@@ -44,7 +44,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The Yezdi Roadster sits on the BG6 platform that Classic Legends — the Mahindra-group subsidiary that resurrected the Yezdi brand in January 2022 — also uses for the Yezdi Scrambler, Yezdi Adventure 334, and Jawa 42 Bobber 350. The engine is a 334 cc liquid-cooled DOHC single producing 28.6 hp (29 PS) at 7300 rpm and 29 Nm at 6500 rpm, with a six-speed cassette gearbox running ratios [2.692, 1.937, 1.500, 1.227, 1.045, 0.913] and 15/37 final drive on the Roadster specifically. The platform is documented in Classic Legends service manual YEZ-BG6-001, which cross-references gear ratios and engine internals across all four sibling bikes.',
+    text: 'The Yezdi Roadster sits on the BG6 platform that Classic Legends (the Mahindra-group subsidiary that resurrected the Yezdi brand in January 2022) also uses for the Yezdi Scrambler, Yezdi Adventure 334, and Jawa 42 Bobber 350. The engine is a 334 cc liquid-cooled DOHC single producing 28.6 hp (29 PS) at 7300 rpm and 29 Nm at 6500 rpm, with a six-speed cassette gearbox running ratios [2.692, 1.937, 1.500, 1.227, 1.045, 0.913] and 15/37 final drive on the Roadster specifically. The platform is documented in Classic Legends service manual YEZ-BG6-001, which cross-references gear ratios and engine internals across all four sibling bikes.',
   },
   {
     type: 'p',
@@ -74,7 +74,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'No instrumented quarter-mile data exists in the public record for the Roadster — every Indian magazine that has reviewed the bike (Autocar India, ZigWheels, BikeWale, Motoroids) ran 0-100 km/h tests and city-cycle fuel economy runs, none ran a 402 m strip pass. The closest comparison data is the Yezdi Scrambler review by ZigWheels (2022), which clocked 0-100 in 8.2 seconds — within 0.3 s of the simulator estimate for the Roadster, which makes sense since the two bikes share an engine and gearbox and differ only in tyre size and final drive ratio.',
+    text: 'No instrumented quarter-mile data exists in the public record for the Roadster. Every Indian magazine that has reviewed the bike (Autocar India, ZigWheels, BikeWale, Motoroids) ran 0-100 km/h tests and city-cycle fuel economy runs, none ran a 402 m strip pass. The closest comparison data is the Yezdi Scrambler review by ZigWheels (2022), which clocked 0-100 in 8.2 seconds, within 0.3 s of the simulator estimate for the Roadster, which makes sense since the two bikes share an engine and gearbox and differ only in tyre size and final drive ratio.',
   },
   {
     type: 'callout',
@@ -86,11 +86,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Three things define the Roadster on a quarter-mile pass. First is the power-to-weight ratio: 163 hp/tonne dry puts the Roadster in roughly the same band as a stock Bajaj Pulsar NS200 (165 hp/tonne) but with significantly taller gearing. Second is the gear cassette itself — the BG6 six-speed cassette is identical to the gearbox Yamaha uses in the YZF-R3, MT-03, and FZ25, scaled for the 334 cc engine character. That gearbox was designed for a 50 hp twin and is, on the Roadster, overgeared for the available torque. The bike crosses the trap line in fourth gear at approximately 7100 rpm with two unused gears in reserve — a clean signature of road-going final-drive selection.',
+    text: 'Three things define the Roadster on a quarter-mile pass. First is the power-to-weight ratio: 163 hp/tonne dry puts the Roadster in roughly the same band as a stock Bajaj Pulsar NS200 (165 hp/tonne) but with significantly taller gearing. Second is the gear cassette itself: the BG6 six-speed cassette is identical to the gearbox Yamaha uses in the YZF-R3, MT-03, and FZ25, scaled for the 334 cc engine character. That gearbox was designed for a 50 hp twin and is, on the Roadster, overgeared for the available torque. The bike crosses the trap line in fourth gear at approximately 7100 rpm with two unused gears in reserve, a clean signature of road-going final-drive selection.',
   },
   {
     type: 'p',
-    text: 'Third, and most consequential at trap speed, is aerodynamics. The Roadster is a retro naked with an upright riding posture, exposed handlebars, no fairing, no fly screen. Catalog Cd is 0.78 and frontal area is 0.48 m². At the 138 km/h trap, drag is consuming roughly 7 kW (9.4 hp) — close to one-third of the engine output. The same engine in the upcoming Yezdi Scrambler-S variant with a small bikini fairing (Cd ≈ 0.72, A ≈ 0.46 m²) would drop drag at the same trap speed to about 5.5 kW, and the simulator predicts a corresponding ET drop of roughly 0.15 s. A full sport fairing on a 28-hp single is a worse trade than it sounds — the weight penalty cancels most of the aero gain — but the directional finding holds: this is a power-limited bike whose drag budget is non-trivial.',
+    text: 'Third, and most consequential at trap speed, is aerodynamics. The Roadster is a retro naked with an upright riding posture, exposed handlebars, no fairing, no fly screen. Catalog Cd is 0.78 and frontal area is 0.48 m². At the 138 km/h trap, drag is consuming roughly 7 kW (9.4 hp), close to one-third of the engine output. The same engine in the upcoming Yezdi Scrambler-S variant with a small bikini fairing (Cd ≈ 0.72, A ≈ 0.46 m²) would drop drag at the same trap speed to about 5.5 kW, and the simulator predicts a corresponding ET drop of roughly 0.15 s. A full sport fairing on a 28-hp single is a worse trade than it sounds (the weight penalty cancels most of the aero gain), but the directional finding holds: this is a power-limited bike whose drag budget is non-trivial.',
   },
   {
     type: 'p',
@@ -117,7 +117,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The Roadster is the quickest bike in its ₹2.0-2.2 lakh price band by a comfortable margin — about 1.0 to 1.6 seconds quicker than the Royal Enfield and Honda 350 alternatives. That gap is almost entirely the 28.6 hp vs 20.2 hp peak power difference at similar dry mass; the BG6 platform is fundamentally more powerful than the RE J-series and Honda Unicorn 350 platforms. The Roadster gives up about 1.8 seconds to the KTM Duke 390, which costs roughly 50 percent more and makes 15 hp more in a 26 kg lighter chassis. That bigger gap is the entire reason the Roadster exists as a separate category — it is the fastest sub-₹2.5-lakh retro naked, not the fastest sub-₹3.5-lakh naked. Those are different shopping decisions.',
+    text: 'The Roadster is the quickest bike in its ₹2.0-2.2 lakh price band by a comfortable margin: about 1.0 to 1.6 seconds quicker than the Royal Enfield and Honda 350 alternatives. That gap is almost entirely the 28.6 hp vs 20.2 hp peak power difference at similar dry mass; the BG6 platform is fundamentally more powerful than the RE J-series and Honda Unicorn 350 platforms. The Roadster gives up about 1.8 seconds to the KTM Duke 390, which costs roughly 50 percent more and makes 15 hp more in a 26 kg lighter chassis. That bigger gap is the entire reason the Roadster exists as a separate category: it is the fastest sub-₹2.5-lakh retro naked, not the fastest sub-₹3.5-lakh naked. Those are different shopping decisions.',
   },
   {
     type: 'p',
@@ -133,19 +133,19 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The single highest-ROI modification is the rear sprocket. The stock 15/37 final drive is geared for highway cruising — the Roadster pulls 6th gear comfortably at 95 km/h sustained, which is genuinely useful on a 200 km highway run but actively wrong for a strip pass. A 15/41 swap (replacing only the rear sprocket) shortens the ratios by 10.8 percent and gets the bike crossing the trap line at 7800 rpm in fourth gear instead of 7100 rpm — much closer to the engine’s 7300 rpm power peak. The simulator predicts an ET drop of approximately 0.18 seconds for this single change. A JT Sprockets 41T rear in 520 pitch retails for ₹650 to ₹900 in India; pair with a fresh 520 chain (₹4,500 for a DID O-ring) and the total parts cost is under ₹6,500. That is the cheapest tenth on this bike, full stop.',
+    text: 'The single highest-ROI modification is the rear sprocket. The stock 15/37 final drive is geared for highway cruising. The Roadster pulls 6th gear comfortably at 95 km/h sustained, which is genuinely useful on a 200 km highway run but actively wrong for a strip pass. A 15/41 swap (replacing only the rear sprocket) shortens the ratios by 10.8 percent and gets the bike crossing the trap line at 7800 rpm in fourth gear instead of 7100 rpm, much closer to the engine’s 7300 rpm power peak. The simulator predicts an ET drop of approximately 0.18 seconds for this single change. A JT Sprockets 41T rear in 520 pitch retails for ₹650 to ₹900 in India; pair with a fresh 520 chain (₹4,500 for a DID O-ring) and the total parts cost is under ₹6,500. That is the cheapest tenth on this bike, full stop.',
   },
   {
     type: 'p',
-    text: 'The second-highest ROI is the rear tyre. The Roadster ships with the Ceat Zoom-X 130/80-17 — a competent commuter tyre that prioritises wet grip and long wear over peak μ. A swap to the Apollo Alpha H1 or the MRF Mogrip Meteor M3 in the same 130/80-17 size pushes peak μ from 1.20 to roughly 1.32, which the simulator translates to an ET reduction of about 0.06 to 0.08 seconds. Cost is approximately ₹3,800 for the tyre plus ₹400 fitment. The trade is real street-rideability — both alternatives wear faster than the OEM Ceat and grip less in cold-wet conditions — but for a bike that sees occasional strip duty, the swap pays for itself in performance.',
+    text: 'The second-highest ROI is the rear tyre. The Roadster ships with the Ceat Zoom-X 130/80-17, a competent commuter tyre that prioritises wet grip and long wear over peak μ. A swap to the Apollo Alpha H1 or the MRF Mogrip Meteor M3 in the same 130/80-17 size pushes peak μ from 1.20 to roughly 1.32, which the simulator translates to an ET reduction of about 0.06 to 0.08 seconds. Cost is approximately ₹3,800 for the tyre plus ₹400 fitment. The trade is real street-rideability (both alternatives wear faster than the OEM Ceat and grip less in cold-wet conditions), but for a bike that sees occasional strip duty, the swap pays for itself in performance.',
   },
   {
     type: 'p',
-    text: 'The third-highest ROI is the ECU tune. The Roadster ships with a Classic Legends-mapped ECU that prioritises BS6 emissions compliance and mid-range driveability over peak power. A Powertronic Stage 1 ECU map for the BG6 platform was released in late 2024 for the Yezdi range; it adds approximately 2.4 hp at peak (30.4 hp vs 28.6 hp stock) and shifts the torque peak from 6500 rpm to 6200 rpm. The simulator predicts an ET drop of about 0.10 seconds for the flash, at a cost of roughly ₹18,000 from a Powertronic dealer. The cost-per-tenth is roughly twice as expensive as the sprocket swap, but the two modifications stack additively — running both takes the Roadster from 15.42 s stock to approximately 15.14 s.',
+    text: 'The third-highest ROI is the ECU tune. The Roadster ships with a Classic Legends-mapped ECU that prioritises BS6 emissions compliance and mid-range driveability over peak power. A Powertronic Stage 1 ECU map for the BG6 platform was released in late 2024 for the Yezdi range; it adds approximately 2.4 hp at peak (30.4 hp vs 28.6 hp stock) and shifts the torque peak from 6500 rpm to 6200 rpm. The simulator predicts an ET drop of about 0.10 seconds for the flash, at a cost of roughly ₹18,000 from a Powertronic dealer. The cost-per-tenth is roughly twice as expensive as the sprocket swap, but the two modifications stack additively: running both takes the Roadster from 15.42 s stock to approximately 15.14 s.',
   },
   {
     type: 'callout',
-    text: 'Fastest path on a Yezdi Roadster: 15/41 sprocket swap first (~₹6,500 / ~0.18 s — cheapest tenth on the bike), then Apollo or MRF rear tyre upgrade (~₹4,200 / ~0.07 s), then Powertronic Stage 1 flash if you have a Powertronic dealer reachable (~₹18,000 / ~0.10 s). Total ~₹28,700 for ~0.35 s of ET, which lands a sub-15-second stock-class Roadster at most Indian strips. Skip the slip-on exhaust on this engine — single-cylinder volumetric efficiency does not benefit meaningfully from back-pressure changes on a stock head.',
+    text: 'Fastest path on a Yezdi Roadster: 15/41 sprocket swap first (~₹6,500 / ~0.18 s, cheapest tenth on the bike), then Apollo or MRF rear tyre upgrade (~₹4,200 / ~0.07 s), then Powertronic Stage 1 flash if you have a Powertronic dealer reachable (~₹18,000 / ~0.10 s). Total ~₹28,700 for ~0.35 s of ET, which lands a sub-15-second stock-class Roadster at most Indian strips. Skip the slip-on exhaust on this engine: single-cylinder volumetric efficiency does not benefit meaningfully from back-pressure changes on a stock head.',
   },
   {
     type: 'h2',
@@ -157,7 +157,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'For a strip-curious buyer the ordering matters. The Roadster is the platform-mate to pick if drag-strip performance is the differentiator. It is also, conveniently, the cheapest of the four — Classic Legends positions the Roadster as the entry point to the Yezdi range, with the Scrambler and Adventure carrying ₹15,000 to ₹35,000 premiums for their off-road styling. The fastest BG6 bike happens to be the cheapest one. That alignment is rare enough in the Indian market that it is worth naming explicitly.',
+    text: 'For a strip-curious buyer the ordering matters. The Roadster is the platform-mate to pick if drag-strip performance is the differentiator. It is also, conveniently, the cheapest of the four. Classic Legends positions the Roadster as the entry point to the Yezdi range, with the Scrambler and Adventure carrying ₹15,000 to ₹35,000 premiums for their off-road styling. The fastest BG6 bike happens to be the cheapest one. That alignment is rare enough in the Indian market that it is worth naming explicitly.',
   },
   {
     type: 'h2',
@@ -169,7 +169,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The cost-per-tenth pathway on this bike is unusually clean. The sprocket swap is the cheapest tenth available on any 300-400 cc Indian bike — partly because the OEM 15/37 final drive is genuinely sub-optimal for strip use, and partly because 520-pitch sprockets are commodity items at every Indian motorcycle shop. The tyre upgrade is honest and well-validated. The ECU flash is more expensive per tenth but stacks cleanly with the other two. Total spend to drop the Roadster from a 15.4-second bike to a 15.1-second bike is roughly ₹28,000 — less than the price difference between a Roadster and a Duke 390, which is the more important comparison most buyers will run.',
+    text: 'The cost-per-tenth pathway on this bike is unusually clean. The sprocket swap is the cheapest tenth available on any 300-400 cc Indian bike, partly because the OEM 15/37 final drive is genuinely sub-optimal for strip use, and partly because 520-pitch sprockets are commodity items at every Indian motorcycle shop. The tyre upgrade is honest and well-validated. The ECU flash is more expensive per tenth but stacks cleanly with the other two. Total spend to drop the Roadster from a 15.4-second bike to a 15.1-second bike is roughly ₹28,000, less than the price difference between a Roadster and a Duke 390, which is the more important comparison most buyers will run.',
   },
   {
     type: 'p',
@@ -185,15 +185,15 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'More relevant for tuning: MotoQuant scores every part in its catalog by cost-per-tenth for your specific bike. On the Roadster, the sprocket swap is the answer, the tyre upgrade is the second answer, and the ECU flash is the third — in that exact order. The simulator will tell you that in numbers, not in opinions, and on a platform where four bikes share an engine and a gearbox, the cross-platform mod data is unusually well-correlated.',
+    text: 'More relevant for tuning: MotoQuant scores every part in its catalog by cost-per-tenth for your specific bike. On the Roadster, the sprocket swap is the answer, the tyre upgrade is the second answer, and the ECU flash is the third, in that exact order. The simulator will tell you that in numbers, not in opinions, and on a platform where four bikes share an engine and a gearbox, the cross-platform mod data is unusually well-correlated.',
   },
   {
     type: 'p',
-    text: 'Two final caveats. First, every number in this post is a stock-tune simulation under matched Aamby Valley November conditions. Change the venue (sea-level MMRT will help by ~0.15-0.20 s) or change the rider (a 65 kg rider versus the 78 kg simulated default will help by ~0.10 s), and absolute ETs shift; the relative ordering of the Roadster against its rivals stays stable. Second, the simulator has no instrumented ET data to calibrate against for this specific bike — the 15.42 s number is a first-principles physics estimate from the engine torque curve, the gearbox ratios, the dry mass, and the published Cd/frontal-area inputs. If a Dragy timeslip from a stock Roadster surfaces (Valley Run 2026 Winter would be the obvious place to capture one), the model will be updated and the headline number may shift by 0.1 to 0.3 seconds in either direction.',
+    text: 'Two final caveats. First, every number in this post is a stock-tune simulation under matched Aamby Valley November conditions. Change the venue (sea-level MMRT will help by ~0.15-0.20 s) or change the rider (a 65 kg rider versus the 78 kg simulated default will help by ~0.10 s), and absolute ETs shift; the relative ordering of the Roadster against its rivals stays stable. Second, the simulator has no instrumented ET data to calibrate against for this specific bike. The 15.42 s number is a first-principles physics estimate from the engine torque curve, the gearbox ratios, the dry mass, and the published Cd/frontal-area inputs. If a Dragy timeslip from a stock Roadster surfaces (Valley Run 2026 Winter would be the obvious place to capture one), the model will be updated and the headline number may shift by 0.1 to 0.3 seconds in either direction.',
   },
   {
     type: 'p',
-    text: 'If you take one thing from this post, take this: the Yezdi Roadster 334 is the fastest sub-₹2.5-lakh retro naked in India, and the cheapest tenth available on it is a ₹6,500 sprocket-and-chain swap that closes 0.18 seconds. Every other modification stacks on top of that one. Every other comparison — against the Classic 350, against the Hunter 350, against the Duke 390 — rests on the simulator-derived 15.42 s baseline. That baseline now exists in the public record. Use it.',
+    text: 'If you take one thing from this post, take this: the Yezdi Roadster 334 is the fastest sub-₹2.5-lakh retro naked in India, and the cheapest tenth available on it is a ₹6,500 sprocket-and-chain swap that closes 0.18 seconds. Every other modification stacks on top of that one. Every other comparison (against the Classic 350, against the Hunter 350, against the Duke 390) rests on the simulator-derived 15.42 s baseline. That baseline now exists in the public record. Use it.',
   },
 ];
 
@@ -317,36 +317,36 @@ export default function PostPage() {
               ·{' '}
               <Link href="/blog/re-continental-gt-650-quarter-mile-physics" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Royal Enfield Continental GT 650 Quarter-Mile Physics
-              </Link>{' '}
-              — the bigger-displacement retro twin that sits one segment up from the Roadster.
+              </Link>
+              : the bigger-displacement retro twin that sits one segment up from the Roadster.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/ktm-duke-390-vs-rc-390-quarter-mile-physics" className="text-brand-accent hover:text-brand-orange transition-colors">
                 KTM Duke 390 vs RC 390: Quarter-Mile Physics
-              </Link>{' '}
-              — the ₹3.1-lakh alternative that the Roadster gives up 1.8 s to.
+              </Link>
+              : the ₹3.1-lakh alternative that the Roadster gives up 1.8 s to.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/how-the-motoquant-physics-engine-works" className="text-brand-accent hover:text-brand-orange transition-colors">
                 How the MotoQuant Physics Engine Works
-              </Link>{' '}
-              — the 15-sub-model architecture behind every ET prediction in this post.
+              </Link>
+              : the 15-sub-model architecture behind every ET prediction in this post.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/how-to-tune-for-aamby-valley-in-november" className="text-brand-accent hover:text-brand-orange transition-colors">
                 How to Tune for Aamby Valley in November
-              </Link>{' '}
-              — the venue conditions used for every simulation above.
+              </Link>
+              : the venue conditions used for every simulation above.
             </li>
             <li>
               ·{' '}
               <Link href="/bikes" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Browse the full bike catalog
-              </Link>{' '}
-              — including the Roadster, Scrambler, Adventure 334, and Jawa 42 Bobber 350 platform-mates.
+              </Link>
+              : including the Roadster, Scrambler, Adventure 334, and Jawa 42 Bobber 350 platform-mates.
             </li>
           </ul>
         </div>
@@ -356,7 +356,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Run the Roadster yourself</div>
             <div className="text-white/60 text-sm">
-              Free simulator — pick the Yezdi Roadster, dial in your local conditions, and watch the ET update live.
+              Free simulator: pick the Yezdi Roadster, dial in your local conditions, and watch the ET update live.
             </div>
           </div>
           <Link

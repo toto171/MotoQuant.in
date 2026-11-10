@@ -4,7 +4,7 @@
 
 import StructuredData, { SITE_URL } from '../StructuredData';
 
-const TITLE = "Terms of Service — MotoQuant";
+const TITLE = "Terms of Service | MotoQuant";
 const DESCRIPTION = "Terms of Service for MotoQuant. Indian law, Pune jurisdiction.";
 
 export const metadata = {

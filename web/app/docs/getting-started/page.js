@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Term from '../../../components/Term';
 
 export const metadata = {
-  title: 'Getting started — your first quarter-mile time in five minutes',
+  title: 'Getting started: your first quarter-mile time in five minutes',
   description:
     'A five-minute walkthrough of MotoQuant: pick one of 534 bikes, read your quarter-mile time, change rider weight and location, add parts, find the best parts for your budget and get a race-day setup. Free and open source.',
   keywords: [
@@ -89,7 +89,7 @@ export default function GettingStartedPage() {
             extra power.
           </li>
           <li>
-            <Term k="eighth">Halfway — ⅛ mile</Term>: the time at the halfway point, which many strips also time.
+            <Term k="eighth">Halfway (⅛ mile)</Term>: the time at the halfway point, which many strips also time.
           </li>
         </ul>
       </Step>

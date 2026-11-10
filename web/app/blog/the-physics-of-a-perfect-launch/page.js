@@ -6,7 +6,7 @@ import CodeComment from '../../../components/CodeComment';
 import ScoreboardDigits from '../../../components/ScoreboardDigits';
 
 export const metadata = {
-  title: 'The Physics of a Perfect Launch — MotoQuant Blog',
+  title: 'The Physics of a Perfect Launch | MotoQuant Blog',
   description: 'How clutch engagement RPM, tire slip ratio, and weight transfer interact in the first 0.4 seconds of a drag run. A first-principles breakdown for Indian drag racers.',
   keywords: ['drag racing launch physics', 'motorcycle launch control', 'clutch engagement drag racing', 'tire slip ratio drag'],
   alternates: { canonical: 'https://motoquant.in/blog/the-physics-of-a-perfect-launch' },
@@ -22,7 +22,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'Clutch engagement RPM, tire slip ratio, and weight transfer work together in the first 0.4 seconds of a drag run. Getting any one of them wrong costs you tenths — sometimes a lot more than tenths. This article breaks down the physics of each variable, how they interact, and what MotoQuant actually simulates when you press Run.',
+    text: 'Clutch engagement RPM, tire slip ratio, and weight transfer work together in the first 0.4 seconds of a drag run. Getting any one of them wrong costs you tenths, sometimes a lot more than tenths. This article breaks down the physics of each variable, how they interact, and what MotoQuant actually simulates when you press Run.',
   },
   {
     type: 'h2',
@@ -30,7 +30,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'In a 10-second run, the first 60 feet typically takes 1.7–2.1 seconds. But the physics that determines your 60-ft time is almost entirely set in the first half-second — from the moment the clutch releases to the moment the rear tyre stops spinning up and the bike commits to a traction-limited acceleration. Miss the launch, and there is no catching up in the top end.',
+    text: 'In a 10-second run, the first 60 feet typically takes 1.7–2.1 seconds. But the physics that determines your 60-ft time is almost entirely set in the first half-second, from the moment the clutch releases to the moment the rear tyre stops spinning up and the bike commits to a traction-limited acceleration. Miss the launch, and there is no catching up in the top end.',
   },
   {
     type: 'p',
@@ -42,7 +42,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The clutch does two things at launch. First, it limits the torque transferred to the rear wheel so the tyre does not instantly light up and spin. Second, it allows the engine to stay above idle — ideally at its peak torque RPM — while the bike accelerates from rest.',
+    text: 'The clutch does two things at launch. First, it limits the torque transferred to the rear wheel so the tyre does not instantly light up and spin. Second, it allows the engine to stay above idle (ideally at its peak torque RPM) while the bike accelerates from rest.',
   },
   {
     type: 'p',
@@ -50,7 +50,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'MotoQuant models clutch dynamics through an engagement rate (Nm/s) and a slip RPM threshold. When the clutch is releasing, torque transfer scales with the engagement rate. Once the rear wheel RPM is within the slip threshold of the engine RPM, the clutch is considered locked. This produces realistic clutch heat and slip duration — you can watch both in the simulation output.',
+    text: 'MotoQuant models clutch dynamics through an engagement rate (Nm/s) and a slip RPM threshold. When the clutch is releasing, torque transfer scales with the engagement rate. Once the rear wheel RPM is within the slip threshold of the engine RPM, the clutch is considered locked. This produces realistic clutch heat and slip duration, and you can watch both in the simulation output.',
   },
   {
     type: 'callout',
@@ -78,7 +78,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'When you accelerate, weight shifts from the front axle to the rear. This increases rear tyre load, which increases the friction force the rear can generate — up to a point. But if weight transfer is so extreme that the front wheel lifts, you have a wheelie: the bike\'s angular momentum is working against forward progress.',
+    text: 'When you accelerate, weight shifts from the front axle to the rear. This increases rear tyre load, which increases the friction force the rear can generate, up to a point. But if weight transfer is so extreme that the front wheel lifts, you have a wheelie: the bike\'s angular momentum is working against forward progress.',
   },
   {
     type: 'p',
@@ -86,7 +86,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'MotoQuant tracks front and rear axle loads at every millisecond. If front load goes to zero, the physics transitions to a wheelie model that trades forward traction for rotational lift. Wheelie bars extend the effective wheelbase to resist this transition — a popular drag-prep mod that shows up clearly in MotoQuant\'s ET delta.',
+    text: 'MotoQuant tracks front and rear axle loads at every millisecond. If front load goes to zero, the physics transitions to a wheelie model that trades forward traction for rotational lift. Wheelie bars extend the effective wheelbase to resist this transition, a popular drag-prep mod that shows up clearly in MotoQuant\'s ET delta.',
   },
   {
     type: 'h2',
@@ -98,7 +98,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'In MotoQuant, you can sweep the launch RPM and power boost sliders and watch the 60-ft time change in real time. The sweet spot is typically visible as a shallow minimum — slightly higher launch RPM gains nothing because the traction limit is already reached.',
+    text: 'In MotoQuant, you can sweep the launch RPM and power boost sliders and watch the 60-ft time change in real time. The sweet spot is typically visible as a shallow minimum: slightly higher launch RPM gains nothing because the traction limit is already reached.',
   },
   {
     type: 'callout',
@@ -118,7 +118,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The physics does not lie. Run the numbers before you tune. MotoQuant is free — there is no reason to guess.',
+    text: 'The physics does not lie. Run the numbers before you tune. MotoQuant is free, so there is no reason to guess.',
   },
 ];
 
@@ -193,7 +193,7 @@ export default function PostPage() {
         <div className="max-w-2xl mx-auto mt-16 glass rounded-xl p-6 border border-brand-orange/25 flex flex-col sm:flex-row items-center gap-4">
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Test your own launch physics</div>
-            <div className="text-white/60 text-sm">Free simulator — pick your bike, adjust rider weight, and watch the 60-ft time change.</div>
+            <div className="text-white/60 text-sm">Free simulator: pick your bike, adjust rider weight, and watch the 60-ft time change.</div>
           </div>
           <Link href="/simulator" className="shrink-0 px-5 py-2.5 bg-brand-orange text-on-accent font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">
             Open the simulator →

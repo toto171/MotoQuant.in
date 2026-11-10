@@ -6,10 +6,10 @@ import StructuredData, { articleSchema } from '../../StructuredData';
 const SLUG = 'yamaha-mt-125-xsr125-platform-physics';
 const TITLE = 'Yamaha MT-125 vs XSR125: Same Engine, 0.10s Apart at the Strip';
 const DESCRIPTION =
-  'MotoQuant simulates the Yamaha MT-125 at 19.123s and the XSR125 at 19.222s — same engine, same gearbox, same final drive, 0.10s apart. Where the tenth comes from and why the heritage tax is paid in frontal area.';
+  'MotoQuant simulates the Yamaha MT-125 at 19.123s and the XSR125 at 19.222s: same engine, same gearbox, same final drive, 0.10s apart. Where the tenth comes from and why the heritage tax is paid in frontal area.';
 
 export const metadata = {
-  title: 'Yamaha MT-125 vs XSR125 Quarter-Mile Physics — MotoQuant',
+  title: 'Yamaha MT-125 vs XSR125 Quarter-Mile Physics | MotoQuant',
   description: DESCRIPTION,
   keywords: [
     'yamaha mt-125 quarter mile',
@@ -44,15 +44,15 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "Yamaha launched the MT-125 in 2020 as the Hyper Naked sibling of the YZF-R125 sportbike. The XSR125 followed in 2021 as the Sport Heritage variant — same engine, same chassis sub-frame, retro-styled bodywork over the top. Both bikes are Euro 5 compliant, both are A1-licence-restricted at 11 kilowatts (15 hp), and both pull from the same Yamaha factory in Indonesia using the same engine castings. The only mechanical differences between them sit above the swingarm: handlebar position, headlight shape, tank capacity, and tire sizing.",
+    text: "Yamaha launched the MT-125 in 2020 as the Hyper Naked sibling of the YZF-R125 sportbike. The XSR125 followed in 2021 as the Sport Heritage variant: same engine, same chassis sub-frame, retro-styled bodywork over the top. Both bikes are Euro 5 compliant, both are A1-licence-restricted at 11 kilowatts (15 hp), and both pull from the same Yamaha factory in Indonesia using the same engine castings. The only mechanical differences between them sit above the swingarm: handlebar position, headlight shape, tank capacity, and tire sizing.",
   },
   {
     type: 'p',
-    text: 'The engine is the 124.7 cc liquid-cooled DOHC 4-valve single with Yamaha’s Variable Valve Actuation system — the same VVA head that appears on every Yamaha 125 platform from the YZF-R125 to the MT-125 to the XSR125. It produces 11 kilowatts (15 hp) at 10,000 rpm and 11.5 newton-metres of torque at 8,000 rpm. Bore is 52.0 mm, stroke 58.7 mm, compression 11.2:1, fuelling EFI. The redline sits at 11,500 rpm. The six-speed cassette gearbox is identical between all three bikes — Yamaha’s service manual cross-reference (technical instruction TI-2021-014) confirms the cassette internals are shipped from the same parts bin to all three assembly lines.',
+    text: 'The engine is the 124.7 cc liquid-cooled DOHC 4-valve single with Yamaha’s Variable Valve Actuation system, the same VVA head that appears on every Yamaha 125 platform from the YZF-R125 to the MT-125 to the XSR125. It produces 11 kilowatts (15 hp) at 10,000 rpm and 11.5 newton-metres of torque at 8,000 rpm. Bore is 52.0 mm, stroke 58.7 mm, compression 11.2:1, fuelling EFI. The redline sits at 11,500 rpm. The six-speed cassette gearbox is identical between all three bikes: Yamaha’s service manual cross-reference (technical instruction TI-2021-014) confirms the cassette internals are shipped from the same parts bin to all three assembly lines.',
   },
   {
     type: 'p',
-    text: 'Final drive is identical: 14-tooth front sprocket, 48-tooth rear, 428 chain. Gear ratios run [2.917, 1.938, 1.500, 1.227, 1.045, 0.913] across the six speeds. Dry mass is 131 kg on both bikes — kerb mass is 140 kg with the 11-litre tank full and oils settled, which means the published wet-weight difference between MT-125 and XSR125 in magazine reviews is mostly a question of how the journalist measured the test bike rather than a real platform delta.',
+    text: 'Final drive is identical: 14-tooth front sprocket, 48-tooth rear, 428 chain. Gear ratios run [2.917, 1.938, 1.500, 1.227, 1.045, 0.913] across the six speeds. Dry mass is 131 kg on both bikes; kerb mass is 140 kg with the 11-litre tank full and oils settled, which means the published wet-weight difference between MT-125 and XSR125 in magazine reviews is mostly a question of how the journalist measured the test bike rather than a real platform delta.',
   },
   {
     type: 'h2',
@@ -68,10 +68,10 @@ const CONTENT = [
       ['Metric', 'MT-125', 'XSR125', 'Delta'],
       ['Quarter-mile ET', '19.123 s', '19.222 s', '+0.099 s'],
       ['Trap speed', '117.5 km/h', '117.2 km/h', '−0.3 km/h'],
-      ['Peak hp (crank)', '15.0 @ 10000', '15.0 @ 10000', '—'],
-      ['Peak torque', '11.5 Nm @ 8000', '11.5 Nm @ 8000', '—'],
-      ['Dry mass', '131 kg', '131 kg', '—'],
-      ['Cd (sim)', '0.78', '0.78', '—'],
+      ['Peak hp (crank)', '15.0 @ 10000', '15.0 @ 10000', '–'],
+      ['Peak torque', '11.5 Nm @ 8000', '11.5 Nm @ 8000', '–'],
+      ['Dry mass', '131 kg', '131 kg', '–'],
+      ['Cd (sim)', '0.78', '0.78', '–'],
       ['Frontal area', '0.47 m²', '0.48 m²', '+0.01 m²'],
       ['CdA product', '0.367 m²', '0.374 m²', '+1.9%'],
       ['Wheelbase', '1325 mm', '1330 mm', '+5 mm'],
@@ -79,7 +79,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Real-world ETs from magazine instrumented tests put the MT-125 at roughly 18.4 to 18.8 seconds (MCN 2020, Visordown 2021) and the XSR125 at 18.5 to 19.0 seconds (Visordown 2022, MCN 2022). The simulator runs about 0.4 to 0.6 seconds slower than the magazine numbers on both bikes, which is the documented bias band for the "other / unknown" cluster that the entry-band 125 cc singles route into. That bias is a known calibration target — see the standing-priorities list — but the relative ordering of the two bikes (MT-125 quicker than XSR125 by ~0.10 s) is preserved exactly between the simulator and the real-world tests, which is the more important property.',
+    text: 'Real-world ETs from magazine instrumented tests put the MT-125 at roughly 18.4 to 18.8 seconds (MCN 2020, Visordown 2021) and the XSR125 at 18.5 to 19.0 seconds (Visordown 2022, MCN 2022). The simulator runs about 0.4 to 0.6 seconds slower than the magazine numbers on both bikes, which is the documented bias band for the "other / unknown" cluster that the entry-band 125 cc singles route into. That bias is a known calibration target (see the standing-priorities list), but the relative ordering of the two bikes (MT-125 quicker than XSR125 by ~0.10 s) is preserved exactly between the simulator and the real-world tests, which is the more important property.',
   },
   {
     type: 'callout',
@@ -95,11 +95,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The MT-125 ships with a 100/80 front tire, 130/70 rear, low-set sport-naked handlebars, and a riding posture that is leaned-forward and tucked. Catalog frontal area is 0.47 m². The XSR125 ships with retro 110/70 front and 140/70 rear tires (wider sidewall profile, slightly more rolling resistance at the contact patch), upright Sport Heritage handlebars that push the rider into a more vertical posture, and that posture adds approximately 0.01 m² to the projected frontal area. Both bikes carry the same Cd in the catalog at 0.78 — the difference is purely in projected area, not in shape efficiency.',
+    text: 'The MT-125 ships with a 100/80 front tire, 130/70 rear, low-set sport-naked handlebars, and a riding posture that is leaned-forward and tucked. Catalog frontal area is 0.47 m². The XSR125 ships with retro 110/70 front and 140/70 rear tires (wider sidewall profile, slightly more rolling resistance at the contact patch), upright Sport Heritage handlebars that push the rider into a more vertical posture, and that posture adds approximately 0.01 m² to the projected frontal area. Both bikes carry the same Cd in the catalog at 0.78; the difference is purely in projected area, not in shape efficiency.',
   },
   {
     type: 'p',
-    text: 'At the 117 km/h trap speed, aerodynamic drag force scales with the CdA product times velocity squared. The MT-125 produces about 4.0 kilonewtons-second of cumulative drag impulse from launch to the trap line; the XSR125 produces about 4.1 kilonewtons-second from the same time integral. That 2.5 percent drag-impulse difference, multiplied by the fact that this is a 15-hp bike with almost no power margin, produces exactly the 0.10 s ET delta the simulator reports. On a litre superbike with 200 hp the same CdA difference would show up as a 0.02 s delta — there is so much engine power that drag is a fraction of the total propulsive budget. On a 15-hp single, drag is the dominant resistance at trap, and a 2.5 percent change in drag impulse is a 2.5 percent change in trap time.',
+    text: 'At the 117 km/h trap speed, aerodynamic drag force scales with the CdA product times velocity squared. The MT-125 produces about 4.0 kilonewtons-second of cumulative drag impulse from launch to the trap line; the XSR125 produces about 4.1 kilonewtons-second from the same time integral. That 2.5 percent drag-impulse difference, multiplied by the fact that this is a 15-hp bike with almost no power margin, produces exactly the 0.10 s ET delta the simulator reports. On a litre superbike with 200 hp the same CdA difference would show up as a 0.02 s delta, because there is so much engine power that drag is a fraction of the total propulsive budget. On a 15-hp single, drag is the dominant resistance at trap, and a 2.5 percent change in drag impulse is a 2.5 percent change in trap time.',
   },
   {
     type: 'p',
@@ -111,7 +111,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "Yamaha sells three bikes off this platform in Europe: the MT-125 (Hyper Naked), the XSR125 (Sport Heritage), and the YZF-R125 (Supersport). All three use the same engine, gearbox, and final drive. The YZF-R125 ships with a full sport fairing, clip-on bars, and a leaned-forward riding posture that drops the rider into a proper tuck behind the bubble. Catalog Cd for the R125 is about 0.65 (the fairing genuinely earns its weight), and frontal area drops to roughly 0.45 m² with the tucked rider. CdA product is approximately 0.293 m² — about 20 percent lower than the MT-125 and 22 percent lower than the XSR125.",
+    text: "Yamaha sells three bikes off this platform in Europe: the MT-125 (Hyper Naked), the XSR125 (Sport Heritage), and the YZF-R125 (Supersport). All three use the same engine, gearbox, and final drive. The YZF-R125 ships with a full sport fairing, clip-on bars, and a leaned-forward riding posture that drops the rider into a proper tuck behind the bubble. Catalog Cd for the R125 is about 0.65 (the fairing genuinely earns its weight), and frontal area drops to roughly 0.45 m² with the tucked rider. CdA product is approximately 0.293 m², about 20 percent lower than the MT-125 and 22 percent lower than the XSR125.",
   },
   {
     type: 'p',
@@ -127,11 +127,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "Neither the MT-125 nor the XSR125 is officially sold in India — both are Completely Built Unit imports for the few CBU dealers in Mumbai and Bangalore, which lifts the on-road price into the ₹4-5 lakh band that buys far more bike in domestic-spec hardware. The platform's relevance is in Europe (where the A1 licence is a major two-wheeler entry point and Yamaha sells the 125 family by the tens of thousands annually) and in Southeast Asia, where Thailand, Indonesia, and the Philippines run a serious 125 cc drag-strip community on Honda CBR150R, Yamaha R15, and the Yamaha 125 family.",
+    text: "Neither the MT-125 nor the XSR125 is officially sold in India; both are Completely Built Unit imports for the few CBU dealers in Mumbai and Bangalore, which lifts the on-road price into the ₹4-5 lakh band that buys far more bike in domestic-spec hardware. The platform's relevance is in Europe (where the A1 licence is a major two-wheeler entry point and Yamaha sells the 125 family by the tens of thousands annually) and in Southeast Asia, where Thailand, Indonesia, and the Philippines run a serious 125 cc drag-strip community on Honda CBR150R, Yamaha R15, and the Yamaha 125 family.",
   },
   {
     type: 'p',
-    text: 'The buying decision between MT-125 and XSR125, viewed through a drag-physics lens, is purely a posture-and-bodywork decision. The MT-125 is the quicker of the two by a meaningful tenth, and that tenth comes entirely from the lower handlebars and the smaller-section tires. The XSR125 is slower because the Sport Heritage styling brief required upright ergonomics and a more vertical rider posture — design choices that improve street-comfort on weekend rides and cost the rider a fraction of a second on the strip.',
+    text: 'The buying decision between MT-125 and XSR125, viewed through a drag-physics lens, is purely a posture-and-bodywork decision. The MT-125 is the quicker of the two by a meaningful tenth, and that tenth comes entirely from the lower handlebars and the smaller-section tires. The XSR125 is slower because the Sport Heritage styling brief required upright ergonomics and a more vertical rider posture, design choices that improve street-comfort on weekend rides and cost the rider a fraction of a second on the strip.',
   },
   {
     type: 'p',
@@ -143,15 +143,15 @@ const CONTENT = [
   },
   {
     type: 'h2',
-    text: 'Gearing — Why Sixth Gear Never Engages',
+    text: 'Gearing: Why Sixth Gear Never Engages',
   },
   {
     type: 'p',
-    text: 'The MT-125 and XSR125 share the same six-speed cassette but neither bike reaches sixth gear in a quarter-mile pass. The simulator log shows both bikes crossing the trap line in fifth gear at approximately 9100 rpm. Sixth gear on this platform is a true overdrive at 0.913 ratio, designed for highway cruise at 100-110 km/h sustained — the bike does not have the power margin to upshift into sixth and continue accelerating, so the optimal strategy is to hold fifth through the trap and let the engine wind into the 10000 rpm peak-power zone.',
+    text: 'The MT-125 and XSR125 share the same six-speed cassette but neither bike reaches sixth gear in a quarter-mile pass. The simulator log shows both bikes crossing the trap line in fifth gear at approximately 9100 rpm. Sixth gear on this platform is a true overdrive at 0.913 ratio, designed for highway cruise at 100-110 km/h sustained. The bike does not have the power margin to upshift into sixth and continue accelerating, so the optimal strategy is to hold fifth through the trap and let the engine wind into the 10000 rpm peak-power zone.',
   },
   {
     type: 'p',
-    text: 'A 14/50 final drive (shortening the ratios by 4.2 percent vs the stock 14/48) puts the bike into sixth gear at the trap, which sounds like an improvement and is not. The shift point lands about 30 metres before the trap line, costing more ET in the gear-change deadband than the shorter gear gains in wheel torque. A 14/46 final drive (lengthening the ratios by 4.2 percent) does the opposite — keeps the bike in fourth gear at the trap, which means trap RPM falls to about 8500 and the bike crosses the line slightly below the peak-power band. Net result of either swap on this platform: less than 0.02 s either way, both within sim noise. The stock 14/48 final drive is genuinely optimised for this engine’s power band and the quarter-mile distance.',
+    text: 'A 14/50 final drive (shortening the ratios by 4.2 percent vs the stock 14/48) puts the bike into sixth gear at the trap, which sounds like an improvement and is not. The shift point lands about 30 metres before the trap line, costing more ET in the gear-change deadband than the shorter gear gains in wheel torque. A 14/46 final drive (lengthening the ratios by 4.2 percent) does the opposite: it keeps the bike in fourth gear at the trap, which means trap RPM falls to about 8500 and the bike crosses the line slightly below the peak-power band. Net result of either swap on this platform: less than 0.02 s either way, both within sim noise. The stock 14/48 final drive is genuinely optimised for this engine’s power band and the quarter-mile distance.',
   },
   {
     type: 'p',
@@ -163,11 +163,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The Yamaha MT-125 and XSR125 are the same motorcycle from the swingarm down. The 0.10 second ET difference between them at the drag strip is a clean physics demonstration of how much rider posture and tire-profile selection matter on a platform where engine power is fixed by A1-licence regulation and total ET is bounded by 18-19 seconds. There is no engine tuning that moves this number meaningfully on either bike — the 15 hp ceiling is a regulatory constraint, not a mechanical one, and removing it requires a derestricted ECU map and an MOT inspector who is willing to look the other way.',
+    text: 'The Yamaha MT-125 and XSR125 are the same motorcycle from the swingarm down. The 0.10 second ET difference between them at the drag strip is a clean physics demonstration of how much rider posture and tire-profile selection matter on a platform where engine power is fixed by A1-licence regulation and total ET is bounded by 18-19 seconds. There is no engine tuning that moves this number meaningfully on either bike. The 15 hp ceiling is a regulatory constraint, not a mechanical one, and removing it requires a derestricted ECU map and an MOT inspector who is willing to look the other way.',
   },
   {
     type: 'p',
-    text: 'The bikes that matter on this platform are the three Yamaha sells in parallel: the MT-125 (Hyper Naked, second-quickest), the XSR125 (Sport Heritage, slowest, most comfortable), and the YZF-R125 (Supersport, quickest, least comfortable). The physics says the differentiation is real, the differences are small in absolute terms but meaningful as a fraction of the dynamic range, and the choice between them is entirely a question of how the rider wants to spend Saturday afternoons — leaned forward on track tires, upright on retro tires, or somewhere in between.',
+    text: 'The bikes that matter on this platform are the three Yamaha sells in parallel: the MT-125 (Hyper Naked, second-quickest), the XSR125 (Sport Heritage, slowest, most comfortable), and the YZF-R125 (Supersport, quickest, least comfortable). The physics says the differentiation is real, the differences are small in absolute terms but meaningful as a fraction of the dynamic range, and the choice between them is entirely a question of how the rider wants to spend Saturday afternoons: leaned forward on track tires, upright on retro tires, or somewhere in between.',
   },
   {
     type: 'p',
@@ -179,11 +179,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'If you ride the MT-125 or XSR125 (or are deciding between them), the simulator at motoquant.in lets you sweep rider weight, ambient temperature, density altitude, and parts-catalog mods to see exactly where the tenths come from on your specific bike. The simulator currently rates both bikes within the "other / unknown" cluster bias band, which means absolute ETs are slow by approximately 0.4 to 0.6 seconds versus magazine instrumented tests — but the relative ordering between the two bikes (MT-125 quicker by 0.10 s) is preserved exactly. That bias is being closed in the background as the small-cc benchmark dataset grows.',
+    text: 'If you ride the MT-125 or XSR125 (or are deciding between them), the simulator at motoquant.in lets you sweep rider weight, ambient temperature, density altitude, and parts-catalog mods to see exactly where the tenths come from on your specific bike. The simulator currently rates both bikes within the "other / unknown" cluster bias band, which means absolute ETs are slow by approximately 0.4 to 0.6 seconds versus magazine instrumented tests, but the relative ordering between the two bikes (MT-125 quicker by 0.10 s) is preserved exactly. That bias is being closed in the background as the small-cc benchmark dataset grows.',
   },
   {
     type: 'p',
-    text: 'Two final caveats. First, every number in this post is a stock-tune simulation under matched Aamby Valley November conditions. Change the venue (denser air at sea-level European tracks like Bruntingthorpe will help both bikes by ~0.15 s) or change the rider (a 65 kg rider versus the 78 kg simulated default will help both bikes by ~0.10 s), and absolute ETs shift; the relative MT-125-versus-XSR125 ordering stays stable. Second, this is one of the few platforms in the MotoQuant catalog where the published Cd numbers and the simulator’s frontal-area estimates are derived from manufacturer aero data and review-photography geometric analysis rather than wind-tunnel measurement — the 0.01 m² frontal-area delta between MT-125 and XSR125 is well-bounded by photographic evidence but is not a tunnel-measured number.',
+    text: 'Two final caveats. First, every number in this post is a stock-tune simulation under matched Aamby Valley November conditions. Change the venue (denser air at sea-level European tracks like Bruntingthorpe will help both bikes by ~0.15 s) or change the rider (a 65 kg rider versus the 78 kg simulated default will help both bikes by ~0.10 s), and absolute ETs shift; the relative MT-125-versus-XSR125 ordering stays stable. Second, this is one of the few platforms in the MotoQuant catalog where the published Cd numbers and the simulator’s frontal-area estimates are derived from manufacturer aero data and review-photography geometric analysis rather than wind-tunnel measurement. The 0.01 m² frontal-area delta between MT-125 and XSR125 is well-bounded by photographic evidence but is not a tunnel-measured number.',
   },
   {
     type: 'p',
@@ -311,36 +311,36 @@ export default function PostPage() {
               ·{' '}
               <Link href="/blog/why-your-r15-wont-hit-14s" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Why Your R15 Won&rsquo;t Hit 14s (And What Will Actually Help)
-              </Link>{' '}
-              — the Indian-market Yamaha 150 single platform, same physics arc one displacement up.
+              </Link>
+              : the Indian-market Yamaha 150 single platform, same physics arc one displacement up.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/cfmoto-800nk-quarter-mile-physics" className="text-brand-accent hover:text-brand-orange transition-colors">
                 CFMoto 800NK Quarter-Mile Physics
-              </Link>{' '}
-              — what platform-sharing looks like one displacement category up, with KTM as the source.
+              </Link>
+              : what platform-sharing looks like one displacement category up, with KTM as the source.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/how-the-motoquant-physics-engine-works" className="text-brand-accent hover:text-brand-orange transition-colors">
                 How the MotoQuant Physics Engine Works
-              </Link>{' '}
-              — the 15-sub-model architecture behind every ET prediction in this post.
+              </Link>
+              : the 15-sub-model architecture behind every ET prediction in this post.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/how-to-tune-for-aamby-valley-in-november" className="text-brand-accent hover:text-brand-orange transition-colors">
                 How to Tune for Aamby Valley in November
-              </Link>{' '}
-              — the venue conditions used for every simulation above.
+              </Link>
+              : the venue conditions used for every simulation above.
             </li>
             <li>
               ·{' '}
               <Link href="/bikes" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Browse the full bike catalog
-              </Link>{' '}
-              — including the MT-125, XSR125, and YZF-R125 platform-mates with every published spec.
+              </Link>
+              : including the MT-125, XSR125, and YZF-R125 platform-mates with every published spec.
             </li>
           </ul>
         </div>
@@ -350,7 +350,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Run both bikes yourself</div>
             <div className="text-white/60 text-sm">
-              Free simulator — load the MT-125 and XSR125 side-by-side, dial in your local conditions, and watch the ET delta update live.
+              Free simulator: load the MT-125 and XSR125 side-by-side, dial in your local conditions, and watch the ET delta update live.
             </div>
           </div>
           <Link
