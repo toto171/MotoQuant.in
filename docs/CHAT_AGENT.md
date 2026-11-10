@@ -50,13 +50,22 @@ CLI and older clients.
   not, exactly like `POST /api/optimize/build`, `POST /api/autotune/ecu` and
   `POST /api/jobs/outlaw`. There are no tiers, quotas or upgrade paths
   (ADR-0006). The per-turn budgets above are the CPU fuse.
+* **Heavy tools share the direct routes' rate bucket.** Each
+  `optimize_build` / `autotune_setup` call consults a per-IP gate
+  (`heavy_gate_for` in `motoquant/ratelimit.py`) that counts against the same
+  bucket as `POST /api/optimize/build` (6 per minute per IP), so asking the
+  chat agent for the heavy tools cannot out-run calling the routes directly.
+  A refused call comes back as a plain tool-result message, which the model
+  relays in its own words; the request does not fail.
 * `sims_run` on the response is **reporting, not a charge.** Sim tools count
   1 each (`compare_bikes` 2, `simulate_estimated_bike` 2, `rank_bikes` its
   planned batch). Heavy ops add a nominal **18** (`HEAVY_OP_SIM_COST`, from
   autotune's own sweep total: 1 baseline + 9 gearing + 7 launch + 1
   combined), and the composed outlaw pipeline adds **36**.
 * **Per-IP fuses** (whoever runs a deployment pays its LLM bill):
-  20 chat requests/min/IP, plus a daily cap of `MOTOQUANT_CHAT_DAILY_LIMIT`
+  20 chat requests/min/IP (`mode: "classic"`, which can run up to 25 sims
+  per request outside the agent's budgets, has a tighter bucket of 4/min/IP),
+  plus a daily cap of `MOTOQUANT_CHAT_DAILY_LIMIT`
   turns per IP per rolling 24 h (default **200**; `0` disables, e.g. for a
   self-hoster's own key or a local model). Both buckets are shared by
   `/api/chat` and `/api/jobs/chat`, and tripping either answers HTTP 429 with
@@ -77,7 +86,10 @@ CLI and older clients.
   (live stage text: "Simulating…", "Optimizing stage_4…"), cancellable.
   Use this from UIs — agent turns can take minutes on the 0.5-CPU prod tier.
 * `POST /api/jobs/outlaw` — direct access to the composed pipeline
-  (`{bike_id, budget_inr?: null=no limit, venue_id?, max_candidates?}`).
+  (`{bike_id, budget_inr?: null=no limit, max_candidates?}` plus the optional
+  conditions every simulation route takes: `venue_id`, `location`, `lat`/`lon`,
+  `altitude_m`, temperatures, humidity, pressure). The result echoes the
+  conditions used in `environment`.
 * `POST /api/optimize/build` — `budget_inr` is now optional; `null`/`0` =
   no limit (resolved server-side to ₹5M).
 
@@ -104,5 +116,7 @@ sanity, unlimited-budget semantics).
 `tests/test_open_source_pivot.py` pins, through the real HTTP routes, that no
 paywall exists (`TestMonetizationIsGone`) and that the daily chat cap trips,
 is per-IP, is shared by both chat routes and can be disabled
-(`TestChatDailyCap`). The old `tests/test_chat_gating.py` (tier gate +
-metering in both billing modes) was deleted with monetization.
+(`TestChatDailyCap`). `tests/test_chat_fuses.py` pins the heavy-tool gate,
+the per-message budgets and the chat route rate limits, also through the real
+routes. The old `tests/test_chat_gating.py` (tier gate + metering in both
+billing modes) was deleted with monetization.

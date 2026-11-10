@@ -15,12 +15,10 @@ eggs/
 .eggs/
 lib/
 lib64/
-# ...but these first-party `lib/` folders under the JS/TS frontends are
-# source, not Python build artifacts, and must be tracked.
+# ...but the first-party `lib/` folder under the web frontend is source, not
+# a Python build artifact, and must be tracked.
 !web/lib/
 !web/lib/**
-!desktop/src/lib/
-!desktop/src/lib/**
 parts/
 # motoquant/parts/ is first-party source (compatibility engine), not a
 # Python build artifact. Must be tracked — otherwise /api/parts with a
@@ -102,6 +100,9 @@ artifacts/**/*.log
 # Node
 node_modules/
 .next/
+# Alternate Next.js build directories (NEXT_DIST_DIR=.next-<name>, used so
+# parallel builds do not share one output folder), e.g. web/.next-ci/
+.next-*/
 
 # Scrape checkpoints
 *_checkpoint.json

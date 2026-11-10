@@ -58,8 +58,9 @@ Windows: `%APPDATA%\Claude\`) and restart the app:
 
 `python` must be a interpreter that can `import motoquant` — either the repo's
 virtualenv (`/path/to/.venv/bin/python`) or a checkout installed with
-`pip install -e .`. In HTTP mode nothing beyond the stdlib is needed at
-runtime, so a bare `pip install -e . --no-deps` is enough.
+`pip install -e .` (which also installs the runtime dependencies). In HTTP
+mode nothing beyond the stdlib is needed at runtime, so a bare
+`pip install -e . --no-deps` is enough.
 
 ### Local (no network, full fidelity)
 
@@ -77,7 +78,8 @@ runtime, so a bare `pip install -e . --no-deps` is enough.
 }
 ```
 
-Local mode needs `pip install -r requirements-api.txt` (it imports
+Local mode needs the runtime dependencies (`pip install -e .`, or
+`pip install -r requirements-api.txt`; it imports
 `motoquant.api` so the MCP tools and the REST routes cannot drift apart).
 
 ### Verify without a client

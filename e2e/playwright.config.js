@@ -2,18 +2,20 @@
 'use strict';
 
 /**
- * MotoQuant Pro — Playwright smoke harness config
- * ================================================
+ * MotoQuant — Playwright smoke harness config
+ * ============================================
  * Low-risk, version-controlled end-to-end smoke test for the landing →
- * quick-sim happy path. Intentionally minimal: one Chromium project, one
+ * calculator happy path. Intentionally minimal: one Chromium project, one
  * short spec, generous timeouts to tolerate a cold-starting API (the prod
  * backend is Render free-tier and can take 15-60s to wake).
  *
  * Run locally (see e2e/README.md for the full recipe):
- *   1. boot the API:   python3 -m uvicorn motoquant.api:app --port 8000
- *   2. build + start:  cd web && npm run build && npm start   (port 3000)
- *   3. point + run:     E2E_BASE_URL=http://localhost:3000 \
- *                       cd web && npm run e2e
+ *   1. boot the API on a COPY of the catalog:
+ *        cp motoquant.db /tmp/e2e.db
+ *        MOTOQUANT_DB=/tmp/e2e.db python3 -m uvicorn motoquant.api:app --port 8000
+ *   2. build + start:  cd web && NEXT_PUBLIC_API_URL=http://127.0.0.1:8000 npm run build
+ *                      NEXT_PUBLIC_API_URL=http://127.0.0.1:8000 npm start   (port 3000)
+ *   3. point + run:    cd e2e && npm install && E2E_BASE_URL=http://localhost:3000 npm test
  *
  * Chromium resolution:
  *   - In THIS sandbox a browser is pre-installed at
@@ -64,13 +66,9 @@ module.exports = defineConfig({
   ],
   use: {
     baseURL: BASE_URL,
-    // Reduced motion is load-bearing here, not cosmetic:
-    //   - the landing BootSequence overlay is prefers-reduced-motion-gated,
-    //     so this stops a full-screen z-[100] overlay from intercepting the
-    //     first clicks;
-    //   - framer-motion Reveals / ManifestoScrub / TronGrid all take their
-    //     static branch, which removes a large class of animation-timing
-    //     flake from the smoke.
+    // Reduced motion keeps the smoke deterministic: the site's entrance
+    // animations (Reveal and friends) take their static branch, which removes
+    // a class of animation-timing flake.
     reducedMotion: 'reduce',
     actionTimeout: 20_000,
     navigationTimeout: 45_000,

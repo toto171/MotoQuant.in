@@ -20,7 +20,7 @@ Closes #
 - [ ] New feature
 - [ ] Physics / sub-model change
 - [ ] Database schema change
-- [ ] Bike / parts / tire data
+- [ ] Bike / parts / tire / benchmark data (every value has a cited source in the PR body)
 - [ ] Calibration data (Dragy / dyno / ECU log)
 - [ ] Web (Next.js) frontend
 - [ ] Docs / tooling / CI
@@ -66,5 +66,6 @@ python scripts/check_baselines.py
 - [ ] `ruff check .` and `ruff format --check .` are clean.
 - [ ] If this is a web PR: `make web-build` (= `npm run build` in `web/`, what Vercel runs) is green.
 - [ ] If user-visible counts changed: `make audit` is in sync. If behaviour changed: docs updated (and a `CHANGELOG.md` entry for anything notable).
+- [ ] No fabricated data: every spec, benchmark and price I added has a citable source.
 - [ ] No secrets, API keys, or `.env` files in the diff.
 - [ ] Commit messages are imperative-mood ("Add …", "Fix …"), subject ≤ 72 chars.

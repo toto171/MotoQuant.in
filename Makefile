@@ -11,7 +11,8 @@ PY ?= python3
 PYTEST ?= $(PY) -m pytest
 FAST_TESTS := tests/test_validation.py tests/test_scraper.py \
               tests/test_two_stroke.py tests/test_compatibility.py \
-              tests/test_submodel_kaizen.py tests/test_category_dispatch.py
+              tests/test_submodel_kaizen.py tests/test_category_dispatch.py \
+              tests/test_docs_truth_2026_11.py
 
 .DEFAULT_GOAL := help
 
@@ -26,18 +27,19 @@ help: ## Show this help
 
 # ── Setup ──────────────────────────────────────────────────────────────────
 .PHONY: install
-install: ## Install runtime + dev dependencies and the package (editable)
-	$(PY) -m pip install -r requirements-api.txt -r requirements-dev.txt
-	$(PY) -m pip install -e .
+install: ## Install the package (editable) with its runtime + dev dependencies
+	$(PY) -m pip install -e ".[dev]"
 
 .PHONY: db
 DEV_DB ?= /tmp/motoquant-dev.db
 
-db: ## Build a fresh dev database at $(DEV_DB) (the tracked motoquant.db ships seeded)
+db: ## Fresh STARTER dev DB at $(DEV_DB): 3 reference bikes + tires/parts/venues (the tracked motoquant.db is the full catalog)
 	rm -f $(DEV_DB)
 	$(PY) -m motoquant.run --db $(DEV_DB) db init
 	$(PY) -m motoquant.run --db $(DEV_DB) db seed
-	@echo "Dev DB at $(DEV_DB) -- use it with MOTOQUANT_DB=$(DEV_DB)
+	@echo "Dev DB at $(DEV_DB) -- use it with MOTOQUANT_DB=$(DEV_DB)"
+	@echo "It holds the three reference bikes only; add the curated catalog with:"
+	@echo "  $(PY) -m motoquant.run --db $(DEV_DB) import --known-bikes"
 
 .PHONY: lock
 lock: ## Regenerate requirements-api.lock (clean-venv resolve of requirements-api.txt)
@@ -153,7 +155,7 @@ native-test: ## Rust unit + fixture tests (cargo) and the pytest native gate (fa
 	MOTOQUANT_REQUIRE_NATIVE=1 $(PYTEST) tests/test_native_engine.py tests/test_engine_select.py -q
 
 .PHONY: native-parity
-native-parity: ## FULL Python-vs-Rust parity sweep (all 541 bikes × fixed/adaptive/top speed + stress) + bench
+native-parity: ## FULL Python-vs-Rust parity sweep (every catalog bike × fixed/adaptive/top speed + stress) + bench
 	$(PY) scripts/check_native_parity.py
 
 .PHONY: native-parity-quick

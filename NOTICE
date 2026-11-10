@@ -40,6 +40,17 @@ corrections are welcome via GitHub issues.
 -------------------------------------------------------------------------------
 Third-party assets
 -------------------------------------------------------------------------------
-- Barlow Condensed font subsets (web/scripts/fonts/): SIL Open Font License
-  1.1, Copyright 2017 The Barlow Project Authors. See
+Fonts are redistributed under the SIL Open Font License 1.1. They keep their
+own licence; the Apache License covers the MotoQuant code, not these files.
+
+- Site typefaces, self-hosted in web/app/fonts/ (Latin subsets, unmodified,
+  from the @fontsource-variable packages; see web/app/fonts/README.md):
+    Inter            Copyright 2016 The Inter Project Authors
+                     web/app/fonts/LICENSE-Inter.txt
+    Space Grotesk    Copyright 2020 The Space Grotesk Project Authors
+                     web/app/fonts/LICENSE-SpaceGrotesk.txt
+    JetBrains Mono   Copyright 2020 The JetBrains Mono Project Authors
+                     web/app/fonts/LICENSE-JetBrainsMono.txt
+- Barlow Condensed font subsets (web/scripts/fonts/, used by the image
+  generation scripts): Copyright 2017 The Barlow Project Authors. See
   web/scripts/fonts/OFL.txt.

@@ -114,6 +114,7 @@ jobs:
           tests/test_two_stroke.py tests/test_compatibility.py
           tests/test_submodel_kaizen.py tests/test_category_dispatch.py
           tests/test_physics_invariants.py tests/test_regression_snapshot.py
+          tests/test_docs_truth_2026_11.py
           -q --maxfail=5
 
       - name: Run pytest (full suite + coverage — main pushes)

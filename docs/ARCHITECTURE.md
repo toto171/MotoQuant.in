@@ -140,8 +140,8 @@ flowchart TD
 | `motoquant/mcp_server.py` | Stdlib-only stdio MCP server exposing sims/catalog/what-ifs as tools (`docs/MCP.md`) | `main()` |
 | `motoquant/engine_select.py` | The ONE place that picks the integrator for every production simulation: `make_engine(cfg)` → Rust core or `MotoQuantEngine`, per `MOTOQUANT_ENGINE` (`auto` / `python` kill switch / `native`); reported by `/api/health` | `make_engine()` |
 | `motoquant/native.py` + `rust/` | Rust physics core (PyO3 extension + wasm32 browser engine), bit-identical to `physics.py`, which stays the reference. Python resolves the config (`resolve_engine`), Rust integrates; schema-versioned + source-fingerprinted (stale builds are refused). `docs/RUST_CORE.md`, ADR-0007 | `available()`, `resolve_engine()` |
-| `web/` | Next.js frontend (app router, components, `lib/api.js`) | `web/app/page.js` |
-| `tests/` | pytest suite (thousands of tests; `make test-fast` for the quick subset) | `conftest.py` |
+| `web/` | Next.js frontend (app router). Design system and vocabulary: `web/DESIGN.md`. The simulator is `components/sim/*` (Simple and Advanced modes); `lib/api.js` is the one API client; `lib/instantEstimate.js` decides when the in-browser estimate may answer | `web/app/page.js` |
+| `tests/` | pytest suite (thousands of tests; `make test-fast` for the quick subset). `tests/test_docs_truth_2026_11.py` keeps these docs honest | `conftest.py` |
 | `scripts/` | Sweeps, reseed, patches, audits, autonomous-ops orchestration | `reseed_configs_from_specs.py` |
 
 ---

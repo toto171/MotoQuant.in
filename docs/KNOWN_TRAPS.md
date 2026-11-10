@@ -16,10 +16,18 @@ parallel-session edits. **Always stage explicit paths.** `git status --short`
 first and decide file by file.
 
 ### T2 — `motoquant.db` shows "modified" but nothing changed
-Opening the seeded DB in a test rewrites SQLite internal pages. `git diff` flags
+Opening the seeded DB through the CLI or a test rewrites it. `git diff` flags
 it as binary-modified with **no content change**. Verify row counts against
 `HEAD`; if unchanged, `git checkout -- motoquant.db`. Never commit incidental DB
 churn — it bloats the repo (the file is ~18 MB).
+
+The mechanism (measured 2026-11-10): `MotoQuantDB.initialize()` re-runs its
+`INSERT OR IGNORE` seed rows for venues, seasonal weather and part categories
+on every open, and an ignored insert into an `AUTOINCREMENT` table still
+consumes sequence numbers. So **every** CLI command on the default path, even
+a read-only `bikes --search` or `sim`, moves three counters in
+`sqlite_sequence` and nothing else. When you only want to look, point the CLI
+at a copy: `cp motoquant.db /tmp/mq.db && python -m motoquant.run --db /tmp/mq.db …`.
 
 ### T3 — Physics/importer change without a reseed → silent DB-path drift
 `/api/simulate?bike_id=N` reads stored `bike_configs` blobs, not live specs.
@@ -137,3 +145,72 @@ price/tire diff). Same shape as the seed-source resurrection closed July 4
 `scripts/patch_*.py` also updates the reseed chain in `CLAUDE.md` CURRENT
 STATE (and anywhere else the chain is written out). The gate: re-prove the
 FULL chain idempotent (×2) whenever a script is added.
+
+### T18 — A catalog bike and a reference preset do not run in the same air
+`/api/simulate` with `bike_id=1` and `python -m motoquant.run sim --bike-id 1`
+answer about 0.1 s slower than the pinned 10.0436 s for the same K5. Nothing
+is broken: a config loaded from the DB gets the default environment (Aamby
+Valley, 679 m, 22 °C; see the `motoquant/database/bridge.py` docstring), while
+`motoquant.gsxr1000_k5()` and the other two presets run at sea level, which is
+what `scripts/check_baselines.py` pins. Before reporting a "baseline drift",
+compare like with like: read the conditions the result states (the
+`environment` block of an API result, the "Environment" section of the CLI
+output), or use `make baselines`.
+
+### T19 — ETs from before and after November 2026 are not the same quantity
+Since the 2026-10/11 epoch every split is clocked from the 1-ft stage beam
+(ET = t(402.336 m) − t(0.3048 m)); before it, from first motion. The same run
+reads a few tenths quicker under the new convention with no change in the
+bike (0.29 s on the reference K5). Do not compare a pre-epoch figure (an old
+report, a blog table, a saved run) with a current sim, and do not score a
+benchmark row without checking which convention its source used: the sweep
+scores each row under its own convention for exactly this reason (the
+`"timing": "row"` mode recorded in `reports/acc_final_2026_11_05.json`).
+
+### T20 — "Obviously wrong data" is not a licence to change it without a sweep
+The November 2026 audit confirmed that many small bikes carry implausibly tall
+gearing (a litre-bike primary ratio used as a fallback). The obvious fix, an
+inferred primary ratio, was built and swept: it made the weighted accuracy
+*worse*, no physically plausible retune recovered it, and it was reverted
+(`reports/session_2026_11_10_epoch.md`). The per-class knobs had been fitted
+around the wrong gearing, so correcting one input alone un-centres the class.
+The rule: a catalog-wide data rule ships only with the full weighted sweep as
+evidence, and inferred values never replace missing sourced ones. Add
+service-manual ratios bike by bike instead.
+
+### T21 — The site build must not fetch anything from the network
+The fonts are files in `web/app/fonts/`, loaded with `next/font/local`.
+`next/font/google` downloads at build time, and that fetch failed CI twice.
+Do not reintroduce it (or any other build-time download); `web-verify.yml`
+runs `npm ci` + `next build` and should pass with no access beyond the npm
+registry.
+
+### T22 — In the web theme, `white` and `black` are not colours
+`web/tailwind.config.js` maps `white` to the foreground ink and `black` to the
+deepest background, so both **invert** in the light theme. `text-white` on a
+coloured button turns dark-on-dark there. On an accent or solid colour fill
+use the `on-accent` token; see `web/DESIGN.md`.
+
+### T23 — Two web builds in one checkout clobber each other's `.next`
+Parallel builds (a CI matrix, two contributors or agents on one tree) that
+share `web/.next` fail in confusing ways. Give each its own output directory:
+`NEXT_DIST_DIR=.next-<name> npm run build` (`web/next.config.js` reads it;
+`.next-*/` is git-ignored). Unset, the build uses `.next`, which is what
+Vercel expects.
+
+### T24 — A redirected `pytest -q` log lags far behind the run
+With stdout redirected to a file, `pytest -q` output is block-buffered: a log
+that shows "2 %" can belong to a run that is 75 % done, and a silent log does
+not mean a hung run. Check the process and its CPU time, or run with
+`python -u -m pytest` / `-p no:cacheprovider -rfE` and read the summary at the
+end, before concluding anything from a partial log.
+
+### T25 — Docs drift silently; the docs-truth test is the gate
+The docs have promised things the tree did not have: a `make` target that did
+not exist, a CODEOWNERS path with no file behind it, a setup recipe that
+installed no dependencies, a licence the repository does not use.
+`tests/test_docs_truth_2026_11.py` now checks relative links, `make` targets,
+CLI subcommands, CODEOWNERS patterns, packaging metadata, the licence and the
+retired product wording across the live docs. When you rename a target, a
+subcommand or a file, run it; when you add a doc that others will rely on,
+add it to the test's list.

@@ -64,10 +64,11 @@ including the physics-model terms, in `reference/glossary.md`.
   first. A tenth lost in the 60-foot is usually two tenths lost at the stripe.
 - **Eighth mile (660 ft)** — the mid-point split; how many small-bore and
   street classes actually run.
-- **Rollout** — the ~30 cm the front wheel travels between breaking the stage
-  beam and starting the clock. Real timeslips include it; sim ETs are
-  rollout-free, which is one reason a sim can read slightly slower than a
-  strip slip for the same bike.
+- **Rollout** — the ~30 cm (1 ft) the bike rolls before the front wheel
+  clears the stage beam and the clock starts. Timeslips, most magazine tests
+  and Dragy all time from there, and so does MotoQuant: every ET and split is
+  t(distance) − t(0.3048 m). A figure timed from first motion is a few tenths
+  longer for the same run, so check the convention before comparing.
 - **Two-step / launch RPM** — a rev limiter that holds the engine at a chosen
   launch RPM against the clutch.
 - **Over-clutching** — deliberately slipping the clutch to hold the engine in
@@ -147,9 +148,15 @@ mean something.
 2. **Quote sensible precision.** Two decimals of ET (`10.24 s`), one of trap
    (`245.5 km/h`), three when reporting a small delta (`−0.068 s`). The
    engine returns four; four implies a confidence the model does not have.
-3. **Say what conditions you assumed.** Default is 75 kg rider at sea-level
-   standard conditions. If someone asks about a real strip, pass `venue_id`
-   from `list_venues` — altitude alone can move ET by half a second.
+3. **Say what conditions you assumed.** The default rider is 75 kg. Default
+   air depends on how you named the bike: a catalog `bike_id` runs at the
+   conditions stored with the catalog (Aamby Valley: 679 m, 22 °C), a
+   `bike_preset` at sea level. Over REST every result carries an
+   `environment` block with the values actually simulated (see
+   `reference/api.md`); the MCP tools return a compact result without it, so
+   state the default yourself. If someone asks about a real strip, pass
+   `venue_id` from `list_venues` — altitude alone can move ET by half a
+   second.
 4. **Pass `bike_id` to `search_parts`.** Without it you will happily suggest a
    530-pitch sprocket for a 428-chain commuter. The fitment engine checks
    chain pitch, engine layout, displacement and stroke type — use it.

@@ -92,7 +92,9 @@ check, and the release checklist.
   (`MOTOQUANT_CHAT_DAILY_LIMIT`, default 200; `0` disables), which is the
   LLM-bill fuse. Rate-limit buckets expire on their **own** window, so a
   short-window call can never evict a daily counter. —
-  `tests/test_public_route_fuses.py`, `tests/test_ratelimit.py::TestPerKeyWindows`,
+  `tests/test_public_route_fuses.py`, `tests/test_chat_fuses.py` (the chat
+  agent's heavy tools draw on the optimize bucket; classic chat has its own
+  tighter one), `tests/test_ratelimit.py::TestPerKeyWindows`,
   `tests/test_open_source_pivot.py::TestChatDailyCap`, and
   `tests/test_open_source_pivot.py::TestMonetizationIsGone` (no payment or
   subscription routes, no quota headers, no paywall can creep back).
@@ -134,3 +136,22 @@ re-implement the fix inside the test.
 
 **Enforcement.** Code review + this doc. When adding a regression test, ask:
 "would this fail on `git revert` of the fix?"
+
+## I9 — The docs do not promise what the tree does not have
+
+**What.** In the live docs (README, CONTRIBUTING, AGENTS, SECURITY, the
+`docs/` guides, the `skills/motoquant` reference): every relative link
+resolves, every `make` target and CLI subcommand named exists, every
+CODEOWNERS pattern matches a tracked file, the packaging metadata matches the
+files it points at, the licence named is the one the repository uses
+(Apache-2.0), there is one version number (`motoquant.__version__`), and the
+retired product wording (paid tiers, the old "Pro" name, usage quotas) does
+not appear.
+
+**Why.** Each of these drifted at least once: a setup recipe that installed no
+dependencies, a `make` target that did not exist, a CODEOWNERS path with no
+file behind it, two different licences named in two places.
+
+**Enforcement.** `tests/test_docs_truth_2026_11.py` (in `make test-fast` and
+the PR fast tier) and the `Docs truth` workflow, which runs it on docs-only
+changes that the code-filtered CI would skip.

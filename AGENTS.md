@@ -51,9 +51,10 @@ before a big change.
 1. **Never `git add -A` / `git add .`** — stage explicit file paths. The tree
    routinely holds unrelated WIP.
 2. **Never commit `motoquant.db` churn** unless you *intended* a data change.
-   Opening the DB in a test rewrites SQLite pages with no content change; if
-   `git diff` shows it modified but row counts are unchanged, `git checkout --
-   motoquant.db`.
+   Opening the DB through the CLI or a test rewrites it with no content
+   change (even `bikes --search`; KNOWN_TRAPS T2), so run read-only commands
+   against a copy (`--db /tmp/mq.db`). If `git diff` shows it modified but row
+   counts are unchanged, `git checkout -- motoquant.db`.
 3. **Regression tests must exercise the production path** (DB round-trip for
    `/api/simulate?bike_id=N`, HTTP for API bugs). A test that re-implements the
    fix and asserts its own math is worthless.

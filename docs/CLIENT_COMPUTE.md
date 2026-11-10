@@ -41,15 +41,21 @@ The shipped numpy surrogate (`artifacts/surrogate/surrogate_numpy.npz`, a
 `web/lib/surrogate.js` replicates the server inference pipeline exactly
 (float64 feature math → `Math.fround` per feature, mirroring the float32 cast
 in `config_to_feature_vector` → float64 MLP forward pass) and **refuses
-rather than guesses** — parts/tire overrides, non-default weather, envelope
-violations, and load failures all fall back to the server route.
+rather than guesses**. The model's only inputs are the bike, rider weight,
+power change, weight change and a known venue's altitude, so anything else
+sends the request to the exact server simulation: selected parts, a tyre
+override, changed weather, a resolved place, a venue whose surface is not
+asphalt (or is unknown), a venue missing from the exported altitudes, inputs
+outside the training envelope, and load failures. The list lives in one
+place, `web/lib/instantEstimate.js`.
 
 **Proof, not hope:** `tests/test_surrogate_web_export.py` +
 `web/scripts/surrogate-parity.mjs` run the real JS module (via a fetch shim)
 against reference values computed by the real server pipeline —
 **677/677 cases within 1e-9 s, worst ΔET 7.1e-15 s** across the full
-541-bike catalog plus randomized slider perturbations, with envelope
-refusals honoured.
+catalog (541 bikes when measured) plus randomized slider perturbations, with
+envelope refusals honoured. The count follows the catalog: `make
+surrogate-web` regenerates the assets and re-runs the proof.
 
 Honesty rules baked into the UI:
 - every client number is labeled **instant estimate** with the surrogate's

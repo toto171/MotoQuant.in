@@ -19,29 +19,27 @@ After that, get the test suite green locally (see `CONTRIBUTING.md` §2) and you
 
 ## 1. What MotoQuant is (in one paragraph)
 
-A first-principles physics engine for predicting and optimising motorcycle quarter-mile drag racing times, aimed first at the Indian drag racing community (Aamby Valley, MMRT, BIC, Kari, Hyderabad) and now expanding to the international market (US/EU/JP/CN drag scenes). It's a Python package with a CLI, a FastAPI backend (live on Render), a Next.js web frontend (live at motoquant.in), and an agentic AI chat that can run the whole product (sims, comparisons, the build optimizer, outlaw-class builds, web lookup, estimated sims for unknown bikes). Under the hood: 15 physics sub-models integrated with RK4 at 1 ms, validated against 250 published benchmarks (266 matched runs, weighted mean |Δ| ≈ 0.25 s and bias +0.02 s corpus-wide). It is free and open source under Apache-2.0 with no paid tiers ([ADR-0006](adr/0006-open-source-pivot.md)), and you can run your own copy ([SELF_HOSTING.md](SELF_HOSTING.md)).
+A first-principles physics engine for predicting and optimising motorcycle quarter-mile drag racing times, aimed first at the Indian drag racing community (Aamby Valley, MMRT, BIC, Kari, Hyderabad) and now expanding to the international market (US/EU/JP/CN drag scenes). It's a Python package with a CLI, a FastAPI backend (live on Render), a Next.js web frontend (live at motoquant.in), and an agentic AI chat that can run the whole product (sims, comparisons, the build optimizer, outlaw-class builds, web lookup, estimated sims for unknown bikes). Under the hood: 15 physics sub-models integrated with RK4 at 1 ms, validated against a source-labelled corpus of published benchmarks (the measured accuracy is in the README and on [motoquant.in/validation](https://www.motoquant.in/validation)). It is free and open source under Apache-2.0 with no paid tiers ([ADR-0006](adr/0006-open-source-pivot.md)), and you can run your own copy ([SELF_HOSTING.md](SELF_HOSTING.md)).
 
 **Tagline:** *"The physics of faster."*
 
 ---
 
-## 2. Current state snapshot (October 2026)
+## 2. Current state snapshot (November 2026, release 2.0.0)
 
 | Metric | Value |
 |---|---|
 | Status | Free & open source (Apache-2.0) since 2026-10-23. Monetization scrapped; optional accounts kept |
 | Tests | full pytest suite green (runs ~25–35 min; focused subsets in `CONTRIBUTING.md` §4) |
-| Bikes in catalog | 541 across 30+ manufacturers (India, SE Asia, US, EU, JP, CN) |
-| Tires | 254 (incl. drag radials/slicks + cruiser rubber), 1,783 fitments |
-| Parts | 593 across 19 categories (incl. lowering kits, air shifters, lockup clutches) |
-| Venues | 20 (India + international drag strips) |
-| Benchmarks | 250 ET rows + 86 top-speed rows; weighted sweep 266 matched, |Δ| 0.249 s, bias +0.022 s (`reports/acc_final_2026_11_05.json`) |
+| Catalog | Bikes across 30+ manufacturers (India, SE Asia, US, EU, JP, CN), tires incl. drag radials/slicks, parts across 19 categories, 20 venues. Current counts: the README (kept in sync by `make audit`) |
+| Benchmarks | Published ET and top-speed rows, each with a source label and a weight; the weighted sweep result is the newest `reports/acc_final_*.json` |
 | Reference baselines | K5 10.0436 / R1 10.1092 / Hayabusa 10.1100 — pinned **bit-identical**, CI-gated |
 | Chat AI | multi-step tool-calling agent (`motoquant/llm/agent.py`, `docs/CHAT_AGENT.md`) |
 | Deployed | API: Render free tier (`motoquant-api.onrender.com`); web: Vercel (`motoquant.in`); both auto-deploy from `main`. Self-hosting: `docs/SELF_HOSTING.md` |
-| Optional | Rust physics core, bit-identical to the Python reference (`docs/RUST_CORE.md`) |
+| Engines | Python reference + Rust physics core, bit-identical to it; the server uses the Rust core when it is installed (`docs/RUST_CORE.md`) |
+| Version | 2.0.0 — one number, `motoquant.__version__` |
 
-The code is not the bottleneck. The main limits are data (instrumented Dragy timeslips for small-cc bikes) and open-source logistics (repo visibility, contributor on-ramps). See `docs/ROADMAP.md`.
+The code is not the bottleneck. The main limits are data (instrumented Dragy timeslips and sourced gear ratios for small-cc bikes) and open-source logistics (repo visibility, contributor on-ramps). See `docs/ROADMAP.md`.
 
 ---
 
@@ -50,14 +48,19 @@ The code is not the bottleneck. The main limits are data (instrumented Dragy tim
 ### Live and working
 - CLI (`python -m motoquant.run --help`) — db/bikes/sim/venues/tires/parts/weather/import/analysis/chat and more.
 - FastAPI backend: sims (quick/full/top-speed/compare), jobs API with real progress + cancel, build optimizer (surrogate-accelerated knapsack), ECU autotune, the composed outlaw pipeline, agentic chat (`/api/chat`, `/api/jobs/chat`), optional accounts (magic link + password; saved-run garage), Dragy/dyno/ECU calibration uploads, leaderboard, shareable timeslips. Everything is free and anonymous-capable; per-IP rate limits protect the compute-heavy routes.
-- Next.js web app: cockpit-themed landing + simulator workbench + optimizer/autotune pages + transcript chat UI + docs/blog/validation explorer.
+- Next.js web app (design system v6, `web/DESIGN.md`): light and dark themes, a landing page built around a ten-second calculator, a simulator with Simple and Advanced modes, step-by-step Upgrades (the build optimizer) and Race-day setup (autotune) tools, the chat UI, a glossary, and docs/blog/validation explorer. Fonts are self-hosted (`web/app/fonts/`), so the build needs no network.
 - (The Tauri desktop app was discontinued in July 2026 and its scaffold deleted in October; see ADR-0005.)
-- Physics: 15 sub-models, adaptive RK4, calibration pipeline, numpy surrogate v2.5 (regenerate after ANY physics/DB reseed — standing contract in `artifacts/surrogate/README.md`).
+- Physics: 15 sub-models, fixed and adaptive RK4, ET timed from the 1-ft stage beam, calibration pipeline, and a numpy surrogate (the instant-estimate model; regenerate after ANY physics/DB reseed — standing contract and current version in `artifacts/surrogate/README.md`).
 
 ### Pending / known gaps (the honest list)
 - Hosted-instance DB durability: SQLite is baked into the Docker image, so every deploy wipes optional accounts and saved runs until a persistent disk is mounted (`docs/SELF_HOSTING.md` §3d).
-- Small-cc accuracy floor is data-limited, not model-limited — needs real Dragy timeslips.
-- Epoch-gated physics work (do NOT wire casually — moves the pinned baselines): Pacejka slip model, 4-branch clutch dispatch, staging rollout/dead-time. See the July 3 session report.
+- Small bikes are the weakest class. Partly data: it needs real Dragy timeslips. Partly catalog: many small bikes run a generic primary gear ratio; an inferred correction was measured, made the fit worse and was not shipped (`reports/session_2026_11_10_epoch.md`) — it needs sourced primaries.
+- Class bias remains on entry 200–300 cc, 300–500 cc singles and two-strokes; the three reference bikes' spread is compressed; two litre bikes carry millisecond-level dry-mass inversions. All documented in `reports/session_2026_11_05_handoff.md`.
+- Top speed is weaker than ET.
+- Catalog bikes simulate at their stored default venue conditions while the three reference presets run at sea level; every result states its conditions, but the two defaults differ.
+- Saved-run pages (`/r/[id]`) do not store the conditions of the run.
+- Exact full simulations in the browser: the Rust core is compiled to WebAssembly and parity-proven, but the simulator UI still runs full sims on the server.
+- Epoch-gated physics work (do NOT wire casually — moves the pinned baselines): Pacejka slip force, 4-branch clutch dispatch, staging dead time.
 - Full backlog: `docs/ROADMAP.md`.
 
 ---
@@ -139,7 +142,7 @@ maintainers and are never committed. To run your own instance, see
 
 - [ ] Fork (or clone) the repo: <https://github.com/toto171/MotoQuant.in>.
 - [ ] Get the test suite green locally (`CONTRIBUTING.md` §2 — use the focused subset first, the full run takes ~30 min).
-- [ ] Run a sim: `python -m motoquant.run sim --bike-id 1 --venue-id 1` → the K5 at Aamby Valley (≈ 10.1 s; the 10.0436 s pin is the sea-level reference config, `make baselines`).
+- [ ] Run a sim: `python -m motoquant.run sim --bike-id 1 --venue-id 1` → the K5 at Aamby Valley on the shipped `motoquant.db` (≈ 10.1 s; the 10.0436 s pin is the sea-level reference config, `make baselines`). A scratch `db init` + `db seed` database also has the K5 as id 1 but holds only the three reference bikes.
 - [ ] Boot the API (`make api`) and the web app (`make web-install && make web-dev`), and click through the simulator and the chat.
 - [ ] Read `AGENTS.md` and the top of `CHANGELOG.md`.
 - [ ] Pick one §4 good-first-issue, scope it as a GitHub Issue, then ship a PR — however small. Proving the workflow end-to-end on day one beats a big first contribution.

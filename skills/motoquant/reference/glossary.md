@@ -13,7 +13,7 @@ headline numbers in `SKILL.md`.
 | **Trap speed** | Speed at the finish line. Tracks power-to-weight closely and is nearly immune to launch quality, so a bike that traps high but runs a slow ET has a launch problem, not a power problem. |
 | **60-foot** | Time over the first 18.288 m. The launch-quality number — traction, clutch work, wheelie limit and gearing all show up here. |
 | **330-foot / eighth mile (660 ft) / 1000-foot** | Intermediate splits. The eighth mile is a class in its own right for small-bore and street bikes. |
-| **Rollout** | The ~0.3 m the front wheel rolls between breaking the stage beam and starting the clock. Strip timeslips include it, so a real slip can read slightly quicker than a rollout-free simulation of the same run. |
+| **Rollout** | The ~0.3 m (1 ft) the bike rolls before the front wheel clears the stage beam and the clock starts. Strip timeslips, most magazine tests and Dragy time from the beam, and so does MotoQuant since the 2026-11 accuracy epoch: ET = t(402.336 m) − t(0.3048 m). A first-motion figure for the same run is a few tenths longer. |
 | **Staging** | Rolling forward until the pre-stage and stage beams are broken. "Deep staging" trades reaction time for a shorter effective run. |
 | **Reaction time** | Time from green to the bike leaving the beam. It is a racer stat, not a bike stat, and is not part of ET. |
 | **Red light / foul** | Leaving before green. Instant loss regardless of ET. |

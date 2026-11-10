@@ -3,8 +3,9 @@
 > Honest, prioritized, and tied to real blockers. This is the "what to do next
 > and why" for whoever is at the keyboard, whether that is a model, a human
 > contributor or the maintainer. Re-rank it as reality changes; don't let it
-> rot. Last substantive revision: 2026-10-23 (open-source pivot,
-> [ADR-0006](adr/0006-open-source-pivot.md)).
+> rot. Last substantive revision: 2026-11-10 (release 2.0.0: open-source
+> pivot [ADR-0006](adr/0006-open-source-pivot.md), Rust core
+> [ADR-0007](adr/0007-rust-physics-core.md), accuracy epoch, site redesign).
 
 ## North star
 
@@ -28,9 +29,11 @@ The **code is not the bottleneck.** The engine is validated, the product is
 live (`motoquant.in` on Vercel, API on Render), and the test suite is deep.
 What limits MotoQuant now, in order:
 
-1. **Data.** Small-cc accuracy is *data-limited, not model-limited*. It needs
-   real instrumented timeslips, which means community contributions and data
-   partnerships with tuning shops and dyno owners.
+1. **Data.** Small bikes are the weakest class. Part of that is benchmark
+   data (it needs real instrumented timeslips, which means community
+   contributions and data partnerships with tuning shops and dyno owners) and
+   part is catalog data (many small bikes run a generic primary gear ratio;
+   see "Accuracy" below).
 2. **Openness logistics.** The repo has to be public and easy to contribute
    to: visibility flipped, private security reporting on, issue templates
    triaged, CI working for forks.
@@ -83,31 +86,46 @@ repeatedly re-scoped completed work from stale backlog text:
   hardening that used to be listed here was deleted with monetization on
   2026-10-23; see ADR-0006.)
 
-## P1 — Accuracy (data-limited)
+## P1 — Accuracy
 
-- **Small-cc / 2-stroke ET floor** is limited by benchmark *data quality*, not
-  the model. The lever is **instrumented Dragy/VBox timeslips** from real Indian
-  / SE-Asia stock bikes (Aamby Valley, MMRT). This is a community/partnership
+- **Small-cc / 2-stroke ET** is limited mostly by benchmark *data quality*.
+  The lever is **instrumented Dragy/VBox timeslips** from real Indian /
+  SE-Asia stock bikes (Aamby Valley, MMRT). This is a community/partnership
   play, not a code change. Every added instrumented benchmark tightens the
   weighted sweep and the public accuracy story.
-- **Epoch-gated physics** (Pacejka slip, 4-branch clutch dispatch, staging
-  rollout/dead-time) — do NOT wire casually; they move the pinned baselines
-  (ADR-0002). Only behind a deliberate, sweep-justified accuracy pass.
-  *(July 13, 2026: the first such epoch landed — locked-clutch deceleration,
-  converged weight-transfer→traction cap, slip-phase ram-air+parasitic,
-  front-wheel inertia radius, per-cluster `mu_peak_scale` recalibration.
-  New pins 9.9331 / 10.1436 / 10.3633; see
-  `reports/session_2026_07_13_epoch_data_hardening.md`.)*
+- **Small-bike gearing needs sourced primary ratios.** Many small bikes fall
+  back to a litre-bike primary ratio and are geared implausibly tall. An
+  *inferred* primary rule was built and measured in November 2026: it made
+  the weighted fit worse, no plausible retune recovered it, and it was
+  reverted (`reports/session_2026_11_10_epoch.md`, measured on the
+  pre-rollout model). Do not re-apply an inferred rule; add service-manual
+  primaries bike by bike and re-run the sweep.
+  `scripts/check_gearing_plausibility.py` keeps the flagged list from
+  growing.
+- **The 2026-10/11 accuracy epoch landed** (rollout timing from the 1-ft
+  beam, combined bike + rider centre of mass in the wheelie limit, aero pitch
+  moment, tyre heat balance, `wheelie_margin`; pins 10.0436 / 10.1092 /
+  10.1100; see `CHANGELOG.md` and `reports/session_2026_11_05_handoff.md`).
+  Its documented residuals are the next levers, in the handoff's order: a
+  launch model calibrated on measured 60-ft rows; per-source rollout
+  evidence; the two-stroke curve ladder; measured CoG / weight-distribution
+  data in place of the 52 %-front and 810 mm seat defaults.
+- **Epoch-gated physics still open** (Pacejka slip force, 4-branch clutch
+  dispatch, staging dead time) — do NOT wire casually; they move the pinned
+  baselines (ADR-0002). Only behind a deliberate, sweep-justified accuracy
+  pass.
+- **One default-conditions convention.** Catalog bikes simulate at their
+  stored default venue conditions while the three reference presets run at
+  sea level. Every result now states its conditions, but one default would be
+  simpler to explain.
 - **Factory speed-limiter model** — *shipped in PR #114*: `speed_limiter_kmh`
   is a validated spec field, plumbed through the bridge and config_io
   round-trip, clamped at all four RK4 stage velocities, with a green test
-  module. Ten specs are annotated at 299 km/h and the top-speed sweep bias
-  fell +28.5 → +25.4 km/h. **What remains is a broader annotation pass** —
-  and one blocker found in the 2026-07-25 audit: four of the ten annotated
-  heavies (Hayabusa Gen2/Gen3, ZX-14R, ZZR1400) never reach their own
-  limiter because their catalog top-gear ratio is ~21–25 % too short, so
-  they rev-limit at 264–289 km/h. Fix the gearing data before annotating
-  more bikes, or the annotation is inert. See the audit report.
+  module. The blocker found in the 2026-07-25 audit (four annotated heavies
+  whose catalog top gear was too short to reach their own limiter) was fixed
+  on 2026-08-08 with service-manual gearboxes, and more bikes were annotated
+  then. **What remains is a broader annotation pass**; top speed is still
+  weaker than ET (figures in the newest `reports/acc_final_*.json`).
 
 ## P1 — Community data
 
@@ -126,10 +144,14 @@ repeatedly re-scoped completed work from stale backlog text:
 - **Good-first-issue pipeline.** Label scoped issues (catalog passes,
   resolver tokenization, chat streaming, small UI polish) so new
   contributors have an obvious entry point.
-- **Rust core adoption** (optional accelerator, bit-identical to the Python
-  reference): server adoption behind `native.available()`, exact
-  client-side full sims in the browser, and faster sweeps. See
-  [RUST_CORE.md](RUST_CORE.md). Python stays the reference.
+- **Rust core** (bit-identical to the Python reference, which stays the
+  reference): it already serves every server simulation when installed
+  (`motoquant/engine_select.py`) and runs the sweeps. Remaining: wire exact
+  client-side full sims in the browser to the committed wasm engine
+  (`web/lib/engine.js`; parity is proven, the UI is not wired). See
+  [RUST_CORE.md](RUST_CORE.md).
+- **Saved runs do not store their conditions.** `/r/[id]` timeslips show the
+  result but not the venue/weather it was computed for; store and show them.
 - **Observability.** Sentry is wired (env-gated). Server-side PostHog
   forwarding is opt-in and off unless the operator sets `POSTHOG_API_KEY`.
   Funnel events (sim → save → share → signup) help the hosted instance, but a

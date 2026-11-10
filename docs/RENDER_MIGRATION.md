@@ -36,8 +36,7 @@ Files **not** modified:
   `MOTOQUANT_DB` to `/app/motoquant.db`. Works as-is.
 - `motoquant.db` — still tracked in git, still ships in the image. Same DB
   on Render as on Railway.
-- `requirements-api.txt`, `motoquant/api.py`, anything in `web/`,
-  `desktop/`, or the Phase 5 release pipeline — untouched.
+- `requirements-api.txt`, `motoquant/api.py`, anything in `web/` — untouched.
 
 ---
 

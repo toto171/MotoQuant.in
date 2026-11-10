@@ -2,8 +2,9 @@
 
 ## Supported versions
 
-MotoQuant ships continuously from `main`; there are no versioned releases or
-maintained branches. Security fixes land on **`main`** and reach the hosted
+MotoQuant ships continuously from `main`. The version number (2.0.0, in
+`motoquant/__init__.py`) names the release line; there are no maintained
+release branches. Security fixes land on **`main`** and reach the hosted
 instance (<https://www.motoquant.in>) on the next deploy. If you self-host,
 update to the latest `main`.
 

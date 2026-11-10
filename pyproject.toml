@@ -1,14 +1,20 @@
 [project]
 name = "motoquant"
-version = "4.0.0"
+# version      <- motoquant.__version__ (the single source of truth)
+# dependencies <- requirements-api.txt; the `dev` extra <- requirements-dev.txt
+# (see [tool.setuptools.dynamic] below), so `pip install -e ".[dev]"` gives a
+# working developer checkout and the lists cannot drift from the files CI and
+# the Docker lock are built from.
+dynamic = ["version", "dependencies", "optional-dependencies"]
 description = "The physics of faster — free, open-source first-principles motorcycle quarter-mile simulation & optimization"
 authors = [{name = "Hritwik Mudhai", email = "dhisetu@gmail.com"}]
 requires-python = ">=3.10"
-# PEP 639 SPDX expression (+ the file it refers to). Needs setuptools>=77,
+# PEP 639 SPDX expression (+ the files that must ship with every copy: the
+# licence text and the NOTICE, Apache-2.0 section 4). Needs setuptools>=77,
 # pinned in [build-system] below; deliberately NO "License ::" classifier —
 # PEP 639 forbids combining the two.
 license = "Apache-2.0"
-license-files = ["LICENSE"]
+license-files = ["LICENSE", "NOTICE"]
 readme = "README.md"
 keywords = ["motorcycle", "drag racing", "physics", "simulation", "quarter mile"]
 classifiers = [
@@ -28,6 +34,15 @@ motoquant-mcp = "motoquant.mcp_server:main"
 [build-system]
 requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+# Read statically from the source text of motoquant/__init__.py (no import, so
+# building the metadata does not need numpy).
+version = {attr = "motoquant.__version__"}
+dependencies = {file = ["requirements-api.txt"]}
+
+[tool.setuptools.dynamic.optional-dependencies]
+dev = {file = ["requirements-dev.txt"]}
 
 [tool.setuptools.packages.find]
 # Flat layout: repo root holds several top-level dirs (motoquant, tests,

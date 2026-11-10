@@ -1,4 +1,4 @@
-# MotoQuant Pro -- developer / CI-only dependencies
+# MotoQuant -- developer / CI-only dependencies
 # Install with: pip install -r requirements-dev.txt
 #
 # These are only needed to run the test suite + tooling, not to run

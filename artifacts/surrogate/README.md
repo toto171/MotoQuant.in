@@ -10,6 +10,13 @@
 | `motoquant_surrogate_v2_6.npz`      | v2.6 training dataset (9,124 rows × 26 features)    | 660 KB  |
 | `motoquant_surrogate_v1_1k5.npz`    | v1 training dataset (K5 Sobol, 1.5k samples — the historically cited original K5 envelope) | 128 KB  |
 
+> **Version label (2026-11-10).** Two branches each regenerated a model and
+> called it v2.7. The one in this directory is the 2026-11-05 regen described
+> below (2026-10/11 epoch physics, 541 bikes). The other (2026-11-10, trained
+> on the pre-epoch physics after a catalog clean-up to 534 bikes) was never
+> merged; none of its files are here and its metrics do not describe this
+> model. To keep the two apart, the next regeneration is **v2.8**.
+
 > **Pruned 2026-11-05:** the v2.5 model rollback copy
 > (`surrogate_numpy_v2_5.npz.bak`) and v2.5 training dataset
 > (`motoquant_surrogate_v2_5.npz`) were deleted to keep rollback depth at one

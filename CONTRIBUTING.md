@@ -27,6 +27,30 @@ current project state and a list of good first issues. Please follow the
 - New source files don't need a per-file licence header. The repo-root
   `LICENSE` and `NOTICE` cover them.
 
+## Ways to contribute
+
+You do not need to touch the physics to help. In rough order of value:
+
+1. **Instrumented timeslips and benchmarks.** Dragy / VBox / Racelogic runs of
+   *stock* bikes, with a source (magazine test, video, timeslip photo, Dragy
+   export). Small-displacement and two-stroke accuracy is limited mostly by
+   data. Open a "bike / benchmark data" issue or a PR.
+2. **Bike, part and tire data.** New bikes (`motoquant/scraper/known_bikes*.py`),
+   corrections to existing specs, gear cassettes and primary ratios from
+   service manuals, OEM tire fitments, parts and fitment rules.
+3. **Bug reports and fixes.** Use the bug-report issue template; include the
+   bike, venue, inputs and the number you expected.
+4. **Docs, tests, tooling, web UI.** Anything that makes the above easier.
+
+### The honest-data rule
+
+Every spec, benchmark, price and gear ratio needs a **citable source** (service
+manual, manufacturer spec sheet, magazine test, instrumented timeslip, retailer
+page). **No fabricated numbers.** If you cannot source a value, leave it out
+and say so: an honest gap beats apparent completeness. Estimates must be
+labelled as estimates and must not be presented as measurements. Data PRs
+without sources will be closed.
+
 ---
 
 ## 1. Repository
@@ -40,6 +64,18 @@ current project state and a list of good first issues. Please follow the
 
 ## 2. One-time setup
 
+Short version (the `Makefile` runs the same commands as CI):
+
+```bash
+make install   # pip install -e ".[dev]"
+make health    # state of the world: baselines, lint, catalog, headline drift, secret scan
+# ...work...
+make check     # fast pre-PR gate (~3 min): lint + format + baselines + fast tests
+make test      # full suite (~25 min), required before opening a PR
+```
+
+Longer version:
+
 ```bash
 # 1. Fork on GitHub (or clone directly if you have write access)
 git clone https://github.com/<you>/MotoQuant.in.git
@@ -51,15 +87,19 @@ python -m venv .venv
 source .venv/bin/activate          # macOS / Linux
 # .venv\Scripts\activate            # Windows PowerShell
 
-# 3. Install dependencies
-pip install -r requirements-api.txt
-pip install -r requirements-dev.txt # pytest + hypothesis (test-only deps)
-pip install -e .                    # editable install of the motoquant package
+# 3. Install the package, its runtime dependencies (requirements-api.txt) and
+#    the dev extra (requirements-dev.txt: pytest, ruff, hypothesis, ...)
+pip install -e ".[dev]"
 
-# 4. Initialise + seed a fresh dev database
+# 4. (Optional) a scratch database. The repo already ships motoquant.db, the
+#    full curated catalog; use that (read-only) for normal development.
+#    `db init` + `db seed` build a STARTER database: the three reference bikes
+#    (ids 1-3: K5, R1, Hayabusa) plus the tire library, parts and venues.
+#    Seed FIRST so those three keep ids 1-3, then (optionally) import the
+#    curated bike catalog on top. `make db` does the first two steps.
 python -m motoquant.run --db /tmp/motoquant-dev.db db init
-python -m motoquant.run --db /tmp/motoquant-dev.db import --known-bikes
 python -m motoquant.run --db /tmp/motoquant-dev.db db seed
+python -m motoquant.run --db /tmp/motoquant-dev.db import --known-bikes   # optional
 
 # 5. Run the focused test subset first (~3 min) — expect 0 failures
 python -m pytest tests/test_validation.py tests/test_scraper.py \
@@ -69,7 +109,16 @@ python -m pytest tests/test_validation.py tests/test_scraper.py \
 python -m pytest tests/ -q
 ```
 
-If those are green, you're set. (`make install && make check` does the same in one go.)
+If those are green, you're set.
+
+A scratch database is **not** the shipped catalog, so its counts and some ETs
+will not match the published ones. The shipped `motoquant.db` is produced by
+maintainers: `import --known-bikes` on top of a seeded DB, then the idempotent
+re-seed chain (`scripts/reseed_configs_from_specs.py` followed by the dated
+`scripts/patch_*.py` scripts, in the order written out under "Re-seed chain"
+in `CLAUDE.md`; see [docs/KNOWN_TRAPS.md](docs/KNOWN_TRAPS.md) T3 and T17),
+then regenerating the regression snapshot and the surrogate. Run that chain only if you are changing
+physics or importer behaviour.
 
 The committed `motoquant.db` in the repo root is the production seeded DB. Do not run migrations against it during dev — always use a `/tmp/` path like above, or `:memory:` for tests.
 
@@ -127,7 +176,7 @@ python -m pytest tests/test_api.py -v
 MOTOQUANT_SLOW_TESTS=1 python -m pytest tests/test_recommendations.py -v
 
 # Single test by name
-python -m pytest tests/test_physics.py::test_gsxr1000_k5_benchmark -v
+python -m pytest tests/test_validation.py::TestQuarterMileValidation::test_k5_quarter_mile_et -v
 ```
 
 **Rules:**
@@ -238,6 +287,7 @@ This is not optional. The current clean state of the codebase is the result of a
 
 - GitHub Issues for bugs, data corrections and scoped work (they leave a trail).
 - GitHub Discussions for questions and ideas.
+- [docs/ONBOARDING.md](docs/ONBOARDING.md) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) first: most "where does X live?" questions are answered there.
 - Before asking "is X done yet?", check `CHANGELOG.md` and `docs/ROADMAP.md`. (`CLAUDE.md` holds the exhaustive session log if you need to dig.)
 - Security issues: report privately, see [SECURITY.md](SECURITY.md).
 
@@ -250,8 +300,10 @@ Docker via `render.yaml`) and the web app on Vercel (`motoquant.in`, with the
 `/api/*` rewrite in `web/next.config.js` + `vercel.json` pointing at Render).
 
 Merging to `main` IS the production deploy of the public instance. Render
-rebuilds the API when the diff touches `motoquant/**`, `motoquant.db`, `requirements-api.txt`, `Dockerfile`
-or `render.yaml` (the `buildFilter`; web-only merges do not restart the API),
+rebuilds the API when the diff touches the backend (`motoquant/**`,
+`motoquant.db`, the requirements files, the Docker files, `render.yaml` or the
+Rust core under `rust/`; the exact list is the `buildFilter` in `render.yaml`,
+so web-only merges do not restart the API),
 and Vercel deploys the frontend on every merge. Hosting accounts belong to the
 maintainers, so contributors never need credentials. To run your own copy,
 follow [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md). The historical Railway →

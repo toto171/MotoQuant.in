@@ -70,9 +70,10 @@ RUN set -eu; \
     fi; \
     rm -rf /tmp/wheels
 
-# Copy application code (+ the Apache-2.0 LICENSE, which must travel with
-# every redistributed copy — the image is one).
-COPY LICENSE .
+# Copy application code (+ the Apache-2.0 LICENSE and the NOTICE file, which
+# must both travel with every redistributed copy — the image is one; see
+# section 4 of the License).
+COPY LICENSE NOTICE ./
 COPY motoquant/ ./motoquant/
 COPY motoquant.db .
 COPY artifacts/surrogate/surrogate_numpy.npz ./artifacts/surrogate/surrogate_numpy.npz

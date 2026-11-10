@@ -24,7 +24,7 @@ the web frontend.
 git clone https://github.com/toto171/MotoQuant.in.git
 cd MotoQuant.in
 
-make install      # runtime + dev deps, editable motoquant package
+make install      # pip install -e ".[dev]": the package, runtime + dev deps
 make check        # lint + format + baseline gate + fast tests (~3 min)
 
 make api          # FastAPI backend on http://localhost:8000  (OpenAPI UI at /docs)

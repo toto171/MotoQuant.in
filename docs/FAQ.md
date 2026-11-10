@@ -15,7 +15,7 @@ Yes to both. Everything (the simulator, parts ROI, build optimizer, autotune, Dr
 - **Students** — learn motorcycle physics with a working model
 
 ### Is it accurate?
-MotoQuant is validated against **250 published benchmarks** (magazine road tests, instrumented GPS runs, timeslips), weighted by source quality. Across 266 matched runs the weighted mean error is about **0.25 s** and the mean bias **+0.02 s**. Reference bikes: GSX-R 1000 K5 10.04 s simulated vs 9.97 s real, YZF-R1 10.11 s vs 10.3 s, Hayabusa Gen1 10.11 s vs a 10.1–10.7 s real range. Small-cc bikes are less certain because few instrumented benchmarks exist for them. For bikes not in the library, results are estimates; use them to guide decisions, not as law. The full breakdown is at motoquant.in/validation.
+MotoQuant is validated against **250 published benchmarks** (magazine road tests, instrumented GPS runs, timeslips), weighted by source quality. Across 266 matched runs the weighted mean error is about **0.25 s** and the mean bias **+0.02 s**. Reference bikes: GSX-R 1000 K5 10.04 s simulated vs 9.97 s real, YZF-R1 10.11 s vs 10.3 s, Hayabusa Gen1 10.11 s vs a 10.1–10.7 s real range. Small-cc bikes are the weakest class: few instrumented benchmarks exist for them, and many still carry a generic primary gear ratio in the catalog. For bikes not in the library, results are estimates; use them to guide decisions, not as law. The full breakdown is at motoquant.in/validation.
 
 ### Where does the simulator run?
 - **Web simulator** on motoquant.in — enter your bike and mods, get ET in ~50 ms
@@ -28,48 +28,41 @@ MotoQuant is validated against **250 published benchmarks** (magazine road tests
 ## Using the Simulator
 
 ### How do I start a simulation?
-1. Search for your bike by make, model, and year
-2. Select front and rear tires (OEM fitments are highlighted ✅)
-3. Choose **Basic** mode (quick power/weight sliders) or **Advanced** mode (individual parts)
-4. Click **Simulate**
-5. See your ET, trap speed, and build cost
+Open the simulator at motoquant.in/simulator. It starts in **Simple** mode:
+1. Choose your bike (search by make, model or year)
+2. Set the rider weight
+3. Say where you are racing (a city or a drag strip), or leave the default conditions
 
-### What does "Basic Mode" do?
-Basic Mode is the quick path. Adjust a **Power Boost** slider (0–50 %) and **Weight Reduction** slider. The simulator shows your expected ET and cost. Use this when you want a fast estimate.
+The quarter-mile time and trap speed update as you change things, and the result always says which conditions it was computed for.
 
-### What's "Advanced Mode"?
-Advanced Mode lets you pick individual parts from the catalog. You can add:
-- ECU tunes / flashes (+ HP, – consistency in cold weather)
-- Exhaust systems (small HP/TQ gains, weight savings)
-- Intake filters (marginal gains, noise character)
-- Sprocket & chain combos (gear ratio change)
-- Suspension parts (reduced unsprung mass, handling)
-- Weight reduction (bodywork, seats, batteries)
-- Turbo/supercharger kits (large HP jumps, setup risk)
-- Nitrous systems (controlled HP addition)
-- And more
+### What does Simple mode do?
+Simple mode answers one question: how quick is this bike, with this rider, at this place? Under the result it offers the next steps: add parts and mods, find the best parts for a budget ("Upgrades"), get a race-day setup, compare with another bike, see charts and splits, or save and share the run.
 
-The simulator shows the **net effect** of all selected parts before you run the sim: "+14 hp · –2.5 kg mass · –0.08 s ET estimate". Parts are **bike-specific** — a 530-chain sprocket won't appear for a bike that runs 530 chain.
+A result marked **Instant estimate** comes from a fast model that runs in your browser; **Exact** means the full physics simulation ran. Only exact results can be saved to the leaderboard.
+
+### What's Advanced mode?
+Advanced mode is the full workbench, with everything in one place:
+- **Setup**: bike, rider weight, an engine power change (−20 % to +50 %), weight added or removed, air and altitude (venue, air and track temperature, humidity, headwind) and front and rear tyres
+- **Parts and mods**: pick individual parts from the catalog (ECU tunes, exhausts, intake filters, sprockets and chains, suspension, weight reduction, turbo and supercharger kits, nitrous, and more). Parts are **bike-specific**: a part only appears for the bikes it fits
+- **Results**: Quarter mile, Top speed, Charts, Splits, Compare, My data (your own Dragy runs and dyno sheets) and Specs
+
+The result shows the build cost and the change against the stock bike.
 
 ### How do I choose between tires?
-1. The **OEM fitments** (with ✅) are what the manufacturer recommends — safest choice
-2. **Recommended tires** are compatible and trusted by racers
-3. **Drag-specific tires** are slicks or DOT drag tires for serious racers
-
-The web simulator and app warn you if you pick a tire that doesn't physically fit your bike.
+In Advanced mode the front and rear tyre pickers start on **Original tyre (stock)**. You can swap in any tyre from the library; each entry shows its size and compound (sport, sport-touring, race, drag radial or slick, commuter). The picker does not stop you choosing a size that will not fit your rims, so check the size yourself. Each bike's page under motoquant.in/bikes lists the tyres recorded as fitting it; from the command line, `python -m motoquant.run bikes --fitments BIKE_ID` shows the original, recommended and drag-prep tyres recorded for a bike.
 
 ### Can I change rider weight?
-Yes. Use the **Rider Weight** slider (50–130 kg). Heavier riders = slower acceleration (more inertia), later wheelies, different weight transfer. A 20 kg change is worth ~0.1 s.
+Yes. Use the **Rider Weight** slider (50–130 kg). Heavier riders = slower acceleration (more inertia), later wheelies, different weight transfer. How much it matters depends on the bike: on a litre bike, which is limited by wheelies and grip at launch, 20 kg is only a few hundredths of a second; on a 150 cc bike it can be several tenths.
 
-### What's the difference between my bike's power and the "Power %" in Basic mode?
-**Power %** is a multiplier on your base bike power. So a GSX-R 1000 K5 (182 hp stock) at +20 % gets 182 × 1.20 = **218 hp**. In Advanced mode, you pick parts and see the exact HP and torque curve.
+### What does "Engine power change" do in Advanced mode?
+It is a multiplier on the bike's whole power and torque curve: +20 % on a 180 hp bike is 216 hp. Use it for a quick what-if; to model a real build, pick the parts instead.
 
 ---
 
 ## Understanding Results
 
 ### What does "ET" mean?
-**ET** = Elapsed Time, how many seconds to complete 402.336 meters (0.25 miles / quarter mile). Lower is faster. A 10-second ET is very respectable for a street bike; 9 seconds is excellent.
+**ET** = Elapsed Time, how many seconds to complete 402.336 meters (0.25 miles / quarter mile). Lower is faster. Like a strip timeslip, MotoQuant starts the clock when the bike has rolled the first foot (0.3048 m) out of the stage beam, not at first motion. A 10-second ET is very respectable for a street bike; 9 seconds is excellent.
 
 ### What's "Trap Speed"?
 Trap Speed is your velocity at the finish line (402.336 m mark), measured in km/h or mph. It reflects your power-to-weight ratio and aerodynamics. A 250 km/h trap is typical for a literbike; 280+ km/h requires significant mods.

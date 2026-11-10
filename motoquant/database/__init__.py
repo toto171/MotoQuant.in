@@ -20,8 +20,6 @@ Usage:
     config = db.bikes.to_config(bike_id)  # → BikeConfig ready for simulation
 """
 
-__version__ = "0.1.0"
-
 from .connection import MotoQuantDB
 from .schema import SCHEMA_VERSION
 

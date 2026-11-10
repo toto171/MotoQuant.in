@@ -53,6 +53,14 @@ its own timing convention (1-ft beam rollout or first motion)
 Three reference bikes are pinned bit-identical and gated in CI:
 **GSX-R 1000 K5 → 10.0436 s**, **YZF-R1 4C8 → 10.1092 s**,
 **Hayabusa Gen1 → 10.1100 s** (see [docs/INVARIANTS.md](docs/INVARIANTS.md) I1).
+Accuracy is uneven by class, and we say so: small bikes are the weakest
+(entry 200–300 cc, 300–500 cc singles and two-strokes carry the largest class
+bias). Published tests for them are scarce, and many still run a generic
+primary gear ratio; a corrected rule was measured, made the fit worse and was
+not shipped ([`reports/session_2026_11_10_epoch.md`](reports/session_2026_11_10_epoch.md)).
+Top speed is weaker than ET. The known residuals are listed in
+[CHANGELOG.md](CHANGELOG.md).
+
 Every benchmark keeps its source label. If you have an instrumented run that
 disagrees, please [file it](https://github.com/toto171/MotoQuant.in/issues/new/choose);
 that is the fastest way to make the model better.
@@ -65,9 +73,27 @@ Requirements: Python 3.10+ and, for the web app, Node 18+.
 git clone https://github.com/toto171/MotoQuant.in.git
 cd MotoQuant.in
 
-make install          # deps + editable motoquant package
+make install          # pip install -e ".[dev]": the package, its runtime deps and the dev tools
+make baselines        # the three pinned reference bikes are bit-identical (a few seconds)
 make check            # lint + format + baseline gate + fast tests (~3 min)
 make                  # list every target
+```
+
+The repo ships a ready-made `motoquant.db` holding the full curated catalog
+(bikes, parts, tires, fitments, venues), so there is no setup step and
+everything below works immediately. (`db init` + `db seed`, or `make db`,
+build a *starter* database with only the three reference bikes; see
+[CONTRIBUTING.md](CONTRIBUTING.md) §2.)
+
+One simulation from Python (stock GSX-R 1000 K5, sea-level reference
+conditions):
+
+```python
+import motoquant
+
+engine = motoquant.MotoQuantEngine(motoquant.gsxr1000_k5())
+result = engine.run()
+print(f"{result.time_quarter:.4f} s")  # 10.0436
 ```
 
 Run the product locally:
@@ -78,15 +104,20 @@ make web-install      # once
 make web-dev          # Next.js app on http://localhost:3000, against the local API
 ```
 
-Or use the CLI directly. The repo ships a seeded `motoquant.db`, so there is
-no setup step:
+Or use the CLI, for any catalog bike at any venue:
 
 ```bash
+python -m motoquant.run bikes --search hayabusa               # find a bike id
 python -m motoquant.run sim --bike-id 1 --venue-id 1          # K5 at Aamby Valley
 python -m motoquant.run parts --bike-id 3 --impact 56         # what does this part do?
 python -m motoquant.run analysis recommend --bike-id 1 --budget 150000
 python -m motoquant.run nl "optimize my Hayabusa for 35C at Aamby Valley"   # keyless NL
 ```
+
+(The CLI touches the database file it opens, so after these commands git
+shows `motoquant.db` as modified although no data changed. Undo that with
+`git checkout -- motoquant.db`, or work on a copy: `--db /tmp/mq.db` after
+`cp motoquant.db /tmp/mq.db`.)
 
 To host your own instance on Render + Vercel or any Docker host, including
 the optional settings (accounts, email, LLM keys for chat, persistent disk),
