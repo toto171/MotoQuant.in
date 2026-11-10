@@ -84,39 +84,55 @@ class TestNextConfigCacheHeaders(unittest.TestCase):
                     self.assertNotIn("immutable", h["value"], rule["source"])
 
 
-class TestSimulatorBootPartsDedup(unittest.TestCase):
-    """Pin the single-transfer boot parts fetch in web/app/simulator/page.js."""
+class TestSimulatorPartsTransfer(unittest.TestCase):
+    """The full parts catalog crosses the wire once per page load.
+
+    The simulator used to re-download the whole catalog on every bike change
+    just to learn which parts fit. It now goes through two helpers in
+    ``web/lib/api.js``: a memoised catalog fetch, and an ids-only compatibility
+    request per bike. These tests pin that shape so a direct per-bike catalog
+    fetch cannot creep back into the page.
+    """
 
     @classmethod
     def setUpClass(cls):
-        cls.src = (WEB_DIR / "app" / "simulator" / "page.js").read_text(
-            encoding="utf-8"
-        )
+        cls.api = (WEB_DIR / "lib" / "api.js").read_text(encoding="utf-8")
+        sim_dir = WEB_DIR / "components" / "sim"
+        cls.sim_sources = {
+            path.relative_to(WEB_DIR).as_posix(): path.read_text(encoding="utf-8")
+            for path in [
+                *sim_dir.glob("*.js"),
+                WEB_DIR / "app" / "simulator" / "page.js",
+            ]
+        }
 
-    def test_boot_has_no_plain_parts_catalog_fetch(self):
-        # The pre-fix boot line — a plain, un-annotated full-catalog transfer
-        # that the re-annotate effect immediately repeated with bike_id=.
-        # The un-annotated URL survives only as the no-bikes fallback branch
-        # (`bootBike ? … : `), never as an unconditional fetch.
-        self.assertNotIn("fetch(`${API}/api/parts?limit=2000`)", self.src)
-        self.assertIn("?bike_id=${bootBike.id}&compatible_only=false", self.src)
+    def test_simulator_fetches_parts_only_through_the_helpers(self):
+        # /api/parts/categories is a tiny list and is fine; a parts-list URL
+        # built inside the page is the regression.
+        offenders = [
+            name for name, src in self.sim_sources.items() if "/api/parts?" in src
+        ]
+        self.assertEqual(offenders, [], "parts list fetched outside lib/api.js")
+        state = self.sim_sources["components/sim/useSimulatorState.js"]
+        self.assertIn("getPartsCatalog()", state)
+        self.assertIn("getCompatiblePartIds(", state)
 
-    def test_re_annotate_effect_skips_boot_annotated_bike(self):
-        # The guard that stops setBike() at boot from re-transferring the
-        # catalog the boot fetch already annotated.
-        self.assertIn("annotatedBikeRef.current === bike.id) return;", self.src)
-        # And the boot side records what it annotated (rows-present gated so a
-        # failed boot parts fetch still lets the effect recover the catalog).
-        self.assertIn(
-            "if (partsData.parts?.length) annotatedBikeRef.current = bootBike.id;",
-            self.src,
-        )
+    def test_catalog_fetch_is_memoised_and_unscoped(self):
+        body = self.api[self.api.index("export function getPartsCatalog()") :]
+        body = body[: body.index("export async function getCompatiblePartIds")]
+        self.assertIn("if (_partsPromise) return _partsPromise;", body)
+        # No bike id: one response serves every bike for the page lifetime.
+        self.assertIn("/api/parts?limit=5000`", body)
+        self.assertNotIn("bike_id", body)
+        # A failed load must not be cached forever.
+        self.assertIn("_partsPromise = null;", body)
 
-    def test_boot_progress_still_counts_five_fetches(self):
-        # The boot bar ticks 1/5 per settled fetch; the dedup must not have
-        # changed the fetch count the accounting is based on.
-        self.assertIn("setBootProgress((v) => Math.min(1, v + 0.2));", self.src)
-        self.assertEqual(self.src.count("tick(fetch("), 5)
+    def test_per_bike_request_is_ids_only(self):
+        body = self.api[self.api.index("export async function getCompatiblePartIds") :]
+        body = body[: body.index("\n}\n") + 3]
+        self.assertIn("compatible_only=true", body)
+        self.assertIn("fields=id", body)
+        self.assertIn("{ signal }", body)  # superseded bike changes are abortable
 
 
 if __name__ == "__main__":
