@@ -108,13 +108,13 @@ def init_sentry(*, app_name: str = "motoquant-api") -> bool:
         from sentry_sdk.integrations.openai import OpenAIIntegration
 
         disabled_integrations.append(OpenAIIntegration())
-    except ImportError:
+    except Exception:  # noqa: BLE001 - ImportError, or sentry's DidNotEnable when openai is absent
         pass
     try:
         from sentry_sdk.integrations.anthropic import AnthropicIntegration
 
         disabled_integrations.append(AnthropicIntegration())
-    except ImportError:
+    except Exception:  # noqa: BLE001 - ImportError, or sentry's DidNotEnable
         pass
 
     sentry_sdk.init(

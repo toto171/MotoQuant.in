@@ -160,13 +160,12 @@ class TestActivationVisibility:
         assert out.count("[observability] Sentry active") == 1
 
     def test_llm_sdk_auto_integrations_are_disabled(self, monkeypatch):
-        """MOTOQUANT-API-1: the OpenAI auto-integration captured a Groq 400
-        (tool_use_failed) as handled:no at the SDK boundary, BEFORE our
-        llm/client.py salvage path ran — benign noise in a 2-issue stream.
-        init_sentry must disable the OpenAI + Anthropic auto-integrations."""
+        """The Anthropic auto-integration would capture provider errors (and
+        request data) before llm/client.py translates and redacts them, so
+        init_sentry must disable it. The OpenAI one is disabled too when it
+        can load at all (openai is no longer a dependency)."""
         pytest.importorskip("sentry_sdk")
         from sentry_sdk.integrations.anthropic import AnthropicIntegration
-        from sentry_sdk.integrations.openai import OpenAIIntegration
 
         monkeypatch.setenv("SENTRY_DSN", "https://key@o0.ingest.sentry.io/1")
         with patch("sentry_sdk.init") as mock_init:
@@ -174,8 +173,33 @@ class TestActivationVisibility:
         disabled = mock_init.call_args.kwargs.get("disabled_integrations")
         assert disabled, "init_sentry no longer passes disabled_integrations"
         disabled_types = {type(i) for i in disabled}
-        assert OpenAIIntegration in disabled_types
         assert AnthropicIntegration in disabled_types
+        try:
+            from sentry_sdk.integrations.openai import OpenAIIntegration
+        except Exception:  # noqa: BLE001 - DidNotEnable without openai
+            return
+        assert OpenAIIntegration in disabled_types
+
+    def test_init_survives_an_integration_that_cannot_load(self, monkeypatch):
+        """Without the openai package, importing sentry's OpenAI integration
+        raises DidNotEnable (not ImportError); init_sentry must still start."""
+        pytest.importorskip("sentry_sdk")
+        import sys
+        import types
+
+        from sentry_sdk.integrations import DidNotEnable
+
+        broken = types.ModuleType("sentry_sdk.integrations.openai")
+
+        def _raise(name):
+            raise DidNotEnable("OpenAI not installed")
+
+        broken.__getattr__ = _raise
+        monkeypatch.setitem(sys.modules, "sentry_sdk.integrations.openai", broken)
+        monkeypatch.setenv("SENTRY_DSN", "https://key@o0.ingest.sentry.io/1")
+        with patch("sentry_sdk.init") as mock_init:
+            assert obs.init_sentry() is True
+        assert mock_init.called
 
 
 @pytest.fixture()
