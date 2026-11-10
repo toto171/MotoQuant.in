@@ -22,7 +22,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'Three things decide the first 0.4 seconds of a drag run: the RPM at which the clutch engages, how much the rear tyre slips, and how much weight moves onto the rear wheel. Get any one wrong and you lose tenths, sometimes much more. Below is the physics of each, how they affect each other, and what MotoQuant simulates when you press Run.',
+    text: 'Three things decide the first 0.4 seconds of a drag run: the RPM at which the clutch engages, how much the rear tyre slips, and how much weight moves onto the rear wheel. Get any one wrong and you lose tenths, sometimes much more. MotoQuant simulates all three when you press Run, and each one changes the other two.',
   },
   {
     type: 'h2',
@@ -34,7 +34,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Taking 0.1 seconds off the 60-ft time takes roughly 0.07–0.09 seconds off the final ET, depending on the bike class. On a litre-class superbike, that margin decides most heads-up events. On a 155cc street bike, a good launch can make up for 3–4 hp less power.',
+    text: 'A 60-ft time 0.1 seconds quicker gives a final ET roughly 0.07–0.09 seconds quicker, depending on the bike class. On a litre-class superbike, that margin decides most heads-up events. On a 155cc street bike, a good launch can make up for 3–4 hp less power.',
   },
   {
     type: 'h2',

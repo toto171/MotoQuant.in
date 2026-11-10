@@ -404,7 +404,9 @@ class LLMClient:
             # A visitor key is used as given, or not at all: never the env.
             self._api_key = api_key if looks_like_anthropic_key(api_key) else None
         else:
-            self._api_key = api_key or os.environ.get(SERVER_KEY_ENV, "").strip() or None
+            self._api_key = (
+                api_key or os.environ.get(SERVER_KEY_ENV, "").strip() or None
+            )
         self._max_tokens = max_tokens
         self._timeout_s = timeout_s
         self._call_override = _call_override
@@ -468,7 +470,9 @@ class LLMClient:
             return self._sdk_client
         if not self._api_key:
             if self._own_key:
-                raise LLMKeyRejectedError("The Anthropic key sent with this question is not usable.")
+                raise LLMKeyRejectedError(
+                    "The Anthropic key sent with this question is not usable."
+                )
             raise LLMNotConfiguredError(
                 "No Anthropic key is set on the server (ANTHROPIC_API_KEY). "
                 "Add your own key to ask questions."

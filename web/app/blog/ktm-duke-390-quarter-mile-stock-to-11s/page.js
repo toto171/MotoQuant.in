@@ -4,12 +4,12 @@ import SiteFooter from '../../../components/SiteFooter';
 import StructuredData, { articleSchema } from '../../StructuredData';
 
 const SLUG = 'ktm-duke-390-quarter-mile-stock-to-11s';
-const TITLE = 'KTM Duke 390 Quarter Mile: From 13.3s Stock to an 11.342s Record';
+const TITLE = 'KTM Duke 390 quarter mile: from 13.3s stock to an 11.342s record';
 const DESCRIPTION =
   'KTM Duke 390 quarter-mile physics. MotoQuant simulates a stock 2022 Duke 390 at 13.30s and 162 km/h trap at Aamby Valley. Fast Track Racing India ran 11.342s with the same engine. Two seconds of ET, mod by mod, with Indian retail prices.';
 
 export const metadata = {
-  title: 'KTM Duke 390 Quarter Mile India: Stock to 11s | MotoQuant',
+  title: 'KTM Duke 390 quarter mile in India: stock to 11s | MotoQuant',
   description: DESCRIPTION,
   keywords: [
     'ktm duke 390 quarter mile',
@@ -40,15 +40,15 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'A stock 2022 KTM Duke 390 simulates to 13.30 seconds and 162 km/h at Aamby Valley in November. Fast Track Racing India ran 11.342 seconds at the ASEAN Superfast event in Thailand with a heavily-developed Duke 390 carrying the same 373.3 cc LC4c single. That is a gap of roughly two seconds, a number large enough to make most riders assume the record bike is running a completely different engine. It is not. The Fast Track car carries the same bore, the same stroke, the same Bajaj-built bottom end, and the same six-speed cassette. What it has added, mod by mod, is roughly four tenths of grip, three tenths of gearing, two tenths of weight, and one tenth of intake-and-exhaust work. The rest is rider craft. Here is exactly where each of those tenths come from, what the same mods cost at Indian retail, and what a Duke 390 owner with a ₹50,000 budget can realistically run.',
+    text: 'A stock 2022 KTM Duke 390 simulates to 13.30 seconds and 162 km/h at Aamby Valley in November. Fast Track Racing India ran 11.342 seconds at the ASEAN Superfast event in Thailand on a heavily developed Duke 390 with the same 373.3 cc LC4c single. A gap of roughly two seconds makes most riders assume the record bike has a different engine. It does not. The Fast Track bike has the same bore, the same stroke, the same Bajaj-built bottom end and the same six-speed cassette. Mod by mod, it has added roughly four tenths of grip, three tenths of gearing, two tenths of weight and one tenth of intake and exhaust work. The rest is rider craft. Below is where each of those tenths comes from, what the same mods cost at Indian retail, and what a Duke 390 owner with a ₹50,000 budget can realistically run.',
   },
   {
     type: 'h2',
-    text: 'Stock Numbers: Aamby Valley, November, OEM Everything',
+    text: 'Stock numbers: Aamby Valley, November, OEM everything',
   },
   {
     type: 'p',
-    text: 'MotoQuant runs the 2022 KTM Duke 390 against Aamby Valley November conditions: density altitude around 1,100 m, ambient 22°C, relative humidity 40 percent, dry asphalt with the OEM Metzeler Sportec M5 rear tire at μ_peak ≈ 1.10. A 70 kg rider in the upright Duke stance. Two-step launch off the limiter at 5,800 rpm. Adaptive RK4 solver, 1 ms timestep. The bike pulls 13.30 seconds with a 162 km/h trap.',
+    text: 'MotoQuant runs the 2022 KTM Duke 390 at 13.30 seconds with a 162 km/h trap under Aamby Valley November conditions: density altitude around 1,100 m, ambient 22°C, relative humidity 40 percent, and dry asphalt with the OEM Metzeler Sportec M5 rear tire at μ_peak ≈ 1.10. The 70 kg rider sits in the upright Duke stance. The launch is a two-step off the limiter at 5,800 rpm, and the solver is adaptive RK4 with a 1 ms timestep.',
   },
   {
     type: 'table',
@@ -59,28 +59,28 @@ const CONTENT = [
       ['60-foot time', '2.22 s', '2.15 – 2.30 s'],
       ['1/8-mile ET', '8.70 s', '8.60 – 8.90 s'],
       ['Top gear at trap', '5th, ~7,250 rpm', 'Same'],
-      ['Cluster bias band', '±0.4 s (mid-twin-300-500)', 'Honest uncertainty'],
+      ['Cluster bias band', '±0.4 s (mid-twin-300-500)', 'Model uncertainty'],
     ],
   },
   {
     type: 'p',
-    text: 'The 13.30 second figure sits inside the same mid-twin-300-500 cluster that holds the Ninja 400, Apache RR 310, Aprilia RS 457, and the Husqvarna 401 platform. MotoQuant validates that cluster against published Autocar India and Carblogindia stock GPS-timed runs at a weighted mean absolute error of around 0.31 seconds; the Duke 390 historically logs between 13.0 and 13.7 seconds in Indian magazine testing depending on rider weight, ambient density, and whether the launch is rolled in second gear or two-stepped off the limiter. The 162 km/h trap matches the bike falling off the end of fifth gear at peak power, where the LC4c is producing about 43.5 hp at the crank, translating to roughly 38 hp at the wheel through the 6 percent chain-and-final-drive loss MotoQuant assumes for the 520 chain on this platform.',
+    text: 'The Duke 390 sits in the mid-twin-300-500 cluster, with the Ninja 400, Apache RR 310, Aprilia RS 457 and the Husqvarna 401 platform. MotoQuant validates that cluster against published stock GPS-timed runs from Autocar India and Carblogindia, at a weighted mean absolute error of around 0.31 seconds. In Indian magazine testing the Duke 390 has logged between 13.0 and 13.7 seconds, depending on rider weight, ambient density, and whether the launch is rolled in second gear or two-stepped off the limiter. The 162 km/h trap is where the bike runs off the end of fifth gear at peak power. There the LC4c makes about 43.5 hp at the crank, or roughly 38 hp at the wheel after the 6 percent chain and final-drive loss MotoQuant assumes for the 520 chain on this platform.',
   },
   {
     type: 'callout',
-    text: 'Quick sanity check: Autocar India in March 2022 ran a stock Duke 390 over 13.6 seconds GPS-timed at MMRT, denser-air conditions than Aamby Valley but with shorter rollout. ZigWheels in 2023 logged 13.4 seconds at Buddh. The 13.30 second sim sits at the optimistic edge of that range, which is the right place for a bike launched off the limiter by a Dragy with no rollout penalty.',
+    text: 'A sanity check: in March 2022 Autocar India ran a stock Duke 390 at over 13.6 seconds, GPS-timed at MMRT, in denser air than Aamby Valley but with shorter rollout. ZigWheels logged 13.4 seconds at Buddh in 2023. The 13.30 second sim sits at the optimistic edge of that range, which is where it should be for a bike launched off the limiter and timed by a Dragy with no rollout penalty.',
   },
   {
     type: 'h2',
-    text: 'The 11.342 Second Pass: What Fast Track Racing Actually Did',
+    text: 'The 11.342 second pass: what Fast Track Racing did',
   },
   {
     type: 'p',
-    text: 'Fast Track Racing India brought a Duke 390 to the ASEAN Superfast Drag Challenge in Thailand in 2023 and posted an 11.342 second pass. The same team logged 11.732 seconds at Valley Run 2025 Winter at Aamby Valley. Both numbers are real, both are timed by event officials, and both are publicly verifiable. The Fast Track car is also not unique: Pune-based privateers have run between 11.5 and 12.2 seconds on similar 390-class chassis since 2020, and there is a small but consistent community of Indian KTM owners running 12.x passes at any given Valley Run.',
+    text: 'Fast Track Racing India brought a Duke 390 to the ASEAN Superfast Drag Challenge in Thailand in 2023 and posted an 11.342 second pass. The same team logged 11.732 seconds at Valley Run 2025 Winter at Aamby Valley. Event officials timed both runs, and both are publicly verifiable. The Fast Track bike is not unique either. Pune-based privateers have run between 11.5 and 12.2 seconds on similar 390-class chassis since 2020, and a small, steady group of Indian KTM owners runs 12.x passes at any given Valley Run.',
   },
   {
     type: 'p',
-    text: 'What separates an 11.3 from a 13.3? The two-second gap on a single-cylinder 373 cc bike does not come from one magic mod. It comes from stacking five or six smaller-effect changes, each of which buys somewhere between 0.10 and 0.40 seconds, and combining them with a rider who has practised the launch a few hundred times. MotoQuant cannot directly simulate the Fast Track machine because the team does not publish its full build sheet, but the simulator can walk through the established Indian drag-prep ladder and account for the gap.',
+    text: 'On a 373 cc single, the two seconds between an 11.3 and a 13.3 do not come from one magic mod. They come from five or six smaller changes, each worth between 0.10 and 0.40 seconds, plus a rider who has practised the launch a few hundred times. The team does not publish its full build sheet, so MotoQuant cannot simulate the Fast Track bike directly. It can walk through the usual Indian drag-prep ladder and account for the gap.',
   },
   {
     type: 'table',
@@ -98,15 +98,15 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The numbers add up to within one hundredth of the published 11.342 second pass, which is closer than the cluster bias band allows MotoQuant to claim with confidence. Treat the table as a credible decomposition rather than a calibrated prediction: the simulator can independently verify each row against its physics model, but the last two rows (engine builder pass and drag swingarm) involve hardware the simulator cannot model without measured dyno and chassis-geometry data from the actual Fast Track bike. What the table is honest about is the order of magnitude: every row in the ladder buys somewhere between 0.10 and 0.40 seconds, and you need most of them to crack 12.',
+    text: 'The numbers add up to within one hundredth of the published 11.342 second pass, which is closer than the cluster bias band lets MotoQuant claim with confidence. Read the table as a credible breakdown, not a calibrated prediction. The simulator can verify each row against its physics model, but the last two rows (engine builder pass and drag swingarm) involve hardware it cannot model without measured dyno and chassis-geometry data from the Fast Track bike itself. The order of magnitude is the solid part: every row in the ladder buys between 0.10 and 0.40 seconds, and you need most of them to crack 12.',
   },
   {
     type: 'h2',
-    text: 'Cost-per-Tenth: A Practical ₹50,000 Build',
+    text: 'Cost per tenth: a practical ₹50,000 build',
   },
   {
     type: 'p',
-    text: 'Most Duke 390 owners are not chasing an 11-second pass. They are chasing the question: with a fifty-thousand-rupee budget, how far under 13 seconds can the bike actually run while still being legal on a Monday morning commute? MotoQuant\'s parts-ROI engine answers this directly. The numbers below use Indian retail pricing from the May 2026 refresh pass, scraped or formula-priced against Store4Riders, Riders Planet, Motodelic, KustomHub, Performance Racing Store, and Powerstroke.',
+    text: 'Most Duke 390 owners are not chasing an 11-second pass. Their question is this: with a fifty-thousand-rupee budget, how far under 13 seconds can the bike run and still be legal for the Monday morning commute? MotoQuant\'s parts-ROI engine answers it. The prices below are Indian retail from the May 2026 refresh, scraped or formula-priced against Store4Riders, Riders Planet, Motodelic, KustomHub, Performance Racing Store, and Powerstroke.',
   },
   {
     type: 'table',
@@ -122,19 +122,19 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The full ₹49,050 build drops the simulated ET from 13.30 to roughly 12.55 seconds, with the trap rising from 162 to 171 km/h. Everything in the build is road-legal in India, none of it requires a custom tune beyond the Powertronic flash (which is itself a piggyback that retains the OEM ECU), and the entire stack can be installed by any KTM service centre or competent independent mechanic. For owners who care about every-day rideability more than absolute ET, drop the SC-Project exhaust: the slip-on is the worst cost-per-tenth on the list at ₹20,000 per tenth, and stepping back to the OEM exhaust saves twenty-four thousand rupees with only a tenth of ET lost. That trimmed-down build runs 12.67 seconds for ₹25,050.',
+    text: 'The full ₹49,050 build takes the simulated ET from 13.30 to roughly 12.55 seconds and the trap from 162 to 171 km/h. Everything in it is road-legal in India. Nothing needs a custom tune beyond the Powertronic flash, which is a piggyback that keeps the OEM ECU, and any KTM service centre or competent independent mechanic can fit the lot. If you care more about everyday rideability than absolute ET, drop the SC-Project exhaust. At ₹20,000 per tenth it is the worst cost per tenth on the list, and going back to the OEM exhaust saves twenty-four thousand rupees for only a tenth of ET. That trimmed build runs 12.67 seconds for ₹25,050.',
   },
   {
     type: 'p',
-    text: 'The single best cost-per-tenth mod on the Duke 390 is the front sprocket drop, at roughly five hundred rupees per tenth of ET. One tooth less at the front shortens the overall final-drive ratio by 6.25 percent. The LC4c makes its meaningful torque between 6,500 and 9,000 rpm; the stock 16:45 final drive is geared tall enough that on a strip the bike spends the first hundred metres climbing into that band. A 15-tooth front pulls the engine into the meat of the curve sooner. Side-effects: top speed drops from roughly 178 km/h to 167 km/h (irrelevant on a strip where you trap at 162-170 km/h anyway), and highway cruising RPM rises by about 400 rpm at 100 km/h, which is barely perceptible on a single. None of those are deal-breakers for a tracked Duke 390.',
+    text: 'The best cost-per-tenth mod on the Duke 390 is the front sprocket drop, at roughly five hundred rupees per tenth of ET. One tooth less at the front shortens the overall final-drive ratio by 6.25 percent. The LC4c makes its useful torque between 6,500 and 9,000 rpm, and the stock 16:45 final drive is tall enough that on a strip the bike spends the first hundred metres climbing into that band. A 15-tooth front sprocket gets the engine into the meat of the curve sooner. The costs: top speed drops from roughly 178 km/h to 167 km/h, which does not matter on a strip where you trap at 162-170 km/h, and highway cruising revs rise by about 400 rpm at 100 km/h, which you will barely feel on a single. Neither is a deal-breaker for a Duke 390 that goes to the strip.',
   },
   {
     type: 'h2',
-    text: 'Where the Tenths Actually Hide',
+    text: 'Where the tenths hide',
   },
   {
     type: 'p',
-    text: 'The most useful question MotoQuant lets you ask is not "how much faster will mod X make me?" but "what is the bike physically limited by right now?" A stock Duke 390 at Aamby Valley loses tenths in four distinct places. Knowing which one is dominant tells you what to spend on.',
+    text: 'A more useful question than "how much faster will mod X make me?" is "what limits the bike right now?" A stock Duke 390 at Aamby Valley loses tenths in four places, and the biggest one tells you what to spend on.',
   },
   {
     type: 'table',
@@ -148,19 +148,19 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Tire grip is the single largest lever on a stock Duke 390, and it is also the cheapest fix at the lower end. The Sportec M5 is an excellent road tire that is fundamentally not designed to launch a 43 hp single off a prepped strip. Moving to a Eurogrip Protorq Extreme at ₹6,400 unlocks roughly 0.15 seconds; moving to a proper DOT-drag tire like the Pirelli Diablo Supercorsa SC2 at ₹22,000 unlocks closer to 0.35 seconds. The difference is whether the rear is biting into the surface or sliding through it during the first 60 feet. MotoQuant\'s tire-thermal sub-model also factors in cold-launch behaviour: the SC2 needs roughly 45 °C to come on, so a single warm-up burnout matters more than a second of pre-stage flicking.',
+    text: 'Tire grip is the largest lever on a stock Duke 390, and at the low end it is also the cheapest fix. The Sportec M5 is an excellent road tire, but it was not designed to launch a 43 hp single off a prepped strip. A Eurogrip Protorq Extreme at ₹6,400 is worth roughly 0.15 seconds; a proper DOT-drag tire like the Pirelli Diablo Supercorsa SC2 at ₹22,000 is worth closer to 0.35 seconds. The difference is whether the rear bites into the surface or slides over it in the first 60 feet. MotoQuant\'s tire-thermal sub-model also covers cold launches: the SC2 needs roughly 45 °C to come on, so one warm-up burnout matters more than a second of pre-stage flicking.',
   },
   {
     type: 'p',
-    text: 'Gearing is the second-cheapest lever, and the simplest. Aero is essentially fixed on the Duke 390 unless you accept a riding-position change, and at that point the bike has become an RC 390 the hard way. Engine top-end work past the Stage 1 flash starts running into diminishing returns very quickly; the LC4c is a high-compression single that gives back 1.5 to 2 hp from a re-flash and a filter, then becomes stubborn about further power without internal work that costs an order of magnitude more than the gain justifies for a street-driven bike.',
+    text: 'Gearing is the second-cheapest lever, and the simplest. Aero is more or less fixed on the Duke 390 unless you change the riding position, and then you have built an RC 390 the hard way. Engine work past the Stage 1 flash hits diminishing returns quickly. The LC4c is a high-compression single that gives 1.5 to 2 hp from a re-flash and a filter. After that, more power needs internal work that costs an order of magnitude more than the gain is worth on a street bike.',
   },
   {
     type: 'h2',
-    text: 'Aamby Valley vs MMRT vs Buddh: Where to Actually Run',
+    text: 'Aamby Valley vs MMRT vs Buddh: where to run',
   },
   {
     type: 'p',
-    text: 'The Duke 390 is altitude-sensitive in the way every naturally-aspirated single is: the engine loses about 1 percent of peak power for every 100 metres of density-altitude rise. MotoQuant pulls the seasonal density altitude curves for every Indian venue from its environmental sub-model.',
+    text: 'Like every naturally aspirated single, the Duke 390 is sensitive to altitude: the engine loses about 1 percent of peak power for every 100 metres of density-altitude rise. MotoQuant takes the seasonal density-altitude curve for each Indian venue from its environmental sub-model.',
   },
   {
     type: 'table',
@@ -175,31 +175,31 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The times in this table come from the engine as it stood in May 2026; the DA column uses the current catalog\'s November normals. On the current engine a stock 2017-2023 Duke 390 is 0.19 s quicker at MMRT than at Aamby Valley in November, and BIC edges MMRT because of MMRT\'s humidity (see the venue comparison post). The roughly 0.2 second swing between MMRT and Aamby Valley is the largest accuracy-relevant variable on a stock Duke 390. If you have ever wondered why the Pune-area Duke 390 community runs three to four tenths slower than the Chennai community at apparently similar mod levels, this is a large part of the answer. None of this is news to active Indian drag racers, but it is worth running through the simulator before booking flights for a specific Valley Run weekend.',
+    text: 'The times in this table come from the engine as it stood in May 2026; the DA column uses the current catalog\'s November normals. On the current engine a stock 2017-2023 Duke 390 is 0.19 s quicker at MMRT than at Aamby Valley in November, and BIC edges MMRT because of MMRT\'s humidity (see the venue comparison post). That swing of roughly 0.2 seconds between MMRT and Aamby Valley is the largest accuracy-relevant variable on a stock Duke 390. It is a large part of why the Pune-area Duke 390 community runs three to four tenths slower than Chennai riders at what look like similar mod levels. Active Indian drag racers know this already, but run it through the simulator before you book flights for a Valley Run weekend.',
   },
   {
     type: 'h2',
-    text: 'What the Simulator Cannot Tell You',
+    text: 'What the simulator cannot tell you',
   },
   {
     type: 'p',
-    text: 'Three things sit outside MotoQuant\'s honest reach. First, rider launch craft. The simulator assumes a clean two-step off the limiter and a perfect clutch dump at the optimal slip point. A real rider on their fifth pass of the day, at 38 °C track temp, with a slightly tired clutch hand, will give back somewhere between 0.10 and 0.30 seconds. The Fast Track Racing rider\'s ability to repeatably hit the launch is part of the Fast Track 11.3. Second, individual engine variation. No two LC4c singles leave Chakan making identically the same power; observed Indian-market dyno spreads are roughly 4 percent peak-to-peak at the crank, which translates to roughly 0.08 seconds of ET variation on a stock bike before any tuning. Third, custom hardware on the Fast Track bike that is not in MotoQuant\'s catalog. Ported heads, custom pistons, lightened internals, drag swingarms: the simulator can ballpark these but cannot replace measured dyno or weight data.',
+    text: 'Three things are outside what MotoQuant can honestly model. The first is rider launch craft. The simulator assumes a clean two-step off the limiter and a perfect clutch dump at the best slip point. A real rider on the fifth pass of the day, at 38 °C track temperature, with a slightly tired clutch hand, will give back between 0.10 and 0.30 seconds. Part of the Fast Track 11.3 is their rider hitting that launch again and again. The second is engine-to-engine variation. No two LC4c singles leave Chakan making exactly the same power. Observed Indian-market dyno spreads are roughly 4 percent peak-to-peak at the crank, or roughly 0.08 seconds of ET on a stock bike before any tuning. The third is custom hardware on the Fast Track bike that is not in MotoQuant\'s catalog: ported heads, custom pistons, lightened internals, drag swingarms. The simulator can ballpark these, but it cannot replace measured dyno or weight data.',
   },
   {
     type: 'p',
-    text: 'What the simulator can do is answer practical questions with documented physics. "Will a sprocket swap and a sticky tire get my Duke 390 under 13 seconds at MMRT?" Yes, sim says 12.78 seconds. "Is the SC-Project slip-on worth ₹24,000?" Sim says no: twenty thousand rupees per tenth is the worst ROI on the practical Indian mod list. "What is the cheapest path to a 12-second Duke 390?" Sim says roughly ₹49,000 across five mods, plus a strip at sea level and a rider who can launch the bike cleanly. The simulator is honest about the cluster bias band of ±0.4 seconds; if you have a Dragy timeslip, submit it through the "Submit a timeslip" form; a reviewed run joins the benchmark set.',
+    text: 'What the simulator can do is answer practical questions with documented physics. "Will a sprocket swap and a sticky tire get my Duke 390 under 13 seconds at MMRT?" Yes: the sim says 12.78 seconds. "Is the SC-Project slip-on worth ₹24,000?" The sim says no, because twenty thousand rupees per tenth is the worst ROI on the practical Indian mod list. "What is the cheapest path to a 12-second Duke 390?" Roughly ₹49,000 across five mods, plus a strip at sea level and a rider who can launch the bike cleanly. The cluster bias band is ±0.4 seconds. If you have a Dragy timeslip, send it through the "Submit a timeslip" form; a reviewed run joins the benchmark set.',
   },
   {
     type: 'h2',
-    text: 'Run Your Own KTM Duke 390',
+    text: 'Run your own KTM Duke 390',
   },
   {
     type: 'p',
-    text: 'The MotoQuant simulator at motoquant.in carries the 2022 KTM Duke 390 in its catalog of 534 bikes, alongside the 2024 third-generation Duke 390 (the longer-stroke 399 cc version), the RC 390, the Adventure 390, and 14 other 390-class platforms. The parts catalog has Powertronic, DNA, Eurogrip, SC-Project, Akrapovic, JT sprockets, DID chains, and a few dozen other Indian-relevant aftermarket options, each priced in INR and fitment-checked against the bike. You can sweep rider weight, ambient temperature, density altitude, tire compound, sprocket combinations, and any subset of compatible mods; the engine returns ET, trap, splits, and a cost-per-tenth ranking in roughly fifty milliseconds per simulation.',
+    text: 'The simulator at motoquant.in has the 2022 KTM Duke 390 in its catalog of 534 bikes, along with the 2024 third-generation Duke 390 (the longer-stroke 399 cc version), the RC 390, the Adventure 390 and 14 other 390-class platforms. The parts catalog has Powertronic, DNA, Eurogrip, SC-Project, Akrapovic, JT sprockets, DID chains and a few dozen other aftermarket options for Indian riders, each priced in INR and checked for fitment against the bike. You can vary rider weight, ambient temperature, density altitude, tire compound, sprocket combination and any set of compatible mods. Each simulation returns ET, trap, splits and a cost-per-tenth ranking in roughly fifty milliseconds.',
   },
   {
     type: 'p',
-    text: 'MotoQuant is free and open source, and it includes the full parts-ROI engine and the build optimiser that solves the 0/1 knapsack of "best ET under ₹X budget" exactly. The Fast Track Racing 11.342 second pass is out of reach for a stock-plus-bolt-ons build, but the path from a stock 13.30 to a realistic 12.55 absolutely is, and that is the gap that matters to most Duke 390 owners.',
+    text: 'MotoQuant is free and open source, including the full parts-ROI engine and the build optimiser, which solves the 0/1 knapsack of "best ET under ₹X budget" exactly. A stock-plus-bolt-ons build will not reach the Fast Track Racing 11.342 second pass. It can get from a stock 13.30 to a realistic 12.55, and that is the gap most Duke 390 owners care about.',
   },
 ];
 
@@ -305,7 +305,7 @@ export default function PostPage() {
             ))}
           </div>
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
-            KTM Duke 390 Quarter Mile: From 13.3s Stock to an 11.342s Record
+            KTM Duke 390 quarter mile: from 13.3s stock to an 11.342s record
           </h1>
           <div className="text-sm text-white/60 mb-12">
             01 June 2026 · 13 min read · MotoQuant Blog
@@ -318,7 +318,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Simulate your Duke 390 build</div>
             <div className="text-white/60 text-sm">
-              Pick the Duke 390, set Aamby Valley or MMRT, add the sprocket swap and the Powertronic flash, see the ET delta in 50 ms. Free, no sign-up.
+              Pick the Duke 390, set Aamby Valley or MMRT, add the sprocket swap and the Powertronic flash, and see the ET change in 50 ms. Free, no sign-up.
             </div>
           </div>
           <Link
@@ -340,7 +340,7 @@ export default function PostPage() {
               >
                 KTM Duke 390 vs RC 390: Quarter-Mile Physics at Aamby Valley
               </Link>:{' '}
-              same engine, two tenths apart. Where the aerodynamic gap actually lives.
+              same engine, two tenths apart, and where the aerodynamic gap comes from.
             </li>
             <li>
               ·{' '}
@@ -380,7 +380,7 @@ export default function PostPage() {
               >
                 How the MotoQuant Physics Engine Works
               </Link>:{' '}
-              what the cluster bias bands actually mean, and why the simulator is honest about uncertainty.
+              what the cluster bias bands mean, and how the simulator reports its uncertainty.
             </li>
             <li>
               ·{' '}
