@@ -1,39 +1,33 @@
-'use client';
-
 import Link from 'next/link';
 import { Zap } from 'lucide-react';
 import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
-import PageHero from '../../components/PageHero';
+import PageHeader from '../../components/PageHeader';
 import BuildOptimizer from '../../components/BuildOptimizer';
 
+// Server component: composes the page chrome around the client-side tool.
+// Metadata lives in ./layout.js.
 export default function OptimizePage() {
   return (
-    <div className="min-h-screen bg-asphalt-0 text-white overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden bg-asphalt-0 text-white">
       <SiteNav />
 
-      <PageHero
-        kicker="Build optimizer"
-        title={<>The <span className="text-accent">fastest</span> build for the budget</>}
-        sub="Set a bike and a ₹ budget. MotoQuant runs a physics-based knapsack across every compatible upgrade and returns the combination that drops your quarter-mile ET the most — with cost-per-tenth, synergies, and the best next part to buy."
-        stats={[
-          { value: 593, label: 'PARTS' },
-          { value: 541, label: 'BIKES' },
-        ]}
+      <PageHeader
+        title="Best parts for your budget"
+        lede="Tell us your bike and how much you want to spend. We test every compatible part and show the combination that makes it quickest."
       />
 
-      {/* Tool — two-column workbench (inputs left, results right; stacks below lg) */}
-      <section className="px-4 sm:px-6 pb-16 md:pb-24">
-        <div className="max-w-6xl mx-auto">
+      <main id="main" className="px-4 pb-16 sm:px-6 md:pb-24">
+        <div className="mx-auto max-w-6xl">
           <BuildOptimizer />
 
           <div className="mt-10 text-center">
             <Link href="/simulator" className="btn-ghost">
-              <Zap size={15} aria-hidden="true" /> Open the full simulator
+              <Zap size={16} aria-hidden="true" /> Open the simulator
             </Link>
           </div>
         </div>
-      </section>
+      </main>
 
       <SiteFooter />
     </div>

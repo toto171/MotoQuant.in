@@ -1,39 +1,33 @@
-'use client';
-
 import Link from 'next/link';
 import { Zap } from 'lucide-react';
 import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
-import PageHero from '../../components/PageHero';
+import PageHeader from '../../components/PageHeader';
 import EcuAutotune from '../../components/EcuAutotune';
 
+// Server component: composes the page chrome around the client-side tool.
+// Metadata lives in ./layout.js.
 export default function AutotunePage() {
   return (
-    <div className="min-h-screen bg-asphalt-0 text-white overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden bg-asphalt-0 text-white">
       <SiteNav />
 
-      <PageHero
-        kicker="ECU Autotune"
-        title={<>A setup sheet for <span className="text-accent">your strip</span></>}
-        sub="Pick your bike and where you’re running. MotoQuant works out the density altitude and returns gearing, launch RPM, tyre pressure, and fuel/timing — each with the predicted quarter-mile ET change so you know what actually moves the clock."
-        stats={[
-          { value: 541, label: 'BIKES' },
-          { value: 20, label: 'VENUES' },
-        ]}
+      <PageHeader
+        title="Race-day setup"
+        lede="Pick your bike and where you're racing. Get the gearing, launch RPM and tyre pressure that suit today's air — with how much time each one is worth."
       />
 
-      {/* Tool — two-column workbench (inputs left, results right; stacks below lg) */}
-      <section className="px-4 sm:px-6 pb-16 md:pb-24">
-        <div className="max-w-6xl mx-auto">
+      <main id="main" className="px-4 pb-16 sm:px-6 md:pb-24">
+        <div className="mx-auto max-w-6xl">
           <EcuAutotune />
 
           <div className="mt-10 text-center">
             <Link href="/simulator" className="btn-ghost">
-              <Zap size={15} aria-hidden="true" /> Open the full simulator
+              <Zap size={16} aria-hidden="true" /> Open the simulator
             </Link>
           </div>
         </div>
-      </section>
+      </main>
 
       <SiteFooter />
     </div>
