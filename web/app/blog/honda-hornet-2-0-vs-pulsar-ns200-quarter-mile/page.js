@@ -81,7 +81,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running both bikes through the MotoQuant physics engine at matched Aamby Valley November conditions — density altitude near 1,100 m, 22°C ambient, dry concrete with stock OEM rubber at μ_peak ≈ 1.05, 70 kg rider in stock tuck — produces the following:',
+    text: 'Running both bikes through the MotoQuant physics engine at matched Aamby Valley November conditions — density altitude near 1,100 m, 22°C ambient, dry asphalt with stock OEM rubber at μ_peak ≈ 1.05, 70 kg rider in stock tuck — produces the following:',
   },
   {
     type: 'table',
@@ -203,7 +203,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The MotoQuant simulator at motoquant.in lets you run both bikes at any Indian venue with any combination of tire, sprocket, exhaust, and ECU flash from the full Indian parts catalog. You can also sweep rider weight (the Hornet 2.0\'s 18 kg mass advantage matters more at 60 kg rider weight than at 90 kg) and ambient conditions. If you have a Dragy timeslip from either bike at an Indian strip, the calibrator will fit the simulator\'s predictions to your actual run data and tighten the prediction band from ±0.5-0.75 s down to ±0.15 s.',
+    text: 'The MotoQuant simulator at motoquant.in lets you run both bikes at any Indian venue with any combination of tire, sprocket, exhaust, and ECU flash from the full Indian parts catalog. You can also sweep rider weight (the Hornet 2.0\'s 18 kg mass advantage matters more at 60 kg rider weight than at 90 kg) and ambient conditions. If you have a Dragy timeslip from either bike at an Indian strip, submit it through the "Submit a timeslip" form; a reviewed run joins the benchmark set.',
   },
   {
     type: 'p',

@@ -56,7 +56,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running both bikes through MotoQuant at matched Aamby Valley November conditions — density altitude around 1,100 m, 22°C ambient, dry concrete with the OEM Metzeler Sportec M5 rear tire at μ_peak ≈ 1.10, 70 kg rider in stock tuck — produces these numbers:',
+    text: 'Running both bikes through MotoQuant at matched Aamby Valley November conditions — density altitude around 1,100 m, 22°C ambient, dry asphalt with the OEM Metzeler Sportec M5 rear tire at μ_peak ≈ 1.10, 70 kg rider in stock tuck — produces these numbers:',
   },
   {
     type: 'table',
@@ -72,7 +72,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Both ETs sit inside MotoQuant\'s mid-twin-300-500 cluster bias band of about ±0.4 seconds. The relative gap — two tenths and four km/h — is stable across rider weight, ambient temperature, and density altitude sweeps. The Duke 390 is consistently slower by margins that match what a Cd × A delta predicts: roughly equal off the line where aerodynamics barely matters, then the gap opens as speed climbs. By the 1/8-mile mark the RC 390 is already seven hundredths ahead; by the trap it has pulled clear by two full tenths. Neither bike has a Dragy timeslip in our calibrator yet, so the absolute numbers carry the cluster band of uncertainty, but the relative ordering is structural.',
+    text: 'Both ETs sit inside MotoQuant\'s mid-twin-300-500 cluster bias band of about ±0.4 seconds. The relative gap — two tenths and four km/h — is stable across rider weight, ambient temperature, and density altitude sweeps. The Duke 390 is consistently slower by margins that match what a Cd × A delta predicts: roughly equal off the line where aerodynamics barely matters, then the gap opens as speed climbs. By the 1/8-mile mark the RC 390 is already seven hundredths ahead; by the trap it has pulled clear by two full tenths. Neither bike has a Dragy timeslip in our benchmark set yet, so the absolute numbers carry the cluster band of uncertainty, but the relative ordering is structural.',
   },
   {
     type: 'callout',
@@ -155,7 +155,7 @@ const CONTENT = [
   },
   {
     type: 'callout',
-    text: 'Three caveats. First, every simulator number in this post sits inside the mid-twin-300-500 cluster bias band of ±0.4 seconds; a real Dragy timeslip would tighten the prediction. Second, the Powertronic Stage 1 figure quoted here is the conservative end of the range — published dynos for that flash run from 1.2 to 2.5 hp depending on the test bike, the tune revision, and the riding altitude. Third, Indian aftermarket pricing shifts every quarter; pricing-refresh runs monthly and these numbers reflect May 2026 retail.',
+    text: 'Three caveats. First, every simulator number in this post sits inside the mid-twin-300-500 cluster bias band of ±0.4 seconds; a real Dragy timeslip would tighten the prediction. Second, the Powertronic Stage 1 figure quoted here is the conservative end of the range — published dynos for that flash run from 1.2 to 2.5 hp depending on the test bike, the tune revision, and the riding altitude. Third, Indian aftermarket pricing shifts every quarter; these numbers reflect May 2026 retail.',
   },
   {
     type: 'h2',
@@ -179,7 +179,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The MotoQuant simulator at motoquant.in lets you sweep rider weight, density altitude, ambient temperature, tire compound, and any combination of the 546 parts in the catalog against either bike, side by side. You can answer the practical questions — "for my 75 kg rider weight and my home strip at 600 m DA, will the Duke or RC be faster after a sprocket drop and a re-flash?" — without trusting a YouTube comparison or a press release. And the moment a real Dragy timeslip from either bike lands in the calibrator, the simulator folds it in and tightens the prediction. The current ±0.4 second cluster bias band is the honest uncertainty number until that data exists.',
+    text: 'The MotoQuant simulator at motoquant.in lets you sweep rider weight, density altitude, ambient temperature, tire compound, and any combination of the 546 parts in the catalog against either bike, side by side. You can answer the practical questions — "for my 75 kg rider weight and my home strip at 600 m DA, will the Duke or RC be faster after a sprocket drop and a re-flash?" — without trusting a YouTube comparison or a press release. A real Dragy timeslip from either bike, submitted through the "Submit a timeslip" form, would tighten the prediction. The current ±0.4 second cluster bias band is the honest uncertainty number until that data exists.',
   },
 ];
 

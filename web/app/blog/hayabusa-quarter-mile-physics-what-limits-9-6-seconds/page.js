@@ -6,7 +6,7 @@ import StructuredData, { articleSchema } from '../../StructuredData';
 const SLUG = 'hayabusa-quarter-mile-physics-what-limits-9-6-seconds';
 const TITLE = 'Hayabusa Quarter-Mile Physics: What Limits the 9.6';
 const DESCRIPTION =
-  'MotoQuant simulates the Suzuki Hayabusa Gen1 at exactly 10.1100 seconds — a reference baseline locked across every physics commit since July 13, 2026. What stops a stock Hayabusa from running 9.6 on a strip, and where the seven tenths come from on a drag-prepped build.';
+  'MotoQuant simulates the Suzuki Hayabusa Gen1 at exactly 10.1100 seconds, a reference baseline CI holds to four decimals. What stops a stock Hayabusa from running 9.6 on a strip, and where the missing half-second comes from on a drag-prepped build.';
 
 export const metadata = {
   title: 'Hayabusa Quarter-Mile Physics: What Limits the 9.6 Seconds',
@@ -38,23 +38,23 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'MotoQuant simulates the Suzuki Hayabusa Gen1 at exactly 10.1100 seconds — a reference baseline pinned to four decimal places that every physics commit since July 13, 2026 has had to preserve. A drag-prepped Hayabusa with a stretched swingarm, 14-tooth front sprocket, sticky DOT drag rear, and a Power Commander tune runs the strip in 9.5 to 9.7 seconds. The seven-to-eight tenths between those two numbers are not engine power. They are traction, geometry, gearing, and air. Here is exactly where each tenth lives, what it costs in rupees, and why a stock Hayabusa cannot break 10 seconds no matter how good the rider is.',
+    text: 'MotoQuant simulates the Suzuki Hayabusa Gen1 at exactly 10.1100 seconds — a reference baseline pinned to four decimal places that every physics commit has to preserve. A drag-prepped Hayabusa with a stretched swingarm, 14-tooth front sprocket, sticky DOT drag rear, and a Power Commander tune runs the strip in 9.5 to 9.7 seconds. The four to six tenths between those two numbers are not engine power. They are traction, geometry, gearing, and air. Here is exactly where each tenth lives, what it costs in rupees, and why a stock Hayabusa cannot break 10 seconds no matter how good the rider is.',
   },
   {
     type: 'h2',
-    text: 'The 10.3633 Number, and What It Means',
+    text: 'The 10.1100 Number, and What It Means',
   },
   {
     type: 'p',
-    text: 'The Hayabusa Gen1 reference configuration inside MotoQuant is a 1999-2007 spec — 1299 cc inline-four, 170 hp at the rear wheel, 220 kg dry, 1485 mm wheelbase, 530 mm centre of gravity height, 51 percent front weight, 25 degrees of rake, 190/50ZR17 OEM Bridgestone Battlax BT-014 rear. Run that configuration in MotoQuant\'s 15-sub-model RK4 physics engine under matched Aamby Valley November conditions — density altitude around 1100 m, 22 degrees Celsius ambient, dry concrete with mu_peak around 1.30, 75 kg rider, two-step rev limiter set at peak torque RPM — and the simulator returns 10.3633 seconds at roughly 235 km/h trap, on the first run and on the thousandth.',
+    text: 'The Hayabusa Gen1 reference configuration inside MotoQuant is a 1999-2007 spec — 1299 cc inline-four, 170 hp at the rear wheel, 220 kg dry, 1485 mm wheelbase, 530 mm centre of gravity height, 51 percent front weight, 25 degrees of rake, 190/50ZR17 OEM Bridgestone Battlax BT-014 rear. Run that configuration in MotoQuant\'s 15-sub-model RK4 physics engine at the reference conditions (sea level, 25 degrees Celsius, 50 percent humidity, dry asphalt, rear-tyre mu_peak 1.40, 75 kg rider) and the simulator returns 10.1100 seconds at 232.4 km/h trap, on the first run and on the thousandth.',
   },
   {
     type: 'p',
-    text: 'That number is contractually load-bearing. The other two reference baselines pinned alongside it are the Suzuki GSX-R 1000 K5 at 10.0436 seconds and the Yamaha YZF-R1 4C8 at 10.1092 seconds. Every commit to the physics engine — every tweak to the torque curve generator, every change to the clutch slip model, every adjustment to the Pacejka tire coefficients, every new gear cassette in the Tier-1 lookup — has to leave all three numbers at delta plus 0.0000 seconds. The K5 and R1 baselines are validated against magazine ETs of 9.97s and 10.30s respectively; the July 2026 physics-recalibration epoch traded exact agreement on those two magazine numbers for a tighter fit across the full 250-benchmark corpus, so both baselines now run a little quick against their individual magazine targets. The Hayabusa sits inside the published range of 10.1 to 10.7 seconds for a stock Gen1 on a prepared strip.',
+    text: 'That number is contractually load-bearing. The other two reference baselines pinned alongside it are the Suzuki GSX-R 1000 K5 at 10.0436 seconds and the Yamaha YZF-R1 4C8 at 10.1092 seconds. Every commit to the physics engine — every tweak to the torque curve generator, every change to the clutch slip model, every adjustment to the tyre grip model, every new gear cassette in the Tier-1 lookup — has to leave all three numbers at delta plus 0.0000 seconds. The published tests behind them are 9.97 s for the K5 (Cycle World), 10.30 s for the R1 (Sport Rider) and 10.40 s for the Hayabusa (Cycle World). The pins are not fitted to those three numbers; they come out of a fit across all 250 published tests, so the K5 runs 0.07 s slow against its magazine time, and the R1 and the Hayabusa run 0.19 s and 0.29 s quick against theirs.',
   },
   {
     type: 'p',
-    text: 'So 10.3633 is the simulator answer for a stock Hayabusa under near-ideal conditions. The question is why it is not 9.7. Or 9.6. Or the 10.05 that the 2024 Hayabusa Gen3 magazine tests report on US strips. The seven-to-eight-tenths gap between the simulator stock baseline and a drag-prepped strip car comes from four specific physics constraints that no amount of engine power touches.',
+    text: 'So 10.1100 is the simulator answer for a stock Hayabusa under near-ideal conditions. The question is why it is not 9.7. Or 9.6. Or the 10.05 that the 2024 Hayabusa Gen3 magazine tests report on US strips. The four-to-six-tenths gap between the simulator stock baseline and a drag-prepped strip bike comes from four specific physics constraints that no amount of engine power touches.',
   },
   {
     type: 'h2',
@@ -74,7 +74,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The OEM Bridgestone BT-014 fitted to the Gen1 Hayabusa has a Pacejka mu_peak around 1.18 at the optimal operating temperature of 65 degrees Celsius. On a cold strip in November at Aamby Valley, the first launch typically happens with tire temperatures around 25 to 30 degrees Celsius, which puts the contact patch about 10 to 15 degrees below the peak mu window. MotoQuant\'s thermal sub-model captures this — cold-tire mu sits at roughly 1.05 to 1.10 for the first 100 metres of the run, climbing to 1.18 only as the burnout and launch heat soaks in.',
+    text: 'The OEM Bridgestone BT-014 fitted to the Gen1 Hayabusa has a mu_peak around 1.18 at the optimal operating temperature of 65 degrees Celsius. On a cold strip in November at Aamby Valley, the first launch typically happens with tire temperatures around 25 to 30 degrees Celsius, which puts the contact patch about 10 to 15 degrees below the peak mu window. MotoQuant\'s thermal sub-model captures this — cold-tire mu sits at roughly 1.05 to 1.10 for the first 100 metres of the run, climbing to 1.18 only as the burnout and launch heat soaks in.',
   },
   {
     type: 'p',
@@ -126,7 +126,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Putting the four constraints together gives the realistic upgrade path from stock 10.47 to drag-prepped 9.6. The simulator output for each rung is run under matched Aamby Valley November conditions with a 75 kg rider. Cost-per-tenth columns use Indian retail prices from the parts catalog as of May 2026:',
+    text: 'Putting the four constraints together gives the upgrade path from stock to drag-prepped 9.6. Each rung was simulated in May 2026 on an earlier engine version, at Aamby Valley November conditions with a 75 kg rider, so the absolute times are higher than today\'s simulator gives (it puts a stock Gen1 at 10.22 s in the same conditions); treat the steps between rungs as the useful part. Cost-per-tenth columns use Indian retail prices from the parts catalog as of May 2026:',
   },
   {
     type: 'table',
@@ -154,11 +154,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The cleanest answer to "what limits the Hayabusa at 9.6" is also the answer to "why does a stock bike never break 10". The four constraints — wheelie geometry, cold-tire traction, road-spec gearing, and a road-spec rider posture — together cost the stock bike about 0.7 to 0.8 seconds of ET versus what the engine and the chassis could otherwise deliver. The engine itself is not the bottleneck. A stock 197-horsepower Hayabusa Gen2 dyno chart shows roughly 170 hp at the rear wheel; that is enough power to push a 220 kg bike with a 95 kg rider through the 402 metres of a quarter mile in about 9.5 seconds if every other constraint were removed.',
+    text: 'The cleanest answer to "what limits the Hayabusa at 9.6" is also the answer to "why does a stock bike never break 10". The four constraints — wheelie geometry, cold-tire traction, road-spec gearing, and a road-spec rider posture — together cost the stock bike roughly half a second of ET versus what the engine and the chassis could otherwise deliver. The engine itself is not the bottleneck. A stock 197-horsepower Hayabusa Gen2 dyno chart shows roughly 170 hp at the rear wheel; that is enough power to push a 220 kg bike with a 95 kg rider through the 402 metres of a quarter mile in about 9.5 seconds if every other constraint were removed.',
   },
   {
     type: 'p',
-    text: 'None of those constraints are easy to remove on a road-registered bike. A stretched swingarm makes the bike unrideable in city traffic. A sticky DOT drag rear wears out in 800 kilometres. Short gearing means a 110 km/h cruise at 6,500 rpm in 6th instead of 4,200 rpm. The Hayabusa was engineered to be a fast road bike, and the four-tenths-to-eight-tenths penalty it pays at the strip is the cost of that road-bike DNA. The Gen3 reduces the penalty slightly through aerodynamic refinement and a stronger fuel-injection map, which is why magazine ETs on a stock 2024 Gen3 land closer to 10.05 seconds than the Gen1\'s 10.47.',
+    text: 'None of those constraints are easy to remove on a road-registered bike. A stretched swingarm makes the bike unrideable in city traffic. A sticky DOT drag rear wears out in 800 kilometres. Short gearing means a 110 km/h cruise at 6,500 rpm in 6th instead of 4,200 rpm. The Hayabusa was engineered to be a fast road bike, and the four-tenths-to-eight-tenths penalty it pays at the strip is the cost of that road-bike DNA. The Gen3 reduces the penalty slightly through aerodynamic refinement and a stronger fuel-injection map, which is why magazine ETs on a stock 2024 Gen3 land closer to 10.05 seconds than the Gen1\'s 10.40.',
   },
   {
     type: 'h2',
@@ -182,11 +182,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Every number in this post is a simulator output under specific conditions. Change rider weight by 15 kilograms, change ambient temperature by 10 degrees Celsius, change density altitude from Aamby Valley\'s 1100 metres to MMRT Chennai\'s 78 metres, change the launch RPM, change the surface from concrete to asphalt — and the absolute ETs shift on every line of the table above. The relative ordering of where the tenths come from stays the same: tire first, gearing second, geometry third, engine fourth, aerodynamics last for the strip and first for top-speed.',
+    text: 'Every number in this post is a simulator output under specific conditions. Change rider weight by 15 kilograms, change ambient temperature by 10 degrees Celsius, change density altitude from Aamby Valley\'s 1100 metres to MMRT Chennai\'s 78 metres, change the launch RPM, change the surface from asphalt to a prepped strip — and the absolute ETs shift on every line of the table above. The relative ordering of where the tenths come from stays the same: tire first, gearing second, geometry third, engine fourth, aerodynamics last for the strip and first for top-speed.',
   },
   {
     type: 'p',
-    text: 'The simulator at motoquant.in carries the Hayabusa Gen1, Gen2, and Gen3 as separate catalog entries with their own spec sheets, plus 333 other bikes you can compare against. Pick your bike, pick your venue, pick your conditions, then sweep mods and read the ET delta directly. The Hayabusa Gen1 number is reference-locked at 10.1100 seconds and will not move; the Gen2 and Gen3 sit inside the litre-plus hyper-sport cluster with the documented ±0.15 second bias band. If you upload a Dragy timeslip from your own Hayabusa, the calibrator will pull that data point in and tighten the bias on your specific build.',
+    text: 'The simulator at motoquant.in carries the Hayabusa Gen1, Gen2, and Gen3 as separate catalog entries with their own spec sheets, plus 531 other bikes you can compare against. Pick your bike, pick your venue, pick your conditions, then sweep mods and read the ET delta directly. The Hayabusa Gen1 number is reference-locked at 10.1100 seconds and will not move; the Gen2 and Gen3 sit in the litre sport 195 hp-and-up class, which shows a weighted mean absolute error of 0.171 s against 29 published tests. If you have a Dragy timeslip from your own Hayabusa, submit it through the "Submit a timeslip" form; a reviewed run joins the benchmark set.',
   },
   {
     type: 'p',

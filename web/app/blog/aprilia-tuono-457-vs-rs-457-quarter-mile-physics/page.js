@@ -64,7 +64,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Running both bikes in MotoQuant with a 78 kg rider, OEM TVS Eurogrip Protorq Extreme tires, dry concrete, 22 degrees Celsius ambient, and density altitude approximately 1100 m (Aamby Valley in November), the stock-tune numbers come out as follows:",
+    text: "Running both bikes in MotoQuant with a 78 kg rider, OEM TVS Eurogrip Protorq Extreme tires, dry asphalt, 22 degrees Celsius ambient, and density altitude approximately 1100 m (Aamby Valley in November), the stock-tune numbers come out as follows:",
   },
   {
     type: "table",

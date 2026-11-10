@@ -60,7 +60,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running the 1390 in MotoQuant under Aamby Valley November conditions (density altitude ≈ 1100 m, 22°C ambient, dry concrete, μ_peak 1.35 on the OEM Bridgestone S22 rear), with a 78 kg rider on a 200 kg dry bike, produces the following stock-tune numbers:',
+    text: 'Running the 1390 in MotoQuant under Aamby Valley November conditions (density altitude ≈ 1100 m, 22°C ambient, dry asphalt, μ_peak 1.35 on the OEM Bridgestone S22 rear), with a 78 kg rider on a 200 kg dry bike, produces the following stock-tune numbers:',
   },
   {
     type: 'table',

@@ -212,7 +212,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'If you own a Nightster and have a Dragy GPS timer, the MotoQuant calibrator at motoquant.in can fit the simulator\'s predictions to your actual timeslip data. This tightens the prediction band from the cluster\'s ±0.4 second band down to approximately ±0.15 seconds and generates an accurate mod-by-mod ROI table for your specific bike and launch style. The calibrator is especially useful for the Nightster because the belt-drive gearing constraint means the simulation\'s gear-ratio assumptions are exact — there is no sprocket variation to account for.',
+    text: 'If you own a Nightster and have a Dragy GPS timer, upload the run in the simulator to line it up against the simulation split by split; the file is compared and deleted, not kept. To help the model, submit the run through the "Submit a timeslip" form; a reviewed run joins the benchmark set. The Nightster is a good candidate because its belt drive fixes the gearing: there is no sprocket variation to account for.',
   },
   {
     type: 'p',

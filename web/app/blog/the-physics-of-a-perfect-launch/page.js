@@ -66,7 +66,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The Pacejka tire model — which MotoQuant implements — shows that peak longitudinal force occurs at a slip ratio of roughly 0.07–0.15 for most road tyres. That means a small amount of wheel spin is desirable: the tyre is generating more force than it would if it were locked to ground speed. Too much spin (>0.30) and you are on the slope where traction falls off steeply.',
+    text: 'Tyre models such as Pacejka\'s Magic Formula put peak longitudinal force at a slip ratio of roughly 0.07–0.15 for most road tyres. That means a small amount of wheel spin is desirable: the tyre is generating more force than it would if it were locked to ground speed. Too much spin (>0.30) and you are on the slope where traction falls off steeply.',
   },
   {
     type: 'p',

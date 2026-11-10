@@ -64,7 +64,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Running the GSX-R600 K8 in MotoQuant under matched Aamby Valley November conditions (density altitude approximately 1,100 m, 22°C ambient, dry concrete, μ_peak 1.30 on the OEM 180/55ZR17 rear), with a 78 kg rider on the 162 kg dry bike, produces the following stock-tune output:",
+    text: "Running the GSX-R600 K8 in MotoQuant under matched Aamby Valley November conditions (density altitude approximately 1,100 m, 22°C ambient, dry asphalt, μ_peak 1.30 on the OEM 180/55ZR17 rear), with a 78 kg rider on the 162 kg dry bike, produces the following stock-tune output:",
   },
   {
     type: "table",

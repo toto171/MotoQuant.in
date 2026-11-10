@@ -60,7 +60,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Running the CB125R in MotoQuant under matched Aamby Valley November conditions (density altitude approximately 1,100 m, 22°C ambient, dry concrete surface, μ_peak 1.18 on the OEM 150/60R17 rear), with a 78 kg rider on the 122 kg dry bike, produces the following stock-tune output:",
+    text: "Running the CB125R in MotoQuant under matched Aamby Valley November conditions (density altitude approximately 1,100 m, 22°C ambient, dry asphalt surface, μ_peak 1.18 on the OEM 150/60R17 rear), with a 78 kg rider on the 122 kg dry bike, produces the following stock-tune output:",
   },
   {
     type: "table",
@@ -213,7 +213,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Two caveats. First, the absolute ETs in this post are simulator output under specific conditions — change the rider weight, the surface, the temperature, or the launch technique and the numbers shift. The CB125R will run quicker than 18.6 seconds at the strip; expect 16.5 to 17.5 s depending on rider technique. Second, the +1.8 s cluster bias is not a bug or a calibration error; it is a known artefact of the way the model treats clutch slip on sub-15 hp bikes. Future calibrator passes will narrow it as the Indian Dragy submission corpus grows, but for now the relative deltas are what matter and the absolute numbers are systematically conservative.",
+    text: "Two caveats. First, the absolute ETs in this post are simulator output under specific conditions — change the rider weight, the surface, the temperature, or the launch technique and the numbers shift. The CB125R will run quicker than 18.6 seconds at the strip; expect 16.5 to 17.5 s depending on rider technique. Second, the +1.8 s cluster bias is not a bug or a calibration error; it is a known artefact of the way the model treats clutch slip on sub-15 hp bikes. Future accuracy passes will narrow it as more Indian timeslips are submitted, but for now the relative deltas are what matter and the absolute numbers are systematically conservative.",
   },
   {
     type: "p",

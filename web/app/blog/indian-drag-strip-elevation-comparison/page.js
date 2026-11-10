@@ -4,9 +4,9 @@ import SiteFooter from '../../../components/SiteFooter';
 import StructuredData, { articleSchema } from '../../StructuredData';
 
 const SLUG = 'indian-drag-strip-elevation-comparison';
-const TITLE = 'Indian Drag Strips Ranked by Elevation: How Altitude Flips Quarter-Mile Order';
+const TITLE = 'Indian Drag Strips Ranked by Elevation: What Altitude Costs Over a Quarter Mile';
 const DESCRIPTION =
-  'MMRT vs Aamby Valley: same Hayabusa runs 0.21s quicker at MMRT but 4.6 km/h slower at trap. MotoQuant sweeps five Indian strips and shows where each bike class belongs.';
+  'Five Indian drag strips on November weather: a stock Hayabusa loses 0.09 s between BIC and Aamby Valley, an R15 V4 loses 0.36 s. MotoQuant shows why small bikes pay more.';
 
 export const metadata = {
   title: 'Indian Drag Strips Ranked by Elevation — MotoQuant',
@@ -38,7 +38,11 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'MMRT at Sriperumbudur sits 78 metres above sea level. Aamby Valley sits at 679 metres. Run the same stock Hayabusa Gen 1 down both strips in November and the simulator gives you 10.262 s at MMRT and 10.471 s at Aamby — a 0.21 second swing from venue alone. But Aamby beats MMRT at the trap by 4.6 km/h. That order flips for a 200cc commuter, where MMRT wins on every metric. Pick the wrong strip and you spend money chasing tenths the venue is silently taking back.',
+    text: 'Aamby Valley sits 679 metres above sea level; MMRT at Sriperumbudur sits at 78 m and Buddh International Circuit at 208 m. Run the same stock Hayabusa Gen 1 down all five Indian strips on November weather and the simulator gives 10.126 s at BIC and 10.218 s at Aamby, a 0.09 s swing from the venue alone. A Yamaha R15 V4 loses four times as much: 18.185 s at BIC against 18.549 s at Aamby. The venue order is the same for both bikes. The size of the penalty is not.',
+  },
+  {
+    type: 'p',
+    text: 'Updated 10 November 2026: every simulated time in this post was re-run on the current engine. An earlier version said Aamby was a concrete strip and that a Hayabusa traps faster there than at MMRT; neither is true of the current catalog or engine.',
   },
   {
     type: 'h2',
@@ -46,42 +50,30 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'India has five quarter-mile-capable venues that actively host events. They differ by altitude more than by surface or sanctioning body, and the altitude is what dictates how a given bike performs across them. Density altitude (DA) — the altitude at which standard-atmosphere air would match the local density — is the variable that matters for the engine, the aerodynamics, and the trap-speed number. MotoQuant carries each venue with seasonal weather normals, so picking a venue in the simulator also picks the temperature, humidity, pressure, and resulting DA for that month.',
+    text: 'India has five quarter-mile venues in the MotoQuant catalog, all asphalt. They differ mainly in altitude and weather, and those two decide how much power an engine makes there. Density altitude (DA) is the altitude at which standard-atmosphere air would have the local density; it folds elevation, temperature, pressure and humidity into one number. MotoQuant carries November weather normals for each venue, so picking a venue also picks the conditions.',
   },
   {
     type: 'table',
     rows: [
-      ['Venue', 'Elevation', 'Nov DA (typical)', 'Surface', 'City', 'Active'],
-      ['MMRT (Madras Motor Race Track)', '78 m', '~396 m', 'Asphalt', 'Sriperumbudur, TN', 'Yes (FMSCI)'],
-      ['Buddh International Circuit (BIC)', '208 m', '~549 m', 'Asphalt', 'Greater Noida, UP', 'Yes (FMSCI)'],
-      ['Kari Motor Speedway', '300 m', '~610 m', 'Asphalt', 'Chettipalayam, TN', 'Yes (FMSCI)'],
-      ['Hyderabad Street Drags', '542 m', '~671 m', 'Asphalt', 'Hyderabad, TG', 'Periodic'],
-      ['Aamby Valley Airstrip (TVR)', '679 m', '~945 m', 'Concrete', 'Aamby Valley, MH', 'Yes (TVR)'],
+      ['Venue', 'Elevation', 'Nov normal', 'Nov DA', 'Power vs reference day', 'City'],
+      ['Buddh International Circuit (BIC)', '208 m', '21 °C, 45 % RH', '~490 m', '95.0 %', 'Greater Noida, UP'],
+      ['MMRT (Madras Motor Race Track)', '78 m', '26 °C, 80 % RH', '~600 m', '93.8 %', 'Sriperumbudur, TN'],
+      ['Kari Motor Speedway', '300 m', '25 °C, 55 % RH', '~790 m', '92.5 %', 'Chettipalayam, TN'],
+      ['Hyderabad Street Drags', '542 m', '23 °C, 55 % RH', '~990 m', '90.5 %', 'Hyderabad, TG'],
+      ['Aamby Valley Airstrip (TVR)', '679 m', '22 °C, 40 % RH', '~1,120 m', '89.5 %', 'Aamby Valley, MH'],
     ],
   },
   {
     type: 'p',
-    text: 'The DA numbers in the table use the November seasonal normals because November is when most Indian drag events actually happen — monsoon is gone, temperatures are reasonable, and humidity is low enough that the air is dense. Density altitude is always higher than the strip elevation because Indian conditions are warmer than ICAO standard. A strip at 78 m geometric altitude can easily show 400 m DA on a hot November afternoon, and a strip at 679 m can push 950 m DA when the sun warms the surface to 26 °C.',
-  },
-  {
-    type: 'p',
-    text: 'The other thing the table makes obvious: Aamby Valley is alone in two respects. It is the only concrete surface in the active Indian rotation (every other strip is asphalt), and it is the only venue above 600 m. That combination — high altitude, sticky concrete — is the reason Aamby ETs and trap speeds do not map cleanly onto any other Indian venue.',
+    text: 'The DA and power columns are computed the way the simulator computes them: SAE J1349 correction against the reference day of sea level, 25 °C and 50 % humidity. MMRT is the lowest strip but not the densest air in November, because 26 °C and 80 % humidity cost it more than 130 m of elevation costs BIC. Water vapour displaces oxygen, and the correction works on dry-air pressure.',
   },
   {
     type: 'h2',
-    text: 'The Power Versus Drag Trade-Off',
+    text: 'Power Against Drag',
   },
   {
     type: 'p',
-    text: 'Two competing physical effects move in opposite directions when you change altitude. Engine power drops because thinner air carries less oxygen, so combustion is less complete and the dyno-curve at the rear wheel scales down. The standard rule MotoQuant uses (and which the existing Aamby Valley tuning post documents) is roughly 3 percent of rated power per 300 m of density altitude. The same thinner air also reduces aerodynamic drag, because drag force is linear in air density at a given velocity. Less drag means more trap speed for a given throttle position, all else equal.',
-  },
-  {
-    type: 'p',
-    text: 'Whether the net effect of altitude makes you quicker or slower depends entirely on whether the bike is power-limited or drag-limited at the trap. For a 178 hp K5 GSX-R 1000 pulling 240 km/h in the lights, drag dominates and the altitude-driven drag reduction nearly offsets the power loss. For an 18 hp R15 V4 pulling 125 km/h in the lights, drag is a small fraction of total resistance and the power loss dominates outright. This is the mechanism that flips the venue order across bike classes.',
-  },
-  {
-    type: 'callout',
-    text: 'Rule of thumb: above 200 hp, altitude barely matters for ET. Below 30 hp, every 300 m of DA costs you something between 0.10 and 0.25 seconds. The middle of the catalog is where venue choice becomes a real lever.',
+    text: 'Thinner air does two things. The engine makes less power, because each intake stroke carries less oxygen. Aerodynamic drag also falls, because drag force is proportional to air density. Which effect wins depends on how much of the run a bike spends drag-limited. On the current engine, for the two stock bikes in this post, the power loss wins at every venue: both bikes are slower in ET and in trap speed as density altitude rises.',
   },
   {
     type: 'h2',
@@ -89,121 +81,69 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Start with the bike that anchors the simulator. The Hayabusa Gen 1 is one of three reference baselines that every MotoQuant build holds to four decimal places: 10.3633 s at the reference Aamby Valley November condition (679 m, 22 °C, 40 percent RH). That number is locked. The other four Indian venues run the same engine through the same drivetrain into the same tyres, with only the environmental block changed. Here is what falls out.',
+    text: 'The Hayabusa Gen 1 is one of three reference bikes that every MotoQuant build holds to four decimal places: 10.1100 s at the reference conditions (sea level, 25 °C, 50 % humidity). The table changes only the venue and its November weather.',
   },
   {
     type: 'table',
     rows: [
-      ['Venue', 'Sim ET', 'Trap', 'Δ ET vs Aamby', 'Δ Trap vs Aamby', 'Why'],
-      ['MMRT (Nov)', '10.262 s', '244.8 km/h', '−0.209 s', '−4.6 km/h', 'Dense air: more power, more drag'],
-      ['BIC (Nov)', '10.336 s', '243.0 km/h', '−0.135 s', '−2.8 km/h', 'Mid-altitude, mid-temp'],
-      ['Kari (Nov)', '10.368 s', '242.1 km/h', '−0.103 s', '−1.9 km/h', 'Slight altitude, warmer track'],
-      ['Hyderabad (Nov)', '10.405 s', '241.0 km/h', '−0.066 s', '−0.8 km/h', 'Almost matches Aamby DA'],
-      ['Aamby Valley (Nov)', '10.471 s', '240.2 km/h', 'baseline', 'baseline', 'High DA, sticky concrete'],
+      ['Venue', 'Sim ET', 'Trap', 'Δ ET vs Aamby', 'Δ Trap vs Aamby'],
+      ['BIC (Nov)', '10.126 s', '231.6 km/h', '−0.092 s', '+3.5 km/h'],
+      ['MMRT (Nov)', '10.145 s', '230.9 km/h', '−0.073 s', '+2.8 km/h'],
+      ['Kari (Nov)', '10.166 s', '230.1 km/h', '−0.052 s', '+2.0 km/h'],
+      ['Hyderabad (Nov)', '10.201 s', '228.7 km/h', '−0.017 s', '+0.6 km/h'],
+      ['Aamby Valley (Nov)', '10.218 s', '228.1 km/h', 'baseline', 'baseline'],
     ],
   },
   {
     type: 'p',
-    text: 'The Hayabusa is faster in the ET at MMRT than at Aamby Valley by a fifth of a second. It is slower in the trap at MMRT by almost five km per hour. Both numbers are correct and both come from the same physics. The 21 kg-equivalent extra rotational mass that the Hayabusa carries through gear 1 sees more air resistance at MMRT than at Aamby, so the bike accumulates speed more slowly during the launch phase — but the engine has 11 percent more crank power available because the air is 11 percent denser. Power wins the launch by a clear margin, which collapses the ET. Drag wins the back half of the run, which trims the trap.',
-  },
-  {
-    type: 'p',
-    text: 'The Aamby-versus-MMRT split is the canonical example. The other three venues sit on a smooth line between the two extremes, with Hyderabad coming closest to Aamby because the November DA there is only about 270 m lower despite the 137 m elevation drop — Hyderabad gets warmer Novembers than the Sahyadris. The non-linearity is small enough that interpolation by DA is usable: every 100 m of DA reduction is worth roughly 0.02 s of ET on a 197 hp Hayabusa.',
+    text: 'Between BIC and Aamby the Hayabusa gives up 5.8 % of its power and 0.9 % of its ET. Part of the reason is that a litre bike spends its launch traction-limited, where the missing power would only have spun the tyre.',
   },
   {
     type: 'h2',
-    text: 'Where the Order Flips: Small-Cc Bikes Tell a Different Story',
+    text: 'Small Bikes Pay More',
   },
   {
     type: 'p',
-    text: 'Now run the same sweep with the Yamaha R15 V4, which produces 18.4 hp at the crank and traps around 125 km/h on a good day. The relative effect of altitude is much larger because the bike is not drag-limited at trap — it is power-limited at every point on the curve. Less air density means less power, and the partial drag offset matters less because the bike never gets going fast enough for drag to dominate.',
+    text: 'Now the same sweep with the catalog Yamaha R15 V4. It is power-limited from launch to the finish, so every percent of power the air takes away comes straight out of the ET.',
   },
   {
     type: 'table',
     rows: [
-      ['Venue', 'R15 V4 Sim ET', 'Trap', 'Δ vs MMRT', 'Δ Power at trap'],
-      ['MMRT (Nov)', '~17.36 s', '~125.8 km/h', 'baseline', '−1.4%'],
-      ['BIC (Nov)', '~17.48 s', '~125.0 km/h', '+0.12 s', '−3.1%'],
-      ['Kari (Nov)', '~17.53 s', '~124.6 km/h', '+0.17 s', '−3.5%'],
-      ['Hyderabad (Nov)', '~17.58 s', '~124.1 km/h', '+0.22 s', '−4.0%'],
-      ['Aamby Valley (Nov)', '~17.62 s', '~123.7 km/h', '+0.26 s', '−4.5%'],
+      ['Venue', 'R15 V4 Sim ET', 'Trap', 'Δ ET vs BIC'],
+      ['BIC (Nov)', '18.185 s', '115.4 km/h', 'baseline'],
+      ['MMRT (Nov)', '18.262 s', '115.1 km/h', '+0.077 s'],
+      ['Kari (Nov)', '18.347 s', '114.7 km/h', '+0.162 s'],
+      ['Hyderabad (Nov)', '18.484 s', '114.0 km/h', '+0.299 s'],
+      ['Aamby Valley (Nov)', '18.549 s', '113.7 km/h', '+0.364 s'],
     ],
   },
   {
     type: 'p',
-    text: 'The R15 V4 loses 0.26 s of ET running at Aamby instead of MMRT, and gives up roughly 2 km/h at the trap as well. There is no compensation — the bike is slower on every metric at higher altitude. For a small-cc owner the venue choice is unambiguous: if you can travel to a lower strip you will run quicker, full stop. The flip that the Hayabusa shows between ET and trap simply does not exist on a 150cc commuter, because the bike is never drag-limited.',
-  },
-  {
-    type: 'p',
-    text: 'The crossover point — where the ET advantage of low altitude becomes neutral, then negative — sits between 80 and 120 hp for a typical Indian-spec naked or sport bike. A Bajaj Pulsar NS400Z (40 hp), a KTM Duke 390 (44 hp), and a Royal Enfield Continental GT 650 (47 hp) are all firmly on the small-bike side of the line — they want low altitude. A Hayabusa, a Ninja H2 SX, a ZX-14R, and an Aprilia RSV4 1100 are all firmly on the litre side — they trap better at altitude even when the ET says otherwise. The 600 to 1000 cc middleweights sit right at the crossover and have to be considered case by case.',
-  },
-  {
-    type: 'h2',
-    text: 'The Surface Multiplier Nobody Models',
-  },
-  {
-    type: 'p',
-    text: 'Altitude is not the only thing the table is hiding. Aamby Valley runs on concrete and every other Indian strip is asphalt. Concrete in good condition has a surface grip coefficient roughly 0.05 to 0.10 higher than mid-grade asphalt, which means a sticky tyre at Aamby sees an effective μ_peak around 1.10 to 1.20 versus 1.00 to 1.10 at MMRT. That surface advantage saves about 0.03 to 0.08 s on the launch phase for any bike that is traction-limited rather than power-limited at launch — meaning every bike under roughly 130 hp. The Aamby surface is silently giving back a meaningful fraction of the altitude penalty for mid-displacement bikes.',
-  },
-  {
-    type: 'p',
-    text: 'The simulator handles this via a surface_grip_multiplier on the venue record that scales μ_peak. Set the venue to Aamby Valley and the multiplier defaults to 0.88 for the Pacejka-modelled rear tyre. Set it to MMRT and the multiplier defaults to 0.80. The R15 V4 sweep above already includes the surface differential — if it did not, the Aamby Valley ET would be 0.30 s slower instead of 0.26 s. For a Hayabusa the surface barely matters because the launch is engine-power-limited from the second tenth of a second onward. For a small-cc bike it shifts the venue order by about a tenth.',
+    text: 'The R15 V4 loses 0.36 s between BIC and Aamby, 2.0 % of its ET, for the same 5.8 % power loss that cost the Hayabusa 0.9 %. For a small-bike owner the choice is simple: the strip with the densest air on the day runs quickest, and in November that is BIC, with MMRT close behind.',
   },
   {
     type: 'callout',
-    text: 'Aamby concrete partially compensates for Aamby altitude, but only for traction-limited bikes. The Hayabusa does not care. The R15 does. Anything in between has to be modelled, not guessed.',
+    text: 'In November the venue order is the same for both bikes: BIC, MMRT, Kari, Hyderabad, Aamby. What bike class changes is the size of the gap, from 0.09 s on a Hayabusa to 0.36 s on an R15 V4.',
   },
   {
     type: 'h2',
-    text: 'A Bike-Class Picker for Indian Strips',
+    text: 'What Wind Adds',
   },
   {
     type: 'p',
-    text: 'Putting the altitude trade-off and the surface trade-off together produces a practical answer to the question every Indian drag racer asks: which venue is fastest for my bike? This is not the same as which venue is closest, but for an aspiring strip racer who can travel, the difference is worth knowing.',
-  },
-  {
-    type: 'table',
-    rows: [
-      ['Bike class', 'Recommended venue', 'Why'],
-      ['Litre-plus hyperbike (Hayabusa, ZX-14R, H2 SX)', 'MMRT', 'Power-limited at trap — dense air dominates'],
-      ['Litre sport (R1, ZX-10R, S1000RR, RSV4)', 'BIC or MMRT', 'Marginal preference; either runs quicker than Aamby'],
-      ['Litre naked (Z H2, MT-10, Super Duke 1390)', 'MMRT', 'Same physics as litre sport, plus drag matters more in upright posture'],
-      ['Middleweight 600-800cc (765 R, ZX-6R, GSX-8S)', 'MMRT or Kari', 'Crossover zone; MMRT wins on ET'],
-      ['Mid-cc twin (Z650, MT-07, RE GT 650)', 'MMRT or Kari', 'Low-altitude wins outright'],
-      ['Indian 300-400cc (Duke 390, RC 390, Apache RR 310)', 'MMRT', 'Drag-irrelevant; dense air helps'],
-      ['Indian 200cc (NS200, RTR 200, Pulsar N250)', 'MMRT or BIC', 'Lowest altitude wins'],
-      ['Indian 150-160cc (R15, MT-15, Apache RTR 160)', 'MMRT (specifically)', 'Maximum benefit from dense sea-level air'],
-      ['350cc single (Hunter 350, Classic 350, Bullet 350)', 'MMRT', 'Tiny power margin; every percent of air density helps'],
-      ['Drag-prepped Hayabusa / ZX-14R (220+ hp turbo)', 'Aamby Valley', 'Above the crossover; concrete grip + low drag = fastest ET'],
-    ],
-  },
-  {
-    type: 'p',
-    text: 'Two rows in the table want a moment of explanation. The last one — drag-prepped litre bikes choosing Aamby — looks like it contradicts the Hayabusa sweep table at the top of the post, but it does not. A stock 197 hp Hayabusa wants MMRT because dense air gives the engine more breathing room than the extra drag costs the trap. A turbocharged 320 hp Hayabusa is so far above the power-limit-versus-drag crossover that the only thing slowing it down is drag, and Aamby concrete plus thin air is a faster combination than MMRT asphalt plus dense air. The Indian record-holding turbo bikes consistently run their best times at Aamby for exactly this reason.',
-  },
-  {
-    type: 'p',
-    text: 'The other row to flag is the middleweight 600-800 cc class — bikes like the Triumph Street Triple 765 R, the ZX-6R, the GSX-8S, and the Aprilia Tuono 660. These sit right at the crossover and a venue choice that matters by 0.05 s in one direction or the other is not a strong recommendation. For these bikes, surface preference and rider familiarity dominate the venue equation. Run wherever you can run consistent passes.',
+    text: 'The catalog stores November wind normals for every venue (Aamby averages 1.2 m/s, MMRT 2.0 m/s, BIC 1.2 m/s) and each strip\'s heading: MMRT and Kari run north to south, BIC east to west, Aamby north-west to south-east. The tables above assume calm air, the simulator default. A steady 10 km/h headwind at Aamby costs the Hayabusa 0.04 s and the R15 V4 0.21 s, because the slower bike spends longer in it with less power to spare. Real runs should be compared with the wind recorded on the day.',
   },
   {
     type: 'h2',
-    text: 'What Wind Adds to the Picture',
+    text: 'How Far to Trust the Numbers',
   },
   {
     type: 'p',
-    text: 'The simulator carries seasonal wind data for every venue. November is mostly tame — Aamby averages 1.2 m/s, MMRT 2.0 m/s, BIC 1.2 m/s — but prevailing direction matters because the strips run on different headings. MMRT shoots roughly north-to-south, BIC east-to-west, Aamby Valley north-east-to-south-west, Kari north-to-south, Hyderabad north-to-south. A 10 km/h headwind on the back half of the strip costs about 0.04 s of ET on a 200 km/h trap and about 0.02 s on a 130 km/h trap. The numbers in the tables above assume calm air, which is the simulator default and a fair November approximation. Real-world runs should be filtered by recorded wind on the day and adjusted accordingly.',
-  },
-  {
-    type: 'h2',
-    text: 'Why the Sim Numbers Hold',
+    text: 'The three reference bikes (GSX-R 1000 K5 10.0436 s, YZF-R1 4C8 10.1092 s, Hayabusa Gen 1 10.1100 s, all at the sea-level reference conditions) are pinned: CI fails if any of them moves by a ten-thousandth of a second. The venue tables change only the environment, so the deltas between venues come from the environmental sub-model, not from fitted offsets.',
   },
   {
     type: 'p',
-    text: 'The Hayabusa numbers are anchored to a baseline that was re-pinned on July 13, 2026 as part of a physics-recalibration epoch — 10.3633 s at Aamby Valley November conditions. The K5 GSX-R 1000 holds 10.0436 s at the same reference. The R1 4C8 holds 10.1092 s. These are not predictions, they are validation pins; the simulator is required to produce them to four decimal places on every code change, and the regression suite fails if they drift by more than a millisecond. Re-running each of them across the other four Indian venues changes only the environment block, which means the venue-deltas in the tables above are first-principles outputs of the environmental sub-model rather than fitted offsets.',
-  },
-  {
-    type: 'p',
-    text: 'The cluster bias on the litre_sport_195p cluster — the bucket the Hayabusa, K5, and R1 all live in — is documented at a source-quality-weighted mean absolute error of 0.147 s across 30 matched real-world benchmarks, with a near-zero bias of +0.027 s. So the venue-sweep ETs above sit inside roughly an eighth of a second of what a careful instrumented timeslip from any Indian strip should record on a stock bike with warmed tyres and a real launch. The R15 V4 numbers sit inside the entry_150_200 cluster with a documented weighted mean absolute error of 0.702 s and a near-zero bias of −0.011 s — the cluster is centred but the per-bike spread is wide, so the venue-delta is more useful than the absolute ET. If you ride one and you have a Dragy timeslip from a real Indian event, upload it: the simulator calibrator will recalibrate the entry against your data and tighten the cluster bias for everyone.',
+    text: 'Absolute times carry the error of each bike\'s class. In the 10 November 2026 accuracy sweep, litre sport bikes of 195 hp and up show a weighted mean absolute error of 0.171 s over 29 published tests, with a bias of −0.011 s. The 150–200 cc entry class shows 0.651 s over 13 tests, with a bias of −0.106 s, so for an R15 the venue delta is more useful than the absolute ET. If you have a Dragy run from an Indian strip, submit it through the "Submit a timeslip" form; reviewed runs join the benchmark set and tighten these figures for everyone.',
   },
   {
     type: 'h2',
@@ -211,15 +151,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The full venue list lives in the MotoQuant simulator under the Location Picker. Pick any bike from the 534-bike catalog, then pick a venue, then run the sim. The simulator computes density altitude from the seasonal pressure and temperature normals for the month you select, applies the surface grip multiplier, applies the wind correction if you toggle it on, and runs the same physics that produces the validated K5 / R1 / Hayabusa baselines. Switch venues without changing anything else and you see the delta directly. The same workflow on a real bike at a real strip takes a fuel tank, a trailer, and an event entry fee — the simulator gives you the same answer in fifty milliseconds, with the venue physics treated as a first-class variable.',
+    text: 'Pick any bike from the 534-bike catalog in the simulator, pick a venue, and run it. The simulator applies the venue\'s altitude, surface and weather, plus wind if you set it, and runs the same physics as the reference bikes. Change only the venue and you see its effect directly.',
   },
   {
     type: 'p',
-    text: 'Two practical observations to close on. First, if you ride anything below 60 hp and you have access to MMRT or BIC, that is where your bike runs the fastest stock ETs in the country. The drag-limited tail of the run that punishes small-cc bikes at Aamby simply does not bite at the lower-altitude strips. Second, if you own a stock 200 hp class bike and you keep hearing that Aamby is the place to go, the simulator says the opposite — your ET wants MMRT or BIC, your trap wants Aamby, and which one matters depends on whether you race for ETs or for top speed. The simulator lets you split the question cleanly instead of guessing.',
-  },
-  {
-    type: 'p',
-    text: 'Indian drag racing has spent two decades pretending the venue is a constant. The physics says it is not. Five strips, five elevations, five materially different answers for the same bike — pick the strip that fits the bike you have, and run your numbers before you book the trailer.',
+    text: 'The practical rule: below about 60 hp, the strip with the densest air on the day is worth tenths, so BIC or MMRT in November. On a stock litre bike the venue is worth under a tenth, and rider and launch matter more.',
   },
 ];
 
@@ -308,6 +244,7 @@ export default function PostPage() {
           description: DESCRIPTION,
           slug: SLUG,
           datePublished: '2026-05-25',
+          dateModified: '2026-11-10',
         })}
       />
       <SiteNav />
@@ -326,7 +263,7 @@ export default function PostPage() {
             ))}
           </div>
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
-            Indian Drag Strips Ranked by Elevation: How Altitude Flips Quarter-Mile Order
+            Indian Drag Strips Ranked by Elevation: What Altitude Costs Over a Quarter Mile
           </h1>
           <div className="text-sm text-white/60 mb-12">
             25 May 2026 · 12 min read · MotoQuant Blog
@@ -347,7 +284,7 @@ export default function PostPage() {
               >
                 How to Tune for Aamby Valley in November
               </Link>{' '}
-              — venue-specific deep dive on the highest of the five Indian strips, with the surface and wind detail this post abstracts away.
+              — venue-specific deep dive on the highest of the five Indian strips.
             </li>
             <li>
               ·{' '}
@@ -367,7 +304,7 @@ export default function PostPage() {
               >
                 Hayabusa Quarter-Mile Physics: What Limits 9.6 Seconds
               </Link>{' '}
-              — the bike used as the anchor in this post, with full physics breakdown of why the litre-plus class is drag-dominated.
+              — the bike used as the anchor in this post, with a breakdown of what limits a stock litre-plus bike.
             </li>
             <li>
               ·{' '}

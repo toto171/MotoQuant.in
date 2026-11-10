@@ -195,9 +195,9 @@ const POSTS = [
       "physics",
     ],
     title:
-      "Indian Drag Strips Ranked by Elevation: How Altitude Flips Quarter-Mile Order",
+      "Indian Drag Strips Ranked by Elevation: What Altitude Costs Over a Quarter Mile",
     excerpt:
-      "MMRT at 78 m runs a stock Hayabusa Gen 1 at 10.262s — 0.21s quicker than the same bike at Aamby Valley (679 m), but 4.6 km/h slower at the trap. The order flips entirely for a 200cc commuter, where MMRT wins on every metric. MotoQuant sweeps the same physics across all five active Indian strips (MMRT, BIC, Kari, Hyderabad, Aamby Valley) and shows which bike class wants which venue. Drag-prepped turbo Hayabusas want Aamby. Stock R15 V4s want MMRT. The crossover sits between 80 and 120 hp.",
+      "Five Indian drag strips on November weather, run on the current engine. A stock Hayabusa Gen 1 loses 0.09 s between Buddh International Circuit and Aamby Valley; an R15 V4 loses 0.36 s. The venue order is the same for both bikes (BIC, MMRT, Kari, Hyderabad, Aamby), and small bikes pay four times as much for thin air.",
   },
   {
     slug: "royal-enfield-hunter-350-quarter-mile-physics",
@@ -244,7 +244,7 @@ const POSTS = [
     ],
     title: "Kawasaki Ninja H2 SX Quarter-Mile Physics: Supercharged Tourer",
     excerpt:
-      "MotoQuant sims the 2018-2023 Ninja H2 SX at 10.222s and 250.8 km/h trap — a Hayabusa-class quarter-mile from a 238 kg sport-tourer with hard luggage mounts still bolted on. Why the supercharger pays back the touring spec, where the 20 kg of pannier brackets actually live, and how a stripped H2 SX runs within a tenth of a stock Ninja H2 for zero rupees of parts spend. India gray-market context: ₹28-32 lakh vs ₹17.7 lakh Hayabusa Gen 3.",
+      "MotoQuant sims the 2018-2023 Ninja H2 SX at 10.20 s and a 232.8 km/h trap at Aamby Valley in November, a Hayabusa-class quarter-mile from a 238 kg sport-tourer with hard luggage mounts still bolted on. Why the supercharger pays back the touring spec, where the 20 kg of pannier brackets actually live, and how a stripped H2 SX runs within 0.06 s of a stock Ninja H2 for zero rupees of parts spend. India gray-market context: ₹28-32 lakh vs ₹17.7 lakh Hayabusa Gen 3.",
   },
   {
     slug: "honda-cb125r-quarter-mile-physics",
@@ -334,7 +334,7 @@ const POSTS = [
     ],
     title: "Hayabusa Quarter-Mile Physics: What Limits the 9.6",
     excerpt:
-      "MotoQuant locks the Hayabusa Gen1 at 10.3633s — a reference baseline preserved across every physics commit since July 13, 2026. A drag-prepped Hayabusa runs 9.5-9.7s. The seven tenths between are not engine power. They are traction, geometry, gearing, and air — broken down with a stage-by-stage Indian cost-per-tenth table.",
+      "MotoQuant locks the Hayabusa Gen1 at 10.1100 s, a reference baseline CI holds to four decimals. A drag-prepped Hayabusa runs 9.5-9.7s. The four to six tenths between are not engine power. They are traction, geometry, gearing, and air — broken down with a stage-by-stage Indian cost-per-tenth table.",
   },
   {
     slug: "aprilia-tuono-660-factory-quarter-mile-physics",
@@ -431,7 +431,7 @@ const POSTS = [
     readTime: "11 min",
     tags: ["MMRT", "Chennai", "venue", "tuning", "Tamil Nadu"],
     excerpt:
-      "MMRT Chennai sits at 78 m altitude with 80% humidity and 30°C track temperatures most of the year. MotoQuant simulates the same Hayabusa 0.05s quicker at MMRT than Aamby Valley in November, with a higher trap speed but a slightly worse 60-foot. Venue-specific tuning math, month-by-month ET table, and four practical adjustments before you trailer the bike.",
+      "MMRT Chennai sits at 78 m with 80% humidity and a 30°C track in November. MotoQuant simulates a stock Hayabusa 0.07 s quicker at MMRT than at Aamby Valley in the same month, with a higher trap speed and the same 60-foot. Venue-specific tuning math, month-by-month ET table, and four practical adjustments before you trailer the bike.",
   },
   {
     slug: "yamaha-xsr900-gp-vs-mt-09-quarter-mile-physics",
@@ -544,7 +544,7 @@ const POSTS = [
       "comparison",
     ],
     excerpt:
-      "MotoQuant simulates the Hayabusa Gen1 reference at 10.471s and pegs the ZX-14R 2012 with a slim ~0.12 second ET advantage under matched conditions. Spec-by-spec breakdown of the two flagship hyper-bikes — where each one wins, and why.",
+      "MotoQuant simulates a stock Hayabusa Gen1 at 10.218 s and a ZX-14R 2012 at 9.872 s at Aamby Valley in November. Spec-by-spec breakdown of the two flagship hyper-bikes — where each one wins, and why.",
   },
   {
     slug: "hero-xtreme-200s-4v-quarter-mile-physics",
@@ -571,7 +571,7 @@ const POSTS = [
     readTime: "14 min",
     tags: ["physics", "engine", "validation", "methodology"],
     excerpt:
-      "A first-principles tour of the 15-sub-model RK4 physics engine. Engine torque curves, Pacejka tires, clutch slip dynamics, weight transfer — what we simulate, what we validate against, and what the residual error actually means.",
+      "A first-principles tour of the 15-sub-model RK4 physics engine. Engine torque curves, tyre grip and temperature, clutch slip dynamics, weight transfer — what we simulate, what we validate against, and what the residual error actually means.",
   },
   {
     slug: "the-physics-of-a-perfect-launch",
@@ -598,7 +598,7 @@ const POSTS = [
     readTime: "6 min",
     tags: ["venue", "Aamby Valley", "weather", "conditions"],
     excerpt:
-      "November at Aamby Valley means density altitude around 1100 m, 18–24°C, and concrete with a good grip coefficient. Every one of these numbers changes your optimal tune. Here is the MotoQuant venue analysis.",
+      "November at Aamby Valley means 679 m of elevation, about 22°C and a density altitude near 1,100 m on an asphalt strip. What that costs each class of bike, and how to tune for it.",
   },
 ];
 

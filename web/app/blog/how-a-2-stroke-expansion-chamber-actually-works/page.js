@@ -175,7 +175,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "For drag racing specifically, the practical advice from the physics is short. First, match your launch RPM to your tuned RPM — not to peak torque RPM, not to peak power RPM, but to the resonance frequency of your specific pipe. Second, do not lean on gearing changes the way 4T riders do; the powerband is narrower than your gear-ratio steps so the bike will fall off the pipe between shifts no matter what you do. Third, prioritise the pipe over everything else. A perfect pipe with a stock barrel beats a tuned barrel with a wrong pipe every single time. Fourth, expect the simulator to be optimistic by roughly half a second on stock 2T bikes — the calibration bias is documented and being closed as more Dragy uploads come in from real Indian 2T owners.",
+    text: "For drag racing specifically, the practical advice from the physics is short. First, match your launch RPM to your tuned RPM — not to peak torque RPM, not to peak power RPM, but to the resonance frequency of your specific pipe. Second, do not lean on gearing changes the way 4T riders do; the powerband is narrower than your gear-ratio steps so the bike will fall off the pipe between shifts no matter what you do. Third, prioritise the pipe over everything else. A perfect pipe with a stock barrel beats a tuned barrel with a wrong pipe every single time. Fourth, expect the simulator to be optimistic by roughly half a second on stock 2T bikes — the calibration bias is documented and being closed as more timeslips are submitted by real Indian 2T owners.",
   },
   {
     type: "h2",

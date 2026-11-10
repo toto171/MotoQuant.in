@@ -57,7 +57,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running both bikes through MotoQuant under Aamby Valley November conditions — density altitude approximately 1,100 m, 22°C ambient, dry concrete, 78 kg rider, OEM Bridgestone tires — produces these stock-tune numbers:',
+    text: 'Running both bikes through MotoQuant under Aamby Valley November conditions — density altitude approximately 1,100 m, 22°C ambient, dry asphalt, 78 kg rider, OEM Bridgestone tires — produces these stock-tune numbers:',
   },
   {
     type: 'table',

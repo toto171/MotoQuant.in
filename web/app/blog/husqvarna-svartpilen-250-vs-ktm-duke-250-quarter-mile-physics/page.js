@@ -58,7 +58,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running both bikes in MotoQuant under matched Aamby Valley November conditions (density altitude around 1,100 m, 22°C ambient, dry concrete with OEM tire choices, 78 kg rider) produces the head-to-head below. These are stock-tune outputs from the production sweep — no power boost, no mass cut, no parts catalogue mods applied.',
+    text: 'Running both bikes in MotoQuant under matched Aamby Valley November conditions (density altitude around 1,100 m, 22°C ambient, dry asphalt with OEM tire choices, 78 kg rider) produces the head-to-head below. These are stock-tune outputs from the production sweep — no power boost, no mass cut, no parts catalogue mods applied.',
   },
   {
     type: 'table',
@@ -186,7 +186,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Two final caveats. First, every number in this post is a stock-tune simulation under specific conditions; change the rider weight or the surface or the launch technique and the absolute ETs shift, but the relative ordering of which bike is quicker stays stable. Second, the entry-200-300 cc cluster carries a +0.5 to +1.4 s slow bias against real-world instrumented data; expect a competent rider on a warmed bike with good launches to run quicker than the sim figures, with the gap between the two bikes holding roughly constant. Both biases will tighten as more Indian small-cc Dragy and VBOX uploads flow into the calibrator.',
+    text: 'Two final caveats. First, every number in this post is a stock-tune simulation under specific conditions; change the rider weight or the surface or the launch technique and the absolute ETs shift, but the relative ordering of which bike is quicker stays stable. Second, the entry-200-300 cc cluster carries a +0.5 to +1.4 s slow bias against real-world instrumented data; expect a competent rider on a warmed bike with good launches to run quicker than the sim figures, with the gap between the two bikes holding roughly constant. Both biases will tighten as more Indian small-cc Dragy and VBOX timeslips join the benchmark set.',
   },
 ];
 

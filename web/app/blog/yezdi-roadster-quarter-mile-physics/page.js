@@ -56,7 +56,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running the Roadster in MotoQuant with a 78 kg rider, OEM Ceat Zoom-X rear (μ_peak 1.20), 22°C ambient, dry concrete, and density altitude ~1100 m (Aamby Valley November), the stock-tune numbers come out as follows:',
+    text: 'Running the Roadster in MotoQuant with a 78 kg rider, OEM Ceat Zoom-X rear (μ_peak 1.20), 22°C ambient, dry asphalt, and density altitude ~1100 m (Aamby Valley November), the stock-tune numbers come out as follows:',
   },
   {
     type: 'table',
@@ -173,7 +173,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Indian motorcycle review culture has historically treated the 334 cc class as a city-cycle MPG category rather than a performance category, which is part of why no magazine has run an instrumented ET on this bike in the four years it has been on sale. That gap is the reason this post exists: there is genuine information missing from the public record about what a stock Yezdi Roadster does at the quarter mile, and the MotoQuant simulator is the best tool available to fill that gap when no Dragy timeslip data has surfaced. The 15.42-second figure above is a stock-tune estimate under specific Aamby Valley conditions. The real number from a competent rider at MMRT Chennai (sea level, higher density air, dry concrete) would likely come in at 15.0 to 15.2 seconds. That gap is the documented venue delta, not a simulator error.',
+    text: 'Indian motorcycle review culture has historically treated the 334 cc class as a city-cycle MPG category rather than a performance category, which is part of why no magazine has run an instrumented ET on this bike in the four years it has been on sale. That gap is the reason this post exists: there is genuine information missing from the public record about what a stock Yezdi Roadster does at the quarter mile, and the MotoQuant simulator is the best tool available to fill that gap when no Dragy timeslip data has surfaced. The 15.42-second figure above is a stock-tune estimate under specific Aamby Valley conditions. The real number from a competent rider at MMRT Chennai (sea level, higher density air, dry asphalt) would likely come in at 15.0 to 15.2 seconds. That gap is the documented venue delta, not a simulator error.',
   },
   {
     type: 'h2',

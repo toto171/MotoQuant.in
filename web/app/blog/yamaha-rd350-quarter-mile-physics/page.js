@@ -51,7 +51,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Under Aamby Valley November conditions — 21°C ambient, 28% RH, 1050 m elevation, concrete strip with a grip multiplier of 0.88 — MotoQuant runs the simulation through 15 physics sub-models including the new 2-stroke clutch-engagement model that shipped in the May 31 2026 calibration pass. The result, with a 78 kg rider:',
+    text: 'Under Aamby Valley November conditions (22°C ambient, 40% RH, 679 m elevation, asphalt strip), MotoQuant runs the simulation through 15 physics sub-models including the new 2-stroke clutch-engagement model that shipped in the May 31 2026 calibration pass. The result, with a 78 kg rider:',
   },
   {
     type: 'table',

@@ -57,7 +57,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running the 800NK in MotoQuant with a 78 kg rider, OEM Maxxis Supermaxx ST rear (μ_peak 1.30), 22°C ambient, dry concrete, and density altitude ≈ 1100 m (Aamby Valley November), the stock-tune numbers come out as follows:',
+    text: 'Running the 800NK in MotoQuant with a 78 kg rider, OEM Maxxis Supermaxx ST rear (μ_peak 1.30), 22°C ambient, dry asphalt, and density altitude ≈ 1100 m (Aamby Valley November), the stock-tune numbers come out as follows:',
   },
   {
     type: 'table',

@@ -52,7 +52,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Running the Z900RS in MotoQuant under Aamby Valley November conditions (density altitude ≈ 1,100 m, 22°C ambient, dry concrete, μ_peak 1.32 on the OEM Dunlop Sportmax D214 rear), with a 78 kg rider on a 203 kg dry bike, produces the following stock-tune numbers:",
+    text: "Running the Z900RS in MotoQuant under Aamby Valley November conditions (density altitude ≈ 1,100 m, 22°C ambient, dry asphalt, μ_peak 1.32 on the OEM Dunlop Sportmax D214 rear), with a 78 kg rider on a 203 kg dry bike, produces the following stock-tune numbers:",
   },
   {
     type: "table",

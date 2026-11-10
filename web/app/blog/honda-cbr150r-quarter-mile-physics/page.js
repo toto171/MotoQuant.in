@@ -61,7 +61,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Running the CBR150R in MotoQuant under matched Aamby Valley November conditions (density altitude roughly 1,100 m, 22°C ambient, dry concrete surface, μ_peak 1.18 on the OEM 130/70-17 rear at IRC SCT-001 reference grip), with a 70 kg rider in tuck position on the 136 kg dry bike, produces the following:",
+    text: "Running the CBR150R in MotoQuant under matched Aamby Valley November conditions (density altitude roughly 1,100 m, 22°C ambient, dry asphalt surface, μ_peak 1.18 on the OEM 130/70-17 rear at IRC SCT-001 reference grip), with a 70 kg rider in tuck position on the 136 kg dry bike, produces the following:",
   },
   {
     type: "table",
@@ -79,7 +79,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Strip the documented +1.84 s entry-150-200 cluster bias and the CBR150R lands within 0.4 seconds of the MotoStatz instrumented runs — which is well inside repeatability for a 17 hp bike at a 70 kg rider weight. The bias is structural; it affects every bike in the 125-200 cc band roughly equally and has been narrowing pass over pass as the calibrator ingests more real-world timeslips. The relative ordering — CBR150R quicker than R15 V4 quicker than Y15ZR V2 — is what the simulator gets right with confidence.",
+    text: "Strip the documented +1.84 s entry-150-200 cluster bias and the CBR150R lands within 0.4 seconds of the MotoStatz instrumented runs — which is well inside repeatability for a 17 hp bike at a 70 kg rider weight. The bias is structural; it affects every bike in the 125-200 cc band roughly equally and it narrows as more real-world timeslips join the benchmark set. The relative ordering — CBR150R quicker than R15 V4 quicker than Y15ZR V2 — is what the simulator gets right with confidence.",
   },
   {
     type: "callout",
@@ -201,7 +201,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Two caveats. First, the absolute ETs in this post are simulator output under specific conditions — change the rider weight, the surface, the temperature, or the launch technique and the numbers shift. The CBR150R will run quicker than 18.42 seconds at the strip in real life; expect 16.6 to 17.5 s depending on rider technique, with the MotoStatz instrumented test as the published reference point. Second, the +1.84 s cluster bias is a known artefact of how the model treats clutch slip on sub-20 hp bikes. Future calibrator passes will narrow it as the Indian and SE Asia Dragy submission corpus grows.",
+    text: "Two caveats. First, the absolute ETs in this post are simulator output under specific conditions — change the rider weight, the surface, the temperature, or the launch technique and the numbers shift. The CBR150R will run quicker than 18.42 seconds at the strip in real life; expect 16.6 to 17.5 s depending on rider technique, with the MotoStatz instrumented test as the published reference point. Second, the +1.84 s cluster bias is a known artefact of how the model treats clutch slip on sub-20 hp bikes. Future accuracy passes will narrow it as more Indian and South-East Asian timeslips are submitted.",
   },
   {
     type: "p",

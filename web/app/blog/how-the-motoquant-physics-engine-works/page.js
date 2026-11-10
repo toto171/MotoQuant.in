@@ -6,11 +6,10 @@ import ScoreboardDigits from '../../../components/ScoreboardDigits';
 
 export const metadata = {
   title: 'How the MotoQuant Physics Engine Works — MotoQuant Blog',
-  description: 'A first-principles tour of the 15-sub-model RK4 physics engine that powers MotoQuant. From engine torque curves to Pacejka tire models to launch slip dynamics — what we simulate, what we validate against, and what the residual error actually means.',
+  description: 'A first-principles tour of the 15-sub-model RK4 physics engine that powers MotoQuant. From engine torque curves to tyre grip and temperature to launch slip dynamics — what we simulate, what we validate against, and what the residual error actually means.',
   keywords: [
     'motorcycle physics simulation',
     'drag racing simulator',
-    'Pacejka tire model',
     'RK4 motorcycle dynamics',
     'first-principles motorcycle physics',
     'MotoQuant engine',
@@ -98,15 +97,15 @@ const CONTENT = [
   },
   {
     type: 'h2',
-    text: 'Sub-Model 5: Tires (Pacejka with Thermal)',
+    text: 'Sub-Model 5: Tires (Grip and Thermal)',
   },
   {
     type: 'p',
-    text: 'Tire physics is a Pacejka Magic Formula model. Given a slip ratio and a load (vertical force on the tire), the model returns the longitudinal force the tire can deliver. The shape of the curve is controlled by four parameters per tire: B (stiffness), C (shape), D (peak), and E (curvature). These come from a tire library of 254 tires across 16 manufacturers — drag slicks, sport touring, race compounds, Indian commuter rubber (MRF, CEAT), all with calibrated Pacejka coefficients.',
+    text: 'The tire model returns the most longitudinal force the rear tire can deliver: a peak friction coefficient (μ_peak) times the load on the tire. μ_peak falls with load, follows the tread temperature through an optimum window, changes with tire pressure as the tire heats, and scales with the track surface and any prep. Each of the 254 tires in the library (drag slicks, sport touring, race compounds, Indian commuter rubber from MRF and CEAT) carries its own μ_peak and thermal window. The library also stores Pacejka Magic Formula coefficients (B, C, D, E) for every tire, and the full slip curve is coded, but the integrator does not use it yet: a launch is limited by the peak, not by where on the slip curve the tire sits.',
   },
   {
     type: 'p',
-    text: 'Peak longitudinal force occurs at a slip ratio of roughly 0.07–0.15 for road tires. That is why launches with deliberate wheel spin can be faster than perfect-traction launches — you are operating at the peak of the slip-vs-force curve instead of below it. Above the peak, force falls off rapidly, which is why aggressive throttle on a smoking tire is slower than measured throttle.',
+    text: 'On a real tire, peak longitudinal force occurs at a slip ratio of roughly 0.07–0.15. That is why launches with a little wheel spin can be faster than perfect-traction launches, and why a smoking tire is slower than measured throttle: above the peak, force falls off. Wiring that slip curve into the integrator is on the roadmap; it would move the pinned reference times, so it waits for a deliberate accuracy pass.',
   },
   {
     type: 'p',
@@ -142,7 +141,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'We maintain a list of 250 published drag-strip benchmarks (273 matched to a catalog bike) — sourced from Cycle World, Sport Rider, MCN, Motorcycle Consumer News, MotorcycleDaily, MotoStatz, FastestLaps, and Indian Autos Mag where the magazine published the actual instrumented timeslip. For each benchmark, we run the simulator at the test-day environmental conditions and compare predicted ET against measured ET. Each source is weighted by quality (instrumented timeslip 1.0, magazine 0.7, aggregator 0.5, derived 0.1) and the delta gets bucketed by class on a cylinder-aware 12-cluster taxonomy (litre-sport-195+, litre-sport-600-1000, sport-twin-600-1300, singles-300-500, entry-150-200, two-stroke, etc.) so we can see where the physics is honest and where it has systematic bias.',
+    text: 'We maintain a list of 250 published drag-strip benchmarks (263 matched to a catalog bike) — sourced from Cycle World, Sport Rider, MCN, Motorcycle Consumer News, MotorcycleDaily, MotoStatz, FastestLaps, and Indian Autos Mag where the magazine published the actual instrumented timeslip. For each benchmark, we run the simulator at the test-day environmental conditions and compare predicted ET against measured ET. Each source is weighted by quality (instrumented timeslip 1.0, magazine 0.7, aggregator 0.5, derived 0.1) and the delta gets bucketed by class on a cylinder-aware 12-cluster taxonomy (litre-sport-195+, litre-sport-600-1000, sport-twin-600-1300, singles-300-500, entry-150-200, two-stroke, etc.) so we can see where the physics is honest and where it has systematic bias.',
   },
   {
     type: 'p',
@@ -150,7 +149,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Current state across 273 matched benchmarks (November 2026 sweep): overall source-quality-weighted mean absolute error is 0.262 seconds, weighted bias is essentially zero (+0.009 s — meaning the simulator is no longer systematically optimistic or pessimistic). Across the ten cleanest validated runs the mean absolute error is ±0.007 s, and 137 of the 273 benchmarks fall within ±0.20 s. The 195+ hp class is the tightest at 0.145 s weighted |Δ|. The small-cc and 2-stroke clusters have higher variance, partly because their published benchmarks are themselves uncertain (most Indian small-cc ETs are estimated from 0–100 km/h times rather than measured timeslips).',
+    text: 'Current state across 263 matched benchmarks (10 November 2026 sweep): the overall source-quality-weighted mean absolute error is 0.25 seconds, and the weighted bias is essentially zero (+0.023 s), so the simulator is not systematically optimistic or pessimistic. Across the ten cleanest validated runs the mean absolute error is ±0.006 s, and 130 of the 263 benchmarks fall within ±0.20 s. The litre sport classes are the tightest: 0.146 s weighted |Δ| for 600–1000 cc fours and triples, 0.171 s for 195 hp and up. The small-cc and 2-stroke clusters have higher variance, partly because their published benchmarks are themselves uncertain (most Indian small-cc ETs are estimated from 0–100 km/h times rather than measured timeslips).',
   },
   {
     type: 'h2',
@@ -166,7 +165,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The path forward is measured data, plus sourced gearing for the small bikes, not more model complexity. Phase 3 of the project is a Dragy GPS calibrator — a CLI that takes a real Dragy timeslip from your bike on your strip, fits the simulator parameters to your run, and produces a personalized config that matches your build. Once that is in production, the validation loop closes: stock-bike benchmarks become user-uploaded measurements rather than magazine claims.',
+    text: 'The path forward is measured data, plus sourced gearing for the small bikes, not more model complexity. The calibration module (motoquant/calibration/calibrator.py) can already fit drag coefficient and tyre grip to a Dragy run when you run it yourself; the website only lines your run up against the simulation and keeps nothing. The validation loop closes as riders submit timeslips through the "Submit a timeslip" form and reviewed runs join the benchmark set.',
   },
   {
     type: 'h2',
@@ -178,7 +177,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The sub-models are tested independently. test_validation.py exercises physics conservation laws (energy in == energy out + heat). test_no_silent_failures.py runs all 534 catalog bikes and asserts each finishes within the time budget or is on an explicit DNF whitelist for vintage low-power 2-strokes. test_submodel_kaizen.py catches silent failure modes in clutch, tire thermal, braking, and rider dynamics. The full suite passes 174 fast tests; integration tests exercise the surrogate models, ROI engine, and recommendations layer.',
+    text: 'The sub-models are tested independently. test_validation.py exercises physics conservation laws (energy in == energy out + heat). test_no_silent_failures.py runs all 534 catalog bikes and asserts each finishes within the time budget or is on an explicit DNF whitelist for vintage low-power 2-strokes. test_submodel_kaizen.py catches silent failure modes in clutch, tire thermal, braking, and rider dynamics. The full suite has about 6,200 tests; integration tests exercise the surrogate models, ROI engine, and recommendations layer.',
   },
   {
     type: 'h2',
@@ -280,13 +279,13 @@ export default function Page() {
           <div className="relative overflow-hidden rounded-xl border border-brand-orange/20 bg-ink-1/60 p-5 mt-6">
             <span aria-hidden="true" className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent" />
             <div className="text-xs text-white/60 mb-4">
-              Reference baselines · preserved across all releases
+              Reference baselines · held to four decimals by CI
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
-                ['GSX-R 1000 K5', '9.9331'],
-                ['YZF-R1 4C8', '10.1436'],
-                ['Hayabusa Gen1', '10.3633'],
+                ['GSX-R 1000 K5', '10.0436'],
+                ['YZF-R1 4C8', '10.1092'],
+                ['Hayabusa Gen1', '10.1100'],
               ].map(([bike, et]) => (
                 <div key={bike}>
                   <div className="flex items-end gap-1">
@@ -298,7 +297,7 @@ export default function Page() {
               ))}
             </div>
             <p className="text-white/60 text-xs mt-4">
-              All claims about cluster bias, mean absolute error, and within-tolerance fractions in this post reflect the November 2026 sweep against 250 published benchmarks (273 matched).
+              All claims about cluster bias, mean absolute error, and within-tolerance fractions in this post reflect the 10 November 2026 sweep against 250 published benchmarks (263 matched).
             </p>
           </div>
         </footer>

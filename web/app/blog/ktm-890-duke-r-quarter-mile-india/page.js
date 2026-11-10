@@ -84,7 +84,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "Running the 890 Duke R through MotoQuant under matched Aamby Valley November conditions — density altitude approximately 1,100 m, 22°C ambient, dry concrete, 78 kg rider, OEM Michelin Power Cup 2 rear — produces these numbers, alongside the standard 890 Duke baseline from the GSX-S750 comparison piece:",
+    text: "Running the 890 Duke R through MotoQuant under matched Aamby Valley November conditions — density altitude approximately 1,100 m, 22°C ambient, dry asphalt, 78 kg rider, OEM Michelin Power Cup 2 rear — produces these numbers, alongside the standard 890 Duke baseline from the GSX-S750 comparison piece:",
   },
   {
     type: 'table',
@@ -112,7 +112,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "Three contributors, in order of magnitude. First, raw power-to-weight. The R has 16 hp more and only 3 kg more. That alone, holding everything else constant, is worth approximately 0.20 seconds in this displacement class. Second, the launch advantage from the stickier OEM tire. The Michelin Power Cup 2 carries a μ_peak in the 1.42 range on warm dry concrete, against 1.35 for the Bridgestone S21 on the standard bike. A 0.07 grip-coefficient advantage compounds through the 60-foot section because the bike can run a higher slip ratio without breaking traction; the simulator credits about 0.08 seconds to this. Third, the gearing-and-rpm interaction.",
+    text: "Three contributors, in order of magnitude. First, raw power-to-weight. The R has 16 hp more and only 3 kg more. That alone, holding everything else constant, is worth approximately 0.20 seconds in this displacement class. Second, the launch advantage from the stickier OEM tire. The Michelin Power Cup 2 carries a μ_peak in the 1.42 range on warm dry asphalt, against 1.35 for the Bridgestone S21 on the standard bike. A 0.07 grip-coefficient advantage compounds through the 60-foot section because the bike can run a higher slip ratio without breaking traction; the simulator credits about 0.08 seconds to this. Third, the gearing-and-rpm interaction.",
   },
   {
     type: 'p',
@@ -200,7 +200,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "If you own an 890 Duke R and have Dragy or VBox timeslips from your local strip, the MotoQuant calibrator can fit the simulator's aero and tire parameters to your specific bike. This typically tightens the simulation to within 0.05 seconds of measured for that bike-rider combination and removes the cluster bias entirely. Useful if you are deciding between two mods and the predicted delta is below 0.10 seconds — the bias would otherwise swallow your signal.",
+    text: "If you own an 890 Duke R and have Dragy or VBox timeslips from your local strip, upload one in the simulator to compare it with the simulation split by split, and submit it through the “Submit a timeslip” form; a reviewed run joins the benchmark set. Your own timeslip matters most when you are deciding between two mods whose predicted delta is below 0.10 seconds, because the class error would otherwise swallow the signal.",
   },
   {
     type: 'h2',

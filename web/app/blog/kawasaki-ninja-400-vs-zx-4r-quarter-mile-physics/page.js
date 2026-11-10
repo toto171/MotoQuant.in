@@ -79,7 +79,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Both bikes are run in MotoQuant under matched Aamby Valley November conditions — density altitude around 1,100 m, 22°C ambient, dry concrete, a 70 kg rider, OEM tire compounds. The Ninja 400 runs on Dunlop Sportmax GPR-300 front (120/70-17) and rear (160/60-17) at μ_peak ≈ 1.08. The ZX-4R runs on Dunlop Sportmax Roadsport 2 front (110/70-17) and rear (150/60-17) at μ_peak ≈ 1.10. Both are production sport-touring compounds, not drag slicks.",
+    text: "Both bikes are run in MotoQuant under matched Aamby Valley November conditions — density altitude around 1,100 m, 22°C ambient, dry asphalt, a 70 kg rider, OEM tire compounds. The Ninja 400 runs on Dunlop Sportmax GPR-300 front (120/70-17) and rear (160/60-17) at μ_peak ≈ 1.08. The ZX-4R runs on Dunlop Sportmax Roadsport 2 front (110/70-17) and rear (150/60-17) at μ_peak ≈ 1.10. Both are production sport-touring compounds, not drag slicks.",
   },
   {
     type: "table",
@@ -253,7 +253,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "MotoQuant models 20 venues. The two most commonly used Indian strip venues for 400cc bikes are Aamby Valley (Sahyadri Sports Complex, 1,050 m altitude, November is peak season with DA ~1,100 m) and MMRT Chennai (78 m altitude, high humidity, warmer air year-round). The contrast between venues matters for both bikes.",
+    text: "MotoQuant models 20 venues. The two most commonly used Indian strip venues for 400cc bikes are Aamby Valley (679 m altitude, November DA about 1,100 m) and MMRT Chennai (78 m altitude, high humidity, warmer air year-round). The contrast between venues matters for both bikes.",
   },
   {
     type: "p",

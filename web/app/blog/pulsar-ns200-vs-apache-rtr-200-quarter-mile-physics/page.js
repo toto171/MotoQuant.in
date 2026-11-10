@@ -75,7 +75,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running both bikes through the simulator at matched Aamby Valley November conditions — density altitude near 1,100 m, 22°C ambient, dry concrete with stock MRF Nylogrip Zapper at μ_peak ≈ 1.05, 70 kg rider in stock tuck — produces the following stock-tune output:',
+    text: 'Running both bikes through the simulator at matched Aamby Valley November conditions — density altitude near 1,100 m, 22°C ambient, dry asphalt with stock MRF Nylogrip Zapper at μ_peak ≈ 1.05, 70 kg rider in stock tuck — produces the following stock-tune output:',
   },
   {
     type: 'table',
@@ -198,7 +198,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Two final caveats. First, every number in this post is a stock-tune simulation under specific conditions inside the entry-200-300cc cluster bias band of ±0.5 s. A single instrumented Dragy timeslip from either bike at a real Indian strip would tighten the simulator\'s prediction by a meaningful margin — and we will pull that data in through the calibrator the moment we have it. Second, the Indian aftermarket pricing shifts every quarter; the parts-ROI engine pulls live retailer pricing where it can and falls back to formula-based landing-cost math (USD × 84 × 1.30 import duty × 1.18 GST + ₹1,500 freight) where it cannot.',
+    text: 'Two final caveats. First, every number in this post is a stock-tune simulation under specific conditions inside the entry-200-300cc cluster bias band of ±0.5 s. A single instrumented Dragy timeslip from either bike at a real Indian strip would tighten the simulator\'s prediction by a meaningful margin — and the "Submit a timeslip" form is how to send one. Second, the Indian aftermarket pricing shifts every quarter; the parts catalog uses retailer prices where it has them and falls back to formula-based landing-cost math (USD × 84 × 1.30 import duty × 1.18 GST + ₹1,500 freight) where it cannot.',
   },
 ];
 

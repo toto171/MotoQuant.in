@@ -54,7 +54,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running the ZX-4R in MotoQuant under Aamby Valley November conditions (density altitude ≈ 1100 m, 22°C ambient, dry concrete, μ_peak 1.32 on the OEM Dunlop Sportmax GPR-300 rear), with a 78 kg rider on a 191 kg dry bike, produces the following stock-tune numbers:',
+    text: 'Running the ZX-4R in MotoQuant under Aamby Valley November conditions (density altitude ≈ 1100 m, 22°C ambient, dry asphalt, μ_peak 1.32 on the OEM Dunlop Sportmax GPR-300 rear), with a 78 kg rider on a 191 kg dry bike, produces the following stock-tune numbers:',
   },
   {
     type: 'table',
@@ -70,7 +70,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The simulation lands in the middle of the published instrumented band — the kind of accuracy the litre-sport-600-1000 cluster typically delivers (documented 0.22s mean absolute error across 29 matched benchmarks per the April 27 sweep). The ZX-4R is in that cluster despite being a 400cc bike because its engine character — high-revving inline-four with peak power at 14,500 rpm — physically behaves like a 600cc supersport scaled down rather than like a 400cc twin scaled up. The Pacejka tire model, the gear-cassette torque multiplication, and the synthesized 0.88 redline-factor torque tail all transfer directly from the ZX-6R class.',
+    text: 'The simulation lands in the middle of the published instrumented band — the kind of accuracy the litre-sport-600-1000 cluster typically delivers (documented 0.22s mean absolute error across 29 matched benchmarks per the April 27 sweep). The ZX-4R is in that cluster despite being a 400cc bike because its engine character — high-revving inline-four with peak power at 14,500 rpm — physically behaves like a 600cc supersport scaled down rather than like a 400cc twin scaled up. The tyre grip model, the gear-cassette torque multiplication, and the synthesized 0.88 redline-factor torque tail all transfer directly from the ZX-6R class.',
   },
   {
     type: 'callout',

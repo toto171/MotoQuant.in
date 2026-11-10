@@ -59,7 +59,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running the 675SR-R in MotoQuant with a 78 kg rider, OEM Maxxis Supermaxx ST rear (peak grip coefficient 1.30), 22°C ambient, dry concrete, and density altitude around 1100 m (Aamby Valley November), the stock-tune output is:',
+    text: 'Running the 675SR-R in MotoQuant with a 78 kg rider, OEM Maxxis Supermaxx ST rear (peak grip coefficient 1.30), 22°C ambient, dry asphalt, and density altitude around 1100 m (Aamby Valley November), the stock-tune output is:',
   },
   {
     type: 'table',

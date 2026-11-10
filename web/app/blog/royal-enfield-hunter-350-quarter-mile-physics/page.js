@@ -63,7 +63,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running the Hunter 350 in MotoQuant with a 78 kg rider, OEM MRF Revz rear (μ_peak 1.15, consistent with standard bias-ply Indian commuter rubber), 22°C ambient, dry concrete, and density altitude ≈ 1100 m (Aamby Valley November), the stock numbers produce:',
+    text: 'Running the Hunter 350 in MotoQuant with a 78 kg rider, OEM MRF Revz rear (μ_peak 1.15, consistent with standard bias-ply Indian commuter rubber), 22°C ambient, dry asphalt, and density altitude ≈ 1100 m (Aamby Valley November), the stock numbers produce:',
   },
   {
     type: 'table',

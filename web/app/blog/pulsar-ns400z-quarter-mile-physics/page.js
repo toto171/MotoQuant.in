@@ -56,7 +56,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running the NS400Z through the simulator at matched Aamby Valley November conditions — density altitude near 1,100 m, 22°C ambient, dry concrete with the OEM MRF rear tire at μ_peak ≈ 1.08, 70 kg rider in stock upright tuck — produces these numbers:',
+    text: 'Running the NS400Z through the simulator at matched Aamby Valley November conditions — density altitude near 1,100 m, 22°C ambient, dry asphalt with the OEM MRF rear tire at μ_peak ≈ 1.08, 70 kg rider in stock upright tuck — produces these numbers:',
   },
   {
     type: 'table',
@@ -72,7 +72,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Both ETs sit inside MotoQuant\'s mid-twin-300-500 cluster bias band of about ±0.4 seconds. The relative gap (NS400Z three tenths slower, 8 km/h less trap, one tenth slower at the 60-foot) is stable across rider weight, ambient temperature, and density altitude sweeps. A single instrumented Dragy timeslip from either bike would tighten the prediction by a real margin, and we will fold that into the calibrator the moment it lands in the inbox. Until then, the simulator is the best public stock-tune number for the NS400Z that exists.',
+    text: 'Both ETs sit inside MotoQuant\'s mid-twin-300-500 cluster bias band of about ±0.4 seconds. The relative gap (NS400Z three tenths slower, 8 km/h less trap, one tenth slower at the 60-foot) is stable across rider weight, ambient temperature, and density altitude sweeps. A single instrumented Dragy timeslip from either bike would tighten the prediction by a real margin, and the "Submit a timeslip" form is how to send one. Until then, the simulator is the best public stock-tune number for the NS400Z that exists.',
   },
   {
     type: 'callout',
@@ -141,7 +141,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The sprocket swap is the cheapest tenth on the bike by an order of magnitude. Dropping one tooth at the front shortens overall gearing by roughly 6.7 percent, which keeps the engine higher in its power band through the first three gears — exactly where the NS400Z is currently giving up time to the RC 390. The Eurogrip Protorq Extreme is a step up from the OEM MRF rear in compound stickiness; on a tight Indian strip with patchy concrete it buys back most of the launch-grip gap the NS400Z has against an RC 390 on Metzeler Sportec M5 rubber. The Powertronic Stage 1 re-flash unlocks an additional 1.5–2 hp at the top of the rev band by relaxing Bajaj\'s conservative OEM map; you also get sharper throttle response that matters at the strip but matters even more on commute days.',
+    text: 'The sprocket swap is the cheapest tenth on the bike by an order of magnitude. Dropping one tooth at the front shortens overall gearing by roughly 6.7 percent, which keeps the engine higher in its power band through the first three gears — exactly where the NS400Z is currently giving up time to the RC 390. The Eurogrip Protorq Extreme is a step up from the OEM MRF rear in compound stickiness; on a tight Indian strip with patchy asphalt it buys back most of the launch-grip gap the NS400Z has against an RC 390 on Metzeler Sportec M5 rubber. The Powertronic Stage 1 re-flash unlocks an additional 1.5–2 hp at the top of the rev band by relaxing Bajaj\'s conservative OEM map; you also get sharper throttle response that matters at the strip but matters even more on commute days.',
   },
   {
     type: 'p',
@@ -149,7 +149,7 @@ const CONTENT = [
   },
   {
     type: 'callout',
-    text: 'Three caveats. First, every simulator number in this post sits inside the mid-twin-300-500 cluster bias band of ±0.4 seconds. A real Dragy timeslip would tighten the prediction. Second, Indian aftermarket pricing shifts every quarter — the parts-ROI engine pulls live retailer prices where it can and falls back to formula-based landing-cost math (USD × 84 × 1.30 import duty × 1.18 GST + ₹1,500 freight) where it cannot. Third, the NS400Z launched in May 2024; service-history data and long-term durability comparisons against the RC 390 are still being written.',
+    text: 'Three caveats. First, every simulator number in this post sits inside the mid-twin-300-500 cluster bias band of ±0.4 seconds. A real Dragy timeslip would tighten the prediction. Second, Indian aftermarket pricing shifts every quarter — the parts catalog uses retailer prices where it has them and falls back to formula-based landing-cost math (USD × 84 × 1.30 import duty × 1.18 GST + ₹1,500 freight) where it cannot. Third, the NS400Z launched in May 2024; service-history data and long-term durability comparisons against the RC 390 are still being written.',
   },
   {
     type: 'h2',
@@ -157,7 +157,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The numbers above are for Aamby Valley in November — roughly 1,100 m density altitude, 22°C ambient, dry concrete with a μ_peak of about 1.08. At lower-altitude strips the picture sharpens for the NS400Z. At MMRT (Chennai, sea level, 30°C, μ_peak ≈ 1.05 on the better days) the simulator drops the NS400Z to roughly 13.5 seconds and 161 km/h trap — gaining about 0.3 s of ET because the engine is making peak power again without the 1,100 m density-altitude penalty. The RC 390 also gains, but slightly less in relative terms because its tighter gearing was already extracting more from the available power.',
+    text: 'The numbers above are for Aamby Valley in November — roughly 1,100 m density altitude, 22°C ambient, dry asphalt with a μ_peak of about 1.08. At lower-altitude strips the picture sharpens for the NS400Z. At MMRT (Chennai, sea level, 30°C, μ_peak ≈ 1.05 on the better days) the simulator drops the NS400Z to roughly 13.5 seconds and 161 km/h trap — gaining about 0.3 s of ET because the engine is making peak power again without the 1,100 m density-altitude penalty. The RC 390 also gains, but slightly less in relative terms because its tighter gearing was already extracting more from the available power.',
   },
   {
     type: 'p',
@@ -177,7 +177,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'And the moment a real Dragy timeslip from a stock NS400Z lands in the calibrator (which we expect within weeks of this being published), the simulator will fold it in and tighten the prediction. The current ±0.4 second cluster bias band is the honest uncertainty number until that data exists; it is wider than the gap to the RC 390, but the relative ordering across the cluster is stable. The NS400Z is third or fourth quickest in its segment behind the RC 390 and the Duke 390, ahead of the Apache RR 310 and well ahead of the Dominar 400. That order does not change across reasonable sweeps of the input parameters.',
+    text: 'A real Dragy timeslip from a stock NS400Z, submitted through the "Submit a timeslip" form, would tighten the prediction. The current ±0.4 second cluster bias band is the honest uncertainty number until that data exists; it is wider than the gap to the RC 390, but the relative ordering across the cluster is stable. The NS400Z is third or fourth quickest in its segment behind the RC 390 and the Duke 390, ahead of the Apache RR 310 and well ahead of the Dominar 400. That order does not change across reasonable sweeps of the input parameters.',
   },
 ];
 

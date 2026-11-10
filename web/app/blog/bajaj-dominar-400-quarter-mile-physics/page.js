@@ -59,7 +59,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Running the Dominar 400 in MotoQuant under Aamby Valley November conditions — density altitude near 1,100 m, 22°C ambient, dry concrete, μ_peak 1.10 on the OEM MRF Zapper FY1 rear, 78 kg rider — produces these stock numbers:",
+    text: "Running the Dominar 400 in MotoQuant under Aamby Valley November conditions — density altitude near 1,100 m, 22°C ambient, dry asphalt, μ_peak 1.10 on the OEM MRF Zapper FY1 rear, 78 kg rider — produces these stock numbers:",
   },
   {
     type: "table",

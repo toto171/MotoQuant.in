@@ -55,7 +55,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Running the Continental GT 650 in MotoQuant under Aamby Valley November conditions (density altitude ~1,100 m, 22°C ambient, dry concrete with the OEM Pirelli Phantom Sportscomp 130/70-18 rear at μ_peak 1.20) and a 78 kg rider on the 182 kg dry bike produces the following stock-tune output:",
+    text: "Running the Continental GT 650 in MotoQuant under Aamby Valley November conditions (density altitude ~1,100 m, 22°C ambient, dry asphalt with the OEM Pirelli Phantom Sportscomp 130/70-18 rear at μ_peak 1.20) and a 78 kg rider on the 182 kg dry bike produces the following stock-tune output:",
   },
   {
     type: "table",
@@ -110,7 +110,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "2. Launch and clutch. With 52 Nm at 5,250 rpm and a healthy slipper clutch, the GT 650 has an easy launch window. Drop the clutch around 4,000 rpm and the engine pulls cleanly without bogging; bring it above 6,000 and the rear tire — on stock Pirelli Phantoms at μ_peak 1.20 — does not break traction even on warm Indian concrete. The mid-twin-500-700 cluster fix from May 2026 raised the over-clutching factor for this band, which means the simulator now lets the GT launch closer to its peak-torque rpm without snatching. The launch is not where the GT loses time; the launch is one of the things it does well.",
+    text: "2. Launch and clutch. With 52 Nm at 5,250 rpm and a healthy slipper clutch, the GT 650 has an easy launch window. Drop the clutch around 4,000 rpm and the engine pulls cleanly without bogging; bring it above 6,000 and the rear tire — on stock Pirelli Phantoms at μ_peak 1.20 — does not break traction even on warm Indian asphalt. The mid-twin-500-700 cluster fix from May 2026 raised the over-clutching factor for this band, which means the simulator now lets the GT launch closer to its peak-torque rpm without snatching. The launch is not where the GT loses time; the launch is one of the things it does well.",
   },
   {
     type: "p",

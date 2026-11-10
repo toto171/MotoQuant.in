@@ -56,7 +56,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running both bikes in MotoQuant with a 78 kg rider, OEM Pirelli Diablo Rosso IV tires, dry concrete, 22°C ambient, and density altitude ~1100 m (Aamby Valley in November), the stock-tune numbers come out as follows:',
+    text: 'Running both bikes in MotoQuant with a 78 kg rider, OEM Pirelli Diablo Rosso IV tires, dry asphalt, 22°C ambient, and density altitude ~1100 m (Aamby Valley in November), the stock-tune numbers come out as follows:',
   },
   {
     type: 'table',

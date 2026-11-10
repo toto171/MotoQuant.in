@@ -52,7 +52,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running the Xtreme 200S 4V in MotoQuant under Aamby Valley November conditions (density altitude around 1100 m, 22°C ambient, dry concrete with the OEM bias-ply 130/70-17 rear at μ_peak 1.05) and a 78 kg rider on the 158 kg dry bike produces the following stock-tune output:',
+    text: 'Running the Xtreme 200S 4V in MotoQuant under Aamby Valley November conditions (density altitude around 1100 m, 22°C ambient, dry asphalt with the OEM bias-ply 130/70-17 rear at μ_peak 1.05) and a 78 kg rider on the 158 kg dry bike produces the following stock-tune output:',
   },
   {
     type: 'table',
@@ -71,7 +71,7 @@ const CONTENT = [
   },
   {
     type: 'callout',
-    text: 'Why the simulator runs slow on small-cc Indian bikes: the cluster bias is honest, not a bug. Most published 0-100 km/h times for this class are converted to ETs by multiplying by 1.6 — a magazine shortcut, not a real timing trap. Real instrumented Indian small-cc data is thin, so the model is conservatively calibrated to the slower end of plausible until Dragy uploads start flowing through the calibrator.',
+    text: 'Why the simulator runs slow on small-cc Indian bikes: the cluster bias is honest, not a bug. Most published 0-100 km/h times for this class are converted to ETs by multiplying by 1.6 — a magazine shortcut, not a real timing trap. Real instrumented Indian small-cc data is thin, so the model is conservatively calibrated to the slower end of plausible until instrumented timeslips arrive through the "Submit a timeslip" form.',
   },
   {
     type: 'h2',
@@ -107,7 +107,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "2. Clutch and launch. With only 17.35 Nm at 6,500 rpm, the Xtreme has the opposite problem of a litre bike: there is barely enough torque to wheelie, and the launch window is narrow. Drop the clutch below 5,000 rpm and the engine bogs; bring the launch above 7,500 rpm and the rear tire — bias-ply OEM rubber, μ_peak 1.05 — actually does start to spin on dry concrete because the clutch hooks too hard. The simulator's small-cc clutch over-clutching factor (added in the May 2026 calibration pass) lets the Xtreme launch closer to its peak-torque rpm without snatching, which closes about 0.3 seconds of the bigger pre-fix gap. A real rider on a real strip needs to find that window by feel, and most do not.",
+    text: "2. Clutch and launch. With only 17.35 Nm at 6,500 rpm, the Xtreme has the opposite problem of a litre bike: there is barely enough torque to wheelie, and the launch window is narrow. Drop the clutch below 5,000 rpm and the engine bogs; bring the launch above 7,500 rpm and the rear tire — bias-ply OEM rubber, μ_peak 1.05 — actually does start to spin on dry asphalt because the clutch hooks too hard. The simulator's small-cc clutch over-clutching factor (added in the May 2026 calibration pass) lets the Xtreme launch closer to its peak-torque rpm without snatching, which closes about 0.3 seconds of the bigger pre-fix gap. A real rider on a real strip needs to find that window by feel, and most do not.",
   },
   {
     type: 'p',
@@ -176,7 +176,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'For the Xtreme specifically that means the simulator 17.40 second ET and a magazine 16.0 second ET are probably describing the same physical bike — they are just produced by different methodologies. The honest answer for an owner is: take the Xtreme to a real timed strip, run a Dragy or a VBOX, and trust the timing trap over the magazine number. The simulator will close the gap as more Indian small-cc Dragy data flows into the calibrator, which is a Phase 3 priority.',
+    text: 'For the Xtreme specifically that means the simulator 17.40 second ET and a magazine 16.0 second ET are probably describing the same physical bike — they are just produced by different methodologies. The honest answer for an owner is: take the Xtreme to a real timed strip, run a Dragy or a VBOX, and trust the timing trap over the magazine number. The gap will close as more instrumented Indian small-cc timeslips join the benchmark set.',
   },
   {
     type: 'h2',

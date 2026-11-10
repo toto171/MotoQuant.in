@@ -59,7 +59,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Running the Street Triple 765 R in MotoQuant under Aamby Valley November conditions (density altitude ≈ 1,100 m, 22°C ambient, dry concrete, μ_peak 1.38 on the OEM Pirelli Diablo Rosso 3 rear), with a 78 kg rider on a 176 kg dry bike, produces these stock-tune numbers:",
+    text: "Running the Street Triple 765 R in MotoQuant under Aamby Valley November conditions (density altitude ≈ 1,100 m, 22°C ambient, dry asphalt, μ_peak 1.38 on the OEM Pirelli Diablo Rosso 3 rear), with a 78 kg rider on a 176 kg dry bike, produces these stock-tune numbers:",
   },
   {
     type: "table",

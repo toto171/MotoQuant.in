@@ -54,7 +54,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running the MT-15 V1 in MotoQuant under Aamby Valley November conditions (roughly 1,100 m density altitude, 22 °C ambient, dry concrete, the OEM 140/70-17 MRF Zapper rear at μ_peak around 1.10) and a 78 kg rider on the 134 kg dry bike produces:',
+    text: 'Running the MT-15 V1 in MotoQuant under Aamby Valley November conditions (roughly 1,100 m density altitude, 22 °C ambient, dry asphalt, the OEM 140/70-17 MRF Zapper rear at μ_peak around 1.10) and a 78 kg rider on the 134 kg dry bike produces:',
   },
   {
     type: 'table',
@@ -73,7 +73,7 @@ const CONTENT = [
   },
   {
     type: 'callout',
-    text: 'Why the simulator under-predicts small-cc Indian ETs: the cluster bias is calibrated against the most reliable instrumented sources available, which are mostly litre-bike magazine tests. Indian 150cc-200cc instrumented data is thin, so the model is conservatively biased to the slower end of plausible until Dragy uploads start flowing through the Phase 3 calibrator.',
+    text: 'Why the simulator under-predicts small-cc Indian ETs: the cluster bias is calibrated against the most reliable instrumented sources available, which are mostly litre-bike magazine tests. Indian 150cc-200cc instrumented data is thin, so the model is conservatively biased to the slower end of plausible until instrumented timeslips arrive through the "Submit a timeslip" form.',
   },
   {
     type: 'h2',

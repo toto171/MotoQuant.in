@@ -60,7 +60,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Running the F 900 GS in MotoQuant with a 78 kg rider, OEM Metzeler Karoo 4 spoke wheel set (peak grip coefficient 1.05 on dry concrete — these are off-road-biased block-tread tires, not sport-touring radials), 22°C ambient, dry concrete, and density altitude around 1100 m (Aamby Valley November), the stock-tune output is:',
+    text: 'Running the F 900 GS in MotoQuant with a 78 kg rider, OEM Metzeler Karoo 4 spoke wheel set (peak grip coefficient 1.05 on dry asphalt — these are off-road-biased block-tread tires, not sport-touring radials), 22°C ambient, dry asphalt, and density altitude around 1100 m (Aamby Valley November), the stock-tune output is:',
   },
   {
     type: 'table',

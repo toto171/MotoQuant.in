@@ -48,7 +48,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'MotoQuant runs the 2022 KTM Duke 390 against Aamby Valley November conditions — density altitude around 1,100 m, ambient 22°C, relative humidity 55 percent, dry concrete with the OEM Metzeler Sportec M5 rear tire at μ_peak ≈ 1.10. A 70 kg rider in the upright Duke stance. Two-step launch off the limiter at 5,800 rpm. Adaptive RK4 solver, 1 ms timestep. The bike pulls 13.30 seconds with a 162 km/h trap.',
+    text: 'MotoQuant runs the 2022 KTM Duke 390 against Aamby Valley November conditions — density altitude around 1,100 m, ambient 22°C, relative humidity 40 percent, dry asphalt with the OEM Metzeler Sportec M5 rear tire at μ_peak ≈ 1.10. A 70 kg rider in the upright Duke stance. Two-step launch off the limiter at 5,800 rpm. Adaptive RK4 solver, 1 ms timestep. The bike pulls 13.30 seconds with a 162 km/h trap.',
   },
   {
     type: 'table',
@@ -175,7 +175,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The roughly 0.25 second swing between MMRT and Aamby Valley is the largest accuracy-relevant variable on a stock Duke 390. If you have ever wondered why the Pune-area Duke 390 community runs three to four tenths slower than the Chennai community at apparently similar mod levels, this is most of the answer. The other half is the surface — Aamby Valley\'s concrete is consistent but harder than MMRT\'s freshly-laid asphalt, and the launch coefficient differs by about three percent between the two surfaces. None of this is news to active Indian drag racers, but it is worth running through the simulator before booking flights for a specific Valley Run weekend.',
+    text: 'The roughly 0.25 second swing between MMRT and Aamby Valley is the largest accuracy-relevant variable on a stock Duke 390. If you have ever wondered why the Pune-area Duke 390 community runs three to four tenths slower than the Chennai community at apparently similar mod levels, this is most of the answer. None of this is news to active Indian drag racers, but it is worth running through the simulator before booking flights for a specific Valley Run weekend.',
   },
   {
     type: 'h2',
@@ -187,7 +187,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'What the simulator can do is answer practical questions with documented physics. "Will a sprocket swap and a sticky tire get my Duke 390 under 13 seconds at MMRT?" Yes, sim says 12.78 seconds. "Is the SC-Project slip-on worth ₹24,000?" Sim says no — twenty thousand rupees per tenth is the worst ROI on the practical Indian mod list. "What is the cheapest path to a 12-second Duke 390?" Sim says roughly ₹49,000 across five mods, plus a strip at sea level and a rider who can launch the bike cleanly. The simulator is honest about the cluster bias band of ±0.4 seconds; if you upload a Dragy timeslip, it tightens that band to your specific bike.',
+    text: 'What the simulator can do is answer practical questions with documented physics. "Will a sprocket swap and a sticky tire get my Duke 390 under 13 seconds at MMRT?" Yes, sim says 12.78 seconds. "Is the SC-Project slip-on worth ₹24,000?" Sim says no — twenty thousand rupees per tenth is the worst ROI on the practical Indian mod list. "What is the cheapest path to a 12-second Duke 390?" Sim says roughly ₹49,000 across five mods, plus a strip at sea level and a rider who can launch the bike cleanly. The simulator is honest about the cluster bias band of ±0.4 seconds; if you have a Dragy timeslip, submit it through the "Submit a timeslip" form; a reviewed run joins the benchmark set.',
   },
   {
     type: 'h2',

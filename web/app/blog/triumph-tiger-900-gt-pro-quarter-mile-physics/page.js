@@ -65,7 +65,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Running the Tiger 900 GT Pro in MotoQuant with a 78 kg rider, OEM Metzeler Tourance Next 2 road-biased ADV rubber (peak grip coefficient 1.18 on dry concrete), 22°C ambient, dry concrete, and density altitude around 1100 m (Aamby Valley November), the stock-tune output is:",
+    text: "Running the Tiger 900 GT Pro in MotoQuant with a 78 kg rider, OEM Metzeler Tourance Next 2 road-biased ADV rubber (peak grip coefficient 1.18 on dry asphalt), 22°C ambient, dry asphalt, and density altitude around 1100 m (Aamby Valley November), the stock-tune output is:",
   },
   {
     type: "table",

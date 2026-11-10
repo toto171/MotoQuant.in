@@ -61,7 +61,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Running the Interceptor 650 in MotoQuant under matched Aamby Valley November conditions — density altitude around 1,100 m, 22°C ambient, dry concrete, OEM Pirelli Phantom Sportscomp 130/70-18 rear at μ_peak ≈ 1.20, 78 kg rider — produces this stock-tune output:",
+    text: "Running the Interceptor 650 in MotoQuant under matched Aamby Valley November conditions — density altitude around 1,100 m, 22°C ambient, dry asphalt, OEM Pirelli Phantom Sportscomp 130/70-18 rear at μ_peak ≈ 1.20, 78 kg rider — produces this stock-tune output:",
   },
   {
     type: "table",
@@ -218,7 +218,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "Second, the mid_twin_500_700 cluster is being actively calibrated as new Dragy timeslips arrive from Indian Interceptor 650 owners. The May 30 2026 sweep put the cluster mean bias at +0.16 seconds slow for parallel twins in this displacement range. As more real-world data lands in the calibrator, expect the Interceptor 650 sim ET to drift toward 13.95 over the next few months without any change to the bike itself. The relative comparisons against the GT 650, the Super Meteor 650, and the Ninja 650 will stay stable because the calibration applies uniformly across the cluster.",
+    text: "Second, the mid_twin_500_700 cluster is small: six published tests in the 10 November 2026 accuracy sweep, with a weighted bias of +0.135 seconds, meaning the simulator runs these parallel twins slightly slow on average. More instrumented timeslips from Indian Interceptor 650 owners would tighten it. The relative comparisons against the GT 650, the Super Meteor 650 and the Ninja 650 are more reliable than the absolute times, because a class-wide bias moves all of them together.",
   },
   {
     type: "p",
