@@ -50,6 +50,7 @@ from .roi import (
     EXCLUSIVE_CATEGORIES,
     BuildROIResult,
     PartROIResult,
+    SimMemo,
     _knapsack_group_key,
     _part_slots_from_repo,
     _run_et,
@@ -75,7 +76,9 @@ class BuildProfile(Enum):
 
 
 # Categories allowed per profile.  If a profile key is not present in
-# _PROFILE_CATEGORIES, ALL categories are allowed.
+# _PROFILE_CATEGORIES, ALL categories are allowed. Every name here is a real
+# parts_categories.name ("tire" never was: tyres live in their own table), and
+# FULL_RACE covers the whole catalog (tests/test_analysis_fixes_2026_11.py).
 _PROFILE_CATEGORIES: dict[BuildProfile, set[str]] = {
     BuildProfile.STREET_LEGAL: {
         "exhaust",
@@ -89,7 +92,6 @@ _PROFILE_CATEGORIES: dict[BuildProfile, set[str]] = {
         "bodywork",
         "suspension",
         "brakes",
-        "tire",
     },
     BuildProfile.DRAG_PREP: {
         "exhaust",
@@ -103,9 +105,11 @@ _PROFILE_CATEGORIES: dict[BuildProfile, set[str]] = {
         "swingarm_ext",
         "battery",
         "bodywork",
-        "tire",
         "nitrous",
         "fuel_system",
+        "lowering_kit",
+        "air_shifter",
+        "lockup_clutch",
     },
     BuildProfile.FULL_RACE: {
         "exhaust",
@@ -119,12 +123,14 @@ _PROFILE_CATEGORIES: dict[BuildProfile, set[str]] = {
         "swingarm_ext",
         "battery",
         "bodywork",
-        "tire",
         "nitrous",
         "fuel_system",
         "boost_kit",
         "suspension",
         "brakes",
+        "lowering_kit",
+        "air_shifter",
+        "lockup_clutch",
     },
 }
 
@@ -275,7 +281,7 @@ class BuildTier:
         lines = [
             f"── {self.tier_name} (budget: ₹{self.budget_inr:,.0f}) ──",
             f"  ET: {self.build.base_et_s:.3f}s → {self.build.modified_et_s:.3f}s "
-            f"({self.build.delta_et_s:+.3f}s)",
+            f"({-self.build.delta_et_s:+.3f}s)",
             f"  Cost: ₹{self.build.total_cost_inr:,.0f}  "
             f"({len(self.build.selected_parts)} parts)",
         ]
@@ -353,7 +359,11 @@ class BuildRecommendation:
             "budget_inr": self.budget_inr,
             "base_et_s": self.build.base_et_s,
             "modified_et_s": self.build.modified_et_s,
-            "delta_et_s": round(self.build.delta_et_s, 4),
+            # Public convention: delta_et_s = modified - base (negative =
+            # quicker); et_gain_s is the same number with the sign flipped
+            # (positive = quicker).
+            "delta_et_s": round(-self.build.delta_et_s, 4) + 0.0,
+            "et_gain_s": round(self.build.delta_et_s, 4) + 0.0,
             "total_cost_inr": self.build.total_cost_inr,
             "parts_selected": [
                 {
@@ -361,7 +371,11 @@ class BuildRecommendation:
                     "name": p.part_name,
                     "category": p.category,
                     "price_inr": p.price_inr,
-                    "delta_et_s": round(p.delta_et_s, 4),
+                    "delta_et_s": round(-p.delta_et_s, 4) + 0.0,
+                    "et_gain_s": round(p.delta_et_s, 4) + 0.0,
+                    "no_straight_line_effect": bool(
+                        getattr(p, "no_straight_line_effect", False)
+                    ),
                     "roi_score": round(p.roi_score, 4)
                     if not math.isinf(p.roi_score)
                     else None,
@@ -423,7 +437,8 @@ class UpgradePath:
                     "budget_inr": t.budget_inr,
                     "base_et_s": t.build.base_et_s,
                     "modified_et_s": t.build.modified_et_s,
-                    "delta_et_s": round(t.build.delta_et_s, 4),
+                    "delta_et_s": round(-t.build.delta_et_s, 4) + 0.0,
+                    "et_gain_s": round(t.build.delta_et_s, 4) + 0.0,
                     "total_cost_inr": t.build.total_cost_inr,
                     "parts_count": len(t.build.selected_parts),
                     "parts": [
@@ -656,12 +671,18 @@ def recommend_build(
             category_priority=[],
         )
 
+    # One sim memo for the whole recommendation: the stock bike and any
+    # config already simulated (per-part pass, combined build, next-upgrade
+    # probes) is never simulated twice.
+    memo = SimMemo()
+
     # Compute individual ROI for all candidate parts
     all_roi = compute_parts_roi(
         base_config=base_config,
         part_ids=filtered_ids,
         parts_repo=parts_repo,
         bike_model_id=bike_model_id,
+        et_fn=memo,
     )
 
     # Run knapsack optimizer, reusing the ROI pass above (previously this
@@ -673,6 +694,7 @@ def recommend_build(
         part_ids=filtered_ids,
         bike_model_id=bike_model_id,
         precomputed_individual=all_roi,
+        et_fn=memo,
     )
 
     # Detect synergies and warnings in the selected build
@@ -695,7 +717,7 @@ def recommend_build(
             return _knapsack_group_key(r, position_of, slot_of)
 
         def marginal(r):
-            et, _trap = score_build(base_config, selected + [r], parts_repo, _run_et)
+            et, _trap = score_build(base_config, selected + [r], parts_repo, memo)
             return build.modified_et_s - et
 
         next_up = _find_next_upgrade(
@@ -786,6 +808,9 @@ def generate_upgrade_path(
 
     filtered_ids = [p["id"] for p in filtered_parts]
     tiers: list[BuildTier] = []
+    # Every tier scores the same candidate parts on the same stock bike: one
+    # memo across the tiers simulates each part once instead of once per tier.
+    memo = SimMemo()
 
     for i, (budget, name) in enumerate(zip(budget_tiers, tier_names)):
         build = find_best_build(
@@ -794,6 +819,7 @@ def generate_upgrade_path(
             parts_repo=parts_repo,
             part_ids=filtered_ids,
             bike_model_id=bike_model_id,
+            et_fn=memo,
         )
         synergies = _detect_synergies(build.selected_parts)
         warns = _detect_warnings(build.selected_parts)
@@ -865,7 +891,7 @@ def get_category_upgrade_order(
             reason = f"Free upgrade — {part.delta_et_s:.3f}s gain for ₹0"
         elif part.roi_score > 1.0:
             reason = f"High ROI: {part.delta_et_s:.3f}s gain for ₹{part.price_inr:,.0f}"
-        elif part.delta_et_s > 0.1:
+        elif part.delta_et_s > 0.1 and math.isfinite(part.cost_per_tenth_inr):
             reason = f"Large gain: {part.delta_et_s:.3f}s (₹{part.cost_per_tenth_inr:,.0f}/tenth)"
         else:
             reason = f"Moderate gain: {part.delta_et_s:.3f}s for ₹{part.price_inr:,.0f}"

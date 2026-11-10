@@ -419,6 +419,238 @@ class TestHttpBackendPaths(unittest.TestCase):
         self.assertIn("Could not reach", text)
 
 
+# ─── Conditions and skipped parts reach the MCP result ────────────────────
+
+_ENV = {
+    "name": "Test Strip",
+    "is_default": False,
+    "source": "venue",
+    "altitude_m": 679.0,
+    "ambient_temp_c": 22.0,
+    "track_surface": "asphalt",
+}
+
+
+_SKIP = {"id": 999, "reason": "does_not_fit", "detail": "Part 999 does not fit."}
+
+
+def _api_side(name, et, **extra):
+    return {
+        "bike_name": name,
+        "et_quarter_s": et,
+        "trap_speed_kmh": 230.0,
+        "et_60ft_s": 1.8,
+        "et_eighth_s": 6.5,
+        "peak_power_hp": 170.0,
+        "total_mass_kg": 270.0,
+        **extra,
+    }
+
+
+class _CannedBackend:
+    """Answers each backend call with an API-shaped response that carries the
+    ``environment`` block and ``parts_skipped`` (set ``with_extras=False`` for
+    an older API that has neither)."""
+
+    kind = "http"
+
+    def __init__(self, with_extras=True, skip_in_compare=False):
+        self.skip_in_compare = skip_in_compare
+        self.extras = (
+            {
+                "environment": dict(_ENV),
+                "parts_skipped": [999],
+                "parts_skipped_detail": [dict(_SKIP)],
+            }
+            if with_extras
+            else {}
+        )
+
+    def simulate_quick(self, payload):
+        out = _api_side("Test Bike", 10.0 if not payload.get("part_ids") else 9.9)
+        if payload.get("part_ids"):
+            out.update(
+                parts_applied=[{"id": 7, "brand": "Acme", "name": "Pipe"}],
+                build_cost_inr=10_000.0,
+                stock_et_s=10.0,
+                et_delta_s=-0.1,
+            )
+        return {**out, **self.extras}
+
+    def top_speed(self, payload):
+        return {
+            "bike_name": "Test Bike",
+            "terminal_velocity_kmh": 290.0,
+            "terminal_velocity_mph": 180.2,
+            "reached_plateau": True,
+            **self.extras,
+        }
+
+    def compare(self, payload):
+        skipped = (
+            {"parts_skipped": [999], "parts_skipped_detail": [dict(_SKIP)]}
+            if self.skip_in_compare
+            else {}
+        )
+        out = {
+            "a": _api_side("Bike A", 10.0, **skipped),
+            "b": _api_side("Bike B", 10.2),
+            "delta": {"et_s": 0.2, "trap_kmh": -3.0, "faster": "A"},
+        }
+        if self.extras:
+            out["environment"] = dict(_ENV)
+        return out
+
+    def list_parts(self, **kw):
+        return {
+            "parts": [
+                {"id": 1, "param_overrides": {"drivetrain.front_sprocket": 17}},
+                {"id": 2, "param_overrides": {"drivetrain.rear_sprocket": 42}},
+                {"id": 3, "param_overrides": {"drivetrain.rear_sprocket": 45}},
+            ]
+        }
+
+
+class TestConditionsAndSkippedPartsArePassedThrough(unittest.TestCase):
+    """A result without its conditions cannot be compared with anything, and
+    a part that silently did not fit looks applied: every result shaper must
+    carry both through when the API supplies them."""
+
+    GEARING = {
+        "bike_id": 1,
+        "front_a": 17,
+        "rear_a": 42,
+        "front_b": 17,
+        "rear_b": 45,
+    }
+
+    def _calls(self, backend):
+        return {
+            "simulate_quarter_mile": _call(
+                "simulate_quarter_mile", {"bike_id": 1, "part_ids": [7]}, backend
+            ),
+            "simulate_top_speed": _call("simulate_top_speed", {"bike_id": 1}, backend),
+            "compare_bikes": _call(
+                "compare_bikes", {"a_bike_id": 1, "b_bike_id": 2}, backend
+            ),
+            "part_impact": _call("part_impact", {"bike_id": 1, "part_id": 7}, backend),
+            "gearing_impact": _call("gearing_impact", dict(self.GEARING), backend),
+        }
+
+    def test_every_simulation_tool_reports_its_conditions(self):
+        for tool, (is_error, payload) in self._calls(_CannedBackend()).items():
+            self.assertFalse(is_error, (tool, payload))
+            self.assertEqual(payload.get("environment"), _ENV, tool)
+
+    def test_skipped_parts_are_reported_where_parts_can_be_requested(self):
+        got = self._calls(_CannedBackend(skip_in_compare=True))
+        for tool in ("simulate_quarter_mile", "simulate_top_speed", "part_impact"):
+            payload = got[tool][1]
+            self.assertEqual(payload["parts_skipped"], [999], tool)
+            self.assertEqual(payload["parts_skipped_detail"], [_SKIP], tool)
+        # compare: per side, only on the side that skipped
+        payload = got["compare_bikes"][1]
+        self.assertEqual(payload["a"]["parts_skipped"], [999])
+        self.assertEqual(payload["a"]["parts_skipped_detail"], [_SKIP])
+        self.assertNotIn("parts_skipped", payload["b"])
+
+    def test_gearing_comparison_is_refused_when_a_sprocket_was_not_fitted(self):
+        """Over the hosted API a tooth count is a catalog sprocket. If the API
+        skipped one, that side ran on other gearing: no result, the reason."""
+        is_error, text = self._calls(_CannedBackend(skip_in_compare=True))[
+            "gearing_impact"
+        ]
+        self.assertTrue(is_error, text)
+        self.assertIn("setup A", text)
+        self.assertIn("999", text)
+        self.assertIn("does not fit", text)
+
+    def test_part_impact_says_why_a_part_was_not_applied(self):
+        class _Unfitted(_CannedBackend):
+            def simulate_quick(self, payload):
+                out = _api_side("Test Bike", 10.0)
+                if payload.get("part_ids"):
+                    out.update(parts_applied=[], **self.extras)
+                return out
+
+        is_error, text = _call(
+            "part_impact", {"bike_id": 1, "part_id": 999}, _Unfitted()
+        )
+        self.assertTrue(is_error, text)
+        self.assertIn("Part 999 does not fit.", text)
+
+    def test_absent_fields_are_not_invented(self):
+        for tool, (is_error, payload) in self._calls(_CannedBackend(False)).items():
+            self.assertFalse(is_error, (tool, payload))
+            self.assertNotIn("environment", payload, tool)
+            self.assertNotIn("parts_skipped", payload, tool)
+            self.assertNotIn("parts_skipped_detail", payload, tool)
+
+    def test_slim_sim_keeps_both_fields(self):
+        slim = mcp_server._slim_sim(
+            {"bike_name": "X", "environment": _ENV, "parts_skipped": [4, 5]}
+        )
+        self.assertEqual(slim["environment"], _ENV)
+        self.assertEqual(slim["parts_skipped"], [4, 5])
+        self.assertNotIn("parts_skipped", mcp_server._slim_sim({"parts_skipped": []}))
+
+    def test_local_backend_passes_every_route_parameter_explicitly(self):
+        """The GET routes declare Query(...) defaults that only the request
+        layer resolves. Called as functions, every parameter must be given a
+        plain value — including ones a newer API adds."""
+        from fastapi import Query
+
+        seen = {}
+
+        def route(
+            category: str | None = Query(None),
+            bike_id: int | None = Query(None, ge=1),
+            bike_preset: str | None = Query(None, max_length=64),
+            compatible_only: bool = Query(True),
+            limit: int = Query(500, ge=1),
+            fields: str | None = Query(None),
+            include_rules: bool = Query(False),
+            request=None,
+        ):
+            seen.update(locals())
+            return {"parts": []}
+
+        kwargs = LocalBackend._route_kwargs(
+            route,
+            {"category": "sprocket", "bike_preset": "gsxr1000_k5", "not_a_param": 1},
+        )
+        route(**kwargs)
+        self.assertEqual(seen["category"], "sprocket")
+        self.assertEqual(seen["bike_preset"], "gsxr1000_k5")
+        self.assertIsNone(seen["bike_id"])
+        self.assertIs(seen["compatible_only"], True)
+        self.assertEqual(seen["limit"], 500)
+        self.assertIsNone(seen["fields"])
+        self.assertIs(seen["include_rules"], False)
+        self.assertNotIn("not_a_param", kwargs)
+
+    def test_local_results_carry_what_the_api_returns(self):
+        """LOCAL mode (the production code path): the MCP result shows exactly
+        the conditions block the API function returned for the same request."""
+        args = {"bike_preset": "gsxr1000_k5"}
+        api_res = LocalBackend().simulate_quick(dict(args))
+        is_error, payload = _call("simulate_quarter_mile", args)
+        self.assertFalse(is_error, payload)
+        self.assertEqual(payload.get("environment"), api_res.get("environment"))
+        is_error, top = _call("simulate_top_speed", args)
+        self.assertFalse(is_error, top)
+        self.assertEqual(top.get("environment"), api_res.get("environment"))
+        is_error, gearing = _call(
+            "gearing_impact",
+            {**args, "front_a": 17, "rear_a": 42, "front_b": 17, "rear_b": 45},
+        )
+        self.assertFalse(is_error, gearing)
+        self.assertEqual(gearing.get("environment"), api_res.get("environment"))
+        # the conditions are reported once, not repeated inside each setup
+        self.assertNotIn("environment", gearing["a"])
+        self.assertNotIn("environment", gearing["b"])
+
+
 # ─── Malformed input ──────────────────────────────────────────────────────
 
 

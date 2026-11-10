@@ -39,9 +39,11 @@ Usage
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import logging
 import math
+import pickle
 import re
 import warnings
 from dataclasses import dataclass
@@ -59,6 +61,9 @@ from ..physics import effective_et
 # every build. A plain integer, not None: an unfiltered search binds it into
 # SQL ``LIMIT ?`` and SQLite rejects NULL there.
 CANDIDATE_LIMIT = 100_000
+# Same cap under the name the November 2026 callers (nlp, the chat agent,
+# their tests) import.
+_ALL_PARTS_LIMIT = CANDIDATE_LIMIT
 
 
 def json_safe(obj):
@@ -112,6 +117,11 @@ class PartROIResult:
     # Build flag
     is_free: bool = False  # True when price_inr == 0 (weight-reduction, etc.)
 
+    # True when the sim measured exactly no change in ET and trap speed for
+    # this part: its catalog modifiers are empty or touch only parameters the
+    # straight-line physics does not read. Never a performance upgrade.
+    no_straight_line_effect: bool = False
+
     def summary_line(self) -> str:
         """One-liner for CLI output."""
         sign = "▲" if self.delta_et_s > 0 else ("▼" if self.delta_et_s < 0 else "─")
@@ -119,7 +129,7 @@ class PartROIResult:
         roi_str = f"{self.roi_score:.3f}" if self.roi_score < 999 else "∞"
         cpt_str = (
             f"₹{self.cost_per_tenth_inr:,.0f}/tenth"
-            if self.delta_et_s > 0
+            if self.delta_et_s > 0 and math.isfinite(self.cost_per_tenth_inr)
             else "no gain"
         )
         price_s = f"₹{self.price_inr:,.0f}" if self.price_inr else "free"
@@ -150,7 +160,8 @@ class BuildROIResult:
         lines = [
             f"Budget: ₹{self.budget_inr:,.0f}   Spent: ₹{self.total_cost_inr:,.0f}",
             f"Base ET:     {self.base_et_s:.3f}s",
-            f"Modified ET: {self.modified_et_s:.3f}s  ({self.delta_et_s:+.3f}s)",
+            # Shown as a time change (modified - base): negative = quicker.
+            f"Modified ET: {self.modified_et_s:.3f}s  ({-self.delta_et_s:+.3f}s)",
             f"Parts selected ({len(self.selected_parts)}):",
         ]
         for p in self.selected_parts:
@@ -862,6 +873,65 @@ def _run_et(config: BikeConfig) -> tuple[float, float]:
     return effective_et(result), result.speed_quarter
 
 
+# Per-call memo for full sims. Candidate parts routinely produce byte-identical
+# configs (a part whose modifiers the physics ignores, a dozen quickshifters
+# that set the same shift time, the stock config re-simulated as the base of
+# every pass), so one sim covers them all. The cache is keyed by a content
+# fingerprint of the whole config, holds only (et, trap) tuples, is bounded,
+# and lives as long as the object that owns it (one optimizer / ROI / autotune
+# call). The engine choice (Python reference or Rust core) is made per sim by
+# ``_run_et`` and the two are bit-identical, so the key does not include it.
+MEMO_ENABLED = True
+_MEMO_MAX_ENTRIES = 2048
+
+
+def config_fingerprint(config: BikeConfig) -> bytes:
+    """Content hash of a BikeConfig (every dataclass field, arrays included)."""
+    return hashlib.blake2b(pickle.dumps(config, protocol=4), digest_size=16).digest()
+
+
+class SimMemo:
+    """Callable ``BikeConfig -> (et_s, trap_ms)`` that never repeats a sim.
+
+    ``runner`` defaults to ``_run_et`` (looked up at call time, so the engine
+    selector and any test patch of ``roi._run_et`` are honoured).
+    """
+
+    def __init__(self, runner=None):
+        self._runner = runner
+        self._cache: dict[bytes, tuple[float, float]] = {}
+        self.sims = 0
+        self.hits = 0
+
+    def _run(self, config: BikeConfig) -> tuple[float, float]:
+        runner = self._runner if self._runner is not None else _run_et
+        return runner(config)
+
+    def __call__(self, config: BikeConfig) -> tuple[float, float]:
+        if not MEMO_ENABLED:
+            self.sims += 1
+            return self._run(config)
+        try:
+            key = config_fingerprint(config)
+        except Exception:  # noqa: BLE001 — an unhashable config is just simmed
+            self.sims += 1
+            return self._run(config)
+        hit = self._cache.get(key)
+        if hit is not None:
+            self.hits += 1
+            return hit
+        out = self._run(config)
+        self.sims += 1
+        if len(self._cache) >= _MEMO_MAX_ENTRIES:
+            self._cache.pop(next(iter(self._cache)))
+        self._cache[key] = out
+        return out
+
+
+# ET / trap changes smaller than this (seconds, m/s) are numerical zero.
+_NO_EFFECT_EPS_S = 1e-9
+
+
 def _roi_metrics(
     price_inr: float,
     delta_et_s: float,
@@ -1158,9 +1228,7 @@ def compute_parts_roi(
     -------
     List[PartROIResult] sorted by roi_score descending (best ROI first).
     """
-    import json
-
-    _et = et_fn if et_fn is not None else _run_et
+    _et = et_fn if et_fn is not None else SimMemo()
     base_et, base_trap = _et(base_config)
     results: list[PartROIResult] = []
 
@@ -1261,6 +1329,10 @@ def compute_parts_roi(
                 is_compatible=is_compat,
                 availability=part.get("availability", "unknown"),
                 is_free=(price_inr == 0.0),
+                no_straight_line_effect=bool(
+                    abs(delta_et) < _NO_EFFECT_EPS_S
+                    and abs(delta_trap) < _NO_EFFECT_EPS_S
+                ),
             )
         )
 
@@ -1323,7 +1395,9 @@ def find_best_build(
     -------
     BuildROIResult with selected parts, combined ET, and cost summary.
     """
-    _et = et_fn if et_fn is not None else _run_et
+    # One memo for the whole call: the stock bike and any part whose config is
+    # identical to another's are simulated once.
+    _et = et_fn if et_fn is not None else SimMemo()
     gain_of = _objective_gain(objective)
 
     # Discover candidate part IDs (no 200-row cap — see CANDIDATE_LIMIT).
@@ -1349,7 +1423,7 @@ def find_best_build(
             bike_model_id=bike_model_id,
             use_live_pricing=use_live_pricing,
             db_conn=db_conn,
-            et_fn=et_fn,
+            et_fn=_et,
         )
 
     # Filter to parts that clear the noise floor, fit the budget, and are

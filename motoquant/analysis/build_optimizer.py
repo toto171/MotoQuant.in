@@ -16,8 +16,12 @@ Scoring (October 2026):
     full-simmed); the selected parts are then re-verified with full sims.
   * Either way the REPORTED build (optimized ET/trap, delta, cost-per-tenth)
     is a full physics sim of the exact part list, applied in
-    ``applied_part_ids`` order (NA parts before boost), after a joint gearing
-    re-choice and a drop-one pass (``roi.refine_build``).
+    ``applied_part_ids`` order (NA parts before boost), after a bounded
+    one-for-one swap pass scored by combined sims (``_swap_repair``), a joint
+    gearing re-choice and a drop-one pass (``roi.refine_build``). No part is
+    ever recommended that was not simulated on the bike.
+  * Every full sim in one call goes through one ``roi.SimMemo``: identical
+    configs (the stock bike, parts the physics cannot tell apart) run once.
 
 Consolidation (not reinvention)
 -------------------------------
@@ -43,6 +47,7 @@ Public API
 
 from __future__ import annotations
 
+import copy
 import logging
 import time
 import warnings
@@ -64,10 +69,10 @@ from .recommendations import (
 from .roi import (
     CANDIDATE_LIMIT,
     PartROIResult,
+    SimMemo,
     _grouped_knapsack,
     _knapsack_group_key,
     _objective_gain,
-    _run_et,
     apply_order_ids,
     compute_parts_roi,
     noise_floored_metrics,
@@ -244,6 +249,13 @@ class SurrogatePredictor:
         # config as far as the sim cares — one sim covers them all.
         self._blind_cache: dict = {}
         self.on_predict = None  # optional progress hook (jobs API)
+        # Every full physics sim this predictor launches goes through one
+        # memo, so identical configs are simulated once per optimizer call.
+        self._sim = SimMemo()
+
+    def full_sim(self, config: BikeConfig) -> tuple[float, float]:
+        """Memoized full physics sim (never the surrogate)."""
+        return self._sim(config)
 
     def __call__(self, config: BikeConfig) -> tuple[float, float]:
         out = self._predict(config)
@@ -257,7 +269,7 @@ class SurrogatePredictor:
     def _predict(self, config: BikeConfig) -> tuple[float, float]:
         if self.surrogate is None:
             self.n_fallback += 1
-            return _run_et(config)
+            return self._sim(config)
         try:
             from .surrogate_data import config_to_feature_vector
 
@@ -286,7 +298,7 @@ class SurrogatePredictor:
                     if cached is not None:
                         return cached
                     self.n_fallback += 1
-                    out = _run_et(config)
+                    out = self._sim(config)
                     if key is not None:
                         self._blind_cache[key] = out
                     return out
@@ -303,7 +315,7 @@ class SurrogatePredictor:
             if not ok and self.allow_fallback:
                 self.n_out_of_envelope += 1
                 self.n_fallback += 1
-                return _run_et(config)
+                return self._sim(config)
 
             et_arr, trap_arr = self.surrogate.predict(fvec.reshape(1, -1))
             et = float(et_arr[0]) if hasattr(et_arr, "__len__") else float(et_arr)
@@ -314,7 +326,7 @@ class SurrogatePredictor:
                 trap /= 3.6
             self.n_surrogate += 1
             if first_call and self.allow_fallback:
-                true_et, true_trap = _run_et(config)
+                true_et, true_trap = self._sim(config)
                 self.n_anchor_sims += 1
                 self._anchor_offset = (true_et - et, true_trap - trap)
                 return true_et, true_trap
@@ -329,7 +341,7 @@ class SurrogatePredictor:
                 f"build_optimizer: surrogate scoring failed ({exc}); using full sim"
             )
             self.n_fallback += 1
-            return _run_et(config)
+            return self._sim(config)
 
     @property
     def method(self) -> str:
@@ -350,6 +362,8 @@ class SurrogatePredictor:
             "out_of_envelope": self.n_out_of_envelope,
             "feature_blind": self.n_feature_blind,
             "anchor_sims": self.n_anchor_sims,
+            "sims_run": self._sim.sims,
+            "sims_memoized": self._sim.hits,
         }
 
 
@@ -388,6 +402,9 @@ class OptimizedPart:
     roi_score: float | None
     cost_per_tenth_inr: float | None
     is_compatible: bool
+    # No measurable ET/trap change from this part in the sim (see
+    # roi.PartROIResult.no_straight_line_effect).
+    no_straight_line_effect: bool = False
 
     @classmethod
     def from_roi(cls, r: PartROIResult, *, is_compatible: bool = True) -> OptimizedPart:
@@ -405,10 +422,15 @@ class OptimizedPart:
             roi_score=_round_or_none(r.roi_score, 4),
             cost_per_tenth_inr=_round_or_none(r.cost_per_tenth_inr, 2),
             is_compatible=is_compatible,
+            no_straight_line_effect=bool(getattr(r, "no_straight_line_effect", False)),
         )
 
     def to_dict(self) -> dict:
-        return asdict(self)
+        d = asdict(self)
+        # delta_trap_ms has always held m/s; the unit-accurate name is the
+        # supported one and the old key stays as an alias.
+        d["delta_trap_mps"] = d["delta_trap_ms"]
+        return d
 
 
 @dataclass
@@ -508,6 +530,148 @@ def _select_build(
         gain,
         lambda r: _knapsack_group_key(r, position_of, slot_of),
     )
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# Joint-sim swap repair
+# ─────────────────────────────────────────────────────────────────────────
+SWAP_REPAIR_MAX_SIMS = 24
+# Only swaps whose additive estimate is within this many seconds (or trap
+# m/s) of break-even are worth a combined sim: the knapsack already rejected
+# clearly worse ones, and non-additivity is a ~0.1 s effect.
+_SWAP_ESTIMATE_WINDOW = 0.15
+
+# Single-part builds simmed by the final guard in _swap_repair.
+_SINGLE_PART_GUARD_SIMS = 2
+
+
+def _swap_repair(
+    base_config,
+    selected: list[PartROIResult],
+    individual: list[PartROIResult],
+    budget_inr: float,
+    goal: str,
+    *,
+    parts_repo,
+    predictor: SurrogatePredictor | None = None,
+    position_of: dict[int, str] | None = None,
+    slot_of: dict[int, str] | None = None,
+    progress_cb=None,
+    max_sims: int | None = None,
+    sim_fn=None,
+    min_delta_et_ms: float = 5.0,
+) -> tuple[list[PartROIResult], int]:
+    """Improve ``selected`` with one-for-one swaps scored by combined sims.
+
+    The knapsack adds up INDIVIDUAL gains, but parts overlap (two power parts
+    share headroom, a gearing part and a power part interact), so the additive
+    optimum is not always the combined-sim optimum. For each unselected
+    candidate that clears the noise floor and fits the budget and the slot
+    rules once a selected part is removed, the swapped build is simulated as a
+    whole (applied in the canonical ``roi.apply_order_ids`` order); a swap is
+    kept only when the joint metric strictly improves. At most ``max_sims``
+    extra sims are spent in total, the last few of them on checking the top
+    single-part builds so the result is never worse than the best single part
+    it ranked.
+
+    ``sim_fn`` (``BikeConfig -> (et_s, trap_ms)``) defaults to
+    ``predictor.full_sim`` — always the full physics sim, never the surrogate.
+    Returns (selected, sims_used).
+    """
+    if max_sims is None:
+        max_sims = SWAP_REPAIR_MAX_SIMS
+    if max_sims <= 0 or not selected:
+        return selected, 0
+    if sim_fn is None:
+        sim_fn = predictor.full_sim
+    gain = _objective_gain(goal)
+    max_gain = goal == "max_trap"
+
+    def metric(et: float, trap: float) -> float:
+        # larger is better
+        return trap if max_gain else -et
+
+    def group(r):
+        return _knapsack_group_key(r, position_of, slot_of)
+
+    def build_metric(parts: list[PartROIResult]) -> float | None:
+        try:
+            cfg = parts_repo.apply_multiple(
+                apply_order_ids(parts), copy.deepcopy(base_config)
+            )
+        except Exception:  # noqa: BLE001 — an unappliable swap is just skipped
+            return None
+        et, trap = sim_fn(cfg)
+        return metric(et, trap)
+
+    def worthwhile(r: PartROIResult) -> bool:
+        return r.is_compatible and passes_noise_floor(gain(r), min_delta_et_ms)
+
+    current = list(selected)
+    sims = 0
+    cur_metric = build_metric(current)
+    if cur_metric is None:
+        return selected, 0
+    sims += 1  # combined sim of the starting build (memoized when repeated)
+
+    tried: set[frozenset[int]] = {frozenset(r.part_id for r in current)}
+    # The final single-part guard below is part of the same sim budget.
+    swap_cap = max(sims, max_sims - _SINGLE_PART_GUARD_SIMS)
+    while sims < swap_cap:
+        chosen_ids = {r.part_id for r in current}
+        spend = sum(r.price_inr for r in current)
+        moves: list[tuple[float, PartROIResult, PartROIResult]] = []
+        for u in individual:
+            if u.part_id in chosen_ids or not worthwhile(u):
+                continue
+            for s_ in current:
+                if spend - s_.price_inr + u.price_inr > budget_inr:
+                    continue
+                rest_groups = {group(r) for r in current if r.part_id != s_.part_id}
+                if group(u) in rest_groups:
+                    continue
+                est = gain(u) - gain(s_)
+                if est < -_SWAP_ESTIMATE_WINDOW:
+                    continue
+                moves.append((est, u, s_))
+        moves.sort(key=lambda m: -m[0])
+
+        improved = False
+        for _est, u, s_ in moves:
+            if sims >= swap_cap:
+                break
+            cand = [r for r in current if r.part_id != s_.part_id] + [u]
+            key = frozenset(r.part_id for r in cand)
+            if key in tried:
+                continue
+            tried.add(key)
+            if progress_cb is not None:
+                progress_cb(0.95, "Refining build (joint sims)")
+            m = build_metric(cand)
+            sims += 1
+            if m is not None and m > cur_metric + 1e-9:
+                current, cur_metric = cand, m
+                improved = True
+                break
+        if not improved:
+            break
+
+    # Never return a build that is worse than the best single part it ranked:
+    # a stacked build can be dragged down by interactions that one-for-one
+    # swaps cannot unwind. The top few affordable single parts are simmed as
+    # whole builds and win when they beat the refined build.
+    singles = sorted(
+        (r for r in individual if worthwhile(r) and r.price_inr <= budget_inr),
+        key=lambda r: -gain(r),
+    )[:_SINGLE_PART_GUARD_SIMS]
+    for r in singles:
+        if len(current) == 1 and current[0].part_id == r.part_id:
+            continue
+        m = build_metric([r])
+        sims += 1
+        if m is not None and m > cur_metric + 1e-9:
+            current, cur_metric = [r], m
+    return current, sims
 
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -622,8 +786,9 @@ def optimize_build(
 
     def full_et(cfg: BikeConfig) -> tuple[float, float]:
         n_final_sims[0] += 1
-        out = _run_et(cfg)
-        if not native:
+        ran_before = predictor._sim.sims
+        out = predictor.full_sim(cfg)
+        if not native and predictor._sim.sims != ran_before:
             # The Python engine holds the GIL through these back-to-back
             # verification sims; yield so the /api/jobs status poll can
             # respond on a 0.5-CPU host (the browser declared "connection
@@ -763,6 +928,32 @@ def optimize_build(
                 break
             selected = reselected
 
+    # Joint-sim swap repair: the knapsack adds up INDIVIDUAL gains, but parts
+    # overlap, so the additive optimum is not always the combined-sim optimum.
+    # A bounded set of one-for-one swaps is scored on the combined build and
+    # strict improvements are kept; the result is never worse than the best
+    # single part. Runs before refine_build so the gearing re-choice and the
+    # drop-one pass see the repaired build.
+    swap_sims = 0
+    if selected:
+        try:
+            selected, swap_sims = _swap_repair(
+                base_config,
+                selected,
+                individual,
+                float(budget_inr),
+                goal,
+                parts_repo=parts_repo,
+                predictor=predictor,
+                position_of=position_of,
+                slot_of=slot_of,
+                progress_cb=progress_cb,
+                sim_fn=full_et,
+            )
+        except Exception as exc:  # noqa: BLE001 — keep the knapsack pick
+            # (a job cancellation is a BaseException and still propagates)
+            warnings.warn(f"optimize_build: swap pass failed ({exc}); skipped")
+
     # Combined build — ALWAYS the full physics sim of the exact part list
     # (the surrogate cannot see quickshifters, chains or clutch kits; scoring
     # the combined build through it under-reported a real -0.324 s build as
@@ -799,7 +990,8 @@ def optimize_build(
         selected, combined_et, combined_trap_ms = [], base_et_s, base_trap_ms
 
     if surrogate_mode and selected:
-        # Parts the gearing re-choice brought in get their full-sim delta too.
+        # Parts the swap pass or the gearing re-choice brought in get their
+        # full-sim delta too.
         n_verify_sims += _verify(
             [r.part_id for r in selected if r.part_id not in verified],
             0.98,
@@ -847,6 +1039,7 @@ def optimize_build(
 
     stats = {**predictor.stats(), **extra_stats, "verify_sims": n_verify_sims}
     stats["final_sims"] = n_final_sims[0]
+    stats["swap_repair_sims"] = swap_sims
     if refinement is not None:
         stats["gearing_rechosen"] = refinement.gearing_changed
         stats["dropped_part_ids"] = [r.part_id for r in refinement.dropped]

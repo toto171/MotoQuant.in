@@ -132,13 +132,10 @@ DEFAULT_PARAM_BOUNDS: dict[str, SobolParamSpec] = {
         kind="relative",
         description="Rear rolling radius (±5% of nominal)",
     ),
-    "reaction_time": SobolParamSpec(
-        path="staging.reaction_time_ms",
-        low=0.0,
-        high=500.0,
-        kind="absolute",
-        description="Reaction time (ms)",
-    ),
+    # No "reaction_time" entry: the ET is timed from the start beam, so the
+    # rider's reaction time never changes it — a dead dimension that only
+    # diluted every other index (tests/test_analysis_fixes_2026_11.py checks
+    # each default parameter moves the ET).
     "redline_rpm": SobolParamSpec(
         path="engine.redline_rpm",
         low=0.90,
@@ -270,6 +267,49 @@ def _set_nested(obj, path: str, value) -> bool:
     return True
 
 
+def scale_dyno_to_peak_power(cfg: BikeConfig, nominal_hp: float) -> None:
+    """Scale ``cfg``'s stored dyno torque curve by new/nominal peak power.
+
+    The physics engine reads the dyno curve, not ``peak_power_hp``, so a
+    perturbed ``peak_power_hp`` alone changes nothing. Applies to naturally
+    aspirated configs with a stored curve whose peak power moved; mutates
+    ``cfg`` in place.
+    """
+    from ..models import DynoCurve  # lazy import to avoid circular dependency
+
+    new_hp = cfg.engine.peak_power_hp
+    hp_changed = abs(new_hp - nominal_hp) > 0.05
+    has_dyno = cfg.engine.dyno_curve is not None
+    is_na = not cfg.forced_induction.is_boosted
+
+    if hp_changed and has_dyno and is_na and nominal_hp > 1.0:
+        ratio = new_hp / nominal_hp
+        dc = cfg.engine.dyno_curve
+        cfg.engine.dyno_curve = DynoCurve(
+            rpm=dc.rpm.copy(),
+            torque_nm=dc.torque_nm * ratio,
+            is_at_wheel=dc.is_at_wheel,
+        )
+
+
+def prepare_config_for_specs(
+    config: BikeConfig, specs: list[SobolParamSpec]
+) -> BikeConfig:
+    """Return the config the Sobol sampler perturbs.
+
+    If any spec perturbs ``drivetrain.final_drive_ratio``, the gearing is
+    normalised onto that field (``final_ratio`` prefers sprocket teeth over
+    ``final_drive_ratio`` for chain bikes, so a sampled ratio would be written
+    but never read and the sensitivity would falsely read ~0). The effective
+    ratio is preserved, so the all-centre run is bit-identical. Works on a
+    copy; otherwise returns ``config`` itself.
+    """
+    if any(s.path == "drivetrain.final_drive_ratio" for s in specs):
+        config = copy.deepcopy(config)
+        config.drivetrain.set_effective_final_drive(config.drivetrain.final_ratio)
+    return config
+
+
 def _apply_sample_row(
     base_config: BikeConfig,
     specs: list[SobolParamSpec],
@@ -293,8 +333,6 @@ def _apply_sample_row(
     Without this, the physics engine ignores the ``peak_power_hp`` field (it
     uses the dyno curve directly), making the power sensitivity appear as zero.
     """
-    from ..models import DynoCurve  # lazy import to avoid circular dependency
-
     cfg = copy.deepcopy(base_config)
     nominal_hp = base_config.engine.peak_power_hp  # capture before any mutations
 
@@ -309,19 +347,7 @@ def _apply_sample_row(
 
     # Dyno curve scaling: if peak_power_hp was perturbed and the config has a
     # dyno curve, scale the torque array so the physics engine sees the change.
-    new_hp = cfg.engine.peak_power_hp
-    hp_changed = abs(new_hp - nominal_hp) > 0.05
-    has_dyno = cfg.engine.dyno_curve is not None
-    is_na = not cfg.forced_induction.is_boosted
-
-    if hp_changed and has_dyno and is_na and nominal_hp > 1.0:
-        ratio = new_hp / nominal_hp
-        dc = cfg.engine.dyno_curve
-        cfg.engine.dyno_curve = DynoCurve(
-            rpm=dc.rpm.copy(),
-            torque_nm=dc.torque_nm * ratio,
-            is_at_wheel=dc.is_at_wheel,
-        )
+    scale_dyno_to_peak_power(cfg, nominal_hp)
 
     return cfg
 
@@ -405,16 +431,9 @@ def compute_sobol_indices(
     specs = [param_specs[k] for k in keys]
     k = len(specs)
 
-    # If any spec perturbs drivetrain.final_drive_ratio, normalise the config's
-    # gearing onto that field. final_ratio prefers sprocket teeth over
-    # final_drive_ratio for chain bikes, so without this the sampled ratio is
-    # written but never read (the sensitivity would falsely read ~0). Setting
-    # final_drive_ratio to the current *effective* ratio keeps the nominal
-    # (all-centre) run bit-identical while making the knob live. Work on a copy
-    # so the caller's config is untouched.
-    if any(s.path == "drivetrain.final_drive_ratio" for s in specs):
-        config = copy.deepcopy(config)
-        config.drivetrain.set_effective_final_drive(config.drivetrain.final_ratio)
+    # Make a sampled final_drive_ratio live (see prepare_config_for_specs);
+    # works on a copy so the caller's config is untouched.
+    config = prepare_config_for_specs(config, specs)
 
     # Read nominal values once (for relative-kind params)
     nominal_values: list[float] = []

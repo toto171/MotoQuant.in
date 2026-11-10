@@ -199,6 +199,9 @@ class AgentContext:
     result: AgentChatResult
     progress_cb: Callable[[float, str | None], None] | None = None
     surrogate_getter: Callable[[], tuple[Any, str]] | None = None
+    # Per-caller heavy-op fuse supplied by the HTTP layer (a per-IP rate
+    # limit); False → refuse. None (CLI, tests, library use) never blocks.
+    heavy_gate: Callable[[], bool] | None = None
     full_sims_left: int = FULL_SIM_BUDGET
     heavy_ops_left: int = HEAVY_OP_BUDGET
 
@@ -221,6 +224,13 @@ class AgentContext:
             return (
                 f"per-message optimizer budget exhausted ({HEAVY_OP_BUDGET} "
                 f"heavy operations/turn) — answer with what you have"
+            )
+        # Consulted only once the per-turn budget allows the op, and before
+        # any work or sim accounting: a refused op costs nothing.
+        if self.heavy_gate is not None and not self.heavy_gate():
+            return (
+                "too many optimizer/autotune runs from this address in the "
+                "last minute — tell the user to retry shortly"
             )
         self.heavy_ops_left -= 1
         self.result.sims_run += sim_cost
@@ -561,7 +571,13 @@ AGENT_TOOLS: list[dict[str, Any]] = [
         "autotune_setup",
         "Conditions-aware drag setup for a bike: gearing sweep, launch-RPM "
         "sweep, tyre pressures, fuel/timing guidance (full-sim, ~20 sims). "
-        "Use for 'how should I set up X at venue Y' questions.",
+        "Use for 'how should I set up X at venue Y' questions. Only gearing "
+        "and launch RPM are simulated: launch_rpm.recommended_rpm = null "
+        "(adjustable false) means no launch RPM is recommended — say so and "
+        "give launch_rpm.reason, never invent one; requires_two_step true "
+        "means the RPM needs launch control to hold. tyre_pressure and "
+        "fuel_timing are general guidance with no simulated gain. "
+        "combined.knobs lists the changes behind the headline time.",
         {"bike_id": {"type": "integer"}, **_ENV_PROPS},
         ["bike_id"],
     ),
@@ -769,13 +785,15 @@ def _exec_compare_bikes(ctx: AgentContext, args: dict) -> dict:
         except Exception as e:  # noqa: BLE001
             return {"error": f"bike {key} sim failed: {type(e).__name__}: {e}"}
         results[key] = _sim_to_dict(sim, name, notes)
-    delta_et = results["a"]["et_quarter_s"] - results["b"]["et_quarter_s"]
+    # B relative to A (bike A is the reference): NEGATIVE = B is quicker —
+    # the same sign as /api/simulate/compare and /api/surrogate/compare.
+    delta_et = results["b"]["et_quarter_s"] - results["a"]["et_quarter_s"]
     out = {
         "bike_a": results["a"],
         "bike_b": results["b"],
         "delta_et_s": round(delta_et, 4),
         "winner": results["a"]["bike_name"]
-        if delta_et < 0
+        if delta_et > 0
         else results["b"]["bike_name"],
     }
     ctx.add_block("compare_result", out)
@@ -783,6 +801,7 @@ def _exec_compare_bikes(ctx: AgentContext, args: dict) -> dict:
 
 
 def _exec_search_parts(ctx: AgentContext, args: dict) -> dict:
+    from ..analysis.roi import CANDIDATE_LIMIT
     from ..database.parts_repo import PartsRepository
 
     bike_id = _as_int(args.get("bike_id"), 0)
@@ -792,11 +811,11 @@ def _exec_search_parts(ctx: AgentContext, args: dict) -> dict:
         rows = repo.search(
             bike_model_id=bike_id,
             category=args.get("category") or None,
-            limit=200,
+            limit=CANDIDATE_LIMIT,
         )
     except TypeError:
         # older search signature — degrade to unfiltered then filter here
-        rows = repo.search(bike_model_id=bike_id, limit=200)
+        rows = repo.search(bike_model_id=bike_id, limit=CANDIDATE_LIMIT)
     max_price = args.get("max_price_inr")
     out_rows = []
     for r in rows:
@@ -1244,12 +1263,14 @@ def run_agent_chat(
     progress_cb: Callable[[float, str | None], None] | None = None,
     surrogate_getter: Callable[[], tuple[Any, str]] | None = None,
     max_iterations: int = MAX_ITERATIONS,
+    heavy_gate: Callable[[], bool] | None = None,
 ) -> AgentChatResult:
     """Run one agent chat turn. Never raises — errors land on the result.
 
     Cost is bounded per turn by MAX_ITERATIONS / FULL_SIM_BUDGET /
     HEAVY_OP_BUDGET (enforced by the executor) and per client by the API's
-    rate limits (see api._chat_daily_cap).
+    rate limits. ``heavy_gate`` is the API's per-caller fuse for optimizer /
+    autotune / outlaw runs: called once per heavy op, False refuses it.
     """
     result = AgentChatResult(raw_query=query)
     if client is None:
@@ -1270,6 +1291,7 @@ def run_agent_chat(
         result=result,
         progress_cb=progress_cb,
         surrogate_getter=surrogate_getter,
+        heavy_gate=heavy_gate,
     )
 
     system = _system_prompt(ctx)
