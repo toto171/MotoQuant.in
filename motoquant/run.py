@@ -65,7 +65,7 @@ import numpy as np
 
 from . import engine_select
 from .config_io import load_config, save_config
-from .constants import MS_TO_KMH, MS_TO_MPH, QUARTER_MILE_M, G
+from .constants import MS_TO_KMH, MS_TO_MPH, QUARTER_MILE_M, ROLLOUT_M, G
 from .defaults import (
     aamby_valley_summer,
     aamby_valley_winter,
@@ -400,6 +400,29 @@ def print_comparison(entries, results):
 # ═══════════════════════════════════════════
 
 
+def _run_distance_m(text: str) -> float:
+    """argparse type for ``--distance``: a finite number of metres beyond the
+    start beam.
+
+    Runs are timed from the start beam, ``ROLLOUT_M`` (1 ft) past the rest
+    position, so a target at or before it has no timed distance and the
+    engine raises ``ValueError``. Rejecting it here keeps a bad ``--distance``
+    a one-line usage error (exit 2) instead of a traceback.
+    """
+    try:
+        v = float(text)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"not a number: {text!r}") from None
+    if not (v > 0.0 and v < float("inf")):
+        raise argparse.ArgumentTypeError(f"must be a finite number > 0, got {text}")
+    if v <= ROLLOUT_M:
+        raise argparse.ArgumentTypeError(
+            f"must be greater than the {ROLLOUT_M} m (1 ft) rollout the run is "
+            f"timed from, got {text}"
+        )
+    return v
+
+
 def run_bike(
     config: BikeConfig,
     dt: float = 0.001,
@@ -564,9 +587,10 @@ def cmd_bikes(args):
             db.close()
             return
 
-        print(
-            f"\n  Tire Fitments for {bike['manufacturer_name']} {bike['model_name']} ({bike.get('model_code', '-')}):"
-        )
+        if not args.json_out:
+            print(
+                f"\n  Tire Fitments for {bike['manufacturer_name']} {bike['model_name']} ({bike.get('model_code') or '-'}):"
+            )
         if args.json_out:
             print(json.dumps(fitments, indent=2, default=str))
         else:
@@ -1205,7 +1229,8 @@ def cmd_parts(args):
                 "delta_et_s": round(delta_et, 4),
                 "base_trap_ms": round(base_result.speed_quarter, 3),
                 "modified_trap_ms": round(mod_result.speed_quarter, 3),
-                "delta_trap_ms": round(delta_trap, 3),
+                "delta_trap_mps": round(delta_trap, 3),
+                "delta_trap_ms": round(delta_trap, 3),  # deprecated alias (m/s)
                 "cost_per_tenth_inr": (
                     round(cost_per_tenth, 0) if cost_per_tenth < 1e9 else None
                 ),
@@ -1711,7 +1736,9 @@ def legacy_main(args_list=None):
     parser.add_argument("--bike", "-b", type=str, default=None)
     parser.add_argument("--config", "-c", type=str, default=None)
     parser.add_argument("--venue", "-v", type=str, default=None)
-    parser.add_argument("--distance", "-d", type=float, default=QUARTER_MILE_M)
+    parser.add_argument(
+        "--distance", "-d", type=_run_distance_m, default=QUARTER_MILE_M
+    )
     parser.add_argument("--dt", type=float, default=0.001)
     parser.add_argument("--json", "-j", action="store_true")
     parser.add_argument("--csv", type=str, default=None, metavar="FILE")
@@ -2089,7 +2116,12 @@ def cmd_analysis(args):
 
     # ── analysis roi ─────────────────────────────────────────────
     if sub == "roi":
-        from .analysis.roi import compute_parts_roi, find_best_build, rank_categories
+        from .analysis.roi import (
+            CANDIDATE_LIMIT,
+            compute_parts_roi,
+            find_best_build,
+            rank_categories,
+        )
 
         db = ensure_db(args)
         parts_repo = db.parts
@@ -2122,10 +2154,10 @@ def cmd_analysis(args):
         if args.part_ids:
             part_ids = [int(x) for x in args.part_ids.split(",")]
         elif args.category:
-            raw = parts_repo.search(category=args.category, limit=200)
+            raw = parts_repo.search(category=args.category, limit=CANDIDATE_LIMIT)
             part_ids = [p["id"] for p in raw]
         else:
-            raw = parts_repo.search(limit=200)
+            raw = parts_repo.search(limit=CANDIDATE_LIMIT)
             part_ids = [p["id"] for p in raw]
 
         if getattr(args, "optimize", False):
@@ -2146,15 +2178,20 @@ def cmd_analysis(args):
                     "total_cost_inr": build.total_cost_inr,
                     "base_et_s": round(build.base_et_s, 4),
                     "modified_et_s": round(build.modified_et_s, 4),
-                    "delta_et_s": round(build.delta_et_s, 4),
-                    "delta_trap_ms": round(build.delta_trap_ms, 4),
+                    # delta_et_s = modified - base: NEGATIVE = quicker.
+                    "delta_et_s": round(-build.delta_et_s, 4) + 0.0,
+                    "et_gain_s": round(build.delta_et_s, 4) + 0.0,
+                    "delta_trap_mps": round(build.delta_trap_ms, 4),
+                    "delta_trap_ms": round(build.delta_trap_ms, 4),  # deprecated alias
                     "selected_parts": [
                         {
                             "part_id": p.part_id,
                             "name": p.part_name,
                             "category": p.category_display,
                             "price_inr": p.price_inr,
-                            "delta_et_s": round(p.delta_et_s, 4),
+                            "delta_et_s": round(-p.delta_et_s, 4) + 0.0,
+                            "et_gain_s": round(p.delta_et_s, 4) + 0.0,
+                            "no_straight_line_effect": p.no_straight_line_effect,
                             "roi_score": round(p.roi_score, 4),
                             "cost_per_tenth_inr": (
                                 round(p.cost_per_tenth_inr, 0)
@@ -2177,25 +2214,39 @@ def cmd_analysis(args):
             return 0
 
         # Individual ROI ranking
+        # With --bike-id, parts that do not fit the bike are left out by
+        # default (as the API and the optimizer do); --include-incompatible
+        # lists them too, flagged.
+        only_compatible = bike_mid is not None and not getattr(
+            args, "include_incompatible", False
+        )
         results = compute_parts_roi(
             base_config=config,
             part_ids=part_ids,
             parts_repo=parts_repo,
             bike_model_id=bike_mid,
+            require_compatible=only_compatible,
         )
+        hidden = max(0, len(part_ids) - len(results)) if only_compatible else 0
 
         if getattr(args, "output_json", False):
             out = {
                 "bike": bike_name,
                 "base_et": round(results[0].base_et_s, 4) if results else None,
+                "compatible_only": only_compatible,
+                "parts_not_listed": hidden,
                 "parts": [
                     {
                         "part_id": r.part_id,
+                        "compatible": r.is_compatible,
                         "name": r.part_name,
                         "category": r.category_display,
                         "price_inr": r.price_inr,
-                        "delta_et_s": round(r.delta_et_s, 4),
-                        "delta_trap_ms": round(r.delta_trap_ms, 4),
+                        "delta_et_s": round(-r.delta_et_s, 4) + 0.0,
+                        "et_gain_s": round(r.delta_et_s, 4) + 0.0,
+                        "delta_trap_mps": round(r.delta_trap_ms, 4),
+                        "delta_trap_ms": round(r.delta_trap_ms, 4),  # deprecated alias
+                        "no_straight_line_effect": r.no_straight_line_effect,
                         "roi_score": round(r.roi_score, 4),
                         "cost_per_tenth_inr": (
                             round(r.cost_per_tenth_inr, 0)
@@ -2226,8 +2277,14 @@ def cmd_analysis(args):
                     else "no gain"
                 )
                 price = f"₹{r.price_inr:,.0f}" if r.price_inr else "free"
+                flag = "" if r.is_compatible else "  [does not fit this bike]"
                 print(
-                    f"  [{r.part_id:>3}] {r.part_name:<35} {et_s:>10}  {roi:>8}  {cpt:>14}  {price}"
+                    f"  [{r.part_id:>3}] {r.part_name:<35} {et_s:>10}  {roi:>8}  {cpt:>14}  {price}{flag}"
+                )
+            if hidden:
+                print(
+                    f"\n  {hidden} part(s) not listed (not compatible with this bike); "
+                    "use --include-incompatible to show them."
                 )
 
             if getattr(args, "by_category", False):
@@ -3152,9 +3209,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_sim.add_argument(
         "--distance",
         "-d",
-        type=float,
+        type=_run_distance_m,
         default=QUARTER_MILE_M,
-        help="Simulation distance in meters",
+        help="Simulation distance in meters (beyond the 1 ft rollout)",
     )
     p_sim.add_argument("--dt", type=float, default=0.001, help="Timestep (s)")
     # Output
@@ -3472,6 +3529,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Budget for --optimize in rupees (default: 100000)",
     )
     p_roi.add_argument(
+        "--include-incompatible",
+        action="store_true",
+        help="With --bike-id, also rank parts that do not fit the bike (flagged)",
+    )
+    p_roi.add_argument(
         "--by-category", action="store_true", help="Also print a category-level summary"
     )
     p_roi.add_argument(
@@ -3507,7 +3569,6 @@ def build_parser() -> argparse.ArgumentParser:
                     "frontal_area",
                     "tire_mu",
                     "rolling_radius",
-                    "reaction_time",
                     "redline_rpm",
                     "primary_ratio",
                     "final_drive_ratio",

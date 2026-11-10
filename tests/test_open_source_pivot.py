@@ -250,7 +250,7 @@ class TestMonetizationIsGone(_AppTest):
 
 class TestFormerlyGatedRoutesAreOpen(_AppTest):
     """An unknown preset makes each route fail CHEAPLY after any auth layer
-    would already have answered — so "404/202, never 401/402" proves there
+    would already have answered — so "404, never 401/402" proves there
     is no gate without running an optimizer."""
 
     _UNKNOWN = {"bike_preset": "no_such_preset"}
@@ -271,7 +271,8 @@ class TestFormerlyGatedRoutesAreOpen(_AppTest):
             with self.subTest(route=path):
                 r = self.client.post(path, json=self._UNKNOWN)
                 self._cancel(r)
-                self.assertEqual(r.status_code, 202, r.text[:200])
+                self.assertNotIn(r.status_code, (401, 402, 403), r.text[:200])
+                self.assertEqual(r.status_code, 404, r.text[:200])
 
     def test_calibration_uploads(self):
         csv = b"time,speed\n0,0\n"

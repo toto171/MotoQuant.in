@@ -463,5 +463,56 @@ class TestPricingForceFloor(_RouteTest):
             conn.close()
 
 
+class TestEveryExpensiveRouteIsRateLimited(unittest.TestCase):
+    """Route-table pin (ported from PR #127): with the daily quota gone,
+    per-IP limits are the cost fuse, so each expensive POST route must carry a
+    ``rate_limit`` dependency — including the anonymous routes that write to
+    the database (bike suggestions, spec corrections) and the surrogate
+    routes, which had none before the port."""
+
+    EXPENSIVE = {
+        "/api/simulate",
+        "/api/simulate/quick",
+        "/api/simulate/top-speed",
+        "/api/simulate/distance",
+        "/api/simulate/compare",
+        "/api/optimize/build",
+        "/api/autotune/ecu",
+        "/api/calibrate/dragy",
+        "/api/calibrate/dyno",
+        "/api/chat",
+        "/api/jobs/chat",
+        "/api/jobs/simulate",
+        "/api/jobs/topspeed",
+        "/api/jobs/optimize",
+        "/api/jobs/autotune",
+        "/api/jobs/outlaw",
+        "/api/jobs/compare",
+        # anonymous routes that write to the database / feed a review queue
+        "/api/bikes/suggest",
+        "/api/specs/correct",
+        "/api/surrogate/predict",
+        "/api/surrogate/compare",
+    }
+
+    def test_all_have_a_rate_limit_dependency(self):
+        from motoquant.api import app
+
+        seen = set()
+        for r in app.routes:
+            methods = getattr(r, "methods", None) or set()
+            if "POST" not in methods or r.path not in self.EXPENSIVE:
+                continue
+            seen.add(r.path)
+            names = [
+                getattr(d.call, "__qualname__", "") for d in r.dependant.dependencies
+            ]
+            self.assertTrue(
+                any("rate_limit" in n for n in names),
+                f"{r.path} has no rate_limit dependency: {names}",
+            )
+        self.assertEqual(seen, self.EXPENSIVE)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -322,7 +322,7 @@ def test_quick_sim_identical_python_vs_auto(client, monkeypatch, native_calls, b
         monkeypatch,
         native_calls,
         "/api/simulate/quick",
-        {"bike_id": bike_id, "venue_id": 1, "part_ids": [1]},
+        {"bike_id": bike_id, "venue_id": 1, "part_ids": [49]},
         sims=2,  # modified build + stock baseline
     )
     assert py == na and py["stock_et_s"] is not None
@@ -410,7 +410,7 @@ def test_quick_response_carries_the_compared_numbers(client, monkeypatch):
     payload that silently lost them would make ``py == na`` vacuous."""
     monkeypatch.setenv("MOTOQUANT_ENGINE", "python")
     body = _post(
-        client, "/api/simulate/quick", {"bike_id": 11, "venue_id": 1, "part_ids": [1]}
+        client, "/api/simulate/quick", {"bike_id": 11, "venue_id": 1, "part_ids": [49]}
     )
     for k in _QUICK_FIELDS:
         assert isinstance(body.get(k), float) and body[k] > 0, (k, body.get(k))

@@ -289,6 +289,24 @@ def enforce(request: Request, name: str, limit: int, window_s: float) -> None:
         )
 
 
+def heavy_gate_for(request: Request, name: str = "optimize", limit: int = 6):
+    """Build a ``() -> bool`` fuse bound to this request's client IP.
+
+    Captured at route time (job bodies run later on a worker with no Request
+    in scope). Each call counts one hit against the same per-IP bucket the
+    direct optimize/autotune routes use, so asking the chat agent for the
+    heavy tools cannot out-run calling them directly."""
+    ip = client_ip(request)
+
+    def _gate() -> bool:
+        if not RATE_LIMIT_ENABLED:
+            return True
+        allowed, _ = check(f"{name}:{ip}", limit, 60.0)
+        return allowed
+
+    return _gate
+
+
 def rate_limit(name: str, limit: int, window_s: float = 60.0):
     """FastAPI dependency factory.
 
