@@ -27,7 +27,7 @@ export function organizationSchema() {
       height: 512,
     },
     description:
-      'First-principles physics engine for motorcycle quarter-mile drag racing. Predict ET, compare builds, and quantify parts ROI for 534+ bikes.',
+      'First-principles physics engine for motorcycle quarter-mile drag racing. Predict ET, compare builds and see what each part costs per tenth of a second, for 534+ bikes.',
     foundingDate: '2025-11-01',
     founder: [
       { '@type': 'Person', name: 'Arya Desai' },
@@ -57,7 +57,7 @@ export function websiteSchema() {
     url: SITE_URL,
     name: 'MotoQuant',
     description:
-      'Motorcycle drag racing quarter-mile simulator: ET prediction, build optimization, parts ROI.',
+      'Motorcycle quarter-mile simulator: predict ET, plan a build and find the parts worth buying.',
     inLanguage: 'en-IN',
     publisher: { '@id': `${SITE_URL}/#organization` },
     potentialAction: {
@@ -79,7 +79,7 @@ export function softwareApplicationSchema() {
     name: 'MotoQuant',
     alternateName: 'MotoQuant Quarter-Mile Simulator',
     applicationCategory: ['AutomotiveApplication', 'SimulationApplication'],
-    applicationSubCategory: 'Motorcycle Drag Racing Simulator',
+    applicationSubCategory: 'Motorcycle drag racing simulator',
     operatingSystem: 'Web',
     isAccessibleForFree: true,
     license: 'https://www.apache.org/licenses/LICENSE-2.0',
@@ -87,7 +87,7 @@ export function softwareApplicationSchema() {
     downloadUrl: `${SITE_URL}/simulator`,
     softwareVersion: '1.0',
     description:
-      'Physics-based quarter-mile drag racing simulator for motorcycles. 15-submodel engine (engine, drivetrain, clutch, chain, tires, aero, weight-transfer, rider dynamics, staging, environmental, braking, wheelie, parasitic, rolling resistance, forced induction) covering 534 bikes, 546 parts, 254 tires, 20 venues. Validated to K5 GSX-R1000 9.93s, YZF-R1 10.14s, Hayabusa 10.36s.',
+      'Physics-based quarter-mile drag racing simulator for motorcycles. 15-submodel engine (engine, drivetrain, clutch, chain, tires, aero, weight-transfer, rider dynamics, staging, environmental, braking, wheelie, parasitic, rolling resistance, forced induction) covering 534 bikes, 546 parts, 254 tires, 20 venues. Reference bikes, simulated at sea level: GSX-R1000 K5 10.04 s (9.97 s published), YZF-R1 10.11 s (10.30 s), Hayabusa 10.11 s (10.40 s).',
     publisher: { '@id': `${SITE_URL}/#organization` },
     author: { '@id': `${SITE_URL}/#organization` },
     offers: {
@@ -100,12 +100,12 @@ export function softwareApplicationSchema() {
     featureList: [
       'Quarter-mile time, finish-line speed and top speed for 534 motorcycles',
       'Each bike with its own gearing, weight, aerodynamics and power curve',
-      '546-part catalog with cost-per-tenth ROI analysis',
+      '546-part catalog with the cost of each tenth of a second',
       '15 independent physics sub-models',
-      'Dragy GPS + dyno import with sim overlay',
+      'Dragy GPS and dyno import, lined up against the simulation',
       'Instant estimates computed in the browser',
-      'Budget-aware build optimization',
-      'Natural-language tuning queries',
+      'Best parts for your budget',
+      'Tuning questions in plain language',
     ],
     inLanguage: 'en',
   };
@@ -116,7 +116,7 @@ export function softwareApplicationSchema() {
 export const FAQ_ITEMS = [
   {
     q: 'What is MotoQuant?',
-    a: 'MotoQuant is a free simulator that predicts how fast a motorcycle runs the quarter mile. Pick a bike and it shows the time, the speed at the finish line and the splits for 534 bikes, using physics that is checked against real published tests.',
+    a: 'MotoQuant is a free simulator that predicts how fast a motorcycle runs the quarter mile. Pick one of 534 bikes and it shows the time, the speed at the finish line and the splits. The physics is checked against published tests.',
   },
   {
     q: 'How accurate is the quarter-mile prediction?',
@@ -128,7 +128,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: 'Is MotoQuant free?',
-    a: 'Yes. MotoQuant is free and open source under the Apache License 2.0. There is no account to create: saved runs stay in your browser. motoquant.in is a free public copy of the open-source project, and you can also run it yourself from the GitHub repository.',
+    a: 'Yes. MotoQuant is free and open source under the Apache License 2.0. There is no account to create: saved runs stay in your browser. motoquant.in is a free public copy of the project, and you can also run your own from the GitHub repository.',
   },
   {
     q: 'Can I use it for Indian drag strips?',
@@ -136,7 +136,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: 'How does it decide which parts are worth buying?',
-    a: 'Each part in the 546-part catalog is tested by running the simulation with and without it. The change in quarter-mile time is divided by the part\u2019s price to get the cost of each tenth of a second. The best-parts tool then picks the combination that gains the most within your budget, respecting compatibility rules and known pairings such as exhaust plus ECU flash.',
+    a: 'Each part in the 546-part catalog is tested by running the simulation with and without it. The change in quarter-mile time is divided by the part\u2019s price to get the cost of each tenth of a second. The best-parts tool then picks the combination that gains the most within your budget, following the compatibility rules and known pairings such as exhaust plus ECU flash.',
   },
   {
     q: 'Who answers chat questions, and can I use my own key?',

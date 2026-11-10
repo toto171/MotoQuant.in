@@ -12,8 +12,9 @@ were done long before they were removed from here.
 ## Where the project stands
 
 MotoQuant is free and open source under Apache-2.0. The engine is checked
-against 250 published tests (263 matches to catalog bikes), the site is live at motoquant.in, and the test
-suite is large. Code is no longer the main limit. In order, the limits are:
+against 250 published tests (263 matches to catalog bikes), the site is live
+at motoquant.in, and the test suite is large. Code is no longer the main
+limit. In order, the limits are:
 
 1. Data. Small bikes are the weakest class. Few instrumented timeslips exist
    for them, and many run a generic primary gear ratio because nobody has

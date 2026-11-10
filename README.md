@@ -7,7 +7,7 @@
 [![Web](https://img.shields.io/badge/web-motoquant.in-orange)](https://www.motoquant.in)
 
 MotoQuant predicts a motorcycle's quarter-mile time, finish-line speed and top
-speed from first principles, then answers the questions riders and tuners
+speed from first principles. It then answers the questions riders and tuners
 ask: what does this sprocket, exhaust or tyre do to my launch, and which
 upgrade buys a tenth of a second for the least money?
 
@@ -46,11 +46,11 @@ by **0.25 s** on average, with a bias of **+0.02 s**; 130 matches land within
 benchmark with its source is on
 [motoquant.in/validation](https://www.motoquant.in/validation).
 
-Accuracy is uneven, and the project says so. Sport bikes do best (litre bikes
-average 0.15–0.17 s). Small bikes are the weakest class, because few instrumented
-tests exist for them and their catalog gearing is still inferred. Published
-gearing for 53 of them was measured and made the fit worse until the
-small-bike settings are re-tuned, so it is recorded but not applied
+Accuracy is uneven. Sport bikes do best (litre bikes average 0.15–0.17 s).
+Small bikes are the weakest class, because few instrumented tests exist for
+them and their catalog gearing is still inferred. Published gearing for 53 of
+them was measured, but it made the fit worse, so it is recorded and not
+applied until the small-bike settings are re-tuned
 ([`reports/gearing_experiment_2026_11_10.md`](reports/gearing_experiment_2026_11_10.md)).
 Top speed is less accurate than quarter-mile time.
 

@@ -1,16 +1,17 @@
 # Contributing to MotoQuant
 
-Welcome, and thank you. MotoQuant is free and open source under the
-[Apache License 2.0](LICENSE). Contributions of every size are welcome:
-fixes, features, docs, and especially **data** (instrumented quarter-mile
-runs, dyno sheets, service-manual gear ratios, missing bikes).
+MotoQuant is free and open source under the [Apache License 2.0](LICENSE).
+Contributions of any size are welcome: fixes, features, docs, and most of all
+data (instrumented quarter-mile runs, dyno sheets, service-manual gear ratios,
+missing bikes).
 
-This guide gets you from a fresh clone to a green test suite in under 10 minutes, then covers the day-to-day workflow.
+This guide takes you from a fresh clone to a passing test suite in under 10
+minutes, then covers day-to-day work.
 
 Read **[AGENTS.md](AGENTS.md)** first. It is the one-page working contract
-(the prime directive and the non-negotiable rules), and it applies to humans
-and AI tools alike. Then read [docs/ONBOARDING.md](docs/ONBOARDING.md) for a
-tour of the code, and look for issues labelled `good first issue`. Please follow the
+(the prime directive and the non-negotiable rules) for humans and AI tools
+alike. Then read [docs/ONBOARDING.md](docs/ONBOARDING.md) for a tour of the
+code, and look for issues labelled `good first issue`. Please follow the
 [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## 0. Licensing of contributions
@@ -31,35 +32,34 @@ tour of the code, and look for issues labelled `good first issue`. Please follow
 
 You do not need to touch the physics to help. In rough order of value:
 
-1. **Instrumented timeslips and benchmarks.** Dragy / VBox / Racelogic runs of
+1. Instrumented timeslips and benchmarks: Dragy, VBox or Racelogic runs of
    *stock* bikes, with a source (magazine test, video, timeslip photo, Dragy
-   export). Small-displacement and two-stroke accuracy is limited mostly by
-   data. Use the "Submit a timeslip" issue form; no code needed.
-2. **Bike, part and tire data.** Riders can use the "Suggest a bike" form.
+   export). Accuracy for small-displacement and two-stroke bikes is limited
+   mostly by data. Use the "Submit a timeslip" issue form; no code needed.
+2. Bike, part and tire data. Riders can use the "Suggest a bike" form.
    With code: new bikes (`motoquant/scraper/known_bikes*.py`), corrections to
    existing specs, gear cassettes and primary ratios from service manuals,
    OEM tire fitments, parts and fitment rules (the "Catalog data" form).
-3. **Bug reports and fixes.** Use the bug-report issue template; include the
+3. Bug reports and fixes. Use the bug-report issue template and include the
    bike, venue, inputs and the number you expected.
-4. **Docs, tests, tooling, web UI.** Anything that makes the above easier.
+4. Docs, tests, tooling and the web UI: anything that makes the above easier.
 
 ### The honest-data rule
 
 Every spec, benchmark, price and gear ratio needs a **citable source** (service
 manual, manufacturer spec sheet, magazine test, instrumented timeslip, retailer
 page). **No fabricated numbers.** If you cannot source a value, leave it out
-and say so: an honest gap beats apparent completeness. Estimates must be
-labelled as estimates and must not be presented as measurements. Data PRs
-without sources will be closed.
+and say so. Label estimates as estimates and never present them as
+measurements. Data PRs without sources will be closed.
 
 ---
 
 ## 1. Repository
 
-- **GitHub:** https://github.com/toto171/MotoQuant.in
-- **Package name:** `motoquant`
-- **Python:** 3.10 or newer (tested on 3.10, 3.11, 3.12)
-- **Primary DB:** SQLite (`motoquant.db`). It stays until a real scaling trigger ([ADR-0004](docs/adr/0004-sqlite-until-scale.md)).
+- GitHub: https://github.com/toto171/MotoQuant.in
+- Package name: `motoquant`
+- Python: 3.10 or newer (tested on 3.10, 3.11, 3.12)
+- Primary DB: SQLite (`motoquant.db`). It stays until a real scaling trigger ([ADR-0004](docs/adr/0004-sqlite-until-scale.md)).
 
 ---
 
@@ -120,7 +120,9 @@ dated `scripts/patch_*.py` scripts in order (all idempotent; see
 you change physics, the importer or catalog data; section 4a lists what to
 regenerate afterwards.
 
-The committed `motoquant.db` in the repo root is the production seeded DB. Do not run migrations against it during dev — always use a `/tmp/` path like above, or `:memory:` for tests.
+The committed `motoquant.db` in the repo root is the production seeded DB. Do
+not run migrations against it during development. Use a `/tmp/` path as
+above, or `:memory:` for tests.
 
 ---
 
@@ -143,11 +145,11 @@ Every subcommand has `--help` (`python -m motoquant.run <subcommand> --help`).
 cd web && npm install && npm run dev     # http://localhost:3000
 ```
 
-Point it at a local API with `NEXT_PUBLIC_API_URL=http://localhost:8000` (else it
-proxies to the production Render API); `make web-dev` does this for you. Before
-committing anything under `web/`, run `make web-build` (= `npx next build`). It
-is exactly what Vercel runs and catches the App-Router prerender class of
-failure (see `web/CONTRIBUTING.md`).
+Point it at a local API with `NEXT_PUBLIC_API_URL=http://localhost:8000`
+(otherwise it proxies to the production Render API); `make web-dev` does this
+for you. Before committing anything under `web/`, run `make web-build`
+(= `npx next build`). It is the same build Vercel runs, and it catches
+App-Router prerender failures (see `web/CONTRIBUTING.md`).
 
 The web app (`web/`) is the supported user interface. The legacy Streamlit UI
 (`app.py`) and the discontinued desktop app (`desktop/`, ADR-0005) have both
@@ -159,7 +161,8 @@ been removed.
 uvicorn motoquant.api:app --reload --port 8000
 ```
 
-Then hit http://localhost:8000/docs for the OpenAPI UI. The Next.js frontend in `web/` calls this API.
+The OpenAPI UI is at http://localhost:8000/docs. The Next.js frontend in
+`web/` calls this API.
 
 ---
 
@@ -179,15 +182,15 @@ MOTOQUANT_SLOW_TESTS=1 python -m pytest tests/test_recommendations.py -v
 python -m pytest tests/test_validation.py::TestQuarterMileValidation::test_k5_quarter_mile_et -v
 ```
 
-**Rules:**
+Rules:
 1. Every new public function needs at least one test that would fail if the function did nothing.
-2. Tests must use `:memory:` or `/tmp/` SQLite paths — never the production `motoquant.db`.
-3. CLI tests import command handlers directly via `redirect_stdout` + `unittest.mock.patch` — do not spawn subprocesses (WAL journal mode fails on the mounted dev filesystem).
-4. Physics regressions: the three reference baselines are pinned to 4 decimals — K5 **10.0436**, R1 **10.1092**, Hayabusa **10.1100** — and the expectation for refactors is **bit-identical** (Δ +0.0000). If you touch `motoquant/physics.py`, any `submodels/*.py`, `defaults.py`, or `motoquant/scraper/importer.py`: run the baseline check, `tests/test_regression_snapshot.py`, and put the delta table in your PR. A deliberate accuracy change needs the full weighted sweep (`scripts/phys_weighted_sweep.py`) as justification.
+2. Tests must use `:memory:` or `/tmp/` SQLite paths, never the production `motoquant.db`.
+3. CLI tests import command handlers directly via `redirect_stdout` + `unittest.mock.patch`. Do not spawn subprocesses, because WAL journal mode fails on the mounted dev filesystem.
+4. Physics regressions: the three reference baselines are pinned to 4 decimals (K5 **10.0436**, R1 **10.1092**, Hayabusa **10.1100**), and refactors must stay **bit-identical** (Δ +0.0000). If you touch `motoquant/physics.py`, any `submodels/*.py`, `defaults.py`, or `motoquant/scraper/importer.py`: run the baseline check, `tests/test_regression_snapshot.py`, and put the delta table in your PR. A deliberate accuracy change needs the full weighted sweep (`scripts/phys_weighted_sweep.py`) as justification.
 5. After changing `spec_to_bike_config` (importer physics, gear ratios, aero rules): run `make reseed`, then regenerate the caches in section 4a.
 6. After any catalog/count change: `python scripts/audit_headline_stats.py --fix` so the site's stat tiles stay truthful.
 
-### 4a. Regenerating what caches the physics
+### 4a. Regenerating the physics caches
 
 Several committed files are caches of the simulator. When a change moves
 simulated times, regenerate them in the same pull request:
@@ -204,7 +207,7 @@ simulated times, regenerate them in the same pull request:
 
 ## 5. Code style
 
-Ruff enforces lint + format. Config is in `pyproject.toml`.
+Ruff handles linting and formatting. Its config is in `pyproject.toml`.
 
 ```bash
 ruff check .                        # lint
@@ -215,15 +218,20 @@ ruff format .                       # format
 Conventions:
 - Line length 88 (handled by `ruff format`).
 - Imports: sorted by isort rules; `motoquant.*` is first-party.
-- No `print()` in library code — use `logging`. CLI handlers can print to stdout.
-- Type-hint all new public functions. Existing untyped code is fair game to type as you touch it (Kaizen rule).
+- No `print()` in library code; use `logging`. CLI handlers can print to stdout.
+- Type-hint all new public functions. You may add types to existing untyped code as you touch it (Kaizen rule).
 - Docstrings: triple-quoted, first line summary, blank line, then details. Follow the style already in `motoquant/physics.py`.
+
+Text on the site and in the docs follows [docs/WRITING.md](docs/WRITING.md): plain
+words, numbers with units, no em dashes. `tests/test_site_copy_style.py` checks
+the site.
 
 ---
 
 ## 6. Branch + PR workflow
 
-We use a simple trunk-based flow. `main` is always deployable (tests green, API boots, CLI smoke test passes).
+The flow is trunk-based. `main` is always deployable (tests green, API boots,
+CLI smoke test passes).
 
 ```bash
 # 1. Start from an up-to-date main (fork: sync from upstream)
@@ -248,21 +256,21 @@ git push -u origin feature/<short-name>
 Open PRs as **draft** until `make check` and `make test` are green, and fill in the
 PR template (it has the baseline-delta table for physics-adjacent changes).
 
-**PR requirements (a pull request merges only when all of these hold):**
+A pull request merges only when all of these hold:
 - Tests pass locally (`python -m pytest tests/ -q`).
 - Ruff clean (`ruff check . && ruff format --check .`).
 - CI workflow green on the PR (pytest + ruff + baseline gate; the Next.js build for `web/` changes).
-- **An approving review from the maintainer** (`.github/CODEOWNERS`; GitHub
+- An approving review from the maintainer (`.github/CODEOWNERS`; GitHub
   requests it automatically).
 - For physics changes: include the benchmark ET deltas in the PR description (template has a table for this).
 - For schema changes: include the migration path. Existing DBs must keep working; ship an idempotent `scripts/patch_*.py` for the shipped `motoquant.db`. Update `docs/ARCHITECTURE.md` if the data model's shape changed.
 - Every change reaches `main` through a reviewed pull request: no direct pushes, no force-push, no deletion.
 - Once merged, a successful CI run on `main` triggers the Vercel production deploy (`.github/workflows/deploy.yml`). A red CI never reaches Vercel.
 
-**Commit message style** (look at `git log --oneline` for examples):
+Commit messages (see `git log --oneline` for examples):
 - Imperative mood, present tense: "Add …", "Fix …", "Refactor …"
 - Subject line ≤ 72 chars, no trailing period.
-- Body explains why, not what — the diff shows the what.
+- The body explains why. The diff already shows what changed.
 
 ---
 
@@ -274,23 +282,23 @@ PR template (it has the baseline-delta table for physics-adjacent changes).
 2. Data ↔ model mismatch (parameter paths in seed/DB/config that don't match dataclass fields).
 3. Bypass paths / dead fallbacks (fast paths that make a branch dead; modifications must flow through all active paths).
 4. Missing tests on new public functions.
-5. Numerical sanity (simulation deltas must make physical sense — a 15 psi turbo kit moving ET by 0.008s is a bug).
-6. Dead fields (unused DB columns / config keys — flag or remove).
+5. Numerical sanity (simulation deltas must make physical sense: a 15 psi turbo kit that moves ET by 0.008s is a bug).
+6. Dead fields (unused DB columns or config keys: flag or remove them).
 7. Backwards-compatibility for renamed fields (grep all uses, update, run full suite).
 
-This is not optional. The current clean state of the codebase is the result of applying this consistently.
+This is not optional.
 
 ---
 
 ## 8. Things you cannot do
 
 - Commit secrets, API keys, or `.env` files.
-- Run `git add -A` / `git add .` — **ever**. Stage explicit file lists; the working tree routinely carries unrelated WIP and generated artifacts.
+- Run `git add -A` or `git add .`; stage explicit file lists, because the working tree often carries unrelated WIP and generated artifacts.
 - Force-push to `main`. Use `feature/*` branches and PRs.
 - Rename the package away from `motoquant`.
-- Replace SQLite with PostgreSQL without a real scaling trigger ([ADR-0004](docs/adr/0004-sqlite-until-scale.md)). The WAL-fallback code is load-bearing on Windows / mounted FS.
+- Replace SQLite with PostgreSQL without a real scaling trigger ([ADR-0004](docs/adr/0004-sqlite-until-scale.md)). The WAL fallback code is required on Windows and mounted filesystems.
 - Reintroduce paywalls, tier gates, usage quotas or licence keys. MotoQuant is free ([ADR-0006](docs/adr/0006-open-source-pivot.md)). Protect expensive routes with per-IP rate limits instead (`motoquant/ratelimit.py`).
-- Add BeautifulSoup / lxml to the scraper — `motoquant/scraper/bikez.py` is stdlib-only by design.
+- Add BeautifulSoup or lxml to the scraper. `motoquant/scraper/bikez.py` is stdlib-only by design.
 - Introduce `requirements.txt` separate from `requirements-api.txt` without discussing first. One dependency file avoids drift.
 
 ---
@@ -299,7 +307,7 @@ This is not optional. The current clean state of the codebase is the result of a
 
 - GitHub Issues for bugs, data corrections and scoped work (they leave a trail).
 - GitHub Discussions for questions and ideas.
-- [docs/ONBOARDING.md](docs/ONBOARDING.md) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) first: most "where does X live?" questions are answered there.
+- Read [docs/ONBOARDING.md](docs/ONBOARDING.md) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) first. They answer most "where does X live?" questions.
 - Before asking "is X done yet?", check `CHANGELOG.md` and `docs/ROADMAP.md`.
 - Security issues: report privately, see [SECURITY.md](SECURITY.md).
 
@@ -311,12 +319,12 @@ The public instance is live: the API on Render (`motoquant-api.onrender.com`,
 Docker via `render.yaml`) and the web app on Vercel (`motoquant.in`, with the
 `/api/*` rewrite in `web/next.config.js` + `vercel.json` pointing at Render).
 
-Merging to `main` IS the production deploy of the public instance. Render
-rebuilds the API when the diff touches the backend (`motoquant/**`,
-`motoquant.db`, the requirements files, the Docker files, `render.yaml` or the
-Rust core under `rust/`; the exact list is the `buildFilter` in `render.yaml`,
-so web-only merges do not restart the API),
-and Vercel deploys the frontend on every merge. Hosting accounts belong to the
-maintainers, so contributors never need credentials. To run your own copy,
+Merging to `main` is the production deploy of the public instance. Vercel
+deploys the frontend on every merge. Render rebuilds the API when the diff
+touches the backend (`motoquant/**`, `motoquant.db`, the requirements files,
+the Docker files, `render.yaml` or the Rust core under `rust/`), so web-only
+merges do not restart the API. The exact list is the `buildFilter` in
+`render.yaml`. Hosting accounts belong to the maintainers, so contributors
+never need credentials. To run your own copy,
 follow [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md). The historical Railway →
 Render runbook is `docs/RENDER_MIGRATION.md`.

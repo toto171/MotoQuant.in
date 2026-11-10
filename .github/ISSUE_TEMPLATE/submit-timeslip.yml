@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Real runs are what make the simulator more accurate, especially for small bikes, where few instrumented tests have been published. A maintainer checks each submission before it joins the benchmark set, and the change that adds it links back to this issue.
+        Real runs make the simulator more accurate, especially for small bikes, where few instrumented tests have been published. A maintainer checks each submission before it joins the benchmark set, and the change that adds it links back to this issue.
 
         Please only submit runs you made yourself or that were published with their source.
 

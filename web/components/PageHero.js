@@ -4,7 +4,7 @@
  *
  *   <PageHero
  *     kicker="Motorcycle database"          // small eyebrow (optional)
- *     badge="541 bikes"                     // small pill (optional)
+ *     badge="534 bikes"                     // small pill (optional)
  *     title={<>Every bike. <span className="text-accent">Real physics.</span></>}
  *     sub="One plain sentence."
  *     stats={[{ value: 541, label: 'Bikes' }]}   // optional, static (no count-up)

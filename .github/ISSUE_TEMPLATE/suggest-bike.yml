@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks. Each bike in the catalog is built from published figures, so a link to the manufacturer's specification sheet or a magazine road test is the most useful thing you can add. The website's "Suggest a bike" form fills this in for you.
+        Thanks. Each bike in the catalog is built from published figures, so the most useful thing you can add is a link to the manufacturer's specification sheet or a magazine road test. The "Suggest a bike" form on the website fills this in for you.
 
   - type: input
     id: make

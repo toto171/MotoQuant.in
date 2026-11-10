@@ -1,4 +1,4 @@
-# MotoQuant surfaces without the MCP server
+# Using MotoQuant without the MCP server
 
 Read this when the MCP server is not connected, or when you are working
 inside the repo. Base URL for the hosted API:
@@ -7,9 +7,9 @@ inside the repo. Base URL for the hosted API:
 https://motoquant-api.onrender.com
 ```
 
-It runs on Render's free tier and sleeps after 15 minutes idle — the first
-request after a nap can take **~50 s**. That is a cold start, not an outage.
-Interactive OpenAPI docs live at `/docs`.
+It runs on Render's free tier and sleeps after 15 minutes idle, so the first
+request after that can take **~50 s**. That is a cold start, not an outage.
+Interactive OpenAPI docs are at `/docs`.
 
 ## REST endpoints
 
@@ -17,12 +17,12 @@ Interactive OpenAPI docs live at `/docs`.
 
 | Endpoint | Notes |
 |---|---|
-| `/api/health` | `{status, database, bike_count, engine}`. `engine` says which integrator is live (the Rust core or the Python reference; same numbers) and why. Also the wake-up call. |
+| `/api/health` | `{status, database, bike_count, engine}`. `engine` says which integrator is live (the Rust core or the Python reference; same numbers) and why. Also the call that wakes the server. |
 | `/api/bikes` | `?search=&manufacturer=&category=&limit=&offset=`. Returns `{total, bikes:[{id, manufacturer, model, year, category, displacement_cc, peak_power_hp, dry_mass_kg}]}`. `total` respects the filters. |
 | `/api/bikes/{id}` | Full spec sheet + config sub-blocks (aero `cd`, sprockets, `redline_rpm`, `tire_mu_peak`) + `tire_fitments`. 404 on an unknown id. |
 | `/api/venues` | The 20 seeded strips with `altitude_m` and `surface_type`. |
 | `/api/tires` | `?compound=&manufacturer=&limit=` (limit 1–5000). |
-| `/api/parts` | `?bike_id=&category=&category_id=&search=&compatible_only=&limit=&fields=id&include_rules=`. **Pass `bike_id`** — each part is then checked against the bike's fitment rules (chain pitch, engine layout, displacement, stroke type). With `compatible_only=false` every part comes back annotated `{compatible, fitment_reason}` instead of filtered. `fields=id` returns just `{part_ids, total, bike_id, compatible_only}`: the cheap way to learn which parts fit a bike. `total` counts matching parts before `limit` slicing; `include_rules=true` adds each part's raw `fitment_rules` / `specifications`. |
+| `/api/parts` | `?bike_id=&category=&category_id=&search=&compatible_only=&limit=&fields=id&include_rules=`. **Pass `bike_id`**: each part is then checked against the bike's fitment rules (chain pitch, engine layout, displacement, stroke type). With `compatible_only=false` every part comes back annotated `{compatible, fitment_reason}` instead of filtered. `fields=id` returns just `{part_ids, total, bike_id, compatible_only}`: the cheap way to learn which parts fit a bike. `total` counts matching parts before the `limit` cut; `include_rules=true` adds each part's raw `fitment_rules` / `specifications`. |
 | `/api/parts/categories` | Category list. |
 
 ### Simulation (POST, JSON body)
@@ -108,12 +108,12 @@ All times are clocked from the 1-ft stage beam (see "Rollout" in
 
 | Endpoint | Body extras | Returns |
 |---|---|---|
-| `POST /api/simulate/quick` | — | `{et_quarter_s, trap_speed_kmh, et_60ft_s, et_eighth_s, bike_name, peak_power_hp, total_mass_kg, parts_applied, parts_skipped, build_cost_inr, environment, stock_et_s, et_delta_s}`. **The workhorse.** `stock_et_s` / `et_delta_s` are null unless parts were applied (`et_delta_s` = with parts − without; negative = quicker). |
+| `POST /api/simulate/quick` | — | `{et_quarter_s, trap_speed_kmh, et_60ft_s, et_eighth_s, bike_name, peak_power_hp, total_mass_kg, parts_applied, parts_skipped, build_cost_inr, environment, stock_et_s, et_delta_s}`. `stock_et_s` / `et_delta_s` are null unless parts were applied (`et_delta_s` = with parts − without; negative = quicker). Use this route for most questions. |
 | `POST /api/simulate` | `use_adaptive_dt` | `{et_quarter_s, trap_speed_kmh, trap_speed_ms, splits{60ft_s, 330ft_s, 660ft_s, 1000ft_s, 1320ft_s}, environment, parts_applied, parts_skipped, build_cost_inr, bike, config}` plus a `timeseries` block of about 1,000 points (`t_s`, `v_kmh`, `x_m`, `rpm`, `gear`, `accel_g`, `traction_pct`, `tire_temp_c`, `power_kw`, `F_drive_N`, `F_drag_N`). Accepts `part_ids` like every sim route. |
 | `POST /api/simulate/top-speed` | `max_time_s` (0.1–120), `include_timeseries` | Terminal velocity in m/s, km/h and mph; time and distance to reach it; `reached_plateau`; terminal gear, RPM, power; LSR splits; `parts_applied`, `parts_skipped`, `build_cost_inr`, `environment`. |
 | `POST /api/simulate/distance` | `distance_m` (longer than the 0.3048 m rollout, ≤ 20000), `max_time_s` (0.1–300) | Arbitrary-distance run, for land-speed events: `{distance_m, time_s, trap_speed_ms, trap_speed_kmh, trap_speed_mph, peak_velocity_kmh, bike_name, peak_power_hp, total_mass_kg, parts_skipped, environment}`. |
 | `POST /api/simulate/compare` | `a_*` and `b_*` copies of the build fields, shared conditions at the top level | `{a, b, environment, delta:{et_s, trap_kmh, faster, cost_diff_inr}}`. Each of `a` / `b` is a build summary (`et_quarter_s`, `trap_speed_kmh`, `et_60ft_s`, `et_eighth_s`, `parts_applied`, `parts_skipped`, `build_cost_inr`, `timeseries`). `delta` is B − A (negative `et_s` = B quicker). Runs two sims. |
-| `POST /api/chat` | `query`, `messages`, `mode` | The agentic chat — 15 tools, multi-step. |
+| `POST /api/chat` | `query`, `messages`, `mode` | The chat agent: 15 tools, multi-step. |
 | `POST /api/jobs/{simulate\|topspeed\|compare\|optimize\|autotune\|outlaw\|chat}` | same bodies | Returns `{job_id}`; poll `GET /api/jobs/{id}` for `{status, progress, stage, result}` and `POST /api/jobs/{id}/cancel` to stop. Use for anything slow. |
 
 `POST /api/optimize/build` (best parts for a budget: `budget_inr`, `goal`
@@ -139,12 +139,12 @@ they used in `environment` and `environment_source`.
 No sim route accepts sprocket teeth. Two ways to express a gearing change
 over HTTP:
 
-1. **Catalog sprockets** — find parts whose `param_overrides` contain
+1. Catalog sprockets: find parts whose `param_overrides` contain
    `drivetrain.front_sprocket` / `drivetrain.rear_sprocket` at the counts you
    want (`GET /api/parts?bike_id=N&category=sprocket`), then run
    `/api/simulate/compare` with those `part_ids` on each side. The catalog
    covers front 13–18T and rear 38–50T.
-2. **Locally** — build the config and set the two fields directly. This is
+2. Locally: build the config and set the two fields directly. This is
    what the MCP server's local backend does, and it accepts any tooth count.
 
 ## Python / CLI (inside the repo)
@@ -174,16 +174,16 @@ python -m motoquant.mcp_server --selftest          # handshake check, no network
 MOTOQUANT_MCP_LOCAL=1 python -m motoquant.mcp_server
 ```
 
-## Repo conventions worth knowing
+## Repo conventions
 
-- **`AGENTS.md` first**, then `docs/ARCHITECTURE.md`.
-- **The three pinned baselines are load-bearing.** K5 10.0436 / R1 10.1092 /
-  Hayabusa 10.1100, bit-identical. After touching `physics.py`,
+- Read `AGENTS.md` first, then `docs/ARCHITECTURE.md`.
+- The three pinned baselines must stay bit-identical: K5 10.0436 / R1 10.1092 /
+  Hayabusa 10.1100. After touching `physics.py`,
   `submodels/*`, `defaults.py`, `category_profiles.py` or
   `scraper/importer.py`, run `make baselines`.
 - `make check` (fast gate) → `make test` (full suite) before any PR.
 - After a `spec_to_bike_config` or physics change, re-seed the DB blobs or
   `/api/simulate?bike_id=N` silently diverges from the sweep path.
 - Never `git add -A`; never commit incidental `motoquant.db` churn.
-- Accuracy claims sitewide come from one file — the latest
-  `reports/acc_final_*.json`. Quote it, do not estimate.
+- Every accuracy claim on the site comes from one file, the latest
+  `reports/acc_final_*.json`. Quote it; do not estimate.

@@ -2,10 +2,10 @@ blank_issues_enabled: false
 contact_links:
   - name: Ask a question
     url: https://github.com/toto171/MotoQuant.in/discussions
-    about: For open-ended questions and design discussions, use GitHub Discussions instead of an issue.
+    about: Open-ended questions and design discussions go in GitHub Discussions, not in issues.
   - name: Report a security vulnerability (privately)
     url: https://github.com/toto171/MotoQuant.in/security/advisories/new
-    about: Please do not open a public issue for security problems. Report privately here, or email motoquant@gmail.com (see SECURITY.md).
+    about: Do not open a public issue for a security problem. Report it privately here, or email motoquant@gmail.com (see SECURITY.md).
   - name: Read the onboarding doc
     url: https://github.com/toto171/MotoQuant.in/blob/main/docs/ONBOARDING.md
-    about: New contributor? Start here (then AGENTS.md and CONTRIBUTING.md).
+    about: New contributors start here, then read AGENTS.md and CONTRIBUTING.md.

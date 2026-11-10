@@ -1,6 +1,6 @@
 # GitHub Copilot instructions
 
-This repo's working contract is **[../AGENTS.md](../AGENTS.md)** — read it first.
+This repo's working contract is **[../AGENTS.md](../AGENTS.md)**. Read it first.
 It is model-agnostic and authoritative for every AI tool and human.
 
 The one rule you must never break: the three reference bikes (GSX-R 1000 K5
@@ -9,8 +9,8 @@ The one rule you must never break: the three reference bikes (GSX-R 1000 K5
 `defaults.py`, `category_profiles.py`, or `scraper/importer.py`, run
 `make baselines`. See `docs/INVARIANTS.md`.
 
-Before opening a PR: `make check` then `make test`. Full details in AGENTS.md,
-recurring pitfalls in `docs/KNOWN_TRAPS.md`.
+Before opening a PR, run `make check` then `make test`. AGENTS.md has the full
+details and `docs/KNOWN_TRAPS.md` lists recurring pitfalls.
 
 MotoQuant is free and open source (Apache-2.0, `docs/adr/0006-open-source-pivot.md`):
 never add paywalls, tier gates, usage quotas or licence keys. Protect
