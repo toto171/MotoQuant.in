@@ -117,20 +117,20 @@ OUTLAW_SIM_COST = 2 * HEAVY_OP_SIM_COST
 # pistons / big-bore), so its recipe leans on nitrous + supporting mods.
 BUILD_TIERS: dict[str, dict[str, Any]] = {
     "stage_1": {
-        "label": "Stage 1 — bolt-ons",
+        "label": "Stage 1: bolt-ons",
         "description": "exhaust, high-flow air filter, ECU flash/fuel controller",
         "profile": "street_legal",
         "default_budget_inr": 60_000,
     },
     "stage_2": {
-        "label": "Stage 2 — bolt-ons + drivetrain",
+        "label": "Stage 2: bolt-ons + drivetrain",
         "description": "stage 1 + full exhaust, clutch, quickshifter, "
         "sprockets/chain, lightweight battery, dyno tune",
         "profile": "street_legal",
         "default_budget_inr": 200_000,
     },
     "stage_3": {
-        "label": "Stage 3 — serious power",
+        "label": "Stage 3: serious power",
         "description": "stage 2 + nitrous, upgraded fuel system, suspension; "
         "(engine internals like cams/big-bore are not in the parts catalog, "
         "so stage 3 is approximated with bolt-on power adders)",
@@ -138,9 +138,9 @@ BUILD_TIERS: dict[str, dict[str, Any]] = {
         "default_budget_inr": 500_000,
     },
     "stage_4": {
-        "label": "Stage 4 / Outlaw — full drag prep",
+        "label": "Stage 4 / Outlaw: full drag prep",
         "description": "stage 3 + forced induction, extended swingarm, "
-        "wheelie bar, drag slicks, lockup clutch — open/outlaw class, "
+        "wheelie bar, drag slicks, lockup clutch; open/outlaw class, "
         "no budget limit",
         "profile": "full_race",
         "default_budget_inr": None,  # unlimited (resolved server-side)
@@ -718,8 +718,18 @@ _AGENT_TOOL_DEFS: list[dict[str, Any]] = [
                 "type": "string",
                 "enum": ["stage_1", "stage_2", "stage_3", "stage_4", "outlaw"],
             },
-            "budget_inr": {"type": "number"},
-            "goal": {"type": "string", "enum": ["min_et", "max_trap"]},
+            "budget_inr": {
+                "type": "number",
+                "description": (
+                    "Parts budget in rupees, converted from the user's words "
+                    "(1.5 lakh = 150000, 80k = 80000)"
+                ),
+            },
+            "goal": {
+                "type": "string",
+                "enum": ["min_et", "max_trap"],
+                "description": "min_et = quickest ET; max_trap = highest trap speed",
+            },
             "venue_id": {"type": "integer"},
         },
         ["bike_id"],

@@ -329,7 +329,7 @@ class TestPublicWriteSurface(_AppTest):
 
 class TestChatDailyCap(_AppTest):
     """The model client is overridden with an UNCONFIGURED stub, so each turn
-    answers 200 + llm_not_configured without any LLM call — the dependency
+    answers 200 + assistant_unavailable without any LLM call — the dependency
     chain (both rate limits) still runs in full."""
 
     def setUp(self):
@@ -365,7 +365,7 @@ class TestChatDailyCap(_AppTest):
         for _ in range(3):
             r = self._chat()
             self.assertEqual(r.status_code, 200, r.text[:300])
-            self.assertEqual(r.json()["error"], "llm_not_configured")
+            self.assertEqual(r.json()["error"], "assistant_unavailable")
         self._assert_daily_429(self._chat())
         self._assert_daily_429(self._chat(path="/api/jobs/chat"))
 

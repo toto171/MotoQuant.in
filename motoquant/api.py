@@ -4204,10 +4204,8 @@ def _prepare_chat(req: ChatRequest, request: Request, override):
             ),
         )
     own_key = visitor_key is not None
-    if not own_key:
-        _chat_daily_cap(request, req.assistant)
-    _enforce_classic_chat_limit(req, request)
     if not own_key and override is None and server_key_resting():
+        # Known before any model call: do not charge the daily cap for it.
         return (
             None,
             False,
@@ -4218,6 +4216,9 @@ def _prepare_chat(req: ChatRequest, request: Request, override):
                 "your own Anthropic key to keep asking.",
             ),
         )
+    if not own_key:
+        _chat_daily_cap(request, req.assistant)
+    _enforce_classic_chat_limit(req, request)
     return _chat_client(req, visitor_key, override), own_key, None
 
 
@@ -4308,7 +4309,12 @@ def job_chat(
 
             raise RuntimeError(redact_secrets(f"{type(e).__name__}: {e}")) from None
 
-    return _start_job("chat", run)
+    try:
+        return _start_job("chat", run)
+    except HTTPException:
+        if own_key and hasattr(llm, "close"):
+            llm.close()  # the job never started: drop the visitor's key now
+        raise
 
 
 # ═══════════════════════════════════════════════════════════════════════════

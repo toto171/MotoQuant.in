@@ -40,7 +40,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'A stock 2022 KTM Duke 390 simulates to 13.30 seconds and 162 km/h at Aamby Valley in November. Fast Track Racing India ran 11.342 seconds at the ASEAN Superfast event in Thailand on a heavily developed Duke 390 with the same 373.3 cc LC4c single. A gap of roughly two seconds makes most riders assume the record bike has a different engine. It does not. The Fast Track bike has the same bore, the same stroke, the same Bajaj-built bottom end and the same six-speed cassette. Mod by mod, it has added roughly four tenths of grip, three tenths of gearing, two tenths of weight and one tenth of intake and exhaust work. The rest is rider craft. Below is where each of those tenths comes from, what the same mods cost at Indian retail, and what a Duke 390 owner with a ₹50,000 budget can realistically run.',
+    text: 'A stock 2022 KTM Duke 390 simulates to 13.30 seconds and 162 km/h at Aamby Valley in November. Fast Track Racing India ran 11.342 seconds at the ASEAN Superfast event in Thailand on a heavily developed Duke 390 with the same 373.3 cc LC4c single. A gap of roughly two seconds makes most riders assume the record bike has a different engine. It does not. The Fast Track bike has the same bore, the same stroke, the same Bajaj-built bottom end and the same six-speed cassette. Mod by mod, it has added roughly four tenths of grip, three tenths of gearing, two tenths of weight and one tenth of intake and exhaust work. The rest is rider craft. This post traces each of those tenths, prices the same mods at Indian retail, and works out what a Duke 390 owner with a ₹50,000 budget can realistically run.',
   },
   {
     type: 'h2',
@@ -126,7 +126,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The best cost-per-tenth mod on the Duke 390 is the front sprocket drop, at roughly five hundred rupees per tenth of ET. One tooth less at the front shortens the overall final-drive ratio by 6.25 percent. The LC4c makes its useful torque between 6,500 and 9,000 rpm, and the stock 16:45 final drive is tall enough that on a strip the bike spends the first hundred metres climbing into that band. A 15-tooth front sprocket gets the engine into the meat of the curve sooner. The costs: top speed drops from roughly 178 km/h to 167 km/h, which does not matter on a strip where you trap at 162-170 km/h, and highway cruising revs rise by about 400 rpm at 100 km/h, which you will barely feel on a single. Neither is a deal-breaker for a Duke 390 that goes to the strip.',
+    text: 'The best cost-per-tenth mod on the Duke 390 is the front sprocket drop, at roughly five hundred rupees per tenth of ET. One tooth less at the front shortens the overall final-drive ratio by 6.25 percent. The LC4c makes its useful torque between 6,500 and 9,000 rpm, and the stock 16:45 final drive is tall enough that on a strip the bike spends the first hundred metres climbing into that band. A 15-tooth front sprocket gets the engine into the meat of the curve sooner. There are two costs. Top speed drops from roughly 178 km/h to 167 km/h, which does not matter on a strip where you trap at 162-170 km/h. Highway cruising revs rise by about 400 rpm at 100 km/h, which you will barely feel on a single. Neither is a deal-breaker for a Duke 390 that goes to the strip.',
   },
   {
     type: 'h2',

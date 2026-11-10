@@ -50,7 +50,7 @@ const PROFILES = [
   { id: 'street_legal', label: 'Street legal', hint: 'Parts you can run on the road.' },
   { id: 'drag_prep', label: 'Drag-strip prep', hint: 'Bolt-ons and strip rubber.' },
   { id: 'full_race', label: 'Full race', hint: 'Everything, including nitrous and boost.' },
-  { id: 'all', label: 'Anything goes', hint: 'No restrictions at all.' },
+  { id: 'all', label: 'Anything goes', hint: 'No restrictions.' },
 ];
 const PROFILE_LABEL = Object.fromEntries(PROFILES.map((p) => [p.id, p.label]));
 
@@ -464,7 +464,7 @@ export default function BuildOptimizer() {
             className="w-full"
           />
           {!bike && !task.active && (
-            <p className="field-hint text-center">Choose a bike above to get started.</p>
+            <p className="field-hint text-center">Choose a bike above to start.</p>
           )}
           {task.active && (
             <div className="mt-3" aria-live="polite">
@@ -555,7 +555,7 @@ export default function BuildOptimizer() {
                 Parts to buy ({parts.length})
               </h2>
               <p className="mt-1 text-sm text-white/65">
-                Best value first. Value is measured as rupees per tenth of a second (
+                Best value first, by rupees per tenth of a second (
                 <Term k="cost_per_tenth">cost per tenth</Term>). Lower is better.
               </p>
               <ul className="mt-3 divide-y divide-white/[0.08]">

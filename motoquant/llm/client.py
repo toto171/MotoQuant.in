@@ -638,7 +638,7 @@ class LLMClient:
             if isinstance(result, LLMResponse):
                 return result
             if isinstance(result, dict):
-                return LLMResponse(tool_input=result, stop_reason="end_turn")
+                return LLMResponse(tool_input=result, stop_reason="tool_use")
             raise TypeError("_call_override for 'tool' must return dict or LLMResponse")
 
         fmt = {

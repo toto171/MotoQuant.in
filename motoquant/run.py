@@ -2993,9 +2993,11 @@ def cmd_chat(args):
     Differences vs `nl` (regex parser):
       - Handles paraphrased / unusual queries that regex can't match
       - Returns a human-readable summary instead of just stats
-      - Requires ANTHROPIC_API_KEY env var
+      - Needs an Anthropic API key in the ANTHROPIC_API_KEY env var
+      - --assistant picks the mechanic (Claude Sonnet 5.5, default) or the
+        doctor (Claude Opus 5.5)
     """
-    from .llm import run_chat_pipeline
+    from .llm import LLMClient, run_chat_pipeline
 
     query = getattr(args, "query", None)
     if not query:
@@ -3006,7 +3008,8 @@ def cmd_chat(args):
     output_json = getattr(args, "output_json", False)
     verbose = getattr(args, "verbose", False)
 
-    result = run_chat_pipeline(query, db)
+    client = LLMClient(getattr(args, "assistant", None) or "mechanic")
+    result = run_chat_pipeline(query, db, client=client)
     db.close()
 
     if output_json:
@@ -3022,9 +3025,17 @@ def cmd_chat(args):
         if result.parsed_notes:
             print(f"          notes: {result.parsed_notes}")
 
-    if result.error == "llm_not_configured":
+    if result.error == "assistant_unavailable":
         print(f"  Error: {result.error_detail}")
         print("  Hint: try `nl` (regex parser) instead -- no API key required.")
+        return 1
+    if result.error in (
+        "rate_limited",
+        "key_rejected",
+        "free_assistant_resting",
+        "refused",
+    ):
+        print(f"  Error ({result.error}): {result.error_detail}")
         return 1
     if result.error == "parse_failed":
         print(f"  Error parsing query: {result.error_detail}")
@@ -3919,8 +3930,17 @@ def build_parser() -> argparse.ArgumentParser:
     p_chat = subparsers.add_parser(
         "chat",
         help=(
-            "Phase A: Claude-powered NL tuning. Requires ANTHROPIC_API_KEY. "
+            "Ask in plain English, answered by Claude. Needs ANTHROPIC_API_KEY. "
             "Use `nl` if you want the regex parser without an API key."
+        ),
+    )
+    p_chat.add_argument(
+        "--assistant",
+        choices=["mechanic", "doctor"],
+        default="mechanic",
+        help=(
+            "mechanic = Claude Sonnet 5.5, quick and practical (default); "
+            "doctor = Claude Opus 5.5, slower and digs deeper"
         ),
     )
     p_chat.add_argument(
