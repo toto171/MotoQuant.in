@@ -4,7 +4,7 @@ import Term from '../../../components/Term';
 export const metadata = {
   title: 'Getting started — your first quarter-mile time in five minutes',
   description:
-    'A five-minute walkthrough of MotoQuant: pick one of 541 bikes, read your quarter-mile time, change rider weight and location, add parts, find the best parts for your budget and get a race-day setup. Free and open source.',
+    'A five-minute walkthrough of MotoQuant: pick one of 534 bikes, read your quarter-mile time, change rider weight and location, add parts, find the best parts for your budget and get a race-day setup. Free and open source.',
   keywords: [
     'motoquant getting started',
     'how to use motorcycle drag simulator',

@@ -70,7 +70,7 @@ INSTRUCTIONS = (
     "ET is elapsed time over 402.3 m; trap speed is the speed crossing that "
     "line; the 60-foot split is the launch-quality number. All et_delta_s "
     "values are after-minus-before, so negative means faster. Published "
-    "accuracy: weighted mean |error| ~0.27 s across 277 matched real-world "
+    "accuracy: weighted mean |error| ~0.26 s across 273 matched real-world "
     "benchmarks — good for ranking builds and what-ifs, not for claiming a "
     "specific bike will run an exact ET."
 )
@@ -803,7 +803,7 @@ TOOLS: list[dict[str, Any]] = [
     {
         "name": "search_bikes",
         "description": (
-            "Search the 541-bike catalog by free text, manufacturer or category. "
+            "Search the 534-bike catalog by free text, manufacturer or category. "
             "Returns catalog ids to feed the simulation tools. Always start here "
             "when the user names a bike."
         ),
@@ -910,7 +910,7 @@ TOOLS: list[dict[str, Any]] = [
     {
         "name": "search_parts",
         "description": (
-            "Search the 584-part catalog. Pass bike_id to return ONLY parts that "
+            "Search the 546-part catalog. Pass bike_id to return ONLY parts that "
             "actually fit that bike (chain pitch, engine layout, displacement, "
             "stroke type are all checked)."
         ),

@@ -181,6 +181,327 @@ def _truth_values():
     return truth
 
 
+# ─── Accuracy headline (added 2026-11-10) ────────────────────────────────────
+# The catalog-count patterns below cannot see the ACCURACY numbers the site
+# quotes (matched count, weighted |d|, bias, within-band counts). Those drifted
+# silently across every sweep. Truth comes from the newest committed
+# reports/acc_final_*.json (matched/weighted |d|/bias) and the regenerated
+# web/app/validation/accuracy_data.json (within-band distribution). Floats are
+# compared at the PRECISION THE PAGE DECLARES (0.26 vs 0.262 vs 0.2620), so a
+# rounded form never false-alarms. Accuracy drift is reported but never
+# auto-patched: the quoted forms (+0.009 s, 0.262s, '−0.001 s', /273) vary too
+# much for a safe blind rewrite -- patch by hand from the printed truth.
+ACC_REPORT_GLOB = "acc_final_*.json"
+ACC_VIZ_PATH = REPO / "web" / "app" / "validation" / "accuracy_data.json"
+_ACC_FILES = (
+    "web/app/**/*.js",
+    "web/components/*.js",
+    "README.md",
+    "docs/ONBOARDING.md",
+    "docs/MCP.md",
+    "skills/**/*.md",
+    "motoquant/mcp_server.py",
+)
+_NUM = r"([+\u2212-]?\d?\.\d{2,4})"
+# (regex with ONE group, truth key, description). Group is an int or a decimal.
+ACCURACY_PATTERNS = [
+    # matched benchmark count
+    (r"\b(\d{3}) matched\b", "acc_matched", "matched benchmark count"),
+    (r"\((\d{3}) Benchmarks\)", "acc_matched", "matched count (title)"),
+    (
+        r"\bof (?:the )?(\d{3}) (?:matched|land|benchmarks fall)",
+        "acc_matched",
+        "matched count (x of N)",
+    ),
+    (r"\b\d{2,3}/(\d{3}) within\b", "acc_matched", "matched count (x/N within)"),
+    (r">/(\d{3})</span>", "acc_matched", "matched count (/N tile suffix)"),
+    # within-band counts and the top-10 mean quoted outside the tiles
+    (r"\b(\d{2,3})/\d{3} within 0\.20 ?s", "acc_w020", "within 0.20 s (x/N meta)"),
+    (r"\b(\d{2,3}) within \u00b10\.05 s", "acc_w005", "within 0.05 s (prose)"),
+    (
+        r"top-10 (?:cleanest |mean error )?\u00b1(0\.\d{3}) ?s",
+        "acc_top10",
+        "top-10 mean (meta)",
+    ),
+    (
+        r"num: '\u00b1(0\.\d{3}) ?s',\s*label: '(?:Top-10 mean error|average error, 10 best)'",
+        "acc_top10",
+        "top-10 mean tile",
+    ),
+    (
+        r"ten cleanest validated runs the mean absolute error is \u00b1(0\.\d{3}) s",
+        "acc_top10",
+        "top-10 mean (whitepaper/blog)",
+    ),
+    (
+        r"10 cleanest validated runs agree within\s+about \u00b1(0\.\d{3}) s",
+        "acc_top10",
+        "top-10 mean (README)",
+    ),
+    (
+        r"tabular-nums text-accent\">\u00b1(0\.\d{3}) s</p>",
+        "acc_top10",
+        "top-10 mean (validation hero)",
+    ),
+    # overall weighted mean |d| (cluster-level figures are deliberately NOT matched)
+    (
+        r"[Oo]verall[^.\n]{0,60}?(?:mean absolute error|\|\u0394\|) (?:is )?(?:about )?(0\.\d{2,4})",
+        "acc_w_mean",
+        "overall weighted mean |d|",
+    ),
+    (
+        r"weighted mean absolute error is (0\.\d{2,4})",
+        "acc_w_mean",
+        "overall weighted mean |d|",
+    ),
+    (
+        r"weighted mean \|\u0394\| (?:is )?(0\.\d{2,4})",
+        "acc_w_mean",
+        "overall weighted mean |d|",
+    ),
+    (
+        r"weighted mean \\\|error\\\| (0\.\d{2,4})",
+        "acc_w_mean",
+        "overall weighted mean |d| (glossary)",
+    ),
+    (
+        r"matched, \|\u0394\| (0\.\d{2,4})",
+        "acc_w_mean",
+        "overall weighted mean |d| (table)",
+    ),
+    (
+        r"\u2248 (0\.\d{2,4}) s over",
+        "acc_w_mean",
+        "overall weighted mean |d| (MCP doc)",
+    ),
+    (
+        r"mean error is about \*\*(0\.\d{2,4}) s",
+        "acc_w_mean",
+        "overall weighted mean |d| (skill)",
+    ),
+    (
+        r"weighted mean \|error\| ~(0\.\d{2,4}) s",
+        "acc_w_mean",
+        "overall weighted mean |d| (MCP)",
+    ),
+    (
+        r"num: '(0\.\d{3})s', label: 'Weighted \|\u0394\|'",
+        "acc_w_mean",
+        "weighted |d| tile",
+    ),
+    (
+        r"name: 'All bikes[^}]*mae: (0\.\d{2,4})",
+        "acc_w_mean",
+        "landing overall MAE row",
+    ),
+    (
+        r"'All clusters \u00b7 weighted',\s*'\d+',\s*'[^']*',\s*'(0\.\d{3}) s'",
+        "acc_w_mean",
+        "whitepaper overall MAE cell",
+    ),
+    (
+        r"weighted mean absolute error (0\.\d{2,4})s",
+        "acc_w_mean",
+        "weighted mean |d| (meta)",
+    ),
+    # overall weighted bias
+    (
+        r"[Oo]verall weighted bias (?:is|of) ([+\u2212-]0\.\d{3,4})",
+        "acc_w_bias",
+        "overall weighted bias",
+    ),
+    (
+        r"Weighted bias ([+\u2212-]0\.\d{3,4})",
+        "acc_w_bias",
+        "overall weighted bias (meta)",
+    ),
+    (
+        r"\bbias(?: about)?\s+([+\u2212-]0\.\d{3,4})\s*s\s*(?:across|\||,\s*\d+ matched|,\s*top-10|\*\*|[,)])",
+        "acc_w_bias",
+        "overall weighted bias (prose)",
+    ),
+    (
+        r"essentially zero \(([+\u2212-]0\.\d{3,4}) s",
+        "acc_w_bias",
+        "overall weighted bias (blog)",
+    ),
+    (
+        r"num: '([+\u2212-]0\.\d{3})s', label: 'Weighted bias",
+        "acc_w_bias",
+        "weighted bias tile",
+    ),
+    (
+        r"name: 'All bikes[^}]*bias: ([+\u2212-]?0\.\d{3,4})",
+        "acc_w_bias",
+        "landing overall bias row",
+    ),
+    (
+        r"seg: '(0\.\d{3})', pre: '\+', post: 's', label: 'Weighted bias'",
+        "acc_w_bias",
+        "whitepaper bias tile",
+    ),
+    # within-band counts
+    (
+        r"num: '(\d{2,3})', label: 'Within \u00b10\.10s'",
+        "acc_w010",
+        "within 0.10 s tile",
+    ),
+    (
+        r"num: '(\d{2,3})', label: 'Within \u00b10\.20s'",
+        "acc_w020",
+        "within 0.20 s tile",
+    ),
+    (
+        r"num: '(\d{2,3})', label: 'Within \u00b10\.50s'",
+        "acc_w050",
+        "within 0.50 s tile",
+    ),
+    (
+        r"num: '(\d{2,3})', label: 'Within \u00b11\.00s'",
+        "acc_w100",
+        "within 1.00 s tile",
+    ),
+    (
+        r"num: '(\d{2,3})',\s*label: 'within 0\.10 s'",
+        "acc_w010",
+        "landing within 0.10 s tile",
+    ),
+    (
+        r"num: '(\d{2,3})',\s*label: 'within 0\.20 s'",
+        "acc_w020",
+        "landing within 0.20 s tile",
+    ),
+    (r"\((\d{2,3}) within \u00b10\.10 s", "acc_w010", "within 0.10 s (prose)"),
+    (
+        r"(\d{3}) of (?:the )?\d{3}[^.]{0,30}within \u00b10\.20 s",
+        "acc_w020",
+        "within 0.20 s (prose)",
+    ),
+]
+
+
+def _newest_acc_report():
+    files = sorted((REPO / "reports").glob(ACC_REPORT_GLOB))
+    return files[-1] if files else None
+
+
+def _accuracy_truth():
+    """Accuracy truth keys; empty dict when no sweep report is committed."""
+    out = {}
+    rep = _newest_acc_report()
+    if rep is None:
+        return out
+    try:
+        ov = json.loads(rep.read_text(encoding="utf-8"))["overall"]
+        out["acc_report"] = rep.name
+        out["acc_matched"] = int(ov["n"])
+        out["acc_w_mean"] = float(ov["w_mean_abs"])
+        out["acc_w_bias"] = float(ov["w_bias"])
+    except Exception as exc:  # unreadable report: surface, do not guess
+        out["acc_report"] = f"ERROR: {exc}"
+        return out
+    try:
+        viz = json.loads(ACC_VIZ_PATH.read_text(encoding="utf-8"))
+        d = viz["distribution"]
+        out["acc_w010"] = int(d["within_0_10"])
+        out["acc_w020"] = int(d["within_0_20"])
+        out["acc_w050"] = int(d["within_0_50"])
+        out["acc_w100"] = int(d["within_1_00"])
+        out["acc_w005"] = int(d["within_0_05"])
+        # top-10 mean: the ten smallest |d| among non-derived benchmarks, the
+        # set every page's "10 closest matches" table shows
+        _nd = sorted(
+            b["abs_delta"] for b in viz["bikes"] if b.get("quality") != "derived"
+        )[:10]
+        out["acc_top10"] = sum(_nd) / len(_nd)
+        # self-consistency: the viz data must come from the same sweep
+        vo = viz["overall"]
+        out["acc_viz_matches_report"] = (
+            int(viz["n_matched"]) == out["acc_matched"]
+            and abs(float(vo["w_mean_abs"]) - out["acc_w_mean"]) < 5e-5
+            and abs(float(vo["w_bias"]) - out["acc_w_bias"]) < 5e-5
+        )
+    except Exception as exc:
+        out["acc_viz_matches_report"] = f"ERROR: {exc}"
+    return out
+
+
+def _accuracy_drift(truth):
+    """Scan _ACC_FILES for stale accuracy headline values. Report-only."""
+    records = []
+    if not isinstance(truth.get("acc_matched"), int):
+        return records
+    if truth.get("acc_viz_matches_report") is False:
+        records.append(
+            {
+                "file": "web/app/validation/accuracy_data.json",
+                "line": 0,
+                "declared": "viz data",
+                "truth": truth["acc_report"],
+                "truth_key": "acc_viz_matches_report",
+                "description": "accuracy_data.json overall differs from the newest acc_final report",
+            }
+        )
+    seen = set()
+    hits = dict.fromkeys(range(len(ACCURACY_PATTERNS)), 0)
+    for glob in _ACC_FILES:
+        for path in REPO.glob(glob):
+            if not path.is_file() or "node_modules" in path.parts:
+                continue
+            try:
+                text = path.read_text(encoding="utf-8", errors="replace")
+            except Exception:
+                continue
+            for idx, (pattern, key, desc) in enumerate(ACCURACY_PATTERNS):
+                tv = truth.get(key)
+                if tv is None:
+                    continue
+                for m in re.finditer(pattern, text):
+                    hits[idx] += 1
+                    raw = m.group(1).replace("\u2212", "-")
+                    line = text.count("\n", 0, m.start(1)) + 1
+                    src_line = text.splitlines()[line - 1] if text else ""
+                    if HISTORICAL_LINE_MARKER in src_line:
+                        continue
+                    try:
+                        declared = float(raw) if "." in raw else int(raw)
+                    except ValueError:
+                        continue
+                    if isinstance(tv, float):
+                        dec = len(raw.split(".")[1]) if "." in raw else 0
+                        ok = round(tv, dec) == round(declared, dec)
+                    else:
+                        ok = declared == tv
+                    rec_key = (path, line, key, raw)
+                    if not ok and rec_key not in seen:
+                        seen.add(rec_key)
+                        records.append(
+                            {
+                                "file": path.relative_to(REPO).as_posix(),
+                                "line": line,
+                                "declared": m.group(1),
+                                "truth": tv,
+                                "truth_key": key,
+                                "description": f"accuracy: {desc}",
+                            }
+                        )
+    # A pattern that matches nothing guards nothing: the copy it was written
+    # for has been reworded, and a stale number there would pass unseen.
+    for idx, (pattern, key, desc) in enumerate(ACCURACY_PATTERNS):
+        if truth.get(key) is not None and hits[idx] == 0:
+            records.append(
+                {
+                    "file": "scripts/audit_headline_stats.py",
+                    "line": 0,
+                    "declared": "0 matches",
+                    "truth": ">= 1 match",
+                    "truth_key": key,
+                    "description": f"accuracy pattern matched nothing: {desc}",
+                }
+            )
+    return records
+
+
 # ─── Drift patterns ──────────────────────────────────────────────────────────
 # Each entry: (file_glob, regex_pattern, truth_key, description)
 # Group 1 of the regex must capture the declared numeric value.
@@ -1043,6 +1364,7 @@ def main():
     args = ap.parse_args()
 
     truth = _truth_values()
+    truth.update(_accuracy_truth())
 
     # ── Drift report ────────────────────────────────────────────────────
     drift_count = 0
@@ -1069,6 +1391,10 @@ def main():
                             "description": desc,
                         }
                     )
+
+    for rec in _accuracy_drift(truth):
+        drift_count += 1
+        drift_records.append(rec)
 
     if not args.json:
         print("=" * 78)

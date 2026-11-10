@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export const metadata = {
   title: 'Validation Data',
-  description: 'MotoQuant accuracy report — 250 benchmarks (276 matched) against published Cycle World, Sport Rider, MotoStatz, MCN, and BikeWale timeslips. Weighted bias +0.007s, weighted mean absolute error 0.263s, top-10 mean error ±0.007s. Per-cluster bias across the cylinder-aware 12-cluster taxonomy and the open small-cc + 2-stroke calibration gaps. Reference baselines: K5 9.9331s, R1 10.1436s, Hayabusa 10.3633s — Δ ±0.0000 since July 13, 2026.',
+  description: 'MotoQuant accuracy report — 250 benchmarks (273 matched) against published Cycle World, Sport Rider, MotoStatz, MCN, and BikeWale timeslips. Weighted bias +0.009s, weighted mean absolute error 0.262s, top-10 mean error ±0.007s. Per-cluster bias across the cylinder-aware 12-cluster taxonomy and the open small-cc + 2-stroke calibration gaps. Reference baselines: K5 9.9331s, R1 10.1436s, Hayabusa 10.3633s — Δ ±0.0000 since July 13, 2026.',
   alternates: { canonical: 'https://motoquant.in/docs/validation' },
   keywords: [
     'motorcycle simulator accuracy',
@@ -18,10 +18,10 @@ export const metadata = {
   ],
 };
 
-// Top-10 cleanest validated runs, 8 August 2026 sweep
-// (reports/acc_final_2026_08_08.json — 10 smallest |Δ| across the matched
-//  corpus, mean ±0.007s. Every row is instrumented or magazine data — no
-//  DERIVED estimate reaches the top 10 in this sweep.)
+// Top-10 cleanest validated runs, 10 November 2026 sweep
+// (reports/acc_final_2026_11_10.json — 10 smallest |Δ| among NON-derived
+//  benchmarks, mean ±0.007s. DERIVED estimates are excluded: one, the RE
+//  Interceptor 650 at |Δ| 0.005s, would otherwise rank 4th.)
 const TOP10 = [
   { rank: 1, name: "Kawasaki ZRX1200R", year: 2001, cc: "1164cc I4", target: 10.85, sim: 10.8487, delta: -0.001, source: "Cycle World 2001" },
   { rank: 2, name: "Honda CBR650R E-Clutch", year: 2024, cc: "649cc I4", target: 11.45, sim: 11.4521, delta: 0.002, source: "MotoStatz (instrumented)" },
@@ -35,16 +35,16 @@ const TOP10 = [
   { rank: 10, name: "Kawasaki Ninja ZX-10R", year: 2011, cc: "998cc I4", target: 10.08, sim: 10.0933, delta: 0.013, source: "Sport Rider 7/11" },
 ];
 
-// Per-cluster weighted bias + weighted |Δ|, 8 August 2026 sweep
-// (reports/acc_final_2026_08_08.json clusters — cylinder-aware 12-cluster
+// Per-cluster weighted bias + weighted |Δ|, 10 November 2026 sweep
+// (reports/acc_final_2026_11_10.json clusters — cylinder-aware 12-cluster
 // taxonomy: twins/singles/small-I4s are split out from the old
 // displacement-only buckets). Bias is weighted; N in note.
 // Badge rule: "Closed" = weighted |bias| ≤ 0.05s AND weighted |Δ| ≤ 0.30s.
 const CLUSTERS = [
   { name: '600–1000cc sport (I4/triple)', bias: '−0.009s', status: 'closed', note: 'N=72 · weighted |Δ| 0.175s — largest cluster, centred' },
-  { name: 'Sport twins 600–1300cc', bias: '+0.006s', status: 'closed', note: 'N=48 · weighted |Δ| 0.246s — second-largest cluster, centred' },
-  { name: 'Litre sport ≥195 hp', bias: '+0.027s', status: 'closed', note: 'N=30 · weighted |Δ| 0.147s — tightest |Δ| in the corpus' },
-  { name: '500–700cc twin', bias: '+0.001s', status: 'closed', note: 'N=17 · weighted |Δ| 0.145s — instrumented Sport Rider era; one row fell out of the match set this sweep (18 → 17)' },
+  { name: 'Sport twins 600–1300cc', bias: '+0.013s', status: 'closed', note: 'N=46 · weighted |Δ| 0.241s — second-largest cluster, centred' },
+  { name: 'Litre sport ≥195 hp', bias: '+0.028s', status: 'closed', note: 'N=30 · weighted |Δ| 0.145s — tightest |Δ| in the corpus' },
+  { name: '500–700cc twin', bias: '−0.001s', status: 'closed', note: 'N=16 · weighted |Δ| 0.146s — instrumented Sport Rider era; one row fell out of the match set this sweep (17 → 16)' },
   { name: '200–300cc entry', bias: '−0.018s', status: 'closed', note: 'N=14 · weighted |Δ| 0.231s — bias centred; the unweighted |Δ| of 0.513s still reflects derived-benchmark spread' },
   { name: 'Cruiser 1300+', bias: '+0.036s', status: 'closed', note: 'N=5 · weighted |Δ| 0.209s — thin set; muscle-bike slip-launch' },
   { name: 'Singles 300–500cc', bias: '+0.030s', status: 'open', note: 'N=16 · weighted |Δ| 0.509s — bias centred but spread is wide (unweighted |Δ| 1.327s); derived-benchmark uncertainty' },
@@ -60,10 +60,10 @@ export default function ValidationPage() {
     <article>
       <header className="mb-12">
         <p className="eyebrow mb-2">Accuracy</p>
-        <h1 className="font-display font-bold text-3xl md:text-4xl text-white mb-4 tracking-tight">Benchmark results, August 2026</h1>
+        <h1 className="font-display font-bold text-3xl md:text-4xl text-white mb-4 tracking-tight">Benchmark results, November 2026</h1>
         <p className="text-white/70 text-base leading-relaxed mb-5">
-          Source-quality-weighted sweep results across 250 published benchmarks (276 matched to a catalog bike).
-          Metrics, per-cluster bias, and methodology. Last updated 8 August 2026.
+          Source-quality-weighted sweep results across 250 published benchmarks (273 matched to a catalog bike).
+          Metrics, per-cluster bias, and methodology. Last updated 10 November 2026.
         </p>
         <p className="rounded-xl border border-accent/25 bg-accent/5 px-4 py-3 text-base leading-relaxed text-white/85">
           <strong className="font-semibold text-white">In short:</strong> we compare the simulator with real
@@ -82,12 +82,12 @@ export default function ValidationPage() {
 
       {/* Headline stats */}
       <section className="mb-14">
-        <h2 className="font-display font-bold text-2xl text-white mb-6">Aggregate metrics (276 matched benchmarks)</h2>
+        <h2 className="font-display font-bold text-2xl text-white mb-6">Aggregate metrics (273 matched benchmarks)</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
           {[
-            { num: '0.263s', label: 'Weighted |Δ|' },
+            { num: '0.262s', label: 'Weighted |Δ|' },
             { num: '0.200s', label: 'Median |Δ|' },
-            { num: '+0.007s', label: 'Weighted bias (sim − real)' },
+            { num: '+0.009s', label: 'Weighted bias (sim − real)' },
             { num: '±0.007s', label: 'Top-10 mean error' },
           ].map((s, i) => (
             <div key={i} className="card p-4 border-brand-orange/20 text-center">
@@ -98,13 +98,13 @@ export default function ValidationPage() {
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { num: '75', label: 'Within ±0.10s' },
-            { num: '138', label: 'Within ±0.20s' },
-            { num: '224', label: 'Within ±0.50s' },
-            { num: '256', label: 'Within ±1.00s' },
+            { num: '74', label: 'Within ±0.10s' },
+            { num: '137', label: 'Within ±0.20s' },
+            { num: '222', label: 'Within ±0.50s' },
+            { num: '253', label: 'Within ±1.00s' },
           ].map((s, i) => (
             <div key={i} className="card p-4 text-center">
-              <div className="font-display font-bold text-xl text-white tabular-nums">{s.num}<span className="text-white/60 text-sm">/276</span></div>
+              <div className="font-display font-bold text-xl text-white tabular-nums">{s.num}<span className="text-white/60 text-sm">/273</span></div>
               <div className="text-xs text-white/60 mt-1">{s.label}</div>
             </div>
           ))}
@@ -148,9 +148,8 @@ export default function ValidationPage() {
       <section className="mb-14">
         <h2 className="font-display font-bold text-2xl text-white mb-4">Top 10 most accurate bikes</h2>
         <p className="text-white/60 text-sm mb-6">
-          The 10 smallest residuals across the matched corpus — top-10 mean absolute error ±0.007s.
-          Sources: Cycle World, Sport Rider, MCN, Motorcycle Consumer News. One row (rank 3) is a
-          DERIVED estimate and is flagged as such.
+          The 10 smallest residuals among published (non-derived) benchmarks — top-10 mean absolute error ±0.007s.
+          Sources: Cycle World, Sport Rider, MotoStatz and an instrumented VBox test. DERIVED estimates are excluded.
           Conditions: race fuel, professional rider, ideal strip.
         </p>
         <div className="card border-brand-orange/20 overflow-hidden">
@@ -204,7 +203,8 @@ export default function ValidationPage() {
           corpus. A cluster is marked <span className="text-brand-accent">Closed</span> only when its weighted bias
           is inside ±0.05s <em>and</em> its weighted |Δ| is inside 0.30s — a centred cluster that still scatters
           widely stays <span className="text-brand-amber">Open</span>. The remaining spread in the small-cc and
-          two-stroke buckets is a known residual from per-bike calibration work not yet completed — it is not a
+          two-stroke buckets is a known residual: many small bikes carry a gearing limitation (see Known
+          limitations below), and per-bike calibration work is not yet completed — it is not a
           regression.
         </p>
         <div className="card border-brand-orange/20 overflow-hidden">
@@ -253,8 +253,16 @@ export default function ValidationPage() {
             match a 2015 model that shares a name but has different internals.
           </p>
           <p>
-            <strong className="text-white">Known limitations:</strong> Residual small-cc and 2T bias is a calibration
-            gap, not a physics gap. The correct fix is per-bike Cd and μ calibration using real strip data — upload
+            <strong className="text-white">Known limitations:</strong> Small bikes are the weakest class, and many
+            still carry a known gearing limitation, documented in{' '}
+            <a
+              href="https://github.com/toto171/MotoQuant.in/blob/main/reports/session_2026_11_10_epoch.md"
+              className="text-brand-accent underline underline-offset-2"
+              rel="noopener"
+            >
+              the repository
+            </a>
+            . Beyond that, residual small-cc and 2T bias is largely a calibration gap. The correct fix is per-bike Cd and μ calibration using real strip data — upload
             a Dragy CSV to <code className="font-mono text-brand-accent break-words">/api/calibrate/dragy</code> to overlay your
             real run against the sim and quantify the gap for your specific bike; the engine&apos;s offline
             calibrator then fits Cd and μ from measured runs.
@@ -278,7 +286,7 @@ export default function ValidationPage() {
           </Link>
           <Link href="/simulator" className="card card-hover block p-4 group">
             <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Try the simulator →</div>
-            <div className="text-xs text-white/60">541 bikes, free in the browser, no account needed.</div>
+            <div className="text-xs text-white/60">534 bikes, free in the browser, no account needed.</div>
           </Link>
         </div>
       </div>

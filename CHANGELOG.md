@@ -4,24 +4,58 @@ Notable changes, newest first. This is the human-readable milestone history;
 the exhaustive session-by-session log lives in `CLAUDE.md` (top entry = latest)
 and `reports/`. Format loosely follows [Keep a Changelog](https://keepachangelog.com).
 
-## [Unreleased] — 2026-11-09 — Open-sourced under MIT
+## [2.0.0] — 2026-11-10 — Open source, plain-language site, audit fixes
 
-MotoQuant is now free and open source ([LICENSE](LICENSE), MIT).
+MotoQuant is now free and open source ([LICENSE](LICENSE), MIT), the "Pro"
+name is gone, and the site was rebuilt so a first-time visitor can use it.
+Full write-up: `reports/session_2026_11_10_v2.md`.
 
 ### Added
 - `LICENSE` (MIT), `SECURITY.md`, `CODE_OF_CONDUCT.md`; open-source
-  README/CONTRIBUTING, issue/PR templates (incl. a sourced bike/benchmark
-  data template); `docs/adr/0006-open-source-mit.md`.
-- `pyproject.toml` license, readme, classifiers and project URLs.
+  README/CONTRIBUTING, issue/PR templates; `docs/adr/0006-open-source-mit.md`.
+- Site design system v6 (`web/DESIGN.md`): light and dark themes, a glossary
+  with in-place term explanations, plain-language navigation, and a simulator
+  with a Simple mode (three questions) and an Advanced mode (everything else).
+- Every result now states the conditions it was computed for (API
+  `environment` block; shown on the site).
+- Conditions (venue, altitude, temperature, humidity, pressure) accepted by
+  the upgrade, race-day-setup and all simulation routes.
+- `pip install -e .` works; one version number (`motoquant.__version__`).
+- Self-hosted fonts (`web/app/fonts/`), so the site builds without network
+  access.
+- Gates: a gearing-plausibility check with a committed baseline, a docs-truth
+  test, and an accuracy block in `scripts/audit_headline_stats.py`.
 
 ### Removed
-- Payments, subscriptions, paid tiers, license keys and sim-quota metering,
-  along with their docs (`docs/PAYMENTS_SETUP.md`,
-  `docs/COMMERCIAL_LAUNCH.md`). Everything on the site is free.
+- Payments, subscriptions, paid tiers, license keys and sim-quota metering
+  (code, pages, database tables and docs). Everything on the site is free.
+- 47 invented placeholder parts that carried real brand names, and seven
+  bikes that were the same motorcycle entered twice. The catalog is now 534
+  bikes and 546 parts.
 
 ### Changed
-- Accounts are kept, optionally, only to save runs to a garage. Per-IP rate
-  limits remain as abuse protection.
+- Accounts are optional and exist only to save runs. Per-IP rate limits remain
+  as abuse protection.
+- Hot- and cold-day power correction now follows the standard dyno correction
+  formula; the reference day is unchanged.
+- The upgrade tool never recommends a part it has not simulated; the race-day
+  tool says "not adjustable" instead of inventing a launch RPM.
+- The plain-English query parser no longer mistakes a model number or year
+  for a budget; when it cannot tell, it asks instead of guessing.
+- Catalog responses are cached and compressed; background job memory is
+  bounded.
+
+### Fixed
+- Dragy and ECU-log imports mis-timed runs that did not start from a stop.
+- The defects confirmed by a full-codebase audit, and the 33 confirmed by an
+  independent review of this change; see the write-up for the list.
+
+### Measured accuracy (10 November 2026 sweep)
+273 matched tests, weighted mean error 0.262 s, bias +0.009 s
+(`reports/acc_final_2026_11_10.json`). The three pinned reference bikes are
+bit-identical to 1.x. A proposed gearing correction for small bikes was
+measured, made accuracy worse, and was **not** shipped
+(`reports/session_2026_11_10_epoch.md`).
 
 ## [PR #116] — 2026-07-19 — Scrapling dev-side scraping toolkit
 

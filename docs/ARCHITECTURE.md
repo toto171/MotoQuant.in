@@ -134,7 +134,7 @@ flowchart TD
 | `motoquant/jobs.py` | In-memory async job registry (progress + cancel) | `create_job()` |
 | `motoquant/observability.py` | Sentry wiring (env-gated, no-op without DSN) | top of file |
 | `web/` | Next.js frontend (app router, components, `lib/api.js`) | `web/app/page.js` |
-| `tests/` | pytest suite (~4,400 tests) | `conftest.py` |
+| `tests/` | pytest suite (more than 4,800 tests) | `conftest.py` |
 | `scripts/` | Sweeps, reseed, patches, audits, autonomous-ops orchestration | `reseed_configs_from_specs.py` |
 
 ---

@@ -2092,7 +2092,7 @@ def list_parts(
 
     ``total`` in the response is the number of MATCHING parts (after category /
     search / compatibility filtering, before ``limit`` slicing) so paginating
-    callers can detect truncation. Cap is 5000 (593-part catalog as of Nov 2026).
+    callers can detect truncation. Cap is 5000 (546-part catalog as of Nov 2026).
 
     When ``bike_id`` is provided, each returned part is evaluated against the
     bike's fitment rules (stroke_type, manufacturer, engine_config, displacement,

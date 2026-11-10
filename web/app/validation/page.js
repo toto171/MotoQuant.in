@@ -30,12 +30,21 @@ export default function ValidationPage() {
         <PageHero
           kicker="Accuracy"
           title="How accurate is the simulator?"
-          sub="We compare it with 276 published timeslips from Cycle World, Sport Rider, MCN and MotoStatz. On average it is within about a quarter of a second, and neither systematically quick nor slow."
+          sub={`We compare it with 250 published timeslips from Cycle World, Sport Rider, MCN and MotoStatz (${accuracyData.n_matched} bike-to-timeslip matches). On average it is within about a quarter of a second, and neither systematically quick nor slow.`}
         >
           <p className="max-w-2xl rounded-xl border border-accent/25 bg-accent/5 px-4 py-3 text-base leading-relaxed text-white/85">
             <strong className="font-semibold text-white">In short:</strong> every dot below is one real run against what
             MotoQuant predicted. Dots on the diagonal line are perfect predictions. The weak spots are small bikes and
-            two-strokes, where good timeslips are scarce, and we mark them clearly.
+            two-strokes, where good timeslips are scarce, and we mark them clearly. Small bikes are the weakest class, and many
+            still carry a known gearing limitation, documented in{' '}
+            <a
+              href="https://github.com/toto171/MotoQuant.in/blob/main/reports/session_2026_11_10_epoch.md"
+              className="text-accent underline underline-offset-2 hover:text-accent-bright"
+              rel="noopener"
+            >
+              the repository
+            </a>
+            .
           </p>
           <div className="mt-2 flex flex-wrap gap-x-10 gap-y-4">
             {HERO_TILES.map((s) => (

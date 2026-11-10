@@ -27,7 +27,7 @@ export function organizationSchema() {
       height: 512,
     },
     description:
-      'First-principles physics engine for motorcycle quarter-mile drag racing. Predict ET, compare builds, and quantify parts ROI for 541+ bikes.',
+      'First-principles physics engine for motorcycle quarter-mile drag racing. Predict ET, compare builds, and quantify parts ROI for 534+ bikes.',
     foundingDate: '2025-11-01',
     founder: [
       { '@type': 'Person', name: 'Arya Desai' },
@@ -87,7 +87,7 @@ export function softwareApplicationSchema() {
     downloadUrl: `${SITE_URL}/simulator`,
     softwareVersion: '1.0',
     description:
-      'Physics-based quarter-mile drag racing simulator for motorcycles. 15-submodel engine (engine, drivetrain, clutch, chain, tires, aero, weight-transfer, rider dynamics, staging, environmental, braking, wheelie, parasitic, rolling resistance, forced induction) covering 541 bikes, 584 parts, 254 tires, 20 venues. Validated to K5 GSX-R1000 9.93s, YZF-R1 10.14s, Hayabusa 10.36s.',
+      'Physics-based quarter-mile drag racing simulator for motorcycles. 15-submodel engine (engine, drivetrain, clutch, chain, tires, aero, weight-transfer, rider dynamics, staging, environmental, braking, wheelie, parasitic, rolling resistance, forced induction) covering 534 bikes, 546 parts, 254 tires, 20 venues. Validated to K5 GSX-R1000 9.93s, YZF-R1 10.14s, Hayabusa 10.36s.',
     publisher: { '@id': `${SITE_URL}/#organization` },
     author: { '@id': `${SITE_URL}/#organization` },
     offers: {
@@ -99,8 +99,8 @@ export function softwareApplicationSchema() {
     },
     featureList: [
       'Quarter-mile ET prediction to ±0.2s',
-      '541 motorcycles with individual aero + dyno curves',
-      '584-part catalog with cost-per-tenth ROI analysis',
+      '534 motorcycles with individual aero + dyno curves',
+      '546-part catalog with cost-per-tenth ROI analysis',
       '15 independent physics sub-models',
       'Dragy GPS + dyno import with sim overlay',
       'Calibrated surrogate model for instant iteration',
@@ -116,15 +116,15 @@ export function softwareApplicationSchema() {
 export const FAQ_ITEMS = [
   {
     q: 'What is MotoQuant?',
-    a: 'MotoQuant is a free simulator that predicts how fast a motorcycle runs the quarter mile. Pick a bike and it shows the time, the speed at the finish line and the splits for 541 bikes, using physics that is checked against real published tests.',
+    a: 'MotoQuant is a free simulator that predicts how fast a motorcycle runs the quarter mile. Pick a bike and it shows the time, the speed at the finish line and the splits for 534 bikes, using physics that is checked against real published tests.',
   },
   {
     q: 'How accurate is the quarter-mile prediction?',
-    a: 'Checked against published magazine tests and Dragy runs: the Suzuki GSX-R1000 K5 simulates 9.93 s against a real 9.97 s; the Yamaha YZF-R1 simulates 10.14 s against 10.3 s; the Suzuki Hayabusa simulates 10.36 s (real range 10.1–10.7 s). The August 2026 check covers 250 published benchmarks (276 matched to catalog bikes) with a weighted mean bias of +0.007 s; 138 of 276 land within ±0.20 s of the published time. Small bikes are less well covered by published tests, so expect a wider margin there.',
+    a: 'Checked against published magazine tests and Dragy runs: the Suzuki GSX-R1000 K5 simulates 9.93 s against a real 9.97 s; the Yamaha YZF-R1 simulates 10.14 s against 10.3 s; the Suzuki Hayabusa simulates 10.36 s (real range 10.1–10.7 s). The November 2026 check covers 250 published benchmarks (273 matched to catalog bikes) with a weighted mean bias of +0.009 s; 137 of 273 land within ±0.20 s of the published time. Small bikes are less well covered by published tests, so expect a wider margin there.',
   },
   {
     q: 'Which bikes are included?',
-    a: 'The catalog covers 541 bikes across 25+ makers: Suzuki, Yamaha, Honda, Kawasaki, BMW, Ducati, Aprilia, KTM, Triumph, Royal Enfield, Bajaj, TVS, Hero, Harley-Davidson, Indian Motorcycle, CFMoto, Benelli, Husqvarna, MV Agusta, Moto Guzzi, Buell and more. That includes Indian 200–400 cc bikes (Pulsar, Apache, R15 V4), South-East Asian underbones, 400 cc four-cylinder bikes, retro flagships and 20 two-stroke drag bikes (RD350, RX100, RGV250, H2 Mach IV). Missing yours? You can ask for it to be added.',
+    a: 'The catalog covers 534 bikes across 25+ makers: Suzuki, Yamaha, Honda, Kawasaki, BMW, Ducati, Aprilia, KTM, Triumph, Royal Enfield, Bajaj, TVS, Hero, Harley-Davidson, Indian Motorcycle, CFMoto, Benelli, Husqvarna, MV Agusta, Moto Guzzi, Buell and more. That includes Indian 200–400 cc bikes (Pulsar, Apache, R15 V4), South-East Asian underbones, 400 cc four-cylinder bikes, retro flagships and 20 two-stroke drag bikes (RD350, RX100, RGV250, H2 Mach IV). Missing yours? You can ask for it to be added.',
   },
   {
     q: 'Is MotoQuant free?',
@@ -136,7 +136,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: 'How does it decide which parts are worth buying?',
-    a: 'Each part in the 584-part catalog is tested by running the simulation with and without it. The change in quarter-mile time is divided by the part\u2019s price to get the cost of each tenth of a second. The best-parts tool then picks the combination that gains the most within your budget, respecting compatibility rules and known pairings such as exhaust plus ECU flash.',
+    a: 'Each part in the 546-part catalog is tested by running the simulation with and without it. The change in quarter-mile time is divided by the part\u2019s price to get the cost of each tenth of a second. The best-parts tool then picks the combination that gains the most within your budget, respecting compatibility rules and known pairings such as exhaust plus ECU flash.',
   },
   {
     q: 'Can I upload my own Dragy or dyno data?',

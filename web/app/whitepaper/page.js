@@ -28,7 +28,7 @@ export const metadata = {
   },
 };
 
-const ABSTRACT = `MotoQuant is a first-principles physics engine for predicting motorcycle quarter-mile drag-racing elapsed times. The model couples 15 independent sub-models — engine torque (Willans friction), Pacejka tire grip with thermal evolution, gear-shift and clutch slip dynamics, weight transfer and rider centre-of-gravity shift, aerodynamic drag with per-bike Cd × A, environmental conditions (density altitude, surface μ, ambient temp), and parasitic loss budget — through a fixed-step fourth-order Runge–Kutta integrator running at one-millisecond resolution. As of the August 2026 sweep we validate against 250 source-quality-weighted published quarter-mile benchmarks (276 matched) across a cylinder-aware 12-cluster taxonomy. Overall weighted bias is +0.007 s; weighted mean absolute error is 0.263 s. Within instrumented-magazine-data clusters (litre-sport ≥195 hp), weighted bias is +0.027 s and |Δ| is 0.147 s; across the ten cleanest validated runs the mean absolute error is ±0.007 s. Three reference baselines — GSX-R 1000 K5, YZF-R1 4C8, and Suzuki Hayabusa Gen1 — are preserved exactly to the fourth decimal place across every code change since July 13, 2026.`;
+const ABSTRACT = `MotoQuant is a first-principles physics engine for predicting motorcycle quarter-mile drag-racing elapsed times. The model couples 15 independent sub-models — engine torque (Willans friction), Pacejka tire grip with thermal evolution, gear-shift and clutch slip dynamics, weight transfer and rider centre-of-gravity shift, aerodynamic drag with per-bike Cd × A, environmental conditions (density altitude, surface μ, ambient temp), and parasitic loss budget — through a fixed-step fourth-order Runge–Kutta integrator running at one-millisecond resolution. As of the November 2026 sweep we validate against 250 source-quality-weighted published quarter-mile benchmarks (273 matched) across a cylinder-aware 12-cluster taxonomy. Overall weighted bias is +0.009 s; weighted mean absolute error is 0.262 s. Within instrumented-magazine-data clusters (litre-sport ≥195 hp), weighted bias is +0.028 s and |Δ| is 0.145 s; across the ten cleanest validated runs the mean absolute error is ±0.007 s. Three reference baselines — GSX-R 1000 K5, YZF-R1 4C8, and Suzuki Hayabusa Gen1 — are preserved exactly to the fourth decimal place across every code change since July 13, 2026.`;
 
 const SECTIONS = [
   {
@@ -82,7 +82,7 @@ const SECTIONS = [
     n: '4',
     title: 'Validation methodology',
     body: [
-      'As of the August 2026 sweep we benchmark against 250 published quarter-mile elapsed times (276 matched to a catalog bike) where the bike, year range, and venue conditions are unambiguous. Sources are classified by quality and weighted accordingly:',
+      'As of the November 2026 sweep we benchmark against 250 published quarter-mile elapsed times (273 matched to a catalog bike) where the bike, year range, and venue conditions are unambiguous. Sources are classified by quality and weighted accordingly:',
     ],
     list: {
       title: 'Source-quality weights',
@@ -91,12 +91,12 @@ const SECTIONS = [
         'magazine (MCN, RideApart, BikeWale published article)               — weight 0.7',
         'aggregator (FastestLaps, MotoStatz)                                  — weight 0.5',
         'forum or unverified timeslip                                         — weight 0.3',
-        'unknown / single-source                                              — weight 0.4',
+        'unknown / single-source                                              — weight 0.5',
         'derived (0–100 km/h × 1.6 multiplier with declared ±0.7 s)           — weight 0.1',
       ],
     },
     extra: [
-      'Per-cluster bias and weighted MAE are reported with N (sample size) so the reader can judge which clusters are statistically meaningful. Clusters dominated by derived benchmarks (the Indian small-cc and 2T entries) inherit the underlying ±0.7 s data uncertainty regardless of model fidelity.',
+      'Per-cluster bias and weighted MAE are reported with N (sample size) so the reader can judge which clusters are statistically meaningful. Derived benchmarks (mostly Indian small-cc entries) carry a declared ±0.7 s uncertainty and are down-weighted to 0.1 for that reason.',
     ],
   },
   {
@@ -106,10 +106,10 @@ const SECTIONS = [
     table: {
       head: ['Cluster', 'N', 'Weighted bias', 'Weighted |Δ|'],
       rows: [
-        ['Litre Sport ≥195 hp',          '30',  '+0.027 s', '0.147 s'],
+        ['Litre Sport ≥195 hp',          '30',  '+0.028 s', '0.145 s'],
         ['Litre Sport 600–1000 (I4/I3)', '72',  '−0.009 s', '0.176 s'],
-        ['Sport Twin 600–1300',          '48',  '+0.006 s', '0.246 s'],
-        ['Mid-Twin 500–700',             '17',  '+0.001 s', '0.145 s'],
+        ['Sport Twin 600–1300',          '46',  '+0.013 s', '0.241 s'],
+        ['Mid-Twin 500–700',             '16',  '−0.001 s', '0.146 s'],
         ['Mid-Twin 300–500',             '8',   '−0.038 s', '0.361 s'],
         ['Single 300–500',               '16',  '+0.030 s', '0.509 s'],
         ['Entry 200–300',                '14',  '−0.018 s', '0.231 s'],
@@ -118,11 +118,11 @@ const SECTIONS = [
         ['Two-stroke',                   '9',   '+0.077 s', '0.642 s'],
         ['Cruiser 1300+',                '5',   '+0.036 s', '0.209 s'],
         ['Other',                        '42',  '+0.019 s', '0.324 s'],
-        ['All clusters · weighted',      '276', '+0.007 s', '0.263 s'],
+        ['All clusters · weighted',      '273', '+0.009 s', '0.262 s'],
       ],
     },
     body: [
-      'The most accurate clusters are litre-sport ≥195 hp (+0.027 s weighted bias, 0.147 s weighted MAE) and mid-twin 500–700 (+0.001 s bias, 0.145 s weighted MAE) — well within the ±0.20 s tolerance the modern instrumented Cycle World and Sport Rider tests themselves report as 1-σ test-to-test variation; across the ten cleanest validated runs the mean absolute error is ±0.007 s. Overall weighted bias of +0.007 s indicates the model is essentially centred at zero, and 138 of the 276 matched benchmarks fall within ±0.20 s (75 within ±0.10 s, 42 within ±0.05 s). The remaining residual is bounded by benchmark-data quality, not by physics model fidelity: the small-cc and two-stroke clusters draw heavily from derived benchmarks with declared ±0.7 s uncertainty, fundamentally limiting validation precision regardless of how well the physics is modelled.',
+      'The most accurate clusters are litre-sport ≥195 hp (+0.028 s weighted bias, 0.145 s weighted MAE) and mid-twin 500–700 (−0.001 s bias, 0.146 s weighted MAE) — well within the ±0.20 s tolerance the modern instrumented Cycle World and Sport Rider tests themselves report as 1-σ test-to-test variation; across the ten cleanest validated runs the mean absolute error is ±0.007 s. Overall weighted bias of +0.009 s indicates the model is essentially centred at zero, and 137 of the 273 matched benchmarks fall within ±0.20 s (74 within ±0.10 s, 42 within ±0.05 s). The remaining residual has two sources. Part of it is benchmark-data quality: the small-cc clusters include derived benchmarks with a declared ±0.7 s uncertainty. Part of it is the model: on high-confidence (instrumented and magazine) benchmarks alone, bikes under 400 cc show a weighted mean absolute error of 0.39 s against 0.23 s for all high-confidence benchmarks, and many small bikes still carry a known gearing limitation (reports/session_2026_11_10_epoch.md).',
     ],
   },
   {
@@ -149,13 +149,13 @@ const SECTIONS = [
     n: '7',
     title: 'Reproducibility',
     body: [
-      'MotoQuant is open to external audit. The simulator code, all sub-model coefficients, the 541-bike catalog, the 584-part library, and every venue\'s seasonal weather profile are inspectable. Every parts ROI calculation is deterministic given the bike configuration and venue conditions. We publish:',
+      'MotoQuant is open to external audit. The simulator code, all sub-model coefficients, the 534-bike catalog, the 546-part library, and every venue\'s seasonal weather profile are inspectable. Every parts ROI calculation is deterministic given the bike configuration and venue conditions. We publish:',
     ],
     list: {
       title: '',
       items: [
         'reports/ directory with full validation sweeps (JSON + Markdown summaries) — one report per release',
-        'tests/ — 4,393 regression tests covering catalog integrity, physics, API, and silent-failure detection across all 541 bikes',
+        'tests/ — more than 4,800 regression tests covering catalog integrity, physics, API, and silent-failure detection across all 534 bikes',
         '/docs/validation — the complete benchmark table with per-bike sources',
         '/validation — the interactive real-vs-simulated accuracy explorer',
         'CLAUDE.md — the project diary, with every design decision and trade-off recorded chronologically',
@@ -170,8 +170,8 @@ const SECTIONS = [
     n: '8',
     title: 'Known limitations',
     body: [
-      'We are honest about where the model is bounded. The two-stroke cluster still carries a +0.146 s weighted bias and a 0.537 s weighted |Δ| because piston-port 2T launch dynamics include an off-pipe / on-pipe transition whose integral-of-power-over-time is not perfectly captured by the current expansion-chamber Gaussian curve. The Indian entry small-cc cluster (entry-150-200) carries the largest weighted |Δ| in the corpus at 0.820 s — bias-centred at +0.018 s but noise-dominated, bounded by the declared ±0.7 s uncertainty of its derived benchmarks; reaching the published ≤0.05 s stretch goal requires per-bike Dragy / VBox-measured stock data, not further physics tuning.',
-      'The cruiser 1300+ cluster has only N=3 and the small-cc I4 screamer cluster only N=2 — too small to draw statistically meaningful conclusions. The Apache RTR 200 4V is a documented outlier (sim 18.7 s vs derived 15.9 s) where the derived benchmark is suspiciously fast for a 20.5 hp / 153 kg bike; we have flagged it for audit but have not adjusted the model on the strength of one data point.',
+      'We are honest about where the model is bounded. The two-stroke cluster still carries a +0.077 s weighted bias and a 0.642 s weighted |Δ| because piston-port 2T launch dynamics include an off-pipe / on-pipe transition whose integral-of-power-over-time is not perfectly captured by the current expansion-chamber Gaussian curve. The Indian entry small-cc cluster (entry-150-200) carries the largest weighted |Δ| of any cluster with ten or more benchmarks at 0.702 s — bias-centred at −0.011 s but widely scattered. Its derived benchmarks carry a declared ±0.7 s uncertainty, but six of its seven instrumented rows also miss by 0.4–0.9 s, in both directions, and many small bikes still carry a known gearing limitation (reports/session_2026_11_10_epoch.md). Closing the gap needs both per-bike Dragy / VBox-measured stock data and sourced gearing for the benchmarked small bikes.',
+      'The cruiser 1300+ cluster has only N=5 and the small-cc I4 screamer cluster only N=2 — too small to draw statistically meaningful conclusions. The Apache RTR 200 4V is a documented outlier: the simulator gives 18.95 s against an instrumented 18.1 s, a 0.85 s miss on a high-confidence row; we have not adjusted the model on the strength of one data point.',
     ],
   },
   {
@@ -180,7 +180,7 @@ const SECTIONS = [
     title: 'Roadmap',
     body: [
       'Three open work items, in priority order: (1) replace derived benchmark entries with measured Dragy / VBox runs from the Indian community; (2) port the remaining unused profile knobs (Pacejka C, chain efficiency override, tuck transition time, engine inertia multiplier) into their respective sub-models so future tuning passes have richer per-cluster expression; (3) audit the residual spread on the 300–500cc twin and single clusters to determine whether it is derived-benchmark noise, gear-cassette catalog drift, or a physics model gap.',
-      'A Phase 5 calibrator-v2 will accept user-uploaded Dragy logs and contribute their measured ETs back to the benchmark corpus on opt-in. This closes the data-quality loop the small-cc clusters need without requiring any change to the physics model itself.',
+      'A Phase 5 calibrator-v2 will accept user-uploaded Dragy logs and contribute their measured ETs back to the benchmark corpus on opt-in. This closes the data-quality half of the small-cc gap; the known gearing limitation is a separate model-input fix that needs sourced primary ratios.',
     ],
   },
   {
@@ -302,7 +302,7 @@ export default function WhitepaperPage() {
           <Reveal>
           <div className="mb-16 pb-12">
             <div className="text-sm text-white/60 mb-4">
-              Whitepaper · Version 1.0 · April 30, 2026 · validation data: August 2026 sweep
+              Whitepaper · Version 1.0 · April 30, 2026 · validation data: November 2026 sweep
             </div>
             <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-white mb-6">
               MotoQuant:<br />A first-principles drag-racing <span className="text-accent">physics engine</span> for motorcycles
@@ -318,15 +318,15 @@ export default function WhitepaperPage() {
             </p>
 
             {/* Top-level stats — timing-board tiles, regenerated from the
-                8 August 2026 sweep (reports/acc_final_2026_08_08.json): 250 benchmarks,
-                276 matched, weighted bias +0.007 s. Same corpus as /features and
+                10 November 2026 sweep (reports/acc_final_2026_11_10.json): 250 benchmarks,
+                273 matched, weighted bias +0.009 s. Same corpus as /features and
                 /docs/validation. */}
             <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { seg: '15', label: 'Sub-models' },
-                { seg: '541', label: 'Catalog bikes' },
+                { seg: '534', label: 'Catalog bikes' },
                 { seg: '250', label: 'Weighted benchmarks' },
-                { seg: '0.007', pre: '+', post: 's', label: 'Weighted bias' },
+                { seg: '0.009', pre: '+', post: 's', label: 'Weighted bias' },
               ].map(t => (
                 <div key={t.label} className="card p-4">
                   <div className="flex items-end justify-center gap-1">

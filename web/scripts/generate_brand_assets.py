@@ -241,10 +241,10 @@ def render_og_image(path: Path) -> None:
     # NOTE: scripts/audit_headline_stats.py --regen-og owns the live
     # og-image.png; these values are the fallback and must track it.
     stats = [
-        ("541", "bikes"),
-        ("593", "parts"),
+        ("534", "bikes"),
+        ("546", "parts"),
         ("20", "venues"),
-        ("4393", "tests"),
+        ("4800+", "tests"),
     ]
     stat_x = 110
     stat_y = 420

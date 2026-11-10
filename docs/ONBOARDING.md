@@ -30,11 +30,11 @@ A first-principles physics engine for predicting and optimising motorcycle quart
 |---|---|
 | Status | Free and open source (MIT); hosted at motoquant.in, no paid tiers or quota |
 | Tests | full pytest suite green (runs ~25–35 min; focused subsets in `CONTRIBUTING.md` §4) |
-| Bikes in catalog | 541 across 30+ manufacturers (India, SE Asia, US, EU, JP, CN) |
-| Tires | 254 (incl. drag radials/slicks + cruiser rubber), 1,780 fitments |
-| Parts | 584 across 19 categories (incl. lowering kits, air shifters, lockup clutches) |
+| Bikes in catalog | 534 across 30+ manufacturers (India, SE Asia, US, EU, JP, CN) |
+| Tires | 254 (incl. drag radials/slicks + cruiser rubber), 1,765 fitments |
+| Parts | 546 across 19 categories (incl. lowering kits, air shifters, lockup clutches) |
 | Venues | 20 (India + international drag strips) |
-| Benchmarks | 250 ET rows + 86 top-speed rows; weighted sweep 276 matched, |Δ| 0.263 s, bias +0.007 s |
+| Benchmarks | 250 ET rows + 86 top-speed rows; weighted sweep 273 matched, |Δ| 0.262 s, bias +0.009 s |
 | Reference baselines | K5 9.9331 / R1 10.1436 / Hayabusa 10.3633 — pinned **bit-identical**, CI-gated |
 | Chat AI | multi-step tool-calling agent (`motoquant/llm/agent.py`, `docs/CHAT_AGENT.md`) |
 | Deployed | API: Render free tier (`motoquant-api.onrender.com`); web: Vercel (`motoquant.in`) — both auto-deploy from `main` |
@@ -50,11 +50,11 @@ The code is not the bottleneck. The main open items are production DB durability
 - FastAPI backend: sims (quick/full/top-speed/compare), jobs API with real progress + cancel, build optimizer (surrogate-accelerated knapsack), ECU autotune, the composed outlaw pipeline, agentic chat (`/api/chat`, `/api/jobs/chat`), optional accounts (saved runs), Dragy/dyno/ECU calibration uploads, leaderboard, shareable timeslips.
 - Next.js web app: cockpit-themed landing + simulator workbench + optimizer/autotune pages + transcript chat UI + docs/blog.
 - Tauri desktop app: DISCONTINUED (July 2026) — the hosted web app is the product. The `desktop/` scaffold remains in-tree for reference; no binaries will be built.
-- Physics: 15 sub-models, adaptive RK4, calibration pipeline, numpy surrogate v2.5 (regenerate after ANY physics/DB reseed — standing contract in `artifacts/surrogate/README.md`).
+- Physics: 15 sub-models, adaptive RK4, calibration pipeline, numpy surrogate v2.7 (regenerate after ANY physics/DB reseed — standing contract in `artifacts/surrogate/README.md`).
 
 ### Pending / known gaps (the honest list)
 - Prod DB durability: SQLite is baked into the Docker image; every deploy wipes user accounts/saved runs until the Render persistent-disk flip (maintainer, ~$7/mo).
-- Small-cc accuracy floor is data-limited, not model-limited — needs real Dragy timeslips.
+- Small-cc is the weakest class: partly data-limited (needs real Dragy timeslips), partly a known gearing limitation (generic primary ratios; see `reports/session_2026_11_10_epoch.md`).
 - Epoch-gated physics work (do NOT wire casually — moves the pinned baselines): Pacejka slip model, 4-branch clutch dispatch, staging rollout/dead-time. See the July 3 session report.
 - Full backlog: `docs/ROADMAP.md`.
 

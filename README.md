@@ -11,9 +11,9 @@ quarter-mile drag racing: predict elapsed time and trap speed from a bike's
 specs, test modifications (power, gearing, tires, weight, parts) before you
 spend money, and rank parts by seconds gained per rupee. It started in the
 Indian drag-racing community (Aamby Valley, MMRT, BIC, Kari, Hyderabad) and
-models 541 bikes, 254 tires, 584 parts, and 20 venues. Predictions are
-validated against 250 published benchmarks (weighted mean |Δ| 0.263 s, bias
-+0.007 s across 276 matched runs) by a ~4,400-test pytest suite.
+models 534 bikes, 254 tires, 546 parts, and 20 venues. Predictions are
+validated against 250 published benchmarks (weighted mean |Δ| 0.262 s, bias
++0.009 s across 273 matched runs) by a pytest suite of more than 4,800 tests.
 
 MotoQuant is free software released under the [MIT license](LICENSE).
 
@@ -92,10 +92,12 @@ in CI ([docs/INVARIANTS.md](docs/INVARIANTS.md) I1):
 | Yamaha YZF-R1 4C8 | **10.1436 s** |
 | Suzuki Hayabusa Gen1 | **10.3633 s** |
 
-Across the full benchmark corpus the weighted mean |Δ| is 0.263 s (bias
-+0.007 s, 276 matched runs); the 10 cleanest validated runs agree within
-about ±0.007 s. Small-displacement bikes are data-limited rather than
-model-limited — real instrumented timeslips are the most valuable thing you can
+Across the full benchmark corpus the weighted mean |Δ| is 0.262 s (bias
++0.009 s, 273 matched runs); the 10 cleanest validated runs agree within
+about ±0.007 s. Small bikes are the weakest class: published tests for them are scarce,
+and many still carry a known gearing limitation documented in
+[`reports/session_2026_11_10_epoch.md`](reports/session_2026_11_10_epoch.md).
+Real instrumented timeslips are the most valuable thing you can
 contribute (see [CONTRIBUTING.md](CONTRIBUTING.md)). The site's
 [/validation](https://motoquant.in/validation) page shows every comparison.
 

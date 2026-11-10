@@ -180,7 +180,7 @@ export default function BikesPage() {
         title="Bikes"
         lede={
           <>
-            541 motorcycles you can simulate. Pick one to see its predicted time. Missing yours?{' '}
+            534 motorcycles you can simulate. Pick one to see its predicted time. Missing yours?{' '}
             <button
               type="button"
               onClick={() => setSuggestOpen(true)}

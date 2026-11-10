@@ -10,7 +10,7 @@
  * can I trust the numbers · open source · FAQ.
  *
  * Stat-audit shapes preserved (scripts/audit_headline_stats.py): STATS
- * (`num: N, label: 'BIKES'`), the "541 bikes" / "584 parts" / "254 tires" /
+ * (`num: N, label: 'BIKES'`), the "534 bikes" / "546 parts" / "254 tires" /
  * "20 venues" / "250 benchmarks" phrasing, ACCURACY_TILES, HONEST_CLUSTERS,
  * TOP10.
  */
@@ -29,19 +29,20 @@ const REPO_URL = 'https://github.com/toto171/MotoQuant.in';
 const ISSUES_URL = `${REPO_URL}/issues/new/choose`;
 
 // ─── Accuracy: the clusters where published data is good ──────────────
-// Per the 8 August 2026 weighted sweep (reports/acc_final_2026_08_08.json).
-// Small-bike / two-stroke / cruiser groups are limited by the quality of
-// published tests, not the model, and are shown in full on /docs/validation.
+// Per the 10 November 2026 weighted sweep (reports/acc_final_2026_11_10.json).
+// Small-bike / two-stroke / cruiser groups are limited partly by the quality
+// of published tests and, for small bikes, by a known gearing limitation
+// (reports/session_2026_11_10_epoch.md); shown in full on /docs/validation.
 const HONEST_CLUSTERS = [
-  { name: 'Litre sport bikes, 195 hp and up', bias: 0.0271, mae: 0.1466, n: 30 },
+  { name: 'Litre sport bikes, 195 hp and up', bias: 0.0283, mae: 0.1453, n: 30 },
   { name: 'Litre sport bikes, 600–1000 cc', bias: -0.0090, mae: 0.1755, n: 72 },
-  { name: 'Sport twins, 600–1300 cc', bias: 0.0063, mae: 0.2459, n: 48 },
-  { name: 'All bikes, weighted overall', bias: 0.0073, mae: 0.2629, n: 276 },
+  { name: 'Sport twins, 600–1300 cc', bias: 0.0134, mae: 0.2413, n: 46 },
+  { name: 'All bikes, weighted overall', bias: 0.0087, mae: 0.2620, n: 273 },
 ];
 
-// MUST equal the docs/validation TOP10 (8 August 2026 sweep — the 10 smallest
-// differences across the matched set, mean ±0.007 s; every row is instrumented
-// or magazine data). Sync both together.
+// MUST equal the docs/validation TOP10 (10 November 2026 sweep — the 10 smallest
+// differences among non-derived benchmarks, mean ±0.007 s; DERIVED estimates
+// are excluded). Sync both together.
 const TOP10 = [
   { rank: 1,  name: 'Kawasaki ZRX1200R',             year: 2001, cc: '1164cc I4', target: 10.85, sim: 10.8487, delta: -0.001, source: 'Cycle World 2001' },
   { rank: 2,  name: 'Honda CBR650R E-Clutch',        year: 2024, cc: '649cc I4',  target: 11.45, sim: 11.4521, delta:  0.002, source: 'MotoStatz (instrumented)' },
@@ -57,18 +58,18 @@ const TOP10 = [
 
 // What the catalog holds (synced to motoquant.db by audit_headline_stats.py).
 const STATS = [
-  { num: 541, label: 'BIKES' },
-  { num: 584, label: 'PARTS' },
+  { num: 534, label: 'BIKES' },
+  { num: 546, label: 'PARTS' },
   { num: 254, label: 'TIRES' },
   { num: 20,  label: 'VENUES' },
 ];
 const STAT_WORDS = { BIKES: 'bikes', PARTS: 'parts', TIRES: 'tyres', VENUES: 'venues' };
 
-// Aggregate accuracy tiles (8 August 2026 sweep).
+// Aggregate accuracy tiles (10 November 2026 sweep).
 const ACCURACY_TILES = [
   { num: '250',     label: 'published tests checked' },
-  { num: '75',      label: 'within 0.10 s' },
-  { num: '138',     label: 'within 0.20 s' },
+  { num: '74',      label: 'within 0.10 s' },
+  { num: '137',     label: 'within 0.20 s' },
   { num: '±0.007 s', label: 'average error, 10 best' },
 ];
 
@@ -102,7 +103,7 @@ const TASKS = [
 const STEPS = [
   {
     title: 'Pick your bike',
-    body: 'Choose from 541 bikes, from a Pulsar NS200 to a Hayabusa. Each has its own gearing, weight, aerodynamics and power curve.',
+    body: 'Choose from 534 bikes, from a Pulsar NS200 to a Hayabusa. Each has its own gearing, weight, aerodynamics and power curve.',
   },
   {
     title: 'Say where you are racing',
@@ -165,7 +166,7 @@ export default function HomePage() {
                   Open the simulator
                 </Link>
                 <Link href="/bikes" className="btn-ghost">
-                  Browse 541 bikes
+                  Browse 534 bikes
                 </Link>
               </div>
 
@@ -261,8 +262,16 @@ export default function HomePage() {
               <p className="mt-4 text-sm leading-relaxed text-white/70">
                 <strong className="font-semibold text-white">The honest limit:</strong> small
                 bikes, two-strokes and cruisers are less well covered by published tests, so
-                their results carry a wider margin. That reflects missing data more than the
-                physics.{' '}
+                their results carry a wider margin. Small bikes are the weakest class, and many of
+                them still carry a known gearing limitation, documented in{' '}
+                <a
+                  href="https://github.com/toto171/MotoQuant.in/blob/main/reports/session_2026_11_10_epoch.md"
+                  className="text-accent underline underline-offset-2 hover:text-accent-bright"
+                  rel="noopener"
+                >
+                  the repository
+                </a>
+                .{' '}
                 <Link
                   href="/validation"
                   className="text-accent underline underline-offset-2 hover:text-accent-bright"

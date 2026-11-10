@@ -195,7 +195,7 @@ export default function SimulatorWidget() {
 
   const loading = runningKind != null;
 
-  // ── Catalog -> current ids (limit=2000 covers the full 541-bike catalog) ──
+  // ── Catalog -> current ids (limit=2000 covers the full 534-bike catalog) ──
   const loadCatalog = useCallback(() => {
     let cancelled = false;
     setCatalog({ state: 'loading', map: {} });
@@ -549,7 +549,7 @@ export default function SimulatorWidget() {
                     href="/simulator"
                     className="text-accent underline underline-offset-2 hover:text-accent-bright"
                   >
-                    Search all 541 bikes
+                    Search all 534 bikes
                   </Link>
                 </p>
               </>

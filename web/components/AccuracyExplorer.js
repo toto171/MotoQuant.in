@@ -59,7 +59,7 @@ function shortSource(src) {
 
 // Cluster status chip — colour never the only signal (word is always present).
 function StatusChip({ mae }) {
-  const status = mae < 0.2 ? 'tight' : mae < 0.5 ? 'fair' : 'data-limited';
+  const status = mae < 0.2 ? 'tight' : mae < 0.5 ? 'fair' : 'wide';
   const cls = mae < 0.2 ? 'chip-go' : mae < 0.5 ? 'chip-stage' : 'chip-foul';
   return <span className={`chip ${cls}`}>{status}</span>;
 }
@@ -386,7 +386,7 @@ function Distribution({ dist, overall, n, topTen }) {
           label="Weighted bias"
           sub={overall.w_bias < 0 ? 'sim slightly faster' : 'sim slightly slower'}
         />
-        <StatTile value={topTen.toFixed(3)} unit="s" pre="±" label="Top-10 cleanest" sub="mean |Δ| of the 10 best" />
+        <StatTile value={topTen.toFixed(3)} unit="s" pre="±" label="Top-10 cleanest" sub="mean |Δ| of the 10 best published runs" />
       </div>
     </div>
   );
@@ -539,7 +539,7 @@ function ClusterBreakdown({ clusters }) {
         <span className="label-mono">Weighted |Δ|</span>
         <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-signal-go" /> tight &lt; 0.20s</span>
         <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-signal-stage" /> fair &lt; 0.50s</span>
-        <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-signal-foul" /> data-limited ≥ 0.50s</span>
+        <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-signal-foul" /> wide ≥ 0.50s</span>
       </div>
     </div>
   );
@@ -619,7 +619,12 @@ export default function AccuracyExplorer({ data }) {
   const { bikes, distribution, overall, clusters, references, n_matched } = data;
 
   const topTen = useMemo(() => {
-    const cleanest = [...bikes].sort((a, b) => a.abs_delta - b.abs_delta).slice(0, 10);
+    // Same set as the "closest matches" table: published runs only, DERIVED
+    // estimates excluded.
+    const cleanest = [...bikes]
+      .filter((b) => b.quality !== 'derived')
+      .sort((a, b) => a.abs_delta - b.abs_delta)
+      .slice(0, 10);
     return cleanest.reduce((s, b) => s + b.abs_delta, 0) / cleanest.length;
   }, [bikes]);
 
@@ -672,8 +677,8 @@ export default function AccuracyExplorer({ data }) {
 
       <Section
         kicker="By segment"
-        title={<>Litre classes are <span className="text-accent">tight</span>; entry-cc is data-limited</>}
-        sub="Weighted mean absolute error per cluster, on the cylinder-aware 12-cluster taxonomy (twins, singles, and small-cc I4s are split out from same-displacement I4 buckets). The litre, sport-twin, and mid-twin clusters — the ones with real instrumented timeslips — sit well under 0.20s. The wide clusters are the small-cc and two-stroke bikes whose benchmarks are DERIVED estimates, not a model failure."
+        title={<>Litre classes are <span className="text-accent">tight</span>; small bikes are the weakest</>}
+        sub="Weighted mean absolute error per cluster, on the cylinder-aware 12-cluster taxonomy (twins, singles, and small-cc I4s are split out from same-displacement I4 buckets). The litre and 500–700cc mid-twin clusters — the ones with the most instrumented timeslips — sit under 0.20s, and sport twins sit just above it. The wide clusters are the small-cc and two-stroke bikes: their benchmarks are mostly DERIVED estimates, and small bikes are also where the model is weakest."
       >
         <ClusterBreakdown clusters={clusters} />
       </Section>
@@ -686,13 +691,21 @@ export default function AccuracyExplorer({ data }) {
         <BestPredictions bikes={bikes} />
         {/* honest callout */}
         <div className="mt-6 card border-signal-stage/25 bg-signal-stage/[0.04] p-5 sm:p-6">
-          <div className="label-mono text-signal-stage mb-2">Honest caveat · data, not physics</div>
+          <div className="label-mono text-signal-stage mb-2">Honest caveat</div>
           <p className="text-white/75 text-base leading-relaxed">
             The <span className="text-white font-semibold">entry 150–200cc</span> and{' '}
             <span className="text-white font-semibold">two-stroke</span> clusters carry large |Δ| because most of their
             benchmarks are <span className="text-signal-stage font-mono">DERIVED</span> — 0-100 km/h times multiplied by 1.6,
-            with a declared ±0.7s uncertainty. That is a benchmark-data limit, not a physics limit. A single real Dragy
-            timeslip replaces the estimate and collapses the residual. If you have run your bike,{' '}
+            with a declared ±0.7s uncertainty, so part of the spread is a benchmark-data limit. Small bikes are also the
+            weakest class of the simulator: many of them still carry a known gearing limitation, documented in{' '}
+            <a
+              href="https://github.com/toto171/MotoQuant.in/blob/main/reports/session_2026_11_10_epoch.md"
+              className="text-accent hover:text-accent-bright underline underline-offset-2 transition-colors"
+              rel="noopener"
+            >
+              the repository
+            </a>
+            . A single real Dragy timeslip replaces an estimate and collapses its residual. If you have run your bike,{' '}
             <Link href="/simulator" className="text-accent hover:text-accent-bright underline underline-offset-2 transition-colors">
               simulate it
             </Link>{' '}

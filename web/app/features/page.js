@@ -16,7 +16,7 @@ const THINGS = [
     q: 'How fast is my bike?',
     body: (
       <>
-        Pick any of the 541 bikes and see its <Term k="et">quarter-mile time</Term>, its{' '}
+        Pick any of the 534 bikes and see its <Term k="et">quarter-mile time</Term>, its{' '}
         <Term k="trap">finish-line speed</Term> and how it launches. Set your weight and where you are racing and the
         answer changes with them.
       </>
@@ -29,7 +29,7 @@ const THINGS = [
     q: 'What should I buy first?',
     body: (
       <>
-        Tell us your bike and your budget. We test every part that fits it, from a catalog of 584 parts, and show the
+        Tell us your bike and your budget. We test every part that fits it, from a catalog of 546 parts, and show the
         combination that makes it quickest, with the <Term k="cost_per_tenth">cost per tenth of a second</Term> for each one.
       </>
     ),

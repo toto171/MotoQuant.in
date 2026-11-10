@@ -25,7 +25,7 @@ export default function NotFound() {
               Open the simulator
             </Link>
             <Link href="/bikes" className="btn-ghost">
-              Browse 541 bikes
+              Browse 534 bikes
             </Link>
             <Link href="/" className="btn-ghost">
               Home

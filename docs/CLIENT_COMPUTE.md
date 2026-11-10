@@ -34,8 +34,8 @@ violations, and load failures all fall back to the server route.
 **Proof, not hope:** `tests/test_surrogate_web_export.py` +
 `web/scripts/surrogate-parity.mjs` run the real JS module (via a fetch shim)
 against reference values computed by the real server pipeline —
-**677/677 cases within 1e-9 s, worst ΔET 7.1e-15 s** across the full
-541-bike catalog plus randomized slider perturbations, with envelope
+**677/677 cases within 1e-9 s, worst ΔET 7.1e-15 s** across the
+full catalog (541 bikes when measured) plus randomized slider perturbations, with envelope
 refusals honoured.
 
 Honesty rules baked into the UI:

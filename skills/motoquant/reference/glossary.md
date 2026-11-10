@@ -70,4 +70,4 @@ headline numbers in `SKILL.md`.
 | Pacejka B/C/D/E | Magic-formula tire coefficients; `D` is essentially peak grip. |
 | Pinned baselines | GSX-R 1000 K5 **9.9331 s**, YZF-R1 4C8 **10.1436 s**, Hayabusa Gen1 **10.3633 s** — bit-identical, CI-gated. Any change that moves them is a regression unless deliberately re-based with a full benchmark sweep. |
 | Surrogate | A trained numpy model that approximates the simulator for fast search inside the build optimizer. It is a *cache of the physics*, regenerated whenever the physics changes. |
-| Weighted benchmark sweep | The accuracy measurement: every catalog bike simulated against published real-world ETs, each weighted by source quality (instrumented 1.0 → derived 0.1). Current: **276 matched, weighted mean \|error\| 0.2629 s, bias +0.0073 s**. |
+| Weighted benchmark sweep | The accuracy measurement: every catalog bike simulated against published real-world ETs, each weighted by source quality (instrumented 1.0 → derived 0.1). Current: **273 matched, weighted mean \|error\| 0.2620 s, bias +0.0087 s**. |
