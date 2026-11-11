@@ -18,6 +18,15 @@
  * Data: Open-Meteo.com, CC BY 4.0 (credited where the reading is shown).
  */
 
+/**
+ * A self-hosted copy that must not send visitors to a third party, or that
+ * relies on the API's own provider (OPENWEATHERMAP_API_KEY, or
+ * MOTOQUANT_OPEN_METEO=0), builds the site with
+ * NEXT_PUBLIC_MOTOQUANT_BROWSER_WEATHER=0: the picker then asks the API only,
+ * as before. Next.js inlines the value at build time.
+ */
+export const BROWSER_WEATHER_ENABLED = process.env.NEXT_PUBLIC_MOTOQUANT_BROWSER_WEATHER !== '0';
+
 const GEOCODE_URL = 'https://geocoding-api.open-meteo.com/v1/search';
 const FORECAST_URL = 'https://api.open-meteo.com/v1/forecast';
 const TIMEOUT_MS = 10000;

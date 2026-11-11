@@ -4,7 +4,12 @@ import { useState, useCallback, useEffect, useMemo, useId } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, AlertCircle, Check, Locate, X } from 'lucide-react';
 import { API_URL } from '../lib/api';
-import { fetchOpenMeteoConditions, PlaceNotFoundError } from '../lib/openMeteo';
+import {
+  BROWSER_WEATHER_ENABLED,
+  fetchOpenMeteoConditions,
+  PlaceNotFoundError,
+  roundCoord,
+} from '../lib/openMeteo';
 import SimProgress from './SimProgress';
 import Term from './Term';
 
@@ -131,6 +136,10 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
   // the API's own lookup is the last resort (`serverBody`).
   const resolveLive = useCallback(
     async (where, placeBody, serverBody, label) => {
+      if (!BROWSER_WEATHER_ENABLED) {
+        finish(await postResolve(serverBody), label);
+        return;
+      }
       let reading;
       try {
         reading = await fetchOpenMeteoConditions(where);
@@ -182,7 +191,8 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
       setLoading(true);
       setError(null);
       const alt = Number.isFinite(altitude) ? altitude : undefined;
-      const serverBody = { lat, lon };
+      // Rounded here too: the server passes them on to its weather provider.
+      const serverBody = { lat: roundCoord(lat), lon: roundCoord(lon) };
       if (alt != null) serverBody.altitude_m = alt;
       try {
         await resolveLive({ lat, lon, altitude_m: alt }, {}, serverBody, 'My location');
