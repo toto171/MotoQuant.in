@@ -2,13 +2,15 @@
 // The page is "use client" so it cannot export `metadata` itself; App Router
 // pulls it from the nearest server layout instead.
 
-import StructuredData, { SITE_URL } from '../StructuredData';
+import StructuredData, { SITE_URL, OG_IMAGE } from '../StructuredData';
 
-const TITLE = "About MotoQuant: free, open-source quarter-mile simulator built in Pune";
-const DESCRIPTION = "MotoQuant is a free, open-source (Apache-2.0) quarter-mile simulator for motorcycles, built in Pune for Indian riders, drag strips and tuning shops. Why we built it, how it works and who is behind it.";
+const TITLE =
+  'About MotoQuant: open-source simulator from Pune';
+const DESCRIPTION =
+  'MotoQuant is a free, open-source (Apache-2.0) quarter-mile simulator for motorcycles, built in Pune for Indian riders and drag strips. Why we built it and how.';
 
 export const metadata = {
-  title: TITLE,
+  title: { absolute: TITLE }, // already names MotoQuant: no suffix
   description: DESCRIPTION,
   alternates: { canonical: '/about' },
   keywords: [
@@ -33,17 +35,13 @@ export const metadata = {
     description: DESCRIPTION,
     url: `${SITE_URL}/about`,
     type: 'website',
-    images: [{
-      url: `${SITE_URL}/og-image.png`,
-      width: 1200,
-      height: 630,
-      alt: TITLE,
-    }],
+    images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
+    images: [OG_IMAGE],
   },
   robots: { index: true, follow: true },
 };

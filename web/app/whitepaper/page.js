@@ -3,11 +3,12 @@ import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
 import { Reveal } from '../../components/Reveal';
 import ScoreboardDigits from '../../components/ScoreboardDigits';
+import { OG_IMAGE } from '../StructuredData';
 
 export const metadata = {
-  title: 'Whitepaper | MotoQuant physics engine (15 sub-models + RK4)',
+  title: { absolute: 'Whitepaper: the physics behind MotoQuant' },
   description:
-    'MotoQuant whitepaper: a free, open-source motorcycle quarter-mile simulator built on 15 sub-models and RK4 integration at 1 ms, checked against 250 published tests weighted by source quality across a cylinder-aware 12-cluster taxonomy. Three reference bikes are held to four decimals by CI.',
+    'How the MotoQuant quarter-mile simulator works: 15 sub-models, RK4 integration at 1 ms, and validation against 250 published tests weighted by source quality.',
   alternates: { canonical: 'https://motoquant.in/whitepaper' },
   keywords: [
     'motoquant whitepaper',
@@ -18,11 +19,12 @@ export const metadata = {
     'motorcycle drag racing physics paper',
   ],
   openGraph: {
-    title: 'MotoQuant | Physics engine whitepaper (15 sub-models + RK4)',
+    title: 'Whitepaper: the physics behind MotoQuant',
     description:
       '15 sub-models integrated with RK4 at 1 ms, a cylinder-aware 12-cluster taxonomy, and validation weighted by source quality. CI holds the reference bikes to four decimals.',
     url: 'https://motoquant.in/whitepaper',
     type: 'article',
+    images: [OG_IMAGE],
   },
 };
 

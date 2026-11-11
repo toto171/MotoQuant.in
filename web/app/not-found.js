@@ -3,7 +3,7 @@ import SiteNav from '../components/SiteNav';
 import SiteFooter from '../components/SiteFooter';
 
 export const metadata = {
-  title: 'Page not found | MotoQuant',
+  title: 'Page not found',
   robots: { index: false },
 };
 

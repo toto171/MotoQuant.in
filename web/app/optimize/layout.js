@@ -5,11 +5,12 @@
 // the copy below — those are in flux and reconciled separately. Describe
 // the feature generically.
 
-import StructuredData, { SITE_URL } from '../StructuredData';
+import StructuredData, { SITE_URL, OG_IMAGE } from '../StructuredData';
 
-const TITLE = 'Best parts for your budget: motorcycle upgrade planner for India';
+const TITLE =
+  'Best parts for your bike and budget (India)';
 const DESCRIPTION =
-  'Free motorcycle upgrade planner for Indian riders. Enter your bike and a budget in rupees. MotoQuant tests every compatible exhaust, ECU, sprocket and air filter and shows the combination that gives the quickest quarter-mile (or the highest finish-line speed), with the cost per tenth of a second, the parts that work well together and the best next upgrade.';
+  'Set a budget in rupees and see which parts take the most time off your quarter mile, with the cost of each tenth of a second.';
 
 export const metadata = {
   title: TITLE,
@@ -43,19 +44,13 @@ export const metadata = {
     description: DESCRIPTION,
     url: `${SITE_URL}/optimize`,
     type: 'website',
-    images: [
-      {
-        url: `${SITE_URL}/og-image.png`,
-        width: 1200,
-        height: 630,
-        alt: 'MotoQuant: best parts for your budget',
-      },
-    ],
+    images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
+    images: [OG_IMAGE],
   },
   robots: { index: true, follow: true },
 };

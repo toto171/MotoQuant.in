@@ -12,8 +12,8 @@ const DOC_PAGES = [
 ];
 
 export const metadata = {
-  title:    { template: '%s | MotoQuant Docs', default: 'MotoQuant docs: motorcycle drag racing physics documentation' },
-  description: 'Documentation for the MotoQuant motorcycle quarter-mile simulator: getting started, physics whitepaper (RK4 integrator, tyre grip and thermal model, SAE J1349 dyno correction), and validation data covering 250 published benchmarks. Includes Indian drag racing reference for Aamby Valley, MMRT, BIC, and Kari.',
+  title:    { template: '%s | MotoQuant docs', default: 'MotoQuant docs' },
+  description: 'How to use the MotoQuant quarter-mile simulator, the physics behind it, and how its times compare with 250 published benchmarks.',
   keywords: [
     'motoquant docs',
     'motorcycle drag racing documentation',
@@ -25,7 +25,7 @@ export const metadata = {
     'mmrt motorcycle tuning guide',
     'indian drag racing physics reference',
   ],
-  alternates: { canonical: 'https://motoquant.in/docs' },
+  // No canonical here: each docs page, /docs included, sets its own.
 };
 
 export default function DocsLayout({ children }) {
@@ -40,7 +40,7 @@ export default function DocsLayout({ children }) {
           <DocsSidebarNav pages={DOC_PAGES} />
         </aside>
 
-        <main className="flex-1 min-w-0 px-6 sm:px-10 py-12 max-w-4xl">
+        <main id="main" className="flex-1 min-w-0 px-6 sm:px-10 py-12 max-w-4xl">
           {/* Mobile docs nav — the sidebar is hidden below md, so phones get
               a collapsible section list above the content instead. */}
           <DocsMobileNav pages={DOC_PAGES} />

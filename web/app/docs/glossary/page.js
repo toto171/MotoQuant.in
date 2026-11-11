@@ -1,11 +1,20 @@
 import Link from 'next/link';
 import { GLOSSARY_LIST } from '../../../lib/glossary';
+import { OG_IMAGE } from '../../StructuredData';
 
 export const metadata = {
   title: 'Drag-racing terms in plain English',
   description:
-    'A plain-English glossary of drag-racing and motorcycle terms used in MotoQuant: quarter-mile time, finish-line speed, launch RPM, gearing, density altitude, traction, cost per tenth of a second and more.',
+    'The drag-racing and motorcycle terms MotoQuant uses, in plain English: quarter-mile time, finish-line speed, launch rpm, gearing, density altitude and more.',
   alternates: { canonical: 'https://motoquant.in/docs/glossary' },
+  openGraph: {
+    title: 'Drag-racing terms in plain English',
+    description:
+      'The drag-racing and motorcycle terms MotoQuant uses, in plain English: quarter-mile time, finish-line speed, launch rpm, gearing, density altitude and more.',
+    url: 'https://motoquant.in/docs/glossary',
+    type: 'article',
+    images: [OG_IMAGE],
+  },
 };
 
 export default function GlossaryPage() {

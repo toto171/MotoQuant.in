@@ -5,11 +5,12 @@
 // the copy below — those are in flux and reconciled separately. Describe
 // the feature generically.
 
-import StructuredData, { SITE_URL } from '../StructuredData';
+import StructuredData, { SITE_URL, OG_IMAGE } from '../StructuredData';
 
-const TITLE = 'Race-day setup for your motorcycle: gearing, launch RPM and tyre pressure';
+const TITLE =
+  'Race-day setup: gearing, launch rpm and tyres';
 const DESCRIPTION =
-  'Free race-day setup tool for Indian drag strips. Pick your bike and where you are racing, and MotoQuant works out how the air and altitude change your power, then suggests gearing (sprockets), launch RPM, tyre pressure and fuel/timing guidance. Gearing and launch advice come with the simulated quarter-mile time change; tyre and fuel advice are general guidance. Works for Aamby Valley, MMRT, BIC, Kari and more.';
+  "Get gearing, launch rpm and tyre pressure for your bike at your strip, adjusted for altitude and the day's weather.";
 
 export const metadata = {
   title: TITLE,
@@ -43,19 +44,13 @@ export const metadata = {
     description: DESCRIPTION,
     url: `${SITE_URL}/autotune`,
     type: 'website',
-    images: [
-      {
-        url: `${SITE_URL}/og-image.png`,
-        width: 1200,
-        height: 630,
-        alt: 'MotoQuant race-day setup: gearing, launch RPM and tyre pressure',
-      },
-    ],
+    images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
+    images: [OG_IMAGE],
   },
   robots: { index: true, follow: true },
 };
