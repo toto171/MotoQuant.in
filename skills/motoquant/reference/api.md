@@ -4,7 +4,7 @@ Read this when the MCP server is not connected, or when you are working
 inside the repo. Base URL for the hosted API:
 
 ```
-https://motoquant-api.onrender.com
+https://api.motoquant.in
 ```
 
 It runs on Render's free tier and sleeps after 15 minutes idle, so the first

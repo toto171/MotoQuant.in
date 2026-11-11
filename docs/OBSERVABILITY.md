@@ -28,7 +28,7 @@ and no network calls.
 ## Enabling it in production
 
 Set one environment variable on the platform that hosts the API. The
-backend runs on Render (`motoquant-api.onrender.com`), so set it there. The
+backend runs on Render (`api.motoquant.in`), so set it there. The
 frontend (Vercel) is separate; see "Frontend" below.
 
 1. Create a project at <https://sentry.io> (the free tier is plenty at current

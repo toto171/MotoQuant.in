@@ -161,9 +161,9 @@ python -m motoquant.run sim --bike-id 1 --venue-id 1`}</Code>
           <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-sm">make install</code> installs every dependency, and{' '}
           <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-sm">make api</code> starts the HTTP API on
           port 8000 with interactive docs at <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-sm">/docs</code>. The
-          hosted API has the same docs at <A external href="https://motoquant-api.onrender.com/docs">motoquant-api.onrender.com/docs</A>.
+          hosted API has the same docs at <A external href="https://api.motoquant.in/docs">api.motoquant.in/docs</A>.
         </p>
-        <Code>{`curl -X POST https://motoquant-api.onrender.com/api/simulate/quick \\
+        <Code>{`curl -X POST https://api.motoquant.in/api/simulate/quick \\
   -H "Content-Type: application/json" \\
   -d '{"bike_id": 1, "rider_mass_kg": 70}'`}</Code>
         <p>To let an AI assistant such as Claude run simulations for you, add the MCP server:</p>

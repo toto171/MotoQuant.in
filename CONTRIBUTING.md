@@ -315,9 +315,9 @@ This is not optional.
 
 ## 10. Release / deploy
 
-The public instance is live: the API on Render (`motoquant-api.onrender.com`,
-Docker via `render.yaml`) and the web app on Vercel (`motoquant.in`, with the
-`/api/*` rewrite in `web/next.config.js` + `vercel.json` pointing at Render).
+The public instance is live: the API on Render (`api.motoquant.in`, Docker via
+`render.yaml`) and the web app on Vercel (`motoquant.in`, with the `/api/*`
+rewrite in `web/next.config.js` pointing at the API).
 
 Merging to `main` is the production deploy of the public instance. Vercel
 deploys the frontend on every merge. Render rebuilds the API when the diff

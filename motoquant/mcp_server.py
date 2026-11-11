@@ -14,7 +14,7 @@ Design notes (deliberate, see docs/MCP.md)
   here is added to ``requirements-api.txt``; the prod image stays lean.
 * **Two backends, one tool surface.**
   - ``http`` (default) talks to the hosted API at ``MOTOQUANT_API_URL``
-    (default ``https://motoquant-api.onrender.com``) with ``urllib``.
+    (default ``https://api.motoquant.in``) with ``urllib``.
     Zero install beyond Python.
   - ``local`` (``MOTOQUANT_MCP_LOCAL=1``) imports ``motoquant.api`` and
     calls the *same* internal functions the HTTP routes call, against the
@@ -56,7 +56,7 @@ SERVER_VERSION = "0.1.0"
 SUPPORTED_PROTOCOL_VERSIONS = ("2025-06-18", "2025-03-26", "2024-11-05")
 DEFAULT_PROTOCOL_VERSION = "2025-06-18"
 
-DEFAULT_API_URL = "https://motoquant-api.onrender.com"
+DEFAULT_API_URL = "https://api.motoquant.in"
 # The hosted API runs on Render's free tier: a cold instance can take ~50 s to
 # answer the first request. 90 s leaves headroom without hanging forever.
 DEFAULT_TIMEOUT_S = 90.0

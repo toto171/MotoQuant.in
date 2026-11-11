@@ -21,7 +21,7 @@ is worse than useless because nobody can tell it from a simulated result.
 
 If the MotoQuant MCP server is connected, you have the nine tools in the
 table. If it is not, the same calls are available over HTTP at
-`https://motoquant-api.onrender.com`; see `reference/api.md`. If you are
+`https://api.motoquant.in`; see `reference/api.md`. If you are
 working in the repo itself, start with `AGENTS.md`, then
 `docs/ARCHITECTURE.md`.
 

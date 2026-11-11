@@ -16,7 +16,8 @@
 #   1. Push this file to GitHub on `main`.
 #   2. https://dashboard.render.com -> New -> Blueprint -> connect repo.
 #   3. Render reads render.yaml, prompts approval, builds from Dockerfile.
-#   4. Note the resulting `https://motoquant-api.onrender.com` URL.
+#   4. Check https://<service>.onrender.com/api/health, then add the custom
+#      domain api.motoquant.in (Settings -> Custom Domains) and the CNAME it asks for.
 #   5. See docs/RENDER_MIGRATION.md for the rest of the cutover.
 
 services:

@@ -22,7 +22,7 @@ const nextConfig = {
   async rewrites() {
     const backend =
       process.env.MOTOQUANT_API_BACKEND ||
-      'https://motoquant-api.onrender.com';
+      'https://api.motoquant.in';
     return [
       {
         source: '/api/:path*',

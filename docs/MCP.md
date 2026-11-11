@@ -47,7 +47,7 @@ Windows: `%APPDATA%\Claude\`) and restart the app:
       "command": "python",
       "args": ["-m", "motoquant.mcp_server"],
       "env": {
-        "MOTOQUANT_API_URL": "https://motoquant-api.onrender.com"
+        "MOTOQUANT_API_URL": "https://api.motoquant.in"
       }
     }
   }
@@ -112,7 +112,7 @@ backends cannot silently diverge. That is why `LocalBackend` imports
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `MOTOQUANT_API_URL` | `https://motoquant-api.onrender.com` | Hosted API base URL. Point it at `http://localhost:8000` to drive a local `make api`. |
+| `MOTOQUANT_API_URL` | `https://api.motoquant.in` | Hosted API base URL. Point it at `http://localhost:8000` to drive a local `make api`. |
 | `MOTOQUANT_MCP_LOCAL` | unset | `1`/`true`/`yes` selects the in-process backend. |
 | `MOTOQUANT_MCP_TIMEOUT` | `90` | HTTP timeout in seconds. |
 | `MOTOQUANT_DB` | `motoquant.db` | Catalog path (local backend only). |

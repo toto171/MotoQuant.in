@@ -24,7 +24,7 @@ permissions:
 #
 # OPT-IN (open-source repo): the job is a NO-OP unless the repository
 # variable RENDER_API_URL is set (Settings -> Secrets and variables ->
-# Actions -> Variables), e.g. https://motoquant-api.onrender.com. A fork, or
+# Actions -> Variables), e.g. https://api.motoquant.in. A fork, or
 # any copy of this repo, therefore never pings someone else's deployment.
 
 on:
