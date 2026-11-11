@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'suzuki-gsx-s750-vs-ktm-890-duke-quarter-mile';
 const TITLE = 'Suzuki GSX-S750 vs KTM 890 Duke: Quarter-mile physics';
@@ -9,7 +10,7 @@ const DESCRIPTION =
   'MotoQuant simulates the GSX-S750 at 11.58s and the 890 Duke at 11.42s. The Duke is 27 kg lighter and 0.16s quicker. How mass beats displacement at the strip, and what limits each bike.';
 
 export const metadata = {
-  title: 'Suzuki GSX-S750 vs KTM 890 Duke quarter mile | MotoQuant',
+  title: 'Suzuki GSX-S750 vs KTM 890 Duke quarter mile',
   description: DESCRIPTION,
   keywords: [
     'Suzuki GSX-S750 quarter mile',
@@ -27,6 +28,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-18T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -317,7 +319,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -339,6 +341,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[763, 761]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

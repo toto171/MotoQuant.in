@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'aprilia-tuono-660-factory-quarter-mile-physics';
 const TITLE = 'Aprilia Tuono 660 Factory quarter-mile physics: 11.02s on the strip';
@@ -9,7 +10,7 @@ const DESCRIPTION =
   'MotoQuant simulates the Aprilia Tuono 660 Factory at 11.02s with a 215.7 km/h trap. Where its 0.31s gap over the base Tuono comes from, plus the cost per tenth of mods in India.';
 
 export const metadata = {
-  title: 'Aprilia Tuono 660 Factory quarter-mile physics | MotoQuant',
+  title: 'Aprilia Tuono 660 Factory quarter-mile physics',
   description: DESCRIPTION,
   keywords: [
     'aprilia tuono 660 factory quarter mile',
@@ -30,6 +31,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-24T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -317,7 +319,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -339,6 +341,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[743]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

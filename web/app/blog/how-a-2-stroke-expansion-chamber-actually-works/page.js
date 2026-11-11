@@ -1,7 +1,7 @@
 import Link from "next/link";
 import SiteNav from "../../../components/SiteNav";
 import SiteFooter from "../../../components/SiteFooter";
-import StructuredData, { articleSchema } from "../../StructuredData";
+import StructuredData, { articleSchema, OG_IMAGE } from "../../StructuredData";
 
 const SLUG = "how-a-2-stroke-expansion-chamber-actually-works";
 const TITLE = "How a 2-stroke expansion chamber actually works";
@@ -9,7 +9,7 @@ const DESCRIPTION =
   "A pressure wave travelling at 500 m/s, a tuned-RPM peak that lasts roughly 1,500 rpm, and a 0.494 s sim bias on the 2T cluster. Plain-English physics for RX100, RD350, RGV250 and the rest.";
 
 export const metadata = {
-  title: "How a 2-stroke expansion chamber actually works | MotoQuant",
+  title: "How a 2-stroke expansion chamber actually works",
   description: DESCRIPTION,
   keywords: [
     "two stroke expansion chamber physics",
@@ -28,6 +28,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: "article",
     publishedTime: "2026-05-08T00:00:00Z",
+    images: [OG_IMAGE],
   },
 };
 
@@ -285,7 +286,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">

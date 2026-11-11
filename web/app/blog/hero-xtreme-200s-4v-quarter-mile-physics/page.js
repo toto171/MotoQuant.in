@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'hero-xtreme-200s-4v-quarter-mile-physics';
 const TITLE = 'Hero Xtreme 200S 4V quarter-mile physics: 200cc commuter drag';
@@ -9,7 +10,7 @@ const DESCRIPTION =
   'MotoQuant simulates the Hero Xtreme 200S 4V at 17.40s with a 125 km/h trap. What the 19.1 hp 4-valve oil-cooled single can do at an Indian drag strip.';
 
 export const metadata = {
-  title: 'Hero Xtreme 200S 4V quarter-mile physics | MotoQuant',
+  title: 'Hero Xtreme 200S 4V quarter-mile physics',
   description: DESCRIPTION,
   keywords: [
     'Hero Xtreme 200S 4V quarter mile',
@@ -26,6 +27,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-08T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -289,7 +291,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -311,6 +313,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[342]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

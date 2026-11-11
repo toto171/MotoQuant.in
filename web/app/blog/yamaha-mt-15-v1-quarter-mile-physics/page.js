@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'yamaha-mt-15-v1-quarter-mile-physics';
 const TITLE = 'Yamaha MT-15 V1 Quarter-Mile Physics: 155cc Naked Drag';
@@ -9,7 +10,7 @@ const DESCRIPTION =
   'MotoQuant simulates the Yamaha MT-15 V1 at 17.05s and 125.5 km/h trap. Why the no-VVA naked loses a tenth to the R15 V3, and where to find cheap tenths in India.';
 
 export const metadata = {
-  title: 'Yamaha MT-15 V1 Quarter-Mile Physics | MotoQuant',
+  title: 'Yamaha MT-15 V1 Quarter-Mile Physics',
   description: DESCRIPTION,
   keywords: [
     'Yamaha MT-15 V1 quarter mile',
@@ -28,6 +29,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-24T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -286,7 +288,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -308,6 +310,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[4093]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

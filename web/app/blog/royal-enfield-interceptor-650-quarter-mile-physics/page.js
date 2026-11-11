@@ -1,7 +1,8 @@
 import Link from "next/link";
 import SiteNav from "../../../components/SiteNav";
 import SiteFooter from "../../../components/SiteFooter";
-import StructuredData, { articleSchema } from "../../StructuredData";
+import StructuredData, { articleSchema, OG_IMAGE } from "../../StructuredData";
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = "royal-enfield-interceptor-650-quarter-mile-physics";
 const TITLE =
@@ -10,7 +11,7 @@ const DESCRIPTION =
   "MotoQuant sims the RE Interceptor 650 at 14.15s and 155.8 km/h trap, 0.05s slower than its GT 650 sibling because of the upright bars. Plus a cost-per-tenth mod ladder.";
 
 export const metadata = {
-  title: "Royal Enfield Interceptor 650 quarter-mile physics | MotoQuant",
+  title: "Royal Enfield Interceptor 650 quarter-mile physics",
   description: DESCRIPTION,
   keywords: [
     "royal enfield interceptor 650 quarter mile",
@@ -35,6 +36,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: "article",
     publishedTime: "2026-05-31T00:00:00Z",
+    images: [OG_IMAGE],
   },
 };
 
@@ -320,7 +322,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -349,6 +351,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[79]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

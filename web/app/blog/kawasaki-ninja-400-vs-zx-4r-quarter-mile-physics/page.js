@@ -1,7 +1,8 @@
 import Link from "next/link";
 import SiteNav from "../../../components/SiteNav";
 import SiteFooter from "../../../components/SiteFooter";
-import StructuredData, { articleSchema } from "../../StructuredData";
+import StructuredData, { articleSchema, OG_IMAGE } from "../../StructuredData";
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = "kawasaki-ninja-400-vs-zx-4r-quarter-mile-physics";
 const TITLE =
@@ -10,7 +11,7 @@ const DESCRIPTION =
   "MotoQuant simulates the Ninja 400 at ~13.1s and the ZX-4R at 12.681s / 192.6 km/h. Same 400cc class, 0.4s apart. Architecture, redline and gearing explain the gap. India pricing, cost-per-tenth mods, and why the inline-four wins on the top end.";
 
 export const metadata = {
-  title: "Kawasaki Ninja 400 vs ZX-4R quarter mile | MotoQuant",
+  title: "Kawasaki Ninja 400 vs ZX-4R quarter mile",
   description: DESCRIPTION,
   keywords: [
     "kawasaki ninja 400 quarter mile india",
@@ -31,6 +32,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: "article",
     publishedTime: "2026-05-22T00:00:00Z",
+    images: [OG_IMAGE],
   },
 };
 
@@ -379,7 +381,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Tags */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -408,6 +410,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[88, 752]} />
 
         {/* Related reading */}
         <div className="max-w-2xl mx-auto mt-16">

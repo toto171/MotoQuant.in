@@ -1,15 +1,16 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'ktm-duke-390-vs-rc-390-quarter-mile-physics';
 const TITLE = 'KTM Duke 390 vs RC 390: quarter-mile physics at Aamby Valley';
 const DESCRIPTION =
-  'KTM Duke 390 vs RC 390 on the quarter mile. MotoQuant simulates the RC 390 at roughly 13.5s and 166 km/h trap, the Duke 390 at roughly 13.7s and 162 km/h. Same engine, two tenths apart at Aamby Valley. Where the gap comes from, four cost-per-tenth mods under ₹25,000, and the 11.342s Fast Track Racing record.';
+  'MotoQuant simulates the RC 390 at roughly 13.5s and 166 km/h trap, the Duke 390 at roughly 13.7s and 162 km/h. Same engine, two tenths apart at Aamby Valley.';
 
 export const metadata = {
-  title: 'KTM Duke 390 vs RC 390 quarter mile | MotoQuant',
+  title: 'KTM Duke 390 vs RC 390 quarter mile',
   description: DESCRIPTION,
   keywords: [
     'ktm duke 390 quarter mile',
@@ -30,6 +31,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-18T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -272,7 +274,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           <div className="flex flex-wrap gap-2 mb-6">
             {['KTM', 'Duke 390', 'RC 390', 'Indian 400cc', 'comparison'].map((t) => (
@@ -293,6 +295,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[66, 67]} />
 
         <div className="max-w-2xl mx-auto mt-16 glass rounded-xl p-6 border border-brand-orange/25 flex flex-col sm:flex-row items-center gap-4">
           <div className="flex-1">

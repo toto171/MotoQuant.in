@@ -1,15 +1,15 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
 
 const SLUG = 'how-to-tune-for-mmrt-chennai';
 const TITLE = 'How to tune for MMRT Chennai: sea-level, humid, hot track';
 const DESCRIPTION =
-  'MMRT Chennai sits at 78 m with 80% humidity in November: denser air than Aamby Valley, but hotter, wetter intake air. MotoQuant simulates a stock Hayabusa 0.07 s quicker at MMRT in November, and small bikes 0.17–0.28 s quicker. This is the venue-specific tuning math.';
+  'MMRT Chennai sits at 78 m with 80% humidity in November: denser air than Aamby Valley, but hotter, wetter intake air. The venue-specific tuning math.';
 
 export const metadata = {
-  title: 'How to tune for MMRT Chennai | MotoQuant',
+  title: 'How to tune for MMRT Chennai',
   description: DESCRIPTION,
   keywords: [
     'mmrt chennai drag racing motorcycle',
@@ -33,6 +33,8 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-18T00:00:00Z',
+    modifiedTime: '2026-11-10T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -269,11 +271,12 @@ export default function PostPage() {
           description: DESCRIPTION,
           slug: SLUG,
           datePublished: '2026-05-18',
+          dateModified: '2026-11-10',
         })}
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           <div className="flex flex-wrap gap-2 mb-6">
             {['MMRT', 'Chennai', 'venue', 'tuning', 'Tamil Nadu'].map((t) => (

@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'hayabusa-vs-zx-14r-which-is-faster';
 const TITLE = 'Hayabusa vs ZX-14R: Quarter-mile drag race physics (India)';
@@ -9,7 +10,7 @@ const DESCRIPTION =
   'Hayabusa vs Ninja ZX-14R quarter-mile times in India: MotoQuant simulates a stock Suzuki Hayabusa Gen1 at 10.218 s and a Kawasaki ZX-14R 2012 at 9.872 s at Aamby Valley in November. Where each bike wins, spec by spec.';
 
 export const metadata = {
-  title: 'Hayabusa vs ZX-14R: Quarter-mile physics breakdown (India)',
+  title: 'Hayabusa vs ZX-14R: quarter-mile physics (India)',
   description: DESCRIPTION,
   keywords: [
     'Hayabusa vs ZX-14R',
@@ -34,6 +35,8 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-08T00:00:00Z',
+    modifiedTime: '2026-11-10T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -298,11 +301,12 @@ export default function PostPage() {
           description: DESCRIPTION,
           slug: SLUG,
           datePublished: '2026-05-08',
+          dateModified: '2026-11-10',
         })}
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -324,6 +328,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[3, 43]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

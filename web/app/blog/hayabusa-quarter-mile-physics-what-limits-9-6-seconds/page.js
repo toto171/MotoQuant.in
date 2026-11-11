@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'hayabusa-quarter-mile-physics-what-limits-9-6-seconds';
 const TITLE = 'Hayabusa quarter-mile physics: what limits the 9.6';
@@ -9,7 +10,7 @@ const DESCRIPTION =
   'MotoQuant simulates the Suzuki Hayabusa Gen1 at exactly 10.1100 seconds, a reference baseline CI holds to four decimals. What stops a stock Hayabusa from running 9.6 on a strip, and where the missing half-second comes from on a drag-prepped build.';
 
 export const metadata = {
-  title: 'Hayabusa quarter-mile physics: what limits the 9.6 seconds',
+  title: 'Hayabusa quarter mile: what limits the 9.6 s',
   description: DESCRIPTION,
   keywords: [
     'Hayabusa quarter mile time',
@@ -32,6 +33,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-24T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -283,7 +285,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -305,6 +307,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[3]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

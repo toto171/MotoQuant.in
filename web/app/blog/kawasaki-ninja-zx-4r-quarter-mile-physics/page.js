@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'kawasaki-ninja-zx-4r-quarter-mile-physics';
 const TITLE = 'Kawasaki Ninja ZX-4R Quarter-Mile Physics: 400cc Inline-Four';
@@ -9,7 +10,7 @@ const DESCRIPTION =
   'MotoQuant simulates the 2024 Kawasaki Ninja ZX-4R at 12.681s and 192.6 km/h trap. Why a 400cc inline-four runs a 12.6, and what closes the 0.1s gap to the ZX-4RR.';
 
 export const metadata = {
-  title: 'Kawasaki Ninja ZX-4R Quarter-Mile Physics | MotoQuant',
+  title: 'Kawasaki Ninja ZX-4R Quarter-Mile Physics',
   description: DESCRIPTION,
   keywords: [
     'kawasaki ninja zx-4r quarter mile',
@@ -28,6 +29,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-18T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -306,7 +308,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -328,6 +330,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[752]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

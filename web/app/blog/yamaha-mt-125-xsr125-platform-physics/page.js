@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'yamaha-mt-125-xsr125-platform-physics';
 const TITLE = 'Yamaha MT-125 vs XSR125: same engine, 0.10s apart at the strip';
@@ -9,7 +10,7 @@ const DESCRIPTION =
   'MotoQuant simulates the Yamaha MT-125 at 19.123s and the XSR125 at 19.222s. They share the engine, gearbox and final drive and finish 0.10s apart. Where the tenth comes from: the XSR’s heritage styling adds frontal area.';
 
 export const metadata = {
-  title: 'Yamaha MT-125 vs XSR125 quarter-mile physics | MotoQuant',
+  title: 'Yamaha MT-125 vs XSR125 quarter-mile physics',
   description: DESCRIPTION,
   keywords: [
     'yamaha mt-125 quarter mile',
@@ -30,6 +31,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-18T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -280,7 +282,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -302,6 +304,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[749, 748]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

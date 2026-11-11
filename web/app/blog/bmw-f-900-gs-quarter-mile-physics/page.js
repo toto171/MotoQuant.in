@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'bmw-f-900-gs-quarter-mile-physics';
 const TITLE = 'BMW F 900 GS quarter-mile physics: 105hp mid-ADV at 12.08s';
@@ -9,7 +10,7 @@ const DESCRIPTION =
   'MotoQuant simulates the 2024 BMW F 900 GS at 12.083s with a 193.5 km/h trap, 0.45s quicker than the F 850 GS, and compares it with the Tiger 900 GT Pro, Tenere 700 and R 1300 GS in India.';
 
 export const metadata = {
-  title: 'BMW F 900 GS quarter-mile physics | MotoQuant',
+  title: 'BMW F 900 GS quarter-mile physics',
   description: DESCRIPTION,
   keywords: [
     'bmw f 900 gs quarter mile',
@@ -30,6 +31,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-31T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -301,7 +303,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -323,6 +325,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[4593]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

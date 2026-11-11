@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
 
 const SLUG = 'indian-drag-strip-elevation-comparison';
 const TITLE = 'Indian drag strips ranked by elevation: what altitude costs over a quarter mile';
@@ -9,7 +9,7 @@ const DESCRIPTION =
   'Five Indian drag strips on November weather: a stock Hayabusa loses 0.09 s between BIC and Aamby Valley, an R15 V4 loses 0.36 s. MotoQuant shows why small bikes pay more.';
 
 export const metadata = {
-  title: 'Indian drag strips ranked by elevation | MotoQuant',
+  title: 'Indian drag strips ranked by elevation',
   description: DESCRIPTION,
   keywords: [
     'indian drag strips ranked',
@@ -32,6 +32,8 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-25T00:00:00Z',
+    modifiedTime: '2026-11-10T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -249,7 +251,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
