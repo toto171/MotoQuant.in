@@ -4,25 +4,28 @@ import { useState, useCallback, useEffect, useMemo, useId } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, AlertCircle, Check, Locate, X } from 'lucide-react';
 import { API_URL } from '../lib/api';
+import { fetchOpenMeteoConditions, PlaceNotFoundError } from '../lib/openMeteo';
 import SimProgress from './SimProgress';
 import Term from './Term';
 
 /**
- * LocationPicker — asks the backend to resolve a race venue from text,
- * a quick-pick venue chip, or browser GPS, and exposes the resolved
- * environment (temperature, humidity, pressure, altitude, density
- * altitude) to its parent via the `onResolved` callback.
+ * LocationPicker — resolves a race venue from text, a quick-pick venue chip,
+ * or browser GPS, and exposes the resolved environment (temperature,
+ * humidity, pressure, altitude, density altitude) to its parent via the
+ * `onResolved` callback.
  *
  * Three input paths:
  *   1. Quick-pick chip — instant click on a seeded venue (Aamby Valley,
  *      MMRT, BIC, etc.). Resolves via the seeded-venue branch of
- *      /api/venues/resolve, no OWM key required.
- *   2. Free-text query — types a city or venue name; resolves seeded
- *      first, OWM fallback if no match.
+ *      /api/venues/resolve (`seeded_only`), with no weather call.
+ *   2. Free-text query — a known track first (same request); for any other
+ *      place this browser fetches the live weather from Open-Meteo
+ *      (lib/openMeteo.js) and the API computes the air from that reading.
  *   3. Browser GPS — geolocation API → proximity-matches the closest
- *      seeded venue within 50 km (so works without an OWM key as long
- *      as the user is near a tracked drag strip); falls back to OWM by
- *      lat/lon if no nearby venue.
+ *      seeded venue within 50 km; otherwise live weather for the
+ *      coordinates (rounded to about 1 km before they leave the browser).
+ *
+ * If the browser cannot reach Open-Meteo, the API's own lookup is tried.
  *
  * Props
  * -----
@@ -65,6 +68,27 @@ async function fetchVenues() {
   }
 }
 
+// POST /api/venues/resolve. Returns the parsed body, or throws an Error
+// carrying the API's message.
+async function postResolve(body) {
+  const res = await fetch(`${API_URL}/api/venues/resolve`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    let msg = `Request failed (${res.status})`;
+    try {
+      const j = await res.json();
+      if (j?.detail) msg = typeof j.detail === 'string' ? j.detail : JSON.stringify(j.detail);
+    } catch {
+      try { msg = await res.text(); } catch {}
+    }
+    throw new Error(msg);
+  }
+  return res.json();
+}
+
 export default function LocationPicker({ value, onResolved, onCleared, compact = false }) {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
@@ -94,36 +118,81 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
     return indianFirst.slice(0, compact ? 7 : 8);
   }, [venues, compact]);
 
-  const resolve = useCallback(
-    async (body, label) => {
+  const finish = useCallback(
+    (data, label) => {
+      onResolved?.({ ...data, _label: label || data.resolved_name || data.venue_name || query });
+    },
+    [onResolved, query],
+  );
+
+  // Live weather for anything that is not a known track comes from Open-Meteo
+  // in THIS browser (lib/openMeteo.js says why); the API turns the reading into
+  // air density and effective altitude. If the browser cannot reach Open-Meteo,
+  // the API's own lookup is the last resort (`serverBody`).
+  const resolveLive = useCallback(
+    async (where, placeBody, serverBody, label) => {
+      let reading;
+      try {
+        reading = await fetchOpenMeteoConditions(where);
+      } catch (e) {
+        if (e instanceof PlaceNotFoundError) throw e;
+        finish(await postResolve(serverBody), label);
+        return;
+      }
+      const data = await postResolve({
+        ...placeBody,
+        lat: reading.latitude,
+        lon: reading.longitude,
+        altitude_m: reading.altitude_m,
+        observed: reading.observed,
+      });
+      finish(data, label);
+    },
+    [finish],
+  );
+
+  // A place name: a known track first (matched on the server, no weather call),
+  // then live weather. The typed text is sent both times so a name matches a
+  // track exactly as it always did.
+  const resolvePlace = useCallback(
+    async (text, label) => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${API_URL}/api/venues/resolve`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        });
-        if (!res.ok) {
-          let msg = `Request failed (${res.status})`;
-          try {
-            const j = await res.json();
-            if (j?.detail)
-              msg = typeof j.detail === 'string' ? j.detail : JSON.stringify(j.detail);
-          } catch {
-            try { msg = await res.text(); } catch {}
-          }
-          throw new Error(msg);
+        let data = null;
+        try {
+          data = await postResolve({ location: text, seeded_only: true });
+        } catch {
+          // 404: not a known track. Any other failure falls through too.
         }
-        const data = await res.json();
-        onResolved?.({ ...data, _label: label || data.resolved_name || data.venue_name || query });
+        if (data) finish(data, label);
+        else await resolveLive({ query: text }, { location: text }, { location: text }, label);
       } catch (e) {
         setError(e.message || 'Could not look up that place.');
       } finally {
         setLoading(false);
       }
     },
-    [onResolved, query],
+    [finish, resolveLive],
+  );
+
+  // GPS coordinates with no known track nearby.
+  const resolveCoords = useCallback(
+    async (lat, lon, altitude) => {
+      setLoading(true);
+      setError(null);
+      const alt = Number.isFinite(altitude) ? altitude : undefined;
+      const serverBody = { lat, lon };
+      if (alt != null) serverBody.altitude_m = alt;
+      try {
+        await resolveLive({ lat, lon, altitude_m: alt }, {}, serverBody, 'My location');
+      } catch (e) {
+        setError(e.message || 'Could not look up that place.');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [resolveLive],
   );
 
   async function handleText(e) {
@@ -132,12 +201,12 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
       setError('Type a place name first.');
       return;
     }
-    await resolve({ location: query.trim() }, query.trim());
+    await resolvePlace(query.trim(), query.trim());
   }
 
   async function pickVenue(v) {
     setError(null);
-    await resolve({ location: v.name }, v.name);
+    await resolvePlace(v.name, v.name);
   }
 
   async function useMyLocation() {
@@ -150,7 +219,7 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude, altitude } = pos.coords;
-        // Try proximity-match against seeded venues first — no OWM key needed.
+        // Try proximity-match against seeded venues first — no weather call needed.
         try {
           const seeded = venues.length ? venues : await fetchVenues();
           let closest = null;
@@ -165,15 +234,13 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
           }
           if (closest && closestKm <= 50) {
             const label = `Near ${closest.name} (${closestKm.toFixed(0)} km)`;
-            await resolve({ location: closest.name }, label);
+            await resolvePlace(closest.name, label);
             return;
           }
         } catch {
-          // fall through to OWM
+          // fall through to live weather
         }
-        const body = { lat: latitude, lon: longitude };
-        if (altitude != null && Number.isFinite(altitude)) body.altitude_m = altitude;
-        await resolve(body, 'My location');
+        await resolveCoords(latitude, longitude, altitude);
       },
       (err) => {
         setLoading(false);
@@ -317,6 +384,20 @@ function ResolvedCard({ value, onClear, compact }) {
                 : source === 'openweathermap' || source === 'open-meteo'
                   ? 'Live weather'
                   : 'Conditions found'}
+              {/* Open-Meteo data is CC BY 4.0: credit it where it is shown. */}
+              {source === 'open-meteo' && (
+                <>
+                  {' · '}
+                  <a
+                    href="https://open-meteo.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline decoration-white/30 underline-offset-2 hover:text-white"
+                  >
+                    Open-Meteo
+                  </a>
+                </>
+              )}
               {value?.fetched_at &&
                 ` · ${new Date(value.fetched_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
             </p>
@@ -367,12 +448,16 @@ export function environmentOverridesFromLocation(value) {
   } else {
     // Not a known venue: send the place itself so the server simulates the
     // altitude it was resolved at (a known venue is sent by id instead).
+    // With the pressure too, every value a weather lookup could supply is in
+    // the request, so the server makes no outbound call for the run.
     const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
     const label = value.venue_name || value.location_name || value._label || value.resolved_name;
     if (label) out.location = label;
     if (num(value.latitude) != null) out.lat = value.latitude;
     if (num(value.longitude) != null) out.lon = value.longitude;
     if (num(value.altitude_m) != null) out.altitude_m = value.altitude_m;
+    // Same bounds as the API (800..1100 hPa).
+    if (num(value.pressure_hpa) != null) out.pressure_hpa = Math.max(800, Math.min(1100, value.pressure_hpa));
   }
   return out;
 }

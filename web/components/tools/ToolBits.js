@@ -226,8 +226,10 @@ export function manualStates(manual) {
 
 /**
  * Race-condition fields for a request body — the SAME mapping for every tool:
- * a matched venue id, else the place's name (the server resolves it), then the
- * hand-set values on top (they win over the resolved place).
+ * a matched venue id, else the place's name with the altitude and pressure it
+ * was resolved at, then the hand-set values on top (they win over the place).
+ * A searched place therefore arrives with all four of altitude, temperature,
+ * humidity and pressure, and the server makes no weather lookup for the run.
  */
 export function conditionsBody(location, states) {
   const body = {};
@@ -243,6 +245,8 @@ export function conditionsBody(location, states) {
   if (states.humidity.value != null) body.humidity_pct = states.humidity.value;
   else if (env.humidity_pct != null) body.humidity_pct = env.humidity_pct;
   if (states.altitude.value != null) body.altitude_m = states.altitude.value;
+  else if (env.altitude_m != null) body.altitude_m = env.altitude_m;
+  if (env.pressure_hpa != null) body.pressure_hpa = env.pressure_hpa;
   return body;
 }
 
