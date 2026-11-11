@@ -34,7 +34,7 @@ The tagline is *"The physics of faster."*
 | Benchmarks | Published ET and top-speed rows, each with a source label and a weight; the weighted sweep result is the newest `reports/acc_final_*.json` |
 | Reference baselines | K5 10.0436 / R1 10.1092 / Hayabusa 10.1100, pinned **bit-identical**, CI-gated |
 | Chat AI | multi-step tool-calling agent (`motoquant/llm/agent.py`, `docs/CHAT_AGENT.md`) |
-| Deployed | API: Render free tier (`motoquant-api.onrender.com`); web: Vercel (`motoquant.in`); both auto-deploy from `main`. Self-hosting: `docs/SELF_HOSTING.md` |
+| Deployed | API: Render free tier (`api.motoquant.in`); web: Vercel (`motoquant.in`); both auto-deploy from `main`. Self-hosting: `docs/SELF_HOSTING.md` |
 | Engines | Python reference + Rust physics core, bit-identical to it; the server uses the Rust core when it is installed (`docs/RUST_CORE.md`) |
 | Version | 2.0.0, one number: `motoquant.__version__` |
 

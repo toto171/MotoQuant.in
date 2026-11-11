@@ -22,7 +22,10 @@
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // Hobby plan ceiling
 
-const RENDER_HEALTH_URL = 'https://motoquant-api.onrender.com/api/health';
+// Same backend as the /api rewrite in next.config.js.
+const RENDER_HEALTH_URL = `${
+  process.env.MOTOQUANT_API_BACKEND || 'https://api.motoquant.in'
+}/api/health`;
 
 export async function GET() {
   const startedAt = Date.now();

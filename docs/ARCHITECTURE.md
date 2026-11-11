@@ -182,7 +182,7 @@ print(m.MotoQuantEngine(m.gsxr1000_k5()).run().time_quarter, \
 
 ## 6. Deployment topology (October 2026)
 
-- API: FastAPI on the Render free tier (`motoquant-api.onrender.com`),
+- API: FastAPI on the Render free tier (`api.motoquant.in`),
   Docker via `render.yaml`. The Dockerfile's first stage compiles the Rust
   physics core wheel; `/api/health` → `engine` shows which integrator is
   live. `keepwarm.py` and a GitHub Actions keep-alive cron guard against cold

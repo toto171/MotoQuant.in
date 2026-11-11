@@ -748,7 +748,7 @@ class TestBackendSelection(unittest.TestCase):
         try:
             backend = mcp_server.make_backend()
             self.assertIsInstance(backend, HttpBackend)
-            self.assertEqual(backend.base_url, "https://motoquant-api.onrender.com")
+            self.assertEqual(backend.base_url, "https://api.motoquant.in")
         finally:
             if prior_local is not None:
                 os.environ["MOTOQUANT_MCP_LOCAL"] = prior_local

@@ -23,7 +23,7 @@ export function timeslipIssueUrl(run = {}) {
   const et = fixed(run.et, 3);
   p.set('title', `Timeslip: ${run.bikeName || 'bike'}${et ? ` ${et} s` : ''}`);
   if (run.bikeName) p.set('bike', run.bikeName);
-  if (run.bikeId != null) p.set('catalog', `https://www.motoquant.in/bikes/${run.bikeId}`);
+  if (run.bikeId != null) p.set('catalog', `https://motoquant.in/bikes/${run.bikeId}`);
   if (et) p.set('et', et);
   const trap = fixed(run.trap, 1);
   if (trap) p.set('trap', trap);

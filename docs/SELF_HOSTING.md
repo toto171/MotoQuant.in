@@ -64,9 +64,9 @@ browser ──► web (Next.js, static + one route handler) ──/api/* rewrite
   seeded catalog at `/app/motoquant.db`, so every deploy ships the latest
   catalog and nothing needs a persistent disk.
 - Web: `web/` (Next.js App Router). The browser calls same-origin
-  `/api/*`, and `web/next.config.js` (plus the root `vercel.json` on Vercel)
-  rewrites those calls to the API. `MOTOQUANT_API_BACKEND` overrides the
-  rewrite target at build time; `NEXT_PUBLIC_API_URL` makes the browser call
+  `/api/*`, and `web/next.config.js` rewrites those calls to the API.
+  `MOTOQUANT_API_BACKEND` sets the rewrite target at build time (default
+  `https://api.motoquant.in`); `NEXT_PUBLIC_API_URL` makes the browser call
   an absolute API URL directly instead (used by `make web-dev`).
 
 ---
@@ -178,14 +178,14 @@ your copy:
 - [`.github/workflows/keepalive.yml`](../.github/workflows/keepalive.yml):
   GitHub Actions cron. Set the `RENDER_API_URL` repository variable if your
   service URL differs.
-- `web/app/api/wake/route.js` + the `crons` block in `vercel.json`: Vercel
-  cron.
+- `web/app/api/wake/route.js` + the `crons` block in `web/vercel.json`:
+  Vercel cron. It pings `MOTOQUANT_API_BACKEND` too.
 - `motoquant/keepwarm.py`: in-app self-ping (section 3c).
 
 For the web app, import the repo into Vercel with root directory `web`.
-Point the `/api/*` rewrite at your API: edit the destination in the root
-`vercel.json`, or set `MOTOQUANT_API_BACKEND` for the rewrite in
-`web/next.config.js`. Leave `NEXT_PUBLIC_API_URL` empty in production so the
+Point it at your API by setting `MOTOQUANT_API_BACKEND` in the Vercel
+project; the `/api/*` rewrite in `web/next.config.js` and the wake route
+both read it. Leave `NEXT_PUBLIC_API_URL` empty in production so the
 browser stays same-origin, which also avoids CORS and DNS-filter problems
 with PaaS domains. Before pushing anything under `web/`, run
 `make web-build`, which runs the same build as Vercel.

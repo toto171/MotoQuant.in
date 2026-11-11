@@ -133,7 +133,7 @@ test('a timeslip submission opens the issue form with the numbers filled in', ()
   assert.equal(q.get('et'), '13.846');
   assert.equal(q.get('trap'), '151.2');
   assert.equal(q.get('sixty'), '2.100');
-  assert.equal(q.get('catalog'), 'https://www.motoquant.in/bikes/12');
+  assert.equal(q.get('catalog'), 'https://motoquant.in/bikes/12');
   assert.equal(q.has('eighth'), false);
 });
 
