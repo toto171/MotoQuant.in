@@ -58,7 +58,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse, Response
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from starlette.datastructures import MutableHeaders
 
 # TypedDict must come from typing_extensions on Python < 3.12 when used in
@@ -3160,6 +3160,35 @@ async def upload_dyno(
 # --- Venue Resolve (auto race-environment setup) -------------------------
 
 
+class ObservedWeather(BaseModel):
+    """One current-conditions reading that the visitor's browser fetched from
+    Open-Meteo itself (``web/lib/openMeteo.js``).
+
+    Open-Meteo's free tier limits calls per IP address, and a free Render
+    service shares its outbound address with many other apps, so lookups made
+    from the server kept failing with HTTP 429 (2026-11-11). The site now asks
+    from the visitor's own connection and sends the numbers here; the server
+    only does the atmosphere maths. A reading only shapes the requester's own
+    result, so it needs no more trust than conditions set by hand. The bounds
+    keep it physical."""
+
+    temperature_c: float = Field(..., ge=-90, le=60, description="Air temperature [°C]")
+    humidity_pct: float = Field(..., ge=0, le=100, description="Relative humidity [%]")
+    pressure_msl_hpa: float = Field(
+        ...,
+        ge=800,
+        le=1100,
+        description="Sea-level pressure (Open-Meteo pressure_msl) [hPa]",
+    )
+    wind_speed_ms: float = Field(0.0, ge=0, le=120, description="Wind speed [m/s]")
+    wind_direction_deg: float = Field(
+        0.0, ge=0, le=360, description="Wind direction [deg]"
+    )
+    country: str | None = Field(
+        None, pattern=r"^[A-Z]{2}$", description="ISO country code from the geocoder"
+    )
+
+
 class VenueResolveRequest(BaseModel):
     """POST /api/venues/resolve -- resolve a location to a race environment."""
 
@@ -3180,8 +3209,29 @@ class VenueResolveRequest(BaseModel):
         le=8000,
         description="Elevation above sea level [m]. Overrides OWM's estimate if provided.",
     )
+    seeded_only: bool = Field(
+        False,
+        description=(
+            "Only match a seeded venue and never fetch live weather: 404 when "
+            "nothing matches. The site asks this first, then fetches the "
+            "weather in the browser for any other place."
+        ),
+    )
+    observed: ObservedWeather | None = Field(
+        None,
+        description=(
+            "A reading the browser already fetched. Needs `lat` and `lon`; "
+            "the server then makes no outbound call."
+        ),
+    )
 
     model_config = ConfigDict(json_schema_extra={"example": {"location": "Pune, IN"}})
+
+    @model_validator(mode="after")
+    def _observed_needs_coordinates(self) -> "VenueResolveRequest":
+        if self.observed is not None and (self.lat is None or self.lon is None):
+            raise ValueError("`observed` needs both `lat` and `lon`.")
+        return self
 
 
 def _match_seeded_venue(db, location: str) -> dict | None:
@@ -3533,11 +3583,13 @@ def resolve_venue(req: VenueResolveRequest):
       1. If `location` matches a seeded venue (by name, short_name, or city),
          return the seeded venue's environment data plus the most recent
          weather record if available.
-      2. Otherwise, fall back to OpenWeatherMap for live conditions
-         (requires `OPENWEATHERMAP_API_KEY` env var). Computes air density,
-         density altitude, and SAE power correction locally.
+      2. Otherwise, with `seeded_only`, stop with a 404 (no outbound call).
+      3. Otherwise, live conditions: the `observed` reading the browser sent
+         (no outbound call), else OpenWeatherMap when `OPENWEATHERMAP_API_KEY`
+         is set, else Open-Meteo. Air density, density altitude and SAE power
+         correction are computed locally in every case.
 
-    The response shape is identical for both paths so the frontend can always
+    The response shape is identical for every path so the frontend can always
     read `temperature_c`, `humidity_pct`, etc., without branching.
     """
     if not (req.location or (req.lat is not None and req.lon is not None)):
@@ -3618,13 +3670,34 @@ def resolve_venue(req: VenueResolveRequest):
                 "weather_source": weather_source,
             }
 
-    # ─── Path 2: live OWM fetch ──────────────────────────────────────────
-    owm = _fetch_owm_for_location(
-        location=req.location,
-        lat=req.lat,
-        lon=req.lon,
-        altitude_m=req.altitude_m,
-    )
+    if req.seeded_only:
+        raise HTTPException(404, "No known track matches that name.")
+
+    # ─── Path 2: live conditions ─────────────────────────────────────────
+    if req.observed is not None:
+        # The browser's own reading: no outbound call, and nothing goes into
+        # the shared lookup cache (it is one visitor's data).
+        obs = req.observed
+        owm = _live_conditions(
+            location_name=req.location or "Unknown",
+            country=obs.country,
+            lat=req.lat,
+            lon=req.lon,
+            altitude_m=req.altitude_m if req.altitude_m is not None else 0.0,
+            temp_c=obs.temperature_c,
+            humidity=obs.humidity_pct,
+            pressure_hpa=obs.pressure_msl_hpa,
+            wind_ms=obs.wind_speed_ms,
+            wind_deg=obs.wind_direction_deg,
+            provider="open-meteo",
+        )
+    else:
+        owm = _fetch_owm_for_location(
+            location=req.location,
+            lat=req.lat,
+            lon=req.lon,
+            altitude_m=req.altitude_m,
+        )
     if owm is None or owm.get("_error"):
         err = (owm or {}).get("_error", "unknown")
         if err == "place_not_found":
@@ -4813,7 +4886,37 @@ def _apply_conditions(config: BikeConfig, req: ConditionsRequest) -> str:
     echoes (see :func:`_environment_echo`).
     """
     env_source = "config_default"
-    if req.location or (req.lat is not None and req.lon is not None):
+    has_place = bool(req.location) or (req.lat is not None and req.lon is not None)
+    # Everything a weather lookup could supply is already in the request (the
+    # site sends the reading the visitor's browser fetched), and the explicit
+    # values below override a lookup anyway. Only the seeded-venue match still
+    # matters (its name and surface), and that is a local query: no outbound
+    # call, so a busy shared IP at the weather provider cannot fail the run.
+    complete = all(
+        v is not None
+        for v in (
+            req.altitude_m,
+            req.ambient_temp_c,
+            req.humidity_pct,
+            req.pressure_hpa,
+        )
+    )
+    if has_place and complete:
+        env_source = "request_conditions"
+        db = _get_db() if req.location else None
+        venue = _match_seeded_venue(db, req.location) if db else None
+        if venue:
+            _apply_resolved_env(
+                config,
+                {
+                    "venue_name": venue.get("name"),
+                    "surface_type": venue.get("surface_type"),
+                },
+            )
+            env_source = "seeded_venue"
+        if config.environment.venue_name == DEFAULT_CONDITIONS_NAME:
+            config.environment.venue_name = req.location or "Resolved location"
+    elif has_place:
         try:
             resolved = resolve_venue(
                 VenueResolveRequest(
