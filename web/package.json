@@ -11,19 +11,19 @@
     "prebuild": "node scripts/verify-web.mjs"
   },
   "dependencies": {
-    "animejs": "^4.4.1",
-    "framer-motion": "^11.18.2",
-    "lucide-react": "^0.577.0",
-    "next": "15.5.29",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "recharts": "^2.15.4",
+    "animejs": "^4.5.0",
+    "framer-motion": "^14.10.1",
+    "lucide-react": "^1.70.0",
+    "next": "16.4.5",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "recharts": "^3.10.1",
     "styled-jsx": "^5.1.7"
   },
   "devDependencies": {
-    "autoprefixer": "^10.5.4",
+    "autoprefixer": "^10.6.2",
     "postcss": "^8.5.26",
-    "tailwindcss": "^3.4.19"
+    "tailwindcss": "^4.3.5"
   },
   "overridesComment": [
     "Both overrides below patch packages nested INSIDE next@15.5.x that npm audit flags high.",
