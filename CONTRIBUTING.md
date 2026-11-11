@@ -315,16 +315,18 @@ This is not optional.
 
 ## 10. Release / deploy
 
-The public instance is live: the API on Render (`api.motoquant.in`, Docker via
-`render.yaml`) and the web app on Vercel (`motoquant.in`, with the `/api/*`
+The public instance is live: the API on Render (`api.motoquant.in`, Docker,
+with the settings in `render.yaml`) and the web app on Vercel (`motoquant.in`, with the `/api/*`
 rewrite in `web/next.config.js` pointing at the API).
 
 Merging to `main` is the production deploy of the public instance. Vercel
 deploys the frontend on every merge. Render rebuilds the API when the diff
 touches the backend (`motoquant/**`, `motoquant.db`, the requirements files,
 the Docker files, `render.yaml` or the Rust core under `rust/`), so web-only
-merges do not restart the API. The exact list is the `buildFilter` in
-`render.yaml`. Hosting accounts belong to the maintainers, so contributors
+merges do not restart the API. The exact list is the build filter on the
+Render service, which matches the `buildFilter` in `render.yaml`. The live
+service is not linked to that file, so a change to it must also be made in
+the Render dashboard. Hosting accounts belong to the maintainers, so contributors
 never need credentials. To run your own copy,
 follow [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md). The historical Railway →
 Render runbook is `docs/RENDER_MIGRATION.md`.
