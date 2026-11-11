@@ -1,8 +1,10 @@
 /**
  * MotoQuant — Privacy
- * Last updated: 10 November 2026. Accounts and server-side saved runs were
- * removed; saved runs now live in the visitor's browser. The chat assistant
- * runs on Anthropic's Claude, and a visitor may bring their own Anthropic key.
+ * Last updated: 11 November 2026. Live weather is now fetched from Open-Meteo
+ * by the visitor's browser. 10 November 2026: accounts and server-side saved
+ * runs were removed; saved runs now live in the visitor's browser. The chat
+ * assistant runs on Anthropic's Claude, and a visitor may bring their own
+ * Anthropic key.
  *
  * Every statement here is checked against the code. When the code changes
  * what leaves the browser or what the server keeps, change this page in the
@@ -32,7 +34,7 @@ export default function PrivacyPage() {
         sub="No accounts, no cookies, and nothing kept that identifies you. This page lists what leaves your browser and where it goes."
         className="pb-8 md:pb-10"
       >
-        <p className="label-mono">Last updated &middot; 10 November 2026</p>
+        <p className="label-mono">Last updated &middot; 11 November 2026</p>
       </PageHero>
 
       <main id="main" className="px-4 pb-20 pt-10 sm:px-6">
@@ -113,9 +115,11 @@ export default function PrivacyPage() {
                 search terms when the assistant looks something up.
               </li>
               <li>
-                <strong>Open-Meteo</strong> (or <strong>OpenWeatherMap</strong>, if a server is set
-                up with its key) receives a place name or coordinates when you ask for live
-                weather.
+                <strong>Open-Meteo</strong> receives the place name you type, or your coordinates
+                rounded to about 1 km, when you ask for live weather for a place that is not a
+                known track. Your browser asks Open-Meteo directly, so Open-Meteo also sees your IP
+                address. If your browser cannot reach it, our server asks instead (or{' '}
+                <strong>OpenWeatherMap</strong>, if a server is set up with its key).
               </li>
               <li>
                 <strong>Sentry</strong> receives error reports when error tracking is switched on,

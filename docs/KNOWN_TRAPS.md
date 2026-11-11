@@ -231,3 +231,16 @@ statement reaches SQLite, as `CatalogTrackingConnection` does. Keep
 `cached_statements=0` on it, because threads must not share a prepared
 statement. `tests/test_launch_hardening_2026_11_11.py` runs eight threads
 against the connection and fails on a hang.
+
+### T27: Weather lookups from the server fail on a shared IP address
+Open-Meteo's no-key API limits calls per IP address (600 a minute, 10,000
+a day). A free Render service shares its outbound address with many other apps,
+so the API's own lookups failed with HTTP 429 and the site showed "Live weather
+isn't available right now" for any place that is not a known track
+(2026-11-11). The website now fetches the reading in the visitor's browser
+(`web/lib/openMeteo.js`, the same query as
+`motoquant/api.py::_fetch_open_meteo_uncached`) and sends it to
+`/api/venues/resolve` as `observed`; the simulation routes skip the lookup when
+a request carries altitude, temperature, humidity and pressure. Do not move the
+fetch back to the server, and keep the two lookups in step.
+`tests/test_browser_weather_2026_11_11.py` fails if those paths call out.

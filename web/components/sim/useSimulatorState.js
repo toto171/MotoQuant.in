@@ -222,6 +222,14 @@ export default function useSimulatorState(searchParams) {
     if (isNumber(location.latitude)) out.lat = location.latitude;
     if (isNumber(location.longitude)) out.lon = location.longitude;
     if (isNumber(location.altitude_m)) out.altitude_m = location.altitude_m;
+    // The place's pressure, and the temperature and humidity on the sliders
+    // (set from the place when it was chosen): with all four in the request
+    // the server needs no weather lookup for the run (lib/openMeteo.js says
+    // why that lookup fails from the server). These are the same values
+    // weatherFields() sends, so the order the two are merged in is harmless.
+    if (isNumber(location.pressure_hpa)) out.pressure_hpa = Math.max(800, Math.min(1100, location.pressure_hpa));
+    out.ambient_temp_c = ambientTemp;
+    out.humidity_pct = humidity;
     return out;
   }
 
