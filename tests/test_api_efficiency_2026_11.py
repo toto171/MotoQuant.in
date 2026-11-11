@@ -71,11 +71,38 @@ def _close_api_db():
 
 
 def _sql_counter():
-    """Install a trace callback on the API connection; returns (list, remove)."""
-    conn = api._get_db()
+    """Trace the SQL the API runs; returns (list, remove).
+
+    Each thread has its own connection and TestClient serves a request on a
+    worker thread, so the trace goes on whichever connection ``_get_db``
+    hands out while the counter is installed.
+    """
     seen: list[str] = []
-    conn.set_trace_callback(seen.append)
-    return seen, lambda: conn.set_trace_callback(None)
+    traced = []
+    real = api._get_db
+
+    def tracing_get_db():
+        conn = real()
+        if conn is not None:
+            conn.set_trace_callback(seen.append)
+            traced.append(conn)
+        return conn
+
+    api._get_db = tracing_get_db
+
+    def remove():
+        api._get_db = real
+        for conn in traced:
+            conn.set_trace_callback(None)
+
+    return seen, remove
+
+
+def _script_db():
+    """A separate writer, like the CLI or a patch script (authorizer on)."""
+    from motoquant.database.connection import MotoQuantDB
+
+    return MotoQuantDB(os.environ["MOTOQUANT_DB"])
 
 
 def _quiesce_background_jobs(timeout_s: float = 90.0) -> None:
@@ -511,16 +538,17 @@ class TestCatalogCache(unittest.TestCase):
         # parts row; the next catalog read must see it.
         from motoquant.database.connection import catalog_generation
 
-        conn = api._get_db()
-        part_id = conn.execute(
-            "SELECT id FROM parts WHERE price_inr IS NOT NULL LIMIT 1"
-        ).fetchone()[0]
-        client.get("/api/parts?limit=5")  # warm
-        gen = catalog_generation()
-        conn.execute(
-            "UPDATE parts SET price_inr = price_inr + 1 WHERE id=?", (part_id,)
-        )
-        conn.commit()
+        with _script_db() as db:
+            conn = db.conn
+            part_id = conn.execute(
+                "SELECT id FROM parts WHERE price_inr IS NOT NULL LIMIT 1"
+            ).fetchone()[0]
+            client.get("/api/parts?limit=5")  # warm
+            gen = catalog_generation()
+            conn.execute(
+                "UPDATE parts SET price_inr = price_inr + 1 WHERE id=?", (part_id,)
+            )
+            conn.commit()
         self.assertGreater(catalog_generation(), gen)
         seen, undo = _sql_counter()
         try:
@@ -532,26 +560,27 @@ class TestCatalogCache(unittest.TestCase):
     def test_runtime_write_to_a_catalog_table_invalidates(self):
         from motoquant.database.connection import catalog_generation
 
-        conn = api._get_db()
-        gen = catalog_generation()
-        conn.execute("UPDATE venues SET name = name WHERE id = 1")
-        conn.commit()
-        self.assertGreater(catalog_generation(), gen)
-        gen = catalog_generation()
-        conn.execute("SELECT * FROM venues").fetchall()
-        self.assertEqual(catalog_generation(), gen, "reads must not bump")
+        with _script_db() as db:
+            conn = db.conn
+            gen = catalog_generation()
+            conn.execute("UPDATE venues SET name = name WHERE id = 1")
+            conn.commit()
+            self.assertGreater(catalog_generation(), gen)
+            gen = catalog_generation()
+            conn.execute("SELECT * FROM venues").fetchall()
+            self.assertEqual(catalog_generation(), gen, "reads must not bump")
 
     def test_non_catalog_writes_do_not_invalidate(self):
         from motoquant.database.connection import catalog_generation
 
         client.get("/api/venues")
-        conn = api._get_db()
-        gen = catalog_generation()
-        conn.execute(
-            "INSERT INTO sim_runs (bike_config_id, et_quarter_s, trap_speed_kmh) "
-            "VALUES (1, 13.5, 160.0)"
-        )
-        conn.commit()
+        with _script_db() as db:
+            gen = catalog_generation()
+            db.conn.execute(
+                "INSERT INTO sim_runs (bike_config_id, et_quarter_s, trap_speed_kmh) "
+                "VALUES (1, 13.5, 160.0)"
+            )
+            db.conn.commit()
         self.assertEqual(catalog_generation(), gen)
 
     def test_parts_list_omits_heavy_rule_fields_unless_asked(self):

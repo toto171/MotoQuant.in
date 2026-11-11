@@ -105,13 +105,25 @@ change it carefully. It is fixed everywhere (`tire_repo` on July 6,
 `bike_repo` and `venue_repo` in the July 17 run) and stays listed because the
 misreading is easy to bring back.
 
-### T14: One SQLite connection is shared by request and job threads
-`api.py` keeps a module-level `sqlite3` connection (`check_same_thread=False`)
-that FastAPI request threads and the `jobs.py` daemon workers both use. Reads
-are fine on the single-worker Render deploy. No visitor request writes today,
-but a future write route, or a job that writes, can interleave with another
-thread. Moving to a per-thread or pooled connection is the first job before
-scaling to more than one worker. It is deferred and listed in the roadmap.
+### T14: Never share an SQLite connection between API threads
+Until November 2026 `api.py` kept one module-level `sqlite3` connection
+(`check_same_thread=False`) that FastAPI request threads and the `jobs.py`
+workers all used. The problem was worse than interleaved writes: it could
+deadlock. The connection carried a Python authorizer, which SQLite calls while
+it holds the connection's mutex, and the callback needs the GIL. Another thread
+that holds the GIL and binds a parameter on the same connection waits for that
+mutex, so neither moves. Eight parallel `POST /api/simulate/quick` calls hung
+the server for good, `/api/health` included, until a restart.
+
+Now `_get_db()` and `_get_db_facade()` return a per-thread connection with no
+authorizer. Never hand one to another thread or cache it at module level. Do
+not install a Python callback (authorizer, trace, progress handler,
+`create_function`) on a connection that two threads can reach. The API never
+writes catalog rows. Catalog freshness comes from `PRAGMA data_version` on the
+separate `api._db_conn`, which sees commits from every other connection.
+Scripts that write the catalog keep the authorizer (`MotoQuantDB(...)`
+default). Gate: `tests/test_api_db_threads_2026_11.py` runs eight threads
+through `_build_config` in a subprocess with a timeout.
 
 ### T15: Every config serialization path must round-trip `category_tag` (and any new top-level `BikeConfig` field)
 This has been hit twice. On July 2 the DB bridge dropped `category_tag` on the

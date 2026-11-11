@@ -21,7 +21,7 @@ limit. In order, the limits are:
    sourced the real one (see "Accuracy" below).
 2. Contributor logistics: private security reporting, Discussions, triaged
    issue templates and CI that runs on forks.
-3. One engineering blocker to scaling: the shared SQLite connection.
+3. One engineering blocker to scaling: SQLite with more than one worker.
 
 ## P0: launch and stability
 
@@ -29,7 +29,7 @@ limit. In order, the limits are:
 |---|---|---|---|---|
 | P0-1 | Turn on private vulnerability reporting and Discussions, and protect `main` | Maintainer | `SECURITY.md`, `CODE_OF_CONDUCT.md` and `/contact` point at them. Branch protection with code-owner review is what keeps an outside pull request from reaching the site. | "Report a vulnerability" works; Discussions are on; `main` requires a reviewed pull request and green checks. |
 | P0-2 | ~~Durability of user data on the hosted copy~~ | | Resolved on 2026-11-10 by removing accounts. The site stores no visitor data, so a redeploy loses nothing. | |
-| P0-3 | Fix the shared SQLite connection before running more than one worker | Engineering | KNOWN_TRAPS T14 and ADR-0004: one `check_same_thread=False` connection is shared by request and job threads, so concurrent writes can interleave. Safe at one worker. | Two or more workers pass a concurrent read/write stress test. |
+| P0-3 | Prove SQLite under more than one worker | Engineering | KNOWN_TRAPS T14 and ADR-0004: the shared connection that could deadlock is gone (one connection per thread since November 2026), but SQLite has one writer and the in-memory job registry is per process. Safe at one worker. | Two or more workers pass a concurrent read/write stress test. |
 | P0-4 | Keep the secret-scan gate | Maintainer and engineering | A full-history scan before the repository went public found no live credentials. CI blocks token-shaped strings in new commits; a credential that does land must be revoked, not just deleted. | `make health` secret scan stays clean. |
 | P0-5 | CI that works for forks | Engineering | A pull request from a fork must run the checks without secrets. Deploy jobs already run only on pushes to this repository's `main`. | A fork's pull request runs `ci.yml` and `web-verify.yml` green. |
 

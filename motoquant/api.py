@@ -149,41 +149,88 @@ async def _validation_error_handler(request: Request, exc: RequestValidationErro
 
 # ─── DB helper ────────────────────────────────────────────────────────────
 
-_db_conn = None  # module-level singleton -- one connection, reused across requests
+# Every thread gets its own connection (KNOWN_TRAPS T14). One connection
+# shared by request and job threads deadlocked: SQLite runs a Python callback
+# (the catalog-write authorizer) while it holds the connection's mutex, the
+# callback needs the GIL, and another thread holding the GIL waits for that
+# mutex in ``sqlite3_bind_*``. API connections carry no authorizer and are
+# never handed to another thread.
+#
+# ``_db_conn`` is a separate connection that serves only the catalog freshness
+# token. The API never writes catalog rows, so the generation alone would not
+# notice a write; ``PRAGMA data_version`` on this connection moves whenever any
+# OTHER connection commits, which covers every per-thread connection, scripts
+# and other processes. Setting ``_db_conn = None`` (tests do this after
+# pointing MOTOQUANT_DB elsewhere) retires every per-thread connection too.
+_db_conn = None
+_db_conn_path = None  # the file _db_conn (and so every thread) opened
+_db_conn_lock = threading.Lock()
+_db_local = threading.local()
 
 
-def _get_db():
-    """Return a live DB connection or None if DB unavailable.
+def _open_api_db(db_path: str):
+    from .database.connection import MotoQuantDB
 
-    Uses a module-level singleton to avoid creating (and leaking) a new
-    connection on every request.  SQLite is single-writer anyway, so a
-    shared connection is the correct approach for a read-heavy API.
-    """
-    global _db_conn
-    if _db_conn is not None:
+    db = MotoQuantDB(db_path, track_catalog_writes=False)
+    # Up to one connection per worker thread on a 512 MB host: keep each
+    # page cache at SQLite's default 2 MB, not the 64 MB a script gets. The
+    # file itself stays in the OS page cache.
+    db.conn.execute("PRAGMA cache_size=-2000")
+    return db
+
+
+def _db_token_conn():
+    """``(_db_conn, path)``, opening the shared connection first if needed."""
+    global _db_conn, _db_conn_path
+    with _db_conn_lock:
+        if _db_conn is None:
+            db_path = os.environ.get("MOTOQUANT_DB", "motoquant.db")
+            _db_conn = _open_api_db(db_path).conn
+            _db_conn_path = db_path
+            # A new connection may be a different database file: nothing
+            # cached from the previous one may be served.
+            bump_catalog_generation()
+        return _db_conn, _db_conn_path
+
+
+def _thread_db():
+    """This thread's MotoQuantDB facade, (re)opened when stale. May raise."""
+    owner, db_path = _db_token_conn()
+    db = getattr(_db_local, "db", None)
+    if db is not None and _db_local.owner is owner:
         try:
-            # Quick liveness check -- will throw if connection is closed/broken
-            _db_conn.execute("SELECT 1")
-            return _db_conn
+            # Liveness check: throws if the connection was closed.
+            db.conn.execute("SELECT 1")
+            return db
         except Exception as e:
             logging.getLogger(__name__).warning(
                 "DB liveness check failed, reconnecting: %s", e
             )
-            _db_conn = None  # stale -- reconnect below
+    _db_local.db = _db_local.owner = None
+    if db is not None:
+        try:
+            db.close()
+        except Exception:  # noqa: BLE001 — already broken or closed
+            pass
+    db = _open_api_db(db_path)
+    _db_local.db, _db_local.owner = db, owner
+    return db
 
+
+def _get_db():
+    """This thread's DB connection, or None if the DB is unavailable.
+
+    One connection per thread, reused across calls on that thread; see the
+    comment above ``_db_conn``. Never pass the result to another thread.
+    """
     try:
-        from .database.connection import MotoQuantDB
-
-        db_path = os.environ.get("MOTOQUANT_DB", "motoquant.db")
-        db = MotoQuantDB(db_path)
-        _db_conn = db.conn
-        # A new connection may be a different database file: nothing cached
-        # from the previous one may be served.
-        bump_catalog_generation()
-        return _db_conn
+        return _thread_db().conn
     except Exception as e:
         logging.getLogger(__name__).error(
-            "Failed to initialize database at %s: %s", db_path, e, exc_info=True
+            "Failed to initialize database at %s: %s",
+            os.environ.get("MOTOQUANT_DB", "motoquant.db"),
+            e,
+            exc_info=True,
         )
         return None
 
@@ -1051,8 +1098,9 @@ _stock_cache_lock = threading.Lock()
 
 
 def _catalog_token() -> tuple:
-    """Freshness token of the shared catalog connection (see catalog_token)."""
-    return catalog_token(_db_conn)
+    """Freshness token of the catalog (see catalog_token and ``_db_conn``)."""
+    with _db_conn_lock:
+        return catalog_token(_db_conn)
 
 
 def _engine_tag() -> str:
@@ -3820,30 +3868,15 @@ PRICING_FORCE_FLOOR_S = 3600.0
 # ─────────────────────────────────────────────────────────────────
 
 
-_db_facade = None  # MotoQuantDB instance (provides .bikes, .venues, etc.)
-
-
 def _get_db_facade():
-    """Return the MotoQuantDB facade (with repos), reconnecting if needed.
+    """This thread's MotoQuantDB facade (with repos), or None.
 
-    Distinct from `_get_db()` which returns a raw sqlite3.Connection.
-    The chat runner uses the facade so it can call db.bikes.search(),
-    db.venues.to_environment(), etc.
+    Distinct from `_get_db()`, which returns the raw sqlite3.Connection; both
+    share the same per-thread connection. The chat runner uses the facade so
+    it can call db.bikes.search(), db.venues.to_environment(), etc.
     """
-    global _db_facade
-    if _db_facade is not None:
-        try:
-            _db_facade.conn.execute("SELECT 1")
-            return _db_facade
-        except Exception:
-            _db_facade = None  # stale, rebuild
-
     try:
-        from .database.connection import MotoQuantDB
-
-        db_path = os.environ.get("MOTOQUANT_DB", "motoquant.db")
-        _db_facade = MotoQuantDB(db_path)
-        return _db_facade
+        return _thread_db()
     except Exception as e:
         logging.getLogger(__name__).error(
             "Failed to initialize MotoQuantDB at %s: %s",

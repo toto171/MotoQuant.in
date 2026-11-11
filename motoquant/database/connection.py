@@ -107,8 +107,16 @@ class MotoQuantDB:
         db.parts.search(...)
     """
 
-    def __init__(self, db_path: str = "motoquant.db"):
+    def __init__(self, db_path: str = "motoquant.db", *, track_catalog_writes=True):
+        """``track_catalog_writes`` installs the catalog-write authorizer.
+
+        Leave it on for connections that write the catalog (seed and patch
+        scripts, the CLI). The API turns it off: its connections never write
+        catalog rows, and a Python authorizer on a connection that more than
+        one thread touches can deadlock against the GIL (KNOWN_TRAPS T14).
+        """
         self._db_path = Path(db_path)
+        self._track_catalog_writes = track_catalog_writes
         self._conn: sqlite3.Connection | None = None
 
         # Repositories (lazy-initialized after connect)
@@ -133,7 +141,8 @@ class MotoQuantDB:
             str(self._db_path), check_same_thread=False, cached_statements=0
         )
         self._conn.row_factory = sqlite3.Row
-        self._conn.set_authorizer(_catalog_write_authorizer)
+        if self._track_catalog_writes:
+            self._conn.set_authorizer(_catalog_write_authorizer)
 
         # WAL mode is optimal but fails on some network/FUSE-mounted filesystems.
         # Silently fall back to DELETE journal mode if WAL is unavailable.
@@ -148,11 +157,9 @@ class MotoQuantDB:
         self._conn.execute("PRAGMA synchronous=NORMAL")
         self._conn.execute("PRAGMA cache_size=-64000")  # 64 MB
         # Wait up to 5 s for a lock instead of failing instantly with "database
-        # is locked" (default busy_timeout is 0). The API shares one connection
-        # across request + job-worker threads (see docs/KNOWN_TRAPS.md T14); this
-        # lets concurrent writers queue on the lock rather than error out. It is
-        # a mitigation, not a substitute for per-thread/pooled connections at
-        # scale (see docs/ROADMAP.md P0-3).
+        # is locked" (default busy_timeout is 0). The API opens one connection
+        # per thread (see docs/KNOWN_TRAPS.md T14); this lets concurrent
+        # writers queue on the file lock rather than error out.
         self._conn.execute("PRAGMA busy_timeout=5000")
         return self._conn
 

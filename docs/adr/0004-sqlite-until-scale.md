@@ -19,8 +19,8 @@ author-curated catalog. It has zero operational overhead, ships with the image,
 and makes local dev and CI trivial (no DB server to stand up).
 
 Triggers that would justify migrating to a networked DB (Postgres/Supabase):
-1. Multiple API workers/replicas (SQLite's single-writer model + the shared
-   in-process connection — see KNOWN_TRAPS T14 — stop being adequate).
+1. Multiple API workers/replicas (SQLite's single-writer model stops being
+   adequate; connections are already per thread — see KNOWN_TRAPS T14).
 2. User-generated write volume (accounts, saved runs, leaderboard) exceeding
    what a single writer handles comfortably.
 3. A need for cross-instance consistency (horizontal scale) or managed backups.
@@ -29,11 +29,11 @@ Triggers that would justify migrating to a networked DB (Postgres/Supabase):
 
 - **Positive.** No infra to run; the catalog is versioned in git and shipped
   atomically; dev/CI are dependency-free.
-- **Negative / known debt.** The write path shares one process-wide connection
-  across request + job threads (KNOWN_TRAPS T14). This is fine single-worker but
-  is the **first thing to fix before horizontal scale** — either a
-  per-thread/pooled connection *or* the Postgres migration, whichever the
-  scaling trigger demands.
+- **Negative / known debt.** Until November 2026 the API shared one
+  process-wide connection across request + job threads, which could deadlock
+  (KNOWN_TRAPS T14). It now opens one connection per thread. SQLite is still
+  a single writer, so horizontal scale needs a concurrent read/write stress
+  test *or* the Postgres migration, whichever the scaling trigger demands.
 - **Pre-work already staged.** `docker-entrypoint.sh` can seed a persistent-disk
   DB (Render disk) without code changes; `render.yaml` documents the disk block.
   Migration to Postgres would need Alembic (not yet added) for schema management.
