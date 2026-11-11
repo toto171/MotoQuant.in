@@ -113,8 +113,9 @@ export default function PrivacyPage() {
                 search terms when the assistant looks something up.
               </li>
               <li>
-                <strong>OpenWeatherMap</strong> receives a place name or coordinates when you ask
-                for live weather.
+                <strong>Open-Meteo</strong> (or <strong>OpenWeatherMap</strong>, if a server is set
+                up with its key) receives a place name or coordinates when you ask for live
+                weather.
               </li>
               <li>
                 <strong>Sentry</strong> receives error reports when error tracking is switched on,

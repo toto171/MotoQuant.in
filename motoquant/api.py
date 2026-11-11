@@ -203,6 +203,32 @@ app.add_middleware(_BodySizeLimit)
 app.add_middleware(_SecurityHeaders)
 
 
+_PATH_RE = re.compile(r"(?:[A-Za-z]:)?(?:[\\/][\w.\-]+){2,}")
+
+
+def _without_paths(text: str) -> str:
+    """Drop file-system paths (temp files, install dirs) from a message."""
+    return _PATH_RE.sub("<file>", str(text))[:300]
+
+
+def _require_finish(sim, label: str | None = None) -> None:
+    """422 instead of a "0.000 s" success when a run never reaches the line.
+
+    A setup can be valid input and still not finish: very heavy, very weak and
+    into a strong headwind, it runs out of the simulator's time limit. The
+    run then reports a quarter-mile time of 0, which used to go out as if it
+    were a real (impossibly fast) result.
+    """
+    if getattr(sim, "finished_quarter", True):
+        return
+    who = f"{label}: " if label else ""
+    raise HTTPException(
+        422,
+        f"{who}this setup doesn't reach the quarter-mile finish line within the "
+        "simulator's time limit. Check the power, weight and wind settings.",
+    )
+
+
 def _server_error(what: str, exc: BaseException) -> HTTPException:
     """A 500 that logs the exception (Sentry picks it up) but tells the client
     only what failed: exception text can carry file paths, SQL or internals."""
@@ -1888,6 +1914,7 @@ def _simulate_impl(req: SimulateRequest, progress=None):
         )
     except Exception as exc:
         raise _server_error("Simulation error", exc)
+    _require_finish(sim)
 
     # Down-sample to ~100 Hz (every 10th point at 1 ms default dt)
     step = max(1, len(sim.t) // 1000)
@@ -2044,6 +2071,8 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
         if stock_et is None:
             try:
                 stock_sim = engine_select.make_engine(copy.deepcopy(base_cfg)).run()
+                if not getattr(stock_sim, "finished_quarter", True):
+                    raise ValueError("stock baseline did not finish")
                 stock_et = round(float(stock_sim.time_quarter), 4)
                 if not live_place:
                     _stock_cache_put(stock_key, stock_et)
@@ -2057,6 +2086,7 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
         sim = engine.run()
     except Exception as exc:
         raise _server_error("Simulation error", exc)
+    _require_finish(sim)
 
     result: QuickSimResultDict = {
         "tyres": _tyre_labels(req.front_tire_id, req.rear_tire_id),
@@ -2687,6 +2717,7 @@ def _build_summary(
     parts_skipped_detail=(),
 ):
     """Create a response dict from a sim run."""
+    _require_finish(sim, label)
     step = max(1, len(sim.t) // 1000)
     idx = list(range(0, len(sim.t), step))
 
@@ -2952,7 +2983,7 @@ async def upload_dragy(
         # the real reason from the client.
         raise
     except Exception as exc:
-        raise HTTPException(400, f"Failed to read upload: {exc}")
+        raise HTTPException(400, f"Failed to read upload: {_without_paths(exc)}")
 
     try:
         from .calibration.dragy import best_run as dragy_best, parse_dragy_file
@@ -2962,7 +2993,7 @@ async def upload_dragy(
         runs = await asyncio.to_thread(parse_dragy_file, tmp_path)
     except Exception as exc:
         log.warning("Dragy parse error: %s", exc)
-        raise HTTPException(422, f"Failed to parse Dragy file: {exc}")
+        raise HTTPException(422, f"Failed to parse Dragy file: {_without_paths(exc)}")
     finally:
         try:
             os.unlink(tmp_path)
@@ -3081,7 +3112,7 @@ async def upload_dyno(
         # the real reason from the client.
         raise
     except Exception as exc:
-        raise HTTPException(400, f"Failed to read upload: {exc}")
+        raise HTTPException(400, f"Failed to read upload: {_without_paths(exc)}")
 
     try:
         from .calibration.dyno import parse_dyno_file
@@ -3095,7 +3126,7 @@ async def upload_dyno(
         )
     except Exception as exc:
         log.warning("Dyno parse error: %s", exc)
-        raise HTTPException(422, f"Failed to parse dyno file: {exc}")
+        raise HTTPException(422, f"Failed to parse dyno file: {_without_paths(exc)}")
     finally:
         try:
             os.unlink(tmp_path)
@@ -3267,7 +3298,13 @@ def _fetch_owm_uncached(
     """
     api_key = os.environ.get("OPENWEATHERMAP_API_KEY")
     if not api_key:
-        return {"_error": "no_api_key"}
+        # No key: Open-Meteo needs none. MOTOQUANT_OPEN_METEO=0 turns the
+        # fallback off (the test suite does, so it never hits the network).
+        if os.environ.get("MOTOQUANT_OPEN_METEO", "1").strip() == "0":
+            return {"_error": "no_api_key"}
+        return _fetch_open_meteo_uncached(
+            location=location, lat=lat, lon=lon, altitude_m=altitude_m
+        )
 
     try:
         import requests  # type: ignore
@@ -3325,23 +3362,51 @@ def _fetch_owm_uncached(
     # Use caller-provided altitude if given, else assume sea-level (OWM free tier
     # doesn't return elevation; users should pass it if their venue is high-altitude).
     alt = float(altitude_m) if altitude_m is not None else 0.0
+    return _live_conditions(
+        location_name=data.get("name") or location or "Unknown",
+        country=(data.get("sys") or {}).get("country"),
+        lat=resolved_lat,
+        lon=resolved_lon,
+        altitude_m=alt,
+        temp_c=temp_c,
+        humidity=humidity,
+        pressure_hpa=pressure_hpa,
+        wind_ms=wind_ms,
+        wind_deg=wind_deg,
+        provider="openweathermap",
+    )
 
-    # Reuse the atmospheric helpers from weather_repo to keep logic in one place
+
+def _live_conditions(
+    *,
+    location_name: str,
+    country: str | None,
+    lat: float | None,
+    lon: float | None,
+    altitude_m: float,
+    temp_c: float,
+    humidity: float,
+    pressure_hpa: float,
+    wind_ms: float,
+    wind_deg: float,
+    provider: str,
+) -> dict:
+    """Environment parameters from one weather reading (sea-level pressure)."""
     from .database.weather_repo import (
         compute_air_density,
         compute_density_altitude,
         compute_power_correction,
     )
 
+    alt = float(altitude_m)
     air_density = compute_air_density(temp_c, humidity, pressure_hpa, alt)
     da_ft = compute_density_altitude(temp_c, humidity, pressure_hpa, alt)
     pcf = compute_power_correction(temp_c, pressure_hpa, humidity, alt)
-
     return {
-        "location_name": data.get("name") or location or "Unknown",
-        "country": (data.get("sys") or {}).get("country"),
-        "latitude": resolved_lat,
-        "longitude": resolved_lon,
+        "location_name": location_name,
+        "country": country,
+        "latitude": lat,
+        "longitude": lon,
         "altitude_m": alt,
         "temperature_c": round(temp_c, 2),
         "humidity_pct": round(humidity, 1),
@@ -3353,7 +3418,102 @@ def _fetch_owm_uncached(
         "density_altitude_ft": round(float(da_ft), 0),
         "density_altitude_m": round(float(da_ft) * 0.3048, 0),
         "power_correction_factor": round(float(pcf), 4),
+        "provider": provider,
     }
+
+
+_OPEN_METEO_GEOCODE = "https://geocoding-api.open-meteo.com/v1/search"
+_OPEN_METEO_FORECAST = "https://api.open-meteo.com/v1/forecast"
+
+
+def _fetch_open_meteo_uncached(
+    *,
+    location: str | None,
+    lat: float | None,
+    lon: float | None,
+    altitude_m: float | None,
+) -> dict:
+    """Current conditions from Open-Meteo, which needs no API key.
+
+    Used when the server has no OpenWeatherMap key. Open-Meteo also returns
+    the ground elevation, so a searched place gets its real altitude instead
+    of sea level. A trailing country code ("Pune, IN") narrows the search.
+    """
+    try:
+        import requests  # type: ignore
+    except ImportError:
+        return {"_error": "requests_not_installed"}
+
+    name = None
+    country = None
+    try:
+        if lat is None or lon is None:
+            if not location or not location.strip():
+                return {"_error": "missing_location"}
+            parts = [p.strip() for p in location.split(",") if p.strip()]
+            query = parts[0] if parts else location.strip()
+            want_cc = (
+                parts[-1].upper() if len(parts) > 1 and len(parts[-1]) == 2 else None
+            )
+            resp = requests.get(
+                _OPEN_METEO_GEOCODE,
+                params={"name": query, "count": 10, "language": "en", "format": "json"},
+                timeout=10,
+            )
+            resp.raise_for_status()
+            results = resp.json().get("results") or []
+            if want_cc:
+                results = [r for r in results if r.get("country_code") == want_cc]
+            if not results:
+                return {"_error": "place_not_found"}
+            top = results[0]
+            lat, lon = float(top["latitude"]), float(top["longitude"])
+            name = top.get("name")
+            country = top.get("country_code")
+            if altitude_m is None and top.get("elevation") is not None:
+                altitude_m = float(top["elevation"])
+        resp = requests.get(
+            _OPEN_METEO_FORECAST,
+            params={
+                "latitude": lat,
+                "longitude": lon,
+                "current": (
+                    "temperature_2m,relative_humidity_2m,pressure_msl,"
+                    "wind_speed_10m,wind_direction_10m"
+                ),
+                "wind_speed_unit": "ms",
+            },
+            timeout=10,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as exc:
+        logging.getLogger(__name__).warning(
+            "Open-Meteo fetch failed (by=%s): %s",
+            "coords" if location is None else "name",
+            type(exc).__name__,
+        )
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+        return {
+            "_error": f"weather_error: {f'HTTP {status}' if status else type(exc).__name__}"
+        }
+
+    current = data.get("current") or {}
+    if altitude_m is None and data.get("elevation") is not None:
+        altitude_m = float(data["elevation"])
+    return _live_conditions(
+        location_name=name or location or "Unknown",
+        country=country,
+        lat=lat,
+        lon=lon,
+        altitude_m=float(altitude_m) if altitude_m is not None else 0.0,
+        temp_c=float(current.get("temperature_2m", 25.0)),
+        humidity=float(current.get("relative_humidity_2m", 50.0)),
+        pressure_hpa=float(current.get("pressure_msl", 1013.25)),
+        wind_ms=float(current.get("wind_speed_10m", 0.0)),
+        wind_deg=float(current.get("wind_direction_10m", 0.0)),
+        provider="open-meteo",
+    )
 
 
 @app.post(
@@ -3467,18 +3627,27 @@ def resolve_venue(req: VenueResolveRequest):
     )
     if owm is None or owm.get("_error"):
         err = (owm or {}).get("_error", "unknown")
-        if err == "no_api_key":
+        if err == "place_not_found":
             raise HTTPException(
-                503,
-                "Live weather unavailable: OPENWEATHERMAP_API_KEY is not configured on the server.",
+                404, "We couldn't find that place. Try a nearby city or pick a track."
             )
-        if err == "requests_not_installed":
+        if err.startswith(("owm_error", "weather_error")):
+            # The reason is key-free by construction (an HTTP status or an
+            # exception class name), never the upstream message.
+            reason = err.split(":", 1)[1].strip() if ":" in err else ""
             raise HTTPException(
-                503, "Live weather unavailable: `requests` package missing."
+                502,
+                "Live weather isn't available right now"
+                + (f" ({reason})" if reason else "")
+                + ". Pick a track or set the conditions by hand.",
             )
-        if err.startswith("owm_error"):
-            raise HTTPException(502, f"OpenWeatherMap upstream error: {err[11:]}")
-        raise HTTPException(422, f"Could not resolve location: {err}")
+        if err == "missing_location":
+            raise HTTPException(422, "Give a place name or coordinates.")
+        raise HTTPException(
+            503,
+            "Live weather isn't available right now. Pick a track or set the "
+            "conditions by hand.",
+        )
 
     return {
         "matched_venue_id": None,
@@ -3500,7 +3669,7 @@ def resolve_venue(req: VenueResolveRequest):
         "density_altitude_m": owm["density_altitude_m"],
         "power_correction_factor": owm["power_correction_factor"],
         "fetched_at": owm.get("fetched_at") or datetime.now(timezone.utc).isoformat(),
-        "source": "openweathermap",
+        "source": owm.get("provider", "openweathermap"),
     }
 
 
@@ -4468,10 +4637,10 @@ class OptimizeBuildRequest(ConditionsRequest):
             "which exceeds the price of every compatible part combined)"
         ),
     )
-    goal: str = Field(
+    goal: Literal["min_et", "max_trap"] = Field(
         "min_et", description='"min_et" (faster ET) or "max_trap" (higher trap)'
     )
-    profile: str = Field(
+    profile: Literal["all", "street_legal", "drag_prep", "full_race"] = Field(
         "all", description="all | street_legal | drag_prep | full_race"
     )
     rider_weight_kg: float = Field(75.0, ge=40, le=150)

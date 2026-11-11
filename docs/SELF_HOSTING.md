@@ -163,7 +163,7 @@ DDoS-grade protection, rate-limit at your edge as well.
 
 | Variable | Effect |
 |---|---|
-| `OPENWEATHERMAP_API_KEY` | Live weather when a visitor names a place, and for the `weather` CLI (`weather --refresh-all`). Successful lookups are cached for ten minutes. Without a key, a place keeps the default conditions and seeded venues use their stored seasonal data. |
+| `OPENWEATHERMAP_API_KEY` | Optional. Live weather when a visitor names a place comes from OpenWeatherMap when this is set, and from Open-Meteo (no key, free for non-commercial use, and it also gives the place's elevation) when it is not; `MOTOQUANT_OPEN_METEO=0` turns that fallback off. The `weather` CLI (`weather --refresh-all`) needs the key. Successful lookups are cached for ten minutes. Seeded venues use their stored seasonal data. |
 | `SENTRY_DSN` (+ `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE`, `SENTRY_TRACES_SAMPLE_RATE`, `SENTRY_SEND_PII`) | Error tracking. A no-op unless the DSN is set. See [OBSERVABILITY.md](OBSERVABILITY.md). |
 | `POSTHOG_API_KEY` (+ `POSTHOG_HOST`) | Opt-in forwarding of the anonymous web telemetry beacon to PostHog. Unset, beacons are written to the server log only and nothing is sent to a third party. |
 | `MOTOQUANT_KEEPWARM_URL` / `MOTOQUANT_KEEPWARM_INTERVAL_S` | In-app self-ping that keeps a sleeping free-tier host awake during the day. Starts automatically on Render (from `RENDER_EXTERNAL_URL`); off elsewhere unless you set the URL. |

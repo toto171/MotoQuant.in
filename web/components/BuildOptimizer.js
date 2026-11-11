@@ -136,7 +136,9 @@ export default function BuildOptimizer() {
   const [bike, setBike] = useState(null);
   const [budget, setBudget] = useState(100000);
   const [goal, setGoal] = useState('min_et');
-  const [profile, setProfile] = useState('all');
+  // Street legal by default: most visitors ride on the road, and "Anything
+  // goes" put nitrous on commuter bikes in the headline result.
+  const [profile, setProfile] = useState('street_legal');
   const [riderKg, setRiderKg] = useState(75);
   const [location, setLocation] = useState(null);
   const [stopped, setStopped] = useState(false);

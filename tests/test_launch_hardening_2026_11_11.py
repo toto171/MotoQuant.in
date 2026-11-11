@@ -250,3 +250,181 @@ def test_redirect_to_another_host_drops_caller_headers(monkeypatch):
     assert status == 200
     assert seen[0][1].get("X-Subscription-Token") == "token-value"
     assert "X-Subscription-Token" not in seen[1][1]
+
+
+# ─── live weather without an OpenWeatherMap key: Open-Meteo ──────────────
+
+
+class _FakeResp:
+    def __init__(self, payload):
+        self._payload = payload
+
+    def raise_for_status(self):
+        return None
+
+    def json(self):
+        return self._payload
+
+
+def _fake_open_meteo(calls):
+    def get(url, params=None, timeout=None):
+        calls.append((url, dict(params or {})))
+        if "geocoding" in url:
+            return _FakeResp(
+                {
+                    "results": [
+                        {
+                            "name": "Pune",
+                            "latitude": -9.37,
+                            "longitude": 124.32,
+                            "elevation": 330.0,
+                            "country_code": "TL",
+                        },
+                        {
+                            "name": "Pune",
+                            "latitude": 18.52,
+                            "longitude": 73.86,
+                            "elevation": 554.0,
+                            "country_code": "IN",
+                        },
+                    ]
+                }
+            )
+        return _FakeResp(
+            {
+                "elevation": 562.0,
+                "current": {
+                    "temperature_2m": 25.9,
+                    "relative_humidity_2m": 40,
+                    "pressure_msl": 1013.8,
+                    "wind_speed_10m": 1.35,
+                    "wind_direction_10m": 141,
+                },
+            }
+        )
+
+    return get
+
+
+def test_place_search_uses_open_meteo_without_a_key(monkeypatch):
+    import requests
+
+    import motoquant.api as api
+
+    monkeypatch.delenv("OPENWEATHERMAP_API_KEY", raising=False)
+    monkeypatch.setenv("MOTOQUANT_OPEN_METEO", "1")
+    calls = []
+    monkeypatch.setattr(requests, "get", _fake_open_meteo(calls))
+    out = api._fetch_owm_uncached(
+        location="Pune, IN", lat=None, lon=None, altitude_m=None
+    )
+    assert out["provider"] == "open-meteo"
+    # The country code picked the Indian Pune, and its elevation was used.
+    assert out["latitude"] == 18.52 and out["altitude_m"] == 554.0
+    assert out["country"] == "IN"
+    assert out["temperature_c"] == 25.9 and out["pressure_hpa"] == 1013.8
+    assert calls[0][1]["name"] == "Pune"
+    # Coordinates skip the place search and take the forecast's elevation.
+    calls.clear()
+    out = api._fetch_owm_uncached(location=None, lat=18.52, lon=73.86, altitude_m=None)
+    assert len(calls) == 1 and out["altitude_m"] == 562.0
+
+
+def test_unknown_place_gives_a_clear_404(monkeypatch):
+    import requests
+
+    import motoquant.api as api
+
+    monkeypatch.delenv("OPENWEATHERMAP_API_KEY", raising=False)
+    monkeypatch.setenv("MOTOQUANT_OPEN_METEO", "1")
+    monkeypatch.setattr(requests, "get", lambda *a, **k: _FakeResp({"results": []}))
+    monkeypatch.setattr(api, "_get_db", lambda: None)
+    with pytest.raises(api.HTTPException) as info:
+        api.resolve_venue(api.VenueResolveRequest(location="Atlantis Nowhere"))
+    assert info.value.status_code == 404
+    assert "OPENWEATHERMAP" not in info.value.detail
+
+
+# ─── a run that never finishes is an error, not a 0.000 s result ─────────
+
+
+def test_a_run_that_cannot_finish_is_a_clear_422(api_client):
+    client, _ = api_client
+    dnf = {
+        "bike_id": 81,
+        "rider_mass_kg": 250,
+        "mass_delta_kg": 200,
+        "power_boost_pct": -50,
+    }
+    r = client.post("/api/simulate/quick", json=dnf)
+    assert r.status_code == 422, r.text
+    assert "finish line" in r.json()["detail"]
+    ok = client.post("/api/simulate/quick", json={"bike_id": 81})
+    assert ok.status_code == 200 and ok.json()["et_quarter_s"] > 0
+
+
+# ─── the shared SQLite connection must not deadlock under threads ────────
+
+_DEADLOCK_PROBE = r"""
+import os, sys, threading
+os.environ["MOTOQUANT_DB"] = sys.argv[1]
+os.environ["MOTOQUANT_RATE_LIMIT"] = "false"
+import motoquant.api as api
+
+def work(k):
+    for i in range(40):
+        api._build_config(bike_id=10 + (k + i) % 50, bike_preset=None,
+                          power_boost_pct=0, mass_delta_kg=0, rider_mass_kg=75)
+
+threads = [threading.Thread(target=work, args=(k,)) for k in range(8)]
+for t in threads:
+    t.start()
+for t in threads:
+    t.join()
+print("ok")
+"""
+
+
+def test_shared_connection_survives_concurrent_requests(tmp_path):
+    """Eight threads building configs on the API's one shared connection used
+    to deadlock every time (a Python authorizer callback ran under the SQLite
+    connection mutex). A hang here fails on the timeout instead of hanging."""
+    import subprocess
+    import sys
+
+    db = tmp_path / "mq.db"
+    shutil.copyfile(_REPO_DB, db)
+    repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    try:
+        out = subprocess.run(
+            [sys.executable, "-c", _DEADLOCK_PROBE, str(db)],
+            cwd=repo,
+            capture_output=True,
+            text=True,
+            timeout=90,
+        )
+    except subprocess.TimeoutExpired:
+        pytest.fail("concurrent config builds deadlocked")
+    assert out.returncode == 0, out.stderr[-2000:]
+    assert out.stdout.strip().endswith("ok")
+
+
+def test_own_writes_to_the_catalog_still_invalidate_caches(tmp_path):
+    """The write check that replaced the authorizer: catalog writes bump the
+    generation, other writes and reads do not."""
+    from motoquant.database.connection import MotoQuantDB, catalog_generation
+
+    db_path = tmp_path / "mq.db"
+    shutil.copyfile(_REPO_DB, db_path)
+    conn = MotoQuantDB(str(db_path)).conn
+    gen = catalog_generation()
+    conn.execute("UPDATE venues SET name = name WHERE id = 1")
+    assert catalog_generation() > gen
+    gen = catalog_generation()
+    conn.execute("SELECT * FROM venues").fetchall()
+    conn.execute(
+        "INSERT INTO sim_runs (bike_config_id, et_quarter_s, trap_speed_kmh) "
+        "VALUES (1, 13.5, 160.0)"
+    )
+    assert catalog_generation() == gen
+    conn.close()
