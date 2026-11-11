@@ -2,15 +2,45 @@
 // Dropped into <head> (or top of <body>) via <Script type="application/ld+json"> so
 // Google / Bing / Yandex get strongly-typed signals about:
 //   - Who runs the site (Organization)
-//   - What the site is (WebSite + SearchAction)
+//   - What the site is (WebSite)
 //   - What the product is (SoftwareApplication, free, browser-based)
-//   - What questions it answers (FAQPage — rich-result eligible)
+//   - What questions it answers (FAQPage, on the home page only, where the
+//     FAQ is visible)
 //
 // Each helper returns a plain object; use <StructuredData data={...} /> to render.
 // We intentionally keep all URLs absolute (https://motoquant.in/...) because Google
 // treats absolute @id values as canonical and collapses duplicates across crawls.
 
 export const SITE_URL = 'https://motoquant.in';
+
+// The social card. The query string is a cache key: web/vercel.json serves
+// every *.png as immutable for a year, so bump `v` whenever og-image.png is
+// regenerated or crawlers keep the old card. A page-level `openGraph` block
+// REPLACES the root one (Next.js does not merge it), so every page that sets
+// openGraph must list `images: [OG_IMAGE]` itself.
+const OG_IMAGE_PATH = '/og-image.png?v=2';
+export const OG_IMAGE = {
+  url: OG_IMAGE_PATH,
+  width: 1200,
+  height: 630,
+  alt: 'MotoQuant quarter-mile simulator',
+};
+export const OG_IMAGE_URL = `${SITE_URL}${OG_IMAGE_PATH}`;
+
+// BreadcrumbList from [name, path] pairs; Home is added in front.
+export function breadcrumbSchema(trail) {
+  const items = [['Home', '/'], ...trail];
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map(([name, path], i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name,
+      item: path === '/' ? SITE_URL : `${SITE_URL}${path}`,
+    })),
+  };
+}
 
 export function organizationSchema() {
   return {
@@ -60,14 +90,6 @@ export function websiteSchema() {
       'Motorcycle quarter-mile simulator: predict ET, plan a build and find the parts worth buying.',
     inLanguage: 'en-IN',
     publisher: { '@id': `${SITE_URL}/#organization` },
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: {
-        '@type': 'EntryPoint',
-        urlTemplate: `${SITE_URL}/bikes?search={search_term_string}`,
-      },
-      'query-input': 'required name=search_term_string',
-    },
   };
 }
 
@@ -112,7 +134,9 @@ export function softwareApplicationSchema() {
 }
 
 // Single source for the landing-page FAQ: the visible accordion (app/page.js)
-// and the FAQPage JSON-LD below render the SAME questions and answers.
+// and the FAQPage JSON-LD below render the SAME questions and answers. The
+// JSON-LD is emitted from app/page.js only: FAQPage markup must describe a
+// FAQ the visitor can see on that page.
 export const FAQ_ITEMS = [
   {
     q: 'What is MotoQuant?',
@@ -171,6 +195,7 @@ export function articleSchema({ title, description, slug, datePublished, dateMod
     headline: title,
     description,
     url: `${SITE_URL}/blog/${slug}`,
+    image: OG_IMAGE_URL,
     datePublished,
     dateModified: dateModified || datePublished,
     author: {

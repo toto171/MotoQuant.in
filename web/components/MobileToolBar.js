@@ -57,7 +57,7 @@ export default function MobileToolBar() {
               >
                 <Icon size={18} aria-hidden="true" />
               </span>
-              <span className="text-xs font-medium">{t.label}</span>
+              <span className={`text-xs font-medium ${active ? 'text-accent-small' : ''}`}>{t.label}</span>
             </Link>
           );
         })}

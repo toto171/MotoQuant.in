@@ -314,7 +314,7 @@ function ResolvedCard({ value, onClear, compact }) {
             <p className="text-xs text-white/60">
               {source === 'seeded_venue'
                 ? 'Known drag strip'
-                : source === 'openweathermap'
+                : source === 'openweathermap' || source === 'open-meteo'
                   ? 'Live weather'
                   : 'Conditions found'}
               {value?.fetched_at &&

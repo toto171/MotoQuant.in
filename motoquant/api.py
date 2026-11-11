@@ -59,6 +59,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
+from starlette.datastructures import MutableHeaders
 
 # TypedDict must come from typing_extensions on Python < 3.12 when used in
 # Pydantic/FastAPI annotations (pydantic raises PydanticUserError otherwise).
@@ -91,14 +92,149 @@ from motoquant.observability import init_sentry as _init_sentry  # noqa: E402
 
 _init_sentry(app_name="motoquant-api")
 
-# CORS -- allow the Next.js frontend on any origin during early development
+# CORS. The website calls the API same-origin through its /api proxy, so it
+# needs no CORS at all; browsers on other sites must not be able to drive the
+# free (server-key) assistant from their visitors' browsers. Allowed: the
+# public site and local development. Self-hosters add their own origins with
+# MOTOQUANT_CORS_ORIGINS (comma-separated; "*" restores the old behaviour).
+_DEFAULT_CORS_ORIGINS = (
+    "https://motoquant.in",
+    "https://www.motoquant.in",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+)
+
+
+def _cors_origins() -> list[str]:
+    raw = os.environ.get("MOTOQUANT_CORS_ORIGINS", "").strip()
+    if not raw:
+        return list(_DEFAULT_CORS_ORIGINS)
+    return [o.strip() for o in raw.split(",") if o.strip()]
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_cors_origins(),
     allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
+
+# Request-size fuse. No legitimate JSON body is anywhere near this (chat
+# messages cap at 8,000 characters); without it a multi-megabyte body is read
+# and parsed in full on the 512 MB instance before validation rejects it. The
+# calibration uploads keep their own 25 MB cap (MAX_UPLOAD_BYTES).
+MAX_REQUEST_BYTES = 256 * 1024
+_BODY_LIMIT_EXEMPT_PREFIXES = ("/api/calibrate/",)
+
+
+def _too_large() -> HTTPException:
+    return HTTPException(
+        413, f"Request body is larger than {MAX_REQUEST_BYTES // 1024} KB"
+    )
+
+
+class _BodySizeLimit:
+    """Refuse oversized request bodies with 413 before anything parses them."""
+
+    def __init__(self, app, max_bytes: int = MAX_REQUEST_BYTES):
+        self.app = app
+        self.max_bytes = max_bytes
+
+    async def __call__(self, scope, receive, send):
+        if (
+            scope["type"] != "http"
+            or scope.get("method") not in ("POST", "PUT", "PATCH")
+            or scope.get("path", "").startswith(_BODY_LIMIT_EXEMPT_PREFIXES)
+        ):
+            await self.app(scope, receive, send)
+            return
+        for name, value in scope.get("headers") or ():
+            if name == b"content-length":
+                try:
+                    declared = int(value)
+                except ValueError:
+                    declared = 0
+                if declared > self.max_bytes:
+                    response = JSONResponse(
+                        {"detail": _too_large().detail}, status_code=413
+                    )
+                    await response(scope, receive, send)
+                    return
+        received = 0
+
+        async def limited_receive():
+            # Chunked bodies carry no Content-Length: count as they arrive.
+            # An HTTPException here passes through FastAPI's body reader
+            # unchanged and becomes a normal 413 response.
+            nonlocal received
+            message = await receive()
+            if message.get("type") == "http.request":
+                received += len(message.get("body", b""))
+                if received > self.max_bytes:
+                    raise _too_large()
+            return message
+
+        await self.app(scope, limited_receive, send)
+
+
+class _SecurityHeaders:
+    """nosniff and HSTS on every API response (the API is HTTPS-only)."""
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        async def send_with_headers(message):
+            if message["type"] == "http.response.start":
+                headers = MutableHeaders(scope=message)
+                headers.setdefault("X-Content-Type-Options", "nosniff")
+                headers.setdefault("Strict-Transport-Security", "max-age=31536000")
+            await send(message)
+
+        await self.app(scope, receive, send_with_headers)
+
+
+app.add_middleware(_BodySizeLimit)
+app.add_middleware(_SecurityHeaders)
+
+
+_PATH_RE = re.compile(r"(?:[A-Za-z]:)?(?:[\\/][\w.\-]+){2,}")
+
+
+def _without_paths(text: str) -> str:
+    """Drop file-system paths (temp files, install dirs) from a message."""
+    return _PATH_RE.sub("<file>", str(text))[:300]
+
+
+def _require_finish(sim, label: str | None = None) -> None:
+    """422 instead of a "0.000 s" success when a run never reaches the line.
+
+    A setup can be valid input and still not finish: very heavy, very weak and
+    into a strong headwind, it runs out of the simulator's time limit. The
+    run then reports a quarter-mile time of 0, which used to go out as if it
+    were a real (impossibly fast) result.
+    """
+    if getattr(sim, "finished_quarter", True):
+        return
+    who = f"{label}: " if label else ""
+    raise HTTPException(
+        422,
+        f"{who}this setup doesn't reach the quarter-mile finish line within the "
+        "simulator's time limit. Check the power, weight and wind settings.",
+    )
+
+
+def _server_error(what: str, exc: BaseException) -> HTTPException:
+    """A 500 that logs the exception (Sentry picks it up) but tells the client
+    only what failed: exception text can carry file paths, SQL or internals."""
+    logging.getLogger(__name__).error("%s: %s", what, exc, exc_info=exc)
+    return HTTPException(500, f"{what}. Please try again.")
+
 
 # Response compression -- the origin serves 50-600 KB JSON payloads (full
 # catalog fetches, sim timeseries) uncompressed, which is pure egress waste
@@ -1493,7 +1629,7 @@ def list_bikes(
                 "bikes": [_bike_row_to_summary(dict(r)) for r in rows],
             }
         except Exception as exc:
-            raise HTTPException(500, f"Database error: {exc}")
+            raise _server_error("Database error", exc)
 
     return _serve_catalog(
         request, ("bikes", search, manufacturer, category, limit, offset), _build
@@ -1516,7 +1652,7 @@ def get_bike(bike_id: int = Path(..., ge=1, le=MAX_DB_ID), request: Request = No
                 (bike_id,),
             ).fetchone()
         except Exception as exc:
-            raise HTTPException(500, f"Database error: {exc}")
+            raise _server_error("Database error", exc)
 
         if not row:
             raise HTTPException(404, f"Bike {bike_id} not found")
@@ -1676,7 +1812,7 @@ def list_venues(request: Request = None):
                 venues.append(v)
             return {"venues": venues}
         except Exception as exc:
-            raise HTTPException(500, f"Database error: {exc}")
+            raise _server_error("Database error", exc)
 
     return _serve_catalog(request, ("venues",), _build)
 
@@ -1722,7 +1858,7 @@ def list_tires(
                 tires.append(d)
             return {"tires": tires, "total": total}
         except Exception as exc:
-            raise HTTPException(500, f"Database error: {exc}")
+            raise _server_error("Database error", exc)
 
     return _serve_catalog(request, ("tires", compound, manufacturer, limit), _build)
 
@@ -1777,7 +1913,8 @@ def _simulate_impl(req: SimulateRequest, progress=None):
             else None,
         )
     except Exception as exc:
-        raise HTTPException(500, f"Simulation error: {exc}")
+        raise _server_error("Simulation error", exc)
+    _require_finish(sim)
 
     # Down-sample to ~100 Hz (every 10th point at 1 ms default dt)
     step = max(1, len(sim.t) // 1000)
@@ -1934,6 +2071,8 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
         if stock_et is None:
             try:
                 stock_sim = engine_select.make_engine(copy.deepcopy(base_cfg)).run()
+                if not getattr(stock_sim, "finished_quarter", True):
+                    raise ValueError("stock baseline did not finish")
                 stock_et = round(float(stock_sim.time_quarter), 4)
                 if not live_place:
                     _stock_cache_put(stock_key, stock_et)
@@ -1946,7 +2085,8 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
         engine = engine_select.make_engine(cfg)
         sim = engine.run()
     except Exception as exc:
-        raise HTTPException(500, f"Simulation error: {exc}")
+        raise _server_error("Simulation error", exc)
+    _require_finish(sim)
 
     result: QuickSimResultDict = {
         "tyres": _tyre_labels(req.front_tire_id, req.rear_tire_id),
@@ -2096,7 +2236,7 @@ def _topspeed_impl(req: TopSpeedRequest, progress=None) -> TopSpeedResultDict:
             else None,
         )
     except Exception as exc:
-        raise HTTPException(500, f"Top-speed simulation error: {exc}")
+        raise _server_error("Top-speed simulation error", exc)
 
     # Format LSR splits with km/h + mph for convenience
     splits_fmt: dict[str, LsrSplitDict] = {}
@@ -2228,7 +2368,7 @@ def simulate_distance(req: DistanceRunRequest) -> DistanceResultDict:
         engine = engine_select.make_engine(cfg)
         sim = engine.run_distance(req.distance_m, max_time=req.max_time_s)
     except Exception as exc:
-        raise HTTPException(500, f"Distance run error: {exc}")
+        raise _server_error("Distance run error", exc)
 
     # A degenerate config can return an empty trajectory; indexing sim.t[-1] /
     # max(sim.v) below would then raise outside the try above and 500. Surface a
@@ -2283,7 +2423,7 @@ def list_parts_categories(request: Request = None):
             ).fetchall()
             return {"categories": [dict(r) for r in rows]}
         except Exception as exc:
-            raise HTTPException(500, f"Database error: {exc}")
+            raise _server_error("Database error", exc)
 
     return _serve_catalog(request, ("parts_categories",), _build)
 
@@ -2462,7 +2602,7 @@ def list_parts(
         except HTTPException:
             raise
         except Exception as exc:
-            raise HTTPException(500, f"Database error: {exc}")
+            raise _server_error("Database error", exc)
 
     return _serve_catalog(
         request,
@@ -2577,6 +2717,7 @@ def _build_summary(
     parts_skipped_detail=(),
 ):
     """Create a response dict from a sim run."""
+    _require_finish(sim, label)
     step = max(1, len(sim.t) // 1000)
     idx = list(range(0, len(sim.t), step))
 
@@ -2696,7 +2837,7 @@ def _compare_impl(req: CompareRequest, progress=None):
     except HTTPException:
         raise  # e.g. 404 for an unknown bike_id — don't relabel as 500
     except Exception as exc:
-        raise HTTPException(500, f"Simulation error: {exc}")
+        raise _server_error("Simulation error", exc)
 
     if progress is not None:
         progress(0.99, "Building comparison")
@@ -2842,7 +2983,7 @@ async def upload_dragy(
         # the real reason from the client.
         raise
     except Exception as exc:
-        raise HTTPException(400, f"Failed to read upload: {exc}")
+        raise HTTPException(400, f"Failed to read upload: {_without_paths(exc)}")
 
     try:
         from .calibration.dragy import best_run as dragy_best, parse_dragy_file
@@ -2852,7 +2993,7 @@ async def upload_dragy(
         runs = await asyncio.to_thread(parse_dragy_file, tmp_path)
     except Exception as exc:
         log.warning("Dragy parse error: %s", exc)
-        raise HTTPException(422, f"Failed to parse Dragy file: {exc}")
+        raise HTTPException(422, f"Failed to parse Dragy file: {_without_paths(exc)}")
     finally:
         try:
             os.unlink(tmp_path)
@@ -2971,7 +3112,7 @@ async def upload_dyno(
         # the real reason from the client.
         raise
     except Exception as exc:
-        raise HTTPException(400, f"Failed to read upload: {exc}")
+        raise HTTPException(400, f"Failed to read upload: {_without_paths(exc)}")
 
     try:
         from .calibration.dyno import parse_dyno_file
@@ -2985,7 +3126,7 @@ async def upload_dyno(
         )
     except Exception as exc:
         log.warning("Dyno parse error: %s", exc)
-        raise HTTPException(422, f"Failed to parse dyno file: {exc}")
+        raise HTTPException(422, f"Failed to parse dyno file: {_without_paths(exc)}")
     finally:
         try:
             os.unlink(tmp_path)
@@ -3157,7 +3298,13 @@ def _fetch_owm_uncached(
     """
     api_key = os.environ.get("OPENWEATHERMAP_API_KEY")
     if not api_key:
-        return {"_error": "no_api_key"}
+        # No key: Open-Meteo needs none. MOTOQUANT_OPEN_METEO=0 turns the
+        # fallback off (the test suite does, so it never hits the network).
+        if os.environ.get("MOTOQUANT_OPEN_METEO", "1").strip() == "0":
+            return {"_error": "no_api_key"}
+        return _fetch_open_meteo_uncached(
+            location=location, lat=lat, lon=lon, altitude_m=altitude_m
+        )
 
     try:
         import requests  # type: ignore
@@ -3215,23 +3362,51 @@ def _fetch_owm_uncached(
     # Use caller-provided altitude if given, else assume sea-level (OWM free tier
     # doesn't return elevation; users should pass it if their venue is high-altitude).
     alt = float(altitude_m) if altitude_m is not None else 0.0
+    return _live_conditions(
+        location_name=data.get("name") or location or "Unknown",
+        country=(data.get("sys") or {}).get("country"),
+        lat=resolved_lat,
+        lon=resolved_lon,
+        altitude_m=alt,
+        temp_c=temp_c,
+        humidity=humidity,
+        pressure_hpa=pressure_hpa,
+        wind_ms=wind_ms,
+        wind_deg=wind_deg,
+        provider="openweathermap",
+    )
 
-    # Reuse the atmospheric helpers from weather_repo to keep logic in one place
+
+def _live_conditions(
+    *,
+    location_name: str,
+    country: str | None,
+    lat: float | None,
+    lon: float | None,
+    altitude_m: float,
+    temp_c: float,
+    humidity: float,
+    pressure_hpa: float,
+    wind_ms: float,
+    wind_deg: float,
+    provider: str,
+) -> dict:
+    """Environment parameters from one weather reading (sea-level pressure)."""
     from .database.weather_repo import (
         compute_air_density,
         compute_density_altitude,
         compute_power_correction,
     )
 
+    alt = float(altitude_m)
     air_density = compute_air_density(temp_c, humidity, pressure_hpa, alt)
     da_ft = compute_density_altitude(temp_c, humidity, pressure_hpa, alt)
     pcf = compute_power_correction(temp_c, pressure_hpa, humidity, alt)
-
     return {
-        "location_name": data.get("name") or location or "Unknown",
-        "country": (data.get("sys") or {}).get("country"),
-        "latitude": resolved_lat,
-        "longitude": resolved_lon,
+        "location_name": location_name,
+        "country": country,
+        "latitude": lat,
+        "longitude": lon,
         "altitude_m": alt,
         "temperature_c": round(temp_c, 2),
         "humidity_pct": round(humidity, 1),
@@ -3243,7 +3418,102 @@ def _fetch_owm_uncached(
         "density_altitude_ft": round(float(da_ft), 0),
         "density_altitude_m": round(float(da_ft) * 0.3048, 0),
         "power_correction_factor": round(float(pcf), 4),
+        "provider": provider,
     }
+
+
+_OPEN_METEO_GEOCODE = "https://geocoding-api.open-meteo.com/v1/search"
+_OPEN_METEO_FORECAST = "https://api.open-meteo.com/v1/forecast"
+
+
+def _fetch_open_meteo_uncached(
+    *,
+    location: str | None,
+    lat: float | None,
+    lon: float | None,
+    altitude_m: float | None,
+) -> dict:
+    """Current conditions from Open-Meteo, which needs no API key.
+
+    Used when the server has no OpenWeatherMap key. Open-Meteo also returns
+    the ground elevation, so a searched place gets its real altitude instead
+    of sea level. A trailing country code ("Pune, IN") narrows the search.
+    """
+    try:
+        import requests  # type: ignore
+    except ImportError:
+        return {"_error": "requests_not_installed"}
+
+    name = None
+    country = None
+    try:
+        if lat is None or lon is None:
+            if not location or not location.strip():
+                return {"_error": "missing_location"}
+            parts = [p.strip() for p in location.split(",") if p.strip()]
+            query = parts[0] if parts else location.strip()
+            want_cc = (
+                parts[-1].upper() if len(parts) > 1 and len(parts[-1]) == 2 else None
+            )
+            resp = requests.get(
+                _OPEN_METEO_GEOCODE,
+                params={"name": query, "count": 10, "language": "en", "format": "json"},
+                timeout=10,
+            )
+            resp.raise_for_status()
+            results = resp.json().get("results") or []
+            if want_cc:
+                results = [r for r in results if r.get("country_code") == want_cc]
+            if not results:
+                return {"_error": "place_not_found"}
+            top = results[0]
+            lat, lon = float(top["latitude"]), float(top["longitude"])
+            name = top.get("name")
+            country = top.get("country_code")
+            if altitude_m is None and top.get("elevation") is not None:
+                altitude_m = float(top["elevation"])
+        resp = requests.get(
+            _OPEN_METEO_FORECAST,
+            params={
+                "latitude": lat,
+                "longitude": lon,
+                "current": (
+                    "temperature_2m,relative_humidity_2m,pressure_msl,"
+                    "wind_speed_10m,wind_direction_10m"
+                ),
+                "wind_speed_unit": "ms",
+            },
+            timeout=10,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as exc:
+        logging.getLogger(__name__).warning(
+            "Open-Meteo fetch failed (by=%s): %s",
+            "coords" if location is None else "name",
+            type(exc).__name__,
+        )
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+        return {
+            "_error": f"weather_error: {f'HTTP {status}' if status else type(exc).__name__}"
+        }
+
+    current = data.get("current") or {}
+    if altitude_m is None and data.get("elevation") is not None:
+        altitude_m = float(data["elevation"])
+    return _live_conditions(
+        location_name=name or location or "Unknown",
+        country=country,
+        lat=lat,
+        lon=lon,
+        altitude_m=float(altitude_m) if altitude_m is not None else 0.0,
+        temp_c=float(current.get("temperature_2m", 25.0)),
+        humidity=float(current.get("relative_humidity_2m", 50.0)),
+        pressure_hpa=float(current.get("pressure_msl", 1013.25)),
+        wind_ms=float(current.get("wind_speed_10m", 0.0)),
+        wind_deg=float(current.get("wind_direction_10m", 0.0)),
+        provider="open-meteo",
+    )
 
 
 @app.post(
@@ -3357,18 +3627,27 @@ def resolve_venue(req: VenueResolveRequest):
     )
     if owm is None or owm.get("_error"):
         err = (owm or {}).get("_error", "unknown")
-        if err == "no_api_key":
+        if err == "place_not_found":
             raise HTTPException(
-                503,
-                "Live weather unavailable: OPENWEATHERMAP_API_KEY is not configured on the server.",
+                404, "We couldn't find that place. Try a nearby city or pick a track."
             )
-        if err == "requests_not_installed":
+        if err.startswith(("owm_error", "weather_error")):
+            # The reason is key-free by construction (an HTTP status or an
+            # exception class name), never the upstream message.
+            reason = err.split(":", 1)[1].strip() if ":" in err else ""
             raise HTTPException(
-                503, "Live weather unavailable: `requests` package missing."
+                502,
+                "Live weather isn't available right now"
+                + (f" ({reason})" if reason else "")
+                + ". Pick a track or set the conditions by hand.",
             )
-        if err.startswith("owm_error"):
-            raise HTTPException(502, f"OpenWeatherMap upstream error: {err[11:]}")
-        raise HTTPException(422, f"Could not resolve location: {err}")
+        if err == "missing_location":
+            raise HTTPException(422, "Give a place name or coordinates.")
+        raise HTTPException(
+            503,
+            "Live weather isn't available right now. Pick a track or set the "
+            "conditions by hand.",
+        )
 
     return {
         "matched_venue_id": None,
@@ -3390,7 +3669,7 @@ def resolve_venue(req: VenueResolveRequest):
         "density_altitude_m": owm["density_altitude_m"],
         "power_correction_factor": owm["power_correction_factor"],
         "fetched_at": owm.get("fetched_at") or datetime.now(timezone.utc).isoformat(),
-        "source": "openweathermap",
+        "source": owm.get("provider", "openweathermap"),
     }
 
 
@@ -3614,7 +3893,7 @@ def surrogate_predict(
         trap_kmh = trap_val * 3.6 if trap_val < 200.0 else trap_val
 
     except Exception as exc:
-        raise HTTPException(500, f"Surrogate inference error: {exc}") from exc
+        raise _server_error("Surrogate inference error", exc) from exc
 
     return SurrogatePredictResponse(
         et_s=round(et_val, 4),
@@ -4323,7 +4602,7 @@ def job_chat(
             raise RuntimeError(redact_secrets(f"{type(e).__name__}: {e}")) from None
 
     try:
-        return _start_job("chat", run)
+        return _start_job("chat", run, owner=_job_owner(request))
     except HTTPException:
         if own_key and hasattr(llm, "close"):
             llm.close()  # the job never started: drop the visitor's key now
@@ -4358,10 +4637,10 @@ class OptimizeBuildRequest(ConditionsRequest):
             "which exceeds the price of every compatible part combined)"
         ),
     )
-    goal: str = Field(
+    goal: Literal["min_et", "max_trap"] = Field(
         "min_et", description='"min_et" (faster ET) or "max_trap" (higher trap)'
     )
-    profile: str = Field(
+    profile: Literal["all", "street_legal", "drag_prep", "full_race"] = Field(
         "all", description="all | street_legal | drag_prep | full_race"
     )
     rider_weight_kg: float = Field(75.0, ge=40, le=150)
@@ -4469,7 +4748,7 @@ def _optimize_impl(req: OptimizeBuildRequest, progress=None):
         logging.getLogger(__name__).error(
             "optimize_build failed: %s", exc, exc_info=True
         )
-        raise HTTPException(500, f"Optimization failed: {exc}") from exc
+        raise _server_error("Optimization failed", exc) from exc
 
     # Belt-and-braces: cost-per-tenth ratios can be non-finite (a part that
     # adds cost with ~0 ET gain); bare inf/nan is not JSON-compliant and 500s
@@ -4619,7 +4898,7 @@ def _autotune_impl(req: AutotuneRequest, progress=None):
         raise  # e.g. 404 for an unknown bike_id — don't relabel as 500
     except Exception as exc:
         logging.getLogger(__name__).error("autotune failed: %s", exc, exc_info=True)
-        raise HTTPException(500, f"Autotune failed: {exc}") from exc
+        raise _server_error("Autotune failed", exc) from exc
 
     out = result.to_dict()
     out["environment_source"] = env_source
@@ -4659,11 +4938,24 @@ def autotune_ecu_route(req: AutotuneRequest):
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-def _start_job(kind: str, runner) -> dict:
+def _job_owner(request: Request) -> str | None:
+    """Client identity for the per-client job cap, or None to skip that cap.
+
+    Without the site-proxy secret, every visitor who comes through the website
+    reaches us from one of Vercel's addresses, so a per-IP cap would throttle
+    them all together. The cap applies only once the proxy vouches for the
+    real visitor IP (motoquant.ratelimit.proxy_secret_configured).
+    """
+    from .ratelimit import client_ip, proxy_secret_configured
+
+    return client_ip(request) if proxy_secret_configured() else None
+
+
+def _start_job(kind: str, runner, owner: str | None = None) -> dict:
     from .jobs import JobCapacityError, create_job
 
     try:
-        job = create_job(kind, runner)
+        job = create_job(kind, runner, owner=owner)
     except JobCapacityError as exc:
         raise HTTPException(429, str(exc)) from exc
     return {"job_id": job.id, "kind": kind, "status": job.status}
@@ -4678,7 +4970,7 @@ def _start_job(kind: str, runner) -> dict:
         Depends(rate_limit("simulate", 30, 60.0)),
     ],
 )
-def job_simulate(req: SimulateRequest):
+def job_simulate(req: SimulateRequest, request: Request):
     """Start a full simulation as a background job (real progress)."""
     _precheck_refs(
         bike_ids=[req.bike_id],
@@ -4686,7 +4978,11 @@ def job_simulate(req: SimulateRequest):
         venue_id=req.venue_id,
         tire_ids=[req.front_tire_id, req.rear_tire_id],
     )
-    return _start_job("simulate", lambda progress: _simulate_impl(req, progress))
+    return _start_job(
+        "simulate",
+        lambda progress: _simulate_impl(req, progress),
+        owner=_job_owner(request),
+    )
 
 
 @app.post(
@@ -4697,7 +4993,7 @@ def job_simulate(req: SimulateRequest):
         Depends(rate_limit("topspeed", 30, 60.0)),
     ],
 )
-def job_topspeed(req: TopSpeedRequest):
+def job_topspeed(req: TopSpeedRequest, request: Request):
     """Start a top-speed run as a background job (real progress)."""
     _precheck_refs(
         bike_ids=[req.bike_id],
@@ -4705,7 +5001,11 @@ def job_topspeed(req: TopSpeedRequest):
         venue_id=req.venue_id,
         tire_ids=[req.front_tire_id, req.rear_tire_id],
     )
-    return _start_job("topspeed", lambda progress: _topspeed_impl(req, progress))
+    return _start_job(
+        "topspeed",
+        lambda progress: _topspeed_impl(req, progress),
+        owner=_job_owner(request),
+    )
 
 
 @app.post(
@@ -4713,12 +5013,16 @@ def job_topspeed(req: TopSpeedRequest):
     status_code=202,
     dependencies=[Depends(rate_limit("optimize", 6, 60.0))],
 )
-def job_optimize(req: OptimizeBuildRequest):
+def job_optimize(req: OptimizeBuildRequest, request: Request):
     """Start the build optimiser as a background job (real progress)."""
     _precheck_refs(
         bike_ids=[req.bike_id], bike_presets=[req.bike_preset], venue_id=req.venue_id
     )
-    return _start_job("optimize", lambda progress: _optimize_impl(req, progress))
+    return _start_job(
+        "optimize",
+        lambda progress: _optimize_impl(req, progress),
+        owner=_job_owner(request),
+    )
 
 
 @app.post(
@@ -4726,12 +5030,16 @@ def job_optimize(req: OptimizeBuildRequest):
     status_code=202,
     dependencies=[Depends(rate_limit("autotune", 6, 60.0))],
 )
-def job_autotune(req: AutotuneRequest):
+def job_autotune(req: AutotuneRequest, request: Request):
     """Start the ECU autotune as a background job (real progress)."""
     _precheck_refs(
         bike_ids=[req.bike_id], bike_presets=[req.bike_preset], venue_id=req.venue_id
     )
-    return _start_job("autotune", lambda progress: _autotune_impl(req, progress))
+    return _start_job(
+        "autotune",
+        lambda progress: _autotune_impl(req, progress),
+        owner=_job_owner(request),
+    )
 
 
 class OutlawRequest(ConditionsRequest):
@@ -4812,12 +5120,16 @@ def _outlaw_impl(req: OutlawRequest, progress=None) -> dict:
     # plus an autotune, so alternating the two can't double the CPU budget.
     dependencies=[Depends(rate_limit("optimize", 6, 60.0))],
 )
-def job_outlaw(req: OutlawRequest):
+def job_outlaw(req: OutlawRequest, request: Request):
     """Start the composed outlaw/open-class build as a background job."""
     _precheck_refs(
         bike_ids=[req.bike_id], bike_presets=[req.bike_preset], venue_id=req.venue_id
     )
-    return _start_job("outlaw", lambda progress: _outlaw_impl(req, progress))
+    return _start_job(
+        "outlaw",
+        lambda progress: _outlaw_impl(req, progress),
+        owner=_job_owner(request),
+    )
 
 
 @app.post(
@@ -4825,7 +5137,7 @@ def job_outlaw(req: OutlawRequest):
     status_code=202,
     dependencies=[Depends(_rl_compare)],
 )
-def job_compare(req: CompareRequest):
+def job_compare(req: CompareRequest, request: Request):
     """Start an A-vs-B comparison as a background job (real progress).
 
     Shares the ``compare`` rate-limit bucket with the sync
@@ -4842,7 +5154,11 @@ def job_compare(req: CompareRequest):
             req.b_rear_tire_id,
         ],
     )
-    return _start_job("compare", lambda progress: _compare_impl(req, progress))
+    return _start_job(
+        "compare",
+        lambda progress: _compare_impl(req, progress),
+        owner=_job_owner(request),
+    )
 
 
 @app.get("/api/jobs/{job_id}")

@@ -3,9 +3,11 @@ import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 import CodeComment from '../../../components/CodeComment';
 import ScoreboardDigits from '../../../components/ScoreboardDigits';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 export const metadata = {
-  title: "R15 V4 quarter-mile time: why your R15 won't hit 14s | MotoQuant",
+  title: "R15 V4 quarter-mile time: why your R15 won't hit 14s",
   description: "Factory power says a Yamaha R15 V3/V4 should run ~14.5s over the quarter mile. Real R15s run 15.5–17.6s at Indian drag strips. Where each second goes: gearing, clutch slip, traction and aero.",
   keywords: ['R15 V4 quarter mile time', 'R15 V3 quarter mile', 'Yamaha R15 quarter mile', 'R15 V4 drag time', 'R15 V4 0-100 india', 'Indian 150cc drag', 'R15 tuning', 'why is my R15 slow', 'r15 vs ns200 drag', 'r15 vs hornet 2.0'],
   alternates: { canonical: 'https://motoquant.in/blog/why-your-r15-wont-hit-14s' },
@@ -15,6 +17,7 @@ export const metadata = {
     url: 'https://motoquant.in/blog/why-your-r15-wont-hit-14s',
     type: 'article',
     publishedTime: '2026-04-24T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -157,9 +160,17 @@ function Prose({ content }) {
 export default function PostPage() {
   return (
     <div className="min-h-screen bg-black text-white">
+      <StructuredData
+        data={articleSchema({
+          title: "Why your R15 won't hit 14s (and what will help)",
+          description: "Factory power says a Yamaha R15 V3/V4 should run ~14.5s over the quarter mile. Real R15s run 15.5–17.6s at Indian drag strips. Where each second goes: gearing, clutch slip, traction and aero.",
+          slug: 'why-your-r15-wont-hit-14s',
+          datePublished: '2026-04-24',
+        })}
+      />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           <div className="flex flex-wrap gap-2 mb-6">
             {['small-cc', 'Yamaha R15', 'Indian bikes', 'tuning'].map(t => (
@@ -196,6 +207,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[151, 81]} />
 
         <div className="max-w-2xl mx-auto mt-16 glass rounded-xl p-6 border border-brand-orange/25 flex flex-col sm:flex-row items-center gap-4">
           <div className="flex-1">

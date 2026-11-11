@@ -1,448 +1,439 @@
-// Dynamic sitemap — Next.js 14 App Router convention.
-// Compiled into /sitemap.xml at build time.
+// Sitemap, compiled into /sitemap.xml at build time (App Router convention).
+//
+// Everything here is known at build time; nothing is fetched from the API:
+//   - bike pages: the ids in data/bike-ids.json that have a page
+//     (lib/stockCatalog.js), so a removed bike never stays listed;
+//   - blog posts: their own dateModified/datePublished (lib/blogDates.js);
+//   - every other page: CATALOG_DATE, the date the catalog and the pages were
+//     last regenerated. Bump it when they change; a build-time "now" told
+//     crawlers every page changed on every deploy.
 
 import { SITE_URL } from "./StructuredData";
-import { serverApiBase } from "../lib/api";
-// Committed snapshot of the real catalog IDs, used only when the live API is
-// unreachable at build time. REGENERATE with `python web/scripts/gen_bike_ids.py`
-// whenever the bike catalog changes — it belongs to the same ritual as
-// `python scripts/audit_headline_stats.py` (AGENTS.md rule 5), and
-// `--check` will tell you if it has gone stale.
-import BIKE_ID_MANIFEST from "../data/bike-ids.json";
+import { BIKE_PAGE_IDS } from "../lib/stockCatalog";
+import { BLOG_DATES } from "../lib/blogDates";
 
-// Same-origin via the production rewrite unless an env override is set.
-const API_BASE = serverApiBase(SITE_URL);
+const CATALOG_DATE = new Date("2026-11-10T00:00:00Z");
 
-export const revalidate = 86400;
-
-async function fetchAllBikes() {
-  try {
-    // limit=2000 is the simulator client's full-catalog convention (API caps
-    // le=5000). limit=500 silently dropped 41 of the 541 bike pages once the
-    // catalog outgrew it — always keep this ceiling far above the catalog.
-    const res = await fetch(`${API_BASE}/api/bikes?limit=2000`, {
-      next: { revalidate: 86400 },
-    });
-    if (!res.ok) throw new Error(`Sitemap bike fetch: ${res.status}`);
-    const data = await res.json();
-    return Array.isArray(data.bikes) ? data.bikes : [];
-  } catch (err) {
-    if (process.env.NODE_ENV !== "production") {
-      console.warn("[sitemap] API unreachable, using ID range fallback:", err);
-    }
-    // API-unreachable build-time fallback: the REAL (sparse) catalog ids
-    // from the committed manifest — see web/scripts/gen_bike_ids.py for why
-    // an id range can never work here.
-    return BIKE_ID_MANIFEST.ids.map((id) => ({ id }));
-  }
+function postDate(slug) {
+  const d = BLOG_DATES[slug];
+  if (!d) throw new Error(`sitemap: no date for blog post ${slug} (lib/blogDates.js)`);
+  return new Date(`${d.modified || d.published}T00:00:00Z`);
 }
 
-export default async function sitemap() {
-  const now = new Date();
-  const bikes = await fetchAllBikes();
+// The blog index changes whenever a post does.
+const LATEST_POST_DATE = new Date(
+  Math.max(...Object.keys(BLOG_DATES).map((slug) => postDate(slug).getTime())),
+);
 
+export default function sitemap() {
   const staticRoutes = [
     {
       url: `${SITE_URL}/`,
-      lastModified: now,
+      lastModified: CATALOG_DATE,
       changeFrequency: "weekly",
       priority: 1.0,
     },
     {
       url: `${SITE_URL}/simulator`,
-      lastModified: now,
+      lastModified: CATALOG_DATE,
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${SITE_URL}/optimize`,
-      lastModified: now,
+      lastModified: CATALOG_DATE,
       changeFrequency: "monthly",
       priority: 0.85,
     },
     {
       url: `${SITE_URL}/autotune`,
-      lastModified: now,
+      lastModified: CATALOG_DATE,
       changeFrequency: "monthly",
       priority: 0.85,
     },
     {
       url: `${SITE_URL}/bikes`,
-      lastModified: now,
+      lastModified: CATALOG_DATE,
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${SITE_URL}/leaderboard`,
-      lastModified: now,
+      lastModified: CATALOG_DATE,
       changeFrequency: "daily",
       priority: 0.8,
     },
     {
       url: `${SITE_URL}/terms`,
-      lastModified: now,
+      lastModified: CATALOG_DATE,
       changeFrequency: "yearly",
       priority: 0.3,
     },
     {
       url: `${SITE_URL}/privacy`,
-      lastModified: now,
+      lastModified: CATALOG_DATE,
       changeFrequency: "yearly",
       priority: 0.3,
     },
     {
       url: `${SITE_URL}/contact`,
-      lastModified: now,
+      lastModified: CATALOG_DATE,
       changeFrequency: "yearly",
       priority: 0.4,
     },
     {
       url: `${SITE_URL}/features`,
-      lastModified: now,
+      lastModified: CATALOG_DATE,
       changeFrequency: "monthly",
       priority: 0.85,
     },
     {
       url: `${SITE_URL}/about`,
-      lastModified: now,
+      lastModified: CATALOG_DATE,
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${SITE_URL}/blog`,
-      lastModified: now,
+      lastModified: LATEST_POST_DATE,
       changeFrequency: "weekly",
       priority: 0.8,
     },
     {
       url: `${SITE_URL}/blog/motoquant-2-0-is-open-source`,
-      lastModified: now,
+      lastModified: postDate("motoquant-2-0-is-open-source"),
       changeFrequency: "monthly",
       priority: 0.85,
     },
     {
       url: `${SITE_URL}/blog/best-mods-for-ktm-rc-390-budget-vs-cost-per-tenth`,
-      lastModified: now,
+      lastModified: postDate("best-mods-for-ktm-rc-390-budget-vs-cost-per-tenth"),
       changeFrequency: "monthly",
       priority: 0.86,
     },
     {
       url: `${SITE_URL}/blog/pulsar-n125-vs-raider-125-vs-glamour-125-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("pulsar-n125-vs-raider-125-vs-glamour-125-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.86,
     },
     {
       url: `${SITE_URL}/blog/kawasaki-ninja-zx-4r-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("kawasaki-ninja-zx-4r-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.85,
     },
     {
       url: `${SITE_URL}/blog/yamaha-xsr900-gp-vs-mt-09-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("yamaha-xsr900-gp-vs-mt-09-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.82,
     },
     {
       url: `${SITE_URL}/blog/cfmoto-800nk-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("cfmoto-800nk-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.82,
     },
     {
       url: `${SITE_URL}/blog/cfmoto-675sr-r-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("cfmoto-675sr-r-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.85,
     },
     {
       url: `${SITE_URL}/blog/bmw-f-900-gs-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("bmw-f-900-gs-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.85,
     },
     {
       url: `${SITE_URL}/blog/triumph-tiger-900-gt-pro-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("triumph-tiger-900-gt-pro-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.86,
     },
     {
       url: `${SITE_URL}/blog/royal-enfield-interceptor-650-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("royal-enfield-interceptor-650-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.86,
     },
     {
       url: `${SITE_URL}/blog/yamaha-rd350-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("yamaha-rd350-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.86,
     },
     {
       url: `${SITE_URL}/blog/yezdi-roadster-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("yezdi-roadster-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${SITE_URL}/blog/yamaha-mt-125-xsr125-platform-physics`,
-      lastModified: now,
+      lastModified: postDate("yamaha-mt-125-xsr125-platform-physics"),
       changeFrequency: "monthly",
       priority: 0.78,
     },
     {
       url: `${SITE_URL}/blog/how-a-2-stroke-expansion-chamber-actually-works`,
-      lastModified: now,
+      lastModified: postDate("how-a-2-stroke-expansion-chamber-actually-works"),
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${SITE_URL}/blog/hayabusa-vs-zx-14r-which-is-faster`,
-      lastModified: now,
+      lastModified: postDate("hayabusa-vs-zx-14r-which-is-faster"),
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${SITE_URL}/blog/hayabusa-quarter-mile-physics-what-limits-9-6-seconds`,
-      lastModified: now,
+      lastModified: postDate("hayabusa-quarter-mile-physics-what-limits-9-6-seconds"),
       changeFrequency: "monthly",
       priority: 0.88,
     },
     {
       url: `${SITE_URL}/blog/hero-xtreme-200s-4v-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("hero-xtreme-200s-4v-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.78,
     },
     {
       url: `${SITE_URL}/blog/husqvarna-svartpilen-250-vs-ktm-duke-250-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("husqvarna-svartpilen-250-vs-ktm-duke-250-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${SITE_URL}/blog/honda-cb125r-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("honda-cb125r-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.78,
     },
     {
       url: `${SITE_URL}/blog/honda-cbr150r-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("honda-cbr150r-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.82,
     },
     {
       url: `${SITE_URL}/blog/kawasaki-ninja-h2-sx-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("kawasaki-ninja-h2-sx-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.84,
     },
     {
       url: `${SITE_URL}/blog/yamaha-mt-15-v1-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("yamaha-mt-15-v1-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.82,
     },
     {
       url: `${SITE_URL}/blog/ktm-1390-super-duke-r-evo-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("ktm-1390-super-duke-r-evo-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.78,
     },
     {
       url: `${SITE_URL}/blog/ktm-duke-390-vs-rc-390-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("ktm-duke-390-vs-rc-390-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.84,
     },
     {
       url: `${SITE_URL}/blog/ktm-duke-390-quarter-mile-stock-to-11s`,
-      lastModified: now,
+      lastModified: postDate("ktm-duke-390-quarter-mile-stock-to-11s"),
       changeFrequency: "monthly",
       priority: 0.86,
     },
     {
       url: `${SITE_URL}/blog/pulsar-ns200-vs-apache-rtr-200-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("pulsar-ns200-vs-apache-rtr-200-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.82,
     },
     {
       url: `${SITE_URL}/blog/pulsar-ns400z-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("pulsar-ns400z-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.82,
     },
     {
       url: `${SITE_URL}/blog/re-continental-gt-650-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("re-continental-gt-650-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${SITE_URL}/blog/how-the-motoquant-physics-engine-works`,
-      lastModified: now,
+      lastModified: postDate("how-the-motoquant-physics-engine-works"),
       changeFrequency: "monthly",
       priority: 0.78,
     },
     {
       url: `${SITE_URL}/blog/the-physics-of-a-perfect-launch`,
-      lastModified: now,
+      lastModified: postDate("the-physics-of-a-perfect-launch"),
       changeFrequency: "monthly",
       priority: 0.75,
     },
     {
       url: `${SITE_URL}/blog/why-your-r15-wont-hit-14s`,
-      lastModified: now,
+      lastModified: postDate("why-your-r15-wont-hit-14s"),
       changeFrequency: "monthly",
       priority: 0.75,
     },
     {
       url: `${SITE_URL}/blog/how-to-tune-for-aamby-valley-in-november`,
-      lastModified: now,
+      lastModified: postDate("how-to-tune-for-aamby-valley-in-november"),
       changeFrequency: "monthly",
       priority: 0.75,
     },
     {
       url: `${SITE_URL}/blog/suzuki-gsx-s750-vs-ktm-890-duke-quarter-mile`,
-      lastModified: now,
+      lastModified: postDate("suzuki-gsx-s750-vs-ktm-890-duke-quarter-mile"),
       changeFrequency: "monthly",
       priority: 0.83,
     },
     {
       url: `${SITE_URL}/blog/ktm-890-duke-r-quarter-mile-india`,
-      lastModified: now,
+      lastModified: postDate("ktm-890-duke-r-quarter-mile-india"),
       changeFrequency: "monthly",
       priority: 0.86,
     },
     {
       url: `${SITE_URL}/blog/how-to-tune-for-mmrt-chennai`,
-      lastModified: now,
+      lastModified: postDate("how-to-tune-for-mmrt-chennai"),
       changeFrequency: "monthly",
       priority: 0.82,
     },
     {
       url: `${SITE_URL}/blog/kawasaki-ninja-400-vs-zx-4r-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("kawasaki-ninja-400-vs-zx-4r-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.84,
     },
     {
       url: `${SITE_URL}/blog/triumph-street-triple-765r-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("triumph-street-triple-765r-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.85,
     },
     {
       url: `${SITE_URL}/blog/kawasaki-z900rs-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("kawasaki-z900rs-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.84,
     },
     {
       url: `${SITE_URL}/blog/aprilia-tuono-660-factory-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("aprilia-tuono-660-factory-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.85,
     },
     {
       url: `${SITE_URL}/blog/aprilia-tuono-457-vs-rs-457-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("aprilia-tuono-457-vs-rs-457-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.85,
     },
     {
       url: `${SITE_URL}/blog/bajaj-dominar-400-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("bajaj-dominar-400-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.84,
     },
     {
       url: `${SITE_URL}/blog/harley-nightster-rh975-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("harley-nightster-rh975-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.85,
     },
     {
       url: `${SITE_URL}/blog/honda-hornet-2-0-vs-pulsar-ns200-quarter-mile`,
-      lastModified: now,
+      lastModified: postDate("honda-hornet-2-0-vs-pulsar-ns200-quarter-mile"),
       changeFrequency: "monthly",
       priority: 0.84,
     },
     {
       url: `${SITE_URL}/blog/royal-enfield-bullet-350-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("royal-enfield-bullet-350-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.86,
     },
     {
       url: `${SITE_URL}/blog/royal-enfield-hunter-350-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("royal-enfield-hunter-350-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.87,
     },
     {
       url: `${SITE_URL}/blog/indian-drag-strip-elevation-comparison`,
-      lastModified: now,
+      lastModified: postDate("indian-drag-strip-elevation-comparison"),
       changeFrequency: "monthly",
       priority: 0.88,
     },
     {
       url: `${SITE_URL}/blog/suzuki-gsx-r600-k8-quarter-mile-physics`,
-      lastModified: now,
+      lastModified: postDate("suzuki-gsx-r600-k8-quarter-mile-physics"),
       changeFrequency: "monthly",
       priority: 0.84,
     },
     {
       url: `${SITE_URL}/blog/600cc-supersport-launch-physics-engine-deceleration`,
-      lastModified: now,
+      lastModified: postDate("600cc-supersport-launch-physics-engine-deceleration"),
       changeFrequency: "monthly",
       priority: 0.86,
     },
     {
+      url: `${SITE_URL}/docs`,
+      lastModified: CATALOG_DATE,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
       url: `${SITE_URL}/docs/getting-started`,
-      lastModified: now,
+      lastModified: CATALOG_DATE,
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${SITE_URL}/docs/glossary`,
-      lastModified: now,
+      lastModified: CATALOG_DATE,
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${SITE_URL}/docs/physics`,
-      lastModified: now,
+      lastModified: CATALOG_DATE,
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${SITE_URL}/docs/validation`,
-      lastModified: now,
+      lastModified: CATALOG_DATE,
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${SITE_URL}/whitepaper`,
-      lastModified: now,
+      lastModified: CATALOG_DATE,
       changeFrequency: "monthly",
       priority: 0.85,
     },
     {
       url: `${SITE_URL}/validation`,
-      lastModified: now,
+      lastModified: CATALOG_DATE,
       changeFrequency: "monthly",
       priority: 0.85,
     },
   ];
 
-  const bikeRoutes = bikes.map((bike) => ({
-    url: `${SITE_URL}/bikes/${bike.id}`,
-    lastModified: now,
+  const bikeRoutes = BIKE_PAGE_IDS.map((id) => ({
+    url: `${SITE_URL}/bikes/${id}`,
+    lastModified: CATALOG_DATE,
     changeFrequency: "monthly",
     priority: 0.6,
   }));

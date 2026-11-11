@@ -13,7 +13,7 @@ import PageHero from "../../components/PageHero";
 const REPO_URL = "https://github.com/toto171/MotoQuant.in";
 
 export const metadata = {
-  title: "Terms of Service | MotoQuant",
+  title: "Terms of Service",
   alternates: { canonical: "https://motoquant.in/terms" },
 };
 

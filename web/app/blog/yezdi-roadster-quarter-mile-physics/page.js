@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'yezdi-roadster-quarter-mile-physics';
 const TITLE = 'Yezdi Roadster quarter-mile physics: 334cc neo-retro at the strip';
@@ -9,7 +10,7 @@ const DESCRIPTION =
   'MotoQuant simulates the Yezdi Roadster 334 at 15.42s with a 138 km/h trap at Aamby Valley: 28.6 hp, 175 kg dry, the BG6 platform, and a ₹6,500 sprocket swap worth 0.18 s.';
 
 export const metadata = {
-  title: 'Yezdi Roadster quarter-mile physics | MotoQuant',
+  title: 'Yezdi Roadster quarter-mile physics',
   description: DESCRIPTION,
   keywords: [
     'yezdi roadster quarter mile',
@@ -30,6 +31,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-18T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -286,7 +288,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -308,6 +310,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[177]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

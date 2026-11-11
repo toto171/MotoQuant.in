@@ -1,7 +1,8 @@
 import Link from "next/link";
 import SiteNav from "../../../components/SiteNav";
 import SiteFooter from "../../../components/SiteFooter";
-import StructuredData, { articleSchema } from "../../StructuredData";
+import StructuredData, { articleSchema, OG_IMAGE } from "../../StructuredData";
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = "triumph-tiger-900-gt-pro-quarter-mile-physics";
 const TITLE =
@@ -10,7 +11,7 @@ const DESCRIPTION =
   "MotoQuant sims the 2024 Triumph Tiger 900 GT Pro at 12.081s with a 196.5 km/h trap: a dead heat on ET with the BMW F 900 GS, and 3 km/h faster at the trap. Indian price and mods.";
 
 export const metadata = {
-  title: "Triumph Tiger 900 GT Pro quarter-mile physics | MotoQuant",
+  title: "Triumph Tiger 900 GT Pro quarter-mile physics",
   description: DESCRIPTION,
   keywords: [
     "triumph tiger 900 gt pro quarter mile",
@@ -35,6 +36,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: "article",
     publishedTime: "2026-05-31T00:00:00Z",
+    images: [OG_IMAGE],
   },
 };
 
@@ -357,7 +359,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -386,6 +388,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[4590]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

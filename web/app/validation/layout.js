@@ -2,11 +2,12 @@
 // component (AccuracyExplorer), so metadata is declared here on the server
 // layout — same pattern as /features and the other tool routes.
 
-import StructuredData, { SITE_URL } from '../StructuredData';
+import StructuredData, { SITE_URL, OG_IMAGE } from '../StructuredData';
 
-const TITLE = 'Accuracy: Real vs Simulated Quarter-Mile ET (263 Matched Benchmarks)';
+const TITLE =
+  'Accuracy: simulated vs 250 published times';
 const DESCRIPTION =
-  "MotoQuant's accuracy report: every simulated quarter-mile ET plotted against its published timeslip. 250 published tests weighted by source quality (263 matched), weighted mean absolute error 0.25s, bias +0.023s, top-10 cleanest ±0.006s, 130/263 within 0.20s. Interactive scatter, residual histogram and per-cluster breakdown against Cycle World, Sport Rider, MCN and MotoStatz data. Reference bikes, held to four decimals by CI: K5 10.0436s, R1 10.1092s, Hayabusa 10.1100s.";
+  'Every simulated quarter-mile time against its published timeslip: 250 published tests, 263 matched, weighted mean absolute error 0.25s, 130/263 within 0.20 s.';
 
 export const metadata = {
   title: TITLE,
@@ -29,19 +30,13 @@ export const metadata = {
     description: DESCRIPTION,
     url: `${SITE_URL}/validation`,
     type: 'website',
-    images: [
-      {
-        url: `${SITE_URL}/og-image.png`,
-        width: 1200,
-        height: 630,
-        alt: TITLE,
-      },
-    ],
+    images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
+    images: [OG_IMAGE],
   },
   robots: { index: true, follow: true },
 };

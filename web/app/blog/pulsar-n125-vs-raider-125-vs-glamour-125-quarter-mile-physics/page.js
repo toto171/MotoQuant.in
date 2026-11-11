@@ -1,7 +1,8 @@
 import Link from "next/link";
 import SiteNav from "../../../components/SiteNav";
 import SiteFooter from "../../../components/SiteFooter";
-import StructuredData, { articleSchema } from "../../StructuredData";
+import StructuredData, { articleSchema, OG_IMAGE } from "../../StructuredData";
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = "pulsar-n125-vs-raider-125-vs-glamour-125-quarter-mile-physics";
 const TITLE = "Pulsar N125 vs Raider 125 vs Glamour 125: 125cc drag";
@@ -9,7 +10,7 @@ const DESCRIPTION =
   "The fastest 125cc commuter in India, by simulation: Raider 125 at 20.63s, Pulsar N125 at 20.70s, Glamour 125 at 21.28s. Plus the ₹450 sprocket that buys the cheapest tenth.";
 
 export const metadata = {
-  title: "Pulsar N125 vs Raider 125 vs Glamour 125 | MotoQuant",
+  title: "Pulsar N125 vs Raider 125 vs Glamour 125",
   description: DESCRIPTION,
   keywords: [
     "pulsar n125 quarter mile",
@@ -36,6 +37,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: "article",
     publishedTime: "2026-05-31T00:00:00Z",
+    images: [OG_IMAGE],
   },
 };
 
@@ -324,7 +326,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           <div className="flex flex-wrap gap-2 mb-6">
             {[
@@ -353,6 +355,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[753, 758, 756, 745]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

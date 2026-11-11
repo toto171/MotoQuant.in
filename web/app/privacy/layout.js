@@ -2,9 +2,9 @@
 // The page is "use client" so it cannot export `metadata` itself; App Router
 // pulls it from the nearest server layout instead.
 
-import StructuredData, { SITE_URL } from '../StructuredData';
+import StructuredData, { SITE_URL, OG_IMAGE } from '../StructuredData';
 
-const TITLE = "Privacy policy | MotoQuant";
+const TITLE = "Privacy policy";
 const DESCRIPTION = "How MotoQuant handles your data. We comply with the DPDP Act and never sell your data.";
 
 export const metadata = {
@@ -17,17 +17,13 @@ export const metadata = {
     description: DESCRIPTION,
     url: `${SITE_URL}/privacy`,
     type: 'website',
-    images: [{
-      url: `${SITE_URL}/og-image.png`,
-      width: 1200,
-      height: 630,
-      alt: TITLE,
-    }],
+    images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
+    images: [OG_IMAGE],
   },
   robots: { index: true, follow: true },
 };

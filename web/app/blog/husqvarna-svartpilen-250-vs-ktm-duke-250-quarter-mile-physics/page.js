@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'husqvarna-svartpilen-250-vs-ktm-duke-250-quarter-mile-physics';
 const TITLE = 'Husqvarna Svartpilen 250 vs KTM Duke 250: quarter-mile physics';
@@ -9,7 +10,7 @@ const DESCRIPTION =
   'MotoQuant simulates the Husqvarna Svartpilen 250 at 14.77s / 149 km/h and the KTM Duke 250 at 15.08s / 143 km/h. Same engine, same Bajaj Chakan plant; here is why the Husky is 0.31s quicker at the strip.';
 
 export const metadata = {
-  title: 'Husqvarna Svartpilen 250 vs KTM Duke 250 quarter mile | MotoQuant',
+  title: 'Husqvarna Svartpilen 250 vs KTM Duke 250 quarter mile',
   description: DESCRIPTION,
   keywords: [
     'husqvarna svartpilen 250 quarter mile',
@@ -32,6 +33,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-25T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -279,7 +281,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -301,6 +303,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[723]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

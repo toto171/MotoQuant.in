@@ -35,7 +35,8 @@ function BootSkeleton({ progress = null }) {
           <div className="skeleton h-12 w-full" />
           <div className="skeleton h-11 w-3/4" />
         </div>
-        <div className="card card-pad space-y-4 lg:row-span-2">
+        {/* Same reserved height as the real result card (ResultCard.js). */}
+        <div className="card card-pad space-y-4 lg:row-span-2 min-h-[40rem] lg:min-h-[36rem]">
           <div className="skeleton h-6 w-1/3" />
           <div className="skeleton h-16 w-56" />
           <div className="skeleton h-4 w-full" />

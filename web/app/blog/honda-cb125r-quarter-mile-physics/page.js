@@ -1,15 +1,16 @@
 import Link from "next/link";
 import SiteNav from "../../../components/SiteNav";
 import SiteFooter from "../../../components/SiteFooter";
-import StructuredData, { articleSchema } from "../../StructuredData";
+import StructuredData, { articleSchema, OG_IMAGE } from "../../StructuredData";
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = "honda-cb125r-quarter-mile-physics";
 const TITLE = "Honda CB125R quarter-mile physics: 14.7hp Neo Sports Café";
 const DESCRIPTION =
-  "MotoQuant simulates the Honda CB125R at 18.61s with a 122 km/h trap, the fastest stock 125cc commuter in the entry cluster. Why the JC91 single out-traps a KTM 125 Duke by 4.4 km/h, what its ₹1.4 lakh premium over an R15 V4 buys, and the four cheapest tenths on the bike.";
+  'MotoQuant simulates the Honda CB125R at 18.61s with a 122 km/h trap. Why the JC91 single out-traps a KTM 125 Duke by 4.4 km/h, and its cheapest tenths.';
 
 export const metadata = {
-  title: "Honda CB125R quarter-mile physics | MotoQuant",
+  title: "Honda CB125R quarter-mile physics",
   description: DESCRIPTION,
   keywords: [
     "honda cb125r quarter mile",
@@ -30,6 +31,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: "article",
     publishedTime: "2026-05-25T00:00:00Z",
+    images: [OG_IMAGE],
   },
 };
 
@@ -315,7 +317,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -339,6 +341,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[724]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

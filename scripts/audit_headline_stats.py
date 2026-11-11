@@ -207,7 +207,13 @@ _NUM = r"([+\u2212-]?\d?\.\d{2,4})"
 ACCURACY_PATTERNS = [
     # matched benchmark count
     (r"\b(\d{3}) matched\b", "acc_matched", "matched benchmark count"),
-    (r"\((\d{3}) (?:Matched )?Benchmarks\)", "acc_matched", "matched count (title)"),
+    # The /validation title quotes the PUBLISHED benchmark count (250), not
+    # the bike-to-benchmark match count (263).
+    (
+        r"simulated vs (\d{3}) published times",
+        "benchmarks",
+        "published benchmark count (validation title)",
+    ),
     (
         r"\bof (?:the )?(\d{3}) (?:matched|land|benchmarks fall)",
         "acc_matched",
@@ -557,24 +563,25 @@ PATTERNS = [
         "benchmarks",
         "landing-page benchmarks count",
     ),
-    # Bikes catalog page metadata
+    # Bikes catalog page metadata (moved from bikes/layout.js to the server
+    # page.js in November 2026, so /bikes/[id] no longer inherits it)
     (
-        "web/app/bikes/layout.js",
-        r"(\d{2,4})\s*(?:Bikes?|bikes?)\b",
-        "all_known_bikes",
-        "bikes-page metadata",
-    ),
-    (
-        "web/app/bikes/layout.js",
+        "web/app/bikes/page.js",
         r"(\d{2,4})\s*motorcycles?\b",
         "all_known_bikes",
         "bikes-page metadata description",
     ),
     (
-        "web/app/bikes/layout.js",
+        "web/app/bikes/page.js",
         r"numberOfItems:\s*(\d{2,4})",
         "all_known_bikes",
         "bikes-page schema numberOfItems",
+    ),
+    (
+        "web/app/bikes/BikesCatalogClient.js",
+        r"(\d{2,4}) motorcycles you can simulate",
+        "all_known_bikes",
+        "bikes-page header lede",
     ),
     (
         # Brackets escaped: Path.glob reads a bare "[id]" as a character
@@ -928,6 +935,19 @@ PATTERNS = [
         r"(\d{2,4})-tire fitment",
         "tires_db",
         "blog 'N-tire fitment library'",
+    ),
+    # llms.txt (the plain-text site summary for AI crawlers, November 2026)
+    (
+        "web/public/llms.txt",
+        r"(\d{2,4}) motorcycles",
+        "all_known_bikes",
+        "llms.txt bikes count",
+    ),
+    (
+        "web/public/llms.txt",
+        r"from (\d{2,3}) published quarter-mile tests",
+        "benchmarks",
+        "llms.txt published benchmark count",
     ),
     # README
     ("README.md", r"(\d{2,4})\s*bikes?,", "all_known_bikes", "README bikes count"),

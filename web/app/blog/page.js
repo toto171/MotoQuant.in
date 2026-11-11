@@ -2,14 +2,17 @@ import Link from "next/link";
 import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
 import PageHero from "../../components/PageHero";
+import StructuredData, { OG_IMAGE, breadcrumbSchema } from "../StructuredData";
+
+const TITLE = "Drag racing blog: physics and Indian bikes";
+const DESCRIPTION =
+  "Quarter-mile breakdowns bike by bike, mods ranked by cost per tenth, and tuning for Indian drag strips, all worked out in the MotoQuant simulator.";
 
 export const metadata = {
-  title:
-    "MotoQuant blog: Motorcycle drag racing physics & Indian bike breakdowns",
+  title: TITLE,
   // ≤160 chars; the per-post pages carry their own long-tail metadata —
   // stuffing the index was a keyword-cannibalisation risk, not a win.
-  description:
-    "Quarter-mile breakdowns bike by bike, mods ranked by cost per tenth, and tuning for Indian drag strips, all worked out in the MotoQuant simulator.",
+  description: DESCRIPTION,
   keywords: [
     "motorcycle drag racing blog",
     "motorcycle quarter mile times india",
@@ -26,6 +29,13 @@ export const metadata = {
     "motorcycle physics blog india",
   ],
   alternates: { canonical: "https://motoquant.in/blog" },
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: "https://motoquant.in/blog",
+    type: "website",
+    images: [OG_IMAGE],
+  },
 };
 
 const POSTS = [
@@ -703,6 +713,9 @@ export default function BlogIndexPage() {
 
   return (
     <div className="min-h-screen bg-asphalt-0 text-white">
+      {/* Breadcrumb for the index only (it used to sit in blog/layout.js,
+          which every post inherited). */}
+      <StructuredData data={breadcrumbSchema([["Blog", "/blog"]])} />
       <SiteNav />
 
       <PageHero

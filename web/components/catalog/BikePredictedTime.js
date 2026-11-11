@@ -13,6 +13,10 @@
  * Conditions (a stock bike, 75 kg rider, the server's default air) are
  * worded by ConditionsLine — from the server's echoed `environment` block
  * when the server answered, or from what the instant estimate assumes.
+ *
+ * `initial` ({ et, trap, env, riderKg }) is a stored full-simulation result (the stock
+ * leaderboard, passed down by the server page). When given, the card renders
+ * it in the server HTML and computes nothing: no skeleton, no network.
  */
 
 import { useEffect, useState } from 'react';
@@ -26,11 +30,15 @@ import { predictQuick } from '../../lib/surrogate';
 
 const RIDER_KG = 75;
 
-export default function BikePredictedTime({ bike }) {
-  const [est, setEst] = useState(null); // {et, trap, instant}
-  const [done, setDone] = useState(false);
+export default function BikePredictedTime({ bike, initial = null }) {
+  const stored =
+    initial && Number.isFinite(initial.et) ? { ...initial, instant: false, exact: true } : null;
+  const [est, setEst] = useState(stored); // {et, trap, instant, exact?, env?}
+  const [done, setDone] = useState(!!stored);
+  const hasStored = !!stored;
 
   useEffect(() => {
+    if (hasStored) return undefined;
     let cancelled = false;
     const ctrl = new AbortController();
     (async () => {
@@ -68,27 +76,28 @@ export default function BikePredictedTime({ bike }) {
       cancelled = true;
       ctrl.abort();
     };
-  }, [bike.id]);
+  }, [bike.id, hasStored]);
 
   const name = [bike.manufacturer, bike.model].filter(Boolean).join(' ');
 
   return (
     <section className="card card-pad" aria-labelledby="predicted-time-heading">
       <h2 id="predicted-time-heading" className="text-sm font-medium text-white/70">
-        Predicted <Term k="et">quarter-mile time</Term>
+        {est?.exact ? 'Simulated' : 'Predicted'} <Term k="et">quarter-mile time</Term>
       </h2>
       <div className="mt-2 min-h-[4.5rem]" aria-live="polite">
         {est ? (
           <>
             <p className="font-display text-5xl font-bold tabular-nums text-accent md:text-6xl">
-              {est.et.toFixed(2)} <span className="text-2xl text-white/70 md:text-3xl">s</span>
+              {est.et.toFixed(est.exact ? 3 : 2)} <span className="text-2xl text-white/70 md:text-3xl">s</span>
             </p>
             <ResultSentence
               className="mt-3"
               bikeName={name}
-              riderKg={RIDER_KG}
+              riderKg={est.riderKg ?? RIDER_KG}
               et={est.et}
               trapKmh={est.trap}
+              exact={!!est.exact}
             />
             <p className="mt-2 text-sm text-white/60">
               {est.instant && (

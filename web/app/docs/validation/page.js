@@ -1,9 +1,18 @@
 import Link from 'next/link';
+import { OG_IMAGE } from '../../StructuredData';
 
 export const metadata = {
   title: 'Validation data',
-  description: 'MotoQuant accuracy report: 250 published tests (263 matched) from Cycle World, Sport Rider, MotoStatz, MCN and BikeWale. Weighted bias +0.023s, weighted mean absolute error 0.25s, top-10 mean error ±0.006s. Per-cluster bias across the cylinder-aware 12-cluster taxonomy, and the open gaps for small bikes and two-strokes. Reference bikes, held to four decimals by CI: K5 10.0436s, R1 10.1092s, Hayabusa 10.1100s.',
+  description: '250 published tests (263 matched). Weighted bias +0.023s, weighted mean absolute error 0.25s, top-10 mean error ±0.006s, and where small bikes still miss.',
   alternates: { canonical: 'https://motoquant.in/docs/validation' },
+  openGraph: {
+    title: 'Validation data',
+    description:
+      '250 published tests (263 matched). Weighted bias +0.023s, weighted mean absolute error 0.25s, top-10 mean error ±0.006s, and where small bikes still miss.',
+    url: 'https://motoquant.in/docs/validation',
+    type: 'article',
+    images: [OG_IMAGE],
+  },
   keywords: [
     'motorcycle simulator accuracy',
     'drag simulator validation india',

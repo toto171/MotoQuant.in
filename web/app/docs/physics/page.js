@@ -1,9 +1,18 @@
 import Link from 'next/link';
+import { OG_IMAGE } from '../../StructuredData';
 
 export const metadata = {
   title: 'Physics whitepaper',
-  description: 'The first-principles physics behind the MotoQuant quarter-mile simulator: 15 sub-models, RK4 integrator at 1 ms step, a rear-tyre grip model with load sensitivity and thermal evolution, Willans friction, 2T expansion-chamber Gaussian curve, weight transfer and weighted-benchmark validation.',
+  description: 'The physics behind the MotoQuant quarter-mile simulator: 15 sub-models, an RK4 integrator at a 1 ms step, rear-tyre grip with load and heat, weight transfer.',
   alternates: { canonical: 'https://motoquant.in/docs/physics' },
+  openGraph: {
+    title: 'Physics whitepaper',
+    description:
+      'The physics behind the MotoQuant quarter-mile simulator: 15 sub-models, an RK4 integrator at a 1 ms step, rear-tyre grip with load and heat, weight transfer.',
+    url: 'https://motoquant.in/docs/physics',
+    type: 'article',
+    images: [OG_IMAGE],
+  },
   keywords: [
     'rk4 motorcycle simulator',
     'first principles motorcycle drag simulation',

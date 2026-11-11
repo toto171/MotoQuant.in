@@ -1,16 +1,17 @@
 import Link from "next/link";
 import SiteNav from "../../../components/SiteNav";
 import SiteFooter from "../../../components/SiteFooter";
-import StructuredData, { articleSchema } from "../../StructuredData";
+import StructuredData, { articleSchema, OG_IMAGE } from "../../StructuredData";
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = "honda-cbr150r-quarter-mile-physics";
 const TITLE =
   "Honda CBR150R quarter-mile physics: 17hp SE Asia sport single";
 const DESCRIPTION =
-  "MotoQuant simulates the Indonesian Honda CBR150R at 18.42s and 130.5 km/h trap, quicker than a stock R15 V4 by 0.08s with 1hp less. Why the 136 kg dry mass and 0.62 Cd beat the heavier R15 V4, how the CBR150R compares with the Malaysian RS150R underbone, and four mods under ₹15,000 that make a real difference for Indian grey-market owners.";
+  'MotoQuant simulates the Indonesian Honda CBR150R at 18.42s and 130.5 km/h trap, quicker than a stock R15 V4 by 0.08s with 1hp less. Four mods under ₹15,000.';
 
 export const metadata = {
-  title: "Honda CBR150R quarter-mile physics | MotoQuant",
+  title: "Honda CBR150R quarter-mile physics",
   description: DESCRIPTION,
   keywords: [
     "honda cbr150r quarter mile",
@@ -31,6 +32,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: "article",
     publishedTime: "2026-05-26T00:00:00Z",
+    images: [OG_IMAGE],
   },
 };
 
@@ -303,7 +305,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -327,6 +329,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[261]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

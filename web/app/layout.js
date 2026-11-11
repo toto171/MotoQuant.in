@@ -5,8 +5,8 @@ import StructuredData, {
   organizationSchema,
   websiteSchema,
   softwareApplicationSchema,
-  faqSchema,
   SITE_URL,
+  OG_IMAGE,
 } from './StructuredData';
 
 // Fonts are self-hosted (web/app/fonts, SIL Open Font License) so the build
@@ -64,58 +64,36 @@ export const viewport = {
 // earned through page metadata, structured data, content freshness, and
 // internal linking. This file handles the first three.
 
+// Site-wide fallbacks. The home page (app/page.js) sets its own title,
+// canonical and Open Graph block; every other indexable page sets its own
+// canonical. There is deliberately NO canonical here: a root canonical of '/'
+// is inherited by every page that forgets one and tells search engines that
+// page is a copy of the home page.
 const DESCRIPTION =
-  'Free motorcycle quarter-mile drag racing simulator that models the physics instead of using a power-to-weight formula. Predict ET, trap speed and 60-ft split for 534 bikes, including Hayabusa, ZX-14R, R15 V4, KTM Duke 390 and Pulsar NS200. Compare builds, calculate parts ROI in INR and overlay Dragy runs on the sim. Built for Indian drag racers at Aamby Valley, MMRT, BIC and Kari.';
+  "Free quarter-mile simulator for 534 motorcycles. See your bike's time and finish-line speed, then find the parts worth buying, priced in rupees.";
 
 export const metadata = {
   title: {
-    default:
-      'MotoQuant: Motorcycle Quarter-Mile Drag Racing Simulator | ET Predictor & Build Optimizer',
+    default: 'MotoQuant: motorcycle quarter-mile simulator',
     template: '%s · MotoQuant',
   },
   description: DESCRIPTION,
   metadataBase: new URL(SITE_URL),
   applicationName: 'MotoQuant',
   manifest: '/site.webmanifest',
-  alternates: {
-    canonical: '/',
-    languages: {
-      'en-IN': '/',
-      'en-US': '/',
-      'x-default': '/',
-    },
-  },
   openGraph: {
-    title:
-      'MotoQuant: Motorcycle Quarter-Mile Drag Racing Simulator',
+    title: 'MotoQuant: motorcycle quarter-mile simulator',
     description: DESCRIPTION,
-    url: SITE_URL,
     siteName: 'MotoQuant',
-    images: [
-      {
-        url: `${SITE_URL}/og-image.png`,
-        secureUrl: `${SITE_URL}/og-image.png`,
-        width: 1200,
-        height: 630,
-        alt: 'MotoQuant: quarter-mile drag racing simulator covering 534 motorcycles, 546 parts, 254 tires, 20 venues',
-        type: 'image/png',
-      },
-    ],
+    images: [OG_IMAGE],
     locale: 'en_IN',
-    alternateLocale: ['en_US', 'en_GB', 'en_AU'],
     type: 'website',
   },
+  // No title, description or images here on purpose: Next.js then fills the
+  // Twitter card from each page's own openGraph block. A root title would be
+  // inherited by every page that sets openGraph but not twitter.
   twitter: {
     card: 'summary_large_image',
-    title:
-      'MotoQuant: Motorcycle Quarter-Mile Drag Racing Simulator',
-    description: DESCRIPTION,
-    images: [
-      {
-        url: `${SITE_URL}/og-image.png`,
-        alt: 'MotoQuant: quarter-mile drag racing simulator covering 534 motorcycles, 546 parts, 254 tires, 20 venues',
-      },
-    ],
     site: '@motoquant',
     creator: '@motoquant',
   },
@@ -251,7 +229,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html
-      lang="en"
+      lang="en-IN"
       suppressHydrationWarning
       className={[inter.variable, spaceGrotesk.variable, jetbrainsMono.variable].join(' ')}
     >
@@ -277,11 +255,12 @@ export default function RootLayout({ children }) {
         </a>
         {/* Three site-wide JSON-LD blocks. Keeping them in <body> (rather than
             <head>) is equivalent per the schema.org + Google guidance, and
-            lets us render them as React children without <Script> wrappers. */}
+            lets us render them as React children without <Script> wrappers.
+            The FAQPage block lives on the home page, the only page that
+            shows the FAQ. */}
         <StructuredData data={organizationSchema()} />
         <StructuredData data={websiteSchema()} />
         <StructuredData data={softwareApplicationSchema()} />
-        <StructuredData data={faqSchema()} />
         {children}
       </body>
     </html>

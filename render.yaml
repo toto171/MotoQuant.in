@@ -1,24 +1,21 @@
-# Render Blueprint for the MotoQuant API (free, open source — Apache-2.0)
+# Render Blueprint for the MotoQuant API (free, open source, Apache-2.0)
 # https://render.com/docs/blueprint-spec
 #
-# Free-tier deployment plan (May 18, 2026):
-#   - Single web service, Docker runtime, Free plan ($0/mo)
-#   - Reuses the existing root-level Dockerfile (same one Railway uses today)
-#   - Free tier sleeps after 15 min of no inbound traffic and cold-starts in
-#     ~30-60s on next request. A GitHub Actions cron at
-#     `.github/workflows/keepalive.yml` pings /api/health every 14 minutes to
-#     keep the service warm during business hours.
-#   - Migration is a soft cutover: Render comes up first, /api/health verified,
-#     then `vercel.json` rewrite is flipped from the Railway URL to the Render
-#     URL. Railway stays running 48h as a fallback before being suspended.
+# Use this to host your own copy: Render dashboard -> New -> Blueprint ->
+# connect your fork. Render builds the root Dockerfile on the free plan.
+# Then check https://<service>.onrender.com/api/health and, if you want your
+# own address, add a custom domain (Settings -> Custom Domains) and the CNAME
+# record it asks for. docs/SELF_HOSTING.md covers the rest.
 #
-# To deploy:
-#   1. Push this file to GitHub on `main`.
-#   2. https://dashboard.render.com -> New -> Blueprint -> connect repo.
-#   3. Render reads render.yaml, prompts approval, builds from Dockerfile.
-#   4. Check https://<service>.onrender.com/api/health, then add the custom
-#      domain api.motoquant.in (Settings -> Custom Domains) and the CNAME it asks for.
-#   5. See docs/RENDER_MIGRATION.md for the rest of the cutover.
+# The public instance (api.motoquant.in) was created with these settings but
+# is not linked to this file, so editing it does not change production.
+# Change the service in the Render dashboard too.
+#
+# The free plan sleeps after 15 minutes without traffic and takes about
+# 30-60 s to wake. Two things keep it awake: the in-app self-ping
+# (motoquant/keepwarm.py, on automatically on Render) and the Vercel cron
+# that calls /api/wake (web/vercel.json). The GitHub Actions keep-alive
+# (.github/workflows/keepalive.yml) is paused.
 
 services:
   - type: web

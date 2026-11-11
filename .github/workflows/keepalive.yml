@@ -9,9 +9,9 @@ permissions:
 # tank the live simulator widget on motoquant.in for any visitor who hits
 # the page after a quiet period.
 #
-# This workflow pings /api/health every 14 minutes (one minute under the
-# sleep threshold) which counts as inbound traffic and keeps the dyno warm.
-# Cost: ~3000 runs/mo * ~6s each ≈ 5 GitHub Actions hours/mo, well under
+# When its schedule is on, this workflow pings /api/health every 14 minutes
+# (one minute under the sleep threshold). The schedule is paused (see the
+# note under `on:`); manual runs still work. Cost when on: ~3000 runs/mo * ~6s each ≈ 5 GitHub Actions hours/mo, well under
 # the 2000-minute free tier quota for public repos (and 2000 min for private
 # accounts too).
 #
@@ -33,7 +33,7 @@ on:
   # consumer — each throttled run can burn up to ~11 billed minutes in the
   # 4x150s cold-start retry loop (~77 scheduled runs/day). The other two
   # keep-alive layers cost zero Actions minutes and stay active:
-  #   1. Vercel cron -> /api/wake (vercel.json, 3x daily)
+  #   1. Vercel cron -> /api/wake (web/vercel.json, 6x daily)
   #   2. in-app self-ping (motoquant/keepwarm.py) holding the day once woken
   # Re-enable by uncommenting the schedule block below if ever needed —
   # moot after the planned move off Render's free tier to Oracle.

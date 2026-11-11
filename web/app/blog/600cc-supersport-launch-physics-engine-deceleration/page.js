@@ -1,7 +1,7 @@
 import Link from "next/link";
 import SiteNav from "../../../components/SiteNav";
 import SiteFooter from "../../../components/SiteFooter";
-import StructuredData, { articleSchema } from "../../StructuredData";
+import StructuredData, { articleSchema, OG_IMAGE } from "../../StructuredData";
 
 const SLUG = "600cc-supersport-launch-physics-engine-deceleration";
 const TITLE = "Why 600cc supersports were running 200ms slow in our sim";
@@ -9,7 +9,7 @@ const DESCRIPTION =
   "MotoQuant's 600cc inline-four sims ran with a +0.207s slow bias against Sport Rider and MotoStatz benchmarks. The fix was one number: max engine deceleration, raised from 150 to 600 rad per second squared.";
 
 export const metadata = {
-  title: "Why 600cc supersports were running 200ms slow in our sim | MotoQuant",
+  title: 'Why 600cc supersports ran 200 ms slow in our sim',
   description: DESCRIPTION,
   keywords: [
     "600cc supersport quarter mile",
@@ -30,6 +30,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: "article",
     publishedTime: "2026-05-30T00:00:00Z",
+    images: [OG_IMAGE],
   },
 };
 
@@ -433,7 +434,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">

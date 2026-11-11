@@ -217,3 +217,17 @@ CLI subcommands, CODEOWNERS patterns, packaging metadata, the licence and the
 retired product wording across the live docs. Run it when you rename a
 target, a subcommand or a file. When you add a doc that others will rely on,
 add it to the test's list.
+
+### T26: No Python callback may run on the shared SQLite connection
+The API shares one SQLite connection across its request and job threads. An
+authorizer callback on it deadlocked the server under a handful of concurrent
+requests: SQLite calls the callback while holding the connection mutex, the
+callback needs the GIL, and another thread holds the GIL while it waits for
+that mutex (binding parameters or reading columns). Production showed it as a
+hung API that Render restarted, with a minute or two of 502s each time. Do not
+add `set_authorizer`, `set_trace_callback`, `set_progress_handler` or
+`create_function` to that connection; do the work in Python before the
+statement reaches SQLite, as `CatalogTrackingConnection` does. Keep
+`cached_statements=0` on it, because threads must not share a prepared
+statement. `tests/test_launch_hardening_2026_11_11.py` runs eight threads
+against the connection and fails on a hang.

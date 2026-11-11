@@ -5,6 +5,7 @@ Handles SQLite connection lifecycle, schema initialization, migrations,
 and provides a single entry-point (MotoQuantDB) for all repository access.
 """
 
+import re
 import sqlite3
 import threading
 from pathlib import Path
@@ -76,21 +77,68 @@ def bump_catalog_generation() -> int:
         return _catalog_generation
 
 
-_WRITE_ACTIONS = frozenset(
-    {sqlite3.SQLITE_INSERT, sqlite3.SQLITE_UPDATE, sqlite3.SQLITE_DELETE}
+# A statement that may write: INSERT, UPDATE, DELETE or REPLACE anywhere in
+# the text (covers "INSERT OR REPLACE", "WITH ... UPDATE", scripts).
+_WRITE_SQL = re.compile(r"\b(?:INSERT|UPDATE|DELETE|REPLACE)\b", re.IGNORECASE)
+_CATALOG_TABLE_SQL = re.compile(
+    r"\b(?:" + "|".join(sorted(CATALOG_TABLES)) + r")\b", re.IGNORECASE
 )
 
 
-def _catalog_write_authorizer(action, table, _arg2, _dbname, _source):
-    """sqlite3 authorizer: bump the generation on any write to a catalog table.
-
-    Runs at statement-prepare time, which is why the connection is opened with
-    ``cached_statements=0``: a cached prepared statement would skip this hook
-    on every repeat of the same SQL. Never denies anything.
-    """
-    if action in _WRITE_ACTIONS and table in CATALOG_TABLES:
+def _bump_if_catalog_write(sql: str) -> None:
+    """Mark catalog caches stale before a statement that may write a catalog
+    table. Conservative: a write that merely mentions a catalog table (say an
+    INSERT INTO sim_runs ... SELECT FROM bike_configs) also bumps, which costs
+    a cache refill and nothing else."""
+    if (
+        isinstance(sql, str)
+        and _WRITE_SQL.search(sql)
+        and _CATALOG_TABLE_SQL.search(sql)
+    ):
         bump_catalog_generation()
-    return sqlite3.SQLITE_OK
+
+
+class _CatalogTrackingCursor(sqlite3.Cursor):
+    def execute(self, sql, parameters=(), /):
+        _bump_if_catalog_write(sql)
+        return super().execute(sql, parameters)
+
+    def executemany(self, sql, seq_of_parameters, /):
+        _bump_if_catalog_write(sql)
+        return super().executemany(sql, seq_of_parameters)
+
+    def executescript(self, sql_script, /):
+        _bump_if_catalog_write(sql_script)
+        return super().executescript(sql_script)
+
+
+class CatalogTrackingConnection(sqlite3.Connection):
+    """Connection that marks catalog caches stale when it writes the catalog.
+
+    Writes made through other connections (another process, the CLI) change
+    ``PRAGMA data_version``, which :func:`catalog_token` already checks; a
+    connection's own writes do not, so this class looks at the SQL instead.
+
+    This used to be an SQLite authorizer callback. That deadlocked: the API
+    shares one connection across threads, SQLite calls the authorizer while
+    holding the connection mutex, and the callback needs the GIL, which another
+    thread can hold while it waits for that same mutex (for example while it
+    reads column values). Concurrent requests hung the API until Render
+    restarted it. No Python code may run under the SQLite mutex, so the check
+    runs here, before SQLite sees the statement.
+    """
+
+    def cursor(self, factory=_CatalogTrackingCursor):
+        return super().cursor(factory)
+
+    def execute(self, sql, parameters=(), /):
+        return self.cursor().execute(sql, parameters)
+
+    def executemany(self, sql, seq_of_parameters, /):
+        return self.cursor().executemany(sql, seq_of_parameters)
+
+    def executescript(self, sql_script, /):
+        return self.cursor().executescript(sql_script)
 
 
 class MotoQuantDB:
@@ -130,10 +178,14 @@ class MotoQuantDB:
             return self._conn
 
         self._conn = sqlite3.connect(
-            str(self._db_path), check_same_thread=False, cached_statements=0
+            str(self._db_path),
+            check_same_thread=False,
+            # Threads share this connection: a cached prepared statement would
+            # be shared too, and two threads stepping one statement is misuse.
+            cached_statements=0,
+            factory=CatalogTrackingConnection,
         )
         self._conn.row_factory = sqlite3.Row
-        self._conn.set_authorizer(_catalog_write_authorizer)
 
         # WAL mode is optimal but fails on some network/FUSE-mounted filesystems.
         # Silently fall back to DELETE journal mode if WAL is unavailable.

@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import Term from '../../../components/Term';
+import { OG_IMAGE } from '../../StructuredData';
 
 export const metadata = {
-  title: 'Getting started: your first quarter-mile time in five minutes',
+  title: 'Getting started: your first quarter-mile time',
   description:
-    'A five-minute walkthrough of MotoQuant: pick one of 534 bikes, read your quarter-mile time, change rider weight and location, add parts, find the best parts for your budget and get a race-day setup. Free and open source.',
+    'A five-minute walkthrough: pick one of 534 bikes, read its quarter-mile time, change rider weight and location, add parts and get a race-day setup.',
   keywords: [
     'motoquant getting started',
     'how to use motorcycle drag simulator',
@@ -14,6 +15,14 @@ export const metadata = {
     'aamby valley simulation setup',
   ],
   alternates: { canonical: 'https://motoquant.in/docs/getting-started' },
+  openGraph: {
+    title: 'Getting started: your first quarter-mile time',
+    description:
+      'A five-minute walkthrough: pick one of 534 bikes, read its quarter-mile time, change rider weight and location, add parts and get a race-day setup.',
+    url: 'https://motoquant.in/docs/getting-started',
+    type: 'article',
+    images: [OG_IMAGE],
+  },
 };
 
 const REPO = 'https://github.com/toto171/MotoQuant.in';

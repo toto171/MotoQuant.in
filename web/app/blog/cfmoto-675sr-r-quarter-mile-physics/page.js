@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'cfmoto-675sr-r-quarter-mile-physics';
 const TITLE = 'CFMoto 675SR-R quarter-mile physics: the 95hp Daytona 660 rival';
@@ -9,7 +10,7 @@ const DESCRIPTION =
   'MotoQuant simulates the CFMoto 675SR-R at 11.323s with a 214.4 km/h trap. Here is how CFMoto\'s first inline triple, priced under INR 6 lakh, compares in the sim with the Daytona 660, Street Triple 765 R, MT-09 and its 800NK sibling.';
 
 export const metadata = {
-  title: 'CFMoto 675SR-R quarter-mile physics | MotoQuant',
+  title: 'CFMoto 675SR-R quarter-mile physics',
   description: DESCRIPTION,
   keywords: [
     'cfmoto 675sr-r quarter mile',
@@ -29,6 +30,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-31T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -281,7 +283,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -303,6 +305,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[4594]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

@@ -1,15 +1,16 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'yamaha-rd350-quarter-mile-physics';
 const TITLE = 'Yamaha RD350 quarter-mile physics: why a 1973 2-stroke still runs 14.7s';
 const DESCRIPTION =
-  'MotoQuant sims the 1973 Yamaha RD350 at 14.707s and a 145 km/h trap under Aamby Valley November conditions, quicker than a stock Pulsar NS200, Pulsar 220F or Hunter 350 in 2026. Cycle World clocked the real bike at 14.000s in 1973. Where the 0.7s sim residual comes from, what the Indian Rajdoot RD350 HT actually delivered, and why a 39hp piston-port twin still beats modern 200cc commuters.';
+  'MotoQuant sims the 1973 Yamaha RD350 at 14.707s and a 145 km/h trap in Aamby Valley November conditions. Cycle World clocked the real bike at 14.000s in 1973.';
 
 export const metadata = {
-  title: 'Yamaha RD350 quarter-mile time (1973) | MotoQuant',
+  title: 'Yamaha RD350 quarter-mile time (1973)',
   description: DESCRIPTION,
   keywords: [
     'yamaha rd350 quarter mile',
@@ -33,6 +34,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-31T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -293,7 +295,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           <div className="flex flex-wrap gap-2 mb-6">
             {['Yamaha', 'RD350', 'Two-stroke', 'Rajdoot RD350', 'India', 'physics'].map((t) => (
@@ -314,6 +316,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[271]} />
 
         <div className="max-w-2xl mx-auto mt-16 glass rounded-xl p-6 border border-brand-orange/25 flex flex-col sm:flex-row items-center gap-4">
           <div className="flex-1">

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import SiteNav from "../../../components/SiteNav";
 import SiteFooter from "../../../components/SiteFooter";
-import StructuredData, { articleSchema } from "../../StructuredData";
+import StructuredData, { articleSchema, OG_IMAGE } from "../../StructuredData";
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = "bajaj-dominar-400-quarter-mile-physics";
 const TITLE =
@@ -10,7 +11,7 @@ const DESCRIPTION =
   "MotoQuant simulates the Bajaj Dominar 400 at 14.62s with a 156 km/h trap. Where the 0.9s gap to a stock RC 390 comes from, and four Indian-market mods under ₹18,000.";
 
 export const metadata = {
-  title: "Bajaj Dominar 400 quarter-mile physics | MotoQuant",
+  title: "Bajaj Dominar 400 quarter-mile physics",
   description: DESCRIPTION,
   keywords: [
     "bajaj dominar 400 quarter mile",
@@ -33,6 +34,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: "article",
     publishedTime: "2026-05-24T00:00:00Z",
+    images: [OG_IMAGE],
   },
 };
 
@@ -316,7 +318,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -338,6 +340,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[72]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

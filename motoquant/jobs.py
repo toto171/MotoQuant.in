@@ -25,6 +25,10 @@ from typing import Any
 JOB_TTL_S = 900.0  # evict finished jobs this long after their last update
 MAX_JOBS = 200  # hard cap on registry size (memory bound)
 MAX_RUNNING = 6  # concurrent-job guard (free-tier CPU)
+# One client may hold at most this many active jobs, so a single visitor
+# cannot fill every MAX_RUNNING slot. Enforced only when the caller passes a
+# trustworthy owner (see motoquant.api._job_owner).
+MAX_RUNNING_PER_OWNER = 2
 # A worker running past this is treated as hung (wedged network call, runaway
 # loop). We can't kill a daemon thread, but we stop counting it toward
 # MAX_RUNNING and request its cancellation so it can't permanently starve the
@@ -61,6 +65,7 @@ class Job:
     __slots__ = (
         "id",
         "kind",
+        "owner",
         "status",
         "progress",
         "stage",
@@ -74,6 +79,7 @@ class Job:
     def __init__(self, kind: str):
         self.id = uuid.uuid4().hex[:16]
         self.kind = kind
+        self.owner: str | None = None  # client identity, for the per-owner cap
         self.status = "queued"  # queued | running | done | error
         self.progress = 0.0  # 0..1, monotonic non-decreasing
         self.stage = ""
@@ -198,7 +204,9 @@ def _evict_locked(now: float) -> None:
             del _JOBS[jid]
 
 
-def create_job(kind: str, runner: Callable[[Callable], Any]) -> Job:
+def create_job(
+    kind: str, runner: Callable[[Callable], Any], owner: str | None = None
+) -> Job:
     """
     Start ``runner(progress)`` on a daemon thread and return its Job.
 
@@ -206,7 +214,8 @@ def create_job(kind: str, runner: Callable[[Callable], Any]) -> Job:
     and must return a JSON-serialisable result. Progress is clamped to
     [0, 1] and made monotonic so the client bar can never run backwards.
 
-    Raises ``JobCapacityError`` when ``MAX_RUNNING`` jobs are already active.
+    Raises ``JobCapacityError`` when ``MAX_RUNNING`` jobs are already active,
+    or when ``owner`` (a client identity) already has ``MAX_RUNNING_PER_OWNER``.
     """
     now = time.time()
     with _LOCK:
@@ -220,7 +229,20 @@ def create_job(kind: str, runner: Callable[[Callable], Any]) -> Job:
             raise JobCapacityError(
                 f"Too many simulations running ({n_active}); try again in a moment"
             )
+        if owner is not None:
+            mine = sum(
+                1
+                for j in _JOBS.values()
+                if j.owner == owner
+                and j.status in ("queued", "running")
+                and not _is_hung(j, now)
+            )
+            if mine >= MAX_RUNNING_PER_OWNER:
+                raise JobCapacityError(
+                    "You already have runs in progress; wait for one to finish"
+                )
         job = Job(kind)
+        job.owner = owner
         _JOBS[job.id] = job
 
     def _progress(frac: float, stage: str | None = None) -> None:

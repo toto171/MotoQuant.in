@@ -1,15 +1,16 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'harley-nightster-rh975-quarter-mile-physics';
 const TITLE = 'Harley Nightster RH975: Revolution Max quarter-mile physics';
 const DESCRIPTION =
-  'MotoQuant simulates the Harley-Davidson Nightster RH975 and its 975cc Revolution Max 975T V-twin at 12.38s; Cycle World clocked 11.99s at 110.4 mph. Where the gap comes from, why a 90 hp Harley keeps up with 600cc middleweights, and what it means in India.';
+  'MotoQuant simulates the Harley Nightster RH975 at 12.38s; Cycle World clocked 11.99s at 110.4 mph. Where the gap comes from, and what it means in India.';
 
 export const metadata = {
-  title: 'Harley Nightster RH975 quarter-mile physics | MotoQuant',
+  title: 'Harley Nightster RH975 quarter-mile physics',
   description: DESCRIPTION,
   keywords: [
     'harley davidson nightster rh975 quarter mile',
@@ -30,6 +31,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-25T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -317,7 +319,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           <div className="flex flex-wrap gap-2 mb-6">
             {['Harley-Davidson', 'Nightster RH975', 'Revolution Max', 'cruiser', 'V-twin', 'physics'].map((t) => (
@@ -338,6 +340,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[722]} />
 
         <div className="max-w-2xl mx-auto mt-16 glass rounded-xl p-6 border border-brand-orange/25 flex flex-col sm:flex-row items-center gap-4">
           <div className="flex-1">
