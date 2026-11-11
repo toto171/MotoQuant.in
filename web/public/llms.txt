@@ -4,7 +4,7 @@
 
 ## Main pages
 
-- [Simulator](https://motoquant.in/simulator): pick a bike, rider weight and drag strip to get the quarter-mile time, finish-line speed and 60 ft split. Runs in the browser.
+- [Simulator](https://motoquant.in/simulator): pick a bike, rider weight and drag strip to get the quarter-mile time, finish-line speed and 60 ft split. Free, no sign-up.
 - [Bikes](https://motoquant.in/bikes): specs and the simulated stock quarter-mile time for each of the 534 motorcycles in the catalog, one page per bike.
 - [Leaderboard](https://motoquant.in/leaderboard): every catalog bike ranked by its simulated stock quarter-mile time, all with the same rider weight and conditions.
 - [Accuracy](https://motoquant.in/validation): every simulated time plotted against its published timeslip, from 250 published quarter-mile tests.
