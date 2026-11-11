@@ -23,7 +23,32 @@ import {
 import SiteNav from '../components/SiteNav';
 import SiteFooter from '../components/SiteFooter';
 import SimulatorWidget from '../components/SimulatorWidget';
-import { FAQ_ITEMS } from './StructuredData';
+import StructuredData, { FAQ_ITEMS, faqSchema, SITE_URL, OG_IMAGE } from './StructuredData';
+
+const HOME_TITLE = 'Motorcycle quarter-mile and drag race simulator | MotoQuant';
+const HOME_DESCRIPTION =
+  "Free quarter-mile simulator for 534 motorcycles. See your bike's time and finish-line speed, then find the parts worth buying, priced in rupees.";
+
+export const metadata = {
+  title: { absolute: HOME_TITLE },
+  description: HOME_DESCRIPTION,
+  alternates: { canonical: '/' },
+  openGraph: {
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
+    url: SITE_URL,
+    siteName: 'MotoQuant',
+    images: [OG_IMAGE],
+    locale: 'en_IN',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
+    images: [OG_IMAGE],
+  },
+};
 
 const REPO_URL = 'https://github.com/toto171/MotoQuant.in';
 const SUGGEST_URL = `${REPO_URL}/issues/new?template=suggest-bike.yml`;
@@ -137,6 +162,8 @@ export default function HomePage() {
     <div className="min-h-screen overflow-x-clip bg-asphalt-0 text-white antialiased">
       <SiteNav />
 
+      {/* FAQPage markup only here: this is the one page that shows the FAQ. */}
+      <StructuredData data={faqSchema()} />
       <main id="main">
         {/* ─── Hero + calculator ──────────────────────────────────── */}
         <section className="relative overflow-hidden pt-16">

@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'ktm-1390-super-duke-r-evo-quarter-mile-physics';
 const TITLE = 'KTM 1390 Super Duke R EVO quarter-mile physics breakdown';
@@ -9,7 +10,7 @@ const DESCRIPTION =
   'KTM 1390 Super Duke R EVO quarter-mile time: MotoQuant simulates the 2024 EVO at 10.225s with a 237.3 km/h trap at Aamby Valley. MCN clocked 9.95s on a stock bike. India pricing, the cost per tenth of each mod, and what closes the 0.275s gap.';
 
 export const metadata = {
-  title: 'KTM 1390 Super Duke R EVO quarter-mile physics | MotoQuant',
+  title: 'KTM 1390 Super Duke R EVO quarter-mile physics',
   description: DESCRIPTION,
   keywords: [
     'KTM 1390 Super Duke R quarter mile',
@@ -34,6 +35,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-08T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -291,7 +293,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -313,6 +315,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[341]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

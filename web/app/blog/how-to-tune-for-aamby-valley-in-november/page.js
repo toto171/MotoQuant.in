@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
 
 export const metadata = {
-  title: 'How to tune for Aamby Valley in November | MotoQuant Blog',
+  title: 'How to tune for Aamby Valley in November',
   description: 'November at Aamby Valley means 679 m of elevation, about 22°C and a density altitude near 1,100 m on an asphalt strip. What that costs each class of bike, and how to tune for it.',
   keywords: [
     'Aamby Valley drag racing',
@@ -22,6 +23,8 @@ export const metadata = {
     url: 'https://motoquant.in/blog/how-to-tune-for-aamby-valley-in-november',
     type: 'article',
     publishedTime: '2026-04-24T00:00:00Z',
+    modifiedTime: '2026-11-10T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -152,9 +155,18 @@ function Prose({ content }) {
 export default function PostPage() {
   return (
     <div className="min-h-screen bg-black text-white">
+      <StructuredData
+        data={articleSchema({
+          title: 'How to tune for Aamby Valley in November',
+          description: 'November at Aamby Valley means 679 m of elevation, about 22°C and a density altitude near 1,100 m on an asphalt strip. What that costs each class of bike, and how to tune for it.',
+          slug: 'how-to-tune-for-aamby-valley-in-november',
+          datePublished: '2026-04-24',
+          dateModified: '2026-11-10',
+        })}
+      />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           <div className="flex flex-wrap gap-2 mb-6">
             {['venue', 'Aamby Valley', 'weather', 'conditions'].map(t => (

@@ -1,15 +1,16 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'pulsar-ns400z-quarter-mile-physics';
 const TITLE = 'Bajaj Pulsar NS400Z quarter-mile physics (and why an RC 390 still wins)';
 const DESCRIPTION =
-  'Bajaj Pulsar NS400Z quarter-mile time and 0-100 in India: MotoQuant simulates the NS400Z at roughly 13.8s ET and a 158 km/h trap at Aamby Valley and compares it with the BikeWale-tested 6.4s 0-100. A stock KTM RC 390 still beats it by 0.3s. The physics of the 23 kg, the gearing and the Cd the press release left out, plus three cost-per-tenth mods under ₹20,000.';
+  'MotoQuant simulates the Bajaj Pulsar NS400Z at roughly 13.8s ET and a 158 km/h trap at Aamby Valley. A stock KTM RC 390 still beats it by 0.3s. Here is why.';
 
 export const metadata = {
-  title: 'Pulsar NS400Z quarter mile & 0-100 (India) vs RC 390 | MotoQuant',
+  title: 'Pulsar NS400Z quarter mile & 0-100 (India) vs RC 390',
   description: DESCRIPTION,
   keywords: [
     'pulsar ns400z quarter mile',
@@ -30,6 +31,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-18T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -274,7 +276,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           <div className="flex flex-wrap gap-2 mb-6">
             {['Bajaj', 'Pulsar NS400Z', 'KTM RC 390', 'Indian 400cc', 'physics'].map((t) => (
@@ -295,6 +297,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[145]} />
 
         <div className="max-w-2xl mx-auto mt-16 glass rounded-xl p-6 border border-brand-orange/25 flex flex-col sm:flex-row items-center gap-4">
           <div className="flex-1">

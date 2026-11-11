@@ -3,9 +3,10 @@ import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 import CodeComment from '../../../components/CodeComment';
 import ScoreboardDigits from '../../../components/ScoreboardDigits';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
 
 export const metadata = {
-  title: 'How the MotoQuant physics engine works | MotoQuant Blog',
+  title: { absolute: 'How the MotoQuant physics engine works' },
   description: 'The 15 sub-models and RK4 integrator behind MotoQuant, from engine torque curves to tyre grip, tyre temperature and launch slip: what we simulate, what we validate against, and what the remaining error means.',
   keywords: [
     'motorcycle physics simulation',
@@ -23,6 +24,7 @@ export const metadata = {
     url: 'https://motoquant.in/blog/how-the-motoquant-physics-engine-works',
     type: 'article',
     publishedTime: '2026-04-27T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -224,22 +226,18 @@ function renderBlock(block, idx) {
   }
 }
 
-const articleSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'Article',
-  headline: 'How the MotoQuant physics engine works',
-  description: 'The 15 sub-models and RK4 integrator behind MotoQuant.',
-  author: { '@type': 'Organization', name: 'MotoQuant' },
-  publisher: { '@type': 'Organization', name: 'MotoQuant', logo: { '@type': 'ImageObject', url: 'https://motoquant.in/logo.png' } },
-  datePublished: '2026-04-27',
-  mainEntityOfPage: { '@type': 'WebPage', '@id': 'https://motoquant.in/blog/how-the-motoquant-physics-engine-works' },
-};
-
 export default function Page() {
   return (
     <div className="min-h-screen bg-black text-white">
       <SiteNav />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
+      <StructuredData
+        data={articleSchema({
+          title: 'How the MotoQuant physics engine works',
+          description: 'The 15 sub-models and RK4 integrator behind MotoQuant, from engine torque curves to tyre grip, tyre temperature and launch slip: what we simulate, what we validate against, and what the remaining error means.',
+          slug: 'how-the-motoquant-physics-engine-works',
+          datePublished: '2026-04-27',
+        })}
+      />
 
       <main id="main" className="max-w-3xl mx-auto px-6 pt-32 pb-12">
         <Link href="/blog" className="text-brand-accent text-sm font-mono mb-6 inline-block hover:text-brand-orange transition-colors">

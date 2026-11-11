@@ -1,15 +1,16 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'royal-enfield-hunter-350-quarter-mile-physics';
 const TITLE = 'Royal Enfield Hunter 350 quarter-mile physics: Fastest J-platform at the strip';
 const DESCRIPTION =
-  'Royal Enfield Hunter 350 quarter-mile time and top speed in India. MotoQuant simulates the Hunter 350 at 16.895s with a 127.9 km/h trap, and the claimed top speed is 114 km/h. It is the quickest J-platform sibling, ahead of the Classic 350, Meteor and Bullet. On a 20 hp single, 10 kg less mass and a tighter final drive matter more than engine tuning.';
+  'MotoQuant simulates the Royal Enfield Hunter 350 at 16.895s with a 127.9 km/h trap: the quickest J-platform sibling, ahead of the Classic 350 and Meteor.';
 
 export const metadata = {
-  title: 'Royal Enfield Hunter 350 quarter-mile time and top speed (India) | MotoQuant',
+  title: 'Royal Enfield Hunter 350 quarter-mile time',
   description: DESCRIPTION,
   keywords: [
     'royal enfield hunter 350 quarter mile',
@@ -33,6 +34,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-25T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -325,7 +327,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -347,6 +349,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[757]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

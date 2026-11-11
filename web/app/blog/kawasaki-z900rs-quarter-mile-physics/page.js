@@ -1,7 +1,8 @@
 import Link from "next/link";
 import SiteNav from "../../../components/SiteNav";
 import SiteFooter from "../../../components/SiteFooter";
-import StructuredData, { articleSchema } from "../../StructuredData";
+import StructuredData, { articleSchema, OG_IMAGE } from "../../StructuredData";
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = "kawasaki-z900rs-quarter-mile-physics";
 const TITLE = "Kawasaki Z900RS quarter-mile physics: retro tax on a 948cc I4";
@@ -9,7 +10,7 @@ const DESCRIPTION =
   "MotoQuant simulates the Kawasaki Z900RS at 11.18s and 196 km/h trap. MCN clocked the stock bike at 11.4s. Where the 13 hp detune costs you tenths against a Z900, and the ₹8,500 sprocket that closes most of the gap.";
 
 export const metadata = {
-  title: "Kawasaki Z900RS quarter-mile physics | MotoQuant",
+  title: "Kawasaki Z900RS quarter-mile physics",
   description: DESCRIPTION,
   keywords: [
     "Kawasaki Z900RS quarter mile",
@@ -26,6 +27,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: "article",
     publishedTime: "2026-05-22T00:00:00Z",
+    images: [OG_IMAGE],
   },
 };
 
@@ -333,7 +335,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -355,6 +357,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[719]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

@@ -45,16 +45,18 @@ const BikeChooser = memo(function BikeChooser({ bike, bikes, onSelect, variant }
         </div>
       )}
 
-      {bike && (
-        <p className="mt-3 text-sm text-white/65">
-          {[
-            bike.category,
-            bike.peak_power_hp ? `${Math.round(bike.peak_power_hp)} hp` : null,
-            bike.dry_mass_kg ? `${Math.round(bike.dry_mass_kg)} kg` : null,
-            bike.year ? String(bike.year) : null,
-          ].filter(Boolean).join(' · ')}
-        </p>
-      )}
+      {/* Always rendered, one line tall, so the line appearing when the
+          default bike loads does not push the result card down (CLS). */}
+      <p className="mt-3 min-h-[1.25rem] text-sm text-white/65">
+        {bike
+          ? [
+              bike.category,
+              bike.peak_power_hp ? `${Math.round(bike.peak_power_hp)} hp` : null,
+              bike.dry_mass_kg ? `${Math.round(bike.dry_mass_kg)} kg` : null,
+              bike.year ? String(bike.year) : null,
+            ].filter(Boolean).join(' · ')
+          : null}
+      </p>
     </div>
   );
 });

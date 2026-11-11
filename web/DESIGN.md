@@ -68,8 +68,9 @@ be readable in sunlight, which is why it has a real light theme.
    abort) or `lib/surrogate.js` (bit-parity with the server surrogate).
 5. `delta_et_s` sign: negative = quicker = good (green); positive = slower =
    bad (red). Trap-speed deltas: positive = faster = good.
-6. Reduced motion is respected everywhere. The route template stays
-   opacity-only.
+6. Reduced motion is respected everywhere. There is no route-entrance
+   fade: a wrapper that starts at opacity 0 hides the largest element from
+   the browser's LCP measurement. Motion goes on top of visible content.
 7. Mobile is first-class: no horizontal overflow at 360px, tap targets
    ≥ 44px, form inputs ≥ 16px font-size (this prevents iOS zoom).
 8. Existing routes keep their URLs (`/optimize`, `/autotune`, …). Rename

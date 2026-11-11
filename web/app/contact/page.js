@@ -9,15 +9,24 @@
 import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
 import PageHero from "../../components/PageHero";
+import { OG_IMAGE } from "../StructuredData";
 
 const EMAIL = "motoquant@gmail.com";
 const REPO_URL = "https://github.com/toto171/MotoQuant.in";
 
 export const metadata = {
-  title: "Contact | MotoQuant",
+  title: "Contact",
   description:
     "Report a bug or request a feature on GitHub, or email the MotoQuant maintainers.",
   alternates: { canonical: "https://motoquant.in/contact" },
+  openGraph: {
+    title: "Contact",
+    description:
+      "Report a bug or request a feature on GitHub, or email the MotoQuant maintainers.",
+    url: "https://motoquant.in/contact",
+    type: "website",
+    images: [OG_IMAGE],
+  },
 };
 
 export default function ContactPage() {

@@ -4,9 +4,10 @@ import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 import CodeComment from '../../../components/CodeComment';
 import ScoreboardDigits from '../../../components/ScoreboardDigits';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
 
 export const metadata = {
-  title: 'The physics of a perfect launch | MotoQuant Blog',
+  title: 'The physics of a perfect launch',
   description: 'How clutch engagement RPM, tyre slip ratio and weight transfer interact in the first 0.4 seconds of a drag run, worked from first principles for Indian drag racers.',
   keywords: ['drag racing launch physics', 'motorcycle launch control', 'clutch engagement drag racing', 'tire slip ratio drag'],
   alternates: { canonical: 'https://motoquant.in/blog/the-physics-of-a-perfect-launch' },
@@ -16,6 +17,7 @@ export const metadata = {
     url: 'https://motoquant.in/blog/the-physics-of-a-perfect-launch',
     type: 'article',
     publishedTime: '2026-04-24T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -156,9 +158,17 @@ function Prose({ content }) {
 export default function PostPage() {
   return (
     <div className="min-h-screen bg-black text-white">
+      <StructuredData
+        data={articleSchema({
+          title: 'The physics of a perfect launch',
+          description: 'How clutch engagement RPM, tyre slip ratio and weight transfer interact in the first 0.4 seconds of a drag run, worked from first principles for Indian drag racers.',
+          slug: 'the-physics-of-a-perfect-launch',
+          datePublished: '2026-04-24',
+        })}
+      />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">

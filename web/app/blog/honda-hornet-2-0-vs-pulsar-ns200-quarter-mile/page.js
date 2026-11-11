@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'honda-hornet-2-0-vs-pulsar-ns200-quarter-mile';
 const TITLE = 'Honda Hornet 2.0 vs Pulsar NS200: quarter-mile physics';
@@ -9,7 +10,7 @@ const DESCRIPTION =
   'Honda Hornet 2.0 vs Bajaj Pulsar NS200 quarter-mile comparison for Indian riders. MotoQuant simulates the Hornet 2.0 at ~17.55s and the NS200 at ~15.9s. Seven hp and 18 kg separate them; the physics shows where the gap comes from.';
 
 export const metadata = {
-  title: 'Honda Hornet 2.0 vs Pulsar NS200 quarter-mile India | MotoQuant',
+  title: 'Honda Hornet 2.0 vs Pulsar NS200 quarter-mile India',
   description: DESCRIPTION,
   keywords: [
     'honda hornet 2.0 vs pulsar ns200 drag',
@@ -29,6 +30,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-25T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -300,7 +302,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           <div className="flex flex-wrap gap-2 mb-6">
             {['Honda', 'Hornet 2.0', 'Bajaj', 'Pulsar NS200', 'Indian 200cc', 'comparison'].map((t) => (
@@ -321,6 +323,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[86]} />
 
         <div className="max-w-2xl mx-auto mt-16 glass rounded-xl p-6 border border-brand-orange/25 flex flex-col sm:flex-row items-center gap-4">
           <div className="flex-1">

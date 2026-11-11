@@ -1,0 +1,15 @@
+# MotoQuant
+
+> MotoQuant is a free, open-source (Apache-2.0) quarter-mile simulator for motorcycles, built in Pune, India. It works out a bike's quarter-mile time, finish-line speed and 60 ft split from the physics (engine, gearing, tyres, air resistance, weight transfer and the strip's altitude and weather) rather than from a power-to-weight formula. It covers 534 motorcycles. There are no accounts and no paid plans. Every time on the site is a simulated time unless it names a published source.
+
+## Main pages
+
+- [Simulator](https://motoquant.in/simulator): pick a bike, rider weight and drag strip to get the quarter-mile time, finish-line speed and 60 ft split. Free, no sign-up.
+- [Bikes](https://motoquant.in/bikes): specs and the simulated stock quarter-mile time for each of the 534 motorcycles in the catalog, one page per bike.
+- [Leaderboard](https://motoquant.in/leaderboard): every catalog bike ranked by its simulated stock quarter-mile time, all with the same rider weight and conditions.
+- [Accuracy](https://motoquant.in/validation): every simulated time plotted against its published timeslip, from 250 published quarter-mile tests.
+- [Blog](https://motoquant.in/blog): quarter-mile breakdowns bike by bike, mods ranked by cost per tenth of a second, and tuning for Indian drag strips.
+
+## Source
+
+- [GitHub repository](https://github.com/toto171/MotoQuant.in): the physics engine, the bike catalog, the website and the tests.

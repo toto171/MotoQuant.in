@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'ktm-890-duke-r-quarter-mile-india';
 const TITLE = 'KTM 890 Duke R Quarter-Mile in India: 11.07s on the Grey Market';
@@ -9,7 +10,7 @@ const DESCRIPTION =
   'MotoQuant simulates the KTM 890 Duke R at 11.07s and 202 km/h trap at Aamby Valley, 0.35s quicker than the standard 890 Duke. Why the R variant is the one most Indian buyers get, and what closes the gap to a stock Hayabusa for under ₹50,000.';
 
 export const metadata = {
-  title: 'KTM 890 Duke R Quarter-Mile India | MotoQuant',
+  title: 'KTM 890 Duke R Quarter-Mile India',
   description: DESCRIPTION,
   keywords: [
     'KTM 890 Duke quarter mile india',
@@ -30,6 +31,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-22T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -305,7 +307,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -327,6 +329,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[107]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

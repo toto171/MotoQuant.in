@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'cfmoto-800nk-quarter-mile-physics';
 const TITLE = 'CFMoto 800NK quarter-mile physics: a KTM 790 Duke in disguise';
@@ -9,7 +10,7 @@ const DESCRIPTION =
   'MotoQuant simulates the CFMoto 800NK at 11.386s and 203.2 km/h trap. The KTM-derived LC8c parallel twin sits at ₹9-12 lakh in India. The physics shows where the tenths go.';
 
 export const metadata = {
-  title: 'CFMoto 800NK quarter-mile physics | MotoQuant',
+  title: 'CFMoto 800NK quarter-mile physics',
   description: DESCRIPTION,
   keywords: [
     'CFMoto 800NK quarter mile',
@@ -27,6 +28,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-18T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -289,7 +291,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -311,6 +313,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[750]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

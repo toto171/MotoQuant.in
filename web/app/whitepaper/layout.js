@@ -2,13 +2,15 @@
 // The page is "use client" so it cannot export `metadata` itself; App Router
 // pulls it from the nearest server layout instead.
 
-import StructuredData, { SITE_URL } from '../StructuredData';
+import StructuredData, { SITE_URL, OG_IMAGE } from '../StructuredData';
 
-const TITLE = "Whitepaper: the physics behind MotoQuant";
-const DESCRIPTION = "The full technical whitepaper for the MotoQuant motorcycle drag simulator: the RK4 integrator at a 1 ms step, rear-tyre grip with load sensitivity and thermal evolution, SAE J1349 dyno correction, validation against 250 published tests weighted by source quality, an architecture of 15 sub-models, and the K5/R1/Hayabusa reference baselines. Read it before you trust a predicted quarter-mile time.";
+const TITLE =
+  'Whitepaper: the physics behind MotoQuant';
+const DESCRIPTION =
+  'How the MotoQuant quarter-mile simulator works: 15 sub-models, RK4 integration at 1 ms, and validation against 250 published tests weighted by source quality.';
 
 export const metadata = {
-  title: TITLE,
+  title: { absolute: TITLE }, // already names MotoQuant: no suffix
   description: DESCRIPTION,
   alternates: { canonical: '/whitepaper' },
   keywords: [
@@ -37,17 +39,13 @@ export const metadata = {
     description: DESCRIPTION,
     url: `${SITE_URL}/whitepaper`,
     type: 'website',
-    images: [{
-      url: `${SITE_URL}/og-image.png`,
-      width: 1200,
-      height: 630,
-      alt: TITLE,
-    }],
+    images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
+    images: [OG_IMAGE],
   },
   robots: { index: true, follow: true },
 };

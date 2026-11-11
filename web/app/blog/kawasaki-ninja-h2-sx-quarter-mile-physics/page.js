@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'kawasaki-ninja-h2-sx-quarter-mile-physics';
 const TITLE = 'Kawasaki Ninja H2 SX quarter-mile physics: supercharged tourer';
@@ -9,7 +10,7 @@ const DESCRIPTION =
   'MotoQuant simulates the 2018-2023 Ninja H2 SX at 10.20 s and a 232.8 km/h trap at Aamby Valley in November, level with a stock Hayabusa Gen 1. Why a 238 kg supercharged tourer runs a Hayabusa-class quarter in India, and where it loses to the ZX-14R.';
 
 export const metadata = {
-  title: 'Kawasaki Ninja H2 SX quarter-mile physics India | MotoQuant',
+  title: 'Kawasaki Ninja H2 SX quarter-mile physics India',
   description: DESCRIPTION,
   keywords: [
     'kawasaki ninja h2 sx quarter mile',
@@ -36,6 +37,8 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-25T00:00:00Z',
+    modifiedTime: '2026-11-10T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -297,11 +300,12 @@ export default function PostPage() {
           description: DESCRIPTION,
           slug: SLUG,
           datePublished: '2026-05-25',
+          dateModified: '2026-11-10',
         })}
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -323,6 +327,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[4584]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

@@ -1,15 +1,16 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'pulsar-ns200-vs-apache-rtr-200-quarter-mile-physics';
 const TITLE = 'Pulsar NS200 vs Apache RTR 200 4V: Quarter-Mile Physics';
 const DESCRIPTION =
-  'Bajaj Pulsar NS200 vs TVS Apache RTR 200 4V quarter-mile comparison. MotoQuant simulates the NS200 at ~15.9s and the RTR 200 4V at ~16.4s under matched Indian strip conditions, compares the physics spec by spec, and ranks the top three mods for each by cost per tenth.';
+  'MotoQuant simulates the Pulsar NS200 at ~15.9s and the Apache RTR 200 4V at ~16.4s under matched Indian strip conditions, and ranks mods by cost per tenth.';
 
 export const metadata = {
-  title: 'Pulsar NS200 vs Apache RTR 200 4V Quarter-Mile (India) | MotoQuant',
+  title: 'Pulsar NS200 vs Apache RTR 200 4V quarter mile',
   description: DESCRIPTION,
   keywords: [
     'pulsar ns200 vs apache rtr 200',
@@ -29,6 +30,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-18T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -295,7 +297,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           <div className="flex flex-wrap gap-2 mb-6">
             {['Bajaj', 'Pulsar NS200', 'TVS', 'Apache RTR 200 4V', 'Indian 200cc', 'comparison'].map((t) => (
@@ -316,6 +318,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[76]} />
 
         <div className="max-w-2xl mx-auto mt-16 glass rounded-xl p-6 border border-brand-orange/25 flex flex-col sm:flex-row items-center gap-4">
           <div className="flex-1">

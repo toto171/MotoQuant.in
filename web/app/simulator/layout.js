@@ -3,12 +3,12 @@
 // cannot export `metadata` itself — App Router pulls it from the nearest
 // server layout instead.
 
-import StructuredData, { SITE_URL } from '../StructuredData';
+import StructuredData, { SITE_URL, OG_IMAGE } from '../StructuredData';
 
 const TITLE =
-  'Motorcycle quarter-mile calculator: physics-based ET predictor for 534 bikes';
+  'Quarter-mile calculator for 534 motorcycles';
 const DESCRIPTION =
-  'A free motorcycle quarter-mile calculator that runs the physics instead of a power-to-weight formula. Predict ET, trap speed and 60-ft split for 534 bikes at Aamby Valley, MMRT, BIC and 17 more venues. Change rider weight, power, mass and conditions and see the result live. Validated to ±0.2s on GSX-R K5, YZF-R1 and Hayabusa.';
+  'Pick your bike, rider weight and drag strip to get the quarter-mile time, finish-line speed and 60 ft split. Free, in your browser, no sign-up.';
 
 export const metadata = {
   title: TITLE,
@@ -82,19 +82,13 @@ export const metadata = {
     description: DESCRIPTION,
     url: `${SITE_URL}/simulator`,
     type: 'website',
-    images: [
-      {
-        url: `${SITE_URL}/og-image.png`,
-        width: 1200,
-        height: 630,
-        alt: 'MotoQuant simulator: live quarter-mile drag simulation for 534 motorcycles',
-      },
-    ],
+    images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
+    images: [OG_IMAGE],
   },
   robots: { index: true, follow: true },
 };

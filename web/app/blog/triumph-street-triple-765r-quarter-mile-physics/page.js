@@ -1,16 +1,17 @@
 import Link from "next/link";
 import SiteNav from "../../../components/SiteNav";
 import SiteFooter from "../../../components/SiteFooter";
-import StructuredData, { articleSchema } from "../../StructuredData";
+import StructuredData, { articleSchema, OG_IMAGE } from "../../StructuredData";
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = "triumph-street-triple-765r-quarter-mile-physics";
 const TITLE =
   "Triumph Street Triple 765 R quarter-mile physics: 118hp triple at the strip";
 const DESCRIPTION =
-  "MotoQuant simulates the Triumph Street Triple 765 R at 10.74s and 213 km/h trap; the 765 RS sibling runs a published 10.79s @ 132 mph. Cycle World clocked the R at 10.9s in 2023. The physics of India's best-value middleweight triple, and what limits its run at Aamby Valley.";
+  'MotoQuant simulates the Triumph Street Triple 765 R at 10.74s and 213 km/h trap. Cycle World clocked the R at 10.9s in 2023. What limits it at Aamby Valley.';
 
 export const metadata = {
-  title: "Triumph Street Triple 765 R quarter-mile physics India | MotoQuant",
+  title: 'Triumph Street Triple 765 R quarter-mile physics',
   description: DESCRIPTION,
   keywords: [
     "Triumph Street Triple 765 R quarter mile",
@@ -33,6 +34,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: "article",
     publishedTime: "2026-05-24T00:00:00Z",
+    images: [OG_IMAGE],
   },
 };
 
@@ -331,7 +333,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           {/* Meta */}
           <div className="flex flex-wrap gap-2 mb-6">
@@ -354,6 +356,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[720]} />
 
         {/* Internal links / related reading */}
         <div className="max-w-2xl mx-auto mt-16">

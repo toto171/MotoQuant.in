@@ -2,15 +2,16 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import StructuredData, { articleSchema } from '../../StructuredData';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
+import PostBikeLinks from '../../../components/PostBikeLinks';
 
 const SLUG = 'best-mods-for-ktm-rc-390-budget-vs-cost-per-tenth';
 const TITLE = 'Best mods for KTM RC 390 in India: a cost-per-tenth ladder';
 const DESCRIPTION =
-  'The best mods for a KTM RC 390 in India, ranked by rupees per tenth of ET at Aamby Valley. A ₹950 sprocket cuts 0.20s, a ₹14,500 Powertronic flash cuts another 0.22s, and the full ₹68,000 build runs a 12.6 stock. Fast Track Racing India ran 11.342s; here is what closing that gap costs.';
+  'KTM RC 390 mods in India, ranked by rupees per tenth of ET at Aamby Valley. A ₹950 sprocket cuts 0.20s, a ₹14,500 Powertronic flash cuts another 0.22s.';
 
 export const metadata = {
-  title: 'Best mods for KTM RC 390 in India: cost per tenth | MotoQuant',
+  title: 'Best mods for KTM RC 390 in India: cost per tenth',
   description: DESCRIPTION,
   keywords: [
     'best mods for ktm rc 390 india',
@@ -34,6 +35,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-05-22T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -348,7 +350,7 @@ export default function PostPage() {
       />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           <div className="flex flex-wrap gap-2 mb-6">
             {['KTM', 'RC 390', 'Duke 390', 'cost-per-tenth', 'India mods'].map((t) => (
@@ -369,6 +371,8 @@ export default function PostPage() {
         </div>
 
         <Prose content={CONTENT} />
+
+        <PostBikeLinks ids={[67]} />
 
         <div className="max-w-2xl mx-auto mt-16 glass rounded-xl p-6 border border-brand-orange/25 flex flex-col sm:flex-row items-center gap-4">
           <div className="flex-1">

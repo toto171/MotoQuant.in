@@ -73,7 +73,14 @@ export default function ResultCard({ sim, advanced = false }) {
   const runFull = () => startFullSim(advanced ? { goTo: 'charts' } : {});
 
   return (
-    <section className="card card-pad relative overflow-hidden" aria-labelledby="sim-result-title">
+    // Reserve about the height of a finished result (measured: ~658 px on a
+    // 390 px phone, ~586 px on desktop), so "choose a bike", the skeleton and
+    // the result all take the same space and nothing below jumps (CLS). The
+    // no-bike state is normally only the moment before the default bike loads.
+    <section
+      className="card card-pad relative overflow-hidden min-h-[40rem] lg:min-h-[36rem]"
+      aria-labelledby="sim-result-title"
+    >
       {quickTask.active && <SimProgress active edge className="absolute inset-x-0 top-0" />}
 
       <div className="flex items-center justify-between gap-3">

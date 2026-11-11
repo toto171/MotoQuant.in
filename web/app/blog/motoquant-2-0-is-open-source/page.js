@@ -2,12 +2,13 @@ import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 import CodeComment from '../../../components/CodeComment';
+import StructuredData, { articleSchema, OG_IMAGE } from '../../StructuredData';
 
 const REPO = 'https://github.com/toto171/MotoQuant.in';
 const SLUG = 'motoquant-2-0-is-open-source';
 
 export const metadata = {
-  title: 'MotoQuant 2.0 is open source, including where it is wrong | MotoQuant Blog',
+  title: { absolute: 'MotoQuant 2.0 is open source, including where it is wrong' },
   description:
     'MotoQuant 2.0 is free and open source under Apache-2.0, with no accounts and no paid plans. What it gets right, where it is still wrong, and how a timeslip from you makes it better.',
   keywords: [
@@ -23,6 +24,7 @@ export const metadata = {
     url: `https://motoquant.in/blog/${SLUG}`,
     type: 'article',
     publishedTime: '2026-11-10T00:00:00Z',
+    images: [OG_IMAGE],
   },
 };
 
@@ -112,9 +114,17 @@ const LINKS = [
 export default function PostPage() {
   return (
     <div className="min-h-screen bg-black text-white">
+      <StructuredData
+        data={articleSchema({
+          title: 'MotoQuant 2.0 is open source, including where it is wrong',
+          description: 'MotoQuant 2.0 is free and open source under Apache-2.0, with no accounts and no paid plans. What it gets right, where it is still wrong, and how a timeslip from you makes it better.',
+          slug: 'motoquant-2-0-is-open-source',
+          datePublished: '2026-11-10',
+        })}
+      />
       <SiteNav />
 
-      <article className="pt-32 pb-24 px-6">
+      <article id="main" className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
           <div className="flex flex-wrap gap-2 mb-6">
             {['release', 'open source', 'accuracy'].map((t) => (
