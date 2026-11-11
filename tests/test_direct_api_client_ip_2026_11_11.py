@@ -17,7 +17,9 @@ cap among them, could be bypassed by calling the API directly.
 
 ``client_ip()`` now takes the client from CF-Connecting-IP when the trusted
 hop is a Cloudflare address, on Render only, stepping exactly one proxy
-further. The requests below are what uvicorn receives on Render: a 10.x socket
+further. A client cannot send that header itself: on 2026-11-11 Cloudflare
+answered such a request to api.motoquant.in with 403 "error code: 1000"
+before it reached Render. The requests below are what uvicorn receives on Render: a 10.x socket
 peer (Render's proxy), X-Forwarded-For ``[whatever the client sent,] client,
 Cloudflare edge``, and CF-Connecting-IP as Cloudflare set it.
 """
@@ -191,10 +193,12 @@ def test_a_caller_inside_cloudflare_ranges_keys_on_its_own_address(on_render, ca
     assert list(ratelimit._WINDOWS) == ["t:" + caller]
 
 
-def test_without_cloudflare_in_front_the_header_is_ignored(on_render):
-    """If Render ever stops fronting services with Cloudflare, the hop its
-    proxy appends is the client and CF-Connecting-IP is whatever the client
-    sent: the key stays the appended hop, as before this change."""
+def test_without_cloudflare_in_front_the_header_is_ignored(on_render, caplog):
+    """If Render ever stops fronting services with Cloudflare (or Cloudflare
+    connects from a range missing from the list), the hop its proxy appends
+    is not a Cloudflare address and CF-Connecting-IP is not trusted: the key
+    stays the appended hop, as before this change, and the log says so once,
+    without addresses."""
     client = TestClient(_app(limit=2), client=RENDER_PROXY)
     headers = [
         {
@@ -203,8 +207,12 @@ def test_without_cloudflare_in_front_the_header_is_ignored(on_render):
         }
         for i in range(3)
     ]
-    assert _codes(client, headers) == [200, 200, 429]
+    with caplog.at_level(logging.WARNING, logger="motoquant.ratelimit"):
+        assert _codes(client, headers) == [200, 200, 429]
     assert list(ratelimit._WINDOWS) == ["t:" + CLIENT]
+    notes = [r.getMessage() for r in caplog.records if "Cloudflare" in r.getMessage()]
+    assert len(notes) == 1, notes
+    assert CLIENT not in notes[0] and "192.0.2." not in notes[0]
 
 
 @pytest.mark.parametrize(

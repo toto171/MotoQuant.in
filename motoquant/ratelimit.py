@@ -296,9 +296,13 @@ def _render_cloudflare_client_ip(request: Request, seen: str | None) -> str | No
 
     When ``seen`` is inside Cloudflare's ranges, Cloudflare is the proxy that
     saw the client, and it passes that address in CF-Connecting-IP, the
-    header its guide to restoring visitor IPs trusts from its own ranges. A
-    Worker calling another Cloudflare zone arrives with a fixed Cloudflare
-    address there. This steps exactly one proxy further, never more, so a
+    header its guide to restoring visitor IPs trusts from its own ranges.
+    Cloudflare refuses a request whose client sent that header itself
+    (checked on 2026-11-11: 403 "error code: 1000" from Cloudflare, on both
+    api.motoquant.in and the onrender.com name). A Worker calling another
+    Cloudflare zone arrives with a fixed Cloudflare address there.
+    True-Client-IP is not used: Cloudflare passes a client-sent one through
+    unchanged. This steps exactly one proxy further, never more, so a
     caller whose own address is in Cloudflare's ranges (a Worker, say) keys on
     that address and never on anything it sent.
 
@@ -310,11 +314,26 @@ def _render_cloudflare_client_ip(request: Request, seen: str | None) -> str | No
 
     No header, more than one header line, or a value that is not an address
     returns None, and the caller keeps keying on ``seen``: the old behaviour,
-    never a value the client chose.
+    never a value the client chose. Each of those cases, and a header that
+    arrives while ``seen`` is outside the list, logs one warning (no
+    addresses) so a deploy where this never engages shows in the log.
     """
-    if not os.environ.get("RENDER") or not _is_cloudflare_edge(seen):
+    if not os.environ.get("RENDER"):
         return None
     values = request.headers.getlist(CF_CONNECTING_IP_HEADER)
+    if not _is_cloudflare_edge(seen):
+        if values:
+            _note_once(
+                "cloudflare-unlisted",
+                logging.WARNING,
+                "rate limits: a request carries %s, but the address Render's "
+                "proxy reported is not in Cloudflare's published ranges, so "
+                "the header is not trusted and the request keys on that "
+                "address. If Cloudflare has added ranges, update "
+                "_CLOUDFLARE_NETS in motoquant/ratelimit.py.",
+                CF_CONNECTING_IP_HEADER,
+            )
+        return None
     ip = None
     if len(values) == 1:
         try:
