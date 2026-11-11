@@ -141,6 +141,20 @@ set by `MOTOQUANT_TRUSTED_PROXY_HOPS`:
 Invalid values fail closed to 0 with a warning. Trusting more hops than you
 run lets clients spoof their IP and dodge the limits.
 
+If the website proxies `/api/*` to the API (the Vercel setup in section 4),
+every visitor reaches the API from Vercel's addresses and would share one
+set of limits. Set the same random value of at least 16 characters as
+`MOTOQUANT_PROXY_SECRET` on both the Vercel project and the API service.
+The site's middleware (`web/middleware.js`) then sends each visitor's IP
+with that secret, and the API keys its limits on it. The API ignores the
+header from anyone without the secret. While the secret is set, one visitor
+can also run at most 2 background jobs at a time.
+
+Browsers on other sites cannot call the API: CORS allows only
+`https://motoquant.in`, its `www` address and `localhost:3000`. If you
+serve your own site from another origin and call the API directly from the
+browser, list it in `MOTOQUANT_CORS_ORIGINS` (comma-separated).
+
 `MOTOQUANT_RATE_LIMIT=false` disables every limit. Use it for tests, not for
 a public instance. These counters are in-process; for multi-replica or
 DDoS-grade protection, rate-limit at your edge as well.

@@ -19,6 +19,7 @@ fuse.
 
 from __future__ import annotations
 
+import hmac
 import ipaddress
 import logging
 import os
@@ -185,6 +186,44 @@ def _effective_hops(peer: str | None, has_xff: bool = False) -> int:
     return 0
 
 
+#: Shared secret between the website's proxy and the API. When it is set on
+#: both sides, the site's /api middleware (web/middleware.js) sends the
+#: visitor's IP in PROXY_CLIENT_IP_HEADER together with the secret in
+#: PROXY_AUTH_HEADER. Without it every visitor who reaches the API through the
+#: site appears as one of Vercel's egress addresses and shares their rate-limit
+#: buckets. Unset (the default, and every self-hosted copy that does not proxy
+#: through Vercel): the headers are ignored.
+PROXY_SECRET_ENV = "MOTOQUANT_PROXY_SECRET"
+PROXY_AUTH_HEADER = "x-motoquant-proxy-auth"
+PROXY_CLIENT_IP_HEADER = "x-motoquant-client-ip"
+_MIN_PROXY_SECRET_LEN = 16
+
+
+def proxy_secret_configured() -> bool:
+    """True when the site-proxy secret is set (read per call, for tests)."""
+    return len(os.environ.get(PROXY_SECRET_ENV, "")) >= _MIN_PROXY_SECRET_LEN
+
+
+def _proxied_client_ip(request: Request) -> str | None:
+    """The visitor IP the website's proxy vouched for, or None.
+
+    Trusted only when the request carries the shared secret (constant-time
+    compare) and the IP header parses as an address; anything else falls back
+    to the X-Forwarded-For logic in :func:`client_ip`.
+    """
+    secret = os.environ.get(PROXY_SECRET_ENV, "")
+    if len(secret) < _MIN_PROXY_SECRET_LEN:
+        return None
+    sent = request.headers.get(PROXY_AUTH_HEADER, "")
+    if not sent or not hmac.compare_digest(sent.encode(), secret.encode()):
+        return None
+    raw = request.headers.get(PROXY_CLIENT_IP_HEADER, "").strip()
+    try:
+        return str(ipaddress.ip_address(raw))
+    except ValueError:
+        return None
+
+
 def client_ip(request: Request) -> str:
     """Best-effort client IP — the ONE place this repo derives a client
     identity from a request (every rate-limit bucket keys on it).
@@ -201,6 +240,9 @@ def client_ip(request: Request) -> str:
     Repeated X-Forwarded-For header lines are joined in order, so a spoofed
     first line cannot shadow the line a proxy added.
     """
+    proxied = _proxied_client_ip(request)
+    if proxied:
+        return proxied
     peer = request.client.host if request.client else None
     lines = request.headers.getlist("x-forwarded-for")
     hops_trusted = _effective_hops(peer, has_xff=bool(lines))

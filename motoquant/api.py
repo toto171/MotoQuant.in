@@ -59,6 +59,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
+from starlette.datastructures import MutableHeaders
 
 # TypedDict must come from typing_extensions on Python < 3.12 when used in
 # Pydantic/FastAPI annotations (pydantic raises PydanticUserError otherwise).
@@ -91,14 +92,123 @@ from motoquant.observability import init_sentry as _init_sentry  # noqa: E402
 
 _init_sentry(app_name="motoquant-api")
 
-# CORS -- allow the Next.js frontend on any origin during early development
+# CORS. The website calls the API same-origin through its /api proxy, so it
+# needs no CORS at all; browsers on other sites must not be able to drive the
+# free (server-key) assistant from their visitors' browsers. Allowed: the
+# public site and local development. Self-hosters add their own origins with
+# MOTOQUANT_CORS_ORIGINS (comma-separated; "*" restores the old behaviour).
+_DEFAULT_CORS_ORIGINS = (
+    "https://motoquant.in",
+    "https://www.motoquant.in",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+)
+
+
+def _cors_origins() -> list[str]:
+    raw = os.environ.get("MOTOQUANT_CORS_ORIGINS", "").strip()
+    if not raw:
+        return list(_DEFAULT_CORS_ORIGINS)
+    return [o.strip() for o in raw.split(",") if o.strip()]
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_cors_origins(),
     allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
+
+# Request-size fuse. No legitimate JSON body is anywhere near this (chat
+# messages cap at 8,000 characters); without it a multi-megabyte body is read
+# and parsed in full on the 512 MB instance before validation rejects it. The
+# calibration uploads keep their own 25 MB cap (MAX_UPLOAD_BYTES).
+MAX_REQUEST_BYTES = 256 * 1024
+_BODY_LIMIT_EXEMPT_PREFIXES = ("/api/calibrate/",)
+
+
+def _too_large() -> HTTPException:
+    return HTTPException(
+        413, f"Request body is larger than {MAX_REQUEST_BYTES // 1024} KB"
+    )
+
+
+class _BodySizeLimit:
+    """Refuse oversized request bodies with 413 before anything parses them."""
+
+    def __init__(self, app, max_bytes: int = MAX_REQUEST_BYTES):
+        self.app = app
+        self.max_bytes = max_bytes
+
+    async def __call__(self, scope, receive, send):
+        if (
+            scope["type"] != "http"
+            or scope.get("method") not in ("POST", "PUT", "PATCH")
+            or scope.get("path", "").startswith(_BODY_LIMIT_EXEMPT_PREFIXES)
+        ):
+            await self.app(scope, receive, send)
+            return
+        for name, value in scope.get("headers") or ():
+            if name == b"content-length":
+                try:
+                    declared = int(value)
+                except ValueError:
+                    declared = 0
+                if declared > self.max_bytes:
+                    response = JSONResponse(
+                        {"detail": _too_large().detail}, status_code=413
+                    )
+                    await response(scope, receive, send)
+                    return
+        received = 0
+
+        async def limited_receive():
+            # Chunked bodies carry no Content-Length: count as they arrive.
+            # An HTTPException here passes through FastAPI's body reader
+            # unchanged and becomes a normal 413 response.
+            nonlocal received
+            message = await receive()
+            if message.get("type") == "http.request":
+                received += len(message.get("body", b""))
+                if received > self.max_bytes:
+                    raise _too_large()
+            return message
+
+        await self.app(scope, limited_receive, send)
+
+
+class _SecurityHeaders:
+    """nosniff and HSTS on every API response (the API is HTTPS-only)."""
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        async def send_with_headers(message):
+            if message["type"] == "http.response.start":
+                headers = MutableHeaders(scope=message)
+                headers.setdefault("X-Content-Type-Options", "nosniff")
+                headers.setdefault("Strict-Transport-Security", "max-age=31536000")
+            await send(message)
+
+        await self.app(scope, receive, send_with_headers)
+
+
+app.add_middleware(_BodySizeLimit)
+app.add_middleware(_SecurityHeaders)
+
+
+def _server_error(what: str, exc: BaseException) -> HTTPException:
+    """A 500 that logs the exception (Sentry picks it up) but tells the client
+    only what failed: exception text can carry file paths, SQL or internals."""
+    logging.getLogger(__name__).error("%s: %s", what, exc, exc_info=exc)
+    return HTTPException(500, f"{what}. Please try again.")
+
 
 # Response compression -- the origin serves 50-600 KB JSON payloads (full
 # catalog fetches, sim timeseries) uncompressed, which is pure egress waste
@@ -1493,7 +1603,7 @@ def list_bikes(
                 "bikes": [_bike_row_to_summary(dict(r)) for r in rows],
             }
         except Exception as exc:
-            raise HTTPException(500, f"Database error: {exc}")
+            raise _server_error("Database error", exc)
 
     return _serve_catalog(
         request, ("bikes", search, manufacturer, category, limit, offset), _build
@@ -1516,7 +1626,7 @@ def get_bike(bike_id: int = Path(..., ge=1, le=MAX_DB_ID), request: Request = No
                 (bike_id,),
             ).fetchone()
         except Exception as exc:
-            raise HTTPException(500, f"Database error: {exc}")
+            raise _server_error("Database error", exc)
 
         if not row:
             raise HTTPException(404, f"Bike {bike_id} not found")
@@ -1676,7 +1786,7 @@ def list_venues(request: Request = None):
                 venues.append(v)
             return {"venues": venues}
         except Exception as exc:
-            raise HTTPException(500, f"Database error: {exc}")
+            raise _server_error("Database error", exc)
 
     return _serve_catalog(request, ("venues",), _build)
 
@@ -1722,7 +1832,7 @@ def list_tires(
                 tires.append(d)
             return {"tires": tires, "total": total}
         except Exception as exc:
-            raise HTTPException(500, f"Database error: {exc}")
+            raise _server_error("Database error", exc)
 
     return _serve_catalog(request, ("tires", compound, manufacturer, limit), _build)
 
@@ -1777,7 +1887,7 @@ def _simulate_impl(req: SimulateRequest, progress=None):
             else None,
         )
     except Exception as exc:
-        raise HTTPException(500, f"Simulation error: {exc}")
+        raise _server_error("Simulation error", exc)
 
     # Down-sample to ~100 Hz (every 10th point at 1 ms default dt)
     step = max(1, len(sim.t) // 1000)
@@ -1946,7 +2056,7 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
         engine = engine_select.make_engine(cfg)
         sim = engine.run()
     except Exception as exc:
-        raise HTTPException(500, f"Simulation error: {exc}")
+        raise _server_error("Simulation error", exc)
 
     result: QuickSimResultDict = {
         "tyres": _tyre_labels(req.front_tire_id, req.rear_tire_id),
@@ -2096,7 +2206,7 @@ def _topspeed_impl(req: TopSpeedRequest, progress=None) -> TopSpeedResultDict:
             else None,
         )
     except Exception as exc:
-        raise HTTPException(500, f"Top-speed simulation error: {exc}")
+        raise _server_error("Top-speed simulation error", exc)
 
     # Format LSR splits with km/h + mph for convenience
     splits_fmt: dict[str, LsrSplitDict] = {}
@@ -2228,7 +2338,7 @@ def simulate_distance(req: DistanceRunRequest) -> DistanceResultDict:
         engine = engine_select.make_engine(cfg)
         sim = engine.run_distance(req.distance_m, max_time=req.max_time_s)
     except Exception as exc:
-        raise HTTPException(500, f"Distance run error: {exc}")
+        raise _server_error("Distance run error", exc)
 
     # A degenerate config can return an empty trajectory; indexing sim.t[-1] /
     # max(sim.v) below would then raise outside the try above and 500. Surface a
@@ -2283,7 +2393,7 @@ def list_parts_categories(request: Request = None):
             ).fetchall()
             return {"categories": [dict(r) for r in rows]}
         except Exception as exc:
-            raise HTTPException(500, f"Database error: {exc}")
+            raise _server_error("Database error", exc)
 
     return _serve_catalog(request, ("parts_categories",), _build)
 
@@ -2462,7 +2572,7 @@ def list_parts(
         except HTTPException:
             raise
         except Exception as exc:
-            raise HTTPException(500, f"Database error: {exc}")
+            raise _server_error("Database error", exc)
 
     return _serve_catalog(
         request,
@@ -2696,7 +2806,7 @@ def _compare_impl(req: CompareRequest, progress=None):
     except HTTPException:
         raise  # e.g. 404 for an unknown bike_id — don't relabel as 500
     except Exception as exc:
-        raise HTTPException(500, f"Simulation error: {exc}")
+        raise _server_error("Simulation error", exc)
 
     if progress is not None:
         progress(0.99, "Building comparison")
@@ -3614,7 +3724,7 @@ def surrogate_predict(
         trap_kmh = trap_val * 3.6 if trap_val < 200.0 else trap_val
 
     except Exception as exc:
-        raise HTTPException(500, f"Surrogate inference error: {exc}") from exc
+        raise _server_error("Surrogate inference error", exc) from exc
 
     return SurrogatePredictResponse(
         et_s=round(et_val, 4),
@@ -4323,7 +4433,7 @@ def job_chat(
             raise RuntimeError(redact_secrets(f"{type(e).__name__}: {e}")) from None
 
     try:
-        return _start_job("chat", run)
+        return _start_job("chat", run, owner=_job_owner(request))
     except HTTPException:
         if own_key and hasattr(llm, "close"):
             llm.close()  # the job never started: drop the visitor's key now
@@ -4469,7 +4579,7 @@ def _optimize_impl(req: OptimizeBuildRequest, progress=None):
         logging.getLogger(__name__).error(
             "optimize_build failed: %s", exc, exc_info=True
         )
-        raise HTTPException(500, f"Optimization failed: {exc}") from exc
+        raise _server_error("Optimization failed", exc) from exc
 
     # Belt-and-braces: cost-per-tenth ratios can be non-finite (a part that
     # adds cost with ~0 ET gain); bare inf/nan is not JSON-compliant and 500s
@@ -4619,7 +4729,7 @@ def _autotune_impl(req: AutotuneRequest, progress=None):
         raise  # e.g. 404 for an unknown bike_id — don't relabel as 500
     except Exception as exc:
         logging.getLogger(__name__).error("autotune failed: %s", exc, exc_info=True)
-        raise HTTPException(500, f"Autotune failed: {exc}") from exc
+        raise _server_error("Autotune failed", exc) from exc
 
     out = result.to_dict()
     out["environment_source"] = env_source
@@ -4659,11 +4769,24 @@ def autotune_ecu_route(req: AutotuneRequest):
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-def _start_job(kind: str, runner) -> dict:
+def _job_owner(request: Request) -> str | None:
+    """Client identity for the per-client job cap, or None to skip that cap.
+
+    Without the site-proxy secret, every visitor who comes through the website
+    reaches us from one of Vercel's addresses, so a per-IP cap would throttle
+    them all together. The cap applies only once the proxy vouches for the
+    real visitor IP (motoquant.ratelimit.proxy_secret_configured).
+    """
+    from .ratelimit import client_ip, proxy_secret_configured
+
+    return client_ip(request) if proxy_secret_configured() else None
+
+
+def _start_job(kind: str, runner, owner: str | None = None) -> dict:
     from .jobs import JobCapacityError, create_job
 
     try:
-        job = create_job(kind, runner)
+        job = create_job(kind, runner, owner=owner)
     except JobCapacityError as exc:
         raise HTTPException(429, str(exc)) from exc
     return {"job_id": job.id, "kind": kind, "status": job.status}
@@ -4678,7 +4801,7 @@ def _start_job(kind: str, runner) -> dict:
         Depends(rate_limit("simulate", 30, 60.0)),
     ],
 )
-def job_simulate(req: SimulateRequest):
+def job_simulate(req: SimulateRequest, request: Request):
     """Start a full simulation as a background job (real progress)."""
     _precheck_refs(
         bike_ids=[req.bike_id],
@@ -4686,7 +4809,11 @@ def job_simulate(req: SimulateRequest):
         venue_id=req.venue_id,
         tire_ids=[req.front_tire_id, req.rear_tire_id],
     )
-    return _start_job("simulate", lambda progress: _simulate_impl(req, progress))
+    return _start_job(
+        "simulate",
+        lambda progress: _simulate_impl(req, progress),
+        owner=_job_owner(request),
+    )
 
 
 @app.post(
@@ -4697,7 +4824,7 @@ def job_simulate(req: SimulateRequest):
         Depends(rate_limit("topspeed", 30, 60.0)),
     ],
 )
-def job_topspeed(req: TopSpeedRequest):
+def job_topspeed(req: TopSpeedRequest, request: Request):
     """Start a top-speed run as a background job (real progress)."""
     _precheck_refs(
         bike_ids=[req.bike_id],
@@ -4705,7 +4832,11 @@ def job_topspeed(req: TopSpeedRequest):
         venue_id=req.venue_id,
         tire_ids=[req.front_tire_id, req.rear_tire_id],
     )
-    return _start_job("topspeed", lambda progress: _topspeed_impl(req, progress))
+    return _start_job(
+        "topspeed",
+        lambda progress: _topspeed_impl(req, progress),
+        owner=_job_owner(request),
+    )
 
 
 @app.post(
@@ -4713,12 +4844,16 @@ def job_topspeed(req: TopSpeedRequest):
     status_code=202,
     dependencies=[Depends(rate_limit("optimize", 6, 60.0))],
 )
-def job_optimize(req: OptimizeBuildRequest):
+def job_optimize(req: OptimizeBuildRequest, request: Request):
     """Start the build optimiser as a background job (real progress)."""
     _precheck_refs(
         bike_ids=[req.bike_id], bike_presets=[req.bike_preset], venue_id=req.venue_id
     )
-    return _start_job("optimize", lambda progress: _optimize_impl(req, progress))
+    return _start_job(
+        "optimize",
+        lambda progress: _optimize_impl(req, progress),
+        owner=_job_owner(request),
+    )
 
 
 @app.post(
@@ -4726,12 +4861,16 @@ def job_optimize(req: OptimizeBuildRequest):
     status_code=202,
     dependencies=[Depends(rate_limit("autotune", 6, 60.0))],
 )
-def job_autotune(req: AutotuneRequest):
+def job_autotune(req: AutotuneRequest, request: Request):
     """Start the ECU autotune as a background job (real progress)."""
     _precheck_refs(
         bike_ids=[req.bike_id], bike_presets=[req.bike_preset], venue_id=req.venue_id
     )
-    return _start_job("autotune", lambda progress: _autotune_impl(req, progress))
+    return _start_job(
+        "autotune",
+        lambda progress: _autotune_impl(req, progress),
+        owner=_job_owner(request),
+    )
 
 
 class OutlawRequest(ConditionsRequest):
@@ -4812,12 +4951,16 @@ def _outlaw_impl(req: OutlawRequest, progress=None) -> dict:
     # plus an autotune, so alternating the two can't double the CPU budget.
     dependencies=[Depends(rate_limit("optimize", 6, 60.0))],
 )
-def job_outlaw(req: OutlawRequest):
+def job_outlaw(req: OutlawRequest, request: Request):
     """Start the composed outlaw/open-class build as a background job."""
     _precheck_refs(
         bike_ids=[req.bike_id], bike_presets=[req.bike_preset], venue_id=req.venue_id
     )
-    return _start_job("outlaw", lambda progress: _outlaw_impl(req, progress))
+    return _start_job(
+        "outlaw",
+        lambda progress: _outlaw_impl(req, progress),
+        owner=_job_owner(request),
+    )
 
 
 @app.post(
@@ -4825,7 +4968,7 @@ def job_outlaw(req: OutlawRequest):
     status_code=202,
     dependencies=[Depends(_rl_compare)],
 )
-def job_compare(req: CompareRequest):
+def job_compare(req: CompareRequest, request: Request):
     """Start an A-vs-B comparison as a background job (real progress).
 
     Shares the ``compare`` rate-limit bucket with the sync
@@ -4842,7 +4985,11 @@ def job_compare(req: CompareRequest):
             req.b_rear_tire_id,
         ],
     )
-    return _start_job("compare", lambda progress: _compare_impl(req, progress))
+    return _start_job(
+        "compare",
+        lambda progress: _compare_impl(req, progress),
+        owner=_job_owner(request),
+    )
 
 
 @app.get("/api/jobs/{job_id}")

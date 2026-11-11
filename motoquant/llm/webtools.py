@@ -247,6 +247,13 @@ def _http_get(
             err = _check_url(target)
             if err:
                 raise ValueError(f"blocked redirect to a disallowed host ({err})")
+            if (
+                urllib.parse.urlsplit(target).hostname
+                != urllib.parse.urlsplit(current).hostname
+            ):
+                # Caller headers can carry an API key (Brave's
+                # X-Subscription-Token): never hand them to another host.
+                hdrs = {"User-Agent": _UA, "Accept-Language": "en"}
             current = target
             continue
         return status, body

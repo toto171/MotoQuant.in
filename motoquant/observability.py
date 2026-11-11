@@ -165,7 +165,12 @@ def _safe_float(env_var: str, default: float) -> float:
 
 # Request headers that carry credentials. Compared case-insensitively with
 # "_" and "-" treated alike, because Sentry and ASGI spell them both ways.
-_SECRET_HEADERS = {"x-anthropic-key", "authorization", "x-api-key"}
+_SECRET_HEADERS = {
+    "x-anthropic-key",
+    "authorization",
+    "x-api-key",
+    "x-motoquant-proxy-auth",
+}
 _SECRET_RE = re.compile(r"sk-ant-[^\s\"'<>\\]*")
 _REDACTED = "[redacted]"
 
