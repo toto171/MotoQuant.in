@@ -380,13 +380,19 @@ def client_ip(request: Request) -> str:
     client; :func:`_render_cloudflare_client_ip` then takes the client from
     Cloudflare.
     """
+    return _client_identity(request)[0]
+
+
+def _client_identity(request: Request) -> tuple[str, str, str | None]:
+    """(client ip, rule that chose it, trusted-hop address) for client_ip()."""
     proxied = _proxied_client_ip(request)
     if proxied:
-        return proxied
+        return proxied, "site_proxy", None
     peer = request.client.host if request.client else None
     lines = request.headers.getlist("x-forwarded-for")
     hops_trusted = _effective_hops(peer, has_xff=bool(lines))
     seen = peer
+    rule = "peer"
     if hops_trusted > 0:
         hops = [h.strip() for line in lines for h in line.split(",") if h.strip()]
         if hops:
@@ -394,7 +400,64 @@ def client_ip(request: Request) -> str:
             # by a trusted proxy; the leftmost is then the outermost peer.
             idx = -hops_trusted if len(hops) >= hops_trusted else 0
             seen = hops[idx][:_MAX_HOP_LEN]
-    return _render_cloudflare_client_ip(request, seen) or seen or "unknown"
+            rule = "forwarded_for"
+    cf = _render_cloudflare_client_ip(request, seen)
+    if cf:
+        return cf, "cloudflare_connecting_ip", seen
+    return seen or "unknown", rule, seen
+
+
+def _addr_class(addr: str | None, client: str | None = None) -> str:
+    """A label for an address that never reveals it (except "you")."""
+    if not addr:
+        return "absent"
+    try:
+        ip = ipaddress.ip_address(addr.strip())
+    except ValueError:
+        return "invalid"
+    if client and str(ip) == client:
+        return "you"
+    if _is_cloudflare_edge(str(ip)):
+        return "cloudflare"
+    if ip.is_private or ip.is_loopback or ip.is_link_local:
+        return "private"
+    return "other_public"
+
+
+def describe_client(request: Request) -> dict:
+    """What the API sees of the caller, for GET /api/whoami.
+
+    Reveals the caller's own address (which they already know) and only a
+    class for every other address on the path, so it is safe to serve to
+    anyone. Used to check that per-IP limits key on the real client behind
+    each public hostname.
+    """
+    ip, rule, seen = _client_identity(request)
+    hops = [
+        h.strip()
+        for line in request.headers.getlist("x-forwarded-for")
+        for h in line.split(",")
+        if h.strip()
+    ]
+    cf_values = request.headers.getlist(CF_CONNECTING_IP_HEADER)
+    if not cf_values:
+        cf_class = "absent"
+    elif len(cf_values) > 1:
+        cf_class = "multiple"
+    else:
+        cf_class = _addr_class(cf_values[0], ip)
+    return {
+        "client_ip": ip,
+        "rule": rule,
+        "host": (request.headers.get("host") or "")[:100],
+        "peer": _addr_class(request.client.host if request.client else None, ip),
+        "forwarded_for": [_addr_class(h, ip) for h in hops][:10],
+        "trusted_hop": _addr_class(seen, ip) if seen else None,
+        "cf_connecting_ip": cf_class,
+        "true_client_ip": bool(request.headers.get("true-client-ip")),
+        "cdn_loop": (request.headers.get("cdn-loop") or "")[:100] or None,
+        "on_render": bool(os.environ.get("RENDER")),
+    }
 
 
 def _evict_locked(now: float) -> None:
