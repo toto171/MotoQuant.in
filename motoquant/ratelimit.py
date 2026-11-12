@@ -278,6 +278,36 @@ def _is_cloudflare_edge(addr: str | None) -> bool:
     return any(ip in net for net in _CLOUDFLARE_NETS)
 
 
+def _is_private_hop(addr: str | None) -> bool:
+    try:
+        ip = ipaddress.ip_address((addr or "").strip())
+    except ValueError:
+        return False
+    return ip.is_loopback or any(ip in net for net in _PRIVATE_PROXY_NETS)
+
+
+def _past_private_hops(request: Request, seen: str | None) -> str | None:
+    """When ``seen`` is a private (proxy-internal) address, the nearest
+    X-Forwarded-For hop to its left that is not private; else ``seen``.
+
+    Never steps over a public or malformed entry, so it cannot reach a value
+    the client sent.
+    """
+    if not _is_private_hop(seen):
+        return seen
+    hops = [
+        h.strip()
+        for line in request.headers.getlist("x-forwarded-for")
+        for h in line.split(",")
+        if h.strip()
+    ]
+    for hop in reversed(hops):
+        if _is_private_hop(hop):
+            continue
+        return hop[:_MAX_HOP_LEN]
+    return seen
+
+
 def _render_cloudflare_client_ip(request: Request, seen: str | None) -> str | None:
     """The client address Cloudflare reported, for a request that reached a
     Render service through Cloudflare; otherwise None.
@@ -321,6 +351,14 @@ def _render_cloudflare_client_ip(request: Request, seen: str | None) -> str | No
     if not os.environ.get("RENDER"):
         return None
     values = request.headers.getlist(CF_CONNECTING_IP_HEADER)
+    # Render adds its own internal proxy after the one that saw Cloudflare:
+    # measured on 2026-11-12 (GET /api/whoami), the chain uvicorn receives is
+    # "<client>, <Cloudflare edge>, <Render 10.x>", so the hop one trusted
+    # proxy vouches for is Render's private address, not Cloudflare's. Step
+    # left over Render's private hops to the first public one. A client can
+    # only add entries LEFT of what Cloudflare appends, so a private hop on
+    # the right always came from Render.
+    seen = _past_private_hops(request, seen)
     if not _is_cloudflare_edge(seen):
         if values:
             _note_once(
