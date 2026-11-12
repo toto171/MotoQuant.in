@@ -102,7 +102,9 @@ change.
   daily chat cap (`MOTOQUANT_CHAT_DAILY_LIMIT`) limits the LLM bill. Buckets
   key on the client IP taken from `X-Forwarded-For` only for the trusted
   proxy hops (`MOTOQUANT_TRUSTED_PROXY_HOPS`; auto = 1 on Render), never the
-  leftmost hop, which the client can spoof.
+  leftmost hop, which the client can spoof. On Render that trusted hop is
+  Cloudflare's edge, so the client comes from Cloudflare's `CF-Connecting-IP`,
+  trusted only on Render and only when the hop is a Cloudflare address.
 - The chat agent's `web_fetch` re-checks the SSRF guard on **every redirect
   hop**. Any server-side fetch of a URL that a user or the LLM controls must
   do the same.

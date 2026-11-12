@@ -59,9 +59,12 @@ services:
       # /api/health -> engine shows what is live. docs/RUST_CORE.md.
       - key: MOTOQUANT_ENGINE
         value: auto
-      # Render's edge is exactly one appending proxy: rate limits key on the
-      # client IP it reports, never on a spoofable leftmost X-Forwarded-For.
-      # (Auto mode also picks 1 on Render; this pins it explicitly.)
+      # Render's proxy is exactly one appending proxy, never a spoofable
+      # leftmost X-Forwarded-For. The address it appends is Cloudflare's edge
+      # (Render serves every service through Cloudflare), so on Render the
+      # rate limits then key on the client in Cloudflare's CF-Connecting-IP
+      # (motoquant/ratelimit.py). Auto mode also picks 1 on Render; this
+      # pins it explicitly.
       - key: MOTOQUANT_TRUSTED_PROXY_HOPS
         value: "1"
       # Optional: surface FastAPI / uvicorn logs at INFO level

@@ -141,6 +141,17 @@ set by `MOTOQUANT_TRUSTED_PROXY_HOPS`:
 Invalid values fail closed to 0 with a warning. Trusting more hops than you
 run lets clients spoof their IP and dodge the limits.
 
+On Render, every request passes Cloudflare before it reaches Render's proxy,
+so the hop Render appends is a Cloudflare edge address that changes from
+request to request, not the visitor. When that hop is inside Cloudflare's
+published ranges, the API keys on the address Cloudflare reports in
+`CF-Connecting-IP` instead. It does this only on Render (the `RENDER` env
+var): a self-hosted API can be called directly by a Cloudflare Worker, which
+can set that header itself. If you put your own copy behind Cloudflare,
+restore the visitor IP in your reverse proxy as Cloudflare's guide describes
+(for nginx, `set_real_ip_from` for each Cloudflare range and
+`real_ip_header CF-Connecting-IP`), so the hop it appends is the visitor.
+
 If the website proxies `/api/*` to the API (the Vercel setup in section 4),
 every visitor reaches the API from Vercel's addresses and would share one
 set of limits. Set the same random value of at least 16 characters as

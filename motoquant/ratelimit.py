@@ -72,6 +72,44 @@ _PRIVATE_PROXY_NETS = tuple(
     for n in ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "fc00::/7")
 )
 
+# Cloudflare's published edge ranges (https://www.cloudflare.com/ips/, as
+# served on 2026-11-11). Render serves every web service through Cloudflare,
+# custom domains included, so on Render the address its proxy reports for a
+# request is one of these, not the client. See _render_cloudflare_client_ip().
+# If Cloudflare adds a range, requests from it simply fall back to keying on
+# the edge address (the behaviour before this list existed); never to a value
+# the client chose.
+_CLOUDFLARE_NETS = tuple(
+    ipaddress.ip_network(n)
+    for n in (
+        "173.245.48.0/20",
+        "103.21.244.0/22",
+        "103.22.200.0/22",
+        "103.31.4.0/22",
+        "141.101.64.0/18",
+        "108.162.192.0/18",
+        "190.93.240.0/20",
+        "188.114.96.0/20",
+        "197.234.240.0/22",
+        "198.41.128.0/17",
+        "162.158.0.0/15",
+        "104.16.0.0/13",
+        "104.24.0.0/14",
+        "172.64.0.0/13",
+        "131.0.72.0/22",
+        "2400:cb00::/32",
+        "2606:4700::/32",
+        "2803:f800::/32",
+        "2405:b500::/32",
+        "2405:8100::/32",
+        "2a06:98c0::/29",
+        "2c0f:f248::/32",
+    )
+)
+
+#: The header in which Cloudflare passes the address that connected to it.
+CF_CONNECTING_IP_HEADER = "cf-connecting-ip"
+
 # One-time notes on what AUTO decided, so the choice is visible in the log
 # rather than silent (keyed by decision; never logs header contents).
 _auto_notes: set[str] = set()
@@ -144,8 +182,10 @@ def _effective_hops(peer: str | None, has_xff: bool = False) -> int:
     hops = trusted_proxy_hops()
     if hops is not None:
         return hops
-    # AUTO. Render injects RENDER=true into every service and its edge proxy
-    # APPENDS the peer it saw, so exactly one hop is trusted there.
+    # AUTO. Render injects RENDER=true into every service and its proxy
+    # APPENDS the peer it saw, so exactly one hop is trusted there. That peer
+    # is Cloudflare's edge rather than the client; client_ip() takes the
+    # client from Cloudflare (_render_cloudflare_client_ip).
     if os.environ.get("RENDER"):
         return 1
     # Off Render, trust one hop when the peer is on this machine or on a
@@ -224,6 +264,102 @@ def _proxied_client_ip(request: Request) -> str | None:
         return None
 
 
+def _is_cloudflare_edge(addr: str | None) -> bool:
+    """True when ``addr`` is inside Cloudflare's published edge ranges."""
+    if not addr:
+        return False
+    try:
+        ip = ipaddress.ip_address(addr.strip())
+    except ValueError:
+        return False
+    mapped = getattr(ip, "ipv4_mapped", None)
+    if mapped is not None:
+        ip = mapped
+    return any(ip in net for net in _CLOUDFLARE_NETS)
+
+
+def _render_cloudflare_client_ip(request: Request, seen: str | None) -> str | None:
+    """The client address Cloudflare reported, for a request that reached a
+    Render service through Cloudflare; otherwise None.
+
+    ``seen`` is the address the trusted proxy hops reported (see
+    :func:`client_ip`). On Render the path is client -> Cloudflare ->
+    Render's proxy -> uvicorn. Cloudflare appends the client to
+    X-Forwarded-For and Render's proxy then appends the Cloudflare edge
+    address it saw, so the one hop Render's proxy vouches for is a Cloudflare
+    address that changes from request to request. (Render does not document
+    the chain; it matches Cloudflare's documented append, the CF-RAY on every
+    api.motoquant.in response and what Render users have observed.) Keying on
+    it gave a client calling the API directly a fresh bucket on almost every
+    call: on 2026-11-11, 35 direct calls to a 30-per-minute route all
+    returned 200.
+
+    When ``seen`` is inside Cloudflare's ranges, Cloudflare is the proxy that
+    saw the client, and it passes that address in CF-Connecting-IP, the
+    header its guide to restoring visitor IPs trusts from its own ranges.
+    Cloudflare refuses a request whose client sent that header itself
+    (checked on 2026-11-11: 403 "error code: 1000" from Cloudflare, on both
+    api.motoquant.in and the onrender.com name). A Worker calling another
+    Cloudflare zone arrives with a fixed Cloudflare address there.
+    True-Client-IP is not used: Cloudflare passes a client-sent one through
+    unchanged. This steps exactly one proxy further, never more, so a
+    caller whose own address is in Cloudflare's ranges (a Worker, say) keys on
+    that address and never on anything it sent.
+
+    Only on Render (the RENDER env var), where every request passes
+    Cloudflare. A self-hosted API can be called by a Cloudflare Worker
+    directly, and a Worker may set CF-Connecting-IP itself on such a request;
+    operators behind Cloudflare restore the visitor IP in their own reverse
+    proxy instead (docs/SELF_HOSTING.md section 3b).
+
+    No header, more than one header line, or a value that is not an address
+    returns None, and the caller keeps keying on ``seen``: the old behaviour,
+    never a value the client chose. Each of those cases, and a header that
+    arrives while ``seen`` is outside the list, logs one warning (no
+    addresses) so a deploy where this never engages shows in the log.
+    """
+    if not os.environ.get("RENDER"):
+        return None
+    values = request.headers.getlist(CF_CONNECTING_IP_HEADER)
+    if not _is_cloudflare_edge(seen):
+        if values:
+            _note_once(
+                "cloudflare-unlisted",
+                logging.WARNING,
+                "rate limits: a request carries %s, but the address Render's "
+                "proxy reported is not in Cloudflare's published ranges, so "
+                "the header is not trusted and the request keys on that "
+                "address. If Cloudflare has added ranges, update "
+                "_CLOUDFLARE_NETS in motoquant/ratelimit.py.",
+                CF_CONNECTING_IP_HEADER,
+            )
+        return None
+    ip = None
+    if len(values) == 1:
+        try:
+            ip = str(ipaddress.ip_address(values[0].strip()))
+        except ValueError:
+            ip = None
+    if ip is None:
+        _note_once(
+            "cloudflare-missing",
+            logging.WARNING,
+            "rate limits: a request reached the API through Cloudflare without "
+            "exactly one valid %s header; it keys on the Cloudflare edge "
+            "address, so per-IP limits cannot group that client's requests",
+            CF_CONNECTING_IP_HEADER,
+        )
+        return None
+    _note_once(
+        "cloudflare",
+        logging.INFO,
+        "rate limits: requests reach the API through Render's Cloudflare edge; "
+        "keying on the client address in %s",
+        CF_CONNECTING_IP_HEADER,
+    )
+    return ip
+
+
 def client_ip(request: Request) -> str:
     """Best-effort client IP — the ONE place this repo derives a client
     identity from a request (every rate-limit bucket keys on it).
@@ -239,6 +375,10 @@ def client_ip(request: Request) -> str:
 
     Repeated X-Forwarded-For header lines are joined in order, so a spoofed
     first line cannot shadow the line a proxy added.
+
+    On Render the hop its proxy appends is Cloudflare's edge, not the
+    client; :func:`_render_cloudflare_client_ip` then takes the client from
+    Cloudflare.
     """
     proxied = _proxied_client_ip(request)
     if proxied:
@@ -246,14 +386,15 @@ def client_ip(request: Request) -> str:
     peer = request.client.host if request.client else None
     lines = request.headers.getlist("x-forwarded-for")
     hops_trusted = _effective_hops(peer, has_xff=bool(lines))
+    seen = peer
     if hops_trusted > 0:
         hops = [h.strip() for line in lines for h in line.split(",") if h.strip()]
         if hops:
             # Fewer entries than trusted proxies means every entry was added
             # by a trusted proxy; the leftmost is then the outermost peer.
             idx = -hops_trusted if len(hops) >= hops_trusted else 0
-            return hops[idx][:_MAX_HOP_LEN]
-    return peer or "unknown"
+            seen = hops[idx][:_MAX_HOP_LEN]
+    return _render_cloudflare_client_ip(request, seen) or seen or "unknown"
 
 
 def _evict_locked(now: float) -> None:

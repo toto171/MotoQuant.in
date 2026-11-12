@@ -95,9 +95,11 @@ class TestDirectDeployment:
 
 class TestTrustedProxies:
     def test_render_auto_trusts_one_appended_hop(self, monkeypatch):
-        """Production on Render keeps working with no configuration: the edge
-        appends the client it saw, so the rightmost hop is the real client and
-        a spoofed leftmost hop is ignored."""
+        """On Render with no configuration, one appended hop is trusted and a
+        spoofed leftmost hop is ignored. Here the appended hop is the client
+        itself (no Cloudflare in front). In production Render's proxy appends
+        a Cloudflare edge address instead; that path is covered by
+        tests/test_direct_api_client_ip_2026_11_11.py."""
         monkeypatch.setenv("RENDER", "true")
         client = TestClient(_app(limit=2), client=RENDER_EDGE)
         for spoof in ("192.0.2.1", "192.0.2.2"):
