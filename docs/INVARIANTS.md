@@ -105,13 +105,15 @@ check, and the release checklist.
   (`MOTOQUANT_TRUSTED_PROXY_HOPS`; unset means 1 on Render or behind a
   loopback/unix/private-network proxy, and 0 otherwise, which keys on the
   socket peer). The client can spoof the leftmost hop, so it is never used.
-  On Render, when that hop is a Cloudflare edge address, the client is the
-  address in Cloudflare's `CF-Connecting-IP` instead: one proxy further,
-  never more, and never off Render. `client_ip()` in `motoquant/ratelimit.py`
+  On Render, the API first steps left over Render's private internal hops;
+  when the first public hop is a Cloudflare edge address, the client is the
+  address in Cloudflare's `CF-Connecting-IP` instead: never past a public
+  or malformed hop, and never off Render. `client_ip()` in `motoquant/ratelimit.py`
   implements this. Enforced by `tests/test_fixwave_sec_xff.py` (multi-hop
   selection, spoofing without a trusted proxy, invalid values failing closed),
   `tests/test_direct_api_client_ip_2026_11_11.py` (direct calls on Render
-  through Cloudflare) and `test_x_forwarded_for_distinguishes_clients` in
+  through Cloudflare), `tests/test_render_internal_hop_2026_11_12.py` (the
+  chain production actually delivers, with Render's internal hop) and `test_x_forwarded_for_distinguishes_clients` in
   `tests/test_ratelimit.py`.
 - `web_fetch` re-checks the SSRF guard on every redirect hop and bounds the
   whole chain to one timeout. Any server-side fetch of a URL that a user or

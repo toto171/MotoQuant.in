@@ -141,11 +141,14 @@ set by `MOTOQUANT_TRUSTED_PROXY_HOPS`:
 Invalid values fail closed to 0 with a warning. Trusting more hops than you
 run lets clients spoof their IP and dodge the limits.
 
-On Render, every request passes Cloudflare before it reaches Render's proxy,
-so the hop Render appends is a Cloudflare edge address that changes from
-request to request, not the visitor. When that hop is inside Cloudflare's
-published ranges, the API keys on the address Cloudflare reports in
-`CF-Connecting-IP` instead. It does this only on Render (the `RENDER` env
+On Render, every request passes Cloudflare and then Render's own internal
+proxies, so the API receives `X-Forwarded-For: <visitor>, <Cloudflare edge>,
+<Render 10.x>` (measured with `GET /api/whoami`). The trusted hop is Render's
+private address, which is shared by many visitors and changes between
+requests. The API steps left over Render's private hops, and when the first
+public hop is inside Cloudflare's published ranges it keys on the address
+Cloudflare reports in `CF-Connecting-IP` instead. `GET /api/whoami` shows
+which address and rule your own requests get. It does this only on Render (the `RENDER` env
 var): a self-hosted API can be called directly by a Cloudflare Worker, which
 can set that header itself. If you put your own copy behind Cloudflare,
 restore the visitor IP in your reverse proxy as Cloudflare's guide describes
