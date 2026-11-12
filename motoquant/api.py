@@ -3566,6 +3566,19 @@ def _fetch_open_meteo_uncached(
     )
 
 
+@app.get(
+    "/api/whoami",
+    dependencies=[Depends(rate_limit("whoami", 20, 60.0))],
+)
+def whoami(request: Request):
+    """Which address the API counts you as for its per-IP limits, and how it
+    picked it. Every other address on the path is shown only as a class
+    ("cloudflare", "private", "other_public"), never as the address."""
+    from .ratelimit import describe_client
+
+    return describe_client(request)
+
+
 @app.post(
     "/api/venues/resolve",
     # Rate-limited per IP (2026-07-25 audit): on a venue miss this falls
